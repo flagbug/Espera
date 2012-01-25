@@ -8,8 +8,8 @@
     <ProjectGuid>{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FlagTunes.Core</RootNamespace>
-    <AssemblyName>FlagTunes.Core</AssemblyName>
+    <RootNamespace>Espera.Core</RootNamespace>
+    <AssemblyName>Espera.Core</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

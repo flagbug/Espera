@@ -8,8 +8,8 @@
     <ProjectGuid>{3DB64346-7403-48C0-9766-D62A5862973F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FlagTunes.View</RootNamespace>
-    <AssemblyName>FlagTunes.View</AssemblyName>
+    <RootNamespace>Espera.View</RootNamespace>
+    <AssemblyName>Espera.View</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -120,9 +120,9 @@
     <Resource Include="Images\appbar.navigate.previous.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FlagTunes.Core\FlagTunes.Core.csproj">
+    <ProjectReference Include="..\Espera.Core\Espera.Core.csproj">
       <Project>{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}</Project>
-      <Name>FlagTunes.Core</Name>
+      <Name>Espera.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

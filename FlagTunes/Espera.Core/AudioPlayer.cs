@@ -6,7 +6,7 @@ using FlagLib.Reflection;
 using NAudio;
 using NAudio.Wave;
 
-namespace FlagTunes.Core
+namespace Espera.Core
 {
     public sealed class AudioPlayer : IDisposable
     {

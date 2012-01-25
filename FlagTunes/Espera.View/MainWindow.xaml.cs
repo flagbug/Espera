@@ -1,4 +1,4 @@
-﻿namespace FlagTunes.View
+﻿namespace Espera.View
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

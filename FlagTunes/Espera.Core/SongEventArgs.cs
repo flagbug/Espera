@@ -1,7 +1,7 @@
 ﻿using System;
 using FlagLib.Reflection;
 
-namespace FlagTunes.Core
+namespace Espera.Core
 {
     /// <summary>
     /// Provides data for the <see cref="LocalSongFinder.SongFound"/> and <see cref="Library.SongAdded"/> events.

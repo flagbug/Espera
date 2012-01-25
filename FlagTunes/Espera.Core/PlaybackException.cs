@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FlagTunes.Core
+namespace Espera.Core
 {
     /// <summary>
     /// The exception that is thrown, when the <see cref="AudioPlayer"/> couldn't play a song.

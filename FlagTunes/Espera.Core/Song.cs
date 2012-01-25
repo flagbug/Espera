@@ -2,7 +2,7 @@
 using System.IO;
 using FlagLib.Reflection;
 
-namespace FlagTunes.Core
+namespace Espera.Core
 {
     /// <summary>
     /// Represents a song

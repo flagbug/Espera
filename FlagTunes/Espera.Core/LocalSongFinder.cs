@@ -4,7 +4,7 @@ using FlagLib.Extensions;
 using FlagLib.IO;
 using TagLib;
 
-namespace FlagTunes.Core
+namespace Espera.Core
 {
     /// <summary>
     /// Encapsulates a recursive call through the local filesystem that reads the tags of all WAV and MP3 files and returns them.

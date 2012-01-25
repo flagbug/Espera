@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlagTunes.Core", "FlagTunes.Core\FlagTunes.Core.csproj", "{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.Core", "Espera.Core\Espera.Core.csproj", "{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlagTunes.View", "FlagTunes.View\FlagTunes.View.csproj", "{3DB64346-7403-48C0-9766-D62A5862973F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.View", "Espera.View\Espera.View.csproj", "{3DB64346-7403-48C0-9766-D62A5862973F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

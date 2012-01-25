@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace FlagTunes.Core
+namespace Espera.Core
 {
     public class LocalSong : Song
     {

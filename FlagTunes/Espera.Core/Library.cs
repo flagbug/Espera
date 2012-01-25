@@ -4,7 +4,7 @@ using System.IO;
 using FlagLib.Extensions;
 using FlagLib.Reflection;
 
-namespace FlagTunes.Core
+namespace Espera.Core
 {
     public class Library
     {

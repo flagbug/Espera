@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Espera.Core;
 using FlagLib.Patterns.MVVM;
-using FlagTunes.Core;
 
-namespace FlagTunes.View
+namespace Espera.View
 {
     internal class MainViewModel : ViewModelBase<MainViewModel>
     {

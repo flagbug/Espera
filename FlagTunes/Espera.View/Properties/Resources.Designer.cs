@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace FlagTunes.View.Properties
+namespace Espera.View.Properties
 {
 
 
