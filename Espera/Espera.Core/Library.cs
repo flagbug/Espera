@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using FlagLib.Extensions;
 using FlagLib.Reflection;
 
@@ -10,19 +11,32 @@ namespace Espera.Core
     {
         private readonly AudioPlayer audioPlayer;
         private readonly HashSet<Song> songs;
+        private readonly object songLocker = new object();
 
         public event EventHandler<SongEventArgs> SongAdded;
 
         public IEnumerable<Song> Songs
         {
-            get { return this.songs; }
+            get
+            {
+                lock (songLocker)
+                {
+                    return this.songs;
+                }
+            }
         }
 
+        /// <summary>
+        /// Gets the duration of the current played song.
+        /// </summary>
         public TimeSpan TotalTime
         {
             get { return this.audioPlayer.TotalTime; }
         }
 
+        /// <summary>
+        /// Gets the elapsed time of the current played song.
+        /// </summary>
         public TimeSpan CurrentTime
         {
             get { return this.audioPlayer.CurrentTime; }
@@ -37,6 +51,11 @@ namespace Espera.Core
             this.songs = new HashSet<Song>();
         }
 
+        public Task AddLocalSongsAsync(string path)
+        {
+            return Task.Factory.StartNew(() => this.AddLocalSongs(path));
+        }
+
         public void AddLocalSongs(string path)
         {
             if (path == null)
@@ -49,7 +68,14 @@ namespace Espera.Core
 
             finder.SongFound += (sender, e) =>
             {
-                if (this.songs.Add(e.Song))
+                bool added;
+
+                lock (this.songLocker)
+                {
+                    added = this.songs.Add(e.Song);
+                }
+
+                if (added)
                 {
                     this.SongAdded.RaiseSafe(this, new SongEventArgs(e.Song));
                 }
