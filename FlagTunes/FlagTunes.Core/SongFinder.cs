@@ -7,6 +7,9 @@ using TagLib;
 
 namespace FlagTunes.Core
 {
+    /// <summary>
+    /// Encapsulates a recursive call through the local filesystem that reads the tags of all WAV and MP3 files and returns them.
+    /// </summary>
     public sealed class SongFinder
     {
         private readonly DirectoryScanner scanner;
