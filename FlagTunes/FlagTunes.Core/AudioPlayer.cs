@@ -5,7 +5,7 @@ using NAudio.Wave;
 
 namespace FlagTunes.Core
 {
-    public class AudioPlayer : IDisposable
+    public sealed class AudioPlayer : IDisposable
     {
         private IWavePlayer wavePlayer;
         private WaveChannel32 inputStream;
@@ -157,7 +157,7 @@ namespace FlagTunes.Core
         /// Raises the <see cref="SongFinished"/> event.
         /// </summary>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected virtual void OnSongFinished(EventArgs e)
+        private void OnSongFinished(EventArgs e)
         {
             if (this.SongFinished != null)
             {
