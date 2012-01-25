@@ -5,7 +5,7 @@
         xmlns:View="clr-namespace:Espera.View"
         Title="Espera" Height="600" Width="800" WindowState="Maximized">
     <Window.DataContext>
-        <View:MainViewModel />
+        <View:MainViewModel x:Name="mainViewModel" />
     </Window.DataContext>
     <Window.Resources>
         <ResourceDictionary>
@@ -34,7 +34,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <Button Padding="0">
+                <Button Padding="0" Click="AddSongsButtonClick">
                     <Image Source="/Espera.View;component/Images/appbar.add.png" />
                 </Button>
                 <Button Padding="0" Margin="15, 0, 0, 0">
@@ -66,15 +66,21 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
-                <ListBox />
+                <ListBox ItemsSource="{Binding Path=Artists}" SelectedItem="{Binding Path=SelectedArtist}" />
             </Grid>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="0.3*" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <ListView Grid.Row="0">
-                    
+                <ListView Grid.Row="0" ItemsSource="{Binding Path=SelectableSongs}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Path=Title}" />
+                            <GridViewColumn Header="Artist" DisplayMemberBinding="{Binding Path=Artist}" />
+                            <GridViewColumn Header="Album" DisplayMemberBinding="{Binding Path=Album}" />
+                        </GridView>
+                    </ListView.View>
                 </ListView>
                 <ListView Grid.Row="1">
                     

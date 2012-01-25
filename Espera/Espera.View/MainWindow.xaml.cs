@@ -1,4 +1,7 @@
-﻿namespace Espera.View
+﻿using System.Windows;
+using System.Windows.Forms;
+
+namespace Espera.View
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -8,6 +11,14 @@
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void AddSongsButtonClick(object sender, RoutedEventArgs e)
+        {
+            var dialog = new FolderBrowserDialog();
+            dialog.ShowDialog();
+
+            this.mainViewModel.AddSongs(dialog.SelectedPath);
         }
     }
 }
