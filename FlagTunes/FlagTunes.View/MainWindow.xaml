@@ -32,10 +32,10 @@
                     <Image Source="/FlagTunes.View;component/Images/appbar.play.png" />
                 </Button>
                 <Button Padding="0" Margin="5, 0, 0, 0">
-                    <Image Source="/FlagTunes.View;component/Images/appbar.pause.png" />
+                    <Image Source="/FlagTunes.View;component/Images/appbar.navigate.previous.png" />
                 </Button>
                 <Button Padding="0" Margin="5, 0, 0, 0">
-                    <Image Source="/FlagTunes.View;component/Images/appbar.pause.png" />
+                    <Image Source="/FlagTunes.View;component/Images/appbar.navigate.next.png" />
                 </Button>
             </StackPanel>
             <StackPanel Margin="10, 0, 0, 0" Grid.Column="1" Orientation="Horizontal">
