@@ -75,7 +75,8 @@ namespace FlagTunes.Core
         /// <summary>
         /// Loads the specified song.
         /// </summary>
-        /// <param name="song">The song.</param>
+        /// <param name="song">The song to load.</param>
+        /// <exception cref="ArgumentNullException"><c>song</c> is null.</exception>
         public void Load(Song song)
         {
             if (song == null)
