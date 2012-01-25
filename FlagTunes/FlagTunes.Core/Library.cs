@@ -8,6 +8,7 @@ namespace FlagTunes.Core
 {
     public class Library
     {
+        private readonly AudioPlayer audioPlayer;
         private readonly HashSet<Song> songs;
 
         public event EventHandler<SongEventArgs> SongAdded;
@@ -17,11 +18,22 @@ namespace FlagTunes.Core
             get { return this.songs; }
         }
 
+        public TimeSpan TotalTime
+        {
+            get { return this.audioPlayer.TotalTime; }
+        }
+
+        public TimeSpan CurrentTime
+        {
+            get { return this.audioPlayer.CurrentTime; }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Library"/> class.
         /// </summary>
         public Library()
         {
+            this.audioPlayer = new AudioPlayer();
             this.songs = new HashSet<Song>();
         }
 

@@ -36,6 +36,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FlagLib">
+      <HintPath>..\packages\FlagLib.4.4.0\lib\FlagLib.dll</HintPath>
+    </Reference>
     <Reference Include="MahApps.Metro">
       <HintPath>..\packages\MahApps.Metro.0.5.0.0\lib\net40\MahApps.Metro.dll</HintPath>
     </Reference>
@@ -69,6 +72,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MainViewModel.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -114,6 +118,12 @@
   <ItemGroup>
     <Resource Include="Images\appbar.navigate.next.png" />
     <Resource Include="Images\appbar.navigate.previous.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FlagTunes.Core\FlagTunes.Core.csproj">
+      <Project>{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}</Project>
+      <Name>FlagTunes.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

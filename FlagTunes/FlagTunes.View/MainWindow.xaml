@@ -2,7 +2,11 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:View="clr-namespace:FlagTunes.View"
         Title="FlagTunes" Height="600" Width="800" WindowState="Maximized">
+    <Window.DataContext>
+        <View:MainViewModel />
+    </Window.DataContext>
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -19,8 +23,9 @@
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid Height="30">
+        <Grid Grid.Row="0" Height="30">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -45,11 +50,20 @@
             </StackPanel>
             <Slider Grid.Column="2" Margin="5, 0, 0, 0" IsMoveToPointEnabled="True" />
             <StackPanel Orientation="Horizontal" Grid.Column="3">
-                <TextBlock Grid.Column="5" />
+                <TextBlock Grid.Column="5" Text="{Binding Path=CurrentTime, StringFormat=hh\\:mm\\:ss}" />
                 <TextBlock Grid.Column="6" VerticalAlignment="Center" Text="/" />
                 <TextBlock Grid.Column="7" />
                 <TextBox Grid.Column="8" Width="150" Height="25" VerticalAlignment="Center" VerticalContentAlignment="Center" />
             </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1" Margin="0, 5, 0, 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid>
+                <ListBox />
+            </Grid>
         </Grid>
     </Grid>
 </Controls:MetroWindow>
