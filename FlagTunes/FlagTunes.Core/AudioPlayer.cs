@@ -152,6 +152,11 @@ namespace FlagTunes.Core
             {
                 this.inputStream.Close();
             }
+
+            if (this.songFinishedTimer != null)
+            {
+                this.songFinishedTimer.Dispose();
+            }
         }
 
         /// <summary>
