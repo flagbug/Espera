@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FlagLib">
+      <HintPath>..\packages\FlagLib.4.4.0\lib\FlagLib.dll</HintPath>
+    </Reference>
     <Reference Include="NAudio">
       <HintPath>..\packages\NAudio.1.5\lib\NAudio.dll</HintPath>
     </Reference>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Timers;
+using FlagLib.Extensions;
 using NAudio;
 using NAudio.Wave;
 
@@ -154,18 +155,6 @@ namespace FlagTunes.Core
         }
 
         /// <summary>
-        /// Raises the <see cref="SongFinished"/> event.
-        /// </summary>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void OnSongFinished(EventArgs e)
-        {
-            if (this.SongFinished != null)
-            {
-                this.SongFinished(this, e);
-            }
-        }
-
-        /// <summary>
         /// Closes the loaded file.
         /// </summary>
         private void CloseFile()
@@ -271,7 +260,7 @@ namespace FlagTunes.Core
             if (this.CurrentTime >= this.TotalTime)
             {
                 this.Stop();
-                this.OnSongFinished(EventArgs.Empty);
+                this.SongFinished.RaiseSafe(this, e);
             }
         }
     }
