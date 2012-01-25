@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:View="clr-namespace:Espera.View"
-        Title="FlagTunes" Height="600" Width="800" WindowState="Maximized">
+        Title="Espera" Height="600" Width="800" WindowState="Maximized">
     <Window.DataContext>
         <View:MainViewModel />
     </Window.DataContext>
