@@ -4,7 +4,7 @@ using FlagLib.Reflection;
 namespace FlagTunes.Core
 {
     /// <summary>
-    /// Provides data for the <see cref="SongFinder.SongFound"/> event of the <see cref="SongFinder"/> class.
+    /// Provides data for the <see cref="SongFinder.SongFound"/> and <see cref="Library.SongAdded"/> events.
     /// </summary>
     public class SongEventArgs : EventArgs
     {
