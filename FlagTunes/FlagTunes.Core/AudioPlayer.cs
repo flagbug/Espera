@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Timers;
 using FlagLib.Extensions;
+using FlagLib.Reflection;
 using NAudio;
 using NAudio.Wave;
 
@@ -77,6 +78,9 @@ namespace FlagTunes.Core
         /// <param name="song">The song.</param>
         public void Load(Song song)
         {
+            if (song == null)
+                throw new ArgumentNullException(Reflector.GetMemberName(() => song));
+
             this.Stop();
             this.RenewDevice();
 
