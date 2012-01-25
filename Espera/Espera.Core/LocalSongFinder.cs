@@ -75,30 +75,35 @@ namespace Espera.Core
                 try
                 {
                     Tag tag = null;
+                    TimeSpan duration = TimeSpan.Zero;
                     AudioType? audioType = null; // Use a nullable value so that we don't have to assign a enum value
+
+                    File file = null;
 
                     switch (e.File.Extension)
                     {
                         case ".mp3":
-                            using (var file = new TagLib.Mpeg.AudioFile(e.File.FullName))
-                            {
-                                tag = file.Tag;
-                                audioType = AudioType.Mp3;
-                            }
+                            file = new TagLib.Mpeg.AudioFile(e.File.FullName);
+                            audioType = AudioType.Mp3;
                             break;
 
                         case ".wav":
-                            using (var file = new TagLib.WavPack.File(e.File.FullName))
-                            {
-                                tag = file.Tag;
-                                audioType = AudioType.Wav;
-                            }
+                            file = new TagLib.WavPack.File(e.File.FullName);
+                            audioType = AudioType.Wav;
                             break;
+                    }
+
+                    if (file != null)
+                    {
+                        duration = file.Properties.Duration;
+                        tag = file.Tag;
+
+                        file.Dispose();
                     }
 
                     if (tag != null)
                     {
-                        var song = new LocalSong(new Uri(e.File.FullName), audioType.Value, DateTime.Now)
+                        var song = new LocalSong(new Uri(e.File.FullName), audioType.Value, duration, DateTime.Now)
                         {
                             Album = tag.Album ?? String.Empty,
                             Artist = tag.FirstPerformer ?? "Unknown Artist",

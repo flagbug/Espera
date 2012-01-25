@@ -52,6 +52,11 @@ namespace Espera.Core
         public AudioType AudioType { get; private set; }
 
         /// <summary>
+        /// Gets the duration of the song.
+        /// </summary>
+        public TimeSpan Duration { get; private set; }
+
+        /// <summary>
         /// Gets the date, when the song has been added.
         /// </summary>
         public DateTime DateAdded { get; private set; }
@@ -61,14 +66,16 @@ namespace Espera.Core
         /// </summary>
         /// <param name="path">The path of the song.</param>
         /// <param name="audioType">The audio type.</param>
+        /// <param name="duration">The duration of the song.</param>
         /// <param name="dateAdded">The date when the song has been added.</param>
-        protected Song(Uri path, AudioType audioType, DateTime dateAdded)
+        protected Song(Uri path, AudioType audioType, TimeSpan duration, DateTime dateAdded)
         {
             if (path == null)
                 throw new ArgumentNullException(Reflector.GetMemberName(() => path));
 
             this.Path = path;
             this.AudioType = audioType;
+            this.Duration = duration;
             this.DateAdded = dateAdded;
 
             this.Album = String.Empty;

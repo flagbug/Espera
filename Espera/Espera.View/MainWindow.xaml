@@ -77,13 +77,14 @@
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Path=Title}" />
+                            <GridViewColumn Header="Duration" DisplayMemberBinding="{Binding Path=Duration, StringFormat=mm\\:ss}" />
                             <GridViewColumn Header="Artist" DisplayMemberBinding="{Binding Path=Artist}" />
                             <GridViewColumn Header="Album" DisplayMemberBinding="{Binding Path=Album}" />
                         </GridView>
                     </ListView.View>
                 </ListView>
                 <ListView Grid.Row="1">
-                    
+
                 </ListView>
             </Grid>
         </Grid>
