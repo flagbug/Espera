@@ -1,11 +1,13 @@
 ﻿using System;
+using System.IO;
+using FlagLib.Reflection;
 
 namespace FlagTunes.Core
 {
     /// <summary>
     /// Represents a song
     /// </summary>
-    public class Song : IEquatable<Song>
+    public abstract class Song : IEquatable<Song>
     {
         /// <summary>
         /// Gets or sets the title.
@@ -40,9 +42,14 @@ namespace FlagTunes.Core
         public string Genre { get; set; }
 
         /// <summary>
-        /// Gets the path of the song on the local harddrive or removable disk.
+        /// Gets the path of the song on the local filesystem, or in the internet.
         /// </summary>
-        public string Path { get; private set; }
+        public Uri Path { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the type of the audio.
+        /// </summary>
+        public AudioType AudioType { get; private set; }
 
         /// <summary>
         /// Gets the date, when the song has been added.
@@ -52,11 +59,16 @@ namespace FlagTunes.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="Song"/> class.
         /// </summary>
-        /// <param name="path">The path.</param>
+        /// <param name="path">The path of the song.</param>
+        /// <param name="audioType">The audio type.</param>
         /// <param name="dateAdded">The date when the song has been added.</param>
-        public Song(string path, DateTime dateAdded)
+        protected Song(Uri path, AudioType audioType, DateTime dateAdded)
         {
+            if (path == null)
+                throw new ArgumentNullException(Reflector.GetMemberName(() => path));
+
             this.Path = path;
+            this.AudioType = audioType;
             this.DateAdded = dateAdded;
 
             this.Album = String.Empty;
@@ -64,6 +76,12 @@ namespace FlagTunes.Core
             this.Genre = String.Empty;
             this.Title = String.Empty;
         }
+
+        /// <summary>
+        /// Opens a stream that can be used to play the song.
+        /// </summary>
+        /// <returns>A stream that can be used to play the song.</returns>
+        public abstract Stream OpenStream();
 
         /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.

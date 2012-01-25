@@ -50,6 +50,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AudioPlayer.cs" />
+    <Compile Include="AudioType.cs" />
+    <Compile Include="LocalSong.cs" />
+    <Compile Include="PlaybackException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Song.cs" />
     <Compile Include="SongEventArgs.cs" />

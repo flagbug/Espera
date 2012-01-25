@@ -75,6 +75,7 @@ namespace FlagTunes.Core
                 try
                 {
                     Tag tag = null;
+                    AudioType? audioType = null; // Use a nullable value so that we don't have to assign a enum value
 
                     switch (e.File.Extension)
                     {
@@ -82,6 +83,7 @@ namespace FlagTunes.Core
                             using (var file = new TagLib.Mpeg.AudioFile(e.File.FullName))
                             {
                                 tag = file.Tag;
+                                audioType = AudioType.Mp3;
                             }
                             break;
 
@@ -89,13 +91,14 @@ namespace FlagTunes.Core
                             using (var file = new TagLib.WavPack.File(e.File.FullName))
                             {
                                 tag = file.Tag;
+                                audioType = AudioType.Wav;
                             }
                             break;
                     }
 
                     if (tag != null)
                     {
-                        var song = new Song(e.File.FullName, DateTime.Now)
+                        var song = new LocalSong(new Uri(e.File.FullName), audioType.Value, DateTime.Now)
                         {
                             Album = tag.Album ?? String.Empty,
                             Artist = tag.FirstPerformer ?? "Unknown Artist",

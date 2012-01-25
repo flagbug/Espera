@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Timers;
 using FlagLib.Extensions;
 using FlagLib.Reflection;
@@ -85,7 +86,7 @@ namespace FlagTunes.Core
             this.Stop();
             this.RenewDevice();
 
-            this.OpenFile(song.Path);
+            this.OpenSong(song);
 
             this.LoadedSong = song;
         }
@@ -93,6 +94,7 @@ namespace FlagTunes.Core
         /// <summary>
         /// Plays the loaded song.
         /// </summary>
+        /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
         public void Play()
         {
             if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != PlaybackState.Playing)
@@ -103,9 +105,9 @@ namespace FlagTunes.Core
                     this.songFinishedTimer.Start();
                 }
 
-                catch (MmException)
+                catch (MmException ex)
                 {
-                    //TODO: Add user message
+                    throw new PlaybackException("The playback couldn't be started", ex);
                 }
             }
         }
@@ -137,7 +139,7 @@ namespace FlagTunes.Core
                 this.songFinishedTimer.Stop();
             }
 
-            this.CloseFile();
+            this.CloseStream();
         }
 
         /// <summary>
@@ -164,9 +166,9 @@ namespace FlagTunes.Core
         }
 
         /// <summary>
-        /// Closes the loaded file.
+        /// Closes the current stream.
         /// </summary>
-        private void CloseFile()
+        private void CloseStream()
         {
             if (inputStream != null)
             {
@@ -177,45 +179,44 @@ namespace FlagTunes.Core
         }
 
         /// <summary>
-        /// Opens the file.
+        /// Opens the specified song.
         /// </summary>
-        /// <param name="fileName">Name of the file.</param>
-        private void OpenFile(string fileName)
+        /// <param name="song">The song to open.</param>
+        private void OpenSong(Song song)
         {
-            this.CreateInputStream(fileName);
+            this.CreateInputStream(song);
             this.wavePlayer.Init(inputStream);
         }
 
         /// <summary>
         /// Creates the input stream.
         /// </summary>
-        /// <param name="fileName">Name of the file.</param>
-        private void CreateInputStream(string fileName)
+        /// <param name="song">The song that contains the stream.</param>
+        private void CreateInputStream(Song song)
         {
-            if (fileName.EndsWith(".wav"))
+            switch (song.AudioType)
             {
-                this.inputStream = this.OpenWavStream(fileName);
+                case AudioType.Wav:
+                    this.inputStream = this.OpenWavStream(song.OpenStream());
+                    break;
+                case AudioType.Mp3:
+                    this.inputStream = this.OpenMp3Stream(song.OpenStream());
+                    break;
+                default:
+                    throw new InvalidOperationException("Unsupported extension");
             }
 
-            else if (fileName.EndsWith(".mp3"))
-            {
-                this.inputStream = this.OpenMp3Stream(fileName);
-            }
-
-            else
-            {
-                throw new InvalidOperationException("Unsupported extension");
-            }
+            this.inputStream.Volume = this.Volume;
         }
 
         /// <summary>
         /// Opens the MP3 stream.
         /// </summary>
-        /// <param name="fileName">Name of the file.</param>
+        /// <param name="stream">The Mp3 stream</param>
         /// <returns></returns>
-        private WaveChannel32 OpenMp3Stream(string fileName)
+        private WaveChannel32 OpenMp3Stream(Stream stream)
         {
-            WaveStream mp3Stream = new Mp3FileReader(fileName);
+            WaveStream mp3Stream = new Mp3FileReader(stream);
 
             return new WaveChannel32(mp3Stream);
         }
@@ -223,11 +224,11 @@ namespace FlagTunes.Core
         /// <summary>
         /// Opens the wav stream.
         /// </summary>
-        /// <param name="fileName">Name of the file.</param>
+        /// <param name="stream">The wav stream.</param>
         /// <returns></returns>
-        private WaveChannel32 OpenWavStream(string fileName)
+        private WaveChannel32 OpenWavStream(Stream stream)
         {
-            WaveStream readerStream = new WaveFileReader(fileName);
+            WaveStream readerStream = new WaveFileReader(stream);
 
             if (readerStream.WaveFormat.Encoding != WaveFormatEncoding.Pcm)
             {
@@ -237,12 +238,11 @@ namespace FlagTunes.Core
 
             if (readerStream.WaveFormat.BitsPerSample != 16)
             {
-                var format = new WaveFormat(readerStream.WaveFormat.SampleRate,
-                    16, readerStream.WaveFormat.Channels);
+                var format = new WaveFormat(readerStream.WaveFormat.SampleRate, 16, readerStream.WaveFormat.Channels);
                 readerStream = new WaveFormatConversionStream(format, readerStream);
             }
 
-            return new WaveChannel32(readerStream) { Volume = this.Volume };
+            return new WaveChannel32(readerStream);
         }
 
         /// <summary>
