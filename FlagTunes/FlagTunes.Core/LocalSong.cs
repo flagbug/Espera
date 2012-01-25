@@ -21,7 +21,7 @@ namespace FlagTunes.Core
         /// <returns>
         /// A stream that can be used to play the song.
         /// </returns>
-        public override Stream OpenStream()
+        internal override Stream OpenStream()
         {
             return File.OpenRead(this.Path.LocalPath);
         }

@@ -81,7 +81,7 @@ namespace FlagTunes.Core
         /// Opens a stream that can be used to play the song.
         /// </summary>
         /// <returns>A stream that can be used to play the song.</returns>
-        public abstract Stream OpenStream();
+        internal abstract Stream OpenStream();
 
         /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
