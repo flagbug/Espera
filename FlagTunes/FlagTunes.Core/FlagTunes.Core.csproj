@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="AudioPlayer.cs" />
     <Compile Include="AudioType.cs" />
+    <Compile Include="Library.cs" />
     <Compile Include="LocalSong.cs" />
     <Compile Include="PlaybackException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
