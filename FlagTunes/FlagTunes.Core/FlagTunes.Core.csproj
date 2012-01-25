@@ -57,7 +57,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Song.cs" />
     <Compile Include="SongEventArgs.cs" />
-    <Compile Include="SongFinder.cs" />
+    <Compile Include="LocalSongFinder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -9,7 +9,7 @@ namespace FlagTunes.Core
     /// <summary>
     /// Encapsulates a recursive call through the local filesystem that reads the tags of all WAV and MP3 files and returns them.
     /// </summary>
-    public sealed class SongFinder
+    public sealed class LocalSongFinder
     {
         private readonly DirectoryScanner scanner;
 
@@ -41,10 +41,10 @@ namespace FlagTunes.Core
         public event EventHandler Finished;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SongFinder"/> class.
+        /// Initializes a new instance of the <see cref="LocalSongFinder"/> class.
         /// </summary>
         /// <param name="path">The path of the directory where the recursive search should start.</param>
-        public SongFinder(string path)
+        public LocalSongFinder(string path)
         {
             SupportedExtensions = new List<string>(new[] { ".mp3", ".wav" });
             this.SongsFound = new List<Song>();

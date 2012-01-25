@@ -12,6 +12,11 @@ namespace FlagTunes.Core
 
         public event EventHandler<SongEventArgs> SongAdded;
 
+        public IEnumerable<Song> Songs
+        {
+            get { return this.songs; }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Library"/> class.
         /// </summary>
@@ -20,7 +25,7 @@ namespace FlagTunes.Core
             this.songs = new HashSet<Song>();
         }
 
-        public void AddSongsFromLocal(string path)
+        public void AddLocalSongs(string path)
         {
             if (path == null)
                 throw new ArgumentNullException(Reflector.GetMemberName(() => path));
@@ -28,7 +33,7 @@ namespace FlagTunes.Core
             if (!Directory.Exists(path))
                 throw new ArgumentException("The directory doesn't exist.", Reflector.GetMemberName(() => path));
 
-            var finder = new SongFinder(path);
+            var finder = new LocalSongFinder(path);
 
             finder.SongFound += (sender, e) =>
             {
