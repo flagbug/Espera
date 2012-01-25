@@ -145,7 +145,6 @@ namespace FlagTunes.Core
             if (wavePlayer != null)
             {
                 this.wavePlayer.Dispose();
-                this.wavePlayer = null;
             }
 
             if (this.inputStream != null)
@@ -167,7 +166,6 @@ namespace FlagTunes.Core
             if (inputStream != null)
             {
                 this.inputStream.Dispose();
-                this.inputStream = null;
             }
 
             this.LoadedSong = null;
