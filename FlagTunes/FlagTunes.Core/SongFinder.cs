@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using FlagLib.Extensions;
 using FlagLib.IO;
 using TagLib;
@@ -62,14 +61,6 @@ namespace FlagTunes.Core
             this.scanner.Start();
 
             this.Finished.RaiseSafe(this, EventArgs.Empty);
-        }
-
-        /// <summary>
-        /// Starts the song crawler asynchronous.
-        /// </summary>
-        public void StartAsync()
-        {
-            Task.Factory.StartNew(this.Start);
         }
 
         /// <summary>
