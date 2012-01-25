@@ -13,6 +13,7 @@ namespace Espera.Core
         private IWavePlayer wavePlayer;
         private WaveChannel32 inputStream;
         private readonly Timer songFinishedTimer;
+        private float volume;
 
         /// <summary>
         /// Gets the playback state.
@@ -35,8 +36,16 @@ namespace Espera.Core
         /// <value>The volume.</value>
         public float Volume
         {
-            get { return this.inputStream.Volume; }
-            set { this.inputStream.Volume = value; }
+            get { return this.volume; }
+            set
+            {
+                this.volume = value;
+
+                if (this.inputStream != null)
+                {
+                    this.inputStream.Volume = value;
+                }
+            }
         }
 
         /// <summary>
@@ -166,6 +175,30 @@ namespace Espera.Core
         }
 
         /// <summary>
+        /// Opens the wav stream.
+        /// </summary>
+        /// <param name="stream">The wav stream.</param>
+        /// <returns></returns>
+        private static WaveChannel32 OpenWavStream(Stream stream)
+        {
+            WaveStream readerStream = new WaveFileReader(stream);
+
+            if (readerStream.WaveFormat.Encoding != WaveFormatEncoding.Pcm)
+            {
+                readerStream = WaveFormatConversionStream.CreatePcmStream(readerStream);
+                readerStream = new BlockAlignReductionStream(readerStream);
+            }
+
+            if (readerStream.WaveFormat.BitsPerSample != 16)
+            {
+                var format = new WaveFormat(readerStream.WaveFormat.SampleRate, 16, readerStream.WaveFormat.Channels);
+                readerStream = new WaveFormatConversionStream(format, readerStream);
+            }
+
+            return new WaveChannel32(readerStream);
+        }
+
+        /// <summary>
         /// Closes the current stream.
         /// </summary>
         private void CloseStream()
@@ -197,10 +230,10 @@ namespace Espera.Core
             switch (song.AudioType)
             {
                 case AudioType.Wav:
-                    this.inputStream = this.OpenWavStream(song.OpenStream());
+                    this.inputStream = OpenWavStream(song.OpenStream());
                     break;
                 case AudioType.Mp3:
-                    this.inputStream = this.OpenMp3Stream(song.OpenStream());
+                    this.inputStream = OpenMp3Stream(song.OpenStream());
                     break;
                 default:
                     throw new InvalidOperationException("Unsupported extension");
@@ -214,35 +247,11 @@ namespace Espera.Core
         /// </summary>
         /// <param name="stream">The Mp3 stream</param>
         /// <returns></returns>
-        private WaveChannel32 OpenMp3Stream(Stream stream)
+        private static WaveChannel32 OpenMp3Stream(Stream stream)
         {
             WaveStream mp3Stream = new Mp3FileReader(stream);
 
             return new WaveChannel32(mp3Stream);
-        }
-
-        /// <summary>
-        /// Opens the wav stream.
-        /// </summary>
-        /// <param name="stream">The wav stream.</param>
-        /// <returns></returns>
-        private WaveChannel32 OpenWavStream(Stream stream)
-        {
-            WaveStream readerStream = new WaveFileReader(stream);
-
-            if (readerStream.WaveFormat.Encoding != WaveFormatEncoding.Pcm)
-            {
-                readerStream = WaveFormatConversionStream.CreatePcmStream(readerStream);
-                readerStream = new BlockAlignReductionStream(readerStream);
-            }
-
-            if (readerStream.WaveFormat.BitsPerSample != 16)
-            {
-                var format = new WaveFormat(readerStream.WaveFormat.SampleRate, 16, readerStream.WaveFormat.Channels);
-                readerStream = new WaveFormatConversionStream(format, readerStream);
-            }
-
-            return new WaveChannel32(readerStream);
         }
 
         /// <summary>
