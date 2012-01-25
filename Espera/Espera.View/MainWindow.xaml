@@ -34,19 +34,19 @@
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal">
                 <Button Padding="0">
-                    <Image Source="/FlagTunes.View;component/Images/appbar.play.png" />
+                    <Image Source="/Espera.View;component/Images/appbar.play.png" />
                 </Button>
                 <Button Padding="0" Margin="5, 0, 0, 0">
-                    <Image Source="/FlagTunes.View;component/Images/appbar.navigate.previous.png" />
+                    <Image Source="/Espera.View;component/Images/appbar.navigate.previous.png" />
                 </Button>
                 <Button Padding="0" Margin="5, 0, 0, 0">
-                    <Image Source="/FlagTunes.View;component/Images/appbar.navigate.next.png" />
+                    <Image Source="/Espera.View;component/Images/appbar.navigate.next.png" />
                 </Button>
             </StackPanel>
             <StackPanel Margin="10, 0, 0, 0" Grid.Column="1" Orientation="Horizontal">
-                <Image Height="25" Source="/FlagTunes.View;component/Images/appbar.sound.1.png" />
+                <Image Height="25" Source="/Espera.View;component/Images/appbar.sound.1.png" />
                 <Slider Width="200" IsMoveToPointEnabled="True" />
-                <Image Height="25" Source="/FlagTunes.View;component/Images/appbar.sound.3.png" />
+                <Image Height="25" Source="/Espera.View;component/Images/appbar.sound.3.png" />
             </StackPanel>
             <Slider Grid.Column="2" Margin="5, 0, 0, 0" IsMoveToPointEnabled="True" />
             <StackPanel Orientation="Horizontal" Grid.Column="3">
