@@ -206,6 +206,20 @@ namespace Espera.View
             }
         }
 
+        public ICommand UnMuteCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.Volume = 1;
+                    }
+                );
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
         /// </summary>

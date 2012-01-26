@@ -90,7 +90,7 @@
                     <Image Height="25" Source="/Espera.View;component/Images/appbar.sound.1.png" />
                 </Button>
                 <Slider Width="200" IsMoveToPointEnabled="True" Maximum="1" Value="{Binding Path=Volume}" />
-                <Button Style="{StaticResource NoButtonStyle}">
+                <Button Style="{StaticResource NoButtonStyle}" Command="{Binding Path=UnMuteCommand}">
                     <Image Height="25" Source="/Espera.View;component/Images/appbar.sound.3.png" />
                 </Button>
             </StackPanel>
