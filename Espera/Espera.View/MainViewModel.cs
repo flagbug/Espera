@@ -71,6 +71,12 @@ namespace Espera.View
             get { return this.library.Playlist; }
         }
 
+        public double Volume
+        {
+            get { return this.library.Volume; }
+            set { this.library.Volume = (float)value; }
+        }
+
         public TimeSpan TotalTime
         {
             get { return this.library.TotalTime; }

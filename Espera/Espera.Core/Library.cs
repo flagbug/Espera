@@ -32,6 +32,12 @@ namespace Espera.Core
             get { return playlist; }
         }
 
+        public float Volume
+        {
+            get { return this.audioPlayer.Volume; }
+            set { this.audioPlayer.Volume = value; }
+        }
+
         /// <summary>
         /// Gets the duration of the current played song.
         /// </summary>

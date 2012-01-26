@@ -51,7 +51,7 @@
             </StackPanel>
             <StackPanel Margin="10, 0, 0, 0" Grid.Column="1" Orientation="Horizontal">
                 <Image Height="25" Source="/Espera.View;component/Images/appbar.sound.1.png" />
-                <Slider Width="200" IsMoveToPointEnabled="True" />
+                <Slider Width="200" IsMoveToPointEnabled="True" Maximum="1" Value="{Binding Path=Volume}" />
                 <Image Height="25" Source="/Espera.View;component/Images/appbar.sound.3.png" />
             </StackPanel>
             <Slider Grid.Column="2" Margin="5, 0, 0, 0" IsMoveToPointEnabled="True" />
