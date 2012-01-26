@@ -77,7 +77,7 @@
                 </Grid.RowDefinitions>
                 <ListView Grid.Row="0" ItemsSource="{Binding Path=SelectableSongs}" SelectedItem="{Binding Path=SelectedSong}">
                     <ListView.ItemContainerStyle>
-                        <Style TargetType="{x:Type ListViewItem}">
+                        <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                             <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick"/>
                         </Style>
                     </ListView.ItemContainerStyle>
