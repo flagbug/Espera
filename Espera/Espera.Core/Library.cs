@@ -11,6 +11,7 @@ namespace Espera.Core
     {
         private readonly AudioPlayer audioPlayer;
         private readonly HashSet<Song> songs;
+        private readonly List<Song> playlist;
         private readonly object songLocker = new object();
 
         public event EventHandler<SongEventArgs> SongAdded;
@@ -24,6 +25,11 @@ namespace Espera.Core
                     return this.songs;
                 }
             }
+        }
+
+        public IEnumerable<Song> Playlist
+        {
+            get { return playlist; }
         }
 
         /// <summary>
@@ -49,6 +55,12 @@ namespace Espera.Core
         {
             this.audioPlayer = new AudioPlayer();
             this.songs = new HashSet<Song>();
+            this.playlist = new List<Song>();
+        }
+
+        public void AddSongToPlaylist(Song song)
+        {
+            this.playlist.Add(song);
         }
 
         public Task AddLocalSongsAsync(string path)

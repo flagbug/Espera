@@ -14,6 +14,7 @@ namespace Espera.View
         private string selectedArtist;
         private bool isAdding;
         private string currentAddingPath;
+        private Song selectedSong;
 
         public IEnumerable<string> Artists
         {
@@ -50,6 +51,24 @@ namespace Espera.View
                 return this.library.Songs
                     .Where(song => song.Artist == this.SelectedArtist);
             }
+        }
+
+        public Song SelectedSong
+        {
+            get { return this.selectedSong; }
+            set
+            {
+                if (this.SelectedSong != value)
+                {
+                    this.selectedSong = value;
+                    this.OnPropertyChanged(vm => vm.SelectedSong);
+                }
+            }
+        }
+
+        public IEnumerable<Song> Playlist
+        {
+            get { return this.library.Playlist; }
         }
 
         public TimeSpan TotalTime
@@ -94,6 +113,12 @@ namespace Espera.View
         public MainViewModel()
         {
             this.library = new Library();
+        }
+
+        public void AddSelectedSongToPlaylist()
+        {
+            this.library.AddSongToPlaylist(this.SelectedSong);
+            this.OnPropertyChanged(vm => vm.Playlist);
         }
 
         public void AddSongs(string folderPath)
