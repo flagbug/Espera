@@ -47,11 +47,12 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Gets the elapsed time of the current played song.
+        /// Gets or sets the elapsed time of the current played song.
         /// </summary>
         public TimeSpan CurrentTime
         {
             get { return this.audioPlayer.CurrentTime; }
+            set { this.audioPlayer.CurrentTime = value; }
         }
 
         public bool IsPlaying

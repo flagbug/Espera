@@ -16,6 +16,7 @@ namespace Espera.View
         private string currentAddingPath;
         private Song selectedSong;
         private Song selectedPlaylistSong;
+        private readonly Timer updateTimer;
 
         public IEnumerable<string> Artists
         {
@@ -96,9 +97,20 @@ namespace Espera.View
             get { return this.library.TotalTime; }
         }
 
+        public int TotalSeconds
+        {
+            get { return (int)this.TotalTime.TotalSeconds; }
+        }
+
         public TimeSpan CurrentTime
         {
             get { return this.library.CurrentTime; }
+        }
+
+        public int CurrentSeconds
+        {
+            get { return (int)this.CurrentTime.TotalSeconds; }
+            set { this.library.CurrentTime = TimeSpan.FromSeconds(value); }
         }
 
         public bool IsPlaying
@@ -148,7 +160,11 @@ namespace Espera.View
                         else
                         {
                             this.library.PlaySong(this.SelectedPlaylistSong);
+                            this.OnPropertyChanged(vm => vm.TotalSeconds);
+                            this.OnPropertyChanged(vm => vm.TotalTime);
                         }
+
+                        this.updateTimer.Start();
 
                         this.OnPropertyChanged(vm => vm.IsPlaying);
                     }
@@ -165,6 +181,7 @@ namespace Espera.View
                     param =>
                     {
                         this.library.PauseSong();
+                        this.updateTimer.Stop();
                         this.OnPropertyChanged(vm => vm.IsPlaying);
                     }
                 );
@@ -177,6 +194,14 @@ namespace Espera.View
         public MainViewModel()
         {
             this.library = new Library();
+            this.updateTimer = new Timer(1000);
+            this.updateTimer.Elapsed += UpdateTimerElapsed;
+        }
+
+        private void UpdateTimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            this.OnPropertyChanged(vm => vm.CurrentSeconds);
+            this.OnPropertyChanged(vm => vm.CurrentTime);
         }
 
         public void AddSelectedSongToPlaylist()
@@ -220,6 +245,7 @@ namespace Espera.View
         public void Dispose()
         {
             this.library.Dispose();
+            this.updateTimer.Dispose();
         }
     }
 }

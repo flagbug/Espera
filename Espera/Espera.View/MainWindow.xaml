@@ -79,7 +79,7 @@
                 <Slider Width="200" IsMoveToPointEnabled="True" Maximum="1" Value="{Binding Path=Volume}" />
                 <Image Height="25" Source="/Espera.View;component/Images/appbar.sound.3.png" />
             </StackPanel>
-            <Slider Grid.Column="2" Margin="5, 0, 0, 0" IsMoveToPointEnabled="True" />
+            <Slider Grid.Column="2" Margin="5, 0, 0, 0" IsMoveToPointEnabled="True" Value="{Binding Path=CurrentSeconds}" Maximum="{Binding Path=TotalSeconds}" />
             <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="5, 0, 0, 0">
                 <TextBlock VerticalAlignment="Center" Text="{Binding Path=CurrentTime, StringFormat=mm\\:ss}" />
                 <TextBlock VerticalAlignment="Center" Text="/" />
