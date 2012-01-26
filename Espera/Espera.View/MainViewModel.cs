@@ -101,6 +101,11 @@ namespace Espera.View
             get { return this.library.CurrentTime; }
         }
 
+        public bool IsPlaying
+        {
+            get { return this.library.IsPlaying; }
+        }
+
         public bool IsAdding
         {
             get { return this.isAdding; }
@@ -135,7 +140,32 @@ namespace Espera.View
                 (
                     param =>
                     {
-                        this.library.PlaySong(this.SelectedPlaylistSong);
+                        if (this.library.IsPaused && this.SelectedSong == this.library.CurrentSong)
+                        {
+                            this.library.ContinueSong();
+                        }
+
+                        else
+                        {
+                            this.library.PlaySong(this.SelectedPlaylistSong);
+                        }
+
+                        this.OnPropertyChanged(vm => vm.IsPlaying);
+                    }
+                );
+            }
+        }
+
+        public ICommand PauseCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.library.PauseSong();
+                        this.OnPropertyChanged(vm => vm.IsPlaying);
                     }
                 );
             }

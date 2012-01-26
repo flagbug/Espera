@@ -19,9 +19,25 @@ namespace Espera.Core
         /// Gets the playback state.
         /// </summary>
         /// <value>The playback state.</value>
-        public PlaybackState PlaybackState
+        public AudioPlayerState PlaybackState
         {
-            get { return this.wavePlayer.PlaybackState; }
+            get
+            {
+                if (this.wavePlayer != null)
+                {
+                    switch (this.wavePlayer.PlaybackState)
+                    {
+                        case NAudio.Wave.PlaybackState.Stopped:
+                            return AudioPlayerState.Stopped;
+                        case NAudio.Wave.PlaybackState.Playing:
+                            return AudioPlayerState.Playing;
+                        case NAudio.Wave.PlaybackState.Paused:
+                            return AudioPlayerState.Paused;
+                    }
+                }
+
+                return AudioPlayerState.None;
+            }
         }
 
         /// <summary>
@@ -106,7 +122,7 @@ namespace Espera.Core
         /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
         public void Play()
         {
-            if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != PlaybackState.Playing)
+            if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != NAudio.Wave.PlaybackState.Playing)
             {
                 try
                 {
@@ -126,7 +142,7 @@ namespace Espera.Core
         /// </summary>
         public void Pause()
         {
-            if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != PlaybackState.Paused)
+            if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != NAudio.Wave.PlaybackState.Paused)
             {
                 this.wavePlayer.Pause();
                 this.songFinishedTimer.Stop();

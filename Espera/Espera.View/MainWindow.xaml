@@ -39,8 +39,33 @@
                 <Button Padding="0" Click="AddSongsButtonClick">
                     <Image Source="/Espera.View;component/Images/appbar.add.png" />
                 </Button>
-                <Button Padding="0" Margin="15, 0, 0, 0" Command="{Binding Path=PlayCommand}">
-                    <Image Source="/Espera.View;component/Images/appbar.play.png" />
+                <Button Padding="0" Margin="15, 0, 0, 0">
+                    <Button.Style>
+                        <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="{x:Type Button}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=IsPlaying}" Value="True">
+                                    <Setter Property="Command" Value="{Binding Path=PauseCommand}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Path=IsPlaying}" Value="False">
+                                    <Setter Property="Command" Value="{Binding Path=PlayCommand}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <Image>
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=IsPlaying}" Value="True">
+                                        <Setter Property="Source" Value="/Espera.View;component/Images/appbar.pause.png" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Path=IsPlaying}" Value="False">
+                                        <Setter Property="Source" Value="/Espera.View;component/Images/appbar.play.png" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
                 </Button>
                 <Button Padding="0" Margin="5, 0, 0, 0">
                     <Image Source="/Espera.View;component/Images/appbar.navigate.previous.png" />
@@ -85,7 +110,7 @@
                                             <ContentPresenter Margin="5, 0, 0, 0" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                                         </Border>
                                         <ControlTemplate.Triggers>
-                                            <Trigger Property="IsSelected" Value="true">
+                                            <Trigger Property="IsSelected" Value="True">
                                                 <Setter TargetName="Bd" Property="BorderBrush" Value="#FF143c65" />
                                                 <Setter Property="Background" TargetName="Bd" Value="{DynamicResource AccentColorBrush}"></Setter>
                                             </Trigger>
@@ -98,7 +123,7 @@
                                             </Trigger>
                                             <MultiTrigger>
                                                 <MultiTrigger.Conditions>
-                                                    <Condition Property="IsSelected" Value="true" />
+                                                    <Condition Property="IsSelected" Value="True" />
                                                     <Condition Property="Selector.IsSelectionActive" Value="True" />
                                                 </MultiTrigger.Conditions>
                                                 <Setter Property="Background" TargetName="Bd">

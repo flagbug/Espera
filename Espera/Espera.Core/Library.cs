@@ -54,6 +54,21 @@ namespace Espera.Core
             get { return this.audioPlayer.CurrentTime; }
         }
 
+        public bool IsPlaying
+        {
+            get { return this.audioPlayer.PlaybackState == AudioPlayerState.Playing; }
+        }
+
+        public bool IsPaused
+        {
+            get { return this.audioPlayer.PlaybackState == AudioPlayerState.Paused; }
+        }
+
+        public Song CurrentSong
+        {
+            get { return this.audioPlayer.LoadedSong; }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Library"/> class.
         /// </summary>
@@ -64,10 +79,20 @@ namespace Espera.Core
             this.playlist = new List<Song>();
         }
 
+        public void ContinueSong()
+        {
+            this.audioPlayer.Play();
+        }
+
         public void PlaySong(Song song)
         {
             this.audioPlayer.Load(song);
             this.audioPlayer.Play();
+        }
+
+        public void PauseSong()
+        {
+            this.audioPlayer.Pause();
         }
 
         public void AddSongToPlaylist(Song song)
