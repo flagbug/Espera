@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Windows.Input;
 using Espera.Core;
 using FlagLib.Patterns.MVVM;
 
 namespace Espera.View
 {
-    internal class MainViewModel : ViewModelBase<MainViewModel>
+    internal class MainViewModel : ViewModelBase<MainViewModel>, IDisposable
     {
         private readonly Library library;
         private string selectedArtist;
@@ -127,6 +128,20 @@ namespace Espera.View
             }
         }
 
+        public ICommand PlayCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.library.PlaySong(this.SelectedPlaylistSong);
+                    }
+                );
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
         /// </summary>
@@ -169,6 +184,14 @@ namespace Espera.View
                     this.OnPropertyChanged(vm => vm.Artists);
                     this.IsAdding = false;
                 });
+        }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            this.library.Dispose();
         }
     }
 }

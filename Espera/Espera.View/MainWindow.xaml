@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:View="clr-namespace:Espera.View"
-        Title="Espera" Height="600" Width="800" WindowState="Maximized">
+        Title="Espera" Height="600" Width="800" WindowState="Maximized" Closing="MetroWindowClosing">
     <Window.DataContext>
         <View:MainViewModel x:Name="mainViewModel" />
     </Window.DataContext>
@@ -39,7 +39,7 @@
                 <Button Padding="0" Click="AddSongsButtonClick">
                     <Image Source="/Espera.View;component/Images/appbar.add.png" />
                 </Button>
-                <Button Padding="0" Margin="15, 0, 0, 0">
+                <Button Padding="0" Margin="15, 0, 0, 0" Command="{Binding Path=PlayCommand}">
                     <Image Source="/Espera.View;component/Images/appbar.play.png" />
                 </Button>
                 <Button Padding="0" Margin="5, 0, 0, 0">

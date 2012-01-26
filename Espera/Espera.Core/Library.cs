@@ -7,7 +7,7 @@ using FlagLib.Reflection;
 
 namespace Espera.Core
 {
-    public class Library
+    public class Library : IDisposable
     {
         private readonly AudioPlayer audioPlayer;
         private readonly HashSet<Song> songs;
@@ -64,6 +64,12 @@ namespace Espera.Core
             this.playlist = new List<Song>();
         }
 
+        public void PlaySong(Song song)
+        {
+            this.audioPlayer.Load(song);
+            this.audioPlayer.Play();
+        }
+
         public void AddSongToPlaylist(Song song)
         {
             this.playlist.Add(song);
@@ -100,6 +106,14 @@ namespace Espera.Core
             };
 
             finder.Start();
+        }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            this.audioPlayer.Dispose();
         }
     }
 }
