@@ -89,7 +89,11 @@ namespace Espera.View
         public double Volume
         {
             get { return this.library.Volume; }
-            set { this.library.Volume = (float)value; }
+            set
+            {
+                this.library.Volume = (float)value;
+                this.OnPropertyChanged(vm => vm.Volume);
+            }
         }
 
         public TimeSpan TotalTime
@@ -188,6 +192,20 @@ namespace Espera.View
             }
         }
 
+        public ICommand MuteCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.Volume = 0;
+                    }
+                );
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
         /// </summary>
@@ -226,7 +244,8 @@ namespace Espera.View
             this.IsAdding = true;
             artistUpdateTimer.Start();
 
-            this.library.AddLocalSongsAsync(folderPath)
+            this.library
+                .AddLocalSongsAsync(folderPath)
                 .ContinueWith(task =>
                 {
                     this.library.SongAdded -= handler;
