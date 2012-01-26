@@ -15,6 +15,7 @@ namespace Espera.View
         private bool isAdding;
         private string currentAddingPath;
         private Song selectedSong;
+        private Song selectedPlaylistSong;
 
         public IEnumerable<string> Artists
         {
@@ -62,6 +63,19 @@ namespace Espera.View
                 {
                     this.selectedSong = value;
                     this.OnPropertyChanged(vm => vm.SelectedSong);
+                }
+            }
+        }
+
+        public Song SelectedPlaylistSong
+        {
+            get { return this.selectedPlaylistSong; }
+            set
+            {
+                if (this.SelectedPlaylistSong != value)
+                {
+                    this.selectedPlaylistSong = value;
+                    this.OnPropertyChanged(vm => vm.SelectedPlaylistSong);
                 }
             }
         }

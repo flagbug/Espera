@@ -90,7 +90,7 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
-                <ListView Grid.Row="1" ItemsSource="{Binding Path=Playlist, IsAsync=True}">
+                <ListView Grid.Row="1" ItemsSource="{Binding Path=Playlist, IsAsync=True}" SelectedItem="{Binding Path=SelectedPlaylistSong}">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Path=Title}" />
