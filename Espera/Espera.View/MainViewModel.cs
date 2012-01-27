@@ -14,7 +14,7 @@ namespace Espera.View
         private string selectedArtist;
         private bool isAdding;
         private string currentAddingPath;
-        private Song selectedSong;
+        private SongViewModel selectedSong;
         private int selectedPlaylistIndex;
         private readonly Timer updateTimer;
 
@@ -46,18 +46,19 @@ namespace Espera.View
             }
         }
 
-        public IEnumerable<Song> SelectableSongs
+        public IEnumerable<SongViewModel> SelectableSongs
         {
             get
             {
                 return this.library.Songs
                     .Where(song => song.Artist == this.SelectedArtist)
                     .OrderBy(song => song.Album)
-                    .ThenBy(song => song.TrackNumber);
+                    .ThenBy(song => song.TrackNumber)
+                    .Select(song => new SongViewModel(song));
             }
         }
 
-        public Song SelectedSong
+        public SongViewModel SelectedSong
         {
             get { return this.selectedSong; }
             set
@@ -83,9 +84,14 @@ namespace Espera.View
             }
         }
 
-        public IEnumerable<Song> Playlist
+        public IEnumerable<SongViewModel> Playlist
         {
-            get { return this.library.Playlist; }
+            get
+            {
+                return this.library
+                    .Playlist
+                    .Select(song => new SongViewModel(song));
+            }
         }
 
         public double Volume
@@ -158,7 +164,7 @@ namespace Espera.View
                 (
                     param =>
                     {
-                        if (this.library.IsPaused && this.SelectedSong == this.library.CurrentSong)
+                        if (this.library.IsPaused && this.SelectedSong.Model == this.library.CurrentSong)
                         {
                             this.library.ContinueSong();
                         }
@@ -240,7 +246,7 @@ namespace Espera.View
 
         public void AddSelectedSongToPlaylist()
         {
-            this.library.AddSongToPlaylist(this.SelectedSong);
+            this.library.AddSongToPlaylist(this.SelectedSong.Model);
             this.OnPropertyChanged(vm => vm.Playlist);
         }
 
