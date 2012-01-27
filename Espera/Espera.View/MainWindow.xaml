@@ -50,7 +50,7 @@
                 <Button Padding="0" Click="AddSongsButtonClick">
                     <Image Source="/Espera.View;component/Images/appbar.add.png" />
                 </Button>
-                <Button Padding="0" Margin="15, 0, 0, 0">
+                <Button Padding="0" Margin="15, 0, 0, 0" Width="30">
                     <Button.Style>
                         <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="{x:Type Button}">
                             <Style.Triggers>
@@ -59,6 +59,9 @@
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Path=IsPlaying}" Value="False">
                                     <Setter Property="Command" Value="{Binding Path=PlayCommand}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Path=SelectedPlaylistSong}" Value="{x:Null}">
+                                    <Setter Property="IsEnabled" Value="False" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
