@@ -111,13 +111,11 @@
                 <ListBox ItemsSource="{Binding Path=Artists}" SelectedItem="{Binding Path=SelectedArtist}">
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="{x:Type ListBoxItem}">
-                            <Setter Property="Foreground" Value="{DynamicResource BlackBrush}" />
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                             <Setter Property="VerticalContentAlignment" Value="Center" />
                             <Setter Property="MinHeight" Value="25" />
                             <Setter Property="Margin" Value="0,0,0,0" />
                             <Setter Property="IsTabStop" Value="False" />
-                            <Setter Property="Border.BorderBrush" Value="{DynamicResource Grey3}" />
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="{x:Type ListBoxItem}">
