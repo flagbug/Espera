@@ -51,7 +51,9 @@ namespace Espera.View
             get
             {
                 return this.library.Songs
-                    .Where(song => song.Artist == this.SelectedArtist);
+                    .Where(song => song.Artist == this.SelectedArtist)
+                    .OrderBy(song => song.Album)
+                    .ThenBy(song => song.TrackNumber);
             }
         }
 

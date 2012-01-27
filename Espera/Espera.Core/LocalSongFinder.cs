@@ -108,7 +108,8 @@ namespace Espera.Core
                             Album = tag.Album ?? String.Empty,
                             Artist = tag.FirstPerformer ?? "Unknown Artist",
                             Genre = tag.FirstGenre ?? String.Empty,
-                            Title = tag.Title ?? String.Empty
+                            Title = tag.Title ?? String.Empty,
+                            TrackNumber = (int)tag.Track
                         };
 
                         this.SongsFound.Add(song);

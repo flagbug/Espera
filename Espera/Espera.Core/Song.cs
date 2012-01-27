@@ -42,6 +42,14 @@ namespace Espera.Core
         public string Genre { get; set; }
 
         /// <summary>
+        /// Gets or sets the track number.
+        /// </summary>
+        /// <value>
+        /// The track number.
+        /// </value>
+        public int TrackNumber { get; set; }
+
+        /// <summary>
         /// Gets the path of the song on the local filesystem, or in the internet.
         /// </summary>
         public Uri Path { get; private set; }
