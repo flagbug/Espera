@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using FlagLib.Extensions;
 using FlagLib.IO;
 using TagLib;
@@ -12,12 +13,6 @@ namespace Espera.Core
     public sealed class LocalSongFinder
     {
         private readonly DirectoryScanner scanner;
-
-        /// <summary>
-        /// Gets the supported extension.
-        /// </summary>
-        /// <value>The supported extension.</value>
-        public List<string> SupportedExtensions { get; private set; }
 
         /// <summary>
         /// Gets the songs that have been found.
@@ -46,11 +41,10 @@ namespace Espera.Core
         /// <param name="path">The path of the directory where the recursive search should start.</param>
         public LocalSongFinder(string path)
         {
-            SupportedExtensions = new List<string>(new[] { ".mp3", ".wav" });
             this.SongsFound = new List<Song>();
             this.CorruptSongs = new List<string>();
             this.scanner = new DirectoryScanner(path);
-            this.scanner.FileFound += scanner_FileFound;
+            this.scanner.FileFound += ScannerFileFound;
         }
 
         /// <summary>
@@ -68,9 +62,9 @@ namespace Espera.Core
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="FlagLib.IO.FileEventArgs"/> instance containing the event data.</param>
-        private void scanner_FileFound(object sender, FileEventArgs e)
+        private void ScannerFileFound(object sender, FileEventArgs e)
         {
-            if (this.SupportedExtensions.Contains(e.File.Extension))
+            if (new[] { ".mp3", ".wav" }.Contains(e.File.Extension))
             {
                 try
                 {
