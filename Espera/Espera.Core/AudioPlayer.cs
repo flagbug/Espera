@@ -4,6 +4,7 @@ using System.Timers;
 using FlagLib.Extensions;
 using FlagLib.Reflection;
 using NAudio;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 
 namespace Espera.Core
@@ -280,7 +281,7 @@ namespace Espera.Core
                 this.wavePlayer.Dispose();
             }
 
-            this.wavePlayer = new WaveOut();
+            this.wavePlayer = new WasapiOut(AudioClientShareMode.Shared, 250);
         }
 
         /// <summary>
