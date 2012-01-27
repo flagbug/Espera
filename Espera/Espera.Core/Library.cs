@@ -84,8 +84,19 @@ namespace Espera.Core
         public Library()
         {
             this.audioPlayer = new AudioPlayer();
+            this.audioPlayer.SongFinished += AudioPlayerSongFinished;
             this.songs = new HashSet<Song>();
             this.playlist = new Dictionary<int, Song>();
+        }
+
+        private void AudioPlayerSongFinished(object sender, EventArgs e)
+        {
+            int nextIndex = this.CurrentSongPlaylistIndex + 1;
+
+            if (this.playlist.ContainsKey(nextIndex))
+            {
+                this.PlaySong(nextIndex);
+            }
         }
 
         public void ContinueSong()

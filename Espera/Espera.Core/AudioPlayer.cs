@@ -1,10 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Timers;
+using System.Windows.Threading;
 using FlagLib.Extensions;
 using FlagLib.Reflection;
 using NAudio;
-using NAudio.CoreAudioApi;
 using NAudio.Wave;
 
 namespace Espera.Core
@@ -13,13 +12,13 @@ namespace Espera.Core
     {
         private IWavePlayer wavePlayer;
         private WaveChannel32 inputStream;
-        private readonly Timer songFinishedTimer;
+        private readonly DispatcherTimer songFinishedTimer;
         private float volume;
 
         /// <summary>
         /// Occurs when the song has been finished.
         /// </summary>
-        public event EventHandler<SongEventArgs> SongFinished;
+        public event EventHandler SongFinished;
 
         /// <summary>
         /// Gets the playback state.
@@ -95,8 +94,8 @@ namespace Espera.Core
         public AudioPlayer()
         {
             this.Volume = 1.0f;
-            this.songFinishedTimer = new Timer { Interval = 250 };
-            this.songFinishedTimer.Elapsed += SongFinishedTimerElapsed;
+            this.songFinishedTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
+            this.songFinishedTimer.Tick += SongFinishedTimerTick;
         }
 
         /// <summary>
@@ -183,11 +182,6 @@ namespace Espera.Core
             if (this.inputStream != null)
             {
                 this.inputStream.Close();
-            }
-
-            if (this.songFinishedTimer != null)
-            {
-                this.songFinishedTimer.Dispose();
             }
         }
 
@@ -281,20 +275,15 @@ namespace Espera.Core
                 this.wavePlayer.Dispose();
             }
 
-            this.wavePlayer = new WasapiOut(AudioClientShareMode.Shared, 250);
+            this.wavePlayer = new WaveOut();
         }
 
-        /// <summary>
-        /// Handles the Tick event of the songFinishedTimer.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void SongFinishedTimerElapsed(object sender, EventArgs e)
+        private void SongFinishedTimerTick(object sender, EventArgs e)
         {
             if (this.CurrentTime >= this.TotalTime)
             {
                 this.Stop();
-                this.SongFinished.RaiseSafe(this, new SongEventArgs(this.LoadedSong));
+                this.SongFinished.RaiseSafe(this, EventArgs.Empty);
             }
         }
     }
