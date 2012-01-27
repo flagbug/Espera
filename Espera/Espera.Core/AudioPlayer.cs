@@ -16,6 +16,11 @@ namespace Espera.Core
         private float volume;
 
         /// <summary>
+        /// Occurs when the song has been finished.
+        /// </summary>
+        public event EventHandler<SongEventArgs> SongFinished;
+
+        /// <summary>
         /// Gets the playback state.
         /// </summary>
         /// <value>The playback state.</value>
@@ -82,11 +87,6 @@ namespace Espera.Core
         {
             get { return this.LoadedSong == null ? TimeSpan.Zero : this.inputStream.TotalTime; }
         }
-
-        /// <summary>
-        /// Occurs when the song has been finished.
-        /// </summary>
-        public event EventHandler SongFinished;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AudioPlayer"/> class.
@@ -293,7 +293,7 @@ namespace Espera.Core
             if (this.CurrentTime >= this.TotalTime)
             {
                 this.Stop();
-                this.SongFinished.RaiseSafe(this, e);
+                this.SongFinished.RaiseSafe(this, new SongEventArgs(this.LoadedSong));
             }
         }
     }
