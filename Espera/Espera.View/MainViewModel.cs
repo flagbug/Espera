@@ -234,8 +234,15 @@ namespace Espera.View
         public MainViewModel()
         {
             this.library = new Library();
-            this.updateTimer = new Timer(1000);
+            this.library.NextSong += LibraryNextSong;
+            this.updateTimer = new Timer(333);
             this.updateTimer.Elapsed += UpdateTimerElapsed;
+        }
+
+        private void LibraryNextSong(object sender, EventArgs e)
+        {
+            this.OnPropertyChanged(vm => vm.TotalSeconds);
+            this.OnPropertyChanged(vm => vm.TotalTime);
         }
 
         private void UpdateTimerElapsed(object sender, ElapsedEventArgs e)

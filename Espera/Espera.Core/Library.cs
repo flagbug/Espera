@@ -16,6 +16,7 @@ namespace Espera.Core
         private readonly object songLocker = new object();
 
         public event EventHandler<SongEventArgs> SongAdded;
+        public event EventHandler NextSong;
 
         public IEnumerable<Song> Songs
         {
@@ -96,6 +97,7 @@ namespace Espera.Core
             if (this.playlist.ContainsKey(nextIndex))
             {
                 this.PlaySong(nextIndex);
+                this.NextSong.RaiseSafe(this, EventArgs.Empty);
             }
         }
 
