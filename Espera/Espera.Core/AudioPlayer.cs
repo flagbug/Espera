@@ -95,7 +95,7 @@ namespace Espera.Core
         {
             this.Volume = 1.0f;
             this.songFinishedTimer = new Timer { Interval = 250 };
-            this.songFinishedTimer.Elapsed += songFinishedTimer_Elapsed;
+            this.songFinishedTimer.Elapsed += SongFinishedTimerElapsed;
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace Espera.Core
 
                 catch (MmException ex)
                 {
-                    throw new PlaybackException("The playback couldn't be started", ex);
+                    throw new PlaybackException("The playback couldn't be started.", ex);
                 }
             }
         }
@@ -284,11 +284,11 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Handles the Tick event of the songFinishedTimer control.
+        /// Handles the Tick event of the songFinishedTimer.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void songFinishedTimer_Elapsed(object sender, EventArgs e)
+        private void SongFinishedTimerElapsed(object sender, EventArgs e)
         {
             if (this.CurrentTime >= this.TotalTime)
             {
