@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -20,7 +21,12 @@ namespace Espera.View
             var dialog = new FolderBrowserDialog();
             dialog.ShowDialog();
 
-            this.mainViewModel.AddSongs(dialog.SelectedPath);
+            string selectedPath = dialog.SelectedPath;
+
+            if (!String.IsNullOrEmpty(selectedPath))
+            {
+                this.mainViewModel.AddSongs(selectedPath);
+            }
         }
 
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
