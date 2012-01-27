@@ -15,7 +15,7 @@ namespace Espera.View
         private bool isAdding;
         private string currentAddingPath;
         private Song selectedSong;
-        private Song selectedPlaylistSong;
+        private int selectedPlaylistIndex;
         private readonly Timer updateTimer;
 
         public IEnumerable<string> Artists
@@ -70,15 +70,15 @@ namespace Espera.View
             }
         }
 
-        public Song SelectedPlaylistSong
+        public int SelectedPlaylistIndex
         {
-            get { return this.selectedPlaylistSong; }
+            get { return this.selectedPlaylistIndex; }
             set
             {
-                if (this.SelectedPlaylistSong != value)
+                if (this.SelectedPlaylistIndex != value)
                 {
-                    this.selectedPlaylistSong = value;
-                    this.OnPropertyChanged(vm => vm.SelectedPlaylistSong);
+                    this.selectedPlaylistIndex = value;
+                    this.OnPropertyChanged(vm => vm.SelectedPlaylistIndex);
                 }
             }
         }
@@ -165,7 +165,7 @@ namespace Espera.View
 
                         else
                         {
-                            this.library.PlaySong(this.SelectedPlaylistSong);
+                            this.library.PlaySong(this.SelectedPlaylistIndex);
                             this.OnPropertyChanged(vm => vm.TotalSeconds);
                             this.OnPropertyChanged(vm => vm.TotalTime);
                         }

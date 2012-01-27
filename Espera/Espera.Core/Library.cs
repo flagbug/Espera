@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using FlagLib.Extensions;
 using FlagLib.Reflection;
@@ -11,7 +12,7 @@ namespace Espera.Core
     {
         private readonly AudioPlayer audioPlayer;
         private readonly HashSet<Song> songs;
-        private readonly List<Song> playlist;
+        private readonly Dictionary<int, Song> playlist;
         private readonly object songLocker = new object();
 
         public event EventHandler<SongEventArgs> SongAdded;
@@ -29,7 +30,12 @@ namespace Espera.Core
 
         public IEnumerable<Song> Playlist
         {
-            get { return playlist; }
+            get
+            {
+                return playlist
+                    .OrderBy(pair => pair.Key)
+                    .Select(pair => pair.Value);
+            }
         }
 
         public float Volume
@@ -70,6 +76,8 @@ namespace Espera.Core
             get { return this.audioPlayer.LoadedSong; }
         }
 
+        public int CurrentSongPlaylistIndex { get; private set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Library"/> class.
         /// </summary>
@@ -77,7 +85,7 @@ namespace Espera.Core
         {
             this.audioPlayer = new AudioPlayer();
             this.songs = new HashSet<Song>();
-            this.playlist = new List<Song>();
+            this.playlist = new Dictionary<int, Song>();
         }
 
         public void ContinueSong()
@@ -85,9 +93,10 @@ namespace Espera.Core
             this.audioPlayer.Play();
         }
 
-        public void PlaySong(Song song)
+        public void PlaySong(int playlistIndex)
         {
-            this.audioPlayer.Load(song);
+            this.CurrentSongPlaylistIndex = playlistIndex;
+            this.audioPlayer.Load(this.playlist[playlistIndex]);
             this.audioPlayer.Play();
         }
 
@@ -98,7 +107,9 @@ namespace Espera.Core
 
         public void AddSongToPlaylist(Song song)
         {
-            this.playlist.Add(song);
+            int newIndex = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
+
+            this.playlist.Add(newIndex, song);
         }
 
         public Task AddLocalSongsAsync(string path)

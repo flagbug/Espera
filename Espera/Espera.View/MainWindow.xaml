@@ -60,7 +60,7 @@
                                 <DataTrigger Binding="{Binding Path=IsPlaying}" Value="False">
                                     <Setter Property="Command" Value="{Binding Path=PlayCommand}" />
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding Path=SelectedPlaylistSong}" Value="{x:Null}">
+                                <DataTrigger Binding="{Binding Path=SelectedPlaylistIndex}" Value="-1">
                                     <Setter Property="IsEnabled" Value="False" />
                                 </DataTrigger>
                             </Style.Triggers>
@@ -177,7 +177,7 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
-                <ListView Grid.Row="1" ItemsSource="{Binding Path=Playlist, IsAsync=True}" SelectedItem="{Binding Path=SelectedPlaylistSong}">
+                <ListView Grid.Row="1" ItemsSource="{Binding Path=Playlist, IsAsync=True}" SelectedIndex="{Binding Path=SelectedPlaylistIndex}">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Path=Title}" />
