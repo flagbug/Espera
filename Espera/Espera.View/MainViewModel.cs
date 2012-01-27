@@ -17,6 +17,21 @@ namespace Espera.View
         private SongViewModel selectedSong;
         private int selectedPlaylistIndex;
         private readonly Timer updateTimer;
+        private string searchText;
+
+        public string SearchText
+        {
+            get { return this.searchText; }
+            set
+            {
+                if (this.SearchText != value)
+                {
+                    this.searchText = value;
+                    this.OnPropertyChanged(vm => vm.SearchText);
+                    this.OnPropertyChanged(vm => vm.Artists);
+                }
+            }
+        }
 
         public IEnumerable<string> Artists
         {
@@ -24,6 +39,13 @@ namespace Espera.View
             {
                 // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
                 IEnumerable<Song> songs = this.IsAdding ? this.library.Songs.ToList() : this.library.Songs;
+                var keyWords = new List<string>(this.SearchText.Split(' '));
+
+                if (!String.IsNullOrWhiteSpace(this.SearchText))
+                {
+                    songs = songs
+                        .Where(song => keyWords.All(keyword => song.Artist.ToLowerInvariant().Contains(keyword)));
+                }
 
                 return songs
                     .GroupBy(song => song.Artist)
@@ -237,6 +259,7 @@ namespace Espera.View
             this.library.NextSong += LibraryNextSong;
             this.updateTimer = new Timer(333);
             this.updateTimer.Elapsed += UpdateTimerElapsed;
+            this.searchText = String.Empty;
         }
 
         private void LibraryNextSong(object sender, EventArgs e)
