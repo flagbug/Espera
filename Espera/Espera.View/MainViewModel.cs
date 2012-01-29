@@ -28,6 +28,7 @@ namespace Espera.View
                 {
                     this.searchText = value;
                     this.OnPropertyChanged(vm => vm.SearchText);
+                    this.OnPropertyChanged(vm => vm.SelectableSongs);
                     this.OnPropertyChanged(vm => vm.Artists);
                 }
             }
@@ -39,18 +40,30 @@ namespace Espera.View
             {
                 // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
                 IEnumerable<Song> songs = this.IsAdding ? this.library.Songs.ToList() : this.library.Songs;
-                var keyWords = new List<string>(this.SearchText.Split(' '));
+                string[] keyWords = this.SearchText.Split(' ');
 
                 if (!String.IsNullOrWhiteSpace(this.SearchText))
                 {
                     songs = songs
-                        .Where(song => keyWords.All(keyword => song.Artist.ToLowerInvariant().Contains(keyword)));
+                        .Where
+                        (
+                            song => keyWords.All
+                            (
+                                keyword =>
+                                    song.Artist.ToLowerInvariant().Contains(keyword)
+                                    || song.Album.ToLowerInvariant().Contains(keyword)
+                                    || song.Album.ToLowerInvariant().Contains(keyword)
+                                    || song.Genre.ToLowerInvariant().Contains(keyword)
+                                    || song.Title.ToLowerInvariant().Contains(keyword)
+                            )
+                        );
                 }
 
                 return songs
                     .GroupBy(song => song.Artist)
                     .Select(group => group.Key)
-                    .OrderBy(artist => artist);
+                    .OrderBy(artist => artist)
+                    .Where(artist => songs.Any(song => song.Artist == artist));
             }
         }
 
@@ -72,8 +85,29 @@ namespace Espera.View
         {
             get
             {
-                return this.library.Songs
-                    .Where(song => song.Artist == this.SelectedArtist)
+                // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
+                IEnumerable<Song> filtered = this.IsAdding ? this.library.Songs.ToList() : this.library.Songs
+                    .Where(song => song.Artist == this.SelectedArtist);
+
+                string[] keyWords = this.SearchText.Split(' ');
+
+                if (!String.IsNullOrWhiteSpace(this.SearchText))
+                {
+                    filtered = filtered
+                        .Where
+                        (
+                            song => keyWords.All
+                            (
+                                keyword =>
+                                    song.Album.ToLowerInvariant().Contains(keyword)
+                                    || song.Album.ToLowerInvariant().Contains(keyword)
+                                    || song.Genre.ToLowerInvariant().Contains(keyword)
+                                    || song.Title.ToLowerInvariant().Contains(keyword)
+                            )
+                        );
+                }
+
+                return filtered
                     .OrderBy(song => song.Album)
                     .ThenBy(song => song.TrackNumber)
                     .Select(song => new SongViewModel(song));

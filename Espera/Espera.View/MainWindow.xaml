@@ -111,7 +111,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
-                <ListBox ItemsSource="{Binding Path=Artists}" SelectedItem="{Binding Path=SelectedArtist}">
+                <ListBox ItemsSource="{Binding Path=Artists}" SelectedItem="{Binding Path=SelectedArtist, IsAsync=True}">
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="{x:Type ListBoxItem}">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -162,7 +162,7 @@
                     <RowDefinition Height="0.35*" />
                     <RowDefinition Height="0.65*" />
                 </Grid.RowDefinitions>
-                <ListView Grid.Row="0" ItemsSource="{Binding Path=SelectableSongs}" SelectedItem="{Binding Path=SelectedSong}">
+                <ListView Grid.Row="0" ItemsSource="{Binding Path=SelectableSongs, IsAsync=True}" SelectedItem="{Binding Path=SelectedSong}">
                     <ListView.ItemContainerStyle>
                         <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                             <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick"/>
