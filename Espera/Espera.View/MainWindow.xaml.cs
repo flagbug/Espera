@@ -1,8 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
+using MahApps.Metro;
 
 namespace Espera.View
 {
@@ -14,6 +16,8 @@ namespace Espera.View
         public MainWindow()
         {
             InitializeComponent();
+
+            ThemeManager.ChangeTheme(this, ThemeManager.DefaultAccents.First(a => a.Name == "Red"), Theme.Dark);
         }
 
         private void AddSongsButtonClick(object sender, RoutedEventArgs e)
