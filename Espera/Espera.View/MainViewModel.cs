@@ -326,19 +326,6 @@ namespace Espera.View
             this.SelectedPlaylistIndex = -1;
         }
 
-        private void LibrarySongChanged(object sender, EventArgs e)
-        {
-            this.OnPropertyChanged(vm => vm.TotalSeconds);
-            this.OnPropertyChanged(vm => vm.TotalTime);
-            this.OnPropertyChanged(vm => vm.Playlist);
-        }
-
-        private void UpdateTimerElapsed(object sender, ElapsedEventArgs e)
-        {
-            this.OnPropertyChanged(vm => vm.CurrentSeconds);
-            this.OnPropertyChanged(vm => vm.CurrentTime);
-        }
-
         public void AddSelectedSongToPlaylist()
         {
             this.library.AddSongToPlaylist(this.SelectedSong.Model);
@@ -382,6 +369,19 @@ namespace Espera.View
         {
             this.library.Dispose();
             this.updateTimer.Dispose();
+        }
+
+        private void LibrarySongChanged(object sender, EventArgs e)
+        {
+            this.OnPropertyChanged(vm => vm.TotalSeconds);
+            this.OnPropertyChanged(vm => vm.TotalTime);
+            this.OnPropertyChanged(vm => vm.Playlist);
+        }
+
+        private void UpdateTimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            this.OnPropertyChanged(vm => vm.CurrentSeconds);
+            this.OnPropertyChanged(vm => vm.CurrentTime);
         }
     }
 }
