@@ -212,7 +212,7 @@
 
                     </TabItem>
                 </TabControl>
-                <ListView Grid.Row="2" ItemsSource="{Binding Path=Playlist, IsAsync=True}" SelectedIndex="{Binding Path=SelectedPlaylistIndex}">
+                <ListView Grid.Row="2" ItemsSource="{Binding Path=Playlist}" SelectedIndex="{Binding Path=SelectedPlaylistIndex}">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Title">
