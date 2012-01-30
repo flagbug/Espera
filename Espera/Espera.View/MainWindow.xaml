@@ -159,26 +159,33 @@
             </Grid>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="0.35*" />
-                    <RowDefinition Height="0.65*" />
+                    <RowDefinition Height="0.4*" />
+                    <RowDefinition Height="0.6*" />
                 </Grid.RowDefinitions>
-                <ListView Grid.Row="0" ItemsSource="{Binding Path=SelectableSongs}" SelectedItem="{Binding Path=SelectedSong}">
-                    <ListView.ItemContainerStyle>
-                        <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
-                            <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick"/>
-                        </Style>
-                    </ListView.ItemContainerStyle>
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Path=Title}" />
-                            <GridViewColumn Header="Duration" DisplayMemberBinding="{Binding Path=Duration, StringFormat=mm\\:ss}" />
-                            <GridViewColumn Header="Artist" DisplayMemberBinding="{Binding Path=Artist}" />
-                            <GridViewColumn Header="Album" DisplayMemberBinding="{Binding Path=Album}" />
-                            <GridViewColumn Header="Genre" DisplayMemberBinding="{Binding Path=Genre}" />
-                        </GridView>
-                    </ListView.View>
-                </ListView>
-                <ListView Grid.Row="1" ItemsSource="{Binding Path=Playlist, IsAsync=True}" SelectedIndex="{Binding Path=SelectedPlaylistIndex}">
+                <TabControl>
+                    <TabItem Header="Local">
+                        <ListView Grid.Row="1" ItemsSource="{Binding Path=SelectableSongs}" SelectedItem="{Binding Path=SelectedSong}">
+                            <ListView.ItemContainerStyle>
+                                <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
+                                    <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Path=Title}" />
+                                    <GridViewColumn Header="Duration" DisplayMemberBinding="{Binding Path=Duration, StringFormat=mm\\:ss}" />
+                                    <GridViewColumn Header="Artist" DisplayMemberBinding="{Binding Path=Artist}" />
+                                    <GridViewColumn Header="Album" DisplayMemberBinding="{Binding Path=Album}" />
+                                    <GridViewColumn Header="Genre" DisplayMemberBinding="{Binding Path=Genre}" />
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </TabItem>
+                    <TabItem Header="YouTube">
+
+                    </TabItem>
+                </TabControl>
+                <ListView Grid.Row="2" ItemsSource="{Binding Path=Playlist, IsAsync=True}" SelectedIndex="{Binding Path=SelectedPlaylistIndex}">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Path=Title}" />
