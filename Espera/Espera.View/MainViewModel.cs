@@ -90,10 +90,10 @@ namespace Espera.View
                     .AsParallel()
                     .Where(song => song.Artist == this.SelectedArtist);
 
-                string[] keyWords = this.SearchText.Split(' ');
-
                 if (!String.IsNullOrWhiteSpace(this.SearchText))
                 {
+                    string[] keyWords = this.SearchText.Split(' ');
+
                     filtered = filtered
                         .Where
                         (
@@ -137,6 +137,7 @@ namespace Espera.View
                 {
                     this.selectedPlaylistIndex = value;
                     this.OnPropertyChanged(vm => vm.SelectedPlaylistIndex);
+                    this.OnPropertyChanged(vm => vm.PlayCommand);
                 }
             }
         }
@@ -236,7 +237,8 @@ namespace Espera.View
                         this.updateTimer.Start();
 
                         this.OnPropertyChanged(vm => vm.IsPlaying);
-                    }
+                    },
+                    param => this.SelectedPlaylistIndex != -1
                 );
             }
         }
@@ -253,6 +255,30 @@ namespace Espera.View
                         this.updateTimer.Stop();
                         this.OnPropertyChanged(vm => vm.IsPlaying);
                     }
+                );
+            }
+        }
+
+        public ICommand NextSongCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param => this.library.PlayNextSong(),
+                    param => this.library.CanPlayNextSong
+                );
+            }
+        }
+
+        public ICommand PreviousSongCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param => this.library.PlayPreviousSong(),
+                    param => this.library.CanPlayPreviousSong
                 );
             }
         }
@@ -291,13 +317,14 @@ namespace Espera.View
         public MainViewModel()
         {
             this.library = new Library();
-            this.library.NextSong += LibraryNextSong;
+            this.library.SongChanged += LibrarySongChanged;
             this.updateTimer = new Timer(333);
             this.updateTimer.Elapsed += UpdateTimerElapsed;
             this.searchText = String.Empty;
+            this.SelectedPlaylistIndex = -1;
         }
 
-        private void LibraryNextSong(object sender, EventArgs e)
+        private void LibrarySongChanged(object sender, EventArgs e)
         {
             this.OnPropertyChanged(vm => vm.TotalSeconds);
             this.OnPropertyChanged(vm => vm.TotalTime);

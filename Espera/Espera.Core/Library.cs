@@ -16,7 +16,7 @@ namespace Espera.Core
         private readonly object songLocker = new object();
 
         public event EventHandler<SongEventArgs> SongAdded;
-        public event EventHandler NextSong;
+        public event EventHandler SongChanged;
 
         public IEnumerable<Song> Songs
         {
@@ -79,6 +79,16 @@ namespace Espera.Core
 
         public int CurrentSongPlaylistIndex { get; private set; }
 
+        public bool CanPlayNextSong
+        {
+            get { return this.playlist.ContainsKey(this.CurrentSongPlaylistIndex + 1); }
+        }
+
+        public bool CanPlayPreviousSong
+        {
+            get { return this.playlist.ContainsKey(this.CurrentSongPlaylistIndex - 1); }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Library"/> class.
         /// </summary>
@@ -97,7 +107,6 @@ namespace Espera.Core
             if (this.playlist.ContainsKey(nextIndex))
             {
                 this.PlaySong(nextIndex);
-                this.NextSong.RaiseSafe(this, EventArgs.Empty);
             }
         }
 
@@ -111,11 +120,22 @@ namespace Espera.Core
             this.CurrentSongPlaylistIndex = playlistIndex;
             this.audioPlayer.Load(this.playlist[playlistIndex]);
             this.audioPlayer.Play();
+            this.SongChanged.RaiseSafe(this, EventArgs.Empty);
         }
 
         public void PauseSong()
         {
             this.audioPlayer.Pause();
+        }
+
+        public void PlayNextSong()
+        {
+            this.PlaySong(this.CurrentSongPlaylistIndex + 1);
+        }
+
+        public void PlayPreviousSong()
+        {
+            this.PlaySong(this.CurrentSongPlaylistIndex - 1);
         }
 
         public void AddSongToPlaylist(Song song)

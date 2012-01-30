@@ -60,9 +60,6 @@
                                 <DataTrigger Binding="{Binding Path=IsPlaying}" Value="False">
                                     <Setter Property="Command" Value="{Binding Path=PlayCommand}" />
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding Path=SelectedPlaylistIndex}" Value="-1">
-                                    <Setter Property="IsEnabled" Value="False" />
-                                </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Button.Style>
@@ -81,10 +78,10 @@
                         </Image.Style>
                     </Image>
                 </Button>
-                <Button Padding="0" Margin="5, 0, 0, 0">
+                <Button Padding="0" Margin="5, 0, 0, 0" Command="{Binding Path=PreviousSongCommand}">
                     <Image Source="/Espera.View;component/Images/appbar.navigate.previous.png" />
                 </Button>
-                <Button Padding="0" Margin="5, 0, 0, 0">
+                <Button Padding="0" Margin="5, 0, 0, 0" Command="{Binding Path=NextSongCommand}">
                     <Image Source="/Espera.View;component/Images/appbar.navigate.next.png" />
                 </Button>
             </StackPanel>
