@@ -289,10 +289,7 @@ namespace Espera.View
             {
                 return new RelayCommand
                 (
-                    param =>
-                    {
-                        this.Volume = 0;
-                    }
+                    param => this.Volume = 0
                 );
             }
         }
@@ -303,10 +300,7 @@ namespace Espera.View
             {
                 return new RelayCommand
                 (
-                    param =>
-                    {
-                        this.Volume = 1;
-                    }
+                    param => this.Volume = 1
                 );
             }
         }
