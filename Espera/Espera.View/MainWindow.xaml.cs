@@ -17,7 +17,7 @@ namespace Espera.View
         {
             InitializeComponent();
 
-            ThemeManager.ChangeTheme(this, ThemeManager.DefaultAccents.First(a => a.Name == "Red"), Theme.Dark);
+            ThemeManager.ChangeTheme(this, ThemeManager.DefaultAccents.First(accent => accent.Name == "Blue"), Theme.Dark);
         }
 
         private void AddSongsButtonClick(object sender, RoutedEventArgs e)
