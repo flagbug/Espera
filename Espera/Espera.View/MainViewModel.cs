@@ -86,7 +86,8 @@ namespace Espera.View
             get
             {
                 // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
-                IEnumerable<Song> filtered = (this.IsAdding ? this.library.Songs.ToList() : this.library.Songs)
+                var filtered = (this.IsAdding ? this.library.Songs.ToList() : this.library.Songs)
+                    .AsParallel()
                     .Where(song => song.Artist == this.SelectedArtist);
 
                 string[] keyWords = this.SearchText.Split(' ');
