@@ -146,9 +146,17 @@ namespace Espera.View
         {
             get
             {
-                return this.library
+                var playlist = this.library
                     .Playlist
-                    .Select(song => new SongViewModel(song));
+                    .Select(song => new SongViewModel(song))
+                    .ToList();
+
+                if (this.library.CurrentSongPlaylistIndex.HasValue)
+                {
+                    playlist[this.library.CurrentSongPlaylistIndex.Value].IsPlaying = true;
+                }
+
+                return playlist;
             }
         }
 
@@ -322,6 +330,7 @@ namespace Espera.View
         {
             this.OnPropertyChanged(vm => vm.TotalSeconds);
             this.OnPropertyChanged(vm => vm.TotalTime);
+            this.OnPropertyChanged(vm => vm.Playlist);
         }
 
         private void UpdateTimerElapsed(object sender, ElapsedEventArgs e)

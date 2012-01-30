@@ -215,6 +215,13 @@
                 <ListView Grid.Row="2" ItemsSource="{Binding Path=Playlist}" SelectedIndex="{Binding Path=SelectedPlaylistIndex}">
                     <ListView.View>
                         <GridView>
+                            <GridViewColumn Width="40">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Image Source="/Espera.View;component/Images/appbar.sound.3.png" Visibility="{Binding Path=IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
                             <GridViewColumn Header="Title">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>

@@ -77,16 +77,24 @@ namespace Espera.Core
             get { return this.audioPlayer.LoadedSong; }
         }
 
-        public int CurrentSongPlaylistIndex { get; private set; }
+        public int? CurrentSongPlaylistIndex { get; private set; }
 
         public bool CanPlayNextSong
         {
-            get { return this.playlist.ContainsKey(this.CurrentSongPlaylistIndex + 1); }
+            get
+            {
+                return this.CurrentSongPlaylistIndex.HasValue &&
+                       this.playlist.ContainsKey(this.CurrentSongPlaylistIndex.Value + 1);
+            }
         }
 
         public bool CanPlayPreviousSong
         {
-            get { return this.playlist.ContainsKey(this.CurrentSongPlaylistIndex - 1); }
+            get
+            {
+                return this.CurrentSongPlaylistIndex.HasValue &&
+                       this.playlist.ContainsKey(this.CurrentSongPlaylistIndex.Value - 1);
+            }
         }
 
         /// <summary>
@@ -102,11 +110,14 @@ namespace Espera.Core
 
         private void AudioPlayerSongFinished(object sender, EventArgs e)
         {
-            int nextIndex = this.CurrentSongPlaylistIndex + 1;
-
-            if (this.playlist.ContainsKey(nextIndex))
+            if (this.CurrentSongPlaylistIndex != null)
             {
-                this.PlaySong(nextIndex);
+                int nextIndex = this.CurrentSongPlaylistIndex.Value + 1;
+
+                if (this.playlist.ContainsKey(nextIndex))
+                {
+                    this.PlaySong(nextIndex);
+                }
             }
         }
 
@@ -130,12 +141,12 @@ namespace Espera.Core
 
         public void PlayNextSong()
         {
-            this.PlaySong(this.CurrentSongPlaylistIndex + 1);
+            this.PlaySong(this.CurrentSongPlaylistIndex.Value + 1);
         }
 
         public void PlayPreviousSong()
         {
-            this.PlaySong(this.CurrentSongPlaylistIndex - 1);
+            this.PlaySong(this.CurrentSongPlaylistIndex.Value - 1);
         }
 
         public void AddSongToPlaylist(Song song)

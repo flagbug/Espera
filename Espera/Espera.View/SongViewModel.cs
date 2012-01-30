@@ -1,10 +1,13 @@
 ﻿using System;
 using Espera.Core;
+using FlagLib.Patterns.MVVM;
 
 namespace Espera.View
 {
-    public class SongViewModel
+    public class SongViewModel : ViewModelBase<SongViewModel>
     {
+        private bool isPlaying;
+
         public Song Model { get; private set; }
 
         public string Album
@@ -30,6 +33,19 @@ namespace Espera.View
         public string Title
         {
             get { return this.Model.Title; }
+        }
+
+        public bool IsPlaying
+        {
+            get { return this.isPlaying; }
+            set
+            {
+                if (this.IsPlaying != value)
+                {
+                    this.isPlaying = value;
+                    this.OnPropertyChanged(vm => vm.IsPlaying);
+                }
+            }
         }
 
         public SongViewModel(Song model)
