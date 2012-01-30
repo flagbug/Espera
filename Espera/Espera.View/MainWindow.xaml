@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:View="clr-namespace:Espera.View"
-        Title="Espera" Height="600" Width="800" WindowState="Maximized" Closing="MetroWindowClosing">
+        Title="Espera" Height="600" Width="800" WindowState="Maximized" Closing="MetroWindowClosing" Icon="/Espera.View;component/Images/appbar.music.png">
     <Window.DataContext>
         <View:MainViewModel x:Name="mainViewModel" />
     </Window.DataContext>
