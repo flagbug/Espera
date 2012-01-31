@@ -213,6 +213,11 @@
                     </TabItem>
                 </TabControl>
                 <ListView Grid.Row="2" ItemsSource="{Binding Path=Playlist}" SelectedIndex="{Binding Path=SelectedPlaylistIndex}">
+                    <ListView.ItemContainerStyle>
+                        <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
+                            <EventSetter Event="MouseDoubleClick" Handler="PlaylistDoubleClick"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="40">

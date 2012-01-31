@@ -42,5 +42,10 @@ namespace Espera.View
         {
             this.mainViewModel.Dispose();
         }
+
+        private void PlaylistDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            this.mainViewModel.PlayCommand.Execute(null);
+        }
     }
 }
