@@ -230,9 +230,10 @@ namespace Espera.View
                 (
                     param =>
                     {
-                        if (this.library.IsPaused && this.SelectedSong.Model == this.library.CurrentSong)
+                        if (this.library.IsPaused)
                         {
                             this.library.ContinueSong();
+                            this.OnPropertyChanged(vm => vm.IsPlaying);
                         }
 
                         else
@@ -242,7 +243,7 @@ namespace Espera.View
 
                         this.updateTimer.Start();
                     },
-                    param => this.SelectedPlaylistIndex != -1
+                    param => this.SelectedPlaylistIndex != -1 || this.library.CurrentSong != null
                 );
             }
         }
