@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using FlagLib.Extensions;
 using FlagLib.IO;
 using TagLib;
+using File = TagLib.File;
 
 namespace Espera.Core
 {
@@ -112,6 +114,11 @@ namespace Espera.Core
                 }
 
                 catch (CorruptFileException)
+                {
+                    this.CorruptSongs.Add(e.File.FullName);
+                }
+
+                catch (IOException)
                 {
                     this.CorruptSongs.Add(e.File.FullName);
                 }
