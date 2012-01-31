@@ -19,7 +19,7 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-            <Style x:Key="NoButtonStyle" TargetType="{x:Type Button}">
+            <Style x:Key="VolumeButtonStyle" TargetType="{x:Type Button}">
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
@@ -86,11 +86,11 @@
                 </Button>
             </StackPanel>
             <StackPanel Margin="10, 0, 0, 0" Grid.Column="1" Orientation="Horizontal">
-                <Button Style="{StaticResource NoButtonStyle}" Command="{Binding Path=MuteCommand}">
+                <Button Style="{StaticResource VolumeButtonStyle}" Command="{Binding Path=MuteCommand}" VerticalAlignment="Center">
                     <Image Height="25" Source="/Espera.View;component/Images/appbar.sound.1.png" />
                 </Button>
                 <Slider Width="200" IsMoveToPointEnabled="True" Maximum="1" Value="{Binding Path=Volume}" />
-                <Button Style="{StaticResource NoButtonStyle}" Command="{Binding Path=UnMuteCommand}">
+                <Button Style="{StaticResource VolumeButtonStyle}" Command="{Binding Path=UnMuteCommand}" VerticalAlignment="Center">
                     <Image Height="25" Source="/Espera.View;component/Images/appbar.sound.3.png" />
                 </Button>
             </StackPanel>
