@@ -243,7 +243,7 @@ namespace Espera.View
 
                         this.updateTimer.Start();
                     },
-                    param => this.SelectedPlaylistIndex != -1 || this.library.CurrentSong != null
+                    param => this.SelectedPlaylistIndex != -1 || this.library.LoadedSong != null
                 );
             }
         }

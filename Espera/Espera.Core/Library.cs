@@ -15,10 +15,24 @@ namespace Espera.Core
         private readonly Dictionary<int, Song> playlist;
         private readonly object songLocker = new object();
 
+        /// <summary>
+        /// Occurs when a song has been added to the library.
+        /// </summary>
         public event EventHandler<SongEventArgs> SongAdded;
+
+        /// <summary>
+        /// Occurs when a song has started the playback.
+        /// </summary>
         public event EventHandler SongStarted;
+
+        /// <summary>
+        /// Occurs when a song has finished the playback.
+        /// </summary>
         public event EventHandler SongFinished;
 
+        /// <summary>
+        /// Gets all songs that are currently in the library.
+        /// </summary>
         public IEnumerable<Song> Songs
         {
             get
@@ -30,6 +44,9 @@ namespace Espera.Core
             }
         }
 
+        /// <summary>
+        /// Gets the songs that are in the playlist.
+        /// </summary>
         public IEnumerable<Song> Playlist
         {
             get
@@ -40,6 +57,12 @@ namespace Espera.Core
             }
         }
 
+        /// <summary>
+        /// Gets or sets the current volume.
+        /// </summary>
+        /// <value>
+        /// The current volume.
+        /// </value>
         public float Volume
         {
             get { return this.audioPlayer.Volume; }
@@ -47,7 +70,7 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Gets the duration of the current played song.
+        /// Gets the duration of the current song.
         /// </summary>
         public TimeSpan TotalTime
         {
@@ -55,7 +78,7 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Gets or sets the elapsed time of the current played song.
+        /// Gets or sets the current song's elapsed time.
         /// </summary>
         public TimeSpan CurrentTime
         {
@@ -63,23 +86,50 @@ namespace Espera.Core
             set { this.audioPlayer.CurrentTime = value; }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the playback is started.
+        /// </summary>
+        /// <value>
+        /// true if the playback is started; otherwise, false.
+        /// </value>
         public bool IsPlaying
         {
             get { return this.audioPlayer.PlaybackState == AudioPlayerState.Playing; }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the playback is paused.
+        /// </summary>
+        /// <value>
+        /// true if the playback is paused; otherwise, false.
+        /// </value>
         public bool IsPaused
         {
             get { return this.audioPlayer.PlaybackState == AudioPlayerState.Paused; }
         }
 
-        public Song CurrentSong
+        /// <summary>
+        /// Gets the song that is currently loaded.
+        /// </summary>
+        public Song LoadedSong
         {
             get { return this.audioPlayer.LoadedSong; }
         }
 
+        /// <summary>
+        /// Gets the index of the current song in the playlist.
+        /// </summary>
+        /// <value>
+        /// The index of the current song in the playlist.
+        /// </value>
         public int? CurrentSongPlaylistIndex { get; private set; }
 
+        /// <summary>
+        /// Gets a value indicating whether the next song in the playlist can be played.
+        /// </summary>
+        /// <value>
+        /// true if the next song in the playlist can be played; otherwise, false.
+        /// </value>
         public bool CanPlayNextSong
         {
             get
@@ -89,6 +139,12 @@ namespace Espera.Core
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the previous song in the playlist can be played.
+        /// </summary>
+        /// <value>
+        /// true if the previous song in the playlist can be played; otherwise, false.
+        /// </value>
         public bool CanPlayPreviousSong
         {
             get
@@ -104,16 +160,24 @@ namespace Espera.Core
         public Library()
         {
             this.audioPlayer = new AudioPlayer();
-            this.audioPlayer.SongFinished += AudioPlayerSongFinished;
+            this.audioPlayer.SongFinished += (sender, e) => this.HandleSongFinish();
+
             this.songs = new HashSet<Song>();
             this.playlist = new Dictionary<int, Song>();
         }
 
+        /// <summary>
+        /// Continues the currently loaded song.
+        /// </summary>
         public void ContinueSong()
         {
             this.audioPlayer.Play();
         }
 
+        /// <summary>
+        /// Plays the song with the specified index in the playlist.
+        /// </summary>
+        /// <param name="playlistIndex">The index of the song in the playlist.</param>
         public void PlaySong(int playlistIndex)
         {
             this.CurrentSongPlaylistIndex = playlistIndex;
@@ -122,21 +186,34 @@ namespace Espera.Core
             this.SongStarted.RaiseSafe(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Pauses the currently loaded song.
+        /// </summary>
         public void PauseSong()
         {
             this.audioPlayer.Pause();
         }
 
+        /// <summary>
+        /// Plays the next song in the playlist.
+        /// </summary>
         public void PlayNextSong()
         {
             this.PlaySong(this.CurrentSongPlaylistIndex.Value + 1);
         }
 
+        /// <summary>
+        /// Plays the previous song in the playlist.
+        /// </summary>
         public void PlayPreviousSong()
         {
             this.PlaySong(this.CurrentSongPlaylistIndex.Value - 1);
         }
 
+        /// <summary>
+        /// Adds the specified song to end of the playlist.
+        /// </summary>
+        /// <param name="song">The song to add to the end of the playlist.</param>
         public void AddSongToPlaylist(Song song)
         {
             int newIndex = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
@@ -144,11 +221,20 @@ namespace Espera.Core
             this.playlist.Add(newIndex, song);
         }
 
+        /// <summary>
+        /// Adds the song that are contained in the specified directory recursively in an asynchronous manner to the library.
+        /// </summary>
+        /// <param name="path">The path of the directory to search.</param>
+        /// <returns>The <see cref="Task"/> that did the work.</returns>
         public Task AddLocalSongsAsync(string path)
         {
             return Task.Factory.StartNew(() => this.AddLocalSongs(path));
         }
 
+        /// <summary>
+        /// Adds the song that are contained in the specified directory recursively to the library.
+        /// </summary>
+        /// <param name="path">The path of the directory to search.</param>
         public void AddLocalSongs(string path)
         {
             if (path == null)
@@ -185,7 +271,7 @@ namespace Espera.Core
             this.audioPlayer.Dispose();
         }
 
-        private void AudioPlayerSongFinished(object sender, EventArgs e)
+        private void HandleSongFinish()
         {
             this.SongFinished.RaiseSafe(this, EventArgs.Empty);
 

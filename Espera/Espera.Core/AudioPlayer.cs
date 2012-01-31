@@ -12,18 +12,23 @@ namespace Espera.Core
     {
         private IWavePlayer wavePlayer;
         private WaveChannel32 inputStream;
+
+        // We need a dispatcher timer for updating the current state of the song, to avoid cross-threading exceptions
         private readonly DispatcherTimer songFinishedTimer;
+
         private float volume;
 
         /// <summary>
-        /// Occurs when the song has been finished.
+        /// Occurs when the current loaded song has finished.
         /// </summary>
         public event EventHandler SongFinished;
 
         /// <summary>
-        /// Gets the playback state.
+        /// Gets the current playback state.
         /// </summary>
-        /// <value>The playback state.</value>
+        /// <value>
+        /// The current playback state.
+        /// </value>
         public AudioPlayerState PlaybackState
         {
             get
@@ -95,7 +100,7 @@ namespace Espera.Core
         {
             this.Volume = 1.0f;
             this.songFinishedTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
-            this.songFinishedTimer.Tick += SongFinishedTimerTick;
+            this.songFinishedTimer.Tick += (sender, e) => this.UpdateSongState();
         }
 
         /// <summary>
@@ -109,7 +114,7 @@ namespace Espera.Core
                 throw new ArgumentNullException(Reflector.GetMemberName(() => song));
 
             this.Stop();
-            this.RenewDevice();
+            this.RenewWavePlayer();
 
             this.OpenSong(song);
 
@@ -138,7 +143,7 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Pauses the player.
+        /// Pauses the playback.
         /// </summary>
         public void Pause()
         {
@@ -150,7 +155,7 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Stops the loaded song.
+        /// Stops the playback
         /// </summary>
         public void Stop()
         {
@@ -186,10 +191,22 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Opens the wav stream.
+        /// Opens the Mp3 stream from the specified stream.
         /// </summary>
-        /// <param name="stream">The wav stream.</param>
-        /// <returns></returns>
+        /// <param name="stream">The Mp3 stream.</param>
+        /// <returns>The output channel for the Mp3 stream.</returns>
+        private static WaveChannel32 OpenMp3Stream(Stream stream)
+        {
+            WaveStream mp3Stream = new Mp3FileReader(stream);
+
+            return new WaveChannel32(mp3Stream);
+        }
+
+        /// <summary>
+        /// Opens the wav stream from the specified stream.
+        /// </summary>
+        /// <param name="stream">The wave stream.</param>
+        /// <returns>The output channel for the wave stream.</returns>
         private static WaveChannel32 OpenWavStream(Stream stream)
         {
             WaveStream readerStream = new WaveFileReader(stream);
@@ -236,6 +253,7 @@ namespace Espera.Core
         /// Creates the input stream.
         /// </summary>
         /// <param name="song">The song that contains the stream.</param>
+        /// <exception cref="InvalidOperationException">The audio type is not supported.</exception>
         private void CreateInputStream(Song song)
         {
             switch (song.AudioType)
@@ -247,28 +265,16 @@ namespace Espera.Core
                     this.inputStream = OpenMp3Stream(song.OpenStream());
                     break;
                 default:
-                    throw new InvalidOperationException("Unsupported extension");
+                    throw new InvalidOperationException("Unsupported audio type.");
             }
 
             this.inputStream.Volume = this.Volume;
         }
 
         /// <summary>
-        /// Opens the MP3 stream.
+        /// Renews the wave player.
         /// </summary>
-        /// <param name="stream">The Mp3 stream</param>
-        /// <returns></returns>
-        private static WaveChannel32 OpenMp3Stream(Stream stream)
-        {
-            WaveStream mp3Stream = new Mp3FileReader(stream);
-
-            return new WaveChannel32(mp3Stream);
-        }
-
-        /// <summary>
-        /// Ensures that the device is created.
-        /// </summary>
-        private void RenewDevice()
+        private void RenewWavePlayer()
         {
             if (wavePlayer != null)
             {
@@ -278,7 +284,10 @@ namespace Espera.Core
             this.wavePlayer = new WaveOut();
         }
 
-        private void SongFinishedTimerTick(object sender, EventArgs e)
+        /// <summary>
+        /// Updates state of the current song and triggers the necessary events, if the song has finished.
+        /// </summary>
+        private void UpdateSongState()
         {
             if (this.CurrentTime >= this.TotalTime)
             {
