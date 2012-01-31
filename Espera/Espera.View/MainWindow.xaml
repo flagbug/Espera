@@ -24,7 +24,7 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
                             <Border Background="Transparent">
-                                <ContentPresenter/>
+                                <ContentPresenter />
                             </Border>
                         </ControlTemplate>
                     </Setter.Value>
