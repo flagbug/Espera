@@ -100,10 +100,10 @@ namespace Espera.View
                             song => keyWords.All
                             (
                                 keyword =>
-                                    song.Album.ToLowerInvariant().Contains(keyword)
-                                    || song.Album.ToLowerInvariant().Contains(keyword)
-                                    || song.Genre.ToLowerInvariant().Contains(keyword)
-                                    || song.Title.ToLowerInvariant().Contains(keyword)
+                                    song.Album.ToLowerInvariant().Contains(keyword) ||
+                                    song.Album.ToLowerInvariant().Contains(keyword) ||
+                                    song.Genre.ToLowerInvariant().Contains(keyword) ||
+                                    song.Title.ToLowerInvariant().Contains(keyword)
                             )
                         );
                 }
