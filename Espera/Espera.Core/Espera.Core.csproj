@@ -57,6 +57,7 @@
     <Compile Include="LocalSong.cs" />
     <Compile Include="PlaybackException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SearchEngine.cs" />
     <Compile Include="Song.cs" />
     <Compile Include="SongEventArgs.cs" />
     <Compile Include="LocalSongFinder.cs" />

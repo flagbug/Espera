@@ -41,25 +41,7 @@ namespace Espera.View
                 // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
                 IEnumerable<Song> songs = this.IsAdding ? this.library.Songs.ToList() : this.library.Songs;
 
-                if (!String.IsNullOrWhiteSpace(this.SearchText))
-                {
-                    IEnumerable<string> keyWords = this.SearchText.Split(' ').Select(keyword => keyword.ToLowerInvariant());
-
-                    songs = songs
-                        .Where
-                        (
-                            song => keyWords.All
-                            (
-                                keyword =>
-                                    song.Artist.ToLowerInvariant().Contains(keyword) ||
-                                    song.Album.ToLowerInvariant().Contains(keyword) ||
-                                    song.Genre.ToLowerInvariant().Contains(keyword) ||
-                                    song.Title.ToLowerInvariant().Contains(keyword)
-                            )
-                        );
-                }
-
-                return songs
+                return SearchEngine.FilterSongs(songs, this.SearchText)
                     .GroupBy(song => song.Artist)
                     .Select(group => group.Key)
                     .OrderBy(artist => artist)
@@ -86,29 +68,11 @@ namespace Espera.View
             get
             {
                 // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
-                var filtered = (this.IsAdding ? this.library.Songs.ToList() : this.library.Songs)
+                var songs = (this.IsAdding ? this.library.Songs.ToList() : this.library.Songs)
                     .AsParallel()
                     .Where(song => song.Artist == this.SelectedArtist);
 
-                if (!String.IsNullOrWhiteSpace(this.SearchText))
-                {
-                    IEnumerable<string> keyWords = this.SearchText.Split(' ').Select(keyword => keyword.ToLowerInvariant());
-
-                    filtered = filtered
-                        .Where
-                        (
-                            song => keyWords.All
-                            (
-                                keyword =>
-                                    song.Artist.ToLowerInvariant().Contains(keyword) ||
-                                    song.Album.ToLowerInvariant().Contains(keyword) ||
-                                    song.Genre.ToLowerInvariant().Contains(keyword) ||
-                                    song.Title.ToLowerInvariant().Contains(keyword)
-                            )
-                        );
-                }
-
-                return filtered
+                return SearchEngine.FilterSongs(songs, this.SearchText)
                     .OrderBy(song => song.Album)
                     .ThenBy(song => song.TrackNumber)
                     .Select(song => new SongViewModel(song));
