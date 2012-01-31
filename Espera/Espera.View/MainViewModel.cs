@@ -40,21 +40,21 @@ namespace Espera.View
             {
                 // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
                 IEnumerable<Song> songs = this.IsAdding ? this.library.Songs.ToList() : this.library.Songs;
-                string[] keyWords = this.SearchText.Split(' ');
 
                 if (!String.IsNullOrWhiteSpace(this.SearchText))
                 {
+                    IEnumerable<string> keyWords = this.SearchText.Split(' ').Select(keyword => keyword.ToLowerInvariant());
+
                     songs = songs
                         .Where
                         (
                             song => keyWords.All
                             (
                                 keyword =>
-                                    song.Artist.ToLowerInvariant().Contains(keyword)
-                                    || song.Album.ToLowerInvariant().Contains(keyword)
-                                    || song.Album.ToLowerInvariant().Contains(keyword)
-                                    || song.Genre.ToLowerInvariant().Contains(keyword)
-                                    || song.Title.ToLowerInvariant().Contains(keyword)
+                                    song.Artist.ToLowerInvariant().Contains(keyword) ||
+                                    song.Album.ToLowerInvariant().Contains(keyword) ||
+                                    song.Genre.ToLowerInvariant().Contains(keyword) ||
+                                    song.Title.ToLowerInvariant().Contains(keyword)
                             )
                         );
                 }
@@ -92,7 +92,7 @@ namespace Espera.View
 
                 if (!String.IsNullOrWhiteSpace(this.SearchText))
                 {
-                    string[] keyWords = this.SearchText.Split(' ');
+                    IEnumerable<string> keyWords = this.SearchText.Split(' ').Select(keyword => keyword.ToLowerInvariant());
 
                     filtered = filtered
                         .Where
@@ -100,7 +100,7 @@ namespace Espera.View
                             song => keyWords.All
                             (
                                 keyword =>
-                                    song.Album.ToLowerInvariant().Contains(keyword) ||
+                                    song.Artist.ToLowerInvariant().Contains(keyword) ||
                                     song.Album.ToLowerInvariant().Contains(keyword) ||
                                     song.Genre.ToLowerInvariant().Contains(keyword) ||
                                     song.Title.ToLowerInvariant().Contains(keyword)
