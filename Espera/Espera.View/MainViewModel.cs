@@ -238,13 +238,9 @@ namespace Espera.View
                         else
                         {
                             this.library.PlaySong(this.SelectedPlaylistIndex);
-                            this.OnPropertyChanged(vm => vm.TotalSeconds);
-                            this.OnPropertyChanged(vm => vm.TotalTime);
                         }
 
                         this.updateTimer.Start();
-
-                        this.OnPropertyChanged(vm => vm.IsPlaying);
                     },
                     param => this.SelectedPlaylistIndex != -1
                 );
@@ -319,7 +315,8 @@ namespace Espera.View
         public MainViewModel()
         {
             this.library = new Library();
-            this.library.SongChanged += LibrarySongChanged;
+            this.library.SongStarted += LibraryRaisedSongStarted;
+            this.library.SongFinished += LibraryRaisedSongFinished;
             this.updateTimer = new Timer(333);
             this.updateTimer.Elapsed += UpdateTimerElapsed;
             this.searchText = String.Empty;
@@ -371,17 +368,23 @@ namespace Espera.View
             this.updateTimer.Dispose();
         }
 
-        private void LibrarySongChanged(object sender, EventArgs e)
-        {
-            this.OnPropertyChanged(vm => vm.TotalSeconds);
-            this.OnPropertyChanged(vm => vm.TotalTime);
-            this.OnPropertyChanged(vm => vm.Playlist);
-        }
-
         private void UpdateTimerElapsed(object sender, ElapsedEventArgs e)
         {
             this.OnPropertyChanged(vm => vm.CurrentSeconds);
             this.OnPropertyChanged(vm => vm.CurrentTime);
+        }
+
+        private void LibraryRaisedSongFinished(object sender, EventArgs e)
+        {
+            this.OnPropertyChanged(vm => vm.IsPlaying);
+        }
+
+        private void LibraryRaisedSongStarted(object sender, EventArgs e)
+        {
+            this.OnPropertyChanged(vm => vm.TotalSeconds);
+            this.OnPropertyChanged(vm => vm.TotalTime);
+            this.OnPropertyChanged(vm => vm.Playlist);
+            this.OnPropertyChanged(vm => vm.IsPlaying);
         }
     }
 }

@@ -16,7 +16,8 @@ namespace Espera.Core
         private readonly object songLocker = new object();
 
         public event EventHandler<SongEventArgs> SongAdded;
-        public event EventHandler SongChanged;
+        public event EventHandler SongStarted;
+        public event EventHandler SongFinished;
 
         public IEnumerable<Song> Songs
         {
@@ -108,19 +109,6 @@ namespace Espera.Core
             this.playlist = new Dictionary<int, Song>();
         }
 
-        private void AudioPlayerSongFinished(object sender, EventArgs e)
-        {
-            if (this.CurrentSongPlaylistIndex != null)
-            {
-                int nextIndex = this.CurrentSongPlaylistIndex.Value + 1;
-
-                if (this.playlist.ContainsKey(nextIndex))
-                {
-                    this.PlaySong(nextIndex);
-                }
-            }
-        }
-
         public void ContinueSong()
         {
             this.audioPlayer.Play();
@@ -131,7 +119,7 @@ namespace Espera.Core
             this.CurrentSongPlaylistIndex = playlistIndex;
             this.audioPlayer.Load(this.playlist[playlistIndex]);
             this.audioPlayer.Play();
-            this.SongChanged.RaiseSafe(this, EventArgs.Empty);
+            this.SongStarted.RaiseSafe(this, EventArgs.Empty);
         }
 
         public void PauseSong()
@@ -195,6 +183,21 @@ namespace Espera.Core
         public void Dispose()
         {
             this.audioPlayer.Dispose();
+        }
+
+        private void AudioPlayerSongFinished(object sender, EventArgs e)
+        {
+            this.SongFinished.RaiseSafe(this, EventArgs.Empty);
+
+            if (this.CurrentSongPlaylistIndex != null)
+            {
+                int nextIndex = this.CurrentSongPlaylistIndex.Value + 1;
+
+                if (this.playlist.ContainsKey(nextIndex))
+                {
+                    this.PlaySong(nextIndex);
+                }
+            }
         }
     }
 }
