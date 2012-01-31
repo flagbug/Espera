@@ -199,6 +199,9 @@ namespace Espera.Core
         /// </summary>
         public void PlayNextSong()
         {
+            if (!this.CanPlayNextSong || !this.CurrentSongPlaylistIndex.HasValue)
+                throw new InvalidOperationException("The next song couldn't be played.");
+
             this.PlaySong(this.CurrentSongPlaylistIndex.Value + 1);
         }
 
@@ -207,6 +210,9 @@ namespace Espera.Core
         /// </summary>
         public void PlayPreviousSong()
         {
+            if (!this.CanPlayPreviousSong || !this.CurrentSongPlaylistIndex.HasValue)
+                throw new InvalidOperationException("The previous song couldn't be played.");
+
             this.PlaySong(this.CurrentSongPlaylistIndex.Value - 1);
         }
 
