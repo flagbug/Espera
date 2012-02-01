@@ -45,6 +45,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal">
                 <Button Padding="0" Click="AddSongsButtonClick">
@@ -101,6 +102,9 @@
                 <TextBlock VerticalAlignment="Center" Text="{Binding Path=TotalTime, StringFormat=mm\\:ss}" />
             </StackPanel>
             <TextBox Grid.Column="4" Margin="10, 0, 0, 0" VerticalAlignment="Center" VerticalContentAlignment="Center" Width="150" Height="25" Text="{Binding Path=SearchText, UpdateSourceTrigger=PropertyChanged}" />
+            <Button Grid.Column="5" Margin="10, 0, 0, 0" Padding="0">
+                <Image Source="/Espera.View;component/Images/appbar.settings.png" />
+            </Button>
         </Grid>
         <Grid Grid.Row="1" Margin="0, 10, 0, 0">
             <Grid.ColumnDefinitions>
@@ -114,7 +118,7 @@
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                             <Setter Property="VerticalContentAlignment" Value="Center" />
                             <Setter Property="MinHeight" Value="25" />
-                            <Setter Property="Margin" Value="0,0,0,0" />
+                            <Setter Property="Margin" Value="0" />
                             <Setter Property="IsTabStop" Value="False" />
                             <Setter Property="Template">
                                 <Setter.Value>
