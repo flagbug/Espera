@@ -11,13 +11,14 @@ namespace Espera.View
     internal class MainViewModel : ViewModelBase<MainViewModel>, IDisposable
     {
         private readonly Library library;
+        private readonly Timer updateTimer;
         private string selectedArtist;
         private bool isAdding;
         private string currentAddingPath;
         private SongViewModel selectedSong;
         private int selectedPlaylistIndex;
-        private readonly Timer updateTimer;
         private string searchText;
+        private bool showAdministratorPanel;
 
         public string SearchText
         {
@@ -183,6 +184,36 @@ namespace Espera.View
                     this.currentAddingPath = value;
                     this.OnPropertyChanged(vm => vm.CurrentAddingPath);
                 }
+            }
+        }
+
+        public bool IsAdministrator
+        {
+            get { return this.library.AccessMode == AccessMode.Administrator; }
+        }
+
+        public bool ShowAdministratorPanel
+        {
+            get { return this.showAdministratorPanel; }
+            set
+            {
+                this.showAdministratorPanel = value;
+
+                this.OnPropertyChanged(vm => vm.ShowAdministratorPanel);
+            }
+        }
+
+        public ICommand ToggleAdministratorPanel
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.ShowAdministratorPanel = !this.ShowAdministratorPanel;
+                    }
+                );
             }
         }
 

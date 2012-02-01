@@ -14,6 +14,7 @@ namespace Espera.Core
         private readonly HashSet<Song> songs;
         private readonly Dictionary<int, Song> playlist;
         private readonly object songLocker = new object();
+        private string password;
 
         /// <summary>
         /// Occurs when a song has been added to the library.
@@ -66,7 +67,13 @@ namespace Espera.Core
         public float Volume
         {
             get { return this.audioPlayer.Volume; }
-            set { this.audioPlayer.Volume = value; }
+            set
+            {
+                if (this.AccessMode != AccessMode.Administrator)
+                    throw new InvalidOperationException("The user is not in administrator mode.");
+
+                this.audioPlayer.Volume = value;
+            }
         }
 
         /// <summary>
@@ -83,7 +90,13 @@ namespace Espera.Core
         public TimeSpan CurrentTime
         {
             get { return this.audioPlayer.CurrentTime; }
-            set { this.audioPlayer.CurrentTime = value; }
+            set
+            {
+                if (this.AccessMode != AccessMode.Administrator)
+                    throw new InvalidOperationException("The user is not in administrator mode.");
+
+                this.audioPlayer.CurrentTime = value;
+            }
         }
 
         /// <summary>
@@ -155,6 +168,11 @@ namespace Espera.Core
         }
 
         /// <summary>
+        /// Gets the access mode that is currently enabled.
+        /// </summary>
+        public AccessMode AccessMode { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Library"/> class.
         /// </summary>
         public Library()
@@ -166,11 +184,32 @@ namespace Espera.Core
             this.playlist = new Dictionary<int, Song>();
         }
 
+        public void CreateAdmin(string adminPassword)
+        {
+            this.password = adminPassword;
+        }
+
+        public void ChangeToAdmin(string adminPassword)
+        {
+            if (this.password != adminPassword)
+                throw new InvalidPasswordException("The password is not correct.");
+
+            this.AccessMode = AccessMode.Administrator;
+        }
+
+        public void ChangeToUser()
+        {
+            this.AccessMode = AccessMode.User;
+        }
+
         /// <summary>
         /// Continues the currently loaded song.
         /// </summary>
         public void ContinueSong()
         {
+            if (this.AccessMode != AccessMode.Administrator)
+                throw new InvalidOperationException("The user is not in administrator mode.");
+
             this.audioPlayer.Play();
         }
 
@@ -180,6 +219,9 @@ namespace Espera.Core
         /// <param name="playlistIndex">The index of the song in the playlist.</param>
         public void PlaySong(int playlistIndex)
         {
+            if (this.AccessMode != AccessMode.Administrator)
+                throw new InvalidOperationException("The user is not in administrator mode.");
+
             this.CurrentSongPlaylistIndex = playlistIndex;
             this.audioPlayer.Load(this.playlist[playlistIndex]);
             this.audioPlayer.Play();
@@ -191,6 +233,9 @@ namespace Espera.Core
         /// </summary>
         public void PauseSong()
         {
+            if (this.AccessMode != AccessMode.Administrator)
+                throw new InvalidOperationException("The user is not in administrator mode.");
+
             this.audioPlayer.Pause();
         }
 
@@ -199,6 +244,9 @@ namespace Espera.Core
         /// </summary>
         public void PlayNextSong()
         {
+            if (this.AccessMode != AccessMode.Administrator)
+                throw new InvalidOperationException("The user is not in administrator mode.");
+
             if (!this.CanPlayNextSong || !this.CurrentSongPlaylistIndex.HasValue)
                 throw new InvalidOperationException("The next song couldn't be played.");
 
@@ -210,6 +258,9 @@ namespace Espera.Core
         /// </summary>
         public void PlayPreviousSong()
         {
+            if (this.AccessMode != AccessMode.Administrator)
+                throw new InvalidOperationException("The user is not in administrator mode.");
+
             if (!this.CanPlayPreviousSong || !this.CurrentSongPlaylistIndex.HasValue)
                 throw new InvalidOperationException("The previous song couldn't be played.");
 

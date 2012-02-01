@@ -142,7 +142,8 @@
                      Text="{Binding Path=SearchText, UpdateSourceTrigger=PropertyChanged}" />
             <Button Grid.Column="5"
                     Margin="10, 0, 0, 0"
-                    Padding="0">
+                    Padding="0"
+                    Command="{Binding Path=ToggleAdministratorPanel}">
                 <Image Source="/Espera.View;component/Images/appbar.settings.png" />
             </Button>
         </Grid>
@@ -151,6 +152,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
                 <ListBox ItemsSource="{Binding Path=Artists}"
@@ -321,6 +323,20 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
+            </Grid>
+            <Grid Grid.Column="2" Width="200">
+                <Grid.Style>
+                    <Style TargetType="{x:Type Grid}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=ShowAdministratorPanel}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Border BorderBrush="{DynamicResource TextBoxBorderBrush}" BorderThickness="0.5">
+                    <Button Content="Create Administrator" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </Border>
             </Grid>
         </Grid>
         <StatusBar Grid.Row="2" Margin="0, 5, 0, 0" Height="25" Visibility="{Binding Path=IsAdding, Converter={StaticResource BooleanToVisibilityConverter}}" Background="#FF454545">
