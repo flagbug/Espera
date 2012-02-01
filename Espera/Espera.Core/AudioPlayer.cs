@@ -8,18 +8,22 @@ using NAudio.Wave;
 
 namespace Espera.Core
 {
+    /// <summary>
+    /// Provides methods for playing a song.
+    /// </summary>
     public sealed class AudioPlayer : IDisposable
     {
         private IWavePlayer wavePlayer;
         private WaveChannel32 inputStream;
 
-        // We need a dispatcher timer for updating the current state of the song, to avoid cross-threading exceptions
+        // We need a dispatcher timer for updating the current state of the song,
+        // to avoid cross-threading exceptions
         private readonly DispatcherTimer songFinishedTimer;
 
         private float volume;
 
         /// <summary>
-        /// Occurs when the current loaded song has finished.
+        /// Occurs when the <see cref="LoadedSong"/> has finished it's playback.
         /// </summary>
         public event EventHandler SongFinished;
 
@@ -35,6 +39,8 @@ namespace Espera.Core
             {
                 if (this.wavePlayer != null)
                 {
+                    // We map the NAudio playbackstate to our own playback state,
+                    // so that the NAudio API is not exposed outside of this class.
                     switch (this.wavePlayer.PlaybackState)
                     {
                         case NAudio.Wave.PlaybackState.Stopped:
@@ -57,7 +63,7 @@ namespace Espera.Core
         public Song LoadedSong { get; private set; }
 
         /// <summary>
-        /// Gets or sets the volume (a value between 0.0 and 1.0).
+        /// Gets or sets the volume (a value from 0.0 to 1.0).
         /// </summary>
         /// <value>The volume.</value>
         public float Volume
@@ -104,9 +110,9 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Loads the specified song.
+        /// Loads the specified song into the <see cref="AudioPlayer"/>. This is required before playing a new song.
         /// </summary>
-        /// <param name="song">The song to load.</param>
+        /// <param name="song">The song to load into the player.</param>
         /// <exception cref="ArgumentNullException"><c>song</c> is null.</exception>
         public void Load(Song song)
         {
@@ -114,6 +120,8 @@ namespace Espera.Core
                 throw new ArgumentNullException(Reflector.GetMemberName(() => song));
 
             this.Stop();
+
+            // NAudio requires that we renew the current wave player.
             this.RenewWavePlayer();
 
             this.OpenSong(song);
@@ -122,7 +130,7 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Plays the loaded song.
+        /// Starts or continues the playback of the <see cref="LoadedSong"/>.
         /// </summary>
         /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
         public void Play()
@@ -143,7 +151,7 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Pauses the playback.
+        /// Pauses the playback of the <see cref="LoadedSong"/>.
         /// </summary>
         public void Pause()
         {
@@ -155,7 +163,7 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Stops the playback
+        /// Stops the playback of the <see cref="LoadedSong"/>.
         /// </summary>
         public void Stop()
         {
@@ -190,11 +198,6 @@ namespace Espera.Core
             }
         }
 
-        /// <summary>
-        /// Opens the Mp3 stream from the specified stream.
-        /// </summary>
-        /// <param name="stream">The Mp3 stream.</param>
-        /// <returns>The output channel for the Mp3 stream.</returns>
         private static WaveChannel32 OpenMp3Stream(Stream stream)
         {
             WaveStream mp3Stream = new Mp3FileReader(stream);
@@ -202,11 +205,6 @@ namespace Espera.Core
             return new WaveChannel32(mp3Stream);
         }
 
-        /// <summary>
-        /// Opens the wav stream from the specified stream.
-        /// </summary>
-        /// <param name="stream">The wave stream.</param>
-        /// <returns>The output channel for the wave stream.</returns>
         private static WaveChannel32 OpenWavStream(Stream stream)
         {
             WaveStream readerStream = new WaveFileReader(stream);
@@ -226,9 +224,6 @@ namespace Espera.Core
             return new WaveChannel32(readerStream);
         }
 
-        /// <summary>
-        /// Closes the current stream.
-        /// </summary>
         private void CloseStream()
         {
             if (inputStream != null)
@@ -239,21 +234,12 @@ namespace Espera.Core
             this.LoadedSong = null;
         }
 
-        /// <summary>
-        /// Opens the specified song.
-        /// </summary>
-        /// <param name="song">The song to open.</param>
         private void OpenSong(Song song)
         {
             this.CreateInputStream(song);
             this.wavePlayer.Init(inputStream);
         }
 
-        /// <summary>
-        /// Creates the input stream.
-        /// </summary>
-        /// <param name="song">The song that contains the stream.</param>
-        /// <exception cref="InvalidOperationException">The audio type is not supported.</exception>
         private void CreateInputStream(Song song)
         {
             switch (song.AudioType)
@@ -271,9 +257,6 @@ namespace Espera.Core
             this.inputStream.Volume = this.Volume;
         }
 
-        /// <summary>
-        /// Renews the wave player.
-        /// </summary>
         private void RenewWavePlayer()
         {
             if (wavePlayer != null)
@@ -281,12 +264,11 @@ namespace Espera.Core
                 this.wavePlayer.Dispose();
             }
 
+            // There is currently a problem with the WaveOut player, that causes it to hang if the UI does expensive operations.
+            // The problem is, that the other wave players, such as DirectOut or WasapiOut also have problems.
             this.wavePlayer = new WaveOut();
         }
 
-        /// <summary>
-        /// Updates state of the current song and triggers the necessary events, if the song has finished.
-        /// </summary>
         private void UpdateSongState()
         {
             if (this.CurrentTime >= this.TotalTime)
