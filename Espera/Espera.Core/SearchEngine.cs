@@ -24,6 +24,7 @@ namespace Espera.Core
             IEnumerable<string> keyWords = searchText.Split(' ').Select(keyword => keyword.ToLowerInvariant());
 
             return source
+                .AsParallel()
                 .Where
                 (
                     song => keyWords.All
