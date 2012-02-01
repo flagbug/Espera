@@ -11,9 +11,8 @@ namespace Espera.Core
         /// <param name="path">The path of the file.</param>
         /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
-        /// <param name="dateAdded">The date when the song has been added.</param>
-        public LocalSong(Uri path, AudioType audioType, TimeSpan duration, DateTime dateAdded)
-            : base(path, audioType, duration, dateAdded)
+        public LocalSong(Uri path, AudioType audioType, TimeSpan duration)
+            : base(path, audioType, duration)
         { }
 
         /// <summary>

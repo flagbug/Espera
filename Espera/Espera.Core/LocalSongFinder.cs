@@ -99,7 +99,7 @@ namespace Espera.Core
 
                     if (tag != null)
                     {
-                        var song = new LocalSong(new Uri(e.File.FullName), audioType.Value, duration, DateTime.Now)
+                        var song = new LocalSong(new Uri(e.File.FullName), audioType.Value, duration)
                         {
                             Album = tag.Album ?? String.Empty,
                             Artist = tag.FirstPerformer ?? "Unknown Artist",
