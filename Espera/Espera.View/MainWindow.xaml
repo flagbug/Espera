@@ -1,9 +1,14 @@
 ﻿<Controls:MetroWindow x:Class="Espera.View.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-        xmlns:View="clr-namespace:Espera.View"
-        Title="Espera" Height="600" Width="800" WindowState="Maximized" Closing="MetroWindowClosing" Icon="/Espera.View;component/Images/appbar.music.png">
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      xmlns:View="clr-namespace:Espera.View"
+                      Title="Espera"
+                      Height="600"
+                      Width="800"
+                      WindowState="Maximized"
+                      Closing="MetroWindowClosing"
+                      Icon="/Espera.View;component/Images/appbar.music.png">
     <Window.DataContext>
         <View:MainViewModel x:Name="mainViewModel" />
     </Window.DataContext>
@@ -24,7 +29,7 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
                             <Border Background="Transparent">
-                                <ContentPresenter />
+                                <ContentPresenter Height="25" Width="25" />
                             </Border>
                         </ControlTemplate>
                     </Setter.Value>
@@ -38,7 +43,8 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Height="30">
+        <Grid Grid.Row="0"
+              Height="30">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -47,11 +53,15 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <Button Padding="0" Click="AddSongsButtonClick">
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal">
+                <Button Padding="0"
+                        Click="AddSongsButtonClick">
                     <Image Source="/Espera.View;component/Images/appbar.add.png" />
                 </Button>
-                <Button Padding="0" Margin="15, 0, 0, 0" Width="30">
+                <Button Padding="0"
+                        Margin="15, 0, 0, 0"
+                        Width="30">
                     <Button.Style>
                         <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="{x:Type Button}">
                             <Style.Triggers>
@@ -79,40 +89,72 @@
                         </Image.Style>
                     </Image>
                 </Button>
-                <Button Padding="0" Margin="5, 0, 0, 0" Command="{Binding Path=PreviousSongCommand}">
+                <Button Padding="0"
+                        Margin="5, 0, 0, 0"
+                        Command="{Binding Path=PreviousSongCommand}">
                     <Image Source="/Espera.View;component/Images/appbar.navigate.previous.png" />
                 </Button>
-                <Button Padding="0" Margin="5, 0, 0, 0" Command="{Binding Path=NextSongCommand}">
+                <Button Padding="0"
+                        Margin="5, 0, 0, 0"
+                        Command="{Binding Path=NextSongCommand}">
                     <Image Source="/Espera.View;component/Images/appbar.navigate.next.png" />
                 </Button>
             </StackPanel>
-            <StackPanel Margin="10, 0, 0, 0" Grid.Column="1" Orientation="Horizontal">
-                <Button Style="{StaticResource VolumeButtonStyle}" Command="{Binding Path=MuteCommand}" VerticalAlignment="Center">
-                    <Image Height="25" Source="/Espera.View;component/Images/appbar.sound.1.png" />
+            <StackPanel Grid.Column="1"
+                        Margin="10, 0, 0, 0"
+                        Orientation="Horizontal">
+                <Button Style="{StaticResource VolumeButtonStyle}"
+                        Command="{Binding Path=MuteCommand}"
+                        VerticalAlignment="Center">
+                    <Image Source="/Espera.View;component/Images/appbar.sound.1.png" />
                 </Button>
-                <Slider Width="200" IsMoveToPointEnabled="True" Maximum="1" Value="{Binding Path=Volume}" />
-                <Button Style="{StaticResource VolumeButtonStyle}" Command="{Binding Path=UnMuteCommand}" VerticalAlignment="Center">
-                    <Image Height="25" Source="/Espera.View;component/Images/appbar.sound.3.png" />
+                <Slider Width="200"
+                        IsMoveToPointEnabled="True"
+                        Maximum="1"
+                        Value="{Binding Path=Volume}" />
+                <Button Style="{StaticResource VolumeButtonStyle}"
+                        Command="{Binding Path=UnMuteCommand}"
+                        VerticalAlignment="Center">
+                    <Image Source="/Espera.View;component/Images/appbar.sound.3.png" />
                 </Button>
             </StackPanel>
-            <Slider Grid.Column="2" Margin="5, 0, 0, 0" IsMoveToPointEnabled="True" Value="{Binding Path=CurrentSeconds}" Maximum="{Binding Path=TotalSeconds}" />
-            <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="5, 0, 0, 0">
-                <TextBlock VerticalAlignment="Center" Text="{Binding Path=CurrentTime, StringFormat=mm\\:ss}" />
-                <TextBlock VerticalAlignment="Center" Text="/" />
-                <TextBlock VerticalAlignment="Center" Text="{Binding Path=TotalTime, StringFormat=mm\\:ss}" />
+            <Slider Grid.Column="2"
+                    Margin="5, 0, 0, 0"
+                    IsMoveToPointEnabled="True"
+                    Value="{Binding Path=CurrentSeconds}"
+                    Maximum="{Binding Path=TotalSeconds}" />
+            <StackPanel Grid.Column="3"
+                        Orientation="Horizontal"
+                        Margin="5, 0, 0, 0">
+                <TextBlock VerticalAlignment="Center"
+                           Text="{Binding Path=CurrentTime, StringFormat=mm\\:ss}" />
+                <TextBlock VerticalAlignment="Center"
+                           Text="/" />
+                <TextBlock VerticalAlignment="Center"
+                           Text="{Binding Path=TotalTime, StringFormat=mm\\:ss}" />
             </StackPanel>
-            <TextBox Grid.Column="4" Margin="10, 0, 0, 0" VerticalAlignment="Center" VerticalContentAlignment="Center" Width="150" Height="25" Text="{Binding Path=SearchText, UpdateSourceTrigger=PropertyChanged}" />
-            <Button Grid.Column="5" Margin="10, 0, 0, 0" Padding="0">
+            <TextBox Grid.Column="4"
+                     Margin="10, 0, 0, 0"
+                     VerticalAlignment="Center"
+                     VerticalContentAlignment="Center"
+                     Width="150"
+                     Height="25"
+                     Text="{Binding Path=SearchText, UpdateSourceTrigger=PropertyChanged}" />
+            <Button Grid.Column="5"
+                    Margin="10, 0, 0, 0"
+                    Padding="0">
                 <Image Source="/Espera.View;component/Images/appbar.settings.png" />
             </Button>
         </Grid>
-        <Grid Grid.Row="1" Margin="0, 10, 0, 0">
+        <Grid Grid.Row="1"
+              Margin="0, 10, 0, 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
-                <ListBox ItemsSource="{Binding Path=Artists}" SelectedItem="{Binding Path=SelectedArtist}">
+                <ListBox ItemsSource="{Binding Path=Artists}"
+                         SelectedItem="{Binding Path=SelectedArtist}">
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="{x:Type ListBoxItem}">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -123,13 +165,16 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                                        <Border x:Name="Bd" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
-                                            <ContentPresenter Margin="5, 0, 0, 0" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                        <Border x:Name="Bd"
+                                                Background="{TemplateBinding Background}"
+                                                SnapsToDevicePixels="true">
+                                            <ContentPresenter Margin="5, 0, 0, 0"
+                                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsSelected" Value="True">
                                                 <Setter TargetName="Bd" Property="BorderBrush" Value="#FF143c65" />
-                                                <Setter Property="Background" TargetName="Bd" Value="{DynamicResource AccentColorBrush}"></Setter>
+                                                <Setter Property="Background" TargetName="Bd" Value="{DynamicResource AccentColorBrush}" />
                                             </Trigger>
                                             <Trigger Property="IsMouseOver" Value="True">
                                                 <Setter TargetName="Bd" Property="Background">
@@ -165,7 +210,9 @@
                 </Grid.RowDefinitions>
                 <TabControl>
                     <TabItem Header="Local">
-                        <ListView Grid.Row="1" ItemsSource="{Binding Path=SelectableSongs}" SelectedItem="{Binding Path=SelectedSong}">
+                        <ListView Grid.Row="1"
+                                  ItemsSource="{Binding Path=SelectableSongs}"
+                                  SelectedItem="{Binding Path=SelectedSong}">
                             <ListView.ItemContainerStyle>
                                 <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                                     <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick"/>
@@ -176,35 +223,40 @@
                                     <GridViewColumn Header="Title">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Title}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding Path=Title}"
+                                                           TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
                                     <GridViewColumn Header="Duration">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Duration, StringFormat=mm\\:ss}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding Path=Duration, StringFormat=mm\\:ss}"
+                                                           TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
                                     <GridViewColumn Header="Artist">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Artist}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding Path=Artist}"
+                                                           TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
                                     <GridViewColumn Header="Album">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Album}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding Path=Album}"
+                                                           TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
                                     <GridViewColumn Header="Genre">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Genre}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding Path=Genre}"
+                                                           TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
