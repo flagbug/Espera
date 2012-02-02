@@ -143,7 +143,7 @@
             <Button Grid.Column="5"
                     Margin="10, 0, 0, 0"
                     Padding="0"
-                    Command="{Binding Path=ToggleAdministratorPanel}">
+                    Click="AdminPanelToggleButton_Click">
                 <Image Source="/Espera.View;component/Images/appbar.settings.png" />
             </Button>
         </Grid>
@@ -325,7 +325,10 @@
                 </ListView>
             </Grid>
             <Grid Grid.Column="2"
-                  Width="200">
+                  Name="adminPanel"
+                  Width="200"
+                  Visibility="Collapsed"
+                  DataContext="{Binding Path=AdministratorViewModel}">
                 <Grid.Style>
                     <Style TargetType="{x:Type Grid}">
                         <Style.Triggers>
@@ -341,7 +344,8 @@
                                 HorizontalAlignment="Center" >
                         <TextBlock Text="Enter a password:"
                                    HorizontalAlignment="Center" />
-                        <PasswordBox Margin="0, 5, 0, 0" PasswordChanged="PasswordBox_PasswordChanged" />
+                        <PasswordBox Margin="0, 5, 0, 0"
+                                     PasswordChanged="PasswordBox_PasswordChanged" />
                         <Button Content="Create Administrator"
                                 Margin="0, 10, 0, 0"
                                 Command="{Binding Path=CreateAdminCommand}" />

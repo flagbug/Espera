@@ -14,6 +14,8 @@ namespace Espera.View
     /// </summary>
     public partial class MainWindow
     {
+        private bool showAdministratorPanel;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -51,7 +53,14 @@ namespace Espera.View
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.EnteredPassword = ((PasswordBox)sender).Password;
+            this.mainViewModel.AdministratorViewModel.CreationPassword = ((PasswordBox)sender).Password;
+        }
+
+        private void AdminPanelToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.showAdministratorPanel = !this.showAdministratorPanel;
+
+            this.adminPanel.Visibility = this.showAdministratorPanel ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 }

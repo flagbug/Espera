@@ -20,6 +20,8 @@ namespace Espera.View.ViewModels
         private string searchText;
         private bool showAdministratorPanel;
 
+        public AdministratorViewModel AdministratorViewModel { get; private set; }
+
         public string SearchText
         {
             get { return this.searchText; }
@@ -192,33 +194,6 @@ namespace Espera.View.ViewModels
             get { return this.library.AccessMode == AccessMode.Administrator; }
         }
 
-        public string EnteredPassword { get; set; }
-
-        public bool ShowAdministratorPanel
-        {
-            get { return this.showAdministratorPanel; }
-            set
-            {
-                this.showAdministratorPanel = value;
-
-                this.OnPropertyChanged(vm => vm.ShowAdministratorPanel);
-            }
-        }
-
-        public ICommand ToggleAdministratorPanel
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        this.ShowAdministratorPanel = !this.ShowAdministratorPanel;
-                    }
-                );
-            }
-        }
-
         public ICommand PlayCommand
         {
             get
@@ -307,17 +282,6 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public ICommand CreateAdminCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param => this.library.CreateAdmin(this.EnteredPassword)
-                );
-            }
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
         /// </summary>
@@ -326,8 +290,12 @@ namespace Espera.View.ViewModels
             this.library = new Library();
             this.library.SongStarted += LibraryRaisedSongStarted;
             this.library.SongFinished += LibraryRaisedSongFinished;
+
+            this.AdministratorViewModel = new AdministratorViewModel(this.library);
+
             this.updateTimer = new Timer(333);
             this.updateTimer.Elapsed += UpdateTimerElapsed;
+
             this.searchText = String.Empty;
             this.SelectedPlaylistIndex = -1;
         }
