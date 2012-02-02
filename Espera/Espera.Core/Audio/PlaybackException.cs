@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Espera.Core
+namespace Espera.Core.Audio
 {
     /// <summary>
     /// The exception that is thrown, when the <see cref="AudioPlayer"/> couldn't play a song.

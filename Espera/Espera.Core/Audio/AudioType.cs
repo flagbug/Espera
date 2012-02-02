@@ -1,4 +1,4 @@
-﻿namespace Espera.Core
+﻿namespace Espera.Core.Audio
 {
     /// <summary>
     /// Represents the audio type for a <see cref="Song"/> object.

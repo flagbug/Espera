@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Espera.Core.Audio;
 using FlagLib.Extensions;
 using FlagLib.IO;
 using TagLib;

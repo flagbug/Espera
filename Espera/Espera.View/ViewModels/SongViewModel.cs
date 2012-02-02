@@ -2,7 +2,7 @@
 using Espera.Core;
 using FlagLib.Patterns.MVVM;
 
-namespace Espera.View
+namespace Espera.View.ViewModels
 {
     public class SongViewModel : ViewModelBase<SongViewModel>
     {

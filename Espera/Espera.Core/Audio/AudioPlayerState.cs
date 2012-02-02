@@ -1,4 +1,4 @@
-﻿namespace Espera.Core
+﻿namespace Espera.Core.Audio
 {
     /// <summary>
     /// Represents the current playback state of an <see cref="AudioPlayer"/> object.

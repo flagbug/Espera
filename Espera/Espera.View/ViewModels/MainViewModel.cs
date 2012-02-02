@@ -6,7 +6,7 @@ using System.Windows.Input;
 using Espera.Core;
 using FlagLib.Patterns.MVVM;
 
-namespace Espera.View
+namespace Espera.View.ViewModels
 {
     internal class MainViewModel : ViewModelBase<MainViewModel>, IDisposable
     {

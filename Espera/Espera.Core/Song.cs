@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Espera.Core.Audio;
 using FlagLib.Reflection;
 
 namespace Espera.Core

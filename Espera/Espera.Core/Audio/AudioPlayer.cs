@@ -6,7 +6,7 @@ using FlagLib.Reflection;
 using NAudio;
 using NAudio.Wave;
 
-namespace Espera.Core
+namespace Espera.Core.Audio
 {
     /// <summary>
     /// Provides methods for playing a song.
