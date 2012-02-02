@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using MahApps.Metro;
@@ -46,6 +47,11 @@ namespace Espera.View
         private void PlaylistDoubleClick(object sender, MouseButtonEventArgs e)
         {
             this.mainViewModel.PlayCommand.Execute(null);
+        }
+
+        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            this.mainViewModel.EnteredPassword = ((PasswordBox)sender).Password;
         }
     }
 }

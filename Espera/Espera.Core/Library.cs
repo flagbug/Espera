@@ -172,6 +172,8 @@ namespace Espera.Core
         /// </summary>
         public AccessMode AccessMode { get; private set; }
 
+        public bool IsAdministratorCreated { get; private set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Library"/> class.
         /// </summary>
@@ -186,11 +188,21 @@ namespace Espera.Core
 
         public void CreateAdmin(string adminPassword)
         {
+            if (adminPassword == null)
+                throw new ArgumentNullException(Reflector.GetMemberName(() => adminPassword));
+
+            if (this.IsAdministratorCreated)
+                throw new InvalidOperationException("The administrator is already created.");
+
             this.password = adminPassword;
+            this.IsAdministratorCreated = true;
         }
 
         public void ChangeToAdmin(string adminPassword)
         {
+            if (adminPassword == null)
+                throw new ArgumentNullException(Reflector.GetMemberName(() => adminPassword));
+
             if (this.password != adminPassword)
                 throw new InvalidPasswordException("The password is not correct.");
 

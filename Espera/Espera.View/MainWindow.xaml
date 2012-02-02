@@ -324,7 +324,8 @@
                     </ListView.View>
                 </ListView>
             </Grid>
-            <Grid Grid.Column="2" Width="200">
+            <Grid Grid.Column="2"
+                  Width="200">
                 <Grid.Style>
                     <Style TargetType="{x:Type Grid}">
                         <Style.Triggers>
@@ -334,14 +335,29 @@
                         </Style.Triggers>
                     </Style>
                 </Grid.Style>
-                <Border BorderBrush="{DynamicResource TextBoxBorderBrush}" BorderThickness="0.5">
-                    <Button Content="Create Administrator" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                <Border BorderBrush="{DynamicResource TextBoxBorderBrush}"
+                        BorderThickness="0.5">
+                    <StackPanel VerticalAlignment="Center"
+                                HorizontalAlignment="Center" >
+                        <TextBlock Text="Enter a password:"
+                                   HorizontalAlignment="Center" />
+                        <PasswordBox Margin="0, 5, 0, 0" PasswordChanged="PasswordBox_PasswordChanged" />
+                        <Button Content="Create Administrator"
+                                Margin="0, 10, 0, 0"
+                                Command="{Binding Path=CreateAdminCommand}" />
+                    </StackPanel>
                 </Border>
             </Grid>
         </Grid>
-        <StatusBar Grid.Row="2" Margin="0, 5, 0, 0" Height="25" Visibility="{Binding Path=IsAdding, Converter={StaticResource BooleanToVisibilityConverter}}" Background="#FF454545">
-            <StatusBarItem Content="Adding songs: " Foreground="White" />
-            <StatusBarItem Content="{Binding Path=CurrentAddingPath}" Foreground="White" />
+        <StatusBar Grid.Row="2"
+                   Margin="0, 5, 0, 0"
+                   Height="25"
+                   Visibility="{Binding Path=IsAdding, Converter={StaticResource BooleanToVisibilityConverter}}"
+                   Background="#FF454545">
+            <StatusBarItem Content="Adding songs: "
+                           Foreground="White" />
+            <StatusBarItem Content="{Binding Path=CurrentAddingPath}"
+                           Foreground="White" />
         </StatusBar>
     </Grid>
 </Controls:MetroWindow>

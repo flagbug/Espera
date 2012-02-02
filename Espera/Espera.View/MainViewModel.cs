@@ -192,6 +192,8 @@ namespace Espera.View
             get { return this.library.AccessMode == AccessMode.Administrator; }
         }
 
+        public string EnteredPassword { get; set; }
+
         public bool ShowAdministratorPanel
         {
             get { return this.showAdministratorPanel; }
@@ -301,6 +303,17 @@ namespace Espera.View
                 return new RelayCommand
                 (
                     param => this.Volume = 1
+                );
+            }
+        }
+
+        public ICommand CreateAdminCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param => this.library.CreateAdmin(this.EnteredPassword)
                 );
             }
         }
