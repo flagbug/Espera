@@ -53,7 +53,7 @@ namespace Espera.View
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.AdministratorViewModel.CreationPassword = ((PasswordBox)sender).Password;
+            this.mainViewModel.AdministratorViewModel.Password = ((PasswordBox)sender).Password;
         }
 
         private void AdminPanelToggleButton_Click(object sender, RoutedEventArgs e)

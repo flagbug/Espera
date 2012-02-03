@@ -3,6 +3,7 @@
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                       xmlns:ViewModels="clr-namespace:Espera.View.ViewModels"
+                      xmlns:WPF="clr-namespace:FlagLib.WPF;assembly=FlagLib"
                       Title="Espera"
                       Height="600"
                       Width="800"
@@ -167,7 +168,7 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                                        <Border x:Name="Bd"
+                                        <Border x:Name="Border"
                                                 Background="{TemplateBinding Background}"
                                                 SnapsToDevicePixels="true">
                                             <ContentPresenter Margin="5, 0, 0, 0"
@@ -175,11 +176,11 @@
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsSelected" Value="True">
-                                                <Setter TargetName="Bd" Property="BorderBrush" Value="#FF143c65" />
-                                                <Setter Property="Background" TargetName="Bd" Value="{DynamicResource AccentColorBrush}" />
+                                                <Setter TargetName="Border" Property="BorderBrush" Value="#FF143c65" />
+                                                <Setter Property="Background" TargetName="Border" Value="{DynamicResource AccentColorBrush}" />
                                             </Trigger>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Bd" Property="Background">
+                                                <Setter TargetName="Border" Property="Background">
                                                     <Setter.Value>
                                                         <SolidColorBrush Color="{DynamicResource AccentColor3}" />
                                                     </Setter.Value>
@@ -190,12 +191,12 @@
                                                     <Condition Property="IsSelected" Value="True" />
                                                     <Condition Property="Selector.IsSelectionActive" Value="True" />
                                                 </MultiTrigger.Conditions>
-                                                <Setter Property="Background" TargetName="Bd">
+                                                <Setter Property="Background" TargetName="Border">
                                                     <Setter.Value>
                                                         <SolidColorBrush Color="{DynamicResource AccentColor2}" />
                                                     </Setter.Value>
                                                 </Setter>
-                                                <Setter Property="BorderBrush" TargetName="Bd" Value="#FF143c65" />
+                                                <Setter Property="BorderBrush" TargetName="Border" Value="#FF143c65" />
                                             </MultiTrigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -327,12 +328,14 @@
             <Grid Grid.Column="2"
                   Name="adminPanel"
                   Width="200"
-                  Visibility="Collapsed"
                   DataContext="{Binding Path=AdministratorViewModel}">
                 <Grid.Style>
                     <Style TargetType="{x:Type Grid}">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=ShowAdministratorPanel}" Value="False">
+                            <DataTrigger Binding="{Binding Path=IsAdminCreated, Mode=OneTime}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=IsUser}" Value="True">
                                 <Setter Property="Visibility" Value="Collapsed" />
                             </DataTrigger>
                         </Style.Triggers>
@@ -348,22 +351,73 @@
                                         <DataTrigger Binding="{Binding Path=IsAdminCreated}" Value="True">
                                             <Setter Property="Visibility" Value="Hidden" />
                                         </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=IsUser}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </Grid.Style>
                             <StackPanel VerticalAlignment="Center"
                                 HorizontalAlignment="Center" >
-                                <TextBlock Text="Enter a password:"
-                                   HorizontalAlignment="Center" />
+                                <TextBlock HorizontalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=IsAdminCreated}" Value="False">
+                                                    <Setter Property="Text" Value="Enter a password:" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Path=IsUser}" Value="True">
+                                                    <Setter Property="Text" Value="Enter the administrator password:" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                                 <PasswordBox Margin="0, 5, 0, 0"
-                                     PasswordChanged="PasswordBox_PasswordChanged" />
-                                <Button Content="Create Administrator"
-                                Margin="0, 10, 0, 0"
-                                Command="{Binding Path=CreateAdminCommand}" />
+                                             WPF:PasswordBoxBinder.Attach="True"
+                                             WPF:PasswordBoxBinder.Password="{Binding Path=Password, Mode=TwoWay}"
+                                             PasswordChanged="PasswordBox_PasswordChanged" />
+                                <Button Margin="0, 10, 0, 0">
+                                    <Button.Style>
+                                        <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="{x:Type Button}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=IsAdminCreated}" Value="False">
+                                                    <Setter Property="Content" Value="Create Administrator" />
+                                                    <Setter Property="Command" Value="{Binding Path=CreateAdminCommand}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Path=IsAdminCreated}" Value="True">
+                                                    <Setter Property="Content" Value="Login" />
+                                                    <Setter Property="Command" Value="{Binding Path=LoginCommand}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
                             </StackPanel>
                         </Grid>
                         <Grid>
-
+                            <Grid.Style>
+                                <Style TargetType="{x:Type Grid}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=IsAdmin}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=IsUser}" Value="True">
+                                            <Setter Property="Visibility" Value="Hidden" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=IsAdminCreated}" Value="False">
+                                            <Setter Property="Visibility" Value="Hidden" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Button Grid.Row="1"
+                                    Content="Change to user"
+                                    Command="{Binding Path=ChangeToUserCommand}" />
                         </Grid>
                     </Grid>
                 </Border>
