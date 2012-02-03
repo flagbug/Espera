@@ -364,14 +364,9 @@ namespace Espera.Core
         {
             this.SongFinished.RaiseSafe(this, EventArgs.Empty);
 
-            if (this.CurrentSongPlaylistIndex != null)
+            if (this.CanPlayNextSong)
             {
-                int nextIndex = this.CurrentSongPlaylistIndex.Value + 1;
-
-                if (this.playlist.ContainsKey(nextIndex))
-                {
-                    this.PlaySong(nextIndex);
-                }
+                this.PlayNextSong();
             }
         }
     }
