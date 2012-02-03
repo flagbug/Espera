@@ -16,6 +16,7 @@ namespace Espera.Core
         private readonly Dictionary<int, Song> playlist;
         private readonly object songLocker = new object();
         private string password;
+        private AccessMode accessMode;
 
         /// <summary>
         /// Occurs when a song has been added to the library.
@@ -31,6 +32,11 @@ namespace Espera.Core
         /// Occurs when a song has finished the playback.
         /// </summary>
         public event EventHandler SongFinished;
+
+        /// <summary>
+        /// Occurs when <see cref="AccessMode"/> property has changed.
+        /// </summary>
+        public event EventHandler AccessModeChanged;
 
         /// <summary>
         /// Gets all songs that are currently in the library.
@@ -171,7 +177,18 @@ namespace Espera.Core
         /// <summary>
         /// Gets the access mode that is currently enabled.
         /// </summary>
-        public AccessMode AccessMode { get; private set; }
+        public AccessMode AccessMode
+        {
+            get { return this.accessMode; }
+            private set
+            {
+                if (this.AccessMode != value)
+                {
+                    this.accessMode = value;
+                    this.AccessModeChanged.RaiseSafe(this, EventArgs.Empty);
+                }
+            }
+        }
 
         public bool IsAdministratorCreated { get; private set; }
 
@@ -185,6 +202,8 @@ namespace Espera.Core
 
             this.songs = new HashSet<Song>();
             this.playlist = new Dictionary<int, Song>();
+
+            this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
         }
 
         public void CreateAdmin(string adminPassword)

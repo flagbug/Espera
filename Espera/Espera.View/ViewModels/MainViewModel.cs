@@ -18,9 +18,13 @@ namespace Espera.View.ViewModels
         private SongViewModel selectedSong;
         private int selectedPlaylistIndex;
         private string searchText;
-        private bool showAdministratorPanel;
 
         public AdministratorViewModel AdministratorViewModel { get; private set; }
+
+        public bool IsAdmin
+        {
+            get { return this.library.AccessMode == AccessMode.Administrator; }
+        }
 
         public string SearchText
         {
@@ -189,11 +193,6 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public bool IsAdministrator
-        {
-            get { return this.library.AccessMode == AccessMode.Administrator; }
-        }
-
         public ICommand PlayCommand
         {
             get
@@ -215,7 +214,7 @@ namespace Espera.View.ViewModels
 
                         this.updateTimer.Start();
                     },
-                    param => this.SelectedPlaylistIndex != -1 || this.library.LoadedSong != null
+                    param => this.IsAdmin && (this.SelectedPlaylistIndex != -1 || this.library.LoadedSong != null)
                 );
             }
         }
@@ -231,7 +230,8 @@ namespace Espera.View.ViewModels
                         this.library.PauseSong();
                         this.updateTimer.Stop();
                         this.OnPropertyChanged(vm => vm.IsPlaying);
-                    }
+                    },
+                    param => this.IsAdmin
                 );
             }
         }
@@ -241,10 +241,10 @@ namespace Espera.View.ViewModels
             get
             {
                 return new RelayCommand
-                (
+            (
                     param => this.library.PlayNextSong(),
-                    param => this.library.CanPlayNextSong
-                );
+                    param => this.IsAdmin && this.library.CanPlayNextSong
+                    );
             }
         }
 
@@ -255,7 +255,7 @@ namespace Espera.View.ViewModels
                 return new RelayCommand
                 (
                     param => this.library.PlayPreviousSong(),
-                    param => this.library.CanPlayPreviousSong
+                    param => this.IsAdmin && this.library.CanPlayPreviousSong
                 );
             }
         }
@@ -266,7 +266,8 @@ namespace Espera.View.ViewModels
             {
                 return new RelayCommand
                 (
-                    param => this.Volume = 0
+                    param => this.Volume = 0,
+                    param => this.IsAdmin
                 );
             }
         }
@@ -277,7 +278,8 @@ namespace Espera.View.ViewModels
             {
                 return new RelayCommand
                 (
-                    param => this.Volume = 1
+                    param => this.Volume = 1,
+                    param => this.IsAdmin
                 );
             }
         }
@@ -290,11 +292,12 @@ namespace Espera.View.ViewModels
             this.library = new Library();
             this.library.SongStarted += LibraryRaisedSongStarted;
             this.library.SongFinished += LibraryRaisedSongFinished;
+            this.library.AccessModeChanged += (sender, e) => this.UpdateUserAccess();
 
             this.AdministratorViewModel = new AdministratorViewModel(this.library);
 
             this.updateTimer = new Timer(333);
-            this.updateTimer.Elapsed += UpdateTimerElapsed;
+            this.updateTimer.Elapsed += (sender, e) => this.UpdateTime();
 
             this.searchText = String.Empty;
             this.SelectedPlaylistIndex = -1;
@@ -345,7 +348,7 @@ namespace Espera.View.ViewModels
             this.updateTimer.Dispose();
         }
 
-        private void UpdateTimerElapsed(object sender, ElapsedEventArgs e)
+        private void UpdateTime()
         {
             this.OnPropertyChanged(vm => vm.CurrentSeconds);
             this.OnPropertyChanged(vm => vm.CurrentTime);
@@ -362,6 +365,11 @@ namespace Espera.View.ViewModels
             this.OnPropertyChanged(vm => vm.TotalTime);
             this.OnPropertyChanged(vm => vm.Playlist);
             this.OnPropertyChanged(vm => vm.IsPlaying);
+        }
+
+        private void UpdateUserAccess()
+        {
+            this.OnPropertyChanged(vm => vm.IsAdmin);
         }
     }
 }

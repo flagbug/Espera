@@ -1,6 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -20,6 +22,8 @@ namespace Espera.View
         {
             InitializeComponent();
 
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("en-us");
+
             ThemeManager.ChangeTheme(this, ThemeManager.DefaultAccents.First(accent => accent.Name == "Blue"), Theme.Dark);
         }
 
@@ -38,7 +42,10 @@ namespace Espera.View
 
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            this.mainViewModel.AddSelectedSongToPlaylist();
+            if (this.mainViewModel.IsAdmin)
+            {
+                this.mainViewModel.AddSelectedSongToPlaylist();
+            }
         }
 
         private void MetroWindowClosing(object sender, CancelEventArgs e)
@@ -48,7 +55,10 @@ namespace Espera.View
 
         private void PlaylistDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            this.mainViewModel.PlayCommand.Execute(null);
+            if (this.mainViewModel.IsAdmin)
+            {
+                this.mainViewModel.PlayCommand.Execute(null);
+            }
         }
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
