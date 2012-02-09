@@ -4,7 +4,7 @@ using FlagLib.Reflection;
 namespace Espera.Core
 {
     /// <summary>
-    /// Provides data for the <see cref="LocalSongFinder.SongFound"/> and <see cref="Library.SongAdded"/> events.
+    /// Provides data for the <see cref="LocalSongFinder.SongFound"/> event.
     /// </summary>
     public class SongEventArgs : EventArgs
     {

@@ -428,8 +428,18 @@
                    Height="25"
                    Visibility="{Binding Path=IsAdding, Converter={StaticResource BooleanToVisibilityConverter}}"
                    Background="#FF454545">
-            <StatusBarItem Content="Adding songs: "
-                           Foreground="White" />
+            <StatusBarItem>
+                <ProgressBar Width="200" Value="{Binding Path=ProcessedTags, Mode=OneWay}" Maximum="{Binding Path=TotalTags}" />
+            </StatusBarItem>
+            <StatusBarItem Foreground="White">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Added " />
+                    <TextBlock Text="{Binding Path=ProcessedTags}" />
+                    <TextBlock Text=" of " />
+                    <TextBlock Text="{Binding Path=TotalTags}" />
+                    <TextBlock Text=" Songs: " />
+                </StackPanel>
+            </StatusBarItem>
             <StatusBarItem Content="{Binding Path=CurrentAddingPath}"
                            Foreground="White" />
         </StatusBar>

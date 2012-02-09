@@ -56,6 +56,7 @@
     <Compile Include="Audio\AudioType.cs" />
     <Compile Include="InvalidPasswordException.cs" />
     <Compile Include="Library.cs" />
+    <Compile Include="LibraryFillEventArgs.cs" />
     <Compile Include="LocalSong.cs" />
     <Compile Include="Audio\PlaybackException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

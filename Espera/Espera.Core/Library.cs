@@ -21,7 +21,7 @@ namespace Espera.Core
         /// <summary>
         /// Occurs when a song has been added to the library.
         /// </summary>
-        public event EventHandler<SongEventArgs> SongAdded;
+        public event EventHandler<LibraryFillEventArgs> SongAdded;
 
         /// <summary>
         /// Occurs when a song has started the playback.
@@ -318,7 +318,7 @@ namespace Espera.Core
         /// Adds the song that are contained in the specified directory recursively to the library.
         /// </summary>
         /// <param name="path">The path of the directory to search.</param>
-        public void AddLocalSongs(string path)
+        private void AddLocalSongs(string path)
         {
             if (path == null)
                 throw new ArgumentNullException(Reflector.GetMemberName(() => path));
@@ -339,7 +339,7 @@ namespace Espera.Core
 
                 if (added)
                 {
-                    this.SongAdded.RaiseSafe(this, new SongEventArgs(e.Song));
+                    this.SongAdded.RaiseSafe(this, new LibraryFillEventArgs(e.Song, finder.TagsProcessed, finder.CurrentTotalSongs));
                 }
             };
 

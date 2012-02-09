@@ -18,6 +18,8 @@ namespace Espera.View.ViewModels
         private SongViewModel selectedSong;
         private int selectedPlaylistIndex;
         private string searchText;
+        private int processedTags;
+        private int totalTags;
 
         public AdministratorViewModel AdministratorViewModel { get; private set; }
 
@@ -193,6 +195,32 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public int ProcessedTags
+        {
+            get { return this.processedTags; }
+            private set
+            {
+                if (this.ProcessedTags != value)
+                {
+                    this.processedTags = value;
+                    this.OnPropertyChanged(vm => vm.ProcessedTags);
+                }
+            }
+        }
+
+        public int TotalTags
+        {
+            get { return this.totalTags; }
+            private set
+            {
+                if (this.totalTags != value)
+                {
+                    this.totalTags = value;
+                    this.OnPropertyChanged(vm => vm.TotalTags);
+                }
+            }
+        }
+
         public ICommand PlayCommand
         {
             get
@@ -311,9 +339,11 @@ namespace Espera.View.ViewModels
 
         public void AddSongs(string folderPath)
         {
-            EventHandler<SongEventArgs> handler = (sender, e) =>
+            EventHandler<LibraryFillEventArgs> handler = (sender, e) =>
             {
                 this.CurrentAddingPath = e.Song.Path.LocalPath;
+                this.TotalTags = e.TotalTagCount;
+                this.ProcessedTags = e.ProcessedTagCount;
             };
 
             this.library.SongAdded += handler;
