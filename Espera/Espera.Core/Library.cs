@@ -235,17 +235,6 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Continues the currently loaded song.
-        /// </summary>
-        public void ContinueSong()
-        {
-            if (this.AccessMode != AccessMode.Administrator)
-                throw new InvalidOperationException("The user is not in administrator mode.");
-
-            this.audioPlayer.Play();
-        }
-
-        /// <summary>
         /// Plays the song with the specified index in the playlist.
         /// </summary>
         /// <param name="playlistIndex">The index of the song in the playlist.</param>
@@ -254,10 +243,18 @@ namespace Espera.Core
             if (this.AccessMode != AccessMode.Administrator)
                 throw new InvalidOperationException("The user is not in administrator mode.");
 
-            this.CurrentSongPlaylistIndex = playlistIndex;
-            this.audioPlayer.Load(this.playlist[playlistIndex]);
+            this.InternPlaySong(playlistIndex);
+        }
+
+        /// <summary>
+        /// Continues the currently loaded song.
+        /// </summary>
+        public void ContinueSong()
+        {
+            if (this.AccessMode != AccessMode.Administrator)
+                throw new InvalidOperationException("The user is not in administrator mode.");
+
             this.audioPlayer.Play();
-            this.SongStarted.RaiseSafe(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -279,10 +276,7 @@ namespace Espera.Core
             if (this.AccessMode != AccessMode.Administrator)
                 throw new InvalidOperationException("The user is not in administrator mode.");
 
-            if (!this.CanPlayNextSong || !this.CurrentSongPlaylistIndex.HasValue)
-                throw new InvalidOperationException("The next song couldn't be played.");
-
-            this.PlaySong(this.CurrentSongPlaylistIndex.Value + 1);
+            this.InternPlayNextSong();
         }
 
         /// <summary>
@@ -360,13 +354,31 @@ namespace Espera.Core
             this.audioPlayer.Dispose();
         }
 
+        private void InternPlaySong(int playlistIndex)
+        {
+            playlistIndex.ThrowIfLessThan(0, () => playlistIndex);
+
+            this.CurrentSongPlaylistIndex = playlistIndex;
+            this.audioPlayer.Load(this.playlist[playlistIndex]);
+            this.audioPlayer.Play();
+            this.SongStarted.RaiseSafe(this, EventArgs.Empty);
+        }
+
+        private void InternPlayNextSong()
+        {
+            if (!this.CanPlayNextSong || !this.CurrentSongPlaylistIndex.HasValue)
+                throw new InvalidOperationException("The next song couldn't be played.");
+
+            this.InternPlaySong(this.CurrentSongPlaylistIndex.Value + 1);
+        }
+
         private void HandleSongFinish()
         {
             this.SongFinished.RaiseSafe(this, EventArgs.Empty);
 
             if (this.CanPlayNextSong)
             {
-                this.PlayNextSong();
+                this.InternPlayNextSong();
             }
         }
     }
