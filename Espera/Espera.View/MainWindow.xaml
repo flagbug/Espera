@@ -427,7 +427,8 @@
                    Margin="0, 5, 0, 0"
                    Height="25"
                    Visibility="{Binding Path=IsAdding, Converter={StaticResource BooleanToVisibilityConverter}}"
-                   Background="#FF454545">
+                   Background="#FF454545"
+                   DataContext="{Binding Path=StatusViewModel}">
             <StatusBarItem>
                 <ProgressBar Width="200" Value="{Binding Path=ProcessedTags, Mode=OneWay}" Maximum="{Binding Path=TotalTags}" />
             </StatusBarItem>
@@ -440,7 +441,7 @@
                     <TextBlock Text=" Songs: " />
                 </StackPanel>
             </StatusBarItem>
-            <StatusBarItem Content="{Binding Path=CurrentAddingPath}"
+            <StatusBarItem Content="{Binding Path=Path}"
                            Foreground="White" />
         </StatusBar>
     </Grid>

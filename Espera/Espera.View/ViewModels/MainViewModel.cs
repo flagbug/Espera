@@ -13,15 +13,14 @@ namespace Espera.View.ViewModels
         private readonly Library library;
         private readonly Timer updateTimer;
         private string selectedArtist;
-        private bool isAdding;
-        private string currentAddingPath;
         private SongViewModel selectedSong;
         private int selectedPlaylistIndex;
         private string searchText;
-        private int processedTags;
-        private int totalTags;
+        private volatile bool isAdding;
 
         public AdministratorViewModel AdministratorViewModel { get; private set; }
+
+        public StatusViewModel StatusViewModel { get; private set; }
 
         public bool IsAdmin
         {
@@ -48,7 +47,7 @@ namespace Espera.View.ViewModels
             get
             {
                 // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
-                IEnumerable<Song> songs = this.IsAdding ? this.library.Songs.ToList() : this.library.Songs;
+                IEnumerable<Song> songs = this.isAdding ? this.library.Songs.ToList() : this.library.Songs;
 
                 return SearchEngine.FilterSongs(songs, this.SearchText)
                     .Where(song => song.Artist != String.Empty)
@@ -78,7 +77,7 @@ namespace Espera.View.ViewModels
             get
             {
                 // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
-                var songs = (this.IsAdding ? this.library.Songs.ToList() : this.library.Songs)
+                var songs = (this.isAdding ? this.library.Songs.ToList() : this.library.Songs)
                     .AsParallel()
                     .Where(song => song.Artist == this.SelectedArtist);
 
@@ -168,58 +167,6 @@ namespace Espera.View.ViewModels
         public bool IsPlaying
         {
             get { return this.library.IsPlaying; }
-        }
-
-        public bool IsAdding
-        {
-            get { return this.isAdding; }
-            private set
-            {
-                if (this.IsAdding != value)
-                {
-                    this.isAdding = value;
-                    this.OnPropertyChanged(vm => vm.IsAdding);
-                }
-            }
-        }
-
-        public string CurrentAddingPath
-        {
-            get { return this.currentAddingPath; }
-            private set
-            {
-                if (this.CurrentAddingPath != value)
-                {
-                    this.currentAddingPath = value;
-                    this.OnPropertyChanged(vm => vm.CurrentAddingPath);
-                }
-            }
-        }
-
-        public int ProcessedTags
-        {
-            get { return this.processedTags; }
-            private set
-            {
-                if (this.ProcessedTags != value)
-                {
-                    this.processedTags = value;
-                    this.OnPropertyChanged(vm => vm.ProcessedTags);
-                }
-            }
-        }
-
-        public int TotalTags
-        {
-            get { return this.totalTags; }
-            private set
-            {
-                if (this.totalTags != value)
-                {
-                    this.totalTags = value;
-                    this.OnPropertyChanged(vm => vm.TotalTags);
-                }
-            }
         }
 
         public ICommand PlayCommand
@@ -324,6 +271,7 @@ namespace Espera.View.ViewModels
             this.library.AccessModeChanged += (sender, e) => this.UpdateUserAccess();
 
             this.AdministratorViewModel = new AdministratorViewModel(this.library);
+            this.StatusViewModel = new StatusViewModel();
 
             this.updateTimer = new Timer(333);
             this.updateTimer.Elapsed += (sender, e) => this.UpdateTime();
@@ -340,12 +288,8 @@ namespace Espera.View.ViewModels
 
         public void AddSongs(string folderPath)
         {
-            EventHandler<LibraryFillEventArgs> handler = (sender, e) =>
-            {
-                this.CurrentAddingPath = e.Song.Path.LocalPath;
-                this.TotalTags = e.TotalTagCount;
-                this.ProcessedTags = e.ProcessedTagCount;
-            };
+            EventHandler<LibraryFillEventArgs> handler =
+                (sender, e) => this.StatusViewModel.Update(e.Song.Path.LocalPath, e.ProcessedTagCount, e.TotalTagCount);
 
             this.library.SongAdded += handler;
 
@@ -353,7 +297,8 @@ namespace Espera.View.ViewModels
 
             artistUpdateTimer.Elapsed += (sender, e) => this.OnPropertyChanged(vm => vm.Artists);
 
-            this.IsAdding = true;
+            this.isAdding = true;
+            this.StatusViewModel.IsAdding = true;
             artistUpdateTimer.Start();
 
             this.library
@@ -366,7 +311,8 @@ namespace Espera.View.ViewModels
                     artistUpdateTimer.Dispose();
 
                     this.OnPropertyChanged(vm => vm.Artists);
-                    this.IsAdding = false;
+                    this.isAdding = false;
+                    this.StatusViewModel.IsAdding = false;
                 });
         }
 
