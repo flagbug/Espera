@@ -271,7 +271,9 @@
 
                     </TabItem>
                 </TabControl>
-                <ListView Grid.Row="2" ItemsSource="{Binding Path=Playlist}" SelectedIndex="{Binding Path=SelectedPlaylistIndex}">
+                <ListView Grid.Row="2"
+                          ItemsSource="{Binding Path=Playlist}"
+                          SelectedIndex="{Binding Path=SelectedPlaylistIndex}">
                     <ListView.ItemContainerStyle>
                         <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                             <EventSetter Event="MouseDoubleClick" Handler="PlaylistDoubleClick"/>
@@ -282,7 +284,8 @@
                             <GridViewColumn Width="40">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Image Source="/Espera.View;component/Images/appbar.sound.3.png" Visibility="{Binding Path=IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                        <Image Source="/Espera.View;component/Images/appbar.sound.3.png"
+                                               Visibility="{Binding Path=IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -296,28 +299,32 @@
                             <GridViewColumn Header="Duration">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Path=Duration, StringFormat=mm\\:ss}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Path=Duration, StringFormat=mm\\:ss}"
+                                                   TextTrimming="CharacterEllipsis" />
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn Header="Artist">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Path=Artist}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Path=Artist}"
+                                                   TextTrimming="CharacterEllipsis" />
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn Header="Album">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Path=Album}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Path=Album}"
+                                                   TextTrimming="CharacterEllipsis" />
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn Header="Genre">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Path=Genre}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Path=Genre}"
+                                                   TextTrimming="CharacterEllipsis" />
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -358,7 +365,7 @@
                                 </Style>
                             </Grid.Style>
                             <StackPanel VerticalAlignment="Center"
-                                HorizontalAlignment="Center" >
+                                        HorizontalAlignment="Center" >
                                 <TextBlock HorizontalAlignment="Center">
                                     <TextBlock.Style>
                                         <Style TargetType="{x:Type TextBlock}">
