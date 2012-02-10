@@ -1,7 +1,9 @@
 Espera
 ======
 
-Espera is a music player writtenin C# with WPF.
+Overview
+--------
+Espera is a music player written in C# with WPF.
 
 Party-Lock (partially implemented)
 ----------
