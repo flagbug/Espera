@@ -75,5 +75,13 @@ namespace Espera.View.ViewModels
 
             this.OnPropertyChanged(vm => vm.IsProgressUnkown);
         }
+
+        public void Reset()
+        {
+            this.Path = null;
+            this.ProcessedTags = 0;
+            this.TotalTags = 0;
+            this.IsAdding = false;
+        }
     }
 }

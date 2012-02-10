@@ -312,7 +312,7 @@ namespace Espera.View.ViewModels
 
                     this.OnPropertyChanged(vm => vm.Artists);
                     this.isAdding = false;
-                    this.StatusViewModel.IsAdding = false;
+                    this.StatusViewModel.Reset();
                 });
         }
 
