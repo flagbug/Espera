@@ -57,8 +57,14 @@ namespace Espera.View.ViewModels
                 {
                     this.isAdding = value;
                     this.OnPropertyChanged(vm => vm.IsAdding);
+                    this.OnPropertyChanged(vm => vm.IsProgressUnkown);
                 }
             }
+        }
+
+        public bool IsProgressUnkown
+        {
+            get { return this.ProcessedTags == this.TotalTags && this.IsAdding; }
         }
 
         public void Update(string path, int processedTags, int totalTags)
@@ -66,6 +72,8 @@ namespace Espera.View.ViewModels
             this.Path = path;
             this.ProcessedTags = processedTags;
             this.TotalTags = totalTags;
+
+            this.OnPropertyChanged(vm => vm.IsProgressUnkown);
         }
     }
 }

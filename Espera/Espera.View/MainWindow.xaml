@@ -430,7 +430,10 @@
                    Background="#FF454545"
                    DataContext="{Binding Path=StatusViewModel}">
             <StatusBarItem>
-                <ProgressBar Width="200" Value="{Binding Path=ProcessedTags, Mode=OneWay}" Maximum="{Binding Path=TotalTags}" />
+                <ProgressBar Width="200"
+                             Value="{Binding Path=ProcessedTags, Mode=OneWay}"
+                             Maximum="{Binding Path=TotalTags}"
+                             IsIndeterminate="{Binding Path=IsProgressUnkown}"/>
             </StatusBarItem>
             <StatusBarItem Foreground="White">
                 <StackPanel Orientation="Horizontal">
@@ -438,7 +441,7 @@
                     <TextBlock Text="{Binding Path=ProcessedTags}" />
                     <TextBlock Text=" of " />
                     <TextBlock Text="{Binding Path=TotalTags}" />
-                    <TextBlock Text=" Songs: " />
+                    <TextBlock Text=" found Songs: " />
                 </StackPanel>
             </StatusBarItem>
             <StatusBarItem Content="{Binding Path=Path}"
