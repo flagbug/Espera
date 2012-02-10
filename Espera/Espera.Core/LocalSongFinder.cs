@@ -220,9 +220,9 @@ namespace Espera.Core
             return new LocalSong(new Uri(filePath), audioType, duration)
                        {
                            Album = tag.Album ?? String.Empty,
-                           Artist = tag.FirstPerformer ?? "Unknown Artist",
+                           Artist = tag.FirstPerformer ?? String.Empty,
                            Genre = tag.FirstGenre ?? String.Empty,
-                           Title = tag.Title ?? String.Empty,
+                           Title = tag.Title ?? Path.GetFileNameWithoutExtension(filePath),
                            TrackNumber = (int)tag.Track
                        };
         }
