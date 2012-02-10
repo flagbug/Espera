@@ -21,8 +21,8 @@ namespace Espera.Core
         private volatile bool isSearching;
         private volatile bool isTagging;
         private readonly Queue<string> pathQueue;
-        private readonly object syncLock;
-        private readonly object progressLock;
+        private readonly object tagLock;
+        private readonly object songListLock;
         private readonly List<Song> songsFound;
         private readonly List<string> corruptFiles;
 
@@ -62,7 +62,7 @@ namespace Espera.Core
             {
                 int songCount;
 
-                lock (this.progressLock)
+                lock (this.songListLock)
                 {
                     songCount = this.songsFound.Count;
                 }
@@ -80,12 +80,12 @@ namespace Espera.Core
             {
                 int pathCount;
 
-                lock (this.syncLock)
+                lock (this.tagLock)
                 {
                     pathCount = this.pathQueue.Count;
                 }
 
-                lock (this.progressLock)
+                lock (this.songListLock)
                 {
                     pathCount += this.songsFound.Count;
                 }
@@ -100,8 +100,8 @@ namespace Espera.Core
         /// <param name="path">The path of the directory where the recursive search should start.</param>
         public LocalSongFinder(string path)
         {
-            this.syncLock = new object();
-            this.progressLock = new object();
+            this.tagLock = new object();
+            this.songListLock = new object();
 
             this.pathQueue = new Queue<string>();
             this.songsFound = new List<Song>();
@@ -138,7 +138,7 @@ namespace Espera.Core
             {
                 string filePath = null;
 
-                lock (this.syncLock)
+                lock (this.tagLock)
                 {
                     if (this.pathQueue.Any())
                     {
@@ -153,67 +153,76 @@ namespace Espera.Core
 
                 if (filePath != null)
                 {
-                    try
-                    {
-                        Tag tag = null;
-                        TimeSpan duration = TimeSpan.Zero;
-                        AudioType? audioType = null; // Use a nullable value so that we don't have to assign a enum value
-
-                        TagLib.File file = null;
-
-                        switch (Path.GetExtension(filePath))
-                        {
-                            case ".mp3":
-                                file = new TagLib.Mpeg.AudioFile(filePath);
-                                audioType = AudioType.Mp3;
-                                break;
-
-                            case ".wav":
-                                file = new TagLib.WavPack.File(filePath);
-                                audioType = AudioType.Wav;
-                                break;
-                        }
-
-                        if (file != null)
-                        {
-                            duration = file.Properties.Duration;
-                            tag = file.Tag;
-
-                            file.Dispose();
-                        }
-
-                        if (tag != null)
-                        {
-                            var song =
-                                new LocalSong(new Uri(filePath), audioType.Value, duration)
-                                    {
-                                        Album = tag.Album ?? String.Empty,
-                                        Artist = tag.FirstPerformer ?? "Unknown Artist",
-                                        Genre = tag.FirstGenre ?? String.Empty,
-                                        Title = tag.Title ?? String.Empty,
-                                        TrackNumber = (int)tag.Track
-                                    };
-
-                            lock (this.progressLock)
-                            {
-                                this.songsFound.Add(song);
-                            }
-
-                            this.SongFound.RaiseSafe(this, new SongEventArgs(song));
-                        }
-                    }
-
-                    catch (CorruptFileException)
-                    {
-                        this.corruptFiles.Add(filePath);
-                    }
-
-                    catch (IOException)
-                    {
-                        this.corruptFiles.Add(filePath);
-                    }
+                    this.ProcessFile(filePath);
                 }
             }
+        }
+
+        private void ProcessFile(string filePath)
+        {
+            try
+            {
+                AudioType? audioType = null; // Use a nullable value so that we don't have to assign a enum value
+
+                TagLib.File file = null;
+
+                switch (Path.GetExtension(filePath))
+                {
+                    case ".mp3":
+                        file = new TagLib.Mpeg.AudioFile(filePath);
+                        audioType = AudioType.Mp3;
+                        break;
+
+                    case ".wav":
+                        file = new TagLib.WavPack.File(filePath);
+                        audioType = AudioType.Wav;
+                        break;
+                }
+
+                if (file != null)
+                {
+                    if (file.Tag != null)
+                    {
+                        this.AddSong(file, audioType.Value);
+                    }
+
+                    file.Dispose();
+                }
+            }
+
+            catch (CorruptFileException)
+            {
+                this.corruptFiles.Add(filePath);
+            }
+
+            catch (IOException)
+            {
+                this.corruptFiles.Add(filePath);
+            }
+        }
+
+        private void AddSong(TagLib.File file, AudioType audioType)
+        {
+            var song = CreateSong(file.Tag, file.Properties.Duration, audioType, file.Name);
+
+            lock (this.songListLock)
+            {
+                this.songsFound.Add(song);
+            }
+
+            this.SongFound.RaiseSafe(this, new SongEventArgs(song));
+        }
+
+        private static LocalSong CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath)
+        {
+            return new LocalSong(new Uri(filePath), audioType, duration)
+                       {
+                           Album = tag.Album ?? String.Empty,
+                           Artist = tag.FirstPerformer ?? "Unknown Artist",
+                           Genre = tag.FirstGenre ?? String.Empty,
+                           Title = tag.Title ?? String.Empty,
+                           TrackNumber = (int)tag.Track
+                       };
         }
 
         /// <summary>
@@ -225,7 +234,7 @@ namespace Espera.Core
         {
             if (AllowedExtensions.Contains(e.File.Extension))
             {
-                lock (this.syncLock)
+                lock (this.tagLock)
                 {
                     this.pathQueue.Enqueue(e.File.FullName);
                 }
