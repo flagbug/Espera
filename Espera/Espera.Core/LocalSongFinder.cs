@@ -116,6 +116,9 @@ namespace Espera.Core
         public void Start()
         {
             var fileScanTask = Task.Factory.StartNew(this.StartFileScan);
+
+            this.isSearching = true;
+
             var tagScanTask = Task.Factory.StartNew(this.StartTagScan);
 
             Task.WaitAll(fileScanTask, tagScanTask);
@@ -125,7 +128,6 @@ namespace Espera.Core
 
         private void StartFileScan()
         {
-            this.isSearching = true;
             this.scanner.Start();
             this.isSearching = false;
         }
