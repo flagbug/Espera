@@ -223,7 +223,7 @@
                     <RowDefinition Height="0.6*" />
                 </Grid.RowDefinitions>
                 <TabControl>
-                    <TabItem Header="Local">
+                    <TabItem Header="Local" IsSelected="{Binding Path=IsLocal}">
                         <ListView Grid.Row="1"
                                   ItemsSource="{Binding Path=SelectableSongs}"
                                   SelectedItem="{Binding Path=SelectedSong}">
@@ -278,7 +278,7 @@
                             </ListView.View>
                         </ListView>
                     </TabItem>
-                    <TabItem Header="YouTube">
+                    <TabItem Header="YouTube" IsSelected="{Binding Path=IsYoutube}">
 
                     </TabItem>
                 </TabControl>
