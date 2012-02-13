@@ -477,16 +477,27 @@
                              IsIndeterminate="{Binding Path=IsProgressUnkown}"/>
             </StatusBarItem>
             <StatusBarItem Foreground="White">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Added " />
-                    <TextBlock Text="{Binding Path=ProcessedTags}" />
-                    <TextBlock Text=" of " />
-                    <TextBlock Text="{Binding Path=TotalTags}" />
-                    <TextBlock Text=" found Songs: " />
-                </StackPanel>
+                <Grid>
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel.Style>
+                            <Style TargetType="{x:Type StackPanel}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=IsProgressUnkown}" Value="True">
+                                        <Setter Property="Visibility" Value="Hidden" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock Text="Added " />
+                        <TextBlock Text="{Binding Path=ProcessedTags}" />
+                        <TextBlock Text=" of " />
+                        <TextBlock Text="{Binding Path=TotalTags}" />
+                        <TextBlock Text=" found Songs: " />
+                        <TextBlock Text="{Binding Path=Path}" />
+                    </StackPanel>
+                    <TextBlock Text="Searching..." Visibility="{Binding Path=IsProgressUnkown, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </Grid>
             </StatusBarItem>
-            <StatusBarItem Content="{Binding Path=Path}"
-                           Foreground="White" />
         </StatusBar>
     </Grid>
 </Controls:MetroWindow>
