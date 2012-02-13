@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Espera.Core.Audio;
-using FlagLib.Extensions;
 using FlagLib.IO;
 using TagLib;
 
@@ -13,7 +12,7 @@ namespace Espera.Core
     /// <summary>
     /// Encapsulates a recursive call through the local filesystem that reads the tags of all WAV and MP3 files and returns them.
     /// </summary>
-    public sealed class LocalSongFinder
+    public sealed class LocalSongFinder : SongFinder<LocalSong>
     {
         private static readonly string[] AllowedExtensions = new[] { ".mp3", ".wav" };
 
@@ -23,27 +22,7 @@ namespace Espera.Core
         private readonly Queue<string> pathQueue;
         private readonly object tagLock;
         private readonly object songListLock;
-        private readonly List<Song> songsFound;
         private readonly List<string> corruptFiles;
-
-        /// <summary>
-        /// Occurs when a song has been found.
-        /// </summary>
-        public event EventHandler<SongEventArgs> SongFound;
-
-        /// <summary>
-        /// Occurs when the song crawler has finished.
-        /// </summary>
-        public event EventHandler Finished;
-
-        /// <summary>
-        /// Gets the songs that have been found.
-        /// </summary>
-        /// <value>The songs that have been found.</value>
-        public IEnumerable<Song> SongsFound
-        {
-            get { return this.songsFound; }
-        }
 
         /// <summary>
         /// Gets the files that are corrupt and could not be read.
@@ -104,7 +83,6 @@ namespace Espera.Core
             this.songListLock = new object();
 
             this.pathQueue = new Queue<string>();
-            this.songsFound = new List<Song>();
             this.corruptFiles = new List<string>();
             this.scanner = new DirectoryScanner(path);
             this.scanner.FileFound += ScannerFileFound;
@@ -113,7 +91,7 @@ namespace Espera.Core
         /// <summary>
         /// Starts the song crawler in an asynchronous manner.
         /// </summary>
-        public void Start()
+        public override void Start()
         {
             var fileScanTask = Task.Factory.StartNew(this.StartFileScan);
 
@@ -123,7 +101,7 @@ namespace Espera.Core
 
             Task.WaitAll(fileScanTask, tagScanTask);
 
-            this.Finished.RaiseSafe(this, EventArgs.Empty);
+            this.OnFinished(EventArgs.Empty);
         }
 
         private void StartFileScan()
@@ -212,7 +190,7 @@ namespace Espera.Core
                 this.songsFound.Add(song);
             }
 
-            this.SongFound.RaiseSafe(this, new SongEventArgs(song));
+            this.OnSongFound(new SongEventArgs(song));
         }
 
         private static LocalSong CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath)
