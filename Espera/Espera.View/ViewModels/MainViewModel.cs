@@ -68,7 +68,7 @@ namespace Espera.View.ViewModels
 
                     if (this.IsLocal)
                     {
-                        this.OnPropertyChanged(vm => vm.SelectableSongs);
+                        this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
                         this.OnPropertyChanged(vm => vm.Artists);
                     }
                 }
@@ -100,38 +100,38 @@ namespace Espera.View.ViewModels
                 {
                     this.selectedArtist = value;
                     this.OnPropertyChanged(vm => vm.SelectedArtist);
-                    this.OnPropertyChanged(vm => vm.SelectableSongs);
+                    this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
+                    this.IsLocal = true;
+                    this.IsYoutube = false;
                 }
             }
         }
 
-        public IEnumerable<SongViewModel> SelectableSongs
+        public IEnumerable<SongViewModel> SelectableLocalSongs
         {
             get
             {
-                if (this.IsLocal)
-                {
-                    // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
-                    var songs = (this.isAdding ? this.library.Songs.ToList() : this.library.Songs)
-                        .AsParallel()
-                        .Where(song => song.Artist == this.SelectedArtist);
+                // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
+                var songs = (this.isAdding ? this.library.Songs.ToList() : this.library.Songs)
+                    .AsParallel()
+                    .Where(song => song.Artist == this.SelectedArtist);
 
-                    return SearchEngine.FilterSongs(songs, this.SearchText)
-                        .OrderBy(song => song.Album)
-                        .ThenBy(song => song.TrackNumber)
-                        .Select(song => new SongViewModel(song));
-                }
+                return SearchEngine.FilterSongs(songs, this.SearchText)
+                    .OrderBy(song => song.Album)
+                    .ThenBy(song => song.TrackNumber)
+                    .Select(song => new SongViewModel(song));
+            }
+        }
 
-                if (this.IsYoutube)
-                {
-                    var finder = new YoutubeSongFinder(this.SearchText);
-                    finder.Start();
+        public IEnumerable<SongViewModel> SelectableYoutubeSongs
+        {
+            get
+            {
+                var finder = new YoutubeSongFinder(this.SearchText);
+                finder.Start();
 
-                    return finder.SongsFound
-                        .Select(song => new SongViewModel(song));
-                }
-
-                return null;
+                return finder.SongsFound
+                    .Select(song => new SongViewModel(song));
             }
         }
 
@@ -365,7 +365,15 @@ namespace Espera.View.ViewModels
 
         public void StartSearch()
         {
-            Task.Factory.StartNew(() => this.OnPropertyChanged(vm => vm.SelectableSongs));
+            if (this.IsYoutube)
+            {
+                Task.Factory.StartNew(() => this.OnPropertyChanged(vm => vm.SelectableYoutubeSongs));
+            }
+
+            else
+            {
+                Task.Factory.StartNew(() => this.OnPropertyChanged(vm => vm.SelectableLocalSongs));
+            }
         }
 
         /// <summary>

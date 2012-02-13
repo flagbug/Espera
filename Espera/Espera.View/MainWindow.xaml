@@ -224,7 +224,7 @@
                 </Grid.RowDefinitions>
                 <TabControl>
                     <TabItem Header="Local" IsSelected="{Binding Path=IsLocal}">
-                        <ListView ItemsSource="{Binding Path=SelectableSongs}"
+                        <ListView ItemsSource="{Binding Path=SelectableLocalSongs}"
                                   SelectedItem="{Binding Path=SelectedSong}">
                             <ListView.ItemContainerStyle>
                                 <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
@@ -278,7 +278,7 @@
                         </ListView>
                     </TabItem>
                     <TabItem Header="YouTube" IsSelected="{Binding Path=IsYoutube}">
-                        <ListView ItemsSource="{Binding Path=SelectableSongs, IsAsync=True}"
+                        <ListView ItemsSource="{Binding Path=SelectableYoutubeSongs, IsAsync=True}"
                                   SelectedItem="{Binding Path=SelectedSong}">
                             <ListView.ItemContainerStyle>
                                 <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
