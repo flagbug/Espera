@@ -315,6 +315,14 @@ namespace Espera.Core
         }
 
         /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            this.audioPlayer.Dispose();
+        }
+
+        /// <summary>
         /// Adds the song that are contained in the specified directory recursively to the library.
         /// </summary>
         /// <param name="path">The path of the directory to search.</param>
@@ -344,14 +352,6 @@ namespace Espera.Core
             };
 
             finder.Start();
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            this.audioPlayer.Dispose();
         }
 
         private void InternPlaySong(int playlistIndex)
