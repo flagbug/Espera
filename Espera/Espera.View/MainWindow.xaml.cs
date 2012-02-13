@@ -24,7 +24,12 @@ namespace Espera.View
 
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("en-us");
 
-            ThemeManager.ChangeTheme(this, ThemeManager.DefaultAccents.First(accent => accent.Name == "Blue"), Theme.Dark);
+            this.ChangeColor("Blue");
+        }
+
+        private void ChangeColor(string color)
+        {
+            ThemeManager.ChangeTheme(this, ThemeManager.DefaultAccents.First(accent => accent.Name == color), Theme.Dark);
         }
 
         private void AddSongsButtonClick(object sender, RoutedEventArgs e)
@@ -71,6 +76,21 @@ namespace Espera.View
             this.showAdministratorPanel = !this.showAdministratorPanel;
 
             this.adminPanel.Visibility = this.showAdministratorPanel ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void RedColorButtonButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.ChangeColor("Red");
+        }
+
+        private void GreenColorButtonButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.ChangeColor("Green");
+        }
+
+        private void BlueColorButtonButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.ChangeColor("Blue");
         }
     }
 }
