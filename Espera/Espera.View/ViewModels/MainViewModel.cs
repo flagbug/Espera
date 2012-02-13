@@ -17,38 +17,10 @@ namespace Espera.View.ViewModels
         private int selectedPlaylistIndex;
         private string searchText;
         private volatile bool isAdding;
-        private bool isLocal;
-        private bool isYoutube;
 
         public AdministratorViewModel AdministratorViewModel { get; private set; }
 
         public StatusViewModel StatusViewModel { get; private set; }
-
-        public bool IsLocal
-        {
-            get { return this.isLocal; }
-            set
-            {
-                if (this.IsLocal != value)
-                {
-                    this.isLocal = value;
-                    this.OnPropertyChanged(vm => vm.IsLocal);
-                }
-            }
-        }
-
-        public bool IsYoutube
-        {
-            get { return this.isYoutube; }
-            set
-            {
-                if (this.IsYoutube != value)
-                {
-                    this.isYoutube = value;
-                    this.OnPropertyChanged(vm => vm.IsYoutube);
-                }
-            }
-        }
 
         public bool IsAdmin
         {

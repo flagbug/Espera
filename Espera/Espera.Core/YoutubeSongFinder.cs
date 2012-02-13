@@ -34,8 +34,11 @@ namespace Espera.Core
             foreach (Video video in feed.Entries)
             {
                 var duration = TimeSpan.FromSeconds(Int32.Parse(video.YouTubeEntry.Duration.Seconds));
+                string url = video.WatchPage.OriginalString.Replace("&feature=youtube_gdata_player", String.Empty);
 
-                var song = new YoutubeSong(video.ResponseUri, AudioType.Mp3, duration) { Title = video.Title };
+                var song = new YoutubeSong(new Uri(url), AudioType.Mp3, duration) { Title = video.Title };
+
+                this.songsFound.Add(song);
 
                 this.OnSongFound(new SongEventArgs(song));
             }
