@@ -92,5 +92,14 @@ namespace Espera.View
         {
             this.ChangeColor("Blue");
         }
+
+        private void SearchTextBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                this.mainViewModel.StartSearch();
+                e.Handled = true;
+            }
+        }
     }
 }
