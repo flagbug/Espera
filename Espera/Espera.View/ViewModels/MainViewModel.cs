@@ -17,10 +17,38 @@ namespace Espera.View.ViewModels
         private int selectedPlaylistIndex;
         private string searchText;
         private volatile bool isAdding;
+        private bool isLocal;
+        private bool isYoutube;
 
         public AdministratorViewModel AdministratorViewModel { get; private set; }
 
         public StatusViewModel StatusViewModel { get; private set; }
+
+        public bool IsLocal
+        {
+            get { return this.isLocal; }
+            set
+            {
+                if (this.IsLocal != value)
+                {
+                    this.isLocal = value;
+                    this.OnPropertyChanged(vm => vm.IsLocal);
+                }
+            }
+        }
+
+        public bool IsYoutube
+        {
+            get { return this.isYoutube; }
+            set
+            {
+                if (this.IsYoutube != value)
+                {
+                    this.isYoutube = value;
+                    this.OnPropertyChanged(vm => vm.IsYoutube);
+                }
+            }
+        }
 
         public bool IsAdmin
         {
@@ -37,7 +65,11 @@ namespace Espera.View.ViewModels
                     this.searchText = value;
                     this.OnPropertyChanged(vm => vm.SearchText);
                     this.OnPropertyChanged(vm => vm.SelectableSongs);
-                    this.OnPropertyChanged(vm => vm.Artists);
+
+                    if (this.IsLocal)
+                    {
+                        this.OnPropertyChanged(vm => vm.Artists);
+                    }
                 }
             }
         }
@@ -76,15 +108,29 @@ namespace Espera.View.ViewModels
         {
             get
             {
-                // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
-                var songs = (this.isAdding ? this.library.Songs.ToList() : this.library.Songs)
-                    .AsParallel()
-                    .Where(song => song.Artist == this.SelectedArtist);
+                if (this.IsLocal)
+                {
+                    // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
+                    var songs = (this.isAdding ? this.library.Songs.ToList() : this.library.Songs)
+                        .AsParallel()
+                        .Where(song => song.Artist == this.SelectedArtist);
 
-                return SearchEngine.FilterSongs(songs, this.SearchText)
-                    .OrderBy(song => song.Album)
-                    .ThenBy(song => song.TrackNumber)
-                    .Select(song => new SongViewModel(song));
+                    return SearchEngine.FilterSongs(songs, this.SearchText)
+                        .OrderBy(song => song.Album)
+                        .ThenBy(song => song.TrackNumber)
+                        .Select(song => new SongViewModel(song));
+                }
+
+                if (this.IsYoutube)
+                {
+                    var finder = new YoutubeSongFinder(this.SearchText);
+                    finder.Start();
+
+                    return finder.SongsFound
+                        .Select(song => new SongViewModel(song));
+                }
+
+                return null;
             }
         }
 
