@@ -15,6 +15,7 @@ namespace Espera.Core.Audio
     {
         private IWavePlayer wavePlayer;
         private WaveChannel32 inputStream;
+        private readonly VlcPlayer vlcPlayer;
 
         // We need a dispatcher timer for updating the current state of the song,
         // to avoid cross-threading exceptions
@@ -107,6 +108,7 @@ namespace Espera.Core.Audio
             this.Volume = 1.0f;
             this.songFinishedTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
             this.songFinishedTimer.Tick += (sender, e) => this.UpdateSongState();
+            this.vlcPlayer = new VlcPlayer();
         }
 
         /// <summary>
@@ -140,10 +142,7 @@ namespace Espera.Core.Audio
         {
             if (this.LoadedSong is YoutubeSong)
             {
-                using (var player = new VlcPlayer())
-                {
-                    player.Play(this.LoadedSong.Path.OriginalString);
-                }
+                this.vlcPlayer.Play(this.LoadedSong.Path.OriginalString);
             }
 
             else if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != NAudio.Wave.PlaybackState.Playing)
@@ -207,6 +206,8 @@ namespace Espera.Core.Audio
             {
                 this.inputStream.Close();
             }
+
+            this.vlcPlayer.Dispose();
         }
 
         private static WaveChannel32 OpenMp3Stream(Stream stream)
