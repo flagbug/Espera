@@ -23,13 +23,8 @@ namespace Espera.Core.Audio
                 VlcContext.LibVlcPluginsPath = CommonStrings.PLUGINS_PATH_DEFAULT_VALUE_X86;
             }
 
-            //Set the startup options
             VlcContext.StartupOptions.IgnoreConfig = true;
-            VlcContext.StartupOptions.LogOptions.LogInFile = true;
-            VlcContext.StartupOptions.LogOptions.ShowLoggerConsole = true;
-            VlcContext.StartupOptions.LogOptions.Verbosity = VlcLogVerbosities.Debug;
 
-            //Initialize the VlcContext
             VlcContext.Initialize();
 
             this.player = new VlcControl();
