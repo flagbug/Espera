@@ -66,6 +66,7 @@
     <Reference Include="Vlc.DotNet.Core">
       <HintPath>..\lib\Vlc.DotNet.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Vlc.DotNet.Core.Interops, Version=1.2.0.0, Culture=neutral, PublicKeyToken=84529da31f4eb963, processorArchitecture=MSIL" />
     <Reference Include="Vlc.DotNet.Wpf">
       <HintPath>..\lib\Vlc.DotNet.Wpf.dll</HintPath>
     </Reference>
@@ -74,9 +75,10 @@
   <ItemGroup>
     <Compile Include="AccessMode.cs" />
     <Compile Include="Audio\AudioPlayer.cs" />
+    <Compile Include="Audio\LocalAudioPlayer.cs" />
     <Compile Include="Audio\AudioPlayerState.cs" />
     <Compile Include="Audio\AudioType.cs" />
-    <Compile Include="Audio\VlcPlayer.cs" />
+    <Compile Include="Audio\YoutubeAudioPlayer.cs" />
     <Compile Include="InvalidPasswordException.cs" />
     <Compile Include="Library.cs" />
     <Compile Include="LibraryFillEventArgs.cs" />

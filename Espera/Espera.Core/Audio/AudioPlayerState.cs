@@ -1,7 +1,7 @@
 ﻿namespace Espera.Core.Audio
 {
     /// <summary>
-    /// Represents the current playback state of an <see cref="AudioPlayer"/> object.
+    /// Represents the current playback state of an <see cref="LocalAudioPlayer"/> object.
     /// </summary>
     public enum AudioPlayerState
     {

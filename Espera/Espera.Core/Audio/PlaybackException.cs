@@ -3,7 +3,7 @@
 namespace Espera.Core.Audio
 {
     /// <summary>
-    /// The exception that is thrown, when the <see cref="AudioPlayer"/> couldn't play a song.
+    /// The exception that is thrown, when the <see cref="LocalAudioPlayer"/> couldn't play a song.
     /// </summary>
     public class PlaybackException : Exception
     {
