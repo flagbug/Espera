@@ -166,7 +166,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Grid Grid.Column="0">
+            <Grid Grid.Column="0" Visibility="{Binding Path=IsLocal, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <ListBox ItemsSource="{Binding Path=Artists}"
                          SelectedItem="{Binding Path=SelectedArtist}">
                     <ListBox.ItemContainerStyle>
@@ -217,6 +217,15 @@
                     </ListBox.ItemContainerStyle>
                 </ListBox>
             </Grid>
+            <Border Grid.Column="0"
+                    BorderBrush="{DynamicResource TextBoxBorderBrush}"
+                    BorderThickness="0.5"
+                    Visibility="{Binding Path=IsYoutube, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid DataContext="{Binding Path=SelectedSong}">
+                    <Image Source="{Binding Path=Thumbnail}"
+                           Margin="5, 0, 5, 0 "/>
+                </Grid>
+            </Border>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="0.4*" />
