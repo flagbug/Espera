@@ -121,10 +121,13 @@ namespace Espera.Core.Audio
 
             this.Stop();
 
-            // NAudio requires that we renew the current wave player.
-            this.RenewWavePlayer();
+            if (song is LocalSong)
+            {
+                // NAudio requires that we renew the current wave player.
+                this.RenewWavePlayer();
 
-            this.OpenSong(song);
+                this.OpenSong(song);
+            }
 
             this.LoadedSong = song;
         }
@@ -135,7 +138,15 @@ namespace Espera.Core.Audio
         /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
         public void Play()
         {
-            if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != NAudio.Wave.PlaybackState.Playing)
+            if (this.LoadedSong is YoutubeSong)
+            {
+                using (var player = new VlcPlayer())
+                {
+                    player.Play(this.LoadedSong.Path.OriginalString);
+                }
+            }
+
+            else if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != NAudio.Wave.PlaybackState.Playing)
             {
                 try
                 {
