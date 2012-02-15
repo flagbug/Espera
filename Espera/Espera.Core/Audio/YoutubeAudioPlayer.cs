@@ -38,10 +38,13 @@ namespace Espera.Core.Audio
                 switch (this.player.State)
                 {
                     case States.Playing:
+                    case States.Buffering:
+                    case States.Opening:
                         return AudioPlayerState.Playing;
                     case States.Paused:
                         return AudioPlayerState.Paused;
                     case States.Stopped:
+                    case States.Ended:
                         return AudioPlayerState.Stopped;
                     default:
                         return AudioPlayerState.None;
