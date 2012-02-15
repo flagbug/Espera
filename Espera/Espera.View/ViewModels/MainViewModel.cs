@@ -34,6 +34,11 @@ namespace Espera.View.ViewModels
                 {
                     this.isLocal = value;
                     this.OnPropertyChanged(vm => vm.IsLocal);
+
+                    if (this.IsLocal)
+                    {
+                        this.SearchText = String.Empty;
+                    }
                 }
             }
         }
@@ -47,6 +52,11 @@ namespace Espera.View.ViewModels
                 {
                     this.isYoutube = value;
                     this.OnPropertyChanged(vm => vm.IsYoutube);
+
+                    if (this.IsYoutube)
+                    {
+                        this.SearchText = String.Empty;
+                    }
                 }
             }
         }
