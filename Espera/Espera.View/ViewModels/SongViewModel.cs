@@ -88,6 +88,24 @@ namespace Espera.View.ViewModels
             get { return this.Model.Path.ToString(); }
         }
 
+        public string Source
+        {
+            get
+            {
+                if (this.Model is LocalSong)
+                {
+                    return "Local";
+                }
+
+                if (this.Model is YoutubeSong)
+                {
+                    return "Youtube";
+                }
+
+                throw new InvalidOperationException();
+            }
+        }
+
         public ICommand OpenPathCommand
         {
             get
