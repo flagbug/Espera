@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Espera.Core;
@@ -78,6 +80,19 @@ namespace Espera.View.ViewModels
                 }
 
                 return null;
+            }
+        }
+
+        public string Path
+        {
+            get { return this.Model.Path.ToString(); }
+        }
+
+        public ICommand OpenPathCommand
+        {
+            get
+            {
+                return new RelayCommand(param => Process.Start(this.Path));
             }
         }
 
