@@ -233,13 +233,15 @@ namespace Espera.Core.Audio
 
         private void CreateInputStream(Song song)
         {
+            Stream stream = File.OpenRead(song.Path.LocalPath);
+
             switch (song.AudioType)
             {
                 case AudioType.Wav:
-                    this.inputStream = OpenWavStream(song.OpenStream());
+                    this.inputStream = OpenWavStream(stream);
                     break;
                 case AudioType.Mp3:
-                    this.inputStream = OpenMp3Stream(song.OpenStream());
+                    this.inputStream = OpenMp3Stream(stream);
                     break;
                 default:
                     throw new InvalidOperationException("Unsupported audio type.");

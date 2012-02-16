@@ -71,9 +71,7 @@ namespace Espera.Core.Audio
 
         public override void Play()
         {
-            var media = new LocationMedia(this.LoadedSong.Path.OriginalString);
-
-            this.player.Media = media;
+            this.player.Media = new LocationMedia(this.LoadedSong.Path.OriginalString);
             this.player.Play();
         }
 
