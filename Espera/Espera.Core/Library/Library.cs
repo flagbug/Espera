@@ -94,7 +94,7 @@ namespace Espera.Core.Library
         /// </summary>
         public TimeSpan TotalTime
         {
-            get { return this.currentPlayer.TotalTime; }
+            get { return this.currentPlayer == null ? TimeSpan.Zero : this.currentPlayer.TotalTime; }
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace Espera.Core.Library
         /// </summary>
         public TimeSpan CurrentTime
         {
-            get { return this.currentPlayer.CurrentTime; }
+            get { return this.currentPlayer == null ? TimeSpan.Zero : this.currentPlayer.CurrentTime; }
             set
             {
                 if (this.AccessMode != AccessMode.Administrator)
