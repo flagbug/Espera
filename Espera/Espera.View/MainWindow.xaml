@@ -327,7 +327,8 @@
                                             <DataTemplate>
                                                 <TextBlock>
                                                     <Hyperlink Foreground="White" Command="{Binding Path=OpenPathCommand}">
-                                                        <TextBlock Text="{Binding Path=Path}" />
+                                                        <TextBlock Text="{Binding Path=Path}"
+                                                                   TextTrimming="CharacterEllipsis" />
                                                     </Hyperlink>
                                                 </TextBlock>
                                             </DataTemplate>
