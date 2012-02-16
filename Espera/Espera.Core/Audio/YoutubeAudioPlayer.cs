@@ -29,6 +29,8 @@ namespace Espera.Core.Audio
             VlcContext.Initialize();
 
             this.player = new VlcControl();
+
+            this.player.EndReached += (sender, e) => this.OnSongFinished(EventArgs.Empty);
         }
 
         public override AudioPlayerState PlaybackState
