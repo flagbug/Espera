@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Input;
 using Espera.Core;
@@ -74,8 +75,12 @@ namespace Espera.View.ViewModels
                 {
                     this.searchText = value;
                     this.OnPropertyChanged(vm => vm.SearchText);
-                    this.OnPropertyChanged(vm => vm.SelectableSongs);
-                    this.OnPropertyChanged(vm => vm.Artists);
+
+                    if (this.IsLocal)
+                    {
+                        this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
+                        this.OnPropertyChanged(vm => vm.Artists);
+                    }
                 }
             }
         }
@@ -105,12 +110,14 @@ namespace Espera.View.ViewModels
                 {
                     this.selectedArtist = value;
                     this.OnPropertyChanged(vm => vm.SelectedArtist);
-                    this.OnPropertyChanged(vm => vm.SelectableSongs);
+                    this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
+                    this.IsLocal = true;
+                    this.IsYoutube = false;
                 }
             }
         }
 
-        public IEnumerable<SongViewModel> SelectableSongs
+        public IEnumerable<SongViewModel> SelectableLocalSongs
         {
             get
             {
@@ -122,6 +129,18 @@ namespace Espera.View.ViewModels
                 return SearchEngine.FilterSongs(songs, this.SearchText)
                     .OrderBy(song => song.Album)
                     .ThenBy(song => song.TrackNumber)
+                    .Select(song => new SongViewModel(song));
+            }
+        }
+
+        public IEnumerable<SongViewModel> SelectableYoutubeSongs
+        {
+            get
+            {
+                var finder = new YoutubeSongFinder(this.SearchText);
+                finder.Start();
+
+                return finder.SongsFound
                     .Select(song => new SongViewModel(song));
             }
         }
@@ -352,6 +371,19 @@ namespace Espera.View.ViewModels
                     this.isAdding = false;
                     this.StatusViewModel.Reset();
                 });
+        }
+
+        public void StartSearch()
+        {
+            if (this.IsYoutube)
+            {
+                Task.Factory.StartNew(() => this.OnPropertyChanged(vm => vm.SelectableYoutubeSongs));
+            }
+
+            else
+            {
+                Task.Factory.StartNew(() => this.OnPropertyChanged(vm => vm.SelectableLocalSongs));
+            }
         }
 
         /// <summary>

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using Espera.Core.Audio;
 using FlagLib.Reflection;
 
@@ -86,12 +85,6 @@ namespace Espera.Core
             this.Genre = String.Empty;
             this.Title = String.Empty;
         }
-
-        /// <summary>
-        /// Opens a stream that can be used to play the song.
-        /// </summary>
-        /// <returns>A stream that can be used to play the song.</returns>
-        internal abstract Stream OpenStream();
 
         /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.

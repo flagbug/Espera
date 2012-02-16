@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Espera.Core;
 using FlagLib.Patterns.MVVM;
 
@@ -7,6 +9,7 @@ namespace Espera.View.ViewModels
     public class SongViewModel : ViewModelBase<SongViewModel>
     {
         private bool isPlaying;
+        private BitmapImage thumbnail;
 
         public Song Model { get; private set; }
 
@@ -45,6 +48,36 @@ namespace Espera.View.ViewModels
                     this.isPlaying = value;
                     this.OnPropertyChanged(vm => vm.IsPlaying);
                 }
+            }
+        }
+
+        public ImageSource Thumbnail
+        {
+            get
+            {
+                var song = this.Model as YoutubeSong;
+
+                if (song != null)
+                {
+                    return this.thumbnail ?? (this.thumbnail = new BitmapImage(song.ThumbnailSource));
+                }
+
+                return null;
+            }
+        }
+
+        public string Description
+        {
+            get
+            {
+                var song = this.Model as YoutubeSong;
+
+                if (song != null)
+                {
+                    return song.Description;
+                }
+
+                return null;
             }
         }
 

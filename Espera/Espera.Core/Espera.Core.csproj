@@ -34,11 +34,27 @@
     <Reference Include="FlagLib">
       <HintPath>..\packages\FlagLib.4.4.0\lib\FlagLib.dll</HintPath>
     </Reference>
+    <Reference Include="Google.GData.Client">
+      <HintPath>..\packages\Google.GData.Client.1.9.0.0\lib\Google.GData.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.GData.Extensions">
+      <HintPath>..\packages\Google.GData.Extensions.1.9.0.0\lib\Google.GData.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.GData.YouTube">
+      <HintPath>..\packages\Google.GData.YouTube.1.9.0.0\lib\Google.GData.YouTube.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.Build.Tasks.v4.0" />
     <Reference Include="NAudio">
       <HintPath>..\packages\NAudio.1.5\lib\NAudio.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -47,13 +63,22 @@
     <Reference Include="taglib-sharp">
       <HintPath>..\packages\taglib.1.0.0\lib\taglib-sharp.dll</HintPath>
     </Reference>
+    <Reference Include="Vlc.DotNet.Core">
+      <HintPath>..\lib\Vlc.DotNet.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Vlc.DotNet.Core.Interops, Version=1.2.0.0, Culture=neutral, PublicKeyToken=84529da31f4eb963, processorArchitecture=MSIL" />
+    <Reference Include="Vlc.DotNet.Wpf">
+      <HintPath>..\lib\Vlc.DotNet.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccessMode.cs" />
     <Compile Include="Audio\AudioPlayer.cs" />
+    <Compile Include="Audio\LocalAudioPlayer.cs" />
     <Compile Include="Audio\AudioPlayerState.cs" />
     <Compile Include="Audio\AudioType.cs" />
+    <Compile Include="Audio\YoutubeAudioPlayer.cs" />
     <Compile Include="InvalidPasswordException.cs" />
     <Compile Include="Library.cs" />
     <Compile Include="LibraryFillEventArgs.cs" />
@@ -64,6 +89,9 @@
     <Compile Include="Song.cs" />
     <Compile Include="SongEventArgs.cs" />
     <Compile Include="LocalSongFinder.cs" />
+    <Compile Include="SongFinder.cs" />
+    <Compile Include="YoutubeSong.cs" />
+    <Compile Include="YoutubeSongFinder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

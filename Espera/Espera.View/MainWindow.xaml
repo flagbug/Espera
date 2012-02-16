@@ -150,7 +150,7 @@
                      VerticalAlignment="Center"
                      VerticalContentAlignment="Center"
                      Width="150"
-                     Text="{Binding Path=SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                     Text="{Binding Path=SearchText, UpdateSourceTrigger=PropertyChanged}" KeyUp="SearchTextBox_KeyUp" />
             <Button Grid.Column="5"
                     Margin="10, 0, 0, 0"
                     Padding="0"
@@ -165,7 +165,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Grid Grid.Column="0">
+            <Grid Grid.Column="0" Visibility="{Binding Path=IsLocal, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <ListBox ItemsSource="{Binding Path=Artists}"
                          SelectedItem="{Binding Path=SelectedArtist}">
                     <ListBox.ItemContainerStyle>
@@ -216,6 +216,26 @@
                     </ListBox.ItemContainerStyle>
                 </ListBox>
             </Grid>
+            <Border Grid.Column="0"
+                    BorderBrush="{DynamicResource TextBoxBorderBrush}"
+                    BorderThickness="0.5"
+                    Visibility="{Binding Path=IsYoutube, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid DataContext="{Binding Path=SelectedSong}"
+                            Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Image Grid.Row="0"
+                           Source="{Binding Path=Thumbnail}" />
+                    <ScrollViewer Grid.Row="1"
+                                  Margin="0, 10, 0, 0 "
+                                  VerticalScrollBarVisibility="Auto">
+                        <TextBlock Text="{Binding Path=Description}"
+                                   TextWrapping="Wrap" />
+                    </ScrollViewer>
+                </Grid>
+            </Border>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="0.4*" />
@@ -223,8 +243,7 @@
                 </Grid.RowDefinitions>
                 <TabControl>
                     <TabItem Header="Local" IsSelected="{Binding Path=IsLocal}">
-                        <ListView Grid.Row="1"
-                                  ItemsSource="{Binding Path=SelectableSongs}"
+                        <ListView ItemsSource="{Binding Path=SelectableLocalSongs}"
                                   SelectedItem="{Binding Path=SelectedSong}">
                             <ListView.ItemContainerStyle>
                                 <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
@@ -278,7 +297,34 @@
                         </ListView>
                     </TabItem>
                     <TabItem Header="YouTube" IsSelected="{Binding Path=IsYoutube}">
-
+                        <ListView ItemsSource="{Binding Path=SelectableYoutubeSongs, IsAsync=True}"
+                                  SelectedItem="{Binding Path=SelectedSong}">
+                            <ListView.ItemContainerStyle>
+                                <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
+                                    <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="Title">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Path=Title}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn Header="Duration">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Path=Duration, StringFormat=mm\\:ss}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
                     </TabItem>
                 </TabControl>
                 <ListView Grid.Row="2"

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using Espera.Core.Audio;
 
 namespace Espera.Core
@@ -15,16 +14,5 @@ namespace Espera.Core
         public LocalSong(Uri path, AudioType audioType, TimeSpan duration)
             : base(path, audioType, duration)
         { }
-
-        /// <summary>
-        /// Opens a stream that can be used to play the song.
-        /// </summary>
-        /// <returns>
-        /// A stream that can be used to play the song.
-        /// </returns>
-        internal override Stream OpenStream()
-        {
-            return File.OpenRead(this.Path.LocalPath);
-        }
     }
 }

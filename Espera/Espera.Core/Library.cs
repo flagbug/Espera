@@ -11,12 +11,13 @@ namespace Espera.Core
 {
     public class Library : IDisposable
     {
-        private readonly AudioPlayer audioPlayer;
         private readonly HashSet<Song> songs;
         private readonly Dictionary<int, Song> playlist;
-        private readonly object songLocker = new object();
+        private readonly object songLocker;
         private string password;
         private AccessMode accessMode;
+        private AudioPlayer currentPlayer;
+        private float volume;
 
         /// <summary>
         /// Occurs when a song has been added to the library.
@@ -73,13 +74,18 @@ namespace Espera.Core
         /// </value>
         public float Volume
         {
-            get { return this.audioPlayer.Volume; }
+            get { return this.currentPlayer == null ? this.volume : this.currentPlayer.Volume; }
             set
             {
                 if (this.AccessMode != AccessMode.Administrator)
                     throw new InvalidOperationException("The user is not in administrator mode.");
 
-                this.audioPlayer.Volume = value;
+                this.volume = value;
+
+                if (this.currentPlayer != null)
+                {
+                    this.currentPlayer.Volume = value;
+                }
             }
         }
 
@@ -88,7 +94,7 @@ namespace Espera.Core
         /// </summary>
         public TimeSpan TotalTime
         {
-            get { return this.audioPlayer.TotalTime; }
+            get { return this.currentPlayer.TotalTime; }
         }
 
         /// <summary>
@@ -96,13 +102,13 @@ namespace Espera.Core
         /// </summary>
         public TimeSpan CurrentTime
         {
-            get { return this.audioPlayer.CurrentTime; }
+            get { return this.currentPlayer.CurrentTime; }
             set
             {
                 if (this.AccessMode != AccessMode.Administrator)
                     throw new InvalidOperationException("The user is not in administrator mode.");
 
-                this.audioPlayer.CurrentTime = value;
+                this.currentPlayer.CurrentTime = value;
             }
         }
 
@@ -114,7 +120,7 @@ namespace Espera.Core
         /// </value>
         public bool IsPlaying
         {
-            get { return this.audioPlayer.PlaybackState == AudioPlayerState.Playing; }
+            get { return this.currentPlayer != null && this.currentPlayer.PlaybackState == AudioPlayerState.Playing; }
         }
 
         /// <summary>
@@ -125,7 +131,7 @@ namespace Espera.Core
         /// </value>
         public bool IsPaused
         {
-            get { return this.audioPlayer.PlaybackState == AudioPlayerState.Paused; }
+            get { return this.currentPlayer != null && this.currentPlayer.PlaybackState == AudioPlayerState.Paused; }
         }
 
         /// <summary>
@@ -133,7 +139,7 @@ namespace Espera.Core
         /// </summary>
         public Song LoadedSong
         {
-            get { return this.audioPlayer.LoadedSong; }
+            get { return this.currentPlayer == null ? null : this.currentPlayer.LoadedSong; }
         }
 
         /// <summary>
@@ -197,12 +203,10 @@ namespace Espera.Core
         /// </summary>
         public Library()
         {
-            this.audioPlayer = new AudioPlayer();
-            this.audioPlayer.SongFinished += (sender, e) => this.HandleSongFinish();
-
+            this.songLocker = new object();
             this.songs = new HashSet<Song>();
             this.playlist = new Dictionary<int, Song>();
-
+            this.volume = 1.0f;
             this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
         }
 
@@ -254,7 +258,7 @@ namespace Espera.Core
             if (this.AccessMode != AccessMode.Administrator)
                 throw new InvalidOperationException("The user is not in administrator mode.");
 
-            this.audioPlayer.Play();
+            this.currentPlayer.Play();
         }
 
         /// <summary>
@@ -265,7 +269,7 @@ namespace Espera.Core
             if (this.AccessMode != AccessMode.Administrator)
                 throw new InvalidOperationException("The user is not in administrator mode.");
 
-            this.audioPlayer.Pause();
+            this.currentPlayer.Pause();
         }
 
         /// <summary>
@@ -319,7 +323,10 @@ namespace Espera.Core
         /// </summary>
         public void Dispose()
         {
-            this.audioPlayer.Dispose();
+            if (this.currentPlayer != null)
+            {
+                this.currentPlayer.Dispose();
+            }
         }
 
         /// <summary>
@@ -359,8 +366,29 @@ namespace Espera.Core
             playlistIndex.ThrowIfLessThan(0, () => playlistIndex);
 
             this.CurrentSongPlaylistIndex = playlistIndex;
-            this.audioPlayer.Load(this.playlist[playlistIndex]);
-            this.audioPlayer.Play();
+
+            Song song = this.playlist[playlistIndex];
+
+            if (this.currentPlayer != null)
+            {
+                this.currentPlayer.Dispose();
+            }
+
+            if (song is LocalSong)
+            {
+                this.currentPlayer = new LocalAudioPlayer();
+            }
+
+            else
+            {
+                this.currentPlayer = new YoutubeAudioPlayer();
+            }
+
+            this.currentPlayer.SongFinished += (sender, e) => this.HandleSongFinish();
+            this.currentPlayer.Volume = this.Volume;
+
+            this.currentPlayer.Load(song);
+            this.currentPlayer.Play();
             this.SongStarted.RaiseSafe(this, EventArgs.Empty);
         }
 
