@@ -13,7 +13,7 @@ namespace Espera.Core
     {
         private readonly HashSet<Song> songs;
         private readonly Dictionary<int, Song> playlist;
-        private readonly object songLocker = new object();
+        private readonly object songLocker;
         private string password;
         private AccessMode accessMode;
         private AudioPlayer currentPlayer;
@@ -203,6 +203,7 @@ namespace Espera.Core
         /// </summary>
         public Library()
         {
+            this.songLocker = new object();
             this.songs = new HashSet<Song>();
             this.playlist = new Dictionary<int, Song>();
             this.volume = 1.0f;
