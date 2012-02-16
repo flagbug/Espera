@@ -92,6 +92,7 @@ namespace Espera.Core.Audio
         /// </summary>
         public override void Dispose()
         {
+            this.player.Dispose();
             VlcContext.CloseAll();
         }
     }
