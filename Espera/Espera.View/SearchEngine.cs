@@ -18,10 +18,10 @@ namespace Espera.Core
             if (searchText == null)
                 throw new ArgumentNullException(Reflector.GetMemberName(() => searchText));
 
-            if (searchText == String.Empty)
+            if (String.IsNullOrWhiteSpace(searchText))
                 return source;
 
-            IEnumerable<string> keyWords = searchText.Split(' ').Select(keyword => keyword.ToLowerInvariant());
+            IEnumerable<string> keyWords = searchText.Split(' ').Select(keyword => keyword.ToUpperInvariant());
 
             return source
                 .AsParallel()
@@ -30,10 +30,10 @@ namespace Espera.Core
                     song => keyWords.All
                     (
                         keyword =>
-                            song.Artist.ToLowerInvariant().Contains(keyword) ||
-                            song.Album.ToLowerInvariant().Contains(keyword) ||
-                            song.Genre.ToLowerInvariant().Contains(keyword) ||
-                            song.Title.ToLowerInvariant().Contains(keyword)
+                            song.Artist.ToUpperInvariant().Contains(keyword) ||
+                            song.Album.ToUpperInvariant().Contains(keyword) ||
+                            song.Genre.ToUpperInvariant().Contains(keyword) ||
+                            song.Title.ToUpperInvariant().Contains(keyword)
                     )
                 );
         }

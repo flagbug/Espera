@@ -95,10 +95,10 @@ namespace Espera.Core
         /// </returns>
         public override bool Equals(object obj)
         {
-            if (obj == null || !(obj is Song))
-                return false;
-
             var other = (Song)obj;
+
+            if (obj == null)
+                return false;
 
             return this.Path == other.Path;
         }

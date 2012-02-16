@@ -94,7 +94,7 @@ namespace Espera.View.ViewModels
                 IEnumerable<Song> songs = this.isAdding ? this.library.Songs.ToList() : this.library.Songs;
 
                 return SearchEngine.FilterSongs(songs, this.SearchText)
-                    .Where(song => song.Artist != String.Empty)
+                    .Where(song => !String.IsNullOrWhiteSpace(song.Artist))
                     .GroupBy(song => song.Artist)
                     .Select(group => group.Key)
                     .OrderBy(artist => artist)
