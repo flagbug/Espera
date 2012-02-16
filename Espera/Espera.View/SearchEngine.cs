@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Espera.Core;
 using FlagLib.Reflection;
 
-namespace Espera.Core
+namespace Espera.View
 {
     public static class SearchEngine
     {
