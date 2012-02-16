@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Espera.Core
+namespace Espera.Core.Library
 {
     public class InvalidPasswordException : Exception
     {

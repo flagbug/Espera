@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Input;
-using Espera.Core;
+using Espera.Core.Library;
 using FlagLib.Patterns.MVVM;
 
 namespace Espera.View.ViewModels

@@ -1,7 +1,7 @@
 ﻿using System;
 using FlagLib.Reflection;
 
-namespace Espera.Core
+namespace Espera.Core.Library
 {
     public class LibraryFillEventArgs : EventArgs
     {

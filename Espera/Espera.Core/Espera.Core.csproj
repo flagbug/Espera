@@ -73,15 +73,15 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccessMode.cs" />
+    <Compile Include="Library\AccessMode.cs" />
     <Compile Include="Audio\AudioPlayer.cs" />
     <Compile Include="Audio\LocalAudioPlayer.cs" />
     <Compile Include="Audio\AudioPlayerState.cs" />
     <Compile Include="Audio\AudioType.cs" />
     <Compile Include="Audio\YoutubeAudioPlayer.cs" />
-    <Compile Include="InvalidPasswordException.cs" />
-    <Compile Include="Library.cs" />
-    <Compile Include="LibraryFillEventArgs.cs" />
+    <Compile Include="Library\InvalidPasswordException.cs" />
+    <Compile Include="Library\Library.cs" />
+    <Compile Include="Library\LibraryFillEventArgs.cs" />
     <Compile Include="LocalSong.cs" />
     <Compile Include="Audio\PlaybackException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

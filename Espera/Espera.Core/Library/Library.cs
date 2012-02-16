@@ -7,7 +7,7 @@ using Espera.Core.Audio;
 using FlagLib.Extensions;
 using FlagLib.Reflection;
 
-namespace Espera.Core
+namespace Espera.Core.Library
 {
     public class Library : IDisposable
     {
