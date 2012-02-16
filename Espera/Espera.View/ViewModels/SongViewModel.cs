@@ -99,7 +99,7 @@ namespace Espera.View.ViewModels
 
                 if (this.Model is YoutubeSong)
                 {
-                    return "Youtube";
+                    return "YouTube";
                 }
 
                 throw new InvalidOperationException();
