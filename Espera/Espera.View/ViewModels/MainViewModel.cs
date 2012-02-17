@@ -173,13 +173,13 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public IEnumerable<SongViewModel> Playlist
+        public IEnumerable<PlaylistEntryViewModel> Playlist
         {
             get
             {
                 var playlist = this.library
                     .Playlist
-                    .Select(song => new SongViewModel(song))
+                    .Select(song => new PlaylistEntryViewModel(song))
                     .ToList();
 
                 if (this.library.CurrentSongPlaylistIndex.HasValue)

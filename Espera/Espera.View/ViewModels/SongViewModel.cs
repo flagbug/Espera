@@ -10,7 +10,6 @@ namespace Espera.View.ViewModels
 {
     public class SongViewModel : ViewModelBase<SongViewModel>
     {
-        private bool isPlaying;
         private BitmapImage thumbnail;
 
         public Song Model { get; private set; }
@@ -38,19 +37,6 @@ namespace Espera.View.ViewModels
         public string Title
         {
             get { return this.Model.Title; }
-        }
-
-        public bool IsPlaying
-        {
-            get { return this.isPlaying; }
-            set
-            {
-                if (this.IsPlaying != value)
-                {
-                    this.isPlaying = value;
-                    this.OnPropertyChanged(vm => vm.IsPlaying);
-                }
-            }
         }
 
         public ImageSource Thumbnail
@@ -86,24 +72,6 @@ namespace Espera.View.ViewModels
         public string Path
         {
             get { return this.Model.Path.ToString(); }
-        }
-
-        public string Source
-        {
-            get
-            {
-                if (this.Model is LocalSong)
-                {
-                    return "Local";
-                }
-
-                if (this.Model is YoutubeSong)
-                {
-                    return "YouTube";
-                }
-
-                throw new InvalidOperationException();
-            }
         }
 
         public ICommand OpenPathCommand
