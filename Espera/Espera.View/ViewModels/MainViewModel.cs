@@ -273,10 +273,10 @@ namespace Espera.View.ViewModels
             get
             {
                 return new RelayCommand
-            (
+                (
                     param => this.library.PlayNextSong(),
                     param => this.IsAdmin && this.library.CanPlayNextSong
-                    );
+                );
             }
         }
 
