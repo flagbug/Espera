@@ -245,8 +245,6 @@ namespace Espera.View.ViewModels
                         {
                             this.library.PlaySong(this.SelectedPlaylistIndex);
                         }
-
-                        this.updateTimer.Start();
                     },
                     param => this.IsAdmin && (this.SelectedPlaylistIndex != -1 || this.library.LoadedSong != null)
                 );
@@ -405,6 +403,8 @@ namespace Espera.View.ViewModels
         private void LibraryRaisedSongFinished(object sender, EventArgs e)
         {
             this.OnPropertyChanged(vm => vm.IsPlaying);
+
+            this.updateTimer.Stop();
         }
 
         private void LibraryRaisedSongStarted(object sender, EventArgs e)
@@ -413,6 +413,8 @@ namespace Espera.View.ViewModels
             this.OnPropertyChanged(vm => vm.TotalTime);
             this.OnPropertyChanged(vm => vm.Playlist);
             this.OnPropertyChanged(vm => vm.IsPlaying);
+
+            this.updateTimer.Start();
         }
 
         private void UpdateUserAccess()
