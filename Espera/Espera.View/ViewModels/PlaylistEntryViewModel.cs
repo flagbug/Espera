@@ -1,42 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Espera.Core;
-using FlagLib.Patterns.MVVM;
 
 namespace Espera.View.ViewModels
 {
-    public class PlaylistEntryViewModel : ViewModelBase<PlaylistEntryViewModel>
+    public class PlaylistEntryViewModel : SongViewModelBase<PlaylistEntryViewModel>
     {
         private bool isPlaying;
-
-        public Song Model { get; private set; }
-
-        public string Album
-        {
-            get { return this.Model.Album; }
-        }
-
-        public string Artist
-        {
-            get { return this.Model.Artist; }
-        }
-
-        public TimeSpan Duration
-        {
-            get { return this.Model.Duration; }
-        }
-
-        public string Genre
-        {
-            get { return this.Model.Genre; }
-        }
-
-        public string Title
-        {
-            get { return this.Model.Title; }
-        }
 
         public bool IsPlaying
         {
@@ -55,12 +24,12 @@ namespace Espera.View.ViewModels
         {
             get
             {
-                if (this.Model is LocalSong)
+                if (this.Wrapped is LocalSong)
                 {
                     return "Local";
                 }
 
-                if (this.Model is YoutubeSong)
+                if (this.Wrapped is YoutubeSong)
                 {
                     return "YouTube";
                 }
@@ -70,8 +39,7 @@ namespace Espera.View.ViewModels
         }
 
         public PlaylistEntryViewModel(Song model)
-        {
-            this.Model = model;
-        }
+            : base(model)
+        { }
     }
 }

@@ -70,6 +70,7 @@
     <Compile Include="ViewModels\AdministratorViewModel.cs" />
     <Compile Include="ViewModels\PlaylistEntryViewModel.cs" />
     <Compile Include="ViewModels\SongViewModel.cs" />
+    <Compile Include="ViewModels\SongViewModelBase.cs" />
     <Compile Include="ViewModels\StatusViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

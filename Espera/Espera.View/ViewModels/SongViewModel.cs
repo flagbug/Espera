@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -8,35 +7,13 @@ using FlagLib.Patterns.MVVM;
 
 namespace Espera.View.ViewModels
 {
-    public class SongViewModel : ViewModelBase<SongViewModel>
+    public class SongViewModel : SongViewModelBase<SongViewModel>
     {
         private BitmapImage thumbnail;
 
-        public Song Model { get; private set; }
-
-        public string Album
+        public Song Model
         {
-            get { return this.Model.Album; }
-        }
-
-        public string Artist
-        {
-            get { return this.Model.Artist; }
-        }
-
-        public TimeSpan Duration
-        {
-            get { return this.Model.Duration; }
-        }
-
-        public string Genre
-        {
-            get { return this.Model.Genre; }
-        }
-
-        public string Title
-        {
-            get { return this.Model.Title; }
+            get { return this.Wrapped; }
         }
 
         public ImageSource Thumbnail
@@ -83,8 +60,7 @@ namespace Espera.View.ViewModels
         }
 
         public SongViewModel(Song model)
-        {
-            this.Model = model;
-        }
+            : base(model)
+        { }
     }
 }
