@@ -150,7 +150,8 @@
                      VerticalAlignment="Center"
                      VerticalContentAlignment="Center"
                      Width="150"
-                     Text="{Binding Path=SearchText, UpdateSourceTrigger=PropertyChanged}" KeyUp="SearchTextBox_KeyUp" />
+                     Text="{Binding Path=SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     KeyUp="SearchTextBox_KeyUp" />
             <Button Grid.Column="5"
                     Margin="10, 0, 0, 0"
                     Padding="0"
