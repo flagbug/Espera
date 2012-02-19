@@ -30,7 +30,7 @@ namespace Espera.Core.Audio
 
             this.player = new VlcControl();
 
-            this.player.EndReached += (sender, e) => this.OnSongFinished(EventArgs.Empty);
+            this.player.TimeChanged += (sender, e) => this.OnSongFinished(EventArgs.Empty);
         }
 
         public override AudioPlayerState PlaybackState
@@ -94,6 +94,15 @@ namespace Espera.Core.Audio
         {
             this.player.Dispose();
             VlcContext.CloseAll();
+        }
+
+        protected override void OnSongFinished(EventArgs e)
+        {
+            // HACK: Cut the time one second before it really ends, so that the current time reaches the duration
+            if (this.player.Time >= this.player.Duration - TimeSpan.FromSeconds(1))
+            {
+                base.OnSongFinished(e);
+            }
         }
     }
 }
