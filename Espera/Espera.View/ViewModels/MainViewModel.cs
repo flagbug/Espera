@@ -93,7 +93,7 @@ namespace Espera.View.ViewModels
                 // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
                 IEnumerable<Song> songs = this.isAdding ? this.library.Songs.ToList() : this.library.Songs;
 
-                return SearchEngine.FilterSongs(songs, this.SearchText)
+                return songs.FilterSongs(this.SearchText)
                     .Where(song => !String.IsNullOrWhiteSpace(song.Artist))
                     .GroupBy(song => song.Artist)
                     .Select(group => group.Key)
@@ -126,7 +126,7 @@ namespace Espera.View.ViewModels
                     .AsParallel()
                     .Where(song => song.Artist == this.SelectedArtist);
 
-                return SearchEngine.FilterSongs(songs, this.SearchText)
+                return songs.FilterSongs(this.SearchText)
                     .OrderBy(song => song.Album)
                     .ThenBy(song => song.TrackNumber)
                     .Select(song => new SongViewModel(song));

@@ -14,7 +14,7 @@ namespace Espera.View
         /// <param name="source">The songs to search.</param>
         /// <param name="searchText">The search text.</param>
         /// <returns>The filtered sequence of songs.</returns>
-        public static IEnumerable<Song> FilterSongs(IEnumerable<Song> source, string searchText)
+        public static IEnumerable<Song> FilterSongs(this IEnumerable<Song> source, string searchText)
         {
             if (searchText == null)
                 throw new ArgumentNullException(Reflector.GetMemberName(() => searchText));
