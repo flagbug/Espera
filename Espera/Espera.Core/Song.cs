@@ -127,5 +127,7 @@ namespace Espera.Core
         {
             return this.Equals((object)other);
         }
+
+        internal abstract AudioPlayer CreateAudioPlayer();
     }
 }

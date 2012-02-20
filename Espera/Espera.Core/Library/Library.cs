@@ -374,15 +374,7 @@ namespace Espera.Core.Library
                 this.currentPlayer.Dispose();
             }
 
-            if (song is LocalSong)
-            {
-                this.currentPlayer = new LocalAudioPlayer();
-            }
-
-            else
-            {
-                this.currentPlayer = new YoutubeAudioPlayer();
-            }
+            this.currentPlayer = song.CreateAudioPlayer();
 
             this.currentPlayer.SongFinished += (sender, e) => this.HandleSongFinish();
             this.currentPlayer.Volume = this.Volume;

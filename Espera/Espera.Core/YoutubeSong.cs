@@ -14,5 +14,10 @@ namespace Espera.Core
         public YoutubeSong(Uri path, AudioType audioType, TimeSpan duration)
             : base(path, audioType, duration)
         { }
+
+        internal override AudioPlayer CreateAudioPlayer()
+        {
+            return new YoutubeAudioPlayer();
+        }
     }
 }
