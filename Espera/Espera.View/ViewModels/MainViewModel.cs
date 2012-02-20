@@ -97,8 +97,7 @@ namespace Espera.View.ViewModels
                     .Where(song => !String.IsNullOrWhiteSpace(song.Artist))
                     .GroupBy(song => song.Artist)
                     .Select(group => group.Key)
-                    .OrderBy(artist => artist)
-                    .Where(artist => songs.Any(song => song.Artist == artist));
+                    .OrderBy(artist => artist);
             }
         }
 
