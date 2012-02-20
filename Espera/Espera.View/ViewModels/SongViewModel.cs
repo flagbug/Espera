@@ -59,6 +59,21 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public double? Rating
+        {
+            get
+            {
+                var song = this.Model as YoutubeSong;
+
+                if (song != null && song.Rating > 0)
+                {
+                    return song.Rating;
+                }
+
+                return null;
+            }
+        }
+
         public SongViewModel(Song model)
             : base(model)
         { }

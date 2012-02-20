@@ -323,6 +323,14 @@
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
+                                    <GridViewColumn Header="Rating">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Path=Rating, StringFormat=\{0:0.0\}, TargetNullValue=n/a}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
                                     <GridViewColumn Header="Link">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
