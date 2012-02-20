@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents the current playback state of an <see cref="LocalAudioPlayer"/> object.
     /// </summary>
-    public enum AudioPlayerState
+    internal enum AudioPlayerState
     {
         /// <summary>
         /// The audio play is playing.
