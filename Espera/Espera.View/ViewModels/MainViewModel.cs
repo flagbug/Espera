@@ -185,6 +185,11 @@ namespace Espera.View.ViewModels
                 if (this.library.CurrentSongPlaylistIndex.HasValue)
                 {
                     playlist[this.library.CurrentSongPlaylistIndex.Value].IsPlaying = true;
+
+                    foreach (var model in playlist.Take(this.library.CurrentSongPlaylistIndex.Value))
+                    {
+                        model.IsInactive = true;
+                    }
                 }
 
                 return playlist;
