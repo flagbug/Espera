@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Espera.Core.Audio;
 using FlagLib.Reflection;
 
@@ -7,6 +8,7 @@ namespace Espera.Core
     /// <summary>
     /// Represents a song
     /// </summary>
+    [DebuggerDisplay("{Artist}-{Album}-{Title}")]
     public abstract class Song : IEquatable<Song>
     {
         /// <summary>
