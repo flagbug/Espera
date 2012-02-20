@@ -93,6 +93,11 @@ namespace Espera.View
             this.ChangeColor("Blue");
         }
 
+        private void PurpleColorButtonButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.ChangeColor("Purple");
+        }
+
         private void SearchTextBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.Enter)

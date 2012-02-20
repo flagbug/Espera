@@ -519,6 +519,10 @@
                                                 Background="Blue"
                                                 Margin="2, 0, 0, 0"
                                                 Click="BlueColorButtonButton_Click" />
+                                        <Button Style="{StaticResource ColorPickerButtonStyle}"
+                                                Background="Purple"
+                                                Margin="2, 0, 0, 0"
+                                                Click="PurpleColorButtonButton_Click" />
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>
