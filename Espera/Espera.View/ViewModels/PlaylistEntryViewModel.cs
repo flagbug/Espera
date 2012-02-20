@@ -8,6 +8,8 @@ namespace Espera.View.ViewModels
         private bool isPlaying;
         private bool isInactive;
 
+        public int Index { get; private set; }
+
         public bool IsPlaying
         {
             get { return this.isPlaying; }
@@ -52,8 +54,10 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public PlaylistEntryViewModel(Song model)
+        public PlaylistEntryViewModel(Song model, int index)
             : base(model)
-        { }
+        {
+            this.Index = index;
+        }
     }
 }

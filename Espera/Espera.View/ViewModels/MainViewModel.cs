@@ -16,7 +16,7 @@ namespace Espera.View.ViewModels
         private readonly Timer updateTimer;
         private string selectedArtist;
         private SongViewModel selectedSong;
-        private int selectedPlaylistIndex;
+        private PlaylistEntryViewModel selectedPlaylistEntry;
         private string searchText;
         private volatile bool isAdding;
         private bool isLocal;
@@ -159,15 +159,15 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public int SelectedPlaylistIndex
+        public PlaylistEntryViewModel SelectedPlaylistEntry
         {
-            get { return this.selectedPlaylistIndex; }
+            get { return this.selectedPlaylistEntry; }
             set
             {
-                if (this.SelectedPlaylistIndex != value)
+                if (this.SelectedPlaylistEntry != value)
                 {
-                    this.selectedPlaylistIndex = value;
-                    this.OnPropertyChanged(vm => vm.SelectedPlaylistIndex);
+                    this.selectedPlaylistEntry = value;
+                    this.OnPropertyChanged(vm => vm.SelectedPlaylistEntry);
                     this.OnPropertyChanged(vm => vm.PlayCommand);
                 }
             }
@@ -177,16 +177,20 @@ namespace Espera.View.ViewModels
         {
             get
             {
-                var playlist = this.library
-                    .Playlist
-                    .Select(song => new PlaylistEntryViewModel(song))
-                    .ToList();
+                var playlist = this.library.Playlist
+                    .Select((song, index) => new PlaylistEntryViewModel(song, index))
+                    .ToList(); // We want a list, so that ReSharper doesn't complain about multiple enumerations
 
                 if (this.library.CurrentSongPlaylistIndex.HasValue)
                 {
                     playlist[this.library.CurrentSongPlaylistIndex.Value].IsPlaying = true;
 
-                    foreach (var model in playlist.Take(this.library.CurrentSongPlaylistIndex.Value))
+                    if (playlist.TakeWhile(song => !song.IsPlaying).Count() > 5)
+                    {
+                        playlist = playlist.Skip(this.library.CurrentSongPlaylistIndex.Value - 5).ToList();
+                    }
+
+                    foreach (var model in playlist.TakeWhile(song => !song.IsPlaying))
                     {
                         model.IsInactive = true;
                     }
@@ -248,10 +252,10 @@ namespace Espera.View.ViewModels
 
                         else
                         {
-                            this.library.PlaySong(this.SelectedPlaylistIndex);
+                            this.library.PlaySong(this.SelectedPlaylistEntry.Index);
                         }
                     },
-                    param => this.IsAdmin && (this.SelectedPlaylistIndex != -1 || this.library.LoadedSong != null)
+                    param => this.IsAdmin && (this.SelectedPlaylistEntry != null || this.library.LoadedSong != null)
                 );
             }
         }
@@ -338,7 +342,6 @@ namespace Espera.View.ViewModels
             this.updateTimer.Elapsed += (sender, e) => this.UpdateTime();
 
             this.searchText = String.Empty;
-            this.SelectedPlaylistIndex = -1;
         }
 
         public void AddSelectedSongToPlaylist()

@@ -350,7 +350,7 @@
                 </TabControl>
                 <ListView Grid.Row="2"
                           ItemsSource="{Binding Path=Playlist}"
-                          SelectedIndex="{Binding Path=SelectedPlaylistIndex}">
+                          SelectedItem="{Binding Path=SelectedPlaylistEntry}">
                     <ListView.ItemContainerStyle>
                         <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                             <EventSetter Event="MouseDoubleClick" Handler="PlaylistDoubleClick"/>
