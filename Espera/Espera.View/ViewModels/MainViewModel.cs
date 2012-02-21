@@ -184,6 +184,8 @@ namespace Espera.View.ViewModels
                 {
                     playlist[this.library.CurrentSongPlaylistIndex.Value].IsPlaying = true;
 
+                    // If there are more than 5 songs from the beginning of the playlist to the current played song,
+                    // skip all, but 5 songs to the position of the currently played song
                     if (playlist.TakeWhile(song => !song.IsPlaying).Count() > 5)
                     {
                         playlist = playlist.Skip(this.library.CurrentSongPlaylistIndex.Value - 5).ToList();
