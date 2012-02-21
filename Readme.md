@@ -18,6 +18,10 @@ Espera can search songs at YouTube, add them to the playlist and stream the audi
 
 This function requires the VLC media player to be installed, as it streams the YouTube audio track in the background without opening the VLC media player itself. (Sadly I found no other way to stream from YouTube without a depency to VLC)
 
+### Metro-Style
+
+Espera uses [MahApps.Metro](https://github.com/MahApps/MahApps.Metro) for  theming. This gives Espera a beautiful and very clean look.
+
 ## Requirements
 
  - .NET Framwork 4.0
