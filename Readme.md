@@ -25,4 +25,4 @@ This function requires the VLC media player to be installed, as it streams the Y
 
 ## Development
  
- Espera is currently in a verly early stage of development and has to be compiled from the source code, but it already can play songs from the local hard drive or from Youtube.
+ Espera is currently in a verly early stage of development and has to be compiled from the source code, but it already can play songs from the local hard drive or from YouTube.
