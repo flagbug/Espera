@@ -10,7 +10,7 @@ It is designed as party-player, as it offers features such as locking the player
 
 ### Party-Lock (partially implemented)
 
-Espera allows to lock itself, this comes handy on parties, where the guests shouldn't be able to change the volume or stop the music, but sill be able to add songs to the playlist.
+Espera allows to lock itself, this comes handy on parties, where the guests shouldn't be able to change the volume or stop the music, but still be able to add songs to the playlist.
 
 ### YouTube
 
