@@ -2,7 +2,7 @@
 
 ## Overview
 
-Espera is a protable music player written in C# with WPF as frontend technology.
+Espera is a portable music player written in C# with WPF as frontend technology.
 
 ## Features
 
