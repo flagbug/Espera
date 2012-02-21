@@ -246,6 +246,7 @@ namespace Espera.View.ViewModels
                         if (this.library.IsPaused)
                         {
                             this.library.ContinueSong();
+                            this.updateTimer.Start();
                             this.OnPropertyChanged(vm => vm.IsPlaying);
                         }
 
