@@ -23,4 +23,4 @@ Espera can search songs at YouTube, add them to the playlist and stream the audi
 
 ## Development
  
- Espera is currently in a verly early stage of development and must be compiled from the source code, but it already can play songs from the local hard drive or from Youtube.
+ Espera is currently in a verly early stage of development and has to be compiled from the source code, but it already can play songs from the local hard drive or from Youtube.
