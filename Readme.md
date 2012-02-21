@@ -15,7 +15,8 @@ Espera allows to lock itself, this comes handy on parties, where the guests shou
 ### YouTube
 
 Espera can search songs at YouTube, add them to the playlist and stream the audio track. 
-This function requires the VLC media player to be installed, as it currently streams the YouTube audio track in the background without opening the VLC media player itself.
+
+This function requires the VLC media player to be installed, as it streams the YouTube audio track in the background without opening the VLC media player itself. (Sadly I found no other way to stream from YouTube without a depency to VLC)
 
 ## Requirements
 
