@@ -248,6 +248,18 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public TimeSpan TimeRemaining
+        {
+            get
+            {
+                return this.Playlist
+                    .Reverse()
+                    .TakeWhile(song => !song.IsPlaying)
+                    .Select(song => song.Duration)
+                    .Aggregate((t1, t2) => t1 + t2);
+            }
+        }
+
         public ICommand PlayCommand
         {
             get
@@ -362,6 +374,7 @@ namespace Espera.View.ViewModels
             this.library.AddSongToPlaylist(this.SelectedSong.Model);
             this.OnPropertyChanged(vm => vm.Playlist);
             this.OnPropertyChanged(vm => vm.SongsRemaining);
+            this.OnPropertyChanged(vm => vm.TimeRemaining);
         }
 
         public void AddSongs(string folderPath)
@@ -435,6 +448,7 @@ namespace Espera.View.ViewModels
             this.OnPropertyChanged(vm => vm.TotalTime);
             this.OnPropertyChanged(vm => vm.Playlist);
             this.OnPropertyChanged(vm => vm.SongsRemaining);
+            this.OnPropertyChanged(vm => vm.TimeRemaining);
             this.OnPropertyChanged(vm => vm.IsPlaying);
 
             this.updateTimer.Start();
