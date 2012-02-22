@@ -430,7 +430,19 @@
                                 Orientation="Horizontal"
                                 HorizontalAlignment="Center">
                         <TextBlock Text="{Binding Path=SongsRemaining}" />
-                        <TextBlock Text=" songs remaining, with " />
+                        <TextBlock Text=" song" />
+                        <TextBlock Text="s">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=SongsRemaining}" Value="1">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Text=" remaining, with " />
                         <TextBlock Text="{Binding Path=TimeRemaining.TotalMinutes, FallbackValue=0, StringFormat=\{0:0.0\}}" />
                         <TextBlock Text=" minutes play time" />
                     </StackPanel>
