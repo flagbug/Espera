@@ -22,7 +22,7 @@ namespace Espera.View
             if (String.IsNullOrWhiteSpace(searchText))
                 return source;
 
-            IEnumerable<string> keyWords = searchText.Split(' ').Select(keyword => keyword.ToUpperInvariant());
+            IEnumerable<string> keyWords = searchText.ToUpperInvariant().Split(' ');
 
             return source
                 .AsParallel()
