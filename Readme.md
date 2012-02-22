@@ -29,7 +29,7 @@ very clean look.
 
 ## Requirements
 
- - .NET Framwork 4.0
+ - .NET Framework 4.0
  - VLC media player >= 2.0
 
 ## Development
