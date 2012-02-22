@@ -237,6 +237,9 @@ namespace Espera.View.ViewModels
             get { return this.library.IsPlaying; }
         }
 
+        /// <summary>
+        /// Gets the number of songs that come after the currently played song.
+        /// </summary>
         public int SongsRemaining
         {
             get
@@ -248,6 +251,9 @@ namespace Espera.View.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets the total remaining time of all songs that come after the currently played song.
+        /// </summary>
         public TimeSpan TimeRemaining
         {
             get
@@ -260,6 +266,9 @@ namespace Espera.View.ViewModels
             }
         }
 
+        /// <summary>
+        /// Plays the song that is currently selected in the playlist or continues the song if it is paused.
+        /// </summary>
         public ICommand PlayCommand
         {
             get
@@ -285,6 +294,9 @@ namespace Espera.View.ViewModels
             }
         }
 
+        /// <summary>
+        /// Pauses the currently played song.
+        /// </summary>
         public ICommand PauseCommand
         {
             get
@@ -302,6 +314,9 @@ namespace Espera.View.ViewModels
             }
         }
 
+        /// <summary>
+        /// Plays the next song in the playlist.
+        /// </summary>
         public ICommand NextSongCommand
         {
             get
@@ -314,6 +329,9 @@ namespace Espera.View.ViewModels
             }
         }
 
+        /// <summary>
+        /// Plays the song that is before the currently played song in the playlist.
+        /// </summary>
         public ICommand PreviousSongCommand
         {
             get
@@ -326,6 +344,9 @@ namespace Espera.View.ViewModels
             }
         }
 
+        /// <summary>
+        /// Sets the volume to the lowest possible value.
+        /// </summary>
         public ICommand MuteCommand
         {
             get
@@ -338,6 +359,9 @@ namespace Espera.View.ViewModels
             }
         }
 
+        /// <summary>
+        /// Sets the volume to the highest possible value.
+        /// </summary>
         public ICommand UnMuteCommand
         {
             get
