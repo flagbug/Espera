@@ -245,8 +245,7 @@ namespace Espera.View.ViewModels
             get
             {
                 return this.Playlist
-                    .Reverse()
-                    .TakeWhile(song => !song.IsPlaying)
+                    .SkipWhile(song => song.IsInactive)
                     .Count();
             }
         }
@@ -259,8 +258,7 @@ namespace Espera.View.ViewModels
             get
             {
                 return this.Playlist
-                    .Reverse()
-                    .TakeWhile(song => !song.IsPlaying)
+                    .SkipWhile(song => song.IsInactive)
                     .Select(song => song.Duration)
                     .Aggregate((t1, t2) => t1 + t2);
             }
