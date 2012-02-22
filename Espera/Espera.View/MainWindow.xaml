@@ -566,6 +566,7 @@
                                 </StackPanel>
                             </Grid>
                             <Button Grid.Row="1"
+                                    Margin="5"
                                     Content="Change to user"
                                     Command="{Binding Path=ChangeToUserCommand}" />
                         </Grid>
