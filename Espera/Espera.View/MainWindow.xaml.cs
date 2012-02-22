@@ -60,7 +60,7 @@ namespace Espera.View
 
         private void PlaylistDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (this.mainViewModel.IsAdmin)
+            if (this.mainViewModel.PlayCommand.CanExecute(null))
             {
                 this.mainViewModel.PlayCommand.Execute(null);
             }
