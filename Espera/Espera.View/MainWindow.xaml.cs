@@ -106,5 +106,16 @@ namespace Espera.View
                 e.Handled = true;
             }
         }
+
+        private void PlaylistKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                if (this.mainViewModel.RemoveSelectedPlaylistEntryCommand.CanExecute(null))
+                {
+                    this.mainViewModel.RemoveSelectedPlaylistEntryCommand.Execute(null);
+                }
+            }
+        }
     }
 }

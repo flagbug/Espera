@@ -12,7 +12,7 @@ namespace Espera.Core.Library
     public class Library : IDisposable
     {
         private readonly HashSet<Song> songs;
-        private readonly Dictionary<int, Song> playlist;
+        private Dictionary<int, Song> playlist;
         private readonly object songLocker;
         private string password;
         private AccessMode accessMode;
@@ -308,6 +308,17 @@ namespace Espera.Core.Library
             this.playlist.Add(newIndex, song);
         }
 
+        public void RemoveFromPlaylist(int index)
+        {
+            if (this.AccessMode != AccessMode.Administrator)
+                throw new InvalidOperationException("The user is not in administrator mode.");
+
+            index.ThrowIfLessThan(0, () => index);
+
+            this.playlist.Remove(index);
+            this.RebuildPlaylist();
+        }
+
         /// <summary>
         /// Adds the song that are contained in the specified directory recursively in an asynchronous manner to the library.
         /// </summary>
@@ -327,6 +338,23 @@ namespace Espera.Core.Library
             {
                 this.currentPlayer.Dispose();
             }
+        }
+
+        /// <summary>
+        /// Rebuilds the playlist with new indexes.
+        /// </summary>
+        private void RebuildPlaylist()
+        {
+            var newPlaylist = new Dictionary<int, Song>();
+            int index = 0;
+
+            foreach (Song song in playlist.OrderBy(entry => entry.Key).Select(entry => entry.Value))
+            {
+                newPlaylist.Add(index, song);
+                index++;
+            }
+
+            this.playlist = newPlaylist;
         }
 
         /// <summary>

@@ -372,6 +372,22 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public ICommand RemoveSelectedPlaylistEntryCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.library.RemoveFromPlaylist(this.SelectedPlaylistEntry.Index);
+                        this.OnPropertyChanged(vm => vm.Playlist);
+                    },
+                    param => this.IsAdmin
+                );
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
         /// </summary>

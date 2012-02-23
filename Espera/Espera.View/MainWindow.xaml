@@ -355,7 +355,7 @@
                     </Grid.RowDefinitions>
                     <ListView Grid.Row="0"
                               ItemsSource="{Binding Path=Playlist}"
-                              SelectedItem="{Binding Path=SelectedPlaylistEntry}">
+                              SelectedItem="{Binding Path=SelectedPlaylistEntry}" KeyUp="PlaylistKeyUp">
                         <ListView.ItemContainerStyle>
                             <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                                 <EventSetter Event="MouseDoubleClick" Handler="PlaylistDoubleClick"/>
