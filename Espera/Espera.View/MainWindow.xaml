@@ -68,6 +68,7 @@
             <StackPanel Grid.Column="0"
                         Orientation="Horizontal">
                 <Button Padding="0"
+                        ToolTip="Add music"
                         Click="AddSongsButtonClick">
                     <Image Source="/Espera.View;component/Images/appbar.add.png" />
                 </Button>
@@ -79,9 +80,11 @@
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding Path=IsPlaying}" Value="True">
                                     <Setter Property="Command" Value="{Binding Path=PauseCommand}" />
+                                    <Setter Property="ToolTip" Value="Pause" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Path=IsPlaying}" Value="False">
                                     <Setter Property="Command" Value="{Binding Path=PlayCommand}" />
+                                    <Setter Property="ToolTip" Value="Play" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -103,11 +106,13 @@
                 </Button>
                 <Button Padding="0"
                         Margin="5, 0, 0, 0"
+                        ToolTip="Previous song"
                         Command="{Binding Path=PreviousSongCommand}">
                     <Image Source="/Espera.View;component/Images/appbar.navigate.previous.png" />
                 </Button>
                 <Button Padding="0"
                         Margin="5, 0, 0, 0"
+                        ToolTip="Next song"
                         Command="{Binding Path=NextSongCommand}">
                     <Image Source="/Espera.View;component/Images/appbar.navigate.next.png" />
                 </Button>
@@ -116,6 +121,7 @@
                         Margin="10, 0, 0, 0"
                         Orientation="Horizontal">
                 <Button Style="{StaticResource VolumeButtonStyle}"
+                        ToolTip="Mute"
                         Command="{Binding Path=MuteCommand}"
                         VerticalAlignment="Center">
                     <Image Source="/Espera.View;component/Images/appbar.sound.1.png" />
@@ -125,6 +131,7 @@
                         Maximum="1"
                         Value="{Binding Path=Volume}" />
                 <Button Style="{StaticResource VolumeButtonStyle}"
+                        ToolTip="Unmute"
                         Command="{Binding Path=UnMuteCommand}"
                         VerticalAlignment="Center">
                     <Image Source="/Espera.View;component/Images/appbar.sound.3.png" />
@@ -155,6 +162,7 @@
             <Button Grid.Column="5"
                     Margin="10, 0, 0, 0"
                     Padding="0"
+                    ToolTip="Settings"
                     Click="AdminPanelToggleButton_Click">
                 <Image Source="/Espera.View;component/Images/appbar.settings.png" />
             </Button>
