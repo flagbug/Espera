@@ -383,7 +383,7 @@ namespace Espera.View.ViewModels
                         this.library.RemoveFromPlaylist(this.SelectedPlaylistEntry.Index);
                         this.OnPropertyChanged(vm => vm.Playlist);
                     },
-                    param => this.IsAdmin
+                    param => this.IsAdmin && this.SelectedPlaylistEntry != null
                 );
             }
         }
