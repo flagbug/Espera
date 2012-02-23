@@ -354,9 +354,15 @@ namespace Espera.Core.Library
             var newPlaylist = new Dictionary<int, Song>();
             int index = 0;
 
-            foreach (Song song in playlist.OrderBy(entry => entry.Key).Select(entry => entry.Value))
+            foreach (var entry in playlist.OrderBy(entry => entry.Key))
             {
-                newPlaylist.Add(index, song);
+                newPlaylist.Add(index, entry.Value);
+
+                if (this.CurrentSongPlaylistIndex == entry.Key)
+                {
+                    this.CurrentSongPlaylistIndex = index;
+                }
+
                 index++;
             }
 
