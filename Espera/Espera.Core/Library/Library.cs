@@ -316,6 +316,7 @@ namespace Espera.Core.Library
             if (index == this.CurrentSongPlaylistIndex)
             {
                 this.currentPlayer.Stop();
+                this.CurrentSongPlaylistIndex = null;
             }
 
             index.ThrowIfLessThan(0, () => index);
