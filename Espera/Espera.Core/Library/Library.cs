@@ -313,6 +313,11 @@ namespace Espera.Core.Library
             if (this.AccessMode != AccessMode.Administrator)
                 throw new InvalidOperationException("The user is not in administrator mode.");
 
+            if (index == this.CurrentSongPlaylistIndex)
+            {
+                this.currentPlayer.Stop();
+            }
+
             index.ThrowIfLessThan(0, () => index);
 
             this.playlist.Remove(index);
