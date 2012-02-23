@@ -1,4 +1,4 @@
-﻿using FlagLib.Patterns.MVVM;
+﻿using Rareform.Patterns.MVVM;
 
 namespace Espera.View.ViewModels
 {

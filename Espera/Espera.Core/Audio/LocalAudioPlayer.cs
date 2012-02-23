@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Threading;
-using FlagLib.Reflection;
+using Rareform.Reflection;
 using NAudio;
 using NAudio.Wave;
 

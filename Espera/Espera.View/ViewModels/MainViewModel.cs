@@ -6,7 +6,7 @@ using System.Timers;
 using System.Windows.Input;
 using Espera.Core;
 using Espera.Core.Library;
-using FlagLib.Patterns.MVVM;
+using Rareform.Patterns.MVVM;
 
 namespace Espera.View.ViewModels
 {

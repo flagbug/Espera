@@ -3,7 +3,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Espera.Core;
-using FlagLib.Patterns.MVVM;
+using Rareform.Patterns.MVVM;
 
 namespace Espera.View.ViewModels
 {

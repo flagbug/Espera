@@ -1,6 +1,6 @@
 ﻿using System;
 using Espera.Core;
-using FlagLib.Patterns.MVVM;
+using Rareform.Patterns.MVVM;
 
 namespace Espera.View.ViewModels
 {

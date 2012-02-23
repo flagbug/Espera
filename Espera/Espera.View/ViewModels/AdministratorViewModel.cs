@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 using Espera.Core.Library;
-using FlagLib.Patterns.MVVM;
+using Rareform.Patterns.MVVM;
 
 namespace Espera.View.ViewModels
 {

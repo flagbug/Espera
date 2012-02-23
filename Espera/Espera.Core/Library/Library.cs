@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Espera.Core.Audio;
-using FlagLib.Extensions;
-using FlagLib.Reflection;
+using Rareform.Extensions;
+using Rareform.Reflection;
 
 namespace Espera.Core.Library
 {

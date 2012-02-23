@@ -36,12 +36,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FlagLib">
-      <HintPath>..\packages\FlagLib.4.4.0\lib\FlagLib.dll</HintPath>
-    </Reference>
     <Reference Include="MahApps.Metro, Version=0.3.0.17, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\MahApps.Metro.0.6.0.1\lib\net40\MahApps.Metro.dll</HintPath>
+    </Reference>
+    <Reference Include="Rareform">
+      <HintPath>..\packages\Rareform.1.0.0\lib\Rareform.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

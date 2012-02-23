@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Espera.Core.Audio;
-using FlagLib.IO;
+using Rareform.IO;
 using TagLib;
 
 namespace Espera.Core
@@ -209,7 +209,7 @@ namespace Espera.Core
         /// Handles the FileFound event of the directory scanner.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="FlagLib.IO.FileEventArgs"/> instance containing the event data.</param>
+        /// <param name="e">The <see cref="Rareform.IO.FileEventArgs"/> instance containing the event data.</param>
         private void ScannerFileFound(object sender, FileEventArgs e)
         {
             if (AllowedExtensions.Contains(e.File.Extension))

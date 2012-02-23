@@ -3,7 +3,7 @@
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                       xmlns:ViewModels="clr-namespace:Espera.View.ViewModels"
-                      xmlns:WPF="clr-namespace:FlagLib.WPF;assembly=FlagLib"
+                      xmlns:WPF="clr-namespace:Rareform.WPF;assembly=Rareform"
                       Title="Espera"
                       Height="600"
                       Width="800"
