@@ -434,6 +434,8 @@ namespace Espera.Core.Library
 
         private void HandleSongFinish()
         {
+            this.CurrentSongPlaylistIndex = null;
+
             this.SongFinished.RaiseSafe(this, EventArgs.Empty);
 
             if (this.CanPlayNextSong)

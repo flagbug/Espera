@@ -476,6 +476,7 @@ namespace Espera.View.ViewModels
         private void LibraryRaisedSongFinished(object sender, EventArgs e)
         {
             this.OnPropertyChanged(vm => vm.IsPlaying);
+            this.OnPropertyChanged(vm => vm.Playlist);
 
             this.updateTimer.Stop();
         }
