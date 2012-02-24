@@ -376,11 +376,13 @@
                         </ListView.ItemContainerStyle>
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Width="40">
+                                <GridViewColumn Width="35">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <Image Source="/Espera.View;component/Images/appbar.sound.3.png"
-                                               Visibility="{Binding Path=IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                   Visibility="{Binding Path=IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                                   Width="25" 
+                                                   Height="25" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
