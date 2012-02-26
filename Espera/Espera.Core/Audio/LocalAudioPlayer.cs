@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Threading;
-using Rareform.Reflection;
 using NAudio;
 using NAudio.Wave;
+using Rareform.Reflection;
 
 namespace Espera.Core.Audio
 {
@@ -117,7 +117,7 @@ namespace Espera.Core.Audio
                 this.OpenSong(song);
             }
 
-            this.LoadedSong = song;
+            base.Load(song);
         }
 
         /// <summary>
