@@ -44,7 +44,7 @@ namespace Espera.Core
                                    ThumbnailSource = new Uri(video.Thumbnails[0].Url)
                                };
 
-                this.songsFound.Add(song);
+                this.InternSongsFound.Add(song);
 
                 this.OnSongFound(new SongEventArgs(song));
             }

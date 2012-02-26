@@ -43,7 +43,7 @@ namespace Espera.Core
 
                 lock (this.songListLock)
                 {
-                    songCount = this.songsFound.Count;
+                    songCount = this.InternSongsFound.Count;
                 }
 
                 return songCount;
@@ -66,7 +66,7 @@ namespace Espera.Core
 
                 lock (this.songListLock)
                 {
-                    pathCount += this.songsFound.Count;
+                    pathCount += this.InternSongsFound.Count;
                 }
 
                 return pathCount;
@@ -187,7 +187,7 @@ namespace Espera.Core
 
             lock (this.songListLock)
             {
-                this.songsFound.Add(song);
+                this.InternSongsFound.Add(song);
             }
 
             this.OnSongFound(new SongEventArgs(song));
