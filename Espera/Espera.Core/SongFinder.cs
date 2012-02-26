@@ -4,11 +4,11 @@ using Rareform.Extensions;
 
 namespace Espera.Core
 {
-    public abstract class SongFinder<T> where T : Song
+    public abstract class SongFinder
     {
-        private readonly List<T> songsFound;
+        private readonly List<Song> songsFound;
 
-        protected ICollection<T> InternSongsFound
+        protected ICollection<Song> InternSongsFound
         {
             get { return this.songsFound; }
         }
@@ -27,14 +27,14 @@ namespace Espera.Core
         /// Gets the songs that have been found.
         /// </summary>
         /// <value>The songs that have been found.</value>
-        public IEnumerable<T> SongsFound
+        public IEnumerable<Song> SongsFound
         {
             get { return this.songsFound; }
         }
 
         protected SongFinder()
         {
-            this.songsFound = new List<T>();
+            this.songsFound = new List<Song>();
         }
 
         public abstract void Start();
