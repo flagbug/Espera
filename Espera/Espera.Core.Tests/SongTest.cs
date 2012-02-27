@@ -4,9 +4,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Espera.Core.Tests
 {
-    /// <summary>
-    /// Summary description for SongTest
-    /// </summary>
     [TestClass]
     public class SongTest
     {
