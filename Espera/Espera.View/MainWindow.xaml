@@ -365,8 +365,8 @@
                               SelectedItem="{Binding Path=SelectedPlaylistEntry}" KeyUp="PlaylistKeyUp">
                         <ListView.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="Play" Click="PlayPlaylistEntryMenuItem_Click" />
-                                <MenuItem Header="Remove" Click="RemovePlaylistEntryMenuItem_Click" />
+                                <MenuItem Header="Play" Command="{Binding Path=PlayCommand}" />
+                                <MenuItem Header="Remove" Command="{Binding Path=RemoveSelectedPlaylistEntryCommand}" />
                             </ContextMenu>
                         </ListView.ContextMenu>
                         <ListView.ItemContainerStyle>
