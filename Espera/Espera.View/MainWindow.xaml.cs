@@ -125,5 +125,13 @@ namespace Espera.View
                 this.mainViewModel.RemoveSelectedPlaylistEntryCommand.Execute(null);
             }
         }
+
+        private void PlayPlaylistEntryMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.mainViewModel.PlayCommand.CanExecute(null))
+            {
+                this.mainViewModel.PlayCommand.Execute(null);
+            }
+        }
     }
 }
