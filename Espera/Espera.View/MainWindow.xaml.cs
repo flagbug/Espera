@@ -49,9 +49,10 @@ namespace Espera.View
 
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (this.mainViewModel.IsAdmin && e.LeftButton == MouseButtonState.Pressed)
+            if (this.mainViewModel.IsAdmin && e.LeftButton == MouseButtonState.Pressed &&
+                this.mainViewModel.AddSelectedSongToPlaylistCommand.CanExecute(null))
             {
-                this.mainViewModel.AddSelectedSongToPlaylist();
+                this.mainViewModel.AddSelectedSongToPlaylistCommand.Execute(null);
             }
         }
 
@@ -121,6 +122,14 @@ namespace Espera.View
         }
 
         private void Playlist_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if (((ListView)sender).Items.IsEmpty)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void SongList_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             if (((ListView)sender).Items.IsEmpty)
             {

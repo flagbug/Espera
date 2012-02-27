@@ -327,6 +327,19 @@ namespace Espera.Core.Library
             this.RebuildPlaylist();
         }
 
+        public void RemoveFromLibrary(Song song)
+        {
+            this.songs.Remove(song);
+
+            var newPlaylist = playlist
+                .Where(entry => this.songs.Contains(entry.Value))
+                .ToDictionary(entry => entry.Key, entry => entry.Value);
+
+            playlist = newPlaylist;
+
+            this.RebuildPlaylist();
+        }
+
         /// <summary>
         /// Adds the song that are contained in the specified directory recursively in an asynchronous manner to the library.
         /// </summary>

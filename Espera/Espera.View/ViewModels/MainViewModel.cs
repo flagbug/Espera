@@ -383,8 +383,49 @@ namespace Espera.View.ViewModels
                         this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index));
 
                         this.OnPropertyChanged(vm => vm.Playlist);
+                        this.OnPropertyChanged(vm => vm.SongsRemaining);
+                        this.OnPropertyChanged(vm => vm.TimeRemaining);
                     },
                     param => this.IsAdmin && this.SelectedPlaylistEntries != null
+                );
+            }
+        }
+
+        public ICommand AddSelectedSongToPlaylistCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.library.AddSongToPlaylist(this.SelectedSong.Model);
+                        this.OnPropertyChanged(vm => vm.Playlist);
+                        this.OnPropertyChanged(vm => vm.SongsRemaining);
+                        this.OnPropertyChanged(vm => vm.TimeRemaining);
+                    },
+                    param => this.SelectedSong != null
+                );
+            }
+        }
+
+        public ICommand RemoveSelectedSongFromLibraryCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.library.RemoveFromLibrary(this.SelectedSong.Model);
+
+                        this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
+                        this.OnPropertyChanged(vm => vm.Playlist);
+                        this.OnPropertyChanged(vm => vm.SongsRemaining);
+                        this.OnPropertyChanged(vm => vm.TimeRemaining);
+                        this.OnPropertyChanged(vm => vm.Artists);
+                    },
+                    param => this.SelectedSong != null
                 );
             }
         }
@@ -406,14 +447,6 @@ namespace Espera.View.ViewModels
             this.updateTimer.Elapsed += (sender, e) => this.UpdateTime();
 
             this.searchText = String.Empty;
-        }
-
-        public void AddSelectedSongToPlaylist()
-        {
-            this.library.AddSongToPlaylist(this.SelectedSong.Model);
-            this.OnPropertyChanged(vm => vm.Playlist);
-            this.OnPropertyChanged(vm => vm.SongsRemaining);
-            this.OnPropertyChanged(vm => vm.TimeRemaining);
         }
 
         public void AddSongs(string folderPath)
