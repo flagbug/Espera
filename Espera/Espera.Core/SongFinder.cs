@@ -6,7 +6,12 @@ namespace Espera.Core
 {
     public abstract class SongFinder<T> where T : Song
     {
-        protected readonly List<T> songsFound;
+        private readonly List<T> songsFound;
+
+        protected ICollection<T> InternSongsFound
+        {
+            get { return this.songsFound; }
+        }
 
         /// <summary>
         /// Occurs when a song has been found.

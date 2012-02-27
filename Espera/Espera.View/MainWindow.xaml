@@ -183,7 +183,6 @@
                             <Setter Property="VerticalContentAlignment" Value="Center" />
                             <Setter Property="MinHeight" Value="25" />
                             <Setter Property="Margin" Value="0" />
-                            <Setter Property="IsTabStop" Value="False" />
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="{x:Type ListBoxItem}">
@@ -251,9 +250,18 @@
                     <RowDefinition Height="0.6*" />
                 </Grid.RowDefinitions>
                 <TabControl>
-                    <TabItem Header="Local" IsSelected="{Binding Path=IsLocal}">
+                    <TabItem Header="Local"
+                             IsSelected="{Binding Path=IsLocal}">
                         <ListView ItemsSource="{Binding Path=SelectableLocalSongs}"
-                                  SelectedItem="{Binding Path=SelectedSong}">
+                                  SelectionChanged="SongList_SelectionChanged"
+                                  KeyUp="SongListKeyUp"
+                                  ContextMenuOpening="SongList_ContextMenuOpening">
+                            <ListView.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongsToPlaylistCommand}" />
+                                    <MenuItem Header="Remove from library" Command="{Binding Path=RemoveSelectedSongsFromLibraryCommand}" />
+                                </ContextMenu>
+                            </ListView.ContextMenu>
                             <ListView.ItemContainerStyle>
                                 <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                                     <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick"/>
@@ -307,7 +315,13 @@
                     </TabItem>
                     <TabItem Header="YouTube" IsSelected="{Binding Path=IsYoutube}">
                         <ListView ItemsSource="{Binding Path=SelectableYoutubeSongs, IsAsync=True}"
-                                  SelectedItem="{Binding Path=SelectedSong}">
+                                  SelectionChanged="SongList_SelectionChanged"
+                                  ContextMenuOpening="SongList_ContextMenuOpening">
+                            <ListView.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongsToPlaylistCommand}" />
+                                </ContextMenu>
+                            </ListView.ContextMenu>
                             <ListView.ItemContainerStyle>
                                 <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                                     <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick"/>
@@ -363,7 +377,15 @@
                     </Grid.RowDefinitions>
                     <ListView Grid.Row="0"
                               ItemsSource="{Binding Path=Playlist}"
-                              SelectedItem="{Binding Path=SelectedPlaylistEntry}" KeyUp="PlaylistKeyUp">
+                              SelectionChanged="Playlist_SelectionChanged"
+                              KeyUp="PlaylistKeyUp"
+                              ContextMenuOpening="Playlist_ContextMenuOpening">
+                        <ListView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Play" Command="{Binding Path=PlayCommand}" />
+                                <MenuItem Header="Remove" Command="{Binding Path=RemoveSelectedPlaylistEntriesCommand}" />
+                            </ContextMenu>
+                        </ListView.ContextMenu>
                         <ListView.ItemContainerStyle>
                             <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                                 <EventSetter Event="MouseDoubleClick" Handler="PlaylistDoubleClick"/>
@@ -380,8 +402,8 @@
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <Image Source="/Espera.View;component/Images/appbar.sound.3.png"
-                                                   Visibility="{Binding Path=IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}" 
-                                                   Width="25" 
+                                                   Visibility="{Binding Path=IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                   Width="25"
                                                    Height="25" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>

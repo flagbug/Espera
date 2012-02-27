@@ -15,8 +15,8 @@ namespace Espera.View.ViewModels
         private readonly Library library;
         private readonly Timer updateTimer;
         private string selectedArtist;
-        private SongViewModel selectedSong;
-        private PlaylistEntryViewModel selectedPlaylistEntry;
+        private IEnumerable<SongViewModel> selectedSongs;
+        private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
         private string searchText;
         private volatile bool isAdding;
         private bool isLocal;
@@ -145,28 +145,28 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public SongViewModel SelectedSong
+        public IEnumerable<SongViewModel> SelectedSongs
         {
-            get { return this.selectedSong; }
+            get { return this.selectedSongs; }
             set
             {
-                if (this.SelectedSong != value)
+                if (this.SelectedSongs != value)
                 {
-                    this.selectedSong = value;
-                    this.OnPropertyChanged(vm => vm.SelectedSong);
+                    this.selectedSongs = value;
+                    this.OnPropertyChanged(vm => vm.SelectedSongs);
                 }
             }
         }
 
-        public PlaylistEntryViewModel SelectedPlaylistEntry
+        public IEnumerable<PlaylistEntryViewModel> SelectedPlaylistEntries
         {
-            get { return this.selectedPlaylistEntry; }
+            get { return this.selectedPlaylistEntries; }
             set
             {
-                if (this.SelectedPlaylistEntry != value)
+                if (this.SelectedPlaylistEntries != value)
                 {
-                    this.selectedPlaylistEntry = value;
-                    this.OnPropertyChanged(vm => vm.SelectedPlaylistEntry);
+                    this.selectedPlaylistEntries = value;
+                    this.OnPropertyChanged(vm => vm.SelectedPlaylistEntries);
                     this.OnPropertyChanged(vm => vm.PlayCommand);
                 }
             }
@@ -284,10 +284,10 @@ namespace Espera.View.ViewModels
 
                         else
                         {
-                            this.library.PlaySong(this.SelectedPlaylistEntry.Index);
+                            this.library.PlaySong(this.SelectedPlaylistEntries.First().Index);
                         }
                     },
-                    param => this.IsAdmin && (this.SelectedPlaylistEntry != null || this.library.LoadedSong != null)
+                    param => this.IsAdmin && ((this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1) || this.library.LoadedSong != null)
                 );
             }
         }
@@ -372,7 +372,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public ICommand RemoveSelectedPlaylistEntryCommand
+        public ICommand RemoveSelectedPlaylistEntriesCommand
         {
             get
             {
@@ -380,10 +380,53 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        this.library.RemoveFromPlaylist(this.SelectedPlaylistEntry.Index);
+                        this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index));
+
                         this.OnPropertyChanged(vm => vm.Playlist);
+                        this.OnPropertyChanged(vm => vm.SongsRemaining);
+                        this.OnPropertyChanged(vm => vm.TimeRemaining);
                     },
-                    param => this.IsAdmin && this.SelectedPlaylistEntry != null
+                    param => this.IsAdmin && this.SelectedPlaylistEntries != null
+                );
+            }
+        }
+
+        public ICommand AddSelectedSongsToPlaylistCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model));
+
+                        this.OnPropertyChanged(vm => vm.Playlist);
+                        this.OnPropertyChanged(vm => vm.SongsRemaining);
+                        this.OnPropertyChanged(vm => vm.TimeRemaining);
+                    },
+                    param => this.SelectedSongs != null && this.SelectedSongs.Any()
+                );
+            }
+        }
+
+        public ICommand RemoveSelectedSongsFromLibraryCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.library.RemoveFromLibrary(this.SelectedSongs.Select(song => song.Model));
+
+                        this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
+                        this.OnPropertyChanged(vm => vm.Playlist);
+                        this.OnPropertyChanged(vm => vm.SongsRemaining);
+                        this.OnPropertyChanged(vm => vm.TimeRemaining);
+                        this.OnPropertyChanged(vm => vm.Artists);
+                    },
+                    param => this.SelectedSongs != null && this.SelectedSongs.Any()
                 );
             }
         }
@@ -405,14 +448,6 @@ namespace Espera.View.ViewModels
             this.updateTimer.Elapsed += (sender, e) => this.UpdateTime();
 
             this.searchText = String.Empty;
-        }
-
-        public void AddSelectedSongToPlaylist()
-        {
-            this.library.AddSongToPlaylist(this.SelectedSong.Model);
-            this.OnPropertyChanged(vm => vm.Playlist);
-            this.OnPropertyChanged(vm => vm.SongsRemaining);
-            this.OnPropertyChanged(vm => vm.TimeRemaining);
         }
 
         public void AddSongs(string folderPath)

@@ -7,7 +7,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
+using Espera.View.ViewModels;
 using MahApps.Metro;
+using ListView = System.Windows.Controls.ListView;
 
 namespace Espera.View
 {
@@ -47,9 +49,10 @@ namespace Espera.View
 
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (this.mainViewModel.IsAdmin)
+            if (this.mainViewModel.IsAdmin && e.LeftButton == MouseButtonState.Pressed &&
+                this.mainViewModel.AddSelectedSongsToPlaylistCommand.CanExecute(null))
             {
-                this.mainViewModel.AddSelectedSongToPlaylist();
+                this.mainViewModel.AddSelectedSongsToPlaylistCommand.Execute(null);
             }
         }
 
@@ -111,11 +114,48 @@ namespace Espera.View
         {
             if (e.Key == Key.Delete)
             {
-                if (this.mainViewModel.RemoveSelectedPlaylistEntryCommand.CanExecute(null))
+                if (this.mainViewModel.RemoveSelectedPlaylistEntriesCommand.CanExecute(null))
                 {
-                    this.mainViewModel.RemoveSelectedPlaylistEntryCommand.Execute(null);
+                    this.mainViewModel.RemoveSelectedPlaylistEntriesCommand.Execute(null);
                 }
             }
+        }
+
+        private void SongListKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                if (this.mainViewModel.RemoveSelectedSongsFromLibraryCommand.CanExecute(null))
+                {
+                    this.mainViewModel.RemoveSelectedSongsFromLibraryCommand.Execute(null);
+                }
+            }
+        }
+
+        private void Playlist_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if (((ListView)sender).Items.IsEmpty)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void SongList_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if (((ListView)sender).Items.IsEmpty)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void Playlist_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            this.mainViewModel.SelectedPlaylistEntries = ((ListView)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
+        }
+
+        private void SongList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            this.mainViewModel.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModel>();
         }
     }
 }

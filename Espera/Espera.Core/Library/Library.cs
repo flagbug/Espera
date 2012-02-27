@@ -300,28 +300,49 @@ namespace Espera.Core.Library
         /// <summary>
         /// Adds the specified song to end of the playlist.
         /// </summary>
-        /// <param name="song">The song to add to the end of the playlist.</param>
-        public void AddSongToPlaylist(Song song)
+        /// <param name="songList">The songs to add to the end of the playlist.</param>
+        public void AddSongsToPlaylist(IEnumerable<Song> songList)
         {
-            int newIndex = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
+            foreach (Song song in songList)
+            {
+                int newIndex = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
 
-            this.playlist.Add(newIndex, song);
+                this.playlist.Add(newIndex, song);
+            }
         }
 
-        public void RemoveFromPlaylist(int index)
+        public void RemoveFromPlaylist(IEnumerable<int> indexes)
         {
             if (this.AccessMode != AccessMode.Administrator)
                 throw new InvalidOperationException("The user is not in administrator mode.");
 
-            if (index == this.CurrentSongPlaylistIndex)
+            foreach (int index in indexes)
             {
-                this.currentPlayer.Stop();
-                this.CurrentSongPlaylistIndex = null;
+                if (index == this.CurrentSongPlaylistIndex)
+                {
+                    this.currentPlayer.Stop();
+                    this.CurrentSongPlaylistIndex = null;
+                }
+
+                this.playlist.Remove(index);
             }
 
-            index.ThrowIfLessThan(0, () => index);
+            this.RebuildPlaylist();
+        }
 
-            this.playlist.Remove(index);
+        public void RemoveFromLibrary(IEnumerable<Song> songList)
+        {
+            foreach (Song song in songList)
+            {
+                this.songs.Remove(song);
+            }
+
+            var newPlaylist = playlist
+                .Where(entry => this.songs.Contains(entry.Value))
+                .ToDictionary(entry => entry.Key, entry => entry.Value);
+
+            playlist = newPlaylist;
+
             this.RebuildPlaylist();
         }
 
