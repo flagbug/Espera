@@ -363,6 +363,11 @@
                     <ListView Grid.Row="0"
                               ItemsSource="{Binding Path=Playlist}"
                               SelectedItem="{Binding Path=SelectedPlaylistEntry}" KeyUp="PlaylistKeyUp">
+                        <ListView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Remove" Click="RemovePlaylistEntryMenuItem_Click" />
+                            </ContextMenu>
+                        </ListView.ContextMenu>
                         <ListView.ItemContainerStyle>
                             <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                                 <EventSetter Event="MouseDoubleClick" Handler="PlaylistDoubleClick"/>
