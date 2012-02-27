@@ -50,9 +50,9 @@ namespace Espera.View
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (this.mainViewModel.IsAdmin && e.LeftButton == MouseButtonState.Pressed &&
-                this.mainViewModel.AddSelectedSongToPlaylistCommand.CanExecute(null))
+                this.mainViewModel.AddSelectedSongsToPlaylistCommand.CanExecute(null))
             {
-                this.mainViewModel.AddSelectedSongToPlaylistCommand.Execute(null);
+                this.mainViewModel.AddSelectedSongsToPlaylistCommand.Execute(null);
             }
         }
 
@@ -140,6 +140,11 @@ namespace Espera.View
         private void Playlist_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             this.mainViewModel.SelectedPlaylistEntries = ((ListView)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
+        }
+
+        private void SongList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            this.mainViewModel.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModel>();
         }
     }
 }

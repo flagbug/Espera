@@ -253,11 +253,11 @@
                     <TabItem Header="Local"
                              IsSelected="{Binding Path=IsLocal}">
                         <ListView ItemsSource="{Binding Path=SelectableLocalSongs}"
-                                  SelectedItem="{Binding Path=SelectedSong}"
+                                  SelectionChanged="SongList_SelectionChanged"
                                   ContextMenuOpening="SongList_ContextMenuOpening">
                             <ListView.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongToPlaylistCommand}" />
+                                    <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongsToPlaylistCommand}" />
                                     <MenuItem Header="Remove from library" Command="{Binding Path=RemoveSelectedSongFromLibraryCommand}" />
                                 </ContextMenu>
                             </ListView.ContextMenu>

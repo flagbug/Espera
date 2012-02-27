@@ -300,12 +300,15 @@ namespace Espera.Core.Library
         /// <summary>
         /// Adds the specified song to end of the playlist.
         /// </summary>
-        /// <param name="song">The song to add to the end of the playlist.</param>
-        public void AddSongToPlaylist(Song song)
+        /// <param name="songList">The songs to add to the end of the playlist.</param>
+        public void AddSongsToPlaylist(IEnumerable<Song> songList)
         {
-            int newIndex = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
+            foreach (Song song in songList)
+            {
+                int newIndex = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
 
-            this.playlist.Add(newIndex, song);
+                this.playlist.Add(newIndex, song);
+            }
         }
 
         public void RemoveFromPlaylist(IEnumerable<int> indexes)
