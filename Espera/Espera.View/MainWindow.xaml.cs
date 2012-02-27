@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using MahApps.Metro;
+using ListView = System.Windows.Controls.ListView;
 
 namespace Espera.View
 {
@@ -115,6 +116,14 @@ namespace Espera.View
                 {
                     this.mainViewModel.RemoveSelectedPlaylistEntryCommand.Execute(null);
                 }
+            }
+        }
+
+        private void Playlist_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if (((ListView)sender).Items.IsEmpty)
+            {
+                e.Handled = true;
             }
         }
     }
