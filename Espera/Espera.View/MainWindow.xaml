@@ -258,7 +258,7 @@
                             <ListView.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongsToPlaylistCommand}" />
-                                    <MenuItem Header="Remove from library" Command="{Binding Path=RemoveSelectedSongFromLibraryCommand}" />
+                                    <MenuItem Header="Remove from library" Command="{Binding Path=RemoveSelectedSongsFromLibraryCommand}" />
                                 </ContextMenu>
                             </ListView.ContextMenu>
                             <ListView.ItemContainerStyle>

@@ -330,9 +330,12 @@ namespace Espera.Core.Library
             this.RebuildPlaylist();
         }
 
-        public void RemoveFromLibrary(Song song)
+        public void RemoveFromLibrary(IEnumerable<Song> songList)
         {
-            this.songs.Remove(song);
+            foreach (Song song in songList)
+            {
+                this.songs.Remove(song);
+            }
 
             var newPlaylist = playlist
                 .Where(entry => this.songs.Contains(entry.Value))

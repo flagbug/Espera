@@ -410,7 +410,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public ICommand RemoveSelectedSongFromLibraryCommand
+        public ICommand RemoveSelectedSongsFromLibraryCommand
         {
             get
             {
@@ -418,10 +418,7 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        foreach (SongViewModel song in SelectedSongs)
-                        {
-                            this.library.RemoveFromLibrary(song.Model);
-                        }
+                        this.library.RemoveFromLibrary(this.SelectedSongs.Select(song => song.Model));
 
                         this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
                         this.OnPropertyChanged(vm => vm.Playlist);
@@ -429,7 +426,7 @@ namespace Espera.View.ViewModels
                         this.OnPropertyChanged(vm => vm.TimeRemaining);
                         this.OnPropertyChanged(vm => vm.Artists);
                     },
-                    param => this.SelectedSongs != null
+                    param => this.SelectedSongs != null && this.SelectedSongs.Any()
                 );
             }
         }
