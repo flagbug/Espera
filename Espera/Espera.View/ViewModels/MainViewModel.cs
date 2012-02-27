@@ -388,6 +388,24 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public ICommand AddSelectedSongToPlaylistCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.library.AddSongToPlaylist(this.SelectedSong.Model);
+                        this.OnPropertyChanged(vm => vm.Playlist);
+                        this.OnPropertyChanged(vm => vm.SongsRemaining);
+                        this.OnPropertyChanged(vm => vm.TimeRemaining);
+                    },
+                    param => this.SelectedSong != null
+                );
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
         /// </summary>
@@ -405,14 +423,6 @@ namespace Espera.View.ViewModels
             this.updateTimer.Elapsed += (sender, e) => this.UpdateTime();
 
             this.searchText = String.Empty;
-        }
-
-        public void AddSelectedSongToPlaylist()
-        {
-            this.library.AddSongToPlaylist(this.SelectedSong.Model);
-            this.OnPropertyChanged(vm => vm.Playlist);
-            this.OnPropertyChanged(vm => vm.SongsRemaining);
-            this.OnPropertyChanged(vm => vm.TimeRemaining);
         }
 
         public void AddSongs(string folderPath)

@@ -250,9 +250,16 @@
                     <RowDefinition Height="0.6*" />
                 </Grid.RowDefinitions>
                 <TabControl>
-                    <TabItem Header="Local" IsSelected="{Binding Path=IsLocal}">
+                    <TabItem Header="Local"
+                             IsSelected="{Binding Path=IsLocal}">
                         <ListView ItemsSource="{Binding Path=SelectableLocalSongs}"
-                                  SelectedItem="{Binding Path=SelectedSong}">
+                                  SelectedItem="{Binding Path=SelectedSong}"
+                                  ContextMenuOpening="SongList_ContextMenuOpening">
+                            <ListView.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongToPlaylistCommand}" />
+                                </ContextMenu>
+                            </ListView.ContextMenu>
                             <ListView.ItemContainerStyle>
                                 <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                                     <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick"/>
@@ -306,7 +313,13 @@
                     </TabItem>
                     <TabItem Header="YouTube" IsSelected="{Binding Path=IsYoutube}">
                         <ListView ItemsSource="{Binding Path=SelectableYoutubeSongs, IsAsync=True}"
-                                  SelectedItem="{Binding Path=SelectedSong}">
+                                  SelectedItem="{Binding Path=SelectedSong}"
+                                  ContextMenuOpening="SongList_ContextMenuOpening">
+                            <ListView.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongToPlaylistCommand}" />
+                                </ContextMenu>
+                            </ListView.ContextMenu>
                             <ListView.ItemContainerStyle>
                                 <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                                     <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick"/>
