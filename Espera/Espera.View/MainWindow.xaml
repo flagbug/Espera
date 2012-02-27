@@ -314,11 +314,11 @@
                     </TabItem>
                     <TabItem Header="YouTube" IsSelected="{Binding Path=IsYoutube}">
                         <ListView ItemsSource="{Binding Path=SelectableYoutubeSongs, IsAsync=True}"
-                                  SelectedItem="{Binding Path=SelectedSong}"
+                                  SelectionChanged="SongList_SelectionChanged"
                                   ContextMenuOpening="SongList_ContextMenuOpening">
                             <ListView.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongToPlaylistCommand}" />
+                                    <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongsToPlaylistCommand}" />
                                 </ContextMenu>
                             </ListView.ContextMenu>
                             <ListView.ItemContainerStyle>
