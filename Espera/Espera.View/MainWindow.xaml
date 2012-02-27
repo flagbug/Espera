@@ -254,6 +254,7 @@
                              IsSelected="{Binding Path=IsLocal}">
                         <ListView ItemsSource="{Binding Path=SelectableLocalSongs}"
                                   SelectionChanged="SongList_SelectionChanged"
+                                  KeyUp="SongListKeyUp"
                                   ContextMenuOpening="SongList_ContextMenuOpening">
                             <ListView.ContextMenu>
                                 <ContextMenu>

@@ -121,6 +121,17 @@ namespace Espera.View
             }
         }
 
+        private void SongListKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                if (this.mainViewModel.RemoveSelectedSongsFromLibraryCommand.CanExecute(null))
+                {
+                    this.mainViewModel.RemoveSelectedSongsFromLibraryCommand.Execute(null);
+                }
+            }
+        }
+
         private void Playlist_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             if (((ListView)sender).Items.IsEmpty)
