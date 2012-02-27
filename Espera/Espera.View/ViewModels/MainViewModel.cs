@@ -16,7 +16,7 @@ namespace Espera.View.ViewModels
         private readonly Timer updateTimer;
         private string selectedArtist;
         private SongViewModel selectedSong;
-        private PlaylistEntryViewModel selectedPlaylistEntry;
+        private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
         private string searchText;
         private volatile bool isAdding;
         private bool isLocal;
@@ -158,15 +158,15 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public PlaylistEntryViewModel SelectedPlaylistEntry
+        public IEnumerable<PlaylistEntryViewModel> SelectedPlaylistEntries
         {
-            get { return this.selectedPlaylistEntry; }
+            get { return this.selectedPlaylistEntries; }
             set
             {
-                if (this.SelectedPlaylistEntry != value)
+                if (this.SelectedPlaylistEntries != value)
                 {
-                    this.selectedPlaylistEntry = value;
-                    this.OnPropertyChanged(vm => vm.SelectedPlaylistEntry);
+                    this.selectedPlaylistEntries = value;
+                    this.OnPropertyChanged(vm => vm.SelectedPlaylistEntries);
                     this.OnPropertyChanged(vm => vm.PlayCommand);
                 }
             }
@@ -284,10 +284,10 @@ namespace Espera.View.ViewModels
 
                         else
                         {
-                            this.library.PlaySong(this.SelectedPlaylistEntry.Index);
+                            this.library.PlaySong(this.SelectedPlaylistEntries.First().Index);
                         }
                     },
-                    param => this.IsAdmin && (this.SelectedPlaylistEntry != null || this.library.LoadedSong != null)
+                    param => this.IsAdmin && ((this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1) || this.library.LoadedSong != null)
                 );
             }
         }
@@ -380,10 +380,11 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        this.library.RemoveFromPlaylist(this.SelectedPlaylistEntry.Index);
+                        this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index));
+
                         this.OnPropertyChanged(vm => vm.Playlist);
                     },
-                    param => this.IsAdmin && this.SelectedPlaylistEntry != null
+                    param => this.IsAdmin && this.SelectedPlaylistEntries != null
                 );
             }
         }

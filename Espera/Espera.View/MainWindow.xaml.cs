@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
+using Espera.View.ViewModels;
 using MahApps.Metro;
 using ListView = System.Windows.Controls.ListView;
 
@@ -125,6 +126,11 @@ namespace Espera.View
             {
                 e.Handled = true;
             }
+        }
+
+        private void Playlist_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            this.mainViewModel.SelectedPlaylistEntries = ((ListView)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
         }
     }
 }

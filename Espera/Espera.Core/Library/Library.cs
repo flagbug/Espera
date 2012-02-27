@@ -308,20 +308,22 @@ namespace Espera.Core.Library
             this.playlist.Add(newIndex, song);
         }
 
-        public void RemoveFromPlaylist(int index)
+        public void RemoveFromPlaylist(IEnumerable<int> indexes)
         {
             if (this.AccessMode != AccessMode.Administrator)
                 throw new InvalidOperationException("The user is not in administrator mode.");
 
-            if (index == this.CurrentSongPlaylistIndex)
+            foreach (int index in indexes)
             {
-                this.currentPlayer.Stop();
-                this.CurrentSongPlaylistIndex = null;
+                if (index == this.CurrentSongPlaylistIndex)
+                {
+                    this.currentPlayer.Stop();
+                    this.CurrentSongPlaylistIndex = null;
+                }
+
+                this.playlist.Remove(index);
             }
 
-            index.ThrowIfLessThan(0, () => index);
-
-            this.playlist.Remove(index);
             this.RebuildPlaylist();
         }
 

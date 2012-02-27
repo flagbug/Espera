@@ -362,7 +362,7 @@
                     </Grid.RowDefinitions>
                     <ListView Grid.Row="0"
                               ItemsSource="{Binding Path=Playlist}"
-                              SelectedItem="{Binding Path=SelectedPlaylistEntry}"
+                              SelectionChanged="Playlist_SelectionChanged"
                               KeyUp="PlaylistKeyUp"
                               ContextMenuOpening="Playlist_ContextMenuOpening">
                         <ListView.ContextMenu>
