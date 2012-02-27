@@ -6,7 +6,7 @@ using Google.YouTube;
 
 namespace Espera.Core
 {
-    public sealed class YoutubeSongFinder : SongFinder
+    public sealed class YoutubeSongFinder : SongFinder<YoutubeSong>
     {
         private const string ApiKey =
             "AI39si5_zcffmO_ErRSZ9xUkfy_XxPZLWuxTOzI_1RH9HhXDI-GaaQ-j6MONkl2JiF01yBDgBFPbC8-mn6U9Qo4Ek50nKcqH5g";

@@ -12,7 +12,7 @@ namespace Espera.Core
     /// <summary>
     /// Encapsulates a recursive call through the local filesystem that reads the tags of all WAV and MP3 files and returns them.
     /// </summary>
-    internal sealed class LocalSongFinder : SongFinder
+    internal sealed class LocalSongFinder : SongFinder<LocalSong>
     {
         private static readonly string[] AllowedExtensions = new[] { ".mp3", ".wav" };
 
