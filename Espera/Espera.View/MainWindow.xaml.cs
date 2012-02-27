@@ -114,9 +114,9 @@ namespace Espera.View
         {
             if (e.Key == Key.Delete)
             {
-                if (this.mainViewModel.RemoveSelectedPlaylistEntryCommand.CanExecute(null))
+                if (this.mainViewModel.RemoveSelectedPlaylistEntriesCommand.CanExecute(null))
                 {
-                    this.mainViewModel.RemoveSelectedPlaylistEntryCommand.Execute(null);
+                    this.mainViewModel.RemoveSelectedPlaylistEntriesCommand.Execute(null);
                 }
             }
         }

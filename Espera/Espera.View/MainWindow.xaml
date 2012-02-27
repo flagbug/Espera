@@ -382,7 +382,7 @@
                         <ListView.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Play" Command="{Binding Path=PlayCommand}" />
-                                <MenuItem Header="Remove" Command="{Binding Path=RemoveSelectedPlaylistEntryCommand}" />
+                                <MenuItem Header="Remove" Command="{Binding Path=RemoveSelectedPlaylistEntriesCommand}" />
                             </ContextMenu>
                         </ListView.ContextMenu>
                         <ListView.ItemContainerStyle>

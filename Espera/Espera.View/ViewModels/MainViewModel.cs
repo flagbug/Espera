@@ -372,7 +372,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public ICommand RemoveSelectedPlaylistEntryCommand
+        public ICommand RemoveSelectedPlaylistEntriesCommand
         {
             get
             {
