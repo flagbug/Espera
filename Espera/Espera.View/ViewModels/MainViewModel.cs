@@ -257,10 +257,14 @@ namespace Espera.View.ViewModels
         {
             get
             {
-                return this.Playlist
-                    .SkipWhile(song => song.IsInactive)
-                    .Select(song => song.Duration)
-                    .Aggregate((t1, t2) => t1 + t2);
+                var songs = this.Playlist
+                    .SkipWhile(song => song.IsInactive).ToList();
+
+                if (songs.Any())
+                    return songs.Select(song => song.Duration)
+                      .Aggregate((t1, t2) => t1 + t2);
+
+                return TimeSpan.Zero;
             }
         }
 

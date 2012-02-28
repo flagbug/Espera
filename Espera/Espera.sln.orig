@@ -1,0 +1,47 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.Core", "Espera.Core\Espera.Core.csproj", "{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.View", "Espera.View\Espera.View.csproj", "{3DB64346-7403-48C0-9766-D62A5862973F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.Core.Tests", "Espera.Core.Tests\Espera.Core.Tests.csproj", "{10836E51-EAAD-4AB1-9AD8-CE200498500D}"
+EndProject
+Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = Espera.vsmdi
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DB64346-7403-48C0-9766-D62A5862973F}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{3DB64346-7403-48C0-9766-D62A5862973F}.Debug|Any CPU.Build.0 = Debug|x86
+		{3DB64346-7403-48C0-9766-D62A5862973F}.Release|Any CPU.ActiveCfg = Release|x86
+<<<<<<< HEAD
+		{3DB64346-7403-48C0-9766-D62A5862973F}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{3DB64346-7403-48C0-9766-D62A5862973F}.Release|Mixed Platforms.Build.0 = Release|x86
+		{3DB64346-7403-48C0-9766-D62A5862973F}.Release|x86.ActiveCfg = Release|x86
+		{3DB64346-7403-48C0-9766-D62A5862973F}.Release|x86.Build.0 = Release|x86
+		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Release|x86.ActiveCfg = Release|Any CPU
+=======
+>>>>>>> master
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
