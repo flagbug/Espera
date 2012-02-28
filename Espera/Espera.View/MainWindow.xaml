@@ -228,7 +228,7 @@
                     BorderBrush="{DynamicResource TextBoxBorderBrush}"
                     BorderThickness="0.5"
                     Visibility="{Binding Path=IsYoutube, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Grid DataContext="{Binding Path=SelectedSong}"
+                <Grid DataContext="{Binding Path=SelectedSongs/}"
                             Margin="5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
