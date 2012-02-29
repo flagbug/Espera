@@ -7,6 +7,20 @@ namespace Espera.View.ViewModels
     {
         private bool isPlaying;
         private bool isInactive;
+        private int cacheProgress;
+
+        public int CacheProgress
+        {
+            get { return this.cacheProgress; }
+            set
+            {
+                if (this.CacheProgress != value)
+                {
+                    this.cacheProgress = value;
+                    this.OnPropertyChanged(vm => vm.CacheProgress);
+                }
+            }
+        }
 
         public int Index { get; private set; }
 
@@ -58,6 +72,20 @@ namespace Espera.View.ViewModels
             : base(model)
         {
             this.Index = index;
+
+            if (this.Wrapped.IsCached)
+            {
+                this.CacheProgress = 100;
+            }
+
+            else
+            {
+                this.Wrapped.CachingProgressChanged +=
+                    (sender, e) =>
+                    {
+                        this.CacheProgress = (int)((e.TransferredBytes * 1.0 / e.TotalBytes) * 100);
+                    };
+            }
         }
     }
 }
