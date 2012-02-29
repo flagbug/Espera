@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Espera.Core.Audio;
 
 namespace Espera.Core
@@ -18,6 +19,15 @@ namespace Espera.Core
         internal override AudioPlayer CreateAudioPlayer()
         {
             return new LocalAudioPlayer();
+        }
+
+        internal override void LoadToCache()
+        {
+            string path = Path.GetTempFileName();
+
+            File.Copy(this.OriginalPath.LocalPath, path, true);
+
+            this.StreamingPath = new Uri(path);
         }
     }
 }

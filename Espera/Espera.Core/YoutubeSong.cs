@@ -19,5 +19,10 @@ namespace Espera.Core
         {
             return new YoutubeAudioPlayer();
         }
+
+        internal override void LoadToCache()
+        {
+            this.StreamingPath = this.OriginalPath;
+        }
     }
 }

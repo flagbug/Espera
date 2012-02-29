@@ -54,7 +54,9 @@ namespace Espera.Core
         /// <summary>
         /// Gets the path of the song on the local filesystem, or in the internet.
         /// </summary>
-        public Uri Path { get; private set; }
+        public Uri OriginalPath { get; private set; }
+
+        public Uri StreamingPath { get; protected set; }
 
         /// <summary>
         /// Gets or sets the type of the audio.
@@ -78,7 +80,7 @@ namespace Espera.Core
             if (path == null)
                 throw new ArgumentNullException(Reflector.GetMemberName(() => path));
 
-            this.Path = path;
+            this.OriginalPath = path;
             this.AudioType = audioType;
             this.Duration = duration;
 
@@ -102,7 +104,7 @@ namespace Espera.Core
             if (obj == null)
                 return false;
 
-            return this.Path == other.Path;
+            return this.OriginalPath == other.OriginalPath;
         }
 
         /// <summary>
@@ -113,7 +115,7 @@ namespace Espera.Core
         /// </returns>
         public override int GetHashCode()
         {
-            return new { this.Path, this.Duration, this.AudioType }.GetHashCode();
+            return new { Path = this.OriginalPath, this.Duration, this.AudioType }.GetHashCode();
         }
 
         /// <summary>
@@ -129,5 +131,7 @@ namespace Espera.Core
         }
 
         internal abstract AudioPlayer CreateAudioPlayer();
+
+        internal abstract void LoadToCache();
     }
 }
