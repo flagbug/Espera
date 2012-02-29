@@ -377,6 +377,22 @@ namespace Espera.Core.Library
             {
                 this.currentPlayer.Dispose();
             }
+
+            foreach (Song song in songs)
+            {
+                if (song.IsCached)
+                {
+                    try
+                    {
+                        song.ClearCache();
+                    }
+
+                    catch (IOException)
+                    {
+                        // Swallow the exception, we don't care about temporary files that could not be deleted
+                    }
+                }
+            }
         }
 
         /// <summary>
