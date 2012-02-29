@@ -458,17 +458,20 @@
                                 <GridViewColumn>
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <ProgressBar Value="{Binding Path=CacheProgress}" />
-                                            <!--<ProgressBar.Style>
-                                                    <Style BasedOn="{StaticResource {x:Type ProgressBar}}" TargetType="{x:Type ProgressBar}">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Path=CacheProgress}" Value="100">
-                                                                <Setter Property="Visibility" Value="Hidden" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </ProgressBar.Style>
-                                            </ProgressBar>-->
+                                            <Grid>
+                                                <ProgressBar Value="{Binding Path=CacheProgress}">
+                                                    <ProgressBar.Style>
+                                                        <Style BasedOn="{StaticResource {x:Type ProgressBar}}" TargetType="{x:Type ProgressBar}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Path=CacheProgress}" Value="100">
+                                                                    <Setter Property="Visibility" Value="Hidden" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </ProgressBar.Style>
+                                                </ProgressBar>
+                                                <TextBlock Text="{Binding Path=CacheProgress, StringFormat=\{0\}%}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Grid>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
