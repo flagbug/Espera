@@ -329,13 +329,6 @@ namespace Espera.Core.Library
                     this.CurrentSongPlaylistIndex = null;
                 }
 
-                Song song = this.playlist[index];
-
-                if (this.playlist.Count(entry => entry.Value == song) == 1 && !this.songs.Contains(song))
-                {
-                    song.ClearCache();
-                }
-
                 this.playlist.Remove(index);
             }
 
