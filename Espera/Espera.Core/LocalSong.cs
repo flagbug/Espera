@@ -26,11 +26,17 @@ namespace Espera.Core
         {
             string path = Path.GetTempFileName();
 
-            var operation = new StreamCopyOperation(File.OpenRead(this.OriginalPath.LocalPath), File.OpenWrite(path), 32 * 1024, true);
+            using (Stream sourceStream = File.OpenRead(this.OriginalPath.LocalPath))
+            {
+                using (Stream targetStream = File.OpenWrite(path))
+                {
+                    var operation = new StreamCopyOperation(sourceStream, targetStream, 32 * 1024, true);
 
-            operation.CopyProgressChanged += (sender, e) => this.OnCachingProgressChanged(e);
+                    operation.CopyProgressChanged += (sender, e) => this.OnCachingProgressChanged(e);
 
-            operation.Execute();
+                    operation.Execute();
+                }
+            }
 
             this.StreamingPath = new Uri(path);
 
