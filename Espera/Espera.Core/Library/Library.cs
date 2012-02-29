@@ -342,11 +342,8 @@ namespace Espera.Core.Library
                 this.songs.Remove(song);
             }
 
-            var newPlaylist = playlist
-                .Where(entry => this.songs.Contains(entry.Value))
-                .ToDictionary(entry => entry.Key, entry => entry.Value);
-
-            playlist = newPlaylist;
+            var indexes = this.playlist.Where(entry => !this.songs.Contains(entry.Value)).Select(entry => entry.Key).ToList();
+            this.RemoveFromPlaylist(indexes);
 
             this.RebuildPlaylist();
         }
