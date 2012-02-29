@@ -23,6 +23,7 @@ namespace Espera.Core
         internal override void LoadToCache()
         {
             this.StreamingPath = this.OriginalPath;
+            this.IsCached = true;
         }
     }
 }
