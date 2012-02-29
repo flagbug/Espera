@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using Espera.Core.Audio;
+using Rareform.Extensions;
+using Rareform.IO;
 using Rareform.Reflection;
 
 namespace Espera.Core
@@ -11,6 +13,8 @@ namespace Espera.Core
     [DebuggerDisplay("{Artist}-{Album}-{Title}")]
     public abstract class Song : IEquatable<Song>
     {
+        public event EventHandler<DataTransferEventArgs> CachingProgressChanged;
+
         /// <summary>
         /// Gets or sets the title.
         /// </summary>
@@ -67,6 +71,8 @@ namespace Espera.Core
         /// Gets the duration of the song.
         /// </summary>
         public TimeSpan Duration { get; private set; }
+
+        public bool IsCached { get; protected set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Song"/> class.
@@ -128,6 +134,11 @@ namespace Espera.Core
         public bool Equals(Song other)
         {
             return this.Equals((object)other);
+        }
+
+        internal protected void OnCachingProgressChanged(DataTransferEventArgs e)
+        {
+            this.CachingProgressChanged.RaiseSafe(this, e);
         }
 
         internal abstract AudioPlayer CreateAudioPlayer();

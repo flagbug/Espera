@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Espera.Core.Audio;
+using Rareform.IO;
 
 namespace Espera.Core
 {
@@ -25,9 +26,15 @@ namespace Espera.Core
         {
             string path = Path.GetTempFileName();
 
-            File.Copy(this.OriginalPath.LocalPath, path, true);
+            var operation = new StreamCopyOperation(File.OpenRead(this.OriginalPath.LocalPath), File.OpenWrite(path), 32 * 1024, true);
+
+            operation.CopyProgressChanged += (sender, e) => this.OnCachingProgressChanged(e);
+
+            operation.Execute();
 
             this.StreamingPath = new Uri(path);
+
+            this.IsCached = true;
         }
     }
 }

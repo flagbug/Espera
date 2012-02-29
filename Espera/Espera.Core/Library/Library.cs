@@ -305,9 +305,9 @@ namespace Espera.Core.Library
         {
             foreach (Song song in songList)
             {
-                if (song.StreamingPath == null)
+                if (!song.IsCached)
                 {
-                    song.LoadToCache();
+                    Task.Factory.StartNew(song.LoadToCache);
                 }
 
                 int newIndex = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
