@@ -63,5 +63,16 @@ namespace Espera.Core
 
             this.IsCached = true;
         }
+
+        internal override void ClearCache()
+        {
+            if (this.IsRemovable && File.Exists(this.StreamingPath.LocalPath))
+            {
+                File.Delete(this.StreamingPath.LocalPath);
+            }
+
+            this.StreamingPath = null;
+            this.IsCached = false;
+        }
     }
 }

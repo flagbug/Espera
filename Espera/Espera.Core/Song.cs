@@ -144,5 +144,7 @@ namespace Espera.Core
         internal abstract AudioPlayer CreateAudioPlayer();
 
         internal abstract void LoadToCache();
+
+        internal abstract void ClearCache();
     }
 }
