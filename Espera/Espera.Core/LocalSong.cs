@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Espera.Core.Audio;
 using Rareform.IO;
 
@@ -7,6 +8,18 @@ namespace Espera.Core
 {
     public class LocalSong : Song
     {
+        public bool IsRemovable
+        {
+            get
+            {
+                string songDrive = Path.GetPathRoot(this.OriginalPath.LocalPath);
+
+                return DriveInfo.GetDrives()
+                    .Where(drive => drive.DriveType == DriveType.Fixed)
+                    .All(drive => drive.RootDirectory.Name != songDrive);
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalSong"/> class.
         /// </summary>
@@ -24,21 +37,29 @@ namespace Espera.Core
 
         internal override void LoadToCache()
         {
-            string path = Path.GetTempFileName();
-
-            using (Stream sourceStream = File.OpenRead(this.OriginalPath.LocalPath))
+            if (this.IsRemovable)
             {
-                using (Stream targetStream = File.OpenWrite(path))
+                string path = Path.GetTempFileName();
+
+                using (Stream sourceStream = File.OpenRead(this.OriginalPath.LocalPath))
                 {
-                    var operation = new StreamCopyOperation(sourceStream, targetStream, 32 * 1024, true);
+                    using (Stream targetStream = File.OpenWrite(path))
+                    {
+                        var operation = new StreamCopyOperation(sourceStream, targetStream, 32 * 1024, true);
 
-                    operation.CopyProgressChanged += (sender, e) => this.OnCachingProgressChanged(e);
+                        operation.CopyProgressChanged += (sender, e) => this.OnCachingProgressChanged(e);
 
-                    operation.Execute();
+                        operation.Execute();
+                    }
                 }
+
+                this.StreamingPath = new Uri(path);
             }
 
-            this.StreamingPath = new Uri(path);
+            else
+            {
+                this.StreamingPath = this.OriginalPath;
+            }
 
             this.IsCached = true;
         }
