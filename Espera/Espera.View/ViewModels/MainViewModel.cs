@@ -180,15 +180,15 @@ namespace Espera.View.ViewModels
                     .Select((song, index) => new PlaylistEntryViewModel(song, index))
                     .ToList(); // We want a list, so that ReSharper doesn't complain about multiple enumerations
 
-                if (this.library.CurrentSongPlaylistIndex.HasValue)
+                if (this.library.CurrentSongIndex.HasValue)
                 {
-                    playlist[this.library.CurrentSongPlaylistIndex.Value].IsPlaying = true;
+                    playlist[this.library.CurrentSongIndex.Value].IsPlaying = true;
 
                     // If there are more than 5 songs from the beginning of the playlist to the current played song,
                     // skip all, but 5 songs to the position of the currently played song
                     if (playlist.TakeWhile(song => !song.IsPlaying).Count() > 5)
                     {
-                        playlist = playlist.Skip(this.library.CurrentSongPlaylistIndex.Value - 5).ToList();
+                        playlist = playlist.Skip(this.library.CurrentSongIndex.Value - 5).ToList();
                     }
 
                     foreach (var model in playlist.TakeWhile(song => !song.IsPlaying))
