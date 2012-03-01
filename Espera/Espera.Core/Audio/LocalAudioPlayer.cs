@@ -230,7 +230,7 @@ namespace Espera.Core.Audio
 
         private void CreateInputStream(Song song)
         {
-            Stream stream = File.OpenRead(song.StreamingPath.LocalPath);
+            Stream stream = File.OpenRead(song.StreamingPath);
 
             switch (song.AudioType)
             {

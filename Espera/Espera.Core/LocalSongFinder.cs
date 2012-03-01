@@ -195,7 +195,7 @@ namespace Espera.Core
 
         private static LocalSong CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath)
         {
-            return new LocalSong(new Uri(filePath), audioType, duration)
+            return new LocalSong(filePath, audioType, duration)
                        {
                            Album = tag.Album ?? String.Empty,
                            Artist = tag.FirstPerformer ?? String.Empty,

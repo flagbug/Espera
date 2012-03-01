@@ -11,7 +11,7 @@ namespace Espera.Core
 
         public Uri ThumbnailSource { get; set; }
 
-        public YoutubeSong(Uri path, AudioType audioType, TimeSpan duration)
+        public YoutubeSong(string path, AudioType audioType, TimeSpan duration)
             : base(path, audioType, duration)
         { }
 

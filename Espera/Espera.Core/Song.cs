@@ -60,9 +60,9 @@ namespace Espera.Core
         /// <summary>
         /// Gets the path of the song on the local filesystem, or in the internet.
         /// </summary>
-        public Uri OriginalPath { get; private set; }
+        public string OriginalPath { get; private set; }
 
-        public Uri StreamingPath { get; protected set; }
+        public string StreamingPath { get; protected set; }
 
         /// <summary>
         /// Gets or sets the type of the audio.
@@ -83,7 +83,7 @@ namespace Espera.Core
         /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
         /// <exception cref="ArgumentNullException"><c>path</c> is null.</exception>
-        protected Song(Uri path, AudioType audioType, TimeSpan duration)
+        protected Song(string path, AudioType audioType, TimeSpan duration)
         {
             if (path == null)
                 throw new ArgumentNullException(Reflector.GetMemberName(() => path));

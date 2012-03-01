@@ -12,7 +12,7 @@ namespace Espera.Core
         {
             get
             {
-                string songDrive = Path.GetPathRoot(this.OriginalPath.LocalPath);
+                string songDrive = Path.GetPathRoot(this.OriginalPath);
 
                 return DriveInfo.GetDrives()
                     .Where(drive => drive.DriveType == DriveType.Fixed)
@@ -26,7 +26,7 @@ namespace Espera.Core
         /// <param name="path">The path of the file.</param>
         /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
-        public LocalSong(Uri path, AudioType audioType, TimeSpan duration)
+        public LocalSong(string path, AudioType audioType, TimeSpan duration)
             : base(path, audioType, duration)
         { }
 
@@ -41,7 +41,7 @@ namespace Espera.Core
             {
                 string path = Path.GetTempFileName();
 
-                using (Stream sourceStream = File.OpenRead(this.OriginalPath.LocalPath))
+                using (Stream sourceStream = File.OpenRead(this.OriginalPath))
                 {
                     using (Stream targetStream = File.OpenWrite(path))
                     {
@@ -53,7 +53,7 @@ namespace Espera.Core
                     }
                 }
 
-                this.StreamingPath = new Uri(path);
+                this.StreamingPath = path;
             }
 
             else
@@ -67,9 +67,9 @@ namespace Espera.Core
 
         internal override void ClearCache()
         {
-            if (this.IsRemovable && File.Exists(this.StreamingPath.LocalPath))
+            if (this.IsRemovable && File.Exists(this.StreamingPath))
             {
-                File.Delete(this.StreamingPath.LocalPath);
+                File.Delete(this.StreamingPath);
             }
 
             this.StreamingPath = null;

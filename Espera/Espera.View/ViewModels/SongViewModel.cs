@@ -48,7 +48,7 @@ namespace Espera.View.ViewModels
 
         public string Path
         {
-            get { return this.Model.OriginalPath.ToString(); }
+            get { return this.Model.OriginalPath; }
         }
 
         public ICommand OpenPathCommand

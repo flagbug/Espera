@@ -453,7 +453,7 @@ namespace Espera.View.ViewModels
         public void AddSongs(string folderPath)
         {
             EventHandler<LibraryFillEventArgs> handler =
-                (sender, e) => this.StatusViewModel.Update(e.Song.OriginalPath.LocalPath, e.ProcessedTagCount, e.TotalTagCount);
+                (sender, e) => this.StatusViewModel.Update(e.Song.OriginalPath, e.ProcessedTagCount, e.TotalTagCount);
 
             this.library.SongAdded += handler;
 
