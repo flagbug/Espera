@@ -84,6 +84,8 @@ namespace Espera.View.ViewModels
                 {
                     this.CacheProgress = (int)((e.TransferredBytes * 1.0 / e.TotalBytes) * 100);
                 };
+
+                this.Wrapped.CachingCompleted += (sender, e) => this.CacheProgress = 100;
             }
         }
     }

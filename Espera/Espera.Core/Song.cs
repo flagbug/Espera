@@ -15,6 +15,8 @@ namespace Espera.Core
     {
         public event EventHandler<DataTransferEventArgs> CachingProgressChanged;
 
+        public event EventHandler CachingCompleted;
+
         /// <summary>
         /// Gets or sets the title.
         /// </summary>
@@ -139,6 +141,11 @@ namespace Espera.Core
         internal protected void OnCachingProgressChanged(DataTransferEventArgs e)
         {
             this.CachingProgressChanged.RaiseSafe(this, e);
+        }
+
+        internal protected void OnCachingCompleted(EventArgs e)
+        {
+            this.CachingCompleted.RaiseSafe(this, e);
         }
 
         internal abstract AudioPlayer CreateAudioPlayer();

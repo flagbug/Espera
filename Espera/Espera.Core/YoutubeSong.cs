@@ -24,6 +24,7 @@ namespace Espera.Core
         {
             this.StreamingPath = this.OriginalPath;
             this.IsCached = true;
+            this.OnCachingCompleted(EventArgs.Empty);
         }
 
         internal override void ClearCache()

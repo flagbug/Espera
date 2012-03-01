@@ -62,6 +62,7 @@ namespace Espera.Core
             }
 
             this.IsCached = true;
+            this.OnCachingCompleted(EventArgs.Empty);
         }
 
         internal override void ClearCache()
