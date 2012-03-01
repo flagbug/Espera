@@ -109,13 +109,10 @@ namespace Espera.Core.Audio
 
             this.Stop();
 
-            if (song is LocalSong)
-            {
-                // NAudio requires that we renew the current wave player.
-                this.RenewWavePlayer();
+            // NAudio requires that we renew the current wave player.
+            this.RenewWavePlayer();
 
-                this.OpenSong(song);
-            }
+            this.OpenSong(song);
 
             base.Load(song);
         }
