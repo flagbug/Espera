@@ -11,13 +11,26 @@ namespace Espera.Core
 
         public Uri ThumbnailSource { get; set; }
 
-        public YoutubeSong(Uri path, AudioType audioType, TimeSpan duration)
+        public YoutubeSong(string path, AudioType audioType, TimeSpan duration)
             : base(path, audioType, duration)
         { }
 
         internal override AudioPlayer CreateAudioPlayer()
         {
             return new YoutubeAudioPlayer();
+        }
+
+        internal override void LoadToCache()
+        {
+            this.StreamingPath = this.OriginalPath;
+            this.IsCached = true;
+            this.OnCachingCompleted(EventArgs.Empty);
+        }
+
+        internal override void ClearCache()
+        {
+            this.StreamingPath = null;
+            this.IsCached = false;
         }
     }
 }

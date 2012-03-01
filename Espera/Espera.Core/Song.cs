@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using Espera.Core.Audio;
+using Rareform.Extensions;
+using Rareform.IO;
 using Rareform.Reflection;
 
 namespace Espera.Core
@@ -11,6 +13,10 @@ namespace Espera.Core
     [DebuggerDisplay("{Artist}-{Album}-{Title}")]
     public abstract class Song : IEquatable<Song>
     {
+        public event EventHandler<DataTransferEventArgs> CachingProgressChanged;
+
+        public event EventHandler CachingCompleted;
+
         /// <summary>
         /// Gets or sets the title.
         /// </summary>
@@ -54,7 +60,9 @@ namespace Espera.Core
         /// <summary>
         /// Gets the path of the song on the local filesystem, or in the internet.
         /// </summary>
-        public Uri Path { get; private set; }
+        public string OriginalPath { get; private set; }
+
+        public string StreamingPath { get; protected set; }
 
         /// <summary>
         /// Gets or sets the type of the audio.
@@ -66,6 +74,8 @@ namespace Espera.Core
         /// </summary>
         public TimeSpan Duration { get; private set; }
 
+        public bool IsCached { get; protected set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Song"/> class.
         /// </summary>
@@ -73,12 +83,12 @@ namespace Espera.Core
         /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
         /// <exception cref="ArgumentNullException"><c>path</c> is null.</exception>
-        protected Song(Uri path, AudioType audioType, TimeSpan duration)
+        protected Song(string path, AudioType audioType, TimeSpan duration)
         {
             if (path == null)
                 throw new ArgumentNullException(Reflector.GetMemberName(() => path));
 
-            this.Path = path;
+            this.OriginalPath = path;
             this.AudioType = audioType;
             this.Duration = duration;
 
@@ -102,7 +112,7 @@ namespace Espera.Core
             if (obj == null)
                 return false;
 
-            return this.Path == other.Path;
+            return this.OriginalPath == other.OriginalPath;
         }
 
         /// <summary>
@@ -113,7 +123,7 @@ namespace Espera.Core
         /// </returns>
         public override int GetHashCode()
         {
-            return new { this.Path, this.Duration, this.AudioType }.GetHashCode();
+            return new { Path = this.OriginalPath, this.Duration, this.AudioType }.GetHashCode();
         }
 
         /// <summary>
@@ -128,6 +138,20 @@ namespace Espera.Core
             return this.Equals((object)other);
         }
 
+        internal protected void OnCachingProgressChanged(DataTransferEventArgs e)
+        {
+            this.CachingProgressChanged.RaiseSafe(this, e);
+        }
+
+        internal protected void OnCachingCompleted(EventArgs e)
+        {
+            this.CachingCompleted.RaiseSafe(this, e);
+        }
+
         internal abstract AudioPlayer CreateAudioPlayer();
+
+        internal abstract void LoadToCache();
+
+        internal abstract void ClearCache();
     }
 }

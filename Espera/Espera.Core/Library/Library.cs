@@ -303,6 +303,19 @@ namespace Espera.Core.Library
         /// <param name="songList">The songs to add to the end of the playlist.</param>
         public void AddSongsToPlaylist(IEnumerable<Song> songList)
         {
+            var options = new ParallelOptions { MaxDegreeOfParallelism = 3 };
+
+            Task.Factory.StartNew(() =>
+            {
+                Parallel.ForEach(songList, options, song =>
+                {
+                    if (!song.IsCached)
+                    {
+                        song.LoadToCache();
+                    }
+                });
+            });
+
             foreach (Song song in songList)
             {
                 int newIndex = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
@@ -337,11 +350,8 @@ namespace Espera.Core.Library
                 this.songs.Remove(song);
             }
 
-            var newPlaylist = playlist
-                .Where(entry => this.songs.Contains(entry.Value))
-                .ToDictionary(entry => entry.Key, entry => entry.Value);
-
-            playlist = newPlaylist;
+            var indexes = this.playlist.Where(entry => !this.songs.Contains(entry.Value)).Select(entry => entry.Key).ToList();
+            this.RemoveFromPlaylist(indexes);
 
             this.RebuildPlaylist();
         }
@@ -364,6 +374,22 @@ namespace Espera.Core.Library
             if (this.currentPlayer != null)
             {
                 this.currentPlayer.Dispose();
+            }
+
+            foreach (Song song in songs)
+            {
+                if (song.IsCached)
+                {
+                    try
+                    {
+                        song.ClearCache();
+                    }
+
+                    catch (IOException)
+                    {
+                        // Swallow the exception, we don't care about temporary files that could not be deleted
+                    }
+                }
             }
         }
 
