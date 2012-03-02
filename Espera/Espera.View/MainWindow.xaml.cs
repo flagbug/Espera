@@ -157,5 +157,27 @@ namespace Espera.View
         {
             this.mainViewModel.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModel>();
         }
+
+        private void MetroWindow_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+            {
+                if (this.mainViewModel.IsPlaying)
+                {
+                    if (this.mainViewModel.PauseCommand.CanExecute(null))
+                    {
+                        this.mainViewModel.PauseCommand.Execute(null);
+                    }
+                }
+
+                else
+                {
+                    if (this.mainViewModel.PlayCommand.CanExecute(null))
+                    {
+                        this.mainViewModel.PlayCommand.Execute(null);
+                    }
+                }
+            }
+        }
     }
 }

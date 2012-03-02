@@ -8,8 +8,9 @@
                       Height="600"
                       Width="800"
                       WindowState="Maximized"
+                      Icon="/Espera.View;component/Images/appbar.music.png"
                       Closing="MetroWindowClosing"
-                      Icon="/Espera.View;component/Images/appbar.music.png">
+                      KeyUp="MetroWindow_KeyUp">
     <Window.DataContext>
         <ViewModels:MainViewModel x:Name="mainViewModel" />
     </Window.DataContext>
