@@ -106,8 +106,9 @@ namespace Espera.View
             if (e.Key == Key.Enter)
             {
                 this.mainViewModel.StartSearch();
-                e.Handled = true;
             }
+
+            e.Handled = true;
         }
 
         private void PlaylistKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
