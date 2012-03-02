@@ -333,12 +333,14 @@ namespace Espera.Core.Library
             if (this.AccessMode != AccessMode.Administrator)
                 throw new InvalidOperationException("The user is not in administrator mode.");
 
+            songList = songList.ToList(); // Avoid multiple enumeration
+
             foreach (Song song in songList)
             {
                 this.songs.Remove(song);
             }
 
-            this.playlist.RemoveSongs(songList);
+            this.RemoveFromPlaylist(this.playlist.Getindexes(songList));
         }
 
         /// <summary>

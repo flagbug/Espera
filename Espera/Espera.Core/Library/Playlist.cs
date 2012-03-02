@@ -86,14 +86,11 @@ namespace Espera.Core.Library
             this.Rebuild();
         }
 
-        public void RemoveSongs(IEnumerable<Song> songs)
+        public IEnumerable<int> Getindexes(IEnumerable<Song> songs)
         {
-            var removable = this.playlist
+            return this.playlist
                 .Where(entry => songs.Contains(entry.Value))
-                .Select(entry => entry.Key)
-                .ToList();
-
-            this.RemoveSongs(removable);
+                .Select(entry => entry.Key);
         }
 
         public Song this[int index]
