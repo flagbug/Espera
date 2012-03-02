@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Espera.Core.Audio;
 using Rareform.Extensions;
@@ -427,9 +428,19 @@ namespace Espera.Core.Library
             this.currentPlayer.SongFinished += (sender, e) => this.HandleSongFinish();
             this.currentPlayer.Volume = this.Volume;
 
-            this.currentPlayer.Load(song);
-            this.currentPlayer.Play();
-            this.SongStarted.RaiseSafe(this, EventArgs.Empty);
+            Task.Factory.StartNew(() =>
+            {
+                // Wait till the song is cached
+                while (!song.IsCached)
+                {
+                    Thread.Sleep(250);
+                }
+
+                this.currentPlayer.Load(song);
+                this.currentPlayer.Play();
+
+                this.SongStarted.RaiseSafe(this, EventArgs.Empty);
+            });
         }
 
         private void InternPlayNextSong()
