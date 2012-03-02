@@ -37,6 +37,9 @@ namespace Espera.Core
             this.songsFound = new List<T>();
         }
 
+        /// <summary>
+        /// Starts the <see cref="SongFinder{T}"/>.
+        /// </summary>
         public abstract void Start();
 
         protected virtual void OnSongFound(SongEventArgs e)

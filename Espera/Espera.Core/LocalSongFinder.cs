@@ -89,7 +89,7 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Starts the song crawler in an asynchronous manner.
+        /// Starts the <see cref="LocalSongFinder"/>.
         /// </summary>
         public override void Start()
         {
@@ -205,11 +205,6 @@ namespace Espera.Core
                        };
         }
 
-        /// <summary>
-        /// Handles the FileFound event of the directory scanner.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="Rareform.IO.FileEventArgs"/> instance containing the event data.</param>
         private void ScannerFileFound(object sender, FileEventArgs e)
         {
             if (AllowedExtensions.Contains(e.File.Extension))
