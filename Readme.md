@@ -25,7 +25,8 @@ without opening the VLC media player itself. (Sadly I found no other way to stre
 ### Mp3-players & removable devices
 
 Espera has built-in support for adding music from MP3-players and other removable devices to the playlist.
-The music that is added to the playlist will be automatically cached on the computer, so that the devices can be removed.
+The music that is added to the playlist will be automatically cached on the computer, so that the devices can be removed
+without affecting the playback.
 
 ### Metro-Style
 
