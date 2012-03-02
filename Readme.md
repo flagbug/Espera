@@ -22,6 +22,11 @@ Espera can search songs at YouTube, add them to the playlist and stream the audi
 This function requires the VLC media player to be installed, as it streams the YouTube audio track in the background 
 without opening the VLC media player itself. (Sadly I found no other way to stream from YouTube without a depency to VLC)
 
+### MP3-players & removable devices
+
+Espera has built-in support for adding music from MP3-players and other removable devices to the playlist.
+The music that is added to the playlist will be automatically cached on the computer, so that the devices can be removed.
+
 ### Metro-Style
 
 Espera uses [MahApps.Metro](http://github.com/MahApps/MahApps.Metro) for  theming. This gives Espera a beautiful and 
