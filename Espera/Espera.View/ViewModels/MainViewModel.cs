@@ -253,14 +253,22 @@ namespace Espera.View.ViewModels
         /// <summary>
         /// Gets the total remaining time of all songs that come after the currently played song.
         /// </summary>
-        public TimeSpan TimeRemaining
+        public TimeSpan? TimeRemaining
         {
             get
             {
-                return this.Playlist
+                var songs = this.Playlist
                     .SkipWhile(song => song.IsInactive)
-                    .Select(song => song.Duration)
-                    .Aggregate((t1, t2) => t1 + t2);
+                    .ToList();
+
+                if (songs.Any())
+                {
+                    return songs
+                        .Select(song => song.Duration)
+                        .Aggregate((t1, t2) => t1 + t2);
+                }
+
+                return null;
             }
         }
 
