@@ -17,6 +17,8 @@ namespace Espera.Core
 
         public event EventHandler CachingCompleted;
 
+        public event EventHandler CachingFailed;
+
         /// <summary>
         /// Gets or sets the title.
         /// </summary>
@@ -146,6 +148,11 @@ namespace Espera.Core
         internal protected void OnCachingCompleted(EventArgs e)
         {
             this.CachingCompleted.RaiseSafe(this, e);
+        }
+
+        internal protected void OnCachingFailed(EventArgs e)
+        {
+            this.CachingFailed.RaiseSafe(this, e);
         }
 
         internal abstract AudioPlayer CreateAudioPlayer();

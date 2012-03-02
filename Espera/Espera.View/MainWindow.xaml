@@ -470,7 +470,20 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Grid.Style>
-                                                <TextBlock Text="{Binding Path=CacheProgress, StringFormat=Caching... \{0\}%}" VerticalAlignment="Center" />
+                                                <TextBlock VerticalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="{x:Type TextBlock}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Path=HasCachingFailed}" Value="True">
+                                                                    <Setter Property="Text" Value="Caching failed!" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Path=HasCachingFailed}" Value="False">
+                                                                    <Setter Property="Text" Value="{Binding Path=CacheProgress, StringFormat=Caching... \{0\}%}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
                                             </Grid>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
