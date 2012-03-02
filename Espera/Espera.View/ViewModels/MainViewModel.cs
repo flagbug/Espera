@@ -445,7 +445,7 @@ namespace Espera.View.ViewModels
             this.StatusViewModel = new StatusViewModel();
 
             this.updateTimer = new Timer(333);
-            this.updateTimer.Elapsed += (sender, e) => this.UpdateTime();
+            this.updateTimer.Elapsed += (sender, e) => this.UpdateCurrentTime();
 
             this.searchText = String.Empty;
         }
@@ -502,28 +502,38 @@ namespace Espera.View.ViewModels
             this.updateTimer.Dispose();
         }
 
-        private void UpdateTime()
+        private void UpdateCurrentTime()
         {
             this.OnPropertyChanged(vm => vm.CurrentSeconds);
             this.OnPropertyChanged(vm => vm.CurrentTime);
         }
 
-        private void LibraryRaisedSongFinished(object sender, EventArgs e)
+        private void UpdateTotalTime()
+        {
+            this.OnPropertyChanged(vm => vm.TotalSeconds);
+            this.OnPropertyChanged(vm => vm.TotalTime);
+        }
+
+        private void UpdatePlaylist()
         {
             this.OnPropertyChanged(vm => vm.IsPlaying);
             this.OnPropertyChanged(vm => vm.Playlist);
+        }
+
+        private void LibraryRaisedSongFinished(object sender, EventArgs e)
+        {
+            this.UpdatePlaylist();
 
             this.updateTimer.Stop();
         }
 
         private void LibraryRaisedSongStarted(object sender, EventArgs e)
         {
-            this.OnPropertyChanged(vm => vm.TotalSeconds);
-            this.OnPropertyChanged(vm => vm.TotalTime);
-            this.OnPropertyChanged(vm => vm.Playlist);
+            this.UpdateTotalTime();
+            this.UpdatePlaylist();
+
             this.OnPropertyChanged(vm => vm.SongsRemaining);
             this.OnPropertyChanged(vm => vm.TimeRemaining);
-            this.OnPropertyChanged(vm => vm.IsPlaying);
 
             this.updateTimer.Start();
         }
