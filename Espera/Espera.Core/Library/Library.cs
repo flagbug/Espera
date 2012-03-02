@@ -325,6 +325,18 @@ namespace Espera.Core.Library
         }
 
         /// <summary>
+        /// Removes the specified songs from the playlist.
+        /// </summary>
+        /// <param name="songList">The songs to remove.</param>
+        public void RemoveFromPlaylist(IEnumerable<Song> songList)
+        {
+            if (this.AccessMode != AccessMode.Administrator)
+                throw new InvalidOperationException("The user is not in administrator mode.");
+
+            this.RemoveFromPlaylist(this.playlist.Getindexes(songList));
+        }
+
+        /// <summary>
         /// Removes the specified songs from the library.
         /// </summary>
         /// <param name="songList">The list of the songs to remove from the library.</param>
@@ -333,14 +345,10 @@ namespace Espera.Core.Library
             if (this.AccessMode != AccessMode.Administrator)
                 throw new InvalidOperationException("The user is not in administrator mode.");
 
-            songList = songList.ToList(); // Avoid multiple enumeration
-
             foreach (Song song in songList)
             {
                 this.songs.Remove(song);
             }
-
-            this.RemoveFromPlaylist(this.playlist.Getindexes(songList));
         }
 
         /// <summary>

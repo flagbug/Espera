@@ -439,6 +439,30 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public object RemoveSelectedSongsFromLibraryAndPlaylistCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        var songs = this.SelectedSongs.Select(song => song.Model).ToList();
+
+                        this.library.RemoveFromLibrary(songs);
+                        this.library.RemoveFromPlaylist(songs);
+
+                        this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
+                        this.OnPropertyChanged(vm => vm.Playlist);
+                        this.OnPropertyChanged(vm => vm.SongsRemaining);
+                        this.OnPropertyChanged(vm => vm.TimeRemaining);
+                        this.OnPropertyChanged(vm => vm.Artists);
+                    },
+                    param => this.SelectedSongs != null && this.SelectedSongs.Any()
+                );
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
         /// </summary>
