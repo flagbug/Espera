@@ -546,15 +546,16 @@ namespace Espera.View.ViewModels
             this.OnPropertyChanged(vm => vm.TotalTime);
         }
 
-        private void UpdatePlaylist()
-        {
-            this.OnPropertyChanged(vm => vm.IsPlaying);
-            this.OnPropertyChanged(vm => vm.Playlist);
-        }
-
         private void LibraryRaisedSongFinished(object sender, EventArgs e)
         {
-            this.UpdatePlaylist();
+            // We need this check, to avoid that the pause/play button changes its state,
+            // when the library starts the next song
+            if (!this.library.CanPlayNextSong)
+            {
+                this.OnPropertyChanged(vm => vm.IsPlaying);
+            }
+
+            this.OnPropertyChanged(vm => vm.Playlist);
 
             this.updateTimer.Stop();
         }
@@ -562,7 +563,9 @@ namespace Espera.View.ViewModels
         private void LibraryRaisedSongStarted(object sender, EventArgs e)
         {
             this.UpdateTotalTime();
-            this.UpdatePlaylist();
+
+            this.OnPropertyChanged(vm => vm.IsPlaying);
+            this.OnPropertyChanged(vm => vm.Playlist);
 
             this.OnPropertyChanged(vm => vm.SongsRemaining);
             this.OnPropertyChanged(vm => vm.TimeRemaining);
