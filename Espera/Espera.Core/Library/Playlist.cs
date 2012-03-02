@@ -8,7 +8,7 @@ namespace Espera.Core.Library
     public class Playlist : IEnumerable<Song>
     {
         private Dictionary<int, Song> playlist;
-        private object cacheSyncLock;
+        private readonly object cacheSyncLock;
 
         /// <summary>
         /// Gets the index of the currently played song in the playlist.
