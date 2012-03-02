@@ -8,6 +8,7 @@ namespace Espera.Core.Library
     public class Playlist : IEnumerable<Song>
     {
         private Dictionary<int, Song> playlist;
+        private object cacheSyncLock;
 
         /// <summary>
         /// Gets the index of the currently played song in the playlist.
@@ -42,6 +43,7 @@ namespace Espera.Core.Library
         public Playlist()
         {
             this.playlist = new Dictionary<int, Song>();
+            this.cacheSyncLock = new object();
         }
 
         /// <summary>
@@ -54,13 +56,18 @@ namespace Espera.Core.Library
 
             Task.Factory.StartNew(() =>
             {
-                Parallel.ForEach(songList, options, song =>
+                // This lock synchronizes the case that multiple calls of the AddSongs method occur,
+                // before the first sequence of songs is cached completely
+                lock (cacheSyncLock)
                 {
-                    if (!song.IsCached)
+                    Parallel.ForEach(songList, options, song =>
                     {
-                        song.LoadToCache();
-                    }
-                });
+                        if (!song.IsCached)
+                        {
+                            song.LoadToCache();
+                        }
+                    });
+                }
             });
 
             foreach (Song song in songList)
