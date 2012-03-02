@@ -174,6 +174,12 @@ namespace Espera.Core.Library
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the administrator is created.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if the administrator is created; otherwise, <c>false</c>.
+        /// </value>
         public bool IsAdministratorCreated { get; private set; }
 
         /// <summary>
@@ -188,6 +194,10 @@ namespace Espera.Core.Library
             this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
         }
 
+        /// <summary>
+        /// Creates the administrator with the specified password.
+        /// </summary>
+        /// <param name="adminPassword">The administrator password.</param>
         public void CreateAdmin(string adminPassword)
         {
             if (adminPassword == null)
@@ -200,6 +210,10 @@ namespace Espera.Core.Library
             this.IsAdministratorCreated = true;
         }
 
+        /// <summary>
+        /// Logs the administrator with the specified password in.
+        /// </summary>
+        /// <param name="adminPassword">The administrator password.</param>
         public void ChangeToAdmin(string adminPassword)
         {
             if (adminPassword == null)
@@ -211,6 +225,9 @@ namespace Espera.Core.Library
             this.AccessMode = AccessMode.Administrator;
         }
 
+        /// <summary>
+        /// Changes the access mode to user mode.
+        /// </summary>
         public void ChangeToUser()
         {
             this.AccessMode = AccessMode.User;
@@ -284,6 +301,10 @@ namespace Espera.Core.Library
             this.playlist.AddSongs(songList);
         }
 
+        /// <summary>
+        /// Removes the songs with the specified indexes from the playlist.
+        /// </summary>
+        /// <param name="indexes">The indexes of the songs to remove from the playlist.</param>
         public void RemoveFromPlaylist(IEnumerable<int> indexes)
         {
             if (this.AccessMode != AccessMode.Administrator)
@@ -297,6 +318,10 @@ namespace Espera.Core.Library
             this.playlist.RemoveSongs(indexes);
         }
 
+        /// <summary>
+        /// Removes the specified songs from the library.
+        /// </summary>
+        /// <param name="songList">The list of the songs to remove from the library.</param>
         public void RemoveFromLibrary(IEnumerable<Song> songList)
         {
             if (this.AccessMode != AccessMode.Administrator)

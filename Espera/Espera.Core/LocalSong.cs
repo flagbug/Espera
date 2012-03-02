@@ -8,6 +8,12 @@ namespace Espera.Core
 {
     public class LocalSong : Song
     {
+        /// <summary>
+        /// Gets a value indicating whether this song is from a removable drive.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this song is from a removable drive; otherwise, <c>false</c>.
+        /// </value>
         public bool IsRemovable
         {
             get
