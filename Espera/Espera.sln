@@ -7,17 +7,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.View", "Espera.View\
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3DB64346-7403-48C0-9766-D62A5862973F}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{3DB64346-7403-48C0-9766-D62A5862973F}.Debug|Any CPU.Build.0 = Debug|x86
-		{3DB64346-7403-48C0-9766-D62A5862973F}.Release|Any CPU.ActiveCfg = Release|x86
+		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}.Debug|x86.ActiveCfg = Debug|x86
+		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}.Debug|x86.Build.0 = Debug|x86
+		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}.Release|x86.ActiveCfg = Release|x86
+		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}.Release|x86.Build.0 = Release|x86
+		{3DB64346-7403-48C0-9766-D62A5862973F}.Debug|x86.ActiveCfg = Debug|x86
+		{3DB64346-7403-48C0-9766-D62A5862973F}.Debug|x86.Build.0 = Debug|x86
+		{3DB64346-7403-48C0-9766-D62A5862973F}.Release|x86.ActiveCfg = Release|x86
+		{3DB64346-7403-48C0-9766-D62A5862973F}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
