@@ -299,7 +299,7 @@ namespace Espera.Core.Library
         /// <param name="songList">The songs to add to the end of the playlist.</param>
         public void AddSongsToPlaylist(IEnumerable<Song> songList)
         {
-            this.playlist.AddSongs(songList);
+            this.playlist.AddSongs(songList.ToList()); // Copy the sequence to a list, so that the enumeration doesn't gets modified
         }
 
         /// <summary>
