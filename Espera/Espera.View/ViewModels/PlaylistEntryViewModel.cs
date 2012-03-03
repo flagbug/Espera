@@ -8,6 +8,20 @@ namespace Espera.View.ViewModels
         private bool isPlaying;
         private bool isInactive;
         private int cacheProgress;
+        private bool hasCachingFailed;
+
+        public bool HasCachingFailed
+        {
+            get { return this.hasCachingFailed; }
+            set
+            {
+                if (this.HasCachingFailed != value)
+                {
+                    this.hasCachingFailed = value;
+                    this.OnPropertyChanged(vm => vm.HasCachingFailed);
+                }
+            }
+        }
 
         public int CacheProgress
         {
@@ -80,10 +94,10 @@ namespace Espera.View.ViewModels
 
             else
             {
-                this.Wrapped.CachingProgressChanged += (sender, e) =>
-                {
-                    this.CacheProgress = (int)((e.TransferredBytes * 1.0 / e.TotalBytes) * 100);
-                };
+                this.Wrapped.CachingProgressChanged +=
+                    (sender, e) => this.CacheProgress = (int)((e.TransferredBytes * 1.0 / e.TotalBytes) * 100);
+
+                this.Wrapped.CachingFailed += (sender, args) => this.HasCachingFailed = true;
 
                 this.Wrapped.CachingCompleted += (sender, e) => this.CacheProgress = 100;
             }

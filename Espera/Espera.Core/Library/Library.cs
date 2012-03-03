@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Espera.Core.Audio;
 using Rareform.Extensions;
@@ -12,7 +13,7 @@ namespace Espera.Core.Library
     public class Library : IDisposable
     {
         private readonly HashSet<Song> songs;
-        private Dictionary<int, Song> playlist;
+        private readonly Playlist playlist;
         private readonly object songLocker;
         private string password;
         private AccessMode accessMode;
@@ -58,12 +59,28 @@ namespace Espera.Core.Library
         /// </summary>
         public IEnumerable<Song> Playlist
         {
-            get
-            {
-                return playlist
-                    .OrderBy(pair => pair.Key)
-                    .Select(pair => pair.Value);
-            }
+            get { return this.playlist; }
+        }
+
+        /// <summary>
+        /// Gets the index of the currently played song in the playlist.
+        /// </summary>
+        /// <value>
+        /// The index of the currently played song in the playlist.
+        /// </value>
+        public int? CurrentSongIndex
+        {
+            get { return this.playlist.CurrentSongIndex; }
+        }
+
+        public bool CanPlayNextSong
+        {
+            get { return this.playlist.CanPlayNextSong; }
+        }
+
+        public bool CanPlayPreviousSong
+        {
+            get { return this.playlist.CanPlayPreviousSong; }
         }
 
         /// <summary>
@@ -143,44 +160,6 @@ namespace Espera.Core.Library
         }
 
         /// <summary>
-        /// Gets the index of the current song in the playlist.
-        /// </summary>
-        /// <value>
-        /// The index of the current song in the playlist.
-        /// </value>
-        public int? CurrentSongPlaylistIndex { get; private set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the next song in the playlist can be played.
-        /// </summary>
-        /// <value>
-        /// true if the next song in the playlist can be played; otherwise, false.
-        /// </value>
-        public bool CanPlayNextSong
-        {
-            get
-            {
-                return this.CurrentSongPlaylistIndex.HasValue &&
-                       this.playlist.ContainsKey(this.CurrentSongPlaylistIndex.Value + 1);
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the previous song in the playlist can be played.
-        /// </summary>
-        /// <value>
-        /// true if the previous song in the playlist can be played; otherwise, false.
-        /// </value>
-        public bool CanPlayPreviousSong
-        {
-            get
-            {
-                return this.CurrentSongPlaylistIndex.HasValue &&
-                       this.playlist.ContainsKey(this.CurrentSongPlaylistIndex.Value - 1);
-            }
-        }
-
-        /// <summary>
         /// Gets the access mode that is currently enabled.
         /// </summary>
         public AccessMode AccessMode
@@ -196,6 +175,12 @@ namespace Espera.Core.Library
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the administrator is created.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if the administrator is created; otherwise, <c>false</c>.
+        /// </value>
         public bool IsAdministratorCreated { get; private set; }
 
         /// <summary>
@@ -205,11 +190,15 @@ namespace Espera.Core.Library
         {
             this.songLocker = new object();
             this.songs = new HashSet<Song>();
-            this.playlist = new Dictionary<int, Song>();
+            this.playlist = new Playlist();
             this.volume = 1.0f;
             this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
         }
 
+        /// <summary>
+        /// Creates the administrator with the specified password.
+        /// </summary>
+        /// <param name="adminPassword">The administrator password.</param>
         public void CreateAdmin(string adminPassword)
         {
             if (adminPassword == null)
@@ -222,6 +211,10 @@ namespace Espera.Core.Library
             this.IsAdministratorCreated = true;
         }
 
+        /// <summary>
+        /// Logs the administrator with the specified password in.
+        /// </summary>
+        /// <param name="adminPassword">The administrator password.</param>
         public void ChangeToAdmin(string adminPassword)
         {
             if (adminPassword == null)
@@ -233,6 +226,9 @@ namespace Espera.Core.Library
             this.AccessMode = AccessMode.Administrator;
         }
 
+        /// <summary>
+        /// Changes the access mode to user mode.
+        /// </summary>
         public void ChangeToUser()
         {
             this.AccessMode = AccessMode.User;
@@ -291,10 +287,10 @@ namespace Espera.Core.Library
             if (this.AccessMode != AccessMode.Administrator)
                 throw new InvalidOperationException("The user is not in administrator mode.");
 
-            if (!this.CanPlayPreviousSong || !this.CurrentSongPlaylistIndex.HasValue)
+            if (!this.playlist.CanPlayPreviousSong || !this.playlist.CurrentSongIndex.HasValue)
                 throw new InvalidOperationException("The previous song couldn't be played.");
 
-            this.PlaySong(this.CurrentSongPlaylistIndex.Value - 1);
+            this.PlaySong(this.playlist.CurrentSongIndex.Value - 1);
         }
 
         /// <summary>
@@ -303,57 +299,56 @@ namespace Espera.Core.Library
         /// <param name="songList">The songs to add to the end of the playlist.</param>
         public void AddSongsToPlaylist(IEnumerable<Song> songList)
         {
-            var options = new ParallelOptions { MaxDegreeOfParallelism = 3 };
-
-            Task.Factory.StartNew(() =>
-            {
-                Parallel.ForEach(songList, options, song =>
-                {
-                    if (!song.IsCached)
-                    {
-                        song.LoadToCache();
-                    }
-                });
-            });
-
-            foreach (Song song in songList)
-            {
-                int newIndex = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
-
-                this.playlist.Add(newIndex, song);
-            }
+            this.playlist.AddSongs(songList.ToList()); // Copy the sequence to a list, so that the enumeration doesn't gets modified
         }
 
+        /// <summary>
+        /// Removes the songs with the specified indexes from the playlist.
+        /// </summary>
+        /// <param name="indexes">The indexes of the songs to remove from the playlist.</param>
         public void RemoveFromPlaylist(IEnumerable<int> indexes)
         {
             if (this.AccessMode != AccessMode.Administrator)
                 throw new InvalidOperationException("The user is not in administrator mode.");
 
-            foreach (int index in indexes)
+            indexes = indexes.ToList(); // Avoid multiple enumeration
+
+            bool stopCurrentSong = indexes.Any(index => index == this.playlist.CurrentSongIndex);
+
+            this.playlist.RemoveSongs(indexes);
+
+            if (stopCurrentSong)
             {
-                if (index == this.CurrentSongPlaylistIndex)
-                {
-                    this.currentPlayer.Stop();
-                    this.CurrentSongPlaylistIndex = null;
-                }
-
-                this.playlist.Remove(index);
+                this.currentPlayer.Stop();
+                this.SongFinished.RaiseSafe(this, EventArgs.Empty);
             }
-
-            this.RebuildPlaylist();
         }
 
+        /// <summary>
+        /// Removes the specified songs from the playlist.
+        /// </summary>
+        /// <param name="songList">The songs to remove.</param>
+        public void RemoveFromPlaylist(IEnumerable<Song> songList)
+        {
+            if (this.AccessMode != AccessMode.Administrator)
+                throw new InvalidOperationException("The user is not in administrator mode.");
+
+            this.RemoveFromPlaylist(this.playlist.Getindexes(songList));
+        }
+
+        /// <summary>
+        /// Removes the specified songs from the library.
+        /// </summary>
+        /// <param name="songList">The list of the songs to remove from the library.</param>
         public void RemoveFromLibrary(IEnumerable<Song> songList)
         {
+            if (this.AccessMode != AccessMode.Administrator)
+                throw new InvalidOperationException("The user is not in administrator mode.");
+
             foreach (Song song in songList)
             {
                 this.songs.Remove(song);
             }
-
-            var indexes = this.playlist.Where(entry => !this.songs.Contains(entry.Value)).Select(entry => entry.Key).ToList();
-            this.RemoveFromPlaylist(indexes);
-
-            this.RebuildPlaylist();
         }
 
         /// <summary>
@@ -394,29 +389,6 @@ namespace Espera.Core.Library
         }
 
         /// <summary>
-        /// Rebuilds the playlist with new indexes.
-        /// </summary>
-        private void RebuildPlaylist()
-        {
-            var newPlaylist = new Dictionary<int, Song>();
-            int index = 0;
-
-            foreach (var entry in playlist.OrderBy(entry => entry.Key))
-            {
-                newPlaylist.Add(index, entry.Value);
-
-                if (this.CurrentSongPlaylistIndex == entry.Key)
-                {
-                    this.CurrentSongPlaylistIndex = index;
-                }
-
-                index++;
-            }
-
-            this.playlist = newPlaylist;
-        }
-
-        /// <summary>
         /// Adds the song that are contained in the specified directory recursively to the library.
         /// </summary>
         /// <param name="path">The path of the directory to search.</param>
@@ -452,7 +424,7 @@ namespace Espera.Core.Library
         {
             playlistIndex.ThrowIfLessThan(0, () => playlistIndex);
 
-            this.CurrentSongPlaylistIndex = playlistIndex;
+            this.playlist.CurrentSongIndex = playlistIndex;
 
             Song song = this.playlist[playlistIndex];
 
@@ -466,29 +438,39 @@ namespace Espera.Core.Library
             this.currentPlayer.SongFinished += (sender, e) => this.HandleSongFinish();
             this.currentPlayer.Volume = this.Volume;
 
-            this.currentPlayer.Load(song);
-            this.currentPlayer.Play();
-            this.SongStarted.RaiseSafe(this, EventArgs.Empty);
+            Task.Factory.StartNew(() =>
+            {
+                // Wait till the song is cached
+                while (!song.IsCached)
+                {
+                    Thread.Sleep(250);
+                }
+
+                this.currentPlayer.Load(song);
+                this.currentPlayer.Play();
+
+                this.SongStarted.RaiseSafe(this, EventArgs.Empty);
+            });
         }
 
         private void InternPlayNextSong()
         {
-            if (!this.CanPlayNextSong || !this.CurrentSongPlaylistIndex.HasValue)
+            if (!this.playlist.CanPlayNextSong || !this.playlist.CurrentSongIndex.HasValue)
                 throw new InvalidOperationException("The next song couldn't be played.");
 
-            this.InternPlaySong(this.CurrentSongPlaylistIndex.Value + 1);
+            this.InternPlaySong(this.playlist.CurrentSongIndex.Value + 1);
         }
 
         private void HandleSongFinish()
         {
-            if (!this.CanPlayNextSong)
+            if (!this.playlist.CanPlayNextSong)
             {
-                this.CurrentSongPlaylistIndex = null;
+                this.playlist.CurrentSongIndex = null;
             }
 
             this.SongFinished.RaiseSafe(this, EventArgs.Empty);
 
-            if (this.CanPlayNextSong)
+            if (this.playlist.CanPlayNextSong)
             {
                 this.InternPlayNextSong();
             }

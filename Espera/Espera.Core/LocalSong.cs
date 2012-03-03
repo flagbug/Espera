@@ -8,6 +8,12 @@ namespace Espera.Core
 {
     public class LocalSong : Song
     {
+        /// <summary>
+        /// Gets a value indicating whether this song is from a removable drive.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this song is from a removable drive; otherwise, <c>false</c>.
+        /// </value>
         public bool IsRemovable
         {
             get
@@ -39,30 +45,25 @@ namespace Espera.Core
         {
             if (this.IsRemovable)
             {
-                string path = Path.GetTempFileName();
-
-                using (Stream sourceStream = File.OpenRead(this.OriginalPath))
+                try
                 {
-                    using (Stream targetStream = File.OpenWrite(path))
-                    {
-                        var operation = new StreamCopyOperation(sourceStream, targetStream, 32 * 1024, true);
-
-                        operation.CopyProgressChanged += (sender, e) => this.OnCachingProgressChanged(e);
-
-                        operation.Execute();
-                    }
+                    this.LoadToTempFile();
+                    this.IsCached = true;
+                    this.OnCachingCompleted(EventArgs.Empty);
                 }
 
-                this.StreamingPath = path;
+                catch (IOException)
+                {
+                    this.OnCachingFailed(EventArgs.Empty);
+                }
             }
 
             else
             {
                 this.StreamingPath = this.OriginalPath;
+                this.IsCached = true;
+                this.OnCachingCompleted(EventArgs.Empty);
             }
-
-            this.IsCached = true;
-            this.OnCachingCompleted(EventArgs.Empty);
         }
 
         internal override void ClearCache()
@@ -74,6 +75,25 @@ namespace Espera.Core
 
             this.StreamingPath = null;
             this.IsCached = false;
+        }
+
+        private void LoadToTempFile()
+        {
+            string path = Path.GetTempFileName();
+
+            using (Stream sourceStream = File.OpenRead(this.OriginalPath))
+            {
+                using (Stream targetStream = File.OpenWrite(path))
+                {
+                    var operation = new StreamCopyOperation(sourceStream, targetStream, 32 * 1024, true);
+
+                    operation.CopyProgressChanged += (sender, e) => this.OnCachingProgressChanged(e);
+
+                    operation.Execute();
+                }
+            }
+
+            this.StreamingPath = path;
         }
     }
 }

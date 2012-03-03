@@ -13,11 +13,18 @@ namespace Espera.Core
 
         private readonly string searchString;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="YoutubeSongFinder"/> class.
+        /// </summary>
+        /// <param name="searchString">The search string.</param>
         public YoutubeSongFinder(string searchString)
         {
             this.searchString = searchString;
         }
 
+        /// <summary>
+        /// Starts the <see cref="YoutubeSongFinder"/>.
+        /// </summary>
         public override void Start()
         {
             var query = new YouTubeQuery(YouTubeQuery.DefaultVideoUri)

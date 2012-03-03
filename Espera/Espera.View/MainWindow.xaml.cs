@@ -106,8 +106,9 @@ namespace Espera.View
             if (e.Key == Key.Enter)
             {
                 this.mainViewModel.StartSearch();
-                e.Handled = true;
             }
+
+            e.Handled = true;
         }
 
         private void PlaylistKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
@@ -156,6 +157,28 @@ namespace Espera.View
         private void SongList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             this.mainViewModel.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModel>();
+        }
+
+        private void MetroWindow_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+            {
+                if (this.mainViewModel.IsPlaying)
+                {
+                    if (this.mainViewModel.PauseCommand.CanExecute(null))
+                    {
+                        this.mainViewModel.PauseCommand.Execute(null);
+                    }
+                }
+
+                else
+                {
+                    if (this.mainViewModel.PlayCommand.CanExecute(null))
+                    {
+                        this.mainViewModel.PlayCommand.Execute(null);
+                    }
+                }
+            }
         }
     }
 }

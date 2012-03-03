@@ -180,15 +180,15 @@ namespace Espera.View.ViewModels
                     .Select((song, index) => new PlaylistEntryViewModel(song, index))
                     .ToList(); // We want a list, so that ReSharper doesn't complain about multiple enumerations
 
-                if (this.library.CurrentSongPlaylistIndex.HasValue)
+                if (this.library.CurrentSongIndex.HasValue)
                 {
-                    playlist[this.library.CurrentSongPlaylistIndex.Value].IsPlaying = true;
+                    playlist[this.library.CurrentSongIndex.Value].IsPlaying = true;
 
                     // If there are more than 5 songs from the beginning of the playlist to the current played song,
                     // skip all, but 5 songs to the position of the currently played song
                     if (playlist.TakeWhile(song => !song.IsPlaying).Count() > 5)
                     {
-                        playlist = playlist.Skip(this.library.CurrentSongPlaylistIndex.Value - 5).ToList();
+                        playlist = playlist.Skip(this.library.CurrentSongIndex.Value - 5).ToList();
                     }
 
                     foreach (var model in playlist.TakeWhile(song => !song.IsPlaying))
@@ -253,18 +253,22 @@ namespace Espera.View.ViewModels
         /// <summary>
         /// Gets the total remaining time of all songs that come after the currently played song.
         /// </summary>
-        public TimeSpan TimeRemaining
+        public TimeSpan? TimeRemaining
         {
             get
             {
                 var songs = this.Playlist
-                    .SkipWhile(song => song.IsInactive).ToList();
+                    .SkipWhile(song => song.IsInactive)
+                    .ToList();
 
                 if (songs.Any())
-                    return songs.Select(song => song.Duration)
-                      .Aggregate((t1, t2) => t1 + t2);
+                {
+                    return songs
+                        .Select(song => song.Duration)
+                        .Aggregate((t1, t2) => t1 + t2);
+                }
 
-                return TimeSpan.Zero;
+                return null;
             }
         }
 
@@ -435,6 +439,30 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public object RemoveSelectedSongsFromLibraryAndPlaylistCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        var songs = this.SelectedSongs.Select(song => song.Model).ToList();
+
+                        this.library.RemoveFromLibrary(songs);
+                        this.library.RemoveFromPlaylist(songs);
+
+                        this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
+                        this.OnPropertyChanged(vm => vm.Playlist);
+                        this.OnPropertyChanged(vm => vm.SongsRemaining);
+                        this.OnPropertyChanged(vm => vm.TimeRemaining);
+                        this.OnPropertyChanged(vm => vm.Artists);
+                    },
+                    param => this.SelectedSongs != null && this.SelectedSongs.Any()
+                );
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
         /// </summary>
@@ -449,7 +477,7 @@ namespace Espera.View.ViewModels
             this.StatusViewModel = new StatusViewModel();
 
             this.updateTimer = new Timer(333);
-            this.updateTimer.Elapsed += (sender, e) => this.UpdateTime();
+            this.updateTimer.Elapsed += (sender, e) => this.UpdateCurrentTime();
 
             this.searchText = String.Empty;
         }
@@ -506,15 +534,27 @@ namespace Espera.View.ViewModels
             this.updateTimer.Dispose();
         }
 
-        private void UpdateTime()
+        private void UpdateCurrentTime()
         {
             this.OnPropertyChanged(vm => vm.CurrentSeconds);
             this.OnPropertyChanged(vm => vm.CurrentTime);
         }
 
+        private void UpdateTotalTime()
+        {
+            this.OnPropertyChanged(vm => vm.TotalSeconds);
+            this.OnPropertyChanged(vm => vm.TotalTime);
+        }
+
         private void LibraryRaisedSongFinished(object sender, EventArgs e)
         {
-            this.OnPropertyChanged(vm => vm.IsPlaying);
+            // We need this check, to avoid that the pause/play button changes its state,
+            // when the library starts the next song
+            if (!this.library.CanPlayNextSong)
+            {
+                this.OnPropertyChanged(vm => vm.IsPlaying);
+            }
+
             this.OnPropertyChanged(vm => vm.Playlist);
 
             this.updateTimer.Stop();
@@ -522,12 +562,13 @@ namespace Espera.View.ViewModels
 
         private void LibraryRaisedSongStarted(object sender, EventArgs e)
         {
-            this.OnPropertyChanged(vm => vm.TotalSeconds);
-            this.OnPropertyChanged(vm => vm.TotalTime);
+            this.UpdateTotalTime();
+
+            this.OnPropertyChanged(vm => vm.IsPlaying);
             this.OnPropertyChanged(vm => vm.Playlist);
+
             this.OnPropertyChanged(vm => vm.SongsRemaining);
             this.OnPropertyChanged(vm => vm.TimeRemaining);
-            this.OnPropertyChanged(vm => vm.IsPlaying);
 
             this.updateTimer.Start();
         }
