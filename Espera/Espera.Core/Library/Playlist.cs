@@ -60,13 +60,7 @@ namespace Espera.Core.Library
                 // before the first sequence of songs is cached completely
                 lock (cacheSyncLock)
                 {
-                    Parallel.ForEach(songList, options, song =>
-                    {
-                        if (!song.IsCached)
-                        {
-                            song.LoadToCache();
-                        }
-                    });
+                    Parallel.ForEach(songList.Where(song => !song.IsCached), options, song => song.LoadToCache());
                 }
             });
 
