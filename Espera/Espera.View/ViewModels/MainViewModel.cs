@@ -472,9 +472,14 @@ namespace Espera.View.ViewModels
             this.library.SongStarted += LibraryRaisedSongStarted;
             this.library.SongFinished += LibraryRaisedSongFinished;
             this.library.AccessModeChanged += (sender, e) => this.UpdateUserAccess();
+            this.library.Updated += (sender, args) =>
+            {
+                this.OnPropertyChanged(vm => vm.Artists);
+                this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
+            };
 
             this.AdministratorViewModel = new AdministratorViewModel(this.library);
-            this.StatusViewModel = new StatusViewModel();
+            this.StatusViewModel = new StatusViewModel(this.library);
 
             this.updateTimer = new Timer(333);
             this.updateTimer.Elapsed += (sender, e) => this.UpdateCurrentTime();

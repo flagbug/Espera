@@ -96,6 +96,7 @@
     <Compile Include="LocalSong.cs" />
     <Compile Include="Audio\PlaybackException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RemovableDriveNotifier.cs" />
     <Compile Include="Song.cs" />
     <Compile Include="SongEventArgs.cs" />
     <Compile Include="LocalSongFinder.cs" />

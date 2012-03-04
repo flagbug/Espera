@@ -644,6 +644,14 @@
         <StatusBar Grid.Row="2"
                    Margin="0, 5, 0, 0"
                    Height="25"
+                   Visibility="{Binding Path=IsUpdating, Converter={StaticResource BooleanToVisibilityConverter}}"
+                   Background="#FF454545"
+                   DataContext="{Binding Path=StatusViewModel}">
+            <StatusBarItem Content="Updating library..." />
+        </StatusBar>
+        <StatusBar Grid.Row="2"
+                   Margin="0, 5, 0, 0"
+                   Height="25"
                    Visibility="{Binding Path=IsAdding, Converter={StaticResource BooleanToVisibilityConverter}}"
                    Background="#FF454545"
                    DataContext="{Binding Path=StatusViewModel}">
