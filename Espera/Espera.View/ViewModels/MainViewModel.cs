@@ -484,27 +484,29 @@ namespace Espera.View.ViewModels
 
         public void AddSongs(string folderPath)
         {
-            EventHandler<LibraryFillEventArgs> handler =
-                (sender, e) => this.StatusViewModel.Update(e.Song.OriginalPath, e.ProcessedTagCount, e.TotalTagCount);
+            string lastArtist = null;
+
+            EventHandler<LibraryFillEventArgs> handler = (sender, e) =>
+            {
+                this.StatusViewModel.Update(e.Song.OriginalPath, e.ProcessedTagCount, e.TotalTagCount);
+
+                if (e.Song.Artist != lastArtist)
+                {
+                    lastArtist = e.Song.Artist;
+                    this.OnPropertyChanged(vm => vm.Artists);
+                }
+            };
 
             this.library.SongAdded += handler;
 
-            var artistUpdateTimer = new Timer(5000);
-
-            artistUpdateTimer.Elapsed += (sender, e) => this.OnPropertyChanged(vm => vm.Artists);
-
             this.isAdding = true;
             this.StatusViewModel.IsAdding = true;
-            artistUpdateTimer.Start();
 
             this.library
                 .AddLocalSongsAsync(folderPath)
                 .ContinueWith(task =>
                 {
                     this.library.SongAdded -= handler;
-
-                    artistUpdateTimer.Stop();
-                    artistUpdateTimer.Dispose();
 
                     this.OnPropertyChanged(vm => vm.Artists);
                     this.isAdding = false;
