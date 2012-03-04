@@ -256,6 +256,7 @@
                         <ListView ItemsSource="{Binding Path=SelectableLocalSongs}"
                                   SelectionChanged="SongList_SelectionChanged"
                                   KeyUp="SongListKeyUp"
+                                  ScrollViewer.CanContentScroll="True"
                                   ContextMenuOpening="SongList_ContextMenuOpening">
                             <ListView.ContextMenu>
                                 <ContextMenu>
@@ -381,6 +382,7 @@
                               ItemsSource="{Binding Path=Playlist}"
                               SelectionChanged="Playlist_SelectionChanged"
                               KeyUp="PlaylistKeyUp"
+                              ScrollViewer.CanContentScroll="True"
                               ContextMenuOpening="Playlist_ContextMenuOpening">
                         <ListView.ContextMenu>
                             <ContextMenu>
