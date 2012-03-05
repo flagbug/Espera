@@ -37,6 +37,8 @@ namespace Espera.View
         private void AddSongsButtonClick(object sender, RoutedEventArgs e)
         {
             var dialog = new FolderBrowserDialog();
+            dialog.Description = "Choose a folder containing your music";
+            dialog.RootFolder = Environment.SpecialFolder.MyComputer; //Set the root folder to MyComputer otherwise it defaults to Desktop and doesnt allow access to other places.
             dialog.ShowDialog();
 
             string selectedPath = dialog.SelectedPath;
