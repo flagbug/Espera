@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Win32;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
@@ -27,6 +28,22 @@ namespace Espera.View
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("en-us");
 
             this.ChangeColor("Blue");
+
+            var VLCcheck = IsApplictionInstalled("VLC");
+
+            if (!VLCcheck)
+            {
+                int tabpageIndexCount = 0; 
+                foreach (TabItem item in locationTab.Items) 
+                { 
+                    if (item.Header.ToString() == "YouTube") 
+                    {
+                        ((TabItem)locationTab.Items[tabpageIndexCount]).IsEnabled = false;
+                        locationTab.SelectedIndex = tabpageIndexCount + 1;
+                    } 
+                    tabpageIndexCount++;
+                }
+            }
         }
 
         private void ChangeColor(string color)
@@ -182,5 +199,62 @@ namespace Espera.View
                 }
             }
         }
+
+        public static bool IsApplictionInstalled(string p_name)
+        {
+            string displayName;
+            RegistryKey key;
+
+            // search in: CurrentUser
+            key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall");
+            foreach (String keyName in key.GetSubKeyNames())
+            {
+                RegistryKey subkey = key.OpenSubKey(keyName);
+                displayName = subkey.GetValue("DisplayName") as string;
+
+                if (displayName != null)
+                {
+                    if (displayName.Contains(p_name) == true)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // search in: LocalMachine_32
+            key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall");
+            foreach (String keyName in key.GetSubKeyNames())
+            {
+                RegistryKey subkey = key.OpenSubKey(keyName);
+                displayName = subkey.GetValue("DisplayName") as string;
+                if (displayName != null)
+                {
+                    if (displayName.Contains(p_name) == true)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // search in: LocalMachine_64
+            key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall");
+            foreach (String keyName in key.GetSubKeyNames())
+            {
+                RegistryKey subkey = key.OpenSubKey(keyName);
+                displayName = subkey.GetValue("DisplayName") as string;
+                if (displayName != null)
+                {
+                    if (displayName.Contains(p_name) == true)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // NOT FOUND
+            return false;
+        }
+
+
     }
 }
