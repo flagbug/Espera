@@ -62,6 +62,11 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public bool IsVlcInstalled
+        {
+            get { return RegistryHelper.IsApplictionInstalled("VLC"); }
+        }
+
         public bool IsAdmin
         {
             get { return this.library.AccessMode == AccessMode.Administrator; }

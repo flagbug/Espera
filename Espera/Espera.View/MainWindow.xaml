@@ -316,7 +316,9 @@
                             </ListView.View>
                         </ListView>
                     </TabItem>
-                    <TabItem Header="YouTube" IsSelected="{Binding Path=IsYoutube}">
+                    <TabItem Header="YouTube"
+                             IsEnabled="{Binding Path=IsVlcInstalled}"
+                             IsSelected="{Binding Path=IsYoutube}">
                         <ListView ItemsSource="{Binding Path=SelectableYoutubeSongs, IsAsync=True}"
                                   SelectionChanged="SongList_SelectionChanged"
                                   ContextMenuOpening="SongList_ContextMenuOpening">
