@@ -5,7 +5,7 @@ namespace Espera.View
 {
     public static class RegistryHelper
     {
-        public static bool IsApplictionInstalled(string applicationName)
+        public static bool IsApplicationInstalled(string applicationName)
         {
             string displayName;
 

@@ -64,7 +64,7 @@ namespace Espera.View.ViewModels
 
         public bool IsVlcInstalled
         {
-            get { return RegistryHelper.IsApplictionInstalled("VLC"); }
+            get { return RegistryHelper.IsApplicationInstalled("VLC"); }
         }
 
         public bool IsAdmin
