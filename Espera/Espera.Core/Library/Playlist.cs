@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace Espera.Core.Library
 {
+    /// <summary>
+    /// Represents a playlist where songs are stored with an associated index.
+    /// </summary>
     public class Playlist : IEnumerable<Song>
     {
         private Dictionary<int, Song> playlist;
@@ -40,6 +43,9 @@ namespace Espera.Core.Library
             get { return this.CurrentSongIndex.HasValue && this.playlist.ContainsKey(this.CurrentSongIndex.Value - 1); }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Playlist"/> class.
+        /// </summary>
         public Playlist()
         {
             this.playlist = new Dictionary<int, Song>();
@@ -72,6 +78,10 @@ namespace Espera.Core.Library
             }
         }
 
+        /// <summary>
+        /// Removes the songs with the specified indexes from the <see cref="Playlist"/>.
+        /// </summary>
+        /// <param name="indexes">The indexes of the songs to remove.</param>
         public void RemoveSongs(IEnumerable<int> indexes)
         {
             foreach (int index in indexes)
@@ -87,6 +97,11 @@ namespace Espera.Core.Library
             this.Rebuild();
         }
 
+        /// <summary>
+        /// Gets the index in the playlist for each of the specified songs.
+        /// </summary>
+        /// <param name="songs">The songs.</param>
+        /// <returns></returns>
         public IEnumerable<int> GetIndexes(IEnumerable<Song> songs)
         {
             return this.playlist
@@ -94,11 +109,20 @@ namespace Espera.Core.Library
                 .Select(entry => entry.Key);
         }
 
+        /// <summary>
+        /// Gets the <see cref="Espera.Core.Song"/> at the specified index.
+        /// </summary>
         public Song this[int index]
         {
             get { return this.playlist[index]; }
         }
 
+        /// <summary>
+        /// Returns an enumerator that iterates through the collection.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
+        /// </returns>
         public IEnumerator<Song> GetEnumerator()
         {
             return this.playlist
@@ -107,6 +131,12 @@ namespace Espera.Core.Library
                 .GetEnumerator();
         }
 
+        /// <summary>
+        /// Returns an enumerator that iterates through a collection.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
+        /// </returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
