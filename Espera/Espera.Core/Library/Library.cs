@@ -217,6 +217,10 @@ namespace Espera.Core.Library
             if (adminPassword == null)
                 throw new ArgumentNullException(Reflector.GetMemberName(() => adminPassword));
 
+            if (String.IsNullOrWhiteSpace(adminPassword))
+                throw new ArgumentException("Password cannot consist only of whitespaces.",
+                                            Reflector.GetMemberName(() => adminPassword));
+
             if (this.IsAdministratorCreated)
                 throw new InvalidOperationException("The administrator is already created.");
 
