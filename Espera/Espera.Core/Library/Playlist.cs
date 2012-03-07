@@ -72,9 +72,9 @@ namespace Espera.Core.Library
 
             foreach (Song song in songList)
             {
-                int newIndex = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
+                int index = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
 
-                this.playlist.Add(newIndex, song);
+                this.playlist.Add(index, song);
             }
         }
 
