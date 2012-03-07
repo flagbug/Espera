@@ -72,7 +72,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="FolderBrowserDialogEx.cs" />
+    <Compile Include="FolderBrowserDialogEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="RegistryHelper.cs" />
     <Compile Include="SearchEngine.cs" />
     <Compile Include="ViewModels\AdministratorViewModel.cs" />
