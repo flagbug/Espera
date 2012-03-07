@@ -87,7 +87,7 @@ namespace Espera.Core.Library
             this.Rebuild();
         }
 
-        public IEnumerable<int> Getindexes(IEnumerable<Song> songs)
+        public IEnumerable<int> GetIndexes(IEnumerable<Song> songs)
         {
             return this.playlist
                 .Where(entry => songs.Contains(entry.Value))
