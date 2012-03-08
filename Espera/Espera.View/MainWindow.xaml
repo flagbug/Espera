@@ -10,8 +10,7 @@
                       WindowState="Maximized"
                       Icon="/Espera.View;component/Images/appbar.music.png"
                       Closing="MetroWindowClosing"
-                      KeyUp="MetroWindow_KeyUp"
-                      Loaded="MetroWindow_Loaded">
+                      KeyUp="MetroWindow_KeyUp">
     <Window.DataContext>
         <ViewModels:MainViewModel x:Name="mainViewModel" />
     </Window.DataContext>
@@ -318,7 +317,7 @@
                         </ListView>
                     </TabItem>
                     <TabItem Header="YouTube"
-                             IsEnabled="{Binding Path=IsVlcInstalled}"
+                             IsEnabled="{Binding Path=CanUseYoutube}"
                              IsSelected="{Binding Path=IsYoutube}">
                         <ListView ItemsSource="{Binding Path=SelectableYoutubeSongs, IsAsync=True}"
                                   SelectionChanged="SongList_SelectionChanged"
