@@ -1,6 +1,8 @@
 ﻿using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Espera.Core.Library
@@ -11,7 +13,11 @@ namespace Espera.Core.Library
     public class Playlist : IEnumerable<Song>
     {
         private Dictionary<int, Song> playlist;
-        private readonly object cacheSyncLock;
+        private readonly ConcurrentQueue<Song> cachingQueue;
+        private bool isCaching;
+        private readonly int[] threads = { 0 };
+        private readonly ManualResetEvent cachingHandle;
+        private readonly ManualResetEvent bumpHandle;
 
         /// <summary>
         /// Gets the index of the currently played song in the playlist.
@@ -49,7 +55,58 @@ namespace Espera.Core.Library
         public Playlist()
         {
             this.playlist = new Dictionary<int, Song>();
-            this.cacheSyncLock = new object();
+            this.cachingQueue = new ConcurrentQueue<Song>();
+            this.cachingHandle = new ManualResetEvent(false);
+            this.bumpHandle = new ManualResetEvent(false);
+        }
+
+        private void BumpCaching()
+        {
+            this.bumpHandle.Set();
+
+            if (!this.isCaching)
+            {
+                this.isCaching = true;
+
+                Song song;
+
+                while (this.cachingQueue.TryDequeue(out song) && song != null)
+                {
+                    if (this.threads[0] == 3)
+                    {
+                        this.cachingHandle.WaitOne();
+                    }
+
+                    if (!song.IsCached)
+                    {
+                        this.threads[0]++;
+
+                        if (threads[0] <= 3)
+                        {
+                            this.bumpHandle.Reset();
+                        }
+
+                        Task.Factory
+                            .StartNew(song.LoadToCache)
+                            .ContinueWith(task =>
+                            {
+                                threads[0]--;
+                                this.cachingHandle.Set();
+                                this.bumpHandle.Set();
+                            });
+                    }
+
+                    if (threads[0] <= 3)
+                    {
+                        bumpHandle.WaitOne();
+                    }
+                }
+
+                if (threads[0] == 0)
+                {
+                    this.isCaching = false;
+                }
+            }
         }
 
         /// <summary>
@@ -58,17 +115,14 @@ namespace Espera.Core.Library
         /// <param name="songList">The songs to add to the end of the playlist.</param>
         public void AddSongs(IEnumerable<Song> songList)
         {
-            var options = new ParallelOptions { MaxDegreeOfParallelism = 3 };
+            songList = songList.ToList(); // Avoid multiple enumeration
 
-            Task.Factory.StartNew(() =>
+            foreach (Song song in songList)
             {
-                // This lock synchronizes the case that multiple calls of the AddSongs method occur,
-                // before the first sequence of songs is cached completely
-                lock (cacheSyncLock)
-                {
-                    Parallel.ForEach(songList.Where(song => !song.IsCached), options, song => song.LoadToCache());
-                }
-            });
+                this.cachingQueue.Enqueue(song);
+            }
+
+            Task.Factory.StartNew(this.BumpCaching);
 
             foreach (Song song in songList)
             {
