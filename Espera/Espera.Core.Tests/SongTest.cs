@@ -13,9 +13,9 @@ namespace Espera.Core.Tests
 
         public SongTest()
         {
-            this.song = new LocalSong(new Uri("C://"), AudioType.Mp3, TimeSpan.Zero);
-            this.samePath = new LocalSong(new Uri("C://"), AudioType.Mp3, TimeSpan.Zero);
-            this.differentPath = new LocalSong(new Uri("D://"), AudioType.Mp3, TimeSpan.Zero);
+            this.song = new LocalSong("C://", AudioType.Mp3, TimeSpan.Zero);
+            this.samePath = new LocalSong("C://", AudioType.Mp3, TimeSpan.Zero);
+            this.differentPath = new LocalSong("D://", AudioType.Mp3, TimeSpan.Zero);
         }
 
         [TestMethod]
