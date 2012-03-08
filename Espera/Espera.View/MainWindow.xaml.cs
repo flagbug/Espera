@@ -5,12 +5,12 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 using System.Windows.Input;
+using Espera.Core;
 using Espera.View.ViewModels;
+using Ionic.Utils;
 using MahApps.Metro;
 using ListView = System.Windows.Controls.ListView;
-using Ionic.Utils;
 
 namespace Espera.View
 {
@@ -63,6 +63,7 @@ namespace Espera.View
 
         private void MetroWindowClosing(object sender, CancelEventArgs e)
         {
+            ApplicationSettings.Default.Save();
             this.mainViewModel.Dispose();
         }
 
@@ -184,6 +185,10 @@ namespace Espera.View
                     }
                 }
             }
+        }
+
+        private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
+        {
         }
     }
 }

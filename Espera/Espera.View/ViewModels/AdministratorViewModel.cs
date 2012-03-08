@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Input;
+using Espera.Core;
 using Espera.Core.Library;
 using Rareform.Patterns.MVVM;
 
@@ -9,6 +10,12 @@ namespace Espera.View.ViewModels
     {
         private readonly Library library;
         private string password;
+
+        public bool StreamYoutube
+        {
+            get { return ApplicationSettings.Default.StreamYoutube; }
+            set { ApplicationSettings.Default.StreamYoutube = value; }
+        }
 
         public string Password
         {
