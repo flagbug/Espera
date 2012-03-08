@@ -43,7 +43,7 @@ namespace Espera.Core
                 var duration = TimeSpan.FromSeconds(Int32.Parse(video.YouTubeEntry.Duration.Seconds));
                 string url = video.WatchPage.OriginalString.Replace("&feature=youtube_gdata_player", String.Empty);
 
-                var song = new YoutubeSong(url, AudioType.Mp3, duration)
+                var song = new YoutubeSong(url, AudioType.Mp3, duration, ApplicationSettings.Default.StreamYoutube)
                                {
                                    Title = video.Title,
                                    Description = video.Description,

@@ -34,55 +34,69 @@ namespace Espera.Core
         /// </value>
         public Uri ThumbnailSource { get; set; }
 
+        public bool IsStreaming { get; private set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="YoutubeSong"/> class.
         /// </summary>
         /// <param name="path">The path of the song.</param>
         /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
+        /// <param name="isStreaming">if set to true, the song streams from YouTube, instead of downloading.</param>
         /// <exception cref="ArgumentNullException"><c>path</c> is null.</exception>
-        public YoutubeSong(string path, AudioType audioType, TimeSpan duration)
+        public YoutubeSong(string path, AudioType audioType, TimeSpan duration, bool isStreaming)
             : base(path, audioType, duration)
-        { }
+        {
+            this.IsStreaming = isStreaming;
+        }
 
         internal override AudioPlayer CreateAudioPlayer()
         {
-            return new LocalAudioPlayer();
+            return this.IsStreaming ? (AudioPlayer)new YoutubeAudioPlayer() : new LocalAudioPlayer();
         }
 
         internal override void LoadToCache()
         {
-            string tempPath = Path.GetTempFileName();
-
-            IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(this.OriginalPath);
-
-            VideoInfo video = videoInfos
-                .Where(info => info.CanExtractAudio)
-                .First(info =>
-                       info.VideoFormat == VideoFormat.FlashMp3HighQuality ||
-                       info.VideoFormat == VideoFormat.FlashMp3LowQuality);
-
-            var downloader = new AudioDownloader(video, tempPath);
-
-            // HACK: We don't know the total amnd transferred bytes, so we fake them
-            downloader.ProgressChanged += (sender, args) =>
+            if (this.IsStreaming)
             {
-                if ((int)args.ProgressPercentage > 0)
+                this.StreamingPath = this.OriginalPath;
+            }
+
+            else
+            {
+                string tempPath = Path.GetTempFileName();
+
+                IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(this.OriginalPath);
+
+                VideoInfo video = videoInfos
+                    .Where(info => info.CanExtractAudio)
+                    .First(info =>
+                           info.VideoFormat == VideoFormat.FlashMp3HighQuality ||
+                           info.VideoFormat == VideoFormat.FlashMp3LowQuality);
+
+                var downloader = new AudioDownloader(video, tempPath);
+
+                downloader.ProgressChanged += (sender, args) =>
                 {
-                    this.OnCachingProgressChanged(new DataTransferEventArgs(100, (int)args.ProgressPercentage));
-                }
-            };
+                    // HACK: We don't know the total or transferred bytes, so we fake them
+                    // The zero check is needed, because the DataTransferEventArgs class doens't allow zero transferred bytes
+                    if ((int)args.ProgressPercentage > 0)
+                    {
+                        this.OnCachingProgressChanged(new DataTransferEventArgs(100, (int)args.ProgressPercentage));
+                    }
+                };
 
-            downloader.Execute();
+                downloader.Execute();
+                this.StreamingPath = tempPath;
+            }
 
-            this.StreamingPath = tempPath;
             this.IsCached = true;
             this.OnCachingCompleted(EventArgs.Empty);
         }
 
         internal override void ClearCache()
         {
-            if (File.Exists(this.StreamingPath))
+            if (!this.IsStreaming && File.Exists(this.StreamingPath))
             {
                 File.Delete(this.StreamingPath);
             }
