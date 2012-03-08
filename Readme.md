@@ -39,7 +39,7 @@ very clean look.
 ## Requirements
 
  - .NET Framework 4.0
- - VLC media player >= 2.0
+ - VLC media player >= 2.0 (only if YouTube streaming is enabled)
 
 ## Development
  
