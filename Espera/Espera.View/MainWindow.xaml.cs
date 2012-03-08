@@ -5,9 +5,10 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 using System.Windows.Input;
+using Espera.Core;
 using Espera.View.ViewModels;
+using Ionic.Utils;
 using MahApps.Metro;
 using ListView = System.Windows.Controls.ListView;
 
@@ -36,7 +37,11 @@ namespace Espera.View
 
         private void AddSongsButtonClick(object sender, RoutedEventArgs e)
         {
-            var dialog = new FolderBrowserDialog();
+            var dialog = new FolderBrowserDialogEx
+            {
+                Description = "Choose a folder containing the music that you want to add to the library"
+            };
+
             dialog.ShowDialog();
 
             string selectedPath = dialog.SelectedPath;
@@ -58,6 +63,7 @@ namespace Espera.View
 
         private void MetroWindowClosing(object sender, CancelEventArgs e)
         {
+            ApplicationSettings.Default.Save();
             this.mainViewModel.Dispose();
         }
 

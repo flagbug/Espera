@@ -19,6 +19,7 @@ namespace Espera.Core.Library
         private AccessMode accessMode;
         private AudioPlayer currentPlayer;
         private float volume;
+        private readonly RemovableDriveNotifier driveNotifier;
 
         /// <summary>
         /// Occurs when a song has been added to the library.
@@ -39,6 +40,16 @@ namespace Espera.Core.Library
         /// Occurs when <see cref="AccessMode"/> property has changed.
         /// </summary>
         public event EventHandler AccessModeChanged;
+
+        /// <summary>
+        /// Occurs when the library is updating.
+        /// </summary>
+        public event EventHandler Updating;
+
+        /// <summary>
+        /// Occurs when the library is finished with updating.
+        /// </summary>
+        public event EventHandler Updated;
 
         /// <summary>
         /// Gets all songs that are currently in the library.
@@ -193,6 +204,8 @@ namespace Espera.Core.Library
             this.playlist = new Playlist();
             this.volume = 1.0f;
             this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
+            this.driveNotifier = RemovableDriveNotifier.Create();
+            this.driveNotifier.DriveRemoved += (sender, args) => Task.Factory.StartNew(this.Update);
         }
 
         /// <summary>
@@ -203,6 +216,10 @@ namespace Espera.Core.Library
         {
             if (adminPassword == null)
                 throw new ArgumentNullException(Reflector.GetMemberName(() => adminPassword));
+
+            if (String.IsNullOrWhiteSpace(adminPassword))
+                throw new ArgumentException("Password cannot consist only of whitespaces.",
+                                            Reflector.GetMemberName(() => adminPassword));
 
             if (this.IsAdministratorCreated)
                 throw new InvalidOperationException("The administrator is already created.");
@@ -333,7 +350,7 @@ namespace Espera.Core.Library
             if (this.AccessMode != AccessMode.Administrator)
                 throw new InvalidOperationException("The user is not in administrator mode.");
 
-            this.RemoveFromPlaylist(this.playlist.Getindexes(songList));
+            this.RemoveFromPlaylist(this.playlist.GetIndexes(songList));
         }
 
         /// <summary>
@@ -344,6 +361,10 @@ namespace Espera.Core.Library
         {
             if (this.AccessMode != AccessMode.Administrator)
                 throw new InvalidOperationException("The user is not in administrator mode.");
+
+            songList = songList.ToList(); // Avoid multiple enumeration
+
+            this.DisposeSongs(songList);
 
             foreach (Song song in songList)
             {
@@ -371,7 +392,32 @@ namespace Espera.Core.Library
                 this.currentPlayer.Dispose();
             }
 
-            foreach (Song song in songs)
+            this.driveNotifier.Dispose();
+
+            this.DisposeSongs(this.songs);
+        }
+
+        private void Update()
+        {
+            this.Updating.RaiseSafe(this, EventArgs.Empty);
+
+            var removable = this.songs
+                .Where(song => !File.Exists(song.OriginalPath))
+                .ToList();
+
+            this.DisposeSongs(removable);
+
+            foreach (Song song in removable)
+            {
+                this.songs.Remove(song);
+            }
+
+            this.Updated.RaiseSafe(this, EventArgs.Empty);
+        }
+
+        private void DisposeSongs(IEnumerable<Song> songList)
+        {
+            foreach (Song song in songList)
             {
                 if (song.IsCached)
                 {

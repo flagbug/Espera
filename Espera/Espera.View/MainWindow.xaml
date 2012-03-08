@@ -256,6 +256,7 @@
                         <ListView ItemsSource="{Binding Path=SelectableLocalSongs}"
                                   SelectionChanged="SongList_SelectionChanged"
                                   KeyUp="SongListKeyUp"
+                                  ScrollViewer.CanContentScroll="True"
                                   ContextMenuOpening="SongList_ContextMenuOpening">
                             <ListView.ContextMenu>
                                 <ContextMenu>
@@ -315,7 +316,9 @@
                             </ListView.View>
                         </ListView>
                     </TabItem>
-                    <TabItem Header="YouTube" IsSelected="{Binding Path=IsYoutube}">
+                    <TabItem Header="YouTube"
+                             IsEnabled="{Binding Path=CanUseYoutube}"
+                             IsSelected="{Binding Path=IsYoutube}">
                         <ListView ItemsSource="{Binding Path=SelectableYoutubeSongs, IsAsync=True}"
                                   SelectionChanged="SongList_SelectionChanged"
                                   ContextMenuOpening="SongList_ContextMenuOpening">
@@ -381,6 +384,7 @@
                               ItemsSource="{Binding Path=Playlist}"
                               SelectionChanged="Playlist_SelectionChanged"
                               KeyUp="PlaylistKeyUp"
+                              ScrollViewer.CanContentScroll="True"
                               ContextMenuOpening="Playlist_ContextMenuOpening">
                         <ListView.ContextMenu>
                             <ContextMenu>
@@ -607,8 +611,10 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
-                                <StackPanel HorizontalAlignment="Center"
+                                <StackPanel Grid.Row="0"
+                                            HorizontalAlignment="Center"
                                             Margin="0, 5, 0, 0">
                                     <TextBlock Text="Color"
                                                HorizontalAlignment="Center"/>
@@ -630,6 +636,15 @@
                                                 Click="PurpleColorButtonButton_Click" />
                                     </StackPanel>
                                 </StackPanel>
+                                <Grid Grid.Row="1"
+                                      Margin="5">
+                                    <CheckBox Grid.Column="0"
+                                              MinWidth="0"
+                                              IsChecked="{Binding Path=StreamYoutube}">
+                                        <AccessText Text="Stream from Youtube instead of downloading (Requires VLC media player >= 2.0 to be installed)"
+                                                    TextWrapping="Wrap" />
+                                    </CheckBox>
+                                </Grid>
                             </Grid>
                             <Button Grid.Row="1"
                                     Content="Change to user"
@@ -639,6 +654,14 @@
                 </Border>
             </Grid>
         </Grid>
+        <StatusBar Grid.Row="2"
+                   Margin="0, 5, 0, 0"
+                   Height="25"
+                   Visibility="{Binding Path=IsUpdating, Converter={StaticResource BooleanToVisibilityConverter}}"
+                   Background="#FF454545"
+                   DataContext="{Binding Path=StatusViewModel}">
+            <StatusBarItem Content="Updating library..." />
+        </StatusBar>
         <StatusBar Grid.Row="2"
                    Margin="0, 5, 0, 0"
                    Height="25"

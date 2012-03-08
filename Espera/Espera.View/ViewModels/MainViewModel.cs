@@ -62,6 +62,11 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public bool CanUseYoutube
+        {
+            get { return !ApplicationSettings.Default.StreamYoutube || RegistryHelper.IsApplicationInstalled("VLC"); }
+        }
+
         public bool IsAdmin
         {
             get { return this.library.AccessMode == AccessMode.Administrator; }
@@ -472,9 +477,14 @@ namespace Espera.View.ViewModels
             this.library.SongStarted += LibraryRaisedSongStarted;
             this.library.SongFinished += LibraryRaisedSongFinished;
             this.library.AccessModeChanged += (sender, e) => this.UpdateUserAccess();
+            this.library.Updated += (sender, args) =>
+            {
+                this.OnPropertyChanged(vm => vm.Artists);
+                this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
+            };
 
             this.AdministratorViewModel = new AdministratorViewModel(this.library);
-            this.StatusViewModel = new StatusViewModel();
+            this.StatusViewModel = new StatusViewModel(this.library);
 
             this.updateTimer = new Timer(333);
             this.updateTimer.Elapsed += (sender, e) => this.UpdateCurrentTime();
@@ -484,27 +494,29 @@ namespace Espera.View.ViewModels
 
         public void AddSongs(string folderPath)
         {
-            EventHandler<LibraryFillEventArgs> handler =
-                (sender, e) => this.StatusViewModel.Update(e.Song.OriginalPath, e.ProcessedTagCount, e.TotalTagCount);
+            string lastArtist = null;
+
+            EventHandler<LibraryFillEventArgs> handler = (sender, e) =>
+            {
+                this.StatusViewModel.Update(e.Song.OriginalPath, e.ProcessedTagCount, e.TotalTagCount);
+
+                if (e.Song.Artist != lastArtist)
+                {
+                    lastArtist = e.Song.Artist;
+                    this.OnPropertyChanged(vm => vm.Artists);
+                }
+            };
 
             this.library.SongAdded += handler;
 
-            var artistUpdateTimer = new Timer(5000);
-
-            artistUpdateTimer.Elapsed += (sender, e) => this.OnPropertyChanged(vm => vm.Artists);
-
             this.isAdding = true;
             this.StatusViewModel.IsAdding = true;
-            artistUpdateTimer.Start();
 
             this.library
                 .AddLocalSongsAsync(folderPath)
                 .ContinueWith(task =>
                 {
                     this.library.SongAdded -= handler;
-
-                    artistUpdateTimer.Stop();
-                    artistUpdateTimer.Dispose();
 
                     this.OnPropertyChanged(vm => vm.Artists);
                     this.isAdding = false;

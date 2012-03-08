@@ -1,4 +1,5 @@
-﻿using Rareform.Patterns.MVVM;
+﻿using Espera.Core.Library;
+using Rareform.Patterns.MVVM;
 
 namespace Espera.View.ViewModels
 {
@@ -8,6 +9,21 @@ namespace Espera.View.ViewModels
         private int processedTags;
         private int totalTags;
         private bool isAdding;
+        private bool isUpdating;
+        private Library library;
+
+        public bool IsUpdating
+        {
+            get { return this.isUpdating; }
+            set
+            {
+                if (this.isUpdating != value)
+                {
+                    this.isUpdating = value;
+                    this.OnPropertyChanged(vm => vm.IsUpdating);
+                }
+            }
+        }
 
         public string Path
         {
@@ -65,6 +81,13 @@ namespace Espera.View.ViewModels
         public bool IsProgressUnkown
         {
             get { return this.ProcessedTags == this.TotalTags && this.IsAdding; }
+        }
+
+        public StatusViewModel(Library library)
+        {
+            this.library = library;
+            this.library.Updating += (sender, e) => this.IsUpdating = true;
+            this.library.Updated += (sender, args) => this.IsUpdating = false;
         }
 
         public void Update(string path, int processedTags, int totalTags)
