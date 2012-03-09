@@ -1,0 +1,232 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>YoutubeExtractor</name>
+    </assembly>
+    <members>
+        <member name="T:YoutubeExtractor.DownloadUrlResolver">
+            <summary>
+            Provides a method to get the download link of a YouTube video.
+            </summary>
+        </member>
+        <member name="M:YoutubeExtractor.DownloadUrlResolver.GetDownloadUrls(System.String)">
+            <summary>
+            Gets a list of <see cref="T:YoutubeExtractor.VideoInfo"/>s for the specified URL.
+            </summary>
+            <param name="videoUrl">The URL of the YouTube video.</param>
+            <returns>A list of <see cref="T:YoutubeExtractor.VideoInfo"/>s that can be used to download the video.</returns>
+        </member>
+        <member name="M:YoutubeExtractor.Downloader.#ctor(YoutubeExtractor.VideoInfo,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:YoutubeExtractor.Downloader"/> class.
+            </summary>
+            <param name="video">The video to download/convert.</param>
+            <param name="savePath">The path to save the video/audio.</param>
+        </member>
+        <member name="M:YoutubeExtractor.Downloader.Execute">
+            <summary>
+            Starts the work of the <see cref="T:YoutubeExtractor.Downloader"/>.
+            </summary>
+        </member>
+        <member name="E:YoutubeExtractor.Downloader.DownloadStarted">
+            <summary>
+            Occurs when the download is starts.
+            </summary>
+        </member>
+        <member name="E:YoutubeExtractor.Downloader.ProgressChanged">
+            <summary>
+            Occurs when the progress has changed.
+            </summary>
+        </member>
+        <member name="E:YoutubeExtractor.Downloader.DownloadFinished">
+            <summary>
+            Occurs when the download finished.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.Downloader.Video">
+            <summary>
+            Gets the video to download/convert.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.Downloader.SavePath">
+            <summary>
+            Gets the path to save the video/audio.
+            </summary>
+        </member>
+        <member name="M:YoutubeExtractor.VideoInfo.#ctor(System.String,System.String,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:YoutubeExtractor.VideoInfo"/> class.
+            </summary>
+            <param name="downloadUrl">The download URL.</param>
+            <param name="title">The video title.</param>
+            <param name="formatCode">The format code.</param>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.DownloadUrl">
+            <summary>
+            Gets the download URL.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.Title">
+            <summary>
+            Gets the video title.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.VideoType">
+            <summary>
+            Gets the type of the video.
+            </summary>
+            <value>
+            The type of the video.
+            </value>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.VideoFormat">
+            <summary>
+            Gets the video format.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.CanExtractAudio">
+            <summary>
+            Gets a value indicating whether the audio of this video can be extracted by YoutubeExtractor.
+            </summary>
+            <value>
+            	<c>true</c> if the audio of this video can be extracted by YoutubeExtractor; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.AudioExtension">
+            <summary>
+            Gets the audio extension.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.VideoExtension">
+            <summary>
+            Gets the video extension.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.FormatCode">
+            <summary>
+            Gets the format code.
+            </summary>
+        </member>
+        <member name="T:YoutubeExtractor.VideoDownloader">
+            <summary>
+            Provides a method to download a video from YouTube.
+            </summary>
+        </member>
+        <member name="M:YoutubeExtractor.VideoDownloader.#ctor(YoutubeExtractor.VideoInfo,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:YoutubeExtractor.VideoDownloader"/> class.
+            </summary>
+            <param name="video">The video to download.</param>
+            <param name="savePath">The path to save the video.</param>
+        </member>
+        <member name="M:YoutubeExtractor.VideoDownloader.Execute">
+            <summary>
+            Starts the video download.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.ProgressEventArgs.ProgressPercentage">
+            <summary>
+            Gets the progress percentage in a range from 0.0 to 100.0.
+            </summary>
+        </member>
+        <member name="T:YoutubeExtractor.AudioDownloader">
+            <summary>
+            Provides a method to download a video and extract its audio track.
+            </summary>
+        </member>
+        <member name="M:YoutubeExtractor.AudioDownloader.#ctor(YoutubeExtractor.VideoInfo,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:YoutubeExtractor.AudioDownloader"/> class.
+            </summary>
+            <param name="video">The video to convert.</param>
+            <param name="savePath">The path to save the audio.</param>
+        </member>
+        <member name="M:YoutubeExtractor.AudioDownloader.Execute">
+            <summary>
+            Starts the download and then extracts the audio track of the video.
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.WebM720">
+            <summary>
+            A WebM video with 720p resolution (.webm).
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.WebM480">
+            <summary>
+            A WebM video with 480p resolution (.webm).
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.WebM360">
+            <summary>
+            A WebM video with 360p resolution (.webm).
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.HighDefinition4K">
+            <summary>
+            A high definition video with 4K resolution (.mp4).
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.HighDefinition1080">
+            <summary>
+            A high definition video with 1080p resolution (.mp4).
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.HighDefinition720">
+            <summary>
+            A high definition video with 720p resolution (.mp4).
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.HighDefinition720_3D">
+            <summary>
+            A high definition video with 720p resolution and 3D (.mp4).
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.Standard360">
+            <summary>
+            A standard video with 360p solution (.mp4).
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.Standard360_3D">
+            <summary>
+            A standard video with 360p solution and 3D (.mp4).
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.FlashAacHighQuality">
+            <summary>
+            A flash video with 480p resolution and 44KHz stereo AAC audio (.flv).
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.FlashAacLowQuality">
+            <summary>
+            A flash video with 240p resolution and 22KHz stereo AAC audio (.flv).
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.FlashMp3HighQuality">
+            <summary>
+            A flash video with 360p resolution and 44KHz mono Mp3 audio (.flv).
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.FlashMp3LowQuality">
+            <summary>
+            A flash video with 240p resolution and 44KHz mono Mp3 audio (.flv).
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.Mobile">
+            <summary>
+            A 3GP video for mobile devices (.3gp).
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.Unkown">
+            <summary>
+            Unkown format
+            </summary>
+        </member>
+        <member name="M:YoutubeExtractor.FlvFile.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:YoutubeExtractor.FlvFile"/> class.
+            </summary>
+            <param name="inputPath">The path of the input.</param>
+            <param name="outputPath">The path of the output without extension.</param>
+        </member>
+    </members>
+</doc>
