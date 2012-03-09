@@ -14,10 +14,6 @@ namespace Espera.Core.Library
     {
         private Dictionary<int, Song> playlist;
         private readonly ConcurrentQueue<Song> cachingQueue;
-        private bool isCaching;
-        private readonly int[] threads = { 0 };
-        private readonly ManualResetEvent cachingHandle;
-        private readonly ManualResetEvent bumpHandle;
 
         /// <summary>
         /// Gets the index of the currently played song in the playlist.
@@ -56,56 +52,35 @@ namespace Espera.Core.Library
         {
             this.playlist = new Dictionary<int, Song>();
             this.cachingQueue = new ConcurrentQueue<Song>();
-            this.cachingHandle = new ManualResetEvent(false);
-            this.bumpHandle = new ManualResetEvent(false);
+
+            /*
+             * HACK:
+             * 
+             * Oh god this is so wrong, i want to punch myself in the face.
+             * 
+             * If anyone out there knows how to make a good producer/consumer
+             * construct with a maximum amount of consumers, PLEASE FIX THIS!
+             */
+            Task.Factory.StartNew(Cache);
+            Task.Factory.StartNew(Cache);
+            Task.Factory.StartNew(Cache);
         }
 
-        private void BumpCaching()
+        /// <summary>
+        /// Please kids, don't do that at home.
+        /// </summary>
+        private void Cache()
         {
-            this.bumpHandle.Set();
-
-            if (!this.isCaching)
+            while (true)
             {
-                this.isCaching = true;
-
                 Song song;
 
-                while (this.cachingQueue.TryDequeue(out song) && song != null)
+                if (this.cachingQueue.TryDequeue(out song))
                 {
-                    if (this.threads[0] == 3)
-                    {
-                        this.cachingHandle.WaitOne();
-                    }
-
-                    if (!song.IsCached)
-                    {
-                        this.threads[0]++;
-
-                        if (threads[0] <= 3)
-                        {
-                            this.bumpHandle.Reset();
-                        }
-
-                        Task.Factory
-                            .StartNew(song.LoadToCache)
-                            .ContinueWith(task =>
-                            {
-                                threads[0]--;
-                                this.cachingHandle.Set();
-                                this.bumpHandle.Set();
-                            });
-                    }
-
-                    if (threads[0] <= 3)
-                    {
-                        bumpHandle.WaitOne();
-                    }
+                    song.LoadToCache();
                 }
 
-                if (threads[0] == 0)
-                {
-                    this.isCaching = false;
-                }
+                Thread.Sleep(500);
             }
         }
 
@@ -120,12 +95,7 @@ namespace Espera.Core.Library
             foreach (Song song in songList)
             {
                 this.cachingQueue.Enqueue(song);
-            }
 
-            Task.Factory.StartNew(this.BumpCaching);
-
-            foreach (Song song in songList)
-            {
                 int index = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
 
                 this.playlist.Add(index, song);
