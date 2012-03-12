@@ -14,7 +14,7 @@ namespace Espera.Core.Library
     {
         private readonly HashSet<Song> songs;
         private readonly Playlist playlist;
-        private readonly object songLocker;
+        private readonly object songLock;
         private string password;
         private AccessMode accessMode;
         private AudioPlayer currentPlayer;
@@ -58,7 +58,7 @@ namespace Espera.Core.Library
         {
             get
             {
-                lock (songLocker)
+                lock (songLock)
                 {
                     return this.songs;
                 }
@@ -199,7 +199,7 @@ namespace Espera.Core.Library
         /// </summary>
         public Library()
         {
-            this.songLocker = new object();
+            this.songLock = new object();
             this.songs = new HashSet<Song>();
             this.playlist = new Playlist();
             this.volume = 1.0f;
@@ -364,11 +364,14 @@ namespace Espera.Core.Library
 
             songList = songList.ToList(); // Avoid multiple enumeration
 
-            this.DisposeSongs(songList);
+            DisposeSongs(songList);
 
-            foreach (Song song in songList)
+            lock (this.songLock)
             {
-                this.songs.Remove(song);
+                foreach (Song song in songList)
+                {
+                    this.songs.Remove(song);
+                }
             }
         }
 
@@ -394,28 +397,40 @@ namespace Espera.Core.Library
 
             this.driveNotifier.Dispose();
 
-            this.DisposeSongs(this.songs);
+            DisposeSongs(this.songs);
         }
 
         private void Update()
         {
             this.Updating.RaiseSafe(this, EventArgs.Empty);
 
-            var removable = this.songs
-                .Where(song => !File.Exists(song.OriginalPath))
-                .ToList();
+            IEnumerable<Song> removable;
 
-            this.DisposeSongs(removable);
+            lock (this.songLock)
+            {
+                removable = this.songs
+                    .Where(song => !File.Exists(song.OriginalPath))
+                    .ToList();
+            }
+
+            DisposeSongs(removable);
 
             foreach (Song song in removable)
             {
-                this.songs.Remove(song);
+                lock (this.songLock)
+                {
+                    this.songs.Remove(song);
+                }
             }
 
             this.Updated.RaiseSafe(this, EventArgs.Empty);
         }
 
-        private void DisposeSongs(IEnumerable<Song> songList)
+        /// <summary>
+        /// Disposes the all songs and clear their cache.
+        /// </summary>
+        /// <param name="songList">The songs to dispose.</param>
+        private static void DisposeSongs(IEnumerable<Song> songList)
         {
             foreach (Song song in songList)
             {
@@ -452,7 +467,7 @@ namespace Espera.Core.Library
             {
                 bool added;
 
-                lock (this.songLocker)
+                lock (this.songLock)
                 {
                     added = this.songs.Add(e.Song);
                 }
