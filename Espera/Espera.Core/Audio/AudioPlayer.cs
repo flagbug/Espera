@@ -3,7 +3,7 @@ using Rareform.Extensions;
 
 namespace Espera.Core.Audio
 {
-    internal abstract class AudioPlayer : IDisposable
+    public abstract class AudioPlayer : IDisposable
     {
         /// <summary>
         /// Occurs when the <see cref="LoadedSong"/> has finished it's playback.

@@ -135,12 +135,12 @@ namespace Espera.Core
             return other != null && this.OriginalPath == other.OriginalPath;
         }
 
-        internal protected void OnCachingProgressChanged(DataTransferEventArgs e)
+        internal void OnCachingProgressChanged(DataTransferEventArgs e)
         {
             this.CachingProgressChanged.RaiseSafe(this, e);
         }
 
-        internal protected void OnCachingCompleted(EventArgs e)
+        internal void OnCachingCompleted(EventArgs e)
         {
             this.CachingCompleted.RaiseSafe(this, e);
         }
@@ -150,10 +150,10 @@ namespace Espera.Core
             this.CachingFailed.RaiseSafe(this, e);
         }
 
-        internal abstract AudioPlayer CreateAudioPlayer();
+        public abstract AudioPlayer CreateAudioPlayer();
 
-        internal abstract void LoadToCache();
+        public abstract void LoadToCache();
 
-        internal abstract void ClearCache();
+        public abstract void ClearCache();
     }
 }

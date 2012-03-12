@@ -50,12 +50,12 @@ namespace Espera.Core
             this.IsStreaming = isStreaming;
         }
 
-        internal override AudioPlayer CreateAudioPlayer()
+        public override AudioPlayer CreateAudioPlayer()
         {
             return this.IsStreaming ? (AudioPlayer)new YoutubeAudioPlayer() : new LocalAudioPlayer();
         }
 
-        internal override void LoadToCache()
+        public override void LoadToCache()
         {
             if (this.IsStreaming)
             {
@@ -94,7 +94,7 @@ namespace Espera.Core
             this.OnCachingCompleted(EventArgs.Empty);
         }
 
-        internal override void ClearCache()
+        public override void ClearCache()
         {
             if (!this.IsStreaming && File.Exists(this.StreamingPath))
             {

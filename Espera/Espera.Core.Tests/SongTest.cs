@@ -1,45 +1,45 @@
 ﻿using System;
 using Espera.Core.Audio;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace Espera.Core.Tests
 {
     [TestClass]
     public class SongTest
     {
-        private readonly Song song;
-        private readonly Song samePath;
-        private readonly Song differentPath;
-
-        public SongTest()
-        {
-            this.song = new LocalSong("C://", AudioType.Mp3, TimeSpan.Zero);
-            this.samePath = new LocalSong("C://", AudioType.Mp3, TimeSpan.Zero);
-            this.differentPath = new LocalSong("D://", AudioType.Mp3, TimeSpan.Zero);
-        }
-
         [TestMethod]
         public void EqualsNullIsFalse()
         {
-            Assert.IsFalse(this.song.Equals(null));
+            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+
+            Assert.IsFalse(song.Object.Equals(null));
         }
 
         [TestMethod]
         public void EqualsSongWithDifferentPathIsFalse()
         {
-            Assert.IsFalse(this.song.Equals(this.differentPath));
+            var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+            var song2 = new Mock<Song>("TestPath1", AudioType.Mp3, TimeSpan.Zero);
+
+            Assert.IsFalse(song1.Object.Equals(song2.Object));
         }
 
         [TestMethod]
         public void EqualsSameReferenceIsTrue()
         {
-            Assert.IsTrue(this.song.Equals(this.song));
-        }
+            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
 
+            Assert.IsTrue(song.Object.Equals(song.Object));
+        }
+        
         [TestMethod]
         public void EqualsSamePathIsTrue()
         {
-            Assert.IsTrue(this.song.Equals(this.samePath));
+            var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+            var song2 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+
+            Assert.IsTrue(song1.Object.Equals(song2.Object));
         }
     }
 }

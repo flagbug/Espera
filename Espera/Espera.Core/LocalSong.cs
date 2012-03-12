@@ -36,12 +36,12 @@ namespace Espera.Core
             : base(path, audioType, duration)
         { }
 
-        internal override AudioPlayer CreateAudioPlayer()
+        public override AudioPlayer CreateAudioPlayer()
         {
             return new LocalAudioPlayer();
         }
 
-        internal override void LoadToCache()
+        public override void LoadToCache()
         {
             if (this.IsRemovable)
             {
@@ -66,7 +66,7 @@ namespace Espera.Core
             }
         }
 
-        internal override void ClearCache()
+        public override void ClearCache()
         {
             if (this.IsRemovable && File.Exists(this.StreamingPath))
             {
