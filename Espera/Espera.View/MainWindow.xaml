@@ -156,13 +156,13 @@
                      Width="150"
                      Text="{Binding Path=SearchText, UpdateSourceTrigger=PropertyChanged}"
                      KeyUp="SearchTextBox_KeyUp" />
-            <Button Grid.Column="5"
+            <ToggleButton Grid.Column="5"
                     Margin="10, 0, 0, 0"
                     Padding="0"
                     ToolTip="Settings"
                     Click="AdminPanelToggleButton_Click">
                 <Image Source="/Espera.View;component/Images/appbar.settings.png" />
-            </Button>
+            </ToggleButton>
         </Grid>
         <Grid Grid.Row="1"
               Margin="0, 10, 0, 0">
