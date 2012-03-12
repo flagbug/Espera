@@ -46,6 +46,12 @@ very clean look.
 Espera is currently in a verly early stage of development and has to be compiled from the source code, but it already 
 can play songs from the local hard drive or from YouTube.
 
+**Used lbraries**
+
+- [Rareform](http://github.com/flagbug/Rareform)
+- [YoutubeExtractor](http://github.com/flagbug/YoutubeExtractor)
+- [MahApps.Metro](http://github.com/flagbug/MahApps.Metro)
+
 ## Screenshot
 
 ![Screenshot](http://flagbug.github.com/espera/screenshot.jpg)
