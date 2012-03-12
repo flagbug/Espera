@@ -55,33 +55,15 @@ namespace Espera.Core.Library
 
             /*
              * HACK:
-             * 
+             *
              * Oh god this is so wrong, i want to punch myself in the face.
-             * 
+             *
              * If anyone out there knows how to make a good producer/consumer
              * construct with a maximum amount of consumers, PLEASE FIX THIS!
              */
             Task.Factory.StartNew(Cache);
             Task.Factory.StartNew(Cache);
             Task.Factory.StartNew(Cache);
-        }
-
-        /// <summary>
-        /// Please kids, don't do that at home.
-        /// </summary>
-        private void Cache()
-        {
-            while (true)
-            {
-                Song song;
-
-                if (this.cachingQueue.TryDequeue(out song))
-                {
-                    song.LoadToCache();
-                }
-
-                Thread.Sleep(500);
-            }
         }
 
         /// <summary>
@@ -187,6 +169,24 @@ namespace Espera.Core.Library
             }
 
             this.playlist = newPlaylist;
+        }
+
+        /// <summary>
+        /// Please kids, don't do that at home.
+        /// </summary>
+        private void Cache()
+        {
+            while (true)
+            {
+                Song song;
+
+                if (this.cachingQueue.TryDequeue(out song))
+                {
+                    song.LoadToCache();
+                }
+
+                Thread.Sleep(500);
+            }
         }
     }
 }
