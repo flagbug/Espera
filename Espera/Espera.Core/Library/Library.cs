@@ -497,7 +497,7 @@ namespace Espera.Core.Library
             this.currentPlayer = song.CreateAudioPlayer();
 
             this.currentPlayer.SongFinished += (sender, e) => this.HandleSongFinish();
-            this.currentPlayer.Volume = this.Volume;
+            this.currentPlayer.Volume = this.volume;
 
             Task.Factory.StartNew(() =>
             {
