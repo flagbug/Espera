@@ -53,7 +53,7 @@ namespace Espera.Core.Tests
         }
 
         [TestMethod]
-        public void RemoveSongsTest()
+        public void RemoveSongs_RemoveOneSong_OrderIsCorrect()
         {
             Playlist playlist = this.SetupPlaylist();
 
