@@ -109,12 +109,7 @@ namespace Espera.Core
         /// </returns>
         public override bool Equals(object obj)
         {
-            var other = (Song)obj;
-
-            if (obj == null)
-                return false;
-
-            return this.OriginalPath == other.OriginalPath;
+            return this.Equals(obj as Song);
         }
 
         /// <summary>
@@ -137,7 +132,7 @@ namespace Espera.Core
         /// </returns>
         public bool Equals(Song other)
         {
-            return this.Equals((object)other);
+            return other != null && this.OriginalPath == other.OriginalPath;
         }
 
         internal protected void OnCachingProgressChanged(DataTransferEventArgs e)
