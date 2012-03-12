@@ -52,6 +52,7 @@ namespace Espera.Core.Tests
             Assert.AreEqual(this.song3.Object, playlist[3]);
         }
 
+        [TestMethod]
         public void RemoveSongsTest()
         {
             Playlist playlist = this.SetupPlaylist();
