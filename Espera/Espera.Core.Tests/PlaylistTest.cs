@@ -62,7 +62,7 @@ namespace Espera.Core.Tests
             Assert.AreEqual(3, playlist.Count());
             Assert.AreEqual(this.song.Object, playlist[0]);
             Assert.AreEqual(this.song2.Object, playlist[1]);
-            Assert.AreEqual(this.song3.Object, playlist[1]);
+            Assert.AreEqual(this.song3.Object, playlist[2]);
         }
     }
 }
