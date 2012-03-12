@@ -126,6 +126,7 @@
                 <Slider Width="200"
                         IsMoveToPointEnabled="True"
                         Maximum="1"
+                        IsEnabled="{Binding Path=IsAdmin}"
                         Value="{Binding Path=Volume}" />
                 <Button Style="{StaticResource VolumeButtonStyle}"
                         ToolTip="Unmute"
