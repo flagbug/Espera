@@ -64,5 +64,65 @@ namespace Espera.Core.Tests
             Assert.AreEqual(this.song2.Object, playlist[1]);
             Assert.AreEqual(this.song3.Object, playlist[2]);
         }
+
+        [TestMethod]
+        public void CanPlayNextSong_CurrentSongIndexIsZero_ReturnsTrue()
+        {
+            Playlist playlist = this.SetupPlaylist();
+
+            playlist.CurrentSongIndex = 0;
+
+            Assert.IsTrue(playlist.CanPlayNextSong);
+        }
+
+        [TestMethod]
+        public void CanPlayNextSong_CurrentSongIndexIsPlaylistCount_ReturnsFalse()
+        {
+            Playlist playlist = this.SetupPlaylist();
+
+            playlist.CurrentSongIndex = playlist.Count();
+
+            Assert.IsFalse(playlist.CanPlayNextSong);
+        }
+
+        [TestMethod]
+        public void CanPlayNextSong_CurrentSongIndexIsNull_ReturnsFalse()
+        {
+            Playlist playlist = this.SetupPlaylist();
+
+            playlist.CurrentSongIndex = null;
+
+            Assert.IsFalse(playlist.CanPlayNextSong);
+        }
+
+        [TestMethod]
+        public void CanPlayPreviousSong_CurrentSongIndexIsZero_ReturnsFalse()
+        {
+            Playlist playlist = this.SetupPlaylist();
+
+            playlist.CurrentSongIndex = 0;
+
+            Assert.IsFalse(playlist.CanPlayPreviousSong);
+        }
+
+        [TestMethod]
+        public void CanPlayPreviousSong_CurrentSongIndexIsPlaylistCount_ReturnsTrue()
+        {
+            Playlist playlist = this.SetupPlaylist();
+
+            playlist.CurrentSongIndex = playlist.Count();
+
+            Assert.IsTrue(playlist.CanPlayPreviousSong);
+        }
+
+        [TestMethod]
+        public void CanPlayPreviousSong_CurrentSongIndexIsNull_ReturnsFalse()
+        {
+            Playlist playlist = this.SetupPlaylist();
+
+            playlist.CurrentSongIndex = null;
+
+            Assert.IsFalse(playlist.CanPlayPreviousSong);
+        }
     }
 }
