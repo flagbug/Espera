@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using Espera.Core.Audio;
 using Espera.Core.Library;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -175,7 +174,7 @@ namespace Espera.Core.Tests
             library.SongFinished += (sender, args) => songFinishedRaised = true;
 
             library.PlaySong(0);
-            Thread.Sleep(2000);
+
             Assert.IsTrue(songStartedRaised);
             Assert.IsTrue(songFinishedRaised);
 
