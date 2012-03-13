@@ -55,12 +55,27 @@ namespace Espera.Core.Tests
             Song[] songs = SetupSongs(4);
             Playlist playlist = SetupPlaylist(songs);
 
-            playlist.RemoveSongs(new List<int> { 1 });
+            playlist.RemoveSongs(new[] { 1 });
 
             Assert.AreEqual(3, playlist.Count());
             Assert.AreEqual(songs[0], playlist[0]);
             Assert.AreEqual(songs[2], playlist[1]);
             Assert.AreEqual(songs[3], playlist[2]);
+        }
+
+        [TestMethod]
+        public void RemoveSongs_RemoveMultipleSongs_OrderIsCorrect()
+        {
+            Song[] songs = SetupSongs(7);
+            Playlist playlist = SetupPlaylist(songs);
+
+            playlist.RemoveSongs(new[] { 1, 3, 4 });
+
+            Assert.AreEqual(4, playlist.Count());
+            Assert.AreEqual(songs[0], playlist[0]);
+            Assert.AreEqual(songs[2], playlist[1]);
+            Assert.AreEqual(songs[5], playlist[2]);
+            Assert.AreEqual(songs[6], playlist[3]);
         }
 
         [TestMethod]
