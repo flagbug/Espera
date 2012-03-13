@@ -152,5 +152,41 @@ namespace Espera.Core.Tests
                 library.Dispose();
             }
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void PlayNextSong_UserIsNotAdministrator_ThrowsInvalidOperationException()
+        {
+            var library = new Library.Library();
+            library.CreateAdmin("TestPassword");
+            library.ChangeToUser();
+
+            try
+            {
+                library.PlayNextSong();
+            }
+
+            finally
+            {
+                library.Dispose();
+            }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void PlayPreviousSong_PlaylistIsEmpty_ThrowsInvalidOperationException()
+        {
+            var library = new Library.Library();
+
+            try
+            {
+                library.PlayPreviousSong();
+            }
+
+            finally
+            {
+                library.Dispose();
+            }
+        }
     }
 }
