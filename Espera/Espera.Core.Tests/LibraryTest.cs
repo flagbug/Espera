@@ -12,7 +12,16 @@ namespace Espera.Core.Tests
         public void CreateAdmin_PasswordIsNull_ThrowsArgumentNullException()
         {
             var library = new Library.Library();
-            library.CreateAdmin(null);
+
+            try
+            {
+                library.CreateAdmin(null);
+            }
+
+            finally
+            {
+                library.Dispose();
+            }
         }
 
         [TestMethod]
@@ -20,7 +29,16 @@ namespace Espera.Core.Tests
         public void CreateAdmin_PasswordIsEmpty_ThrowsArgumentException()
         {
             var library = new Library.Library();
-            library.CreateAdmin(String.Empty);
+
+            try
+            {
+                library.CreateAdmin(String.Empty);
+            }
+
+            finally
+            {
+                library.Dispose();
+            }
         }
 
         [TestMethod]
@@ -28,16 +46,28 @@ namespace Espera.Core.Tests
         public void CreateAdmin_PasswordIsWhitespace_ThrowsArgumentException()
         {
             var library = new Library.Library();
-            library.CreateAdmin(" ");
+
+            try
+            {
+                library.CreateAdmin(" ");
+            }
+
+            finally
+            {
+                library.Dispose();
+            }
         }
 
         [TestMethod]
         public void CreateAdmin_PasswordIsTestPassword_AdministratorIsCreated()
         {
             var library = new Library.Library();
+
             library.CreateAdmin("TestPassword");
 
             Assert.IsTrue(library.IsAdministratorCreated);
+
+            library.Dispose();
         }
 
         [TestMethod]
@@ -45,7 +75,16 @@ namespace Espera.Core.Tests
         public void ChangeToAdmin_PasswordIsNull_ThrowsArgumentNullException()
         {
             var library = new Library.Library();
-            library.ChangeToAdmin(null);
+
+            try
+            {
+                library.ChangeToAdmin(null);
+            }
+
+            finally
+            {
+                library.Dispose();
+            }
         }
 
         [TestMethod]
@@ -54,7 +93,16 @@ namespace Espera.Core.Tests
         {
             var library = new Library.Library();
             library.CreateAdmin("TestPassword");
-            library.ChangeToAdmin("WrongPassword");
+
+            try
+            {
+                library.ChangeToAdmin("WrongPassword");
+            }
+
+            finally
+            {
+                library.Dispose();
+            }
         }
 
         [TestMethod]
@@ -65,6 +113,8 @@ namespace Espera.Core.Tests
             library.ChangeToAdmin("TestPassword");
 
             Assert.AreEqual(AccessMode.Administrator, library.AccessMode);
+
+            library.Dispose();
         }
     }
 }
