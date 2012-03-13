@@ -637,6 +637,7 @@
                                       Margin="5">
                                     <CheckBox Grid.Column="0"
                                               MinWidth="0"
+                                              IsEnabled="{Binding Path=IsVlcInstalled}"
                                               IsChecked="{Binding Path=StreamYoutube}">
                                         <AccessText Text="Stream from Youtube instead of downloading (Requires VLC media player >= 2.0 to be installed)"
                                                     TextWrapping="Wrap" />

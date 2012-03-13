@@ -64,7 +64,7 @@ namespace Espera.View.ViewModels
 
         public bool CanUseYoutube
         {
-            get { return !ApplicationSettings.Default.StreamYoutube || RegistryHelper.IsApplicationInstalled("VLC"); }
+            get { return !ApplicationSettings.Default.StreamYoutube || RegistryHelper.IsVlcInstalled(); }
         }
 
         public bool IsAdmin

@@ -5,7 +5,12 @@ namespace Espera.View
 {
     public static class RegistryHelper
     {
-        public static bool IsApplicationInstalled(string applicationName)
+        public static bool IsVlcInstalled()
+        {
+            return IsApplicationInstalled("VLC");
+        }
+
+        private static bool IsApplicationInstalled(string applicationName)
         {
             string displayName;
 
