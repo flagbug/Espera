@@ -1,4 +1,5 @@
 ﻿using System;
+using Espera.Core.Library;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Espera.Core.Tests
@@ -37,6 +38,33 @@ namespace Espera.Core.Tests
             library.CreateAdmin("TestPassword");
 
             Assert.IsTrue(library.IsAdministratorCreated);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ChangeToAdmin_PasswordIsNull_ThrowsArgumentNullException()
+        {
+            var library = new Library.Library();
+            library.ChangeToAdmin(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidPasswordException))]
+        public void ChangeToAdmin_PasswordIsNotCorrent_ThrowsInvalidOperationException()
+        {
+            var library = new Library.Library();
+            library.CreateAdmin("TestPassword");
+            library.ChangeToAdmin("WrongPassword");
+        }
+
+        [TestMethod]
+        public void ChangeToAdmin_PasswordIsCorrent_AccessModeIsAdministrator()
+        {
+            var library = new Library.Library();
+            library.CreateAdmin("TestPassword");
+            library.ChangeToAdmin("TestPassword");
+
+            Assert.AreEqual(AccessMode.Administrator, library.AccessMode);
         }
     }
 }
