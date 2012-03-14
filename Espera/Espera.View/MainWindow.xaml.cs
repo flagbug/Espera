@@ -27,7 +27,7 @@ namespace Espera.View
 
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("en-us");
 
-            this.ChangeColor("Blue");
+            this.ChangeColor(ApplicationSettings.Default.AccentColor);
         }
 
         private void ChangeColor(string color)
@@ -90,21 +90,25 @@ namespace Espera.View
         private void RedColorButtonButton_Click(object sender, RoutedEventArgs e)
         {
             this.ChangeColor("Red");
+            ApplicationSettings.Default.AccentColor = "Red";
         }
 
         private void GreenColorButtonButton_Click(object sender, RoutedEventArgs e)
         {
             this.ChangeColor("Green");
+            ApplicationSettings.Default.AccentColor = "Green";
         }
 
         private void BlueColorButtonButton_Click(object sender, RoutedEventArgs e)
         {
             this.ChangeColor("Blue");
+            ApplicationSettings.Default.AccentColor = "Blue";
         }
 
         private void PurpleColorButtonButton_Click(object sender, RoutedEventArgs e)
         {
             this.ChangeColor("Purple");
+            ApplicationSettings.Default.AccentColor = "Purple";
         }
 
         private void SearchTextBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
