@@ -552,6 +552,7 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -592,7 +593,20 @@
                                     </CheckBox>
                                 </Grid>
                             </Grid>
-                            <Button Grid.Row="1"
+                            <StackPanel Grid.Row="1"
+                                        Orientation="Vertical">
+                                <TextBlock Text="Enter a password"
+                                           HorizontalAlignment="Center" />
+                                <PasswordBox Margin="0, 5, 0, 0"
+                                             WPF:PasswordBoxBinder.Attach="True"
+                                             WPF:PasswordBoxBinder.Password="{Binding Path=Password, Mode=TwoWay}"
+                                             PasswordChanged="PasswordBox_PasswordChanged" />
+                                <Button Content="Create Administrator"
+                                        Command="{Binding Path=CreateAdminCommand}"
+                                        Margin="0, 5, 0, 0"/>
+                            </StackPanel>
+                            <Button Grid.Row="2"
+                                    Margin="0, 15, 0, 0"
                                     Content="Change to user"
                                     Command="{Binding Path=ChangeToUserCommand}" />
                         </Grid>
