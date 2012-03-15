@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Espera.Core;
+using Espera.View.Properties;
 using Espera.View.ViewModels;
 using Ionic.Utils;
 using MahApps.Metro;
@@ -27,7 +28,7 @@ namespace Espera.View
 
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("en-us");
 
-            this.ChangeColor(ApplicationSettings.Default.AccentColor);
+            this.ChangeColor(Settings.Default.AccentColor);
         }
 
         private void ChangeColor(string color)
@@ -64,6 +65,8 @@ namespace Espera.View
         private void MetroWindowClosing(object sender, CancelEventArgs e)
         {
             ApplicationSettings.Default.Save();
+            Settings.Default.Save();
+
             this.mainViewModel.Dispose();
         }
 
@@ -90,25 +93,25 @@ namespace Espera.View
         private void RedColorButtonButton_Click(object sender, RoutedEventArgs e)
         {
             this.ChangeColor("Red");
-            ApplicationSettings.Default.AccentColor = "Red";
+            Settings.Default.AccentColor = "Red";
         }
 
         private void GreenColorButtonButton_Click(object sender, RoutedEventArgs e)
         {
             this.ChangeColor("Green");
-            ApplicationSettings.Default.AccentColor = "Green";
+            Settings.Default.AccentColor = "Green";
         }
 
         private void BlueColorButtonButton_Click(object sender, RoutedEventArgs e)
         {
             this.ChangeColor("Blue");
-            ApplicationSettings.Default.AccentColor = "Blue";
+            Settings.Default.AccentColor = "Blue";
         }
 
         private void PurpleColorButtonButton_Click(object sender, RoutedEventArgs e)
         {
             this.ChangeColor("Purple");
-            ApplicationSettings.Default.AccentColor = "Purple";
+            Settings.Default.AccentColor = "Purple";
         }
 
         private void SearchTextBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
