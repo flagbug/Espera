@@ -13,8 +13,8 @@ namespace Espera.View.ViewModels
 
         public bool StreamYoutube
         {
-            get { return ApplicationSettings.Default.StreamYoutube; }
-            set { ApplicationSettings.Default.StreamYoutube = value; }
+            get { return CoreSettings.Default.StreamYoutube; }
+            set { CoreSettings.Default.StreamYoutube = value; }
         }
 
         public string Password

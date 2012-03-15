@@ -89,10 +89,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApplicationSettings.Designer.cs">
+    <Compile Include="CoreSettings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>ApplicationSettings.settings</DependentUpon>
+      <DependentUpon>CoreSettings.settings</DependentUpon>
     </Compile>
     <Compile Include="Library\AccessMode.cs" />
     <Compile Include="Audio\AudioPlayer.cs" />
@@ -117,9 +117,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="ApplicationSettings.settings">
+    <None Include="CoreSettings.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
-      <LastGenOutput>ApplicationSettings.Designer.cs</LastGenOutput>
+      <LastGenOutput>CoreSettings.Designer.cs</LastGenOutput>
     </None>
     <None Include="packages.config" />
   </ItemGroup>

@@ -13,11 +13,11 @@ namespace Espera.Core {
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "10.0.0.0")]
-    public sealed partial class ApplicationSettings : global::System.Configuration.ApplicationSettingsBase {
+    public sealed partial class CoreSettings : global::System.Configuration.ApplicationSettingsBase {
         
-        private static ApplicationSettings defaultInstance = ((ApplicationSettings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new ApplicationSettings())));
+        private static CoreSettings defaultInstance = ((CoreSettings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new CoreSettings())));
         
-        public static ApplicationSettings Default {
+        public static CoreSettings Default {
             get {
                 return defaultInstance;
             }
