@@ -12,49 +12,26 @@ namespace Espera.View
 
         private static bool IsApplicationInstalled(string applicationName)
         {
-            string displayName;
-
-            // Search in: CurrentUser
-            RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall");
-
-            foreach (RegistryKey subkey in key.GetSubKeyNames().Select(keyName => key.OpenSubKey(keyName)))
+            using (RegistryKey currentUser = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"))
             {
-                displayName = subkey.GetValue("DisplayName") as string;
-
-                if (displayName != null && displayName.Contains(applicationName))
+                using (RegistryKey localMachine32 = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"))
                 {
-                    return true;
+                    using (RegistryKey localMachine64 = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"))
+                    {
+                        return IsApplicationInKey(currentUser, applicationName) ||
+                               IsApplicationInKey(localMachine32, applicationName) ||
+                               IsApplicationInKey(localMachine64, applicationName);
+                    }
                 }
             }
+        }
 
-            // Search in: LocalMachine_32
-            key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall");
-
-            foreach (RegistryKey subkey in key.GetSubKeyNames().Select(keyName => key.OpenSubKey(keyName)))
-            {
-                displayName = subkey.GetValue("DisplayName") as string;
-
-                if (displayName != null && displayName.Contains(applicationName))
-                {
-                    return true;
-                }
-            }
-
-            // Search in: LocalMachine_64
-            key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall");
-
-            foreach (RegistryKey subkey in key.GetSubKeyNames().Select(keyName => key.OpenSubKey(keyName)))
-            {
-                displayName = subkey.GetValue("DisplayName") as string;
-
-                if (displayName != null && displayName.Contains(applicationName))
-                {
-                    return true;
-                }
-            }
-
-            // Not found
-            return false;
+        private static bool IsApplicationInKey(RegistryKey key, string applicationName)
+        {
+            return key.GetSubKeyNames()
+                .Select(key.OpenSubKey)
+                .Select(subkey => subkey.GetValue("DisplayName") as string)
+                .Any(displayName => displayName != null && displayName.Contains(applicationName));
         }
     }
 }
