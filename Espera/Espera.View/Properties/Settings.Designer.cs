@@ -34,5 +34,197 @@ namespace Espera.View.Properties {
                 this["AccentColor"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int LocalTitleColumnWidth {
+            get {
+                return ((int)(this["LocalTitleColumnWidth"]));
+            }
+            set {
+                this["LocalTitleColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int LocalDurationColumnWidth {
+            get {
+                return ((int)(this["LocalDurationColumnWidth"]));
+            }
+            set {
+                this["LocalDurationColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int LocalArtistColumnWidth {
+            get {
+                return ((int)(this["LocalArtistColumnWidth"]));
+            }
+            set {
+                this["LocalArtistColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int LocalAlbumColumnWidth {
+            get {
+                return ((int)(this["LocalAlbumColumnWidth"]));
+            }
+            set {
+                this["LocalAlbumColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int LocalGenreColumnWidth {
+            get {
+                return ((int)(this["LocalGenreColumnWidth"]));
+            }
+            set {
+                this["LocalGenreColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int YoutubeTitleColumnWidth {
+            get {
+                return ((int)(this["YoutubeTitleColumnWidth"]));
+            }
+            set {
+                this["YoutubeTitleColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int YoutubeDurationColumnWidth {
+            get {
+                return ((int)(this["YoutubeDurationColumnWidth"]));
+            }
+            set {
+                this["YoutubeDurationColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int YoutubeRatingColumnWidth {
+            get {
+                return ((int)(this["YoutubeRatingColumnWidth"]));
+            }
+            set {
+                this["YoutubeRatingColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int YoutubeLinkColumnWidth {
+            get {
+                return ((int)(this["YoutubeLinkColumnWidth"]));
+            }
+            set {
+                this["YoutubeLinkColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int PlaylistTitleColumnWidth {
+            get {
+                return ((int)(this["PlaylistTitleColumnWidth"]));
+            }
+            set {
+                this["PlaylistTitleColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int PlaylistDurationColumnWidth {
+            get {
+                return ((int)(this["PlaylistDurationColumnWidth"]));
+            }
+            set {
+                this["PlaylistDurationColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int PlaylistArtistColumnWidth {
+            get {
+                return ((int)(this["PlaylistArtistColumnWidth"]));
+            }
+            set {
+                this["PlaylistArtistColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int PlaylistAlbumColumnWidth {
+            get {
+                return ((int)(this["PlaylistAlbumColumnWidth"]));
+            }
+            set {
+                this["PlaylistAlbumColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int PlaylistGenreColumnWidth {
+            get {
+                return ((int)(this["PlaylistGenreColumnWidth"]));
+            }
+            set {
+                this["PlaylistGenreColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int PlaylistSourceColumnWidth {
+            get {
+                return ((int)(this["PlaylistSourceColumnWidth"]));
+            }
+            set {
+                this["PlaylistSourceColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int PlaylistCachingProgressColumnWidth {
+            get {
+                return ((int)(this["PlaylistCachingProgressColumnWidth"]));
+            }
+            set {
+                this["PlaylistCachingProgressColumnWidth"] = value;
+            }
+        }
     }
 }

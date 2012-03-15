@@ -6,6 +6,7 @@ using System.Timers;
 using System.Windows.Input;
 using Espera.Core;
 using Espera.Core.Library;
+using Espera.View.Properties;
 using Rareform.Patterns.MVVM;
 
 namespace Espera.View.ViewModels
@@ -25,6 +26,102 @@ namespace Espera.View.ViewModels
         public AdministratorViewModel AdministratorViewModel { get; private set; }
 
         public StatusViewModel StatusViewModel { get; private set; }
+
+        public int LocalTitleColumnWidth
+        {
+            get { return Settings.Default.LocalTitleColumnWidth; }
+            set { Settings.Default.LocalTitleColumnWidth = value; }
+        }
+
+        public int LocalDurationColumnWidth
+        {
+            get { return Settings.Default.LocalDurationColumnWidth; }
+            set { Settings.Default.LocalDurationColumnWidth = value; }
+        }
+
+        public int LocalArtistColumnWidth
+        {
+            get { return Settings.Default.LocalArtistColumnWidth; }
+            set { Settings.Default.LocalArtistColumnWidth = value; }
+        }
+
+        public int LocalAlbumColumnWidth
+        {
+            get { return Settings.Default.LocalAlbumColumnWidth; }
+            set { Settings.Default.LocalAlbumColumnWidth = value; }
+        }
+
+        public int LocalGenreColumnWidth
+        {
+            get { return Settings.Default.LocalGenreColumnWidth; }
+            set { Settings.Default.LocalGenreColumnWidth = value; }
+        }
+
+        public int YoutubeTitleColumnWidth
+        {
+            get { return Settings.Default.YoutubeTitleColumnWidth; }
+            set { Settings.Default.YoutubeTitleColumnWidth = value; }
+        }
+
+        public int YoutubeDurationColumnWidth
+        {
+            get { return Settings.Default.YoutubeDurationColumnWidth; }
+            set { Settings.Default.YoutubeDurationColumnWidth = value; }
+        }
+
+        public int YoutubeRatingColumnWidth
+        {
+            get { return Settings.Default.YoutubeRatingColumnWidth; }
+            set { Settings.Default.YoutubeRatingColumnWidth = value; }
+        }
+
+        public int YoutubeLinkColumnWidth
+        {
+            get { return Settings.Default.YoutubeLinkColumnWidth; }
+            set { Settings.Default.YoutubeLinkColumnWidth = value; }
+        }
+
+        public int PlaylistTitleColumnWidth
+        {
+            get { return Settings.Default.PlaylistTitleColumnWidth; }
+            set { Settings.Default.PlaylistTitleColumnWidth = value; }
+        }
+
+        public int PlaylistDurationColumnWidth
+        {
+            get { return Settings.Default.PlaylistDurationColumnWidth; }
+            set { Settings.Default.PlaylistDurationColumnWidth = value; }
+        }
+
+        public int PlaylistArtistColumnWidth
+        {
+            get { return Settings.Default.PlaylistArtistColumnWidth; }
+            set { Settings.Default.PlaylistArtistColumnWidth = value; }
+        }
+
+        public int PlaylistAlbumColumnWidth
+        {
+            get { return Settings.Default.PlaylistAlbumColumnWidth; }
+            set { Settings.Default.PlaylistAlbumColumnWidth = value; }
+        }
+
+        public int PlaylistGenreColumnWidth
+        {
+            get { return Settings.Default.PlaylistGenreColumnWidth; }
+            set { Settings.Default.PlaylistGenreColumnWidth = value; }
+        }
+
+        public int PlaylistSourceColumnWidth
+        {
+            get { return Settings.Default.PlaylistSourceColumnWidth; }
+            set { Settings.Default.PlaylistSourceColumnWidth = value; }
+        }
+
+        public int PlaylistCachingProgressColumnWidth
+        {
+            get { return Settings.Default.PlaylistCachingProgressColumnWidth; }
+            set { Settings.Default.PlaylistCachingProgressColumnWidth = value; }
+        }
 
         public bool IsLocal
         {
