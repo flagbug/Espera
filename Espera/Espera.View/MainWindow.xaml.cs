@@ -78,43 +78,43 @@ namespace Espera.View
             }
         }
 
-        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        private void PasswordBoxPasswordChanged(object sender, RoutedEventArgs e)
         {
             this.mainViewModel.AdministratorViewModel.Password = ((PasswordBox)sender).Password;
         }
 
-        private void AdminPanelToggleButton_Click(object sender, RoutedEventArgs e)
+        private void AdminPanelToggleButtonClick(object sender, RoutedEventArgs e)
         {
             this.showAdministratorPanel = !this.showAdministratorPanel;
 
             this.adminPanel.Visibility = this.showAdministratorPanel ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        private void RedColorButtonButton_Click(object sender, RoutedEventArgs e)
+        private void RedColorButtonButtonClick(object sender, RoutedEventArgs e)
         {
             this.ChangeColor("Red");
             Settings.Default.AccentColor = "Red";
         }
 
-        private void GreenColorButtonButton_Click(object sender, RoutedEventArgs e)
+        private void GreenColorButtonButtonClick(object sender, RoutedEventArgs e)
         {
             this.ChangeColor("Green");
             Settings.Default.AccentColor = "Green";
         }
 
-        private void BlueColorButtonButton_Click(object sender, RoutedEventArgs e)
+        private void BlueColorButtonButtonClick(object sender, RoutedEventArgs e)
         {
             this.ChangeColor("Blue");
             Settings.Default.AccentColor = "Blue";
         }
 
-        private void PurpleColorButtonButton_Click(object sender, RoutedEventArgs e)
+        private void PurpleColorButtonButtonClick(object sender, RoutedEventArgs e)
         {
             this.ChangeColor("Purple");
             Settings.Default.AccentColor = "Purple";
         }
 
-        private void SearchTextBox_KeyUp(object sender, KeyEventArgs e)
+        private void SearchTextBoxKeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
@@ -154,7 +154,7 @@ namespace Espera.View
             }
         }
 
-        private void Playlist_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        private void PlaylistContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             if (((ListView)sender).Items.IsEmpty)
             {
@@ -162,7 +162,7 @@ namespace Espera.View
             }
         }
 
-        private void SongList_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        private void SongListContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             if (((ListView)sender).Items.IsEmpty)
             {
@@ -170,17 +170,17 @@ namespace Espera.View
             }
         }
 
-        private void Playlist_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void PlaylistSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             this.mainViewModel.SelectedPlaylistEntries = ((ListView)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
         }
 
-        private void SongList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void SongListSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             this.mainViewModel.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModel>();
         }
 
-        private void MetroWindow_KeyUp(object sender, KeyEventArgs e)
+        private void MetroWindowKeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Space)
             {

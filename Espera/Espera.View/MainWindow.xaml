@@ -10,7 +10,7 @@
                       WindowState="Maximized"
                       Icon="/Espera.View;component/Images/appbar.music.png"
                       Closing="MetroWindowClosing"
-                      KeyUp="MetroWindow_KeyUp">
+                      KeyUp="MetroWindowKeyUp">
     <Window.DataContext>
         <ViewModels:MainViewModel x:Name="mainViewModel" />
     </Window.DataContext>
@@ -157,12 +157,12 @@
                      VerticalContentAlignment="Center"
                      Width="150"
                      Text="{Binding Path=SearchText, UpdateSourceTrigger=PropertyChanged}"
-                     KeyUp="SearchTextBox_KeyUp" />
+                     KeyUp="SearchTextBoxKeyUp" />
             <ToggleButton Grid.Column="5"
                     Margin="10, 0, 0, 0"
                     Padding="0"
                     ToolTip="Settings"
-                    Click="AdminPanelToggleButton_Click">
+                    Click="AdminPanelToggleButtonClick">
                 <Image Source="/Espera.View;component/Images/appbar.settings.png" />
             </ToggleButton>
         </Grid>
@@ -252,10 +252,10 @@
                     <TabItem Header="Local"
                              IsSelected="{Binding Path=IsLocal}">
                         <ListView ItemsSource="{Binding Path=SelectableLocalSongs}"
-                                  SelectionChanged="SongList_SelectionChanged"
+                                  SelectionChanged="SongListSelectionChanged"
                                   KeyUp="SongListKeyUp"
                                   ScrollViewer.CanContentScroll="True"
-                                  ContextMenuOpening="SongList_ContextMenuOpening">
+                                  ContextMenuOpening="SongListContextMenuOpening">
                             <ListView.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongsToPlaylistCommand}" />
@@ -332,8 +332,8 @@
                              IsEnabled="{Binding Path=CanUseYoutube}"
                              IsSelected="{Binding Path=IsYoutube}">
                         <ListView ItemsSource="{Binding Path=SelectableYoutubeSongs, IsAsync=True}"
-                                  SelectionChanged="SongList_SelectionChanged"
-                                  ContextMenuOpening="SongList_ContextMenuOpening">
+                                  SelectionChanged="SongListSelectionChanged"
+                                  ContextMenuOpening="SongListContextMenuOpening">
                             <ListView.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongsToPlaylistCommand}" />
@@ -398,10 +398,10 @@
                     </Grid.RowDefinitions>
                     <ListView Grid.Row="0"
                               ItemsSource="{Binding Path=Playlist}"
-                              SelectionChanged="Playlist_SelectionChanged"
+                              SelectionChanged="PlaylistSelectionChanged"
                               KeyUp="PlaylistKeyUp"
                               ScrollViewer.CanContentScroll="True"
-                              ContextMenuOpening="Playlist_ContextMenuOpening">
+                              ContextMenuOpening="PlaylistContextMenuOpening">
                         <ListView.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Play" Command="{Binding Path=PlayCommand}" />
@@ -567,7 +567,7 @@
                                 <PasswordBox Margin="0, 5, 0, 0"
                                              WPF:PasswordBoxBinder.Attach="True"
                                              WPF:PasswordBoxBinder.Password="{Binding Path=Password, Mode=TwoWay}"
-                                             PasswordChanged="PasswordBox_PasswordChanged" />
+                                             PasswordChanged="PasswordBoxPasswordChanged" />
                                 <Button Margin="0, 10, 0, 0"
                                         Content="Login"
                                         Command="{Binding Path=LoginCommand}" />
@@ -592,19 +592,19 @@
                                     <StackPanel Orientation="Horizontal">
                                         <Button Style="{StaticResource ColorPickerButtonStyle}"
                                                 Background="Red"
-                                                Click="RedColorButtonButton_Click" />
+                                                Click="RedColorButtonButtonClick" />
                                         <Button Style="{StaticResource ColorPickerButtonStyle}"
                                                 Background="Green"
                                                 Margin="2, 0, 0, 0"
-                                                Click="GreenColorButtonButton_Click" />
+                                                Click="GreenColorButtonButtonClick" />
                                         <Button Style="{StaticResource ColorPickerButtonStyle}"
                                                 Background="Blue"
                                                 Margin="2, 0, 0, 0"
-                                                Click="BlueColorButtonButton_Click" />
+                                                Click="BlueColorButtonButtonClick" />
                                         <Button Style="{StaticResource ColorPickerButtonStyle}"
                                                 Background="Purple"
                                                 Margin="2, 0, 0, 0"
-                                                Click="PurpleColorButtonButton_Click" />
+                                                Click="PurpleColorButtonButtonClick" />
                                     </StackPanel>
                                 </StackPanel>
                                 <Grid Grid.Row="1"
@@ -625,7 +625,7 @@
                                 <PasswordBox Margin="0, 5, 0, 0"
                                              WPF:PasswordBoxBinder.Attach="True"
                                              WPF:PasswordBoxBinder.Password="{Binding Path=Password, Mode=TwoWay}"
-                                             PasswordChanged="PasswordBox_PasswordChanged" />
+                                             PasswordChanged="PasswordBoxPasswordChanged" />
                                 <Button Content="Create Administrator"
                                         Command="{Binding Path=CreateAdminCommand}"
                                         Margin="0, 5, 0, 0"/>
