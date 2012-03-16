@@ -391,7 +391,9 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        if (this.library.IsPaused)
+                        var ignorePause = (bool)param;
+
+                        if (this.library.IsPaused && !ignorePause)
                         {
                             this.library.ContinueSong();
                             this.updateTimer.Start();

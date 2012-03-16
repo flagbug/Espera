@@ -74,7 +74,7 @@ namespace Espera.View
         {
             if (this.mainViewModel.PlayCommand.CanExecute(null))
             {
-                this.mainViewModel.PlayCommand.Execute(null);
+                this.mainViewModel.PlayCommand.Execute(true);
             }
         }
 
@@ -188,7 +188,7 @@ namespace Espera.View
                 {
                     if (this.mainViewModel.PlayCommand.CanExecute(null))
                     {
-                        this.mainViewModel.PlayCommand.Execute(null);
+                        this.mainViewModel.PlayCommand.Execute(false);
                     }
                 }
             }
