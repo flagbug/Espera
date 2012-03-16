@@ -403,7 +403,7 @@ namespace Espera.View.ViewModels
                             this.library.PlaySong(this.SelectedPlaylistEntries.First().Index);
                         }
                     },
-                    param => this.IsAdmin && ((this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1) || this.library.LoadedSong != null)
+                    param => this.IsAdmin && ((this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1) || (this.library.LoadedSong != null && this.library.IsPaused))
                 );
             }
         }
