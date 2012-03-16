@@ -114,7 +114,7 @@ namespace Espera.View
             Settings.Default.AccentColor = "Purple";
         }
 
-        private void SearchTextBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        private void SearchTextBox_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
@@ -124,7 +124,7 @@ namespace Espera.View
             e.Handled = true;
         }
 
-        private void PlaylistKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        private void PlaylistKeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Delete)
             {
@@ -143,7 +143,7 @@ namespace Espera.View
             }
         }
 
-        private void SongListKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        private void SongListKeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Delete)
             {
@@ -180,7 +180,7 @@ namespace Espera.View
             this.mainViewModel.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModel>();
         }
 
-        private void MetroWindow_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        private void MetroWindow_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Space)
             {
