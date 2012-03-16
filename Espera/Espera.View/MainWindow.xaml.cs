@@ -133,6 +133,14 @@ namespace Espera.View
                     this.mainViewModel.RemoveSelectedPlaylistEntriesCommand.Execute(null);
                 }
             }
+
+            else if (e.Key == Key.Enter)
+            {
+                if (this.mainViewModel.PlayCommand.CanExecute(null))
+                {
+                    this.mainViewModel.PlayCommand.Execute(true);
+                }
+            }
         }
 
         private void SongListKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
