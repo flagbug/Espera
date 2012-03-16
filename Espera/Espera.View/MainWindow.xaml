@@ -314,6 +314,15 @@
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
+                                    <GridViewColumn Header="Path"
+                                                    Width="{Binding Path=LocalPathColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Path=Path}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
                                 </GridView>
                             </ListView.View>
                         </ListView>

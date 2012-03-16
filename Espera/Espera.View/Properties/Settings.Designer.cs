@@ -226,5 +226,17 @@ namespace Espera.View.Properties {
                 this["PlaylistCachingProgressColumnWidth"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int LocalPathColumnWidth {
+            get {
+                return ((int)(this["LocalPathColumnWidth"]));
+            }
+            set {
+                this["LocalPathColumnWidth"] = value;
+            }
+        }
     }
 }

@@ -57,6 +57,12 @@ namespace Espera.View.ViewModels
             set { Settings.Default.LocalGenreColumnWidth = value; }
         }
 
+        public int LocalPathColumnWidth
+        {
+            get { return Settings.Default.LocalPathColumnWidth; }
+            set { Settings.Default.LocalPathColumnWidth = value; }
+        }
+
         public int YoutubeTitleColumnWidth
         {
             get { return Settings.Default.YoutubeTitleColumnWidth; }
