@@ -8,7 +8,7 @@
                       Height="600"
                       Width="800"
                       WindowState="Maximized"
-                      Icon="/Espera.View;component/Images/appbar.music.png"
+                      Icon="/Espera;component/Images/appbar.music.png"
                       Closing="MetroWindowClosing"
                       KeyUp="MetroWindowKeyUp">
     <Window.DataContext>
@@ -67,7 +67,7 @@
                 <Button Padding="0"
                         ToolTip="Add music"
                         Click="AddSongsButtonClick">
-                    <Image Source="/Espera.View;component/Images/appbar.add.png" />
+                    <Image Source="/Espera;component/Images/appbar.add.png" />
                 </Button>
                 <Button Padding="0"
                         Margin="15, 0, 0, 0"
@@ -92,10 +92,10 @@
                             <Style TargetType="{x:Type Image}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Path=IsPlaying}" Value="True">
-                                        <Setter Property="Source" Value="/Espera.View;component/Images/appbar.pause.png" />
+                                        <Setter Property="Source" Value="/Espera;component/Images/appbar.pause.png" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding Path=IsPlaying}" Value="False">
-                                        <Setter Property="Source" Value="/Espera.View;component/Images/appbar.play.png" />
+                                        <Setter Property="Source" Value="/Espera;component/Images/appbar.play.png" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -106,13 +106,13 @@
                         Margin="5, 0, 0, 0"
                         ToolTip="Previous song"
                         Command="{Binding Path=PreviousSongCommand}">
-                    <Image Source="/Espera.View;component/Images/appbar.navigate.previous.png" />
+                    <Image Source="/Espera;component/Images/appbar.navigate.previous.png" />
                 </Button>
                 <Button Padding="0"
                         Margin="5, 0, 0, 0"
                         ToolTip="Next song"
                         Command="{Binding Path=NextSongCommand}">
-                    <Image Source="/Espera.View;component/Images/appbar.navigate.next.png" />
+                    <Image Source="/Espera;component/Images/appbar.navigate.next.png" />
                 </Button>
             </StackPanel>
             <StackPanel Grid.Column="1"
@@ -122,7 +122,7 @@
                         ToolTip="Mute"
                         Command="{Binding Path=MuteCommand}"
                         VerticalAlignment="Center">
-                    <Image Source="/Espera.View;component/Images/appbar.sound.1.png" />
+                    <Image Source="/Espera;component/Images/appbar.sound.1.png" />
                 </Button>
                 <Slider Width="200"
                         IsMoveToPointEnabled="True"
@@ -133,7 +133,7 @@
                         ToolTip="Unmute"
                         Command="{Binding Path=UnMuteCommand}"
                         VerticalAlignment="Center">
-                    <Image Source="/Espera.View;component/Images/appbar.sound.3.png" />
+                    <Image Source="/Espera;component/Images/appbar.sound.3.png" />
                 </Button>
             </StackPanel>
             <Slider Grid.Column="2"
@@ -163,7 +163,7 @@
                     Padding="0"
                     ToolTip="Settings"
                     Click="AdminPanelToggleButtonClick">
-                <Image Source="/Espera.View;component/Images/appbar.settings.png" />
+                <Image Source="/Espera;component/Images/appbar.settings.png" />
             </ToggleButton>
         </Grid>
         <Grid Grid.Row="1"
@@ -423,7 +423,7 @@
                                 <GridViewColumn Width="35">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Image Source="/Espera.View;component/Images/appbar.sound.3.png"
+                                            <Image Source="/Espera;component/Images/appbar.sound.3.png"
                                                    Visibility="{Binding Path=IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                    Width="25"
                                                    Height="25" />
