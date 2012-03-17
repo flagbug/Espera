@@ -391,7 +391,19 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        var ignorePause = (bool)param;
+                        bool ignorePause;
+
+                        var value = param as string;
+
+                        if (value != null)
+                        {
+                            ignorePause = Boolean.Parse(value);
+                        }
+
+                        else
+                        {
+                            ignorePause = (bool)param;
+                        }
 
                         if (this.library.IsPaused && !ignorePause)
                         {
