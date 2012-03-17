@@ -55,8 +55,7 @@ namespace Espera.View
 
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (this.mainViewModel.IsAdmin && e.LeftButton == MouseButtonState.Pressed &&
-                this.mainViewModel.AddSelectedSongsToPlaylistCommand.CanExecute(null))
+            if (e.LeftButton == MouseButtonState.Pressed && this.mainViewModel.AddSelectedSongsToPlaylistCommand.CanExecute(null))
             {
                 this.mainViewModel.AddSelectedSongsToPlaylistCommand.Execute(null);
             }
