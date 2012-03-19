@@ -216,5 +216,48 @@ namespace Espera.Core.Tests
                 library.Dispose();
             }
         }
+
+        [TestMethod]
+        public void RemoveFromPlaylist_SongIsPlaying_CurrentPlayerIsStopped()
+        {
+            var audioPlayerMock = new Mock<AudioPlayer>();
+
+            var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+            songMock.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayerMock.Object);
+
+            var library = new Library.Library();
+
+            library.AddSongsToPlaylist(new[] { songMock.Object });
+
+            library.PlaySong(0);
+
+            library.RemoveFromPlaylist(new[] { 0 });
+
+            audioPlayerMock.Verify(p => p.Stop(), Times.Once());
+
+            library.Dispose();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void RemoveFromPlaylist_AccessModeIsUser_ThrowsInvalidOperationException()
+        {
+            var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+
+            var library = new Library.Library();
+            library.ChangeToUser();
+
+            library.AddSongsToPlaylist(new[] { songMock.Object });
+
+            try
+            {
+                library.RemoveFromPlaylist(new[] { 0 });
+            }
+
+            finally
+            {
+                library.Dispose();
+            }
+        }
     }
 }
