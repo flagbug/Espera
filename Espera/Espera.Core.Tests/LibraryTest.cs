@@ -155,6 +155,7 @@ namespace Espera.Core.Tests
             }
         }
 
+        [TestMethod]
         public void PlaySong_IndexIsFirstSong_EventsCorrectlyRaised()
         {
             var audioPlayerMock = new Mock<AudioPlayer>();
