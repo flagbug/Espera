@@ -20,6 +20,9 @@ namespace Espera.Core.Library
         private AudioPlayer currentPlayer;
         private float volume;
         private readonly RemovableDriveNotifier driveNotifier;
+        private bool overrideCurrentCaching;
+        private readonly ManualResetEvent cacheResetHandle;
+        private bool isWaitingOnCache;
 
         /// <summary>
         /// Occurs when a song has been added to the library.
@@ -206,6 +209,7 @@ namespace Espera.Core.Library
             this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
             this.driveNotifier = RemovableDriveNotifier.Create();
             this.driveNotifier.DriveRemoved += (sender, args) => Task.Factory.StartNew(this.Update);
+            this.cacheResetHandle = new ManualResetEvent(false);
         }
 
         /// <summary>
@@ -485,6 +489,13 @@ namespace Espera.Core.Library
         {
             playlistIndex.ThrowIfLessThan(0, () => playlistIndex);
 
+            this.overrideCurrentCaching = true;
+
+            if (this.isWaitingOnCache)
+            {
+                cacheResetHandle.WaitOne();
+            }
+
             this.playlist.CurrentSongIndex = playlistIndex;
 
             Song song = this.playlist[playlistIndex];
@@ -502,10 +513,24 @@ namespace Espera.Core.Library
             Task.Factory.StartNew(() =>
             {
                 // Wait till the song is cached
+
+                this.isWaitingOnCache = true;
+
                 while (!song.IsCached)
                 {
+                    if (this.overrideCurrentCaching)
+                    {
+                        this.cacheResetHandle.Set();
+                        this.isWaitingOnCache = false;
+                        this.overrideCurrentCaching = false;
+                        return;
+                    }
+
                     Thread.Sleep(250);
                 }
+
+                this.isWaitingOnCache = false;
+                this.overrideCurrentCaching = false;
 
                 this.currentPlayer.Load(song);
                 this.currentPlayer.Play();
