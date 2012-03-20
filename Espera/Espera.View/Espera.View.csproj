@@ -161,35 +161,24 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\appbar.play.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\appbar.pause.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\appbar.sound.1.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\appbar.sound.3.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\appbar.navigate.next.png" />
-    <Resource Include="Images\appbar.navigate.previous.png" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Espera.Core\Espera.Core.csproj">
       <Project>{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}</Project>
       <Name>Espera.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\appbar.add.png" />
+    <Resource Include="Images\Add.png" />
+    <Resource Include="Images\ApplicationIcon.png" />
+    <Resource Include="Images\Mute.png" />
+    <Resource Include="Images\Next.png" />
+    <Resource Include="Images\Pause.png" />
+    <Resource Include="Images\Play.png" />
+    <Resource Include="Images\Previous.png" />
+    <Resource Include="Images\Settings.png" />
+    <Resource Include="Images\Unmute.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\appbar.music.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\appbar.settings.png" />
+    <Resource Include="Images\CurrentSongIcon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
