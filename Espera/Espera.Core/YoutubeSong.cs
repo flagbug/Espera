@@ -79,7 +79,7 @@ namespace Espera.Core
                 downloader.ProgressChanged += (sender, args) =>
                 {
                     // HACK: We don't know the total or transferred bytes, so we fake them
-                    // The zero check is needed, because the DataTransferEventArgs class doens't allow zero transferred bytes
+                    // The zero check is needed, because the DataTransferEventArgs class doesn't allow zero transferred bytes
                     if ((int)args.ProgressPercentage > 0)
                     {
                         this.OnCachingProgressChanged(new DataTransferEventArgs(100, (int)args.ProgressPercentage));
