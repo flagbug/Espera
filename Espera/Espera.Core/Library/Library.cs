@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Espera.Core.Audio;
 using Rareform.Extensions;
+using Rareform.IO;
 using Rareform.Reflection;
 
 namespace Espera.Core.Library
@@ -19,7 +20,7 @@ namespace Espera.Core.Library
         private AccessMode accessMode;
         private AudioPlayer currentPlayer;
         private float volume;
-        private readonly RemovableDriveNotifier driveNotifier;
+        private readonly RemovableDriveWatcher driveWatcher;
         private bool overrideCurrentCaching;
         private readonly ManualResetEvent cacheResetHandle;
         private bool isWaitingOnCache;
@@ -207,8 +208,8 @@ namespace Espera.Core.Library
             this.playlist = new Playlist();
             this.volume = 1.0f;
             this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
-            this.driveNotifier = RemovableDriveNotifier.Create();
-            this.driveNotifier.DriveRemoved += (sender, args) => Task.Factory.StartNew(this.Update);
+            this.driveWatcher = RemovableDriveWatcher.Create();
+            this.driveWatcher.DriveRemoved += (sender, args) => Task.Factory.StartNew(this.Update);
             this.cacheResetHandle = new ManualResetEvent(false);
         }
 
@@ -399,7 +400,7 @@ namespace Espera.Core.Library
                 this.currentPlayer.Dispose();
             }
 
-            this.driveNotifier.Dispose();
+            this.driveWatcher.Dispose();
 
             DisposeSongs(this.songs);
         }
