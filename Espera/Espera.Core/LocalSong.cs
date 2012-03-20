@@ -85,7 +85,7 @@ namespace Espera.Core
             {
                 using (Stream targetStream = File.OpenWrite(path))
                 {
-                    var operation = new StreamCopyOperation(sourceStream, targetStream, 32 * 1024, true);
+                    var operation = new StreamCopyOperation(sourceStream, targetStream);
 
                     operation.CopyProgressChanged += (sender, e) => this.OnCachingProgressChanged(e);
 
