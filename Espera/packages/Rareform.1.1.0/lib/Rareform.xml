@@ -700,6 +700,40 @@
             </summary>
             <param name="writer">The <see cref="T:System.Xml.XmlWriter"/> stream to which the object is serialized.</param>
         </member>
+        <member name="T:Rareform.IO.RemovableDriveWatcher">
+            <summary>
+            Listens to the USB ports and raises events when a removable device has been insterted or removed.
+            </summary>
+        </member>
+        <member name="M:Rareform.IO.RemovableDriveWatcher.#ctor">
+            <summary>
+            Prevents a default instance of the <see cref="T:Rareform.IO.RemovableDriveWatcher"/> class from being created.
+            </summary>
+        </member>
+        <member name="M:Rareform.IO.RemovableDriveWatcher.Create">
+            <summary>
+            Creates a new <see cref="T:Rareform.IO.RemovableDriveWatcher"/>.
+            </summary>
+            <returns>
+            A new instance of the <see cref="T:Rareform.IO.RemovableDriveWatcher"/> class,
+            if none has been created yet; otherwise, the singleton instance.
+            </returns>
+        </member>
+        <member name="M:Rareform.IO.RemovableDriveWatcher.Dispose">
+            <summary>
+            Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+            </summary>
+        </member>
+        <member name="E:Rareform.IO.RemovableDriveWatcher.DriveInserted">
+            <summary>
+            Occurs when a removable drive has is inserted.
+            </summary>
+        </member>
+        <member name="E:Rareform.IO.RemovableDriveWatcher.DriveRemoved">
+            <summary>
+            Occurs when a removable drive is removed.
+            </summary>
+        </member>
         <member name="T:Rareform.Collections.EventCollectionEventArgs`1">
             <summary>
             Provides data for the events of the <see cref="T:Rareform.Collections.EventCollection`1"/> class.
@@ -938,6 +972,14 @@
             the caller has to do it himself.
             </remarks>
         </member>
+        <member name="M:Rareform.IO.StreamCopyOperation.#ctor(System.IO.Stream,System.IO.Stream)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Rareform.IO.StreamCopyOperation"/> class.
+            </summary>
+            <param name="sourceStream">The source stream.</param>
+            <param name="targetStream">The target stream.</param>
+            <remarks>This constructor uses a 32 kilobyte buffer and a dynamic update interval.</remarks>
+        </member>
         <member name="M:Rareform.IO.StreamCopyOperation.#ctor(System.IO.Stream,System.IO.Stream,System.Int32,System.Int32)">
             <summary>
             Initializes a new instance of the <see cref="T:Rareform.IO.StreamCopyOperation"/> class.
@@ -954,7 +996,7 @@
             <param name="sourceStream">The source stream.</param>
             <param name="targetStream">The target stream.</param>
             <param name="bufferSize">Size of the buffer.</param>
-            <param name="dynamicUpdateInterval">if set to true, the operation uses an dynamic update interval, based on the stream length.;
+            <param name="dynamicUpdateInterval">if set to true, the operation uses a dynamic update interval, based on the stream length.;
             otherwise, it uses a predefined update interval.</param>
         </member>
         <member name="M:Rareform.IO.StreamCopyOperation.#ctor(System.IO.Stream,System.IO.Stream,System.Int32)">
@@ -1281,6 +1323,11 @@
         <member name="P:Rareform.IO.DataTransferEventArgs.TransferredBytes">
             <summary>
             Gets the number of copied bytes.
+            </summary>
+        </member>
+        <member name="P:Rareform.IO.DataTransferEventArgs.ProgressPercentage">
+            <summary>
+            Gets the progress percentage.
             </summary>
         </member>
         <member name="P:Rareform.IO.DataTransferEventArgs.AverageSpeed">
