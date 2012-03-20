@@ -95,7 +95,7 @@ namespace Espera.View.ViewModels
             else
             {
                 this.Wrapped.CachingProgressChanged +=
-                    (sender, e) => this.CacheProgress = (int)((e.TransferredBytes * 1.0 / e.TotalBytes) * 100);
+                    (sender, e) => this.CacheProgress = (int)e.ProgressPercentage;
 
                 this.Wrapped.CachingFailed += (sender, args) => this.HasCachingFailed = true;
 
