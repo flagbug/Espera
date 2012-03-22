@@ -88,11 +88,23 @@ namespace Espera.Core.Library
             get { return this.playlist.CurrentSongIndex; }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the next song in the playlist can be played.
+        /// </summary>
+        /// <value>
+        /// true if the next song in the playlist can be played; otherwise, false.
+        /// </value>
         public bool CanPlayNextSong
         {
             get { return this.playlist.CanPlayNextSong; }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the previous song in the playlist can be played.
+        /// </summary>
+        /// <value>
+        /// true if the previous song in the playlist can be played; otherwise, false.
+        /// </value>
         public bool CanPlayPreviousSong
         {
             get { return this.playlist.CanPlayPreviousSong; }
