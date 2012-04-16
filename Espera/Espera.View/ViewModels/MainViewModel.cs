@@ -27,6 +27,16 @@ namespace Espera.View.ViewModels
 
         public StatusViewModel StatusViewModel { get; private set; }
 
+        public bool CanChangeVolume
+        {
+            get { return CoreSettings.Default.LockVolume && this.IsAdmin; }
+        }
+
+        public bool CanChangeTime
+        {
+            get { return CoreSettings.Default.LockTime && this.IsAdmin; }
+        }
+
         public int LocalTitleColumnWidth
         {
             get { return Settings.Default.LocalTitleColumnWidth; }
@@ -705,6 +715,8 @@ namespace Espera.View.ViewModels
         private void UpdateUserAccess()
         {
             this.OnPropertyChanged(vm => vm.IsAdmin);
+            this.OnPropertyChanged(vm => vm.CanChangeVolume);
+            this.OnPropertyChanged(vm => vm.CanChangeTime);
         }
     }
 }

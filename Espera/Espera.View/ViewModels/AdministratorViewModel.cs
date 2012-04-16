@@ -17,6 +17,18 @@ namespace Espera.View.ViewModels
             set { CoreSettings.Default.StreamYoutube = value; }
         }
 
+        public bool LockVolume
+        {
+            get { return CoreSettings.Default.LockVolume; }
+            set { CoreSettings.Default.LockVolume = value; }
+        }
+
+        public bool LockTime
+        {
+            get { return CoreSettings.Default.LockTime; }
+            set { CoreSettings.Default.LockTime = value; }
+        }
+
         public string Password
         {
             get { return this.password; }

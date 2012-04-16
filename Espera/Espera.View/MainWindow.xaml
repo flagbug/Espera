@@ -127,7 +127,7 @@
                 <Slider Width="200"
                         IsMoveToPointEnabled="True"
                         Maximum="1"
-                        IsEnabled="{Binding Path=IsAdmin}"
+                        IsEnabled="{Binding Path=CanChangeVolume}"
                         Value="{Binding Path=Volume}" />
                 <Button Style="{StaticResource VolumeButtonStyle}"
                         ToolTip="Unmute"
@@ -139,6 +139,7 @@
             <Slider Grid.Column="2"
                     Margin="5, 0, 0, 0"
                     IsMoveToPointEnabled="True"
+                    IsEnabled="{Binding Path=CanChangeTime}"
                     Value="{Binding Path=CurrentSeconds}"
                     Maximum="{Binding Path=TotalSeconds}" />
             <StackPanel Grid.Column="3"
@@ -579,11 +580,7 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
+                            <StackPanel Margin="5">
                                 <StackPanel Grid.Row="0"
                                             HorizontalAlignment="Center"
                                             Margin="0, 5, 0, 0">
@@ -607,17 +604,23 @@
                                                 Click="PurpleColorButtonButtonClick" />
                                     </StackPanel>
                                 </StackPanel>
-                                <Grid Grid.Row="1"
-                                      Margin="5">
-                                    <CheckBox Grid.Column="0"
-                                              MinWidth="0"
-                                              IsEnabled="{Binding Path=IsVlcInstalled}"
-                                              IsChecked="{Binding Path=StreamYoutube}">
-                                        <AccessText Text="Stream from Youtube instead of downloading (Requires VLC media player >= 2.0 to be installed)"
-                                                    TextWrapping="Wrap" />
-                                    </CheckBox>
-                                </Grid>
-                            </Grid>
+                                <CheckBox Margin="0, 10, 0, 0"
+                                          IsEnabled="{Binding Path=IsVlcInstalled}"
+                                          IsChecked="{Binding Path=StreamYoutube}">
+                                    <AccessText Text="Stream from Youtube instead of downloading (Requires VLC media player >= 2.0 to be installed)"
+                                                TextWrapping="Wrap" />
+                                </CheckBox>
+                                <CheckBox Margin="0, 10, 0, 0"
+                                          IsChecked="{Binding Path=LockVolume}">
+                                    <AccessText Text="Lock volume when not in administrator mode"
+                                                TextWrapping="Wrap" />
+                                </CheckBox>
+                                <CheckBox Margin="0, 10, 0, 0"
+                                          IsChecked="{Binding Path=LockTime}">
+                                    <AccessText Text="Lock time when not in administrator mode"
+                                                TextWrapping="Wrap" />
+                                </CheckBox>
+                            </StackPanel>
                             <StackPanel Grid.Row="1"
                                         Orientation="Vertical">
                                 <TextBlock Text="Enter a password"
