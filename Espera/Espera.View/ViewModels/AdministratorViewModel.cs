@@ -52,9 +52,9 @@ namespace Espera.View.ViewModels
             get { return this.library.AccessMode == AccessMode.Administrator; }
         }
 
-        public bool IsUser
+        public bool IsParty
         {
-            get { return this.library.AccessMode == AccessMode.User; }
+            get { return this.library.AccessMode == AccessMode.Party; }
         }
 
         public bool IsVlcInstalled
@@ -93,14 +93,14 @@ namespace Espera.View.ViewModels
                         this.Password = String.Empty;
 
                         this.OnPropertyChanged(vm => vm.IsAdmin);
-                        this.OnPropertyChanged(vm => vm.IsUser);
+                        this.OnPropertyChanged(vm => vm.IsParty);
                     },
                     param => !string.IsNullOrWhiteSpace(this.Password)
                 );
             }
         }
 
-        public ICommand ChangeToUserCommand
+        public ICommand ChangeToPartyCommand
         {
             get
             {
@@ -108,8 +108,8 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        this.library.ChangeToUser();
-                        this.OnPropertyChanged(vm => vm.IsUser);
+                        this.library.ChangeToParty();
+                        this.OnPropertyChanged(vm => vm.IsParty);
                         this.OnPropertyChanged(vm => vm.IsAdmin);
                     }
                 );

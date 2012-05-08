@@ -125,7 +125,7 @@ namespace Espera.Core.Tests
         {
             var library = new Library.Library();
             library.CreateAdmin("TestPassword");
-            library.ChangeToUser();
+            library.ChangeToParty();
 
             try
             {
@@ -188,7 +188,7 @@ namespace Espera.Core.Tests
         {
             var library = new Library.Library();
             library.CreateAdmin("TestPassword");
-            library.ChangeToUser();
+            library.ChangeToParty();
 
             try
             {
@@ -241,12 +241,12 @@ namespace Espera.Core.Tests
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
-        public void RemoveFromPlaylist_AccessModeIsUser_ThrowsInvalidOperationException()
+        public void RemoveFromPlaylist_AccessModeIsParty_ThrowsInvalidOperationException()
         {
             var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
 
             var library = new Library.Library();
-            library.ChangeToUser();
+            library.ChangeToParty();
 
             library.AddSongsToPlaylist(new[] { songMock.Object });
 

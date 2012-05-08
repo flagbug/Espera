@@ -261,11 +261,11 @@ namespace Espera.Core.Library
         }
 
         /// <summary>
-        /// Changes the access mode to user mode.
+        /// Changes the access mode to party mode.
         /// </summary>
-        public void ChangeToUser()
+        public void ChangeToParty()
         {
-            this.AccessMode = AccessMode.User;
+            this.AccessMode = AccessMode.Party;
         }
 
         /// <summary>

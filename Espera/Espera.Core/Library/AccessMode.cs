@@ -3,6 +3,6 @@
     public enum AccessMode
     {
         Administrator,
-        User
+        Party
     }
 }
