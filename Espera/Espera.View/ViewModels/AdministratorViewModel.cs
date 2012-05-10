@@ -29,18 +29,9 @@ namespace Espera.View.ViewModels
             set { CoreSettings.Default.LockTime = value; }
         }
 
-        public string Password
-        {
-            get { return this.password; }
-            set
-            {
-                if (this.Password != value)
-                {
-                    this.password = value;
-                    this.OnPropertyChanged(vm => vm.Password);
-                }
-            }
-        }
+        public string CreationPassword { get; set; }
+
+        public string LoginPassword { get; set; }
 
         public bool IsAdminCreated
         {
@@ -70,13 +61,12 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        this.library.CreateAdmin(this.Password);
-                        this.Password = String.Empty;
+                        this.library.CreateAdmin(this.CreationPassword);
 
                         this.OnPropertyChanged(vm => vm.IsAdminCreated);
                         this.OnPropertyChanged(vm => vm.IsAdmin);
                     },
-                    param => !string.IsNullOrWhiteSpace(this.Password)
+                    param => !string.IsNullOrWhiteSpace(this.CreationPassword)
                 );
             }
         }
@@ -89,13 +79,12 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        this.library.ChangeToAdmin(this.Password);
-                        this.Password = String.Empty;
+                        this.library.ChangeToAdmin(this.LoginPassword);
 
                         this.OnPropertyChanged(vm => vm.IsAdmin);
                         this.OnPropertyChanged(vm => vm.IsParty);
                     },
-                    param => !string.IsNullOrWhiteSpace(this.Password)
+                    param => !string.IsNullOrWhiteSpace(this.LoginPassword)
                 );
             }
         }

@@ -77,9 +77,14 @@ namespace Espera.View
             }
         }
 
-        private void PasswordBoxPasswordChanged(object sender, RoutedEventArgs e)
+        private void CreationPasswordChanged(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.AdministratorViewModel.Password = ((PasswordBox)sender).Password;
+            this.mainViewModel.AdministratorViewModel.CreationPassword = ((PasswordBox)sender).Password;
+        }
+
+        private void LoginPasswordChanged(object sender, RoutedEventArgs e)
+        {
+            this.mainViewModel.AdministratorViewModel.LoginPassword = ((PasswordBox)sender).Password;
         }
 
         private void AdminPanelToggleButtonClick(object sender, RoutedEventArgs e)
@@ -199,6 +204,16 @@ namespace Espera.View
                     }
                 }
             }
+        }
+
+        private void CreateAdminButtonClick(object sender, RoutedEventArgs e)
+        {
+            this.adminPasswordBox.Password = String.Empty;
+        }
+
+        private void LoginButtonClick(object sender, RoutedEventArgs e)
+        {
+            this.loginPasswordBox.Password = String.Empty;
         }
     }
 }
