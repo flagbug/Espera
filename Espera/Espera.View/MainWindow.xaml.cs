@@ -208,11 +208,23 @@ namespace Espera.View
 
         private void CreateAdminButtonClick(object sender, RoutedEventArgs e)
         {
+            ICommand command = this.mainViewModel.AdministratorViewModel.CreateAdminCommand;
+            if (command.CanExecute(null))
+            {
+                command.Execute(null);
+            }
+
             this.adminPasswordBox.Password = String.Empty;
         }
 
         private void LoginButtonClick(object sender, RoutedEventArgs e)
         {
+            ICommand command = this.mainViewModel.AdministratorViewModel.LoginCommand;
+            if (command.CanExecute(null))
+            {
+                command.Execute(null);
+            }
+
             this.loginPasswordBox.Password = String.Empty;
         }
     }
