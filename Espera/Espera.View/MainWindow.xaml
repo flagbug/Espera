@@ -156,6 +156,8 @@
                      VerticalAlignment="Center"
                      VerticalContentAlignment="Center"
                      Width="150"
+                     Controls:TextboxHelper.Watermark="Search"
+                     Controls:TextboxHelper.ClearTextButton="True"
                      Text="{Binding Path=SearchText, UpdateSourceTrigger=PropertyChanged}"
                      KeyUp="SearchTextBoxKeyUp" />
             <ToggleButton Grid.Column="5"
