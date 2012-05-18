@@ -247,10 +247,11 @@
             </Border>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="0.4*" />
-                    <RowDefinition Height="0.6*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <TabControl>
+                <TabControl Grid.Row="0">
                     <TabItem Header="Local"
                              IsSelected="{Binding Path=IsLocal}">
                         <ListView ItemsSource="{Binding Path=SelectableLocalSongs}"
@@ -393,7 +394,12 @@
                         </ListView>
                     </TabItem>
                 </TabControl>
-                <Grid Grid.Row="2">
+                <GridSplitter Grid.Row="1"
+                              Height="3"
+                              Foreground="Transparent"
+                              Background="Transparent"
+                              HorizontalAlignment="Stretch" />
+                    <Grid Grid.Row="2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
