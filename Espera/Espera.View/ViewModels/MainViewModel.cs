@@ -139,6 +139,13 @@ namespace Espera.View.ViewModels
             set { Settings.Default.PlaylistCachingProgressColumnWidth = value; }
         }
 
+        // Save the playlist height as string, so that the initial value can be "*"
+        public string PlaylistHeight
+        {
+            get { return Settings.Default.PlaylistHeight; }
+            set { Settings.Default.PlaylistHeight = value; }
+        }
+
         public bool IsLocal
         {
             get { return this.isLocal; }

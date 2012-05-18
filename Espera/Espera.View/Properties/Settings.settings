@@ -56,5 +56,8 @@
     <Setting Name="LocalPathColumnWidth" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">100</Value>
     </Setting>
+    <Setting Name="PlaylistHeight" Type="System.String" Scope="User">
+      <Value Profile="(Default)">*</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
