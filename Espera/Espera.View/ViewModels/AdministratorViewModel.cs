@@ -29,6 +29,12 @@ namespace Espera.View.ViewModels
             set { CoreSettings.Default.LockTime = value; }
         }
 
+        public bool AllowSongRemoval
+        {
+            get { return CoreSettings.Default.AllowSongRemoval; }
+            set { CoreSettings.Default.AllowSongRemoval = value; }
+        }
+
         public string CreationPassword { get; set; }
 
         public string LoginPassword { get; set; }

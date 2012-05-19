@@ -533,7 +533,9 @@ namespace Espera.View.ViewModels
                         this.OnPropertyChanged(vm => vm.SongsRemaining);
                         this.OnPropertyChanged(vm => vm.TimeRemaining);
                     },
-                    param => this.IsAdmin && this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Any()
+                    param => this.SelectedPlaylistEntries != null
+                        && this.SelectedPlaylistEntries.Any()
+                        && (this.IsAdmin || CoreSettings.Default.AllowSongRemoval)
                 );
             }
         }
