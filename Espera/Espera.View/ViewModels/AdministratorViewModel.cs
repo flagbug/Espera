@@ -106,7 +106,8 @@ namespace Espera.View.ViewModels
                         this.library.ChangeToParty();
                         this.OnPropertyChanged(vm => vm.IsParty);
                         this.OnPropertyChanged(vm => vm.IsAdmin);
-                    }
+                    },
+                    param => this.IsAdminCreated
                 );
             }
         }
