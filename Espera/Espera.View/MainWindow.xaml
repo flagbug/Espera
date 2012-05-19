@@ -642,7 +642,7 @@
                                              PasswordChanged="CreationPasswordChanged" />
                                 <Button Content="Create Administrator"
                                         Command="{Binding Path=CreateAdminCommand}"
-                                        Margin="0, 5, 0, 0" 
+                                        Margin="0, 5, 0, 0"
                                         Click="CreateAdminButtonClick" />
                             </StackPanel>
                             <Button Grid.Row="2"

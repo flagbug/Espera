@@ -1,15 +1,15 @@
 ﻿// FolderBrowserDialogEx.cs
 //
 // A replacement for the builtin System.Windows.Forms.FolderBrowserDialog class.
-// This one includes an edit box, and also displays the full path in the edit box. 
+// This one includes an edit box, and also displays the full path in the edit box.
 //
-// based on code from http://support.microsoft.com/default.aspx?scid=kb;[LN];306285 
-// 
+// based on code from http://support.microsoft.com/default.aspx?scid=kb;[LN];306285
+//
 // 20 Feb 2009
 //
 // ========================================================================================
 // Example usage:
-// 
+//
 // string _folderName = "c:\\dinoch";
 // private void button1_Click(object sender, EventArgs e)
 // {
@@ -24,9 +24,9 @@
 //         ShowFullPathInEditBox= false,
 //     };
 //     dlg1.RootFolder = System.Environment.SpecialFolder.MyComputer;
-// 
+//
 //     var result = dlg1.ShowDialog();
-// 
+//
 //     if (result == DialogResult.OK)
 //     {
 //         _folderName = dlg1.SelectedPath;
@@ -36,16 +36,15 @@
 // }
 //
 
-
 namespace Ionic.Utils
 {
     using System;
-    using System.Windows.Forms;
-    using System.Runtime.InteropServices;
     using System.ComponentModel;
-    using System.Security.Permissions;
+    using System.Runtime.InteropServices;
     using System.Security;
+    using System.Security.Permissions;
     using System.Threading;
+    using System.Windows.Forms;
 
     //[Designer("System.Windows.Forms.Design.FolderBrowserDialogDesigner, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"), DefaultEvent("HelpRequest"), SRDescription("DescriptionFolderBrowserDialog"), DefaultProperty("SelectedPath")]
     public class FolderBrowserDialogEx : System.Windows.Forms.CommonDialog
@@ -54,6 +53,7 @@ namespace Ionic.Utils
 
         // Fields
         private PInvoke.BrowseFolderCallbackProc _callback;
+
         private string _descriptionText;
         private Environment.SpecialFolder _rootFolder;
         private string _selectedPath;
@@ -105,7 +105,6 @@ namespace Ionic.Utils
             return x;
         }
 
-
         // Helpers
         private void BecomePrinterBrowser()
         {
@@ -124,7 +123,6 @@ namespace Ionic.Utils
             ShowNewFolderButton = false;
             ShowEditBox = false;
         }
-
 
         private class CSIDL
         {
@@ -272,7 +270,6 @@ namespace Ionic.Utils
             if (this._showBothFilesAndFolders)
                 _uiFlags += BrowseFlags.BIF_BROWSEINCLUDEFILES;
 
-
             if (Control.CheckForIllegalCrossThreadCalls && (Application.OleRequired() != ApartmentState.STA))
             {
                 throw new ThreadStateException("DebuggingException: ThreadMustBeSTA");
@@ -372,7 +369,7 @@ namespace Ionic.Utils
         //[Browsable(true), SRDescription("FolderBrowserDialogSelectedPath"), SRCategory("CatFolderBrowsing"), DefaultValue(""), Editor("System.Windows.Forms.Design.SelectedPathEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor)), Localizable(true)]
 
         /// <summary>
-        /// Set or get the selected path.  
+        /// Set or get the selected path.
         /// </summary>
         public string SelectedPath
         {
@@ -413,8 +410,8 @@ namespace Ionic.Utils
         /// Show an "edit box" in the folder browser.
         /// </summary>
         /// <remarks>
-        /// The "edit box" normally shows the name of the selected folder.  
-        /// The user may also type a pathname directly into the edit box.  
+        /// The "edit box" normally shows the name of the selected folder.
+        /// The user may also type a pathname directly into the edit box.
         /// </remarks>
         /// <seealso cref="ShowFullPathInEditBox"/>
         public bool ShowEditBox
@@ -447,7 +444,6 @@ namespace Ionic.Utils
             }
         }
 
-
         public bool DontIncludeNetworkFoldersBelowDomainLevel
         {
             get { return _dontIncludeNetworkFoldersBelowDomainLevel; }
@@ -455,10 +451,10 @@ namespace Ionic.Utils
         }
 
         /// <summary>
-        /// Show the full path in the edit box as the user selects it. 
+        /// Show the full path in the edit box as the user selects it.
         /// </summary>
         /// <remarks>
-        /// This works only if ShowEditBox is also set to true. 
+        /// This works only if ShowEditBox is also set to true.
         /// </remarks>
         public bool ShowFullPathInEditBox
         {
@@ -472,8 +468,6 @@ namespace Ionic.Utils
             set { _showBothFilesAndFolders = value; }
         }
     }
-
-
 
     internal static class PInvoke
     {
@@ -503,14 +497,19 @@ namespace Ionic.Utils
         {
             [PreserveSig]
             IntPtr Alloc(int cb);
+
             [PreserveSig]
             IntPtr Realloc(IntPtr pv, int cb);
+
             [PreserveSig]
             void Free(IntPtr pv);
+
             [PreserveSig]
             int GetSize(IntPtr pv);
+
             [PreserveSig]
             int DidAlloc(IntPtr pv);
+
             [PreserveSig]
             void HeapMinimize();
         }
@@ -528,22 +527,21 @@ namespace Ionic.Utils
             public int iImage;
         }
 
-
-
         [SuppressUnmanagedCodeSecurity]
         internal static class Shell32
         {
             // Methods
             [DllImport("shell32.dll", CharSet = CharSet.Auto)]
             public static extern IntPtr SHBrowseForFolder([In] PInvoke.BROWSEINFO lpbi);
+
             [DllImport("shell32.dll")]
             public static extern int SHGetMalloc([Out, MarshalAs(UnmanagedType.LPArray)] PInvoke.IMalloc[] ppMalloc);
+
             [DllImport("shell32.dll", CharSet = CharSet.Auto)]
             public static extern bool SHGetPathFromIDList(IntPtr pidl, IntPtr pszPath);
+
             [DllImport("shell32.dll")]
             public static extern int SHGetSpecialFolderLocation(IntPtr hwnd, int csidl, ref IntPtr ppidl);
         }
-
     }
 }
-

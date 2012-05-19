@@ -32,7 +32,7 @@ namespace Espera.Core.Tests
 
             Assert.IsTrue(song.Object.Equals(song.Object));
         }
-        
+
         [TestMethod]
         public void EqualsSamePathIsTrue()
         {
