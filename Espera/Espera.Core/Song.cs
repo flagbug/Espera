@@ -120,7 +120,7 @@ namespace Espera.Core
         /// </returns>
         public override int GetHashCode()
         {
-            return new { Path = this.OriginalPath, this.Duration, this.AudioType }.GetHashCode();
+            return new { this.OriginalPath, this.Duration, this.AudioType }.GetHashCode();
         }
 
         /// <summary>
