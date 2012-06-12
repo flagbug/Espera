@@ -53,6 +53,11 @@ namespace Espera.Core
             : base(path, audioType, duration)
         {
             this.IsStreaming = isStreaming;
+
+            if (this.IsStreaming)
+            {
+                this.StreamingPath = this.OriginalPath;
+            }
         }
 
         public override AudioPlayer CreateAudioPlayer()
@@ -62,52 +67,33 @@ namespace Espera.Core
 
         public override void LoadToCache()
         {
-            if (this.IsStreaming)
+            string tempPath = Path.GetTempFileName();
+
+            IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(this.OriginalPath);
+
+            VideoInfo video = videoInfos
+                .Where(info => info.CanExtractAudio)
+                .First(info =>
+                        info.VideoFormat == VideoFormat.FlashMp3HighQuality ||
+                        info.VideoFormat == VideoFormat.FlashMp3LowQuality);
+
+            var downloader = new AudioDownloader(video, tempPath);
+
+            downloader.ProgressChanged += (sender, args) =>
             {
-                this.StreamingPath = this.OriginalPath;
-            }
-
-            else
-            {
-                string tempPath = Path.GetTempFileName();
-
-                IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(this.OriginalPath);
-
-                VideoInfo video = videoInfos
-                    .Where(info => info.CanExtractAudio)
-                    .First(info =>
-                           info.VideoFormat == VideoFormat.FlashMp3HighQuality ||
-                           info.VideoFormat == VideoFormat.FlashMp3LowQuality);
-
-                var downloader = new AudioDownloader(video, tempPath);
-
-                downloader.ProgressChanged += (sender, args) =>
+                // HACK: We don't know the total or transferred bytes, so we fake them
+                // The zero check is needed, because the DataTransferEventArgs class doesn't allow zero transferred bytes
+                if ((int)args.ProgressPercentage > 0)
                 {
-                    // HACK: We don't know the total or transferred bytes, so we fake them
-                    // The zero check is needed, because the DataTransferEventArgs class doesn't allow zero transferred bytes
-                    if ((int)args.ProgressPercentage > 0)
-                    {
-                        this.OnCachingProgressChanged(new DataTransferEventArgs(100, (int)args.ProgressPercentage));
-                    }
-                };
+                    this.OnCachingProgressChanged(new DataTransferEventArgs(100, (int)args.ProgressPercentage));
+                }
+            };
 
-                downloader.Execute();
-                this.StreamingPath = tempPath;
-            }
+            downloader.Execute();
+            this.StreamingPath = tempPath;
 
             this.IsCached = true;
             this.OnCachingCompleted(EventArgs.Empty);
-        }
-
-        public override void ClearCache()
-        {
-            if (!this.IsStreaming && File.Exists(this.StreamingPath))
-            {
-                File.Delete(this.StreamingPath);
-            }
-
-            this.StreamingPath = null;
-            this.IsCached = false;
         }
     }
 }

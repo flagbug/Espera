@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using Espera.Core.Audio;
 using Rareform.Extensions;
 using Rareform.IO;
@@ -149,6 +150,17 @@ namespace Espera.Core
             return other != null && this.OriginalPath == other.OriginalPath;
         }
 
+        public void ClearCache()
+        {
+            if (File.Exists(this.StreamingPath))
+            {
+                File.Delete(this.StreamingPath);
+            }
+
+            this.StreamingPath = null;
+            this.IsCached = false;
+        }
+
         internal void OnCachingProgressChanged(DataTransferEventArgs e)
         {
             this.CachingProgressChanged.RaiseSafe(this, e);
@@ -167,7 +179,5 @@ namespace Espera.Core
         public abstract AudioPlayer CreateAudioPlayer();
 
         public abstract void LoadToCache();
-
-        public abstract void ClearCache();
     }
 }

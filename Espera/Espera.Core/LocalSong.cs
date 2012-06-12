@@ -24,8 +24,8 @@ namespace Espera.Core
                     .Where(drive => drive.DriveType == DriveType.Fixed)
                     .All(drive => drive.RootDirectory.Name != songDrive);
             }
-        }        
-        
+        }
+
         public override bool HasToCache
         {
             get { return this.IsRemovable; }
@@ -39,7 +39,12 @@ namespace Espera.Core
         /// <param name="duration">The duration of the song.</param>
         public LocalSong(string path, AudioType audioType, TimeSpan duration)
             : base(path, audioType, duration)
-        { }
+        {
+            if (this.IsRemovable)
+            {
+                this.StreamingPath = this.OriginalPath;
+            }
+        }
 
         public override AudioPlayer CreateAudioPlayer()
         {
@@ -48,38 +53,17 @@ namespace Espera.Core
 
         public override void LoadToCache()
         {
-            if (this.IsRemovable)
+            try
             {
-                try
-                {
-                    this.LoadToTempFile();
-                    this.IsCached = true;
-                    this.OnCachingCompleted(EventArgs.Empty);
-                }
-
-                catch (IOException)
-                {
-                    this.OnCachingFailed(EventArgs.Empty);
-                }
-            }
-
-            else
-            {
-                this.StreamingPath = this.OriginalPath;
+                this.LoadToTempFile();
                 this.IsCached = true;
                 this.OnCachingCompleted(EventArgs.Empty);
             }
-        }
 
-        public override void ClearCache()
-        {
-            if (this.IsRemovable && File.Exists(this.StreamingPath))
+            catch (IOException)
             {
-                File.Delete(this.StreamingPath);
+                this.OnCachingFailed(EventArgs.Empty);
             }
-
-            this.StreamingPath = null;
-            this.IsCached = false;
         }
 
         private void LoadToTempFile()
