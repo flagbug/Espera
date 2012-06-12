@@ -36,6 +36,11 @@ namespace Espera.Core
 
         public bool IsStreaming { get; private set; }
 
+        public override bool HasToCache
+        {
+            get { return !this.IsStreaming; }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="YoutubeSong"/> class.
         /// </summary>

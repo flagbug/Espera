@@ -76,7 +76,10 @@ namespace Espera.Core.Library
 
             foreach (Song song in songList)
             {
-                this.cachingQueue.Enqueue(song);
+                if (song.HasToCache)
+                {
+                    this.cachingQueue.Enqueue(song);
+                }
 
                 int index = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
 

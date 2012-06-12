@@ -79,6 +79,14 @@ namespace Espera.Core
         public bool IsCached { get; protected set; }
 
         /// <summary>
+        /// Gets a value indicating whether the song has to be cached before playing.
+        /// </summary>
+        /// <value>
+        /// true if the song has to be cached before playing; otherwise, false.
+        /// </value>
+        public abstract bool HasToCache { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Song"/> class.
         /// </summary>
         /// <param name="path">The path of the song.</param>

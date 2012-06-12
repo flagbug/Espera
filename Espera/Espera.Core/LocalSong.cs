@@ -24,6 +24,11 @@ namespace Espera.Core
                     .Where(drive => drive.DriveType == DriveType.Fixed)
                     .All(drive => drive.RootDirectory.Name != songDrive);
             }
+        }        
+        
+        public override bool HasToCache
+        {
+            get { return this.IsRemovable; }
         }
 
         /// <summary>
