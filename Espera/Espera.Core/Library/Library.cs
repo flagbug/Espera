@@ -615,10 +615,10 @@ namespace Espera.Core.Library
         {
             playlistIndex.ThrowIfLessThan(0, () => playlistIndex);
 
-            this.overrideCurrentCaching = true;
-
             if (this.isWaitingOnCache)
             {
+                this.overrideCurrentCaching = true;
+
                 // Let the song that is selected to be played wait here, if there is currently another song caching
                 cacheResetHandle.WaitOne();
             }
@@ -663,9 +663,9 @@ namespace Espera.Core.Library
                 {
                     // If we wait on a song that is currently caching, but the user wants to play an other song,
                     // let the other song pass and discard the waiting of the current song
-                    this.cacheResetHandle.Set();
                     this.isWaitingOnCache = false;
                     this.overrideCurrentCaching = false;
+                    this.cacheResetHandle.Set();
                     return;
                 }
 
