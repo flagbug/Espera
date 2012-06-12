@@ -37,7 +37,15 @@ namespace Espera.View.ViewModels
         public bool EnablePlaylistTimeout
         {
             get { return this.library.EnablePlaylistTimeout; }
-            set { this.library.EnablePlaylistTimeout = value; }
+            set
+            {
+                if (this.library.EnablePlaylistTimeout != value)
+                {
+                    this.library.EnablePlaylistTimeout = value;
+                    this.OnPropertyChanged(vm => vm.EnablePlaylistTimeout);
+                }
+                
+            }
         }
 
         public int PlaylistTimeout

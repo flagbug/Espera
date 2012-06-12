@@ -570,7 +570,8 @@
                     <StackPanel Grid.Row="2"
                                 Orientation="Horizontal"
                                 HorizontalAlignment="Center"
-                                Margin="0, 5, 0, 0">
+                                Margin="0, 5, 0, 0"
+                                Visibility="{Binding Path=AdministratorViewModel.EnablePlaylistTimeout, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel.Style>
                             <Style TargetType="{x:Type StackPanel}">
                                 <Style.Triggers>
@@ -681,14 +682,12 @@
                                     <AccessText Text="Allow song removal from playlist when in party mode"
                                                 TextWrapping="Wrap" />
                                 </CheckBox>
-                                <CheckBox Name="timeoutCheckbox"
-                                          x:FieldModifier="private"
-                                          Margin="0, 10, 0, 0"
+                                <CheckBox Margin="0, 10, 0, 0"
                                           IsChecked="{Binding Path=EnablePlaylistTimeout}">
                                     <AccessText Text="Enable timeout when adding songs to the playlist"
                                                 TextWrapping="Wrap" />
                                 </CheckBox>
-                                <StackPanel IsEnabled="{Binding ElementName=timeoutCheckbox, Path=IsChecked}"
+                                <StackPanel IsEnabled="{Binding Path=EnablePlaylistTimeout}"
                                             Margin="30, 5, 0, 0"
                                             Orientation="Horizontal">
                                     <TextBlock
