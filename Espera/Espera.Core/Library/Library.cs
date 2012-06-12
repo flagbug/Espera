@@ -639,26 +639,11 @@ namespace Espera.Core.Library
 
             Task.Factory.StartNew(() =>
             {
-                // Wait till the song is cached
-
-                this.isWaitingOnCache = true;
-
-                while (!song.IsCached)
+                if (song.HasToCache)
                 {
-                    if (this.overrideCurrentCaching)
-                    {
-                        // If we wait on a song that is currently caching, but the user wants to play an other song,
-                        // let the other song pass and discard the waiting of the current song
-                        this.cacheResetHandle.Set();
-                        this.isWaitingOnCache = false;
-                        this.overrideCurrentCaching = false;
-                        return;
-                    }
-
-                    Thread.Sleep(250);
+                    this.AwaitCaching(song);
                 }
 
-                this.isWaitingOnCache = false;
                 this.overrideCurrentCaching = false;
 
                 this.currentPlayer.Load(song);
@@ -666,6 +651,28 @@ namespace Espera.Core.Library
 
                 this.SongStarted.RaiseSafe(this, EventArgs.Empty);
             });
+        }
+
+        private void AwaitCaching(Song song)
+        {
+            this.isWaitingOnCache = true;
+
+            while (!song.IsCached)
+            {
+                if (this.overrideCurrentCaching)
+                {
+                    // If we wait on a song that is currently caching, but the user wants to play an other song,
+                    // let the other song pass and discard the waiting of the current song
+                    this.cacheResetHandle.Set();
+                    this.isWaitingOnCache = false;
+                    this.overrideCurrentCaching = false;
+                    return;
+                }
+
+                Thread.Sleep(250);
+            }
+
+            this.isWaitingOnCache = false;
         }
 
         private void InternPlayNextSong()
