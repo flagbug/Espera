@@ -414,6 +414,9 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
+                        // Some callers want to ignore if a song is paused and want to play the currently 
+                        // selected song, instead of continuing the currently paused song.
+                        // This decision is passed as parameter.
                         bool ignorePause;
 
                         var value = param as string;
@@ -440,7 +443,9 @@ namespace Espera.View.ViewModels
                             this.library.PlaySong(this.SelectedPlaylistEntries.First().Index);
                         }
                     },
-                    param => this.IsAdmin && ((this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1) || (this.library.LoadedSong != null && this.library.IsPaused))
+                    param => this.IsAdmin && 
+                        ((this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1) || 
+                        (this.library.LoadedSong != null && this.library.IsPaused))
                 );
             }
         }
