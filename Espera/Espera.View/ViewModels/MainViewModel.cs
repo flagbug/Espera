@@ -414,22 +414,17 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        // Some callers want to ignore if a song is paused and want to play the currently 
-                        // selected song, instead of continuing the currently paused song.
-                        // This decision is passed as parameter.
-                        bool ignorePause;
-
+                        /* 
+                         * Some callers want to ignore if a song is paused and want to play the currently 
+                         * selected song, instead of continuing the currently paused song.
+                         * This decision is passed as parameter.
+                         *
+                         * XAML commands pass the parameter as string, code-behind commands pass the parameter 
+                         * as boolean, so we have to check what type it is.
+                         */
                         var value = param as string;
 
-                        if (value != null)
-                        {
-                            ignorePause = Boolean.Parse(value);
-                        }
-
-                        else
-                        {
-                            ignorePause = (bool)param;
-                        }
+                        bool ignorePause = value == null ? (bool) param : Boolean.Parse(value);
 
                         if (this.library.IsPaused && !ignorePause)
                         {
