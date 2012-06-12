@@ -118,7 +118,7 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="CoreSettings.settings">
-      <Generator>PublicSettingsSingleFileGenerator</Generator>
+      <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>CoreSettings.Designer.cs</LastGenOutput>
     </None>
     <None Include="packages.config" />

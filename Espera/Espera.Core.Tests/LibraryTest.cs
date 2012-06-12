@@ -219,6 +219,22 @@ namespace Espera.Core.Tests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void AddSongsToPlaylist_PartyModeAndMultipleSongsAdded_ThrowsInvalidOperationException()
+        {
+            var songs = new[] { new LocalSong("TestPath", AudioType.Mp3, TimeSpan.Zero), new LocalSong("TestPath", AudioType.Mp3, TimeSpan.Zero) };
+
+            var library = new Library.Library();
+
+            library.CreateAdmin("TestPassword");
+            library.ChangeToParty();
+
+            library.AddSongsToPlaylist(songs);
+
+            library.Dispose();
+        }
+
+        [TestMethod]
         public void RemoveFromPlaylist_SongIsPlaying_CurrentPlayerIsStopped()
         {
             var audioPlayerMock = new Mock<AudioPlayer>();

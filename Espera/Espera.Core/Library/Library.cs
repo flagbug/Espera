@@ -24,6 +24,7 @@ namespace Espera.Core.Library
         private bool overrideCurrentCaching;
         private readonly ManualResetEvent cacheResetHandle;
         private bool isWaitingOnCache;
+        private DateTime lastSongAddTime;
 
         /// <summary>
         /// Occurs when a song has been added to the library.
@@ -210,6 +211,103 @@ namespace Espera.Core.Library
         /// </value>
         public bool IsAdministratorCreated { get; private set; }
 
+        public bool CanChangeVolume
+        {
+            get { return CoreSettings.Default.LockVolume && this.AccessMode == AccessMode.Administrator; }
+        }
+
+        public bool CanChangeTime
+        {
+            get { return CoreSettings.Default.LockTime && this.AccessMode == AccessMode.Administrator; }
+        }
+
+        public bool StreamYoutube
+        {
+            get { return CoreSettings.Default.StreamYoutube; }
+            set
+            {
+                if (this.AccessMode != AccessMode.Administrator)
+                    throw new InvalidOperationException("The user is not in administrator mode.");
+
+                CoreSettings.Default.StreamYoutube = value;
+            }
+        }
+
+        public bool LockVolume
+        {
+            get { return CoreSettings.Default.LockVolume; }
+            set
+            {
+                if (this.AccessMode != AccessMode.Administrator)
+                    throw new InvalidOperationException("The user is not in administrator mode.");
+
+                CoreSettings.Default.LockVolume = value;
+            }
+        }
+
+        public bool LockTime
+        {
+            get { return CoreSettings.Default.LockTime; }
+            set
+            {
+                if (this.AccessMode != AccessMode.Administrator)
+                    throw new InvalidOperationException("The user is not in administrator mode.");
+
+                CoreSettings.Default.LockTime = value;
+            }
+        }
+
+        public bool AllowSongRemoval
+        {
+            get { return CoreSettings.Default.AllowSongRemoval; }
+            set
+            {
+                if (this.AccessMode != AccessMode.Administrator)
+                    throw new InvalidOperationException("The user is not in administrator mode.");
+
+                CoreSettings.Default.AllowSongRemoval = value;
+            }
+        }
+
+        public bool EnablePlaylistTimeout
+        {
+            get { return CoreSettings.Default.EnablePlaylistTimeout; }
+            set
+            {
+                if (this.AccessMode != AccessMode.Administrator)
+                    throw new InvalidOperationException("The user is not in administrator mode.");
+
+                CoreSettings.Default.EnablePlaylistTimeout = value;
+            }
+        }
+
+        public TimeSpan PlaylistTimeout
+        {
+            get { return CoreSettings.Default.PlaylistTimeout; }
+            set
+            {
+                if (this.AccessMode != AccessMode.Administrator)
+                    throw new InvalidOperationException("The user is not in administrator mode.");
+
+                CoreSettings.Default.PlaylistTimeout = value;
+            }
+        }
+
+        public TimeSpan RemainingPlaylistTimeout
+        {
+            get
+            {
+                return this.lastSongAddTime + this.PlaylistTimeout <= DateTime.Now
+                           ? TimeSpan.Zero
+                           : this.lastSongAddTime - DateTime.Now + this.PlaylistTimeout;
+            }
+        }
+
+        public bool CanAddSongToPlaylist
+        {
+            get { return this.AccessMode == AccessMode.Administrator || this.RemainingPlaylistTimeout <= TimeSpan.Zero; }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Library"/> class.
         /// </summary>
@@ -328,11 +426,27 @@ namespace Espera.Core.Library
         }
 
         /// <summary>
-        /// Adds the specified song to end of the playlist.
+        /// Adds the song to the end of the playlist.
+        /// This method throws an exception, if there is an outstanding timeout.
+        /// </summary>
+        /// <param name="song">The song to add to the end of the playlist.</param>
+        public void AddSongToPlaylist(Song song)
+        {
+            this.playlist.AddSongs(new[] { song });
+
+            this.lastSongAddTime = DateTime.Now;
+        }
+
+        /// <summary>
+        /// Adds the specified song to the end of the playlist.
+        /// This method is only available in administrator mode.
         /// </summary>
         /// <param name="songList">The songs to add to the end of the playlist.</param>
         public void AddSongsToPlaylist(IEnumerable<Song> songList)
         {
+            if (this.AccessMode != AccessMode.Administrator)
+                throw new InvalidOperationException("The user is not in administrator mode.");
+
             this.playlist.AddSongs(songList.ToList()); // Copy the sequence to a list, so that the enumeration doesn't gets modified
         }
 
@@ -412,6 +526,8 @@ namespace Espera.Core.Library
             this.driveWatcher.Dispose();
 
             DisposeSongs(this.songs);
+
+            CoreSettings.Default.Save();
         }
 
         private void Update()

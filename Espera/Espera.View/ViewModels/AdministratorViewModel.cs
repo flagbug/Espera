@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.Windows.Input;
 using Espera.Core;
 using Espera.Core.Library;
 using Rareform.Patterns.MVVM;
@@ -11,26 +12,38 @@ namespace Espera.View.ViewModels
 
         public bool StreamYoutube
         {
-            get { return CoreSettings.Default.StreamYoutube; }
-            set { CoreSettings.Default.StreamYoutube = value; }
+            get { return this.library.StreamYoutube; }
+            set { this.library.StreamYoutube = value; }
         }
 
         public bool LockVolume
         {
-            get { return CoreSettings.Default.LockVolume; }
-            set { CoreSettings.Default.LockVolume = value; }
+            get { return this.library.LockVolume; }
+            set { this.library.LockVolume = value; }
         }
 
         public bool LockTime
         {
-            get { return CoreSettings.Default.LockTime; }
-            set { CoreSettings.Default.LockTime = value; }
+            get { return this.library.LockTime; }
+            set { this.library.LockTime = value; }
         }
 
         public bool AllowSongRemoval
         {
-            get { return CoreSettings.Default.AllowSongRemoval; }
-            set { CoreSettings.Default.AllowSongRemoval = value; }
+            get { return this.library.AllowSongRemoval; }
+            set { this.library.AllowSongRemoval = value; }
+        }
+
+        public bool EnablePlaylistTimeout
+        {
+            get { return this.library.EnablePlaylistTimeout; }
+            set { this.library.EnablePlaylistTimeout = value; }
+        }
+
+        public int PlaylistTimeout
+        {
+            get { return (int)this.library.PlaylistTimeout.TotalSeconds; }
+            set { this.library.PlaylistTimeout = TimeSpan.FromSeconds(value); }
         }
 
         public string CreationPassword { get; set; }

@@ -15,6 +15,7 @@ namespace Espera.View.ViewModels
     {
         private readonly Library library;
         private readonly Timer updateTimer;
+        private readonly Timer playlistTimeoutUpdateTimer;
         private string selectedArtist;
         private IEnumerable<SongViewModel> selectedSongs;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
@@ -29,12 +30,12 @@ namespace Espera.View.ViewModels
 
         public bool CanChangeVolume
         {
-            get { return CoreSettings.Default.LockVolume && this.IsAdmin; }
+            get { return this.library.CanChangeVolume; }
         }
 
         public bool CanChangeTime
         {
-            get { return CoreSettings.Default.LockTime && this.IsAdmin; }
+            get { return this.library.CanChangeTime; }
         }
 
         public int LocalTitleColumnWidth
@@ -146,6 +147,11 @@ namespace Espera.View.ViewModels
             set { Settings.Default.PlaylistHeight = value; }
         }
 
+        public TimeSpan RemainingPlaylistTimeout
+        {
+            get { return this.library.RemainingPlaylistTimeout; }
+        }
+
         public bool IsLocal
         {
             get { return this.isLocal; }
@@ -184,7 +190,7 @@ namespace Espera.View.ViewModels
 
         public bool CanUseYoutube
         {
-            get { return !CoreSettings.Default.StreamYoutube || RegistryHelper.IsVlcInstalled(); }
+            get { return !this.library.StreamYoutube || RegistryHelper.IsVlcInstalled(); }
         }
 
         public bool IsAdmin
@@ -535,7 +541,7 @@ namespace Espera.View.ViewModels
                     },
                     param => this.SelectedPlaylistEntries != null
                         && this.SelectedPlaylistEntries.Any()
-                        && (this.IsAdmin || CoreSettings.Default.AllowSongRemoval)
+                        && (this.IsAdmin || this.library.AllowSongRemoval)
                 );
             }
         }
@@ -548,13 +554,22 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model));
+                        if (this.IsAdmin)
+                        {
+                            this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model));
+                        }
+
+                        else
+                        {
+                            this.library.AddSongToPlaylist(this.SelectedSongs.Select(song => song.Model).Single());
+                            this.OnPropertyChanged(vm => vm.RemainingPlaylistTimeout);
+                        }
 
                         this.OnPropertyChanged(vm => vm.Playlist);
                         this.OnPropertyChanged(vm => vm.SongsRemaining);
                         this.OnPropertyChanged(vm => vm.TimeRemaining);
                     },
-                    param => this.SelectedSongs != null && this.SelectedSongs.Any()
+                    param => this.SelectedSongs != null && this.SelectedSongs.Any() && (this.IsAdmin || this.library.CanAddSongToPlaylist)
                 );
             }
         }
@@ -625,6 +640,10 @@ namespace Espera.View.ViewModels
             this.updateTimer = new Timer(333);
             this.updateTimer.Elapsed += (sender, e) => this.UpdateCurrentTime();
 
+            this.playlistTimeoutUpdateTimer = new Timer(333);
+            this.playlistTimeoutUpdateTimer.Elapsed += (sender, e) => this.UpdateRemainingPlaylistTimeout();
+            this.playlistTimeoutUpdateTimer.Start();
+
             this.searchText = String.Empty;
         }
 
@@ -692,6 +711,14 @@ namespace Espera.View.ViewModels
         {
             this.OnPropertyChanged(vm => vm.TotalSeconds);
             this.OnPropertyChanged(vm => vm.TotalTime);
+        }
+
+        private void UpdateRemainingPlaylistTimeout()
+        {
+            if (this.RemainingPlaylistTimeout > TimeSpan.Zero)
+            {
+                this.OnPropertyChanged(vm => vm.RemainingPlaylistTimeout);
+            }
         }
 
         private void LibraryRaisedSongFinished(object sender, EventArgs e)

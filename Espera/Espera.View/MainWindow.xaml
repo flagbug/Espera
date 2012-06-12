@@ -259,6 +259,16 @@
                                   KeyUp="SongListKeyUp"
                                   ScrollViewer.CanContentScroll="True"
                                   ContextMenuOpening="SongListContextMenuOpening">
+                            <ListView.Style>
+                                <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="{x:Type ListView}">
+                                    <Setter Property="SelectionMode" Value="Extended" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=IsAdmin}" Value="False">
+                                            <Setter Property="SelectionMode" Value="Single" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.Style>
                             <ListView.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongsToPlaylistCommand}" />
@@ -337,6 +347,16 @@
                         <ListView ItemsSource="{Binding Path=SelectableYoutubeSongs, IsAsync=True}"
                                   SelectionChanged="SongListSelectionChanged"
                                   ContextMenuOpening="SongListContextMenuOpening">
+                            <ListView.Style>
+                                <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="{x:Type ListView}">
+                                    <Setter Property="SelectionMode" Value="Extended" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=IsAdmin}" Value="False">
+                                            <Setter Property="SelectionMode" Value="Single" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.Style>
                             <ListView.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongsToPlaylistCommand}" />
@@ -399,9 +419,10 @@
                               Foreground="Transparent"
                               Background="Transparent"
                               HorizontalAlignment="Stretch" />
-                    <Grid Grid.Row="2">
+                <Grid Grid.Row="2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <ListView Grid.Row="0"
@@ -545,6 +566,13 @@
                         <TextBlock Text="{Binding Path=TimeRemaining.TotalMinutes, FallbackValue=0, StringFormat=\{0:0.0\}}" />
                         <TextBlock Text=" minutes play time" />
                     </StackPanel>
+                    <StackPanel Grid.Row="2"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0, 5, 0, 0">
+                        <TextBlock Text="Remaining playlist timeout: " />
+                        <TextBlock Text="{Binding Path=RemainingPlaylistTimeout, StringFormat=hh\\:mm\\:ss}" />
+                    </StackPanel>
                 </Grid>
             </Grid>
             <Grid Grid.Column="2"
@@ -632,6 +660,27 @@
                                     <AccessText Text="Allow song removal from playlist when in party mode"
                                                 TextWrapping="Wrap" />
                                 </CheckBox>
+                                <CheckBox Name="timeoutCheckbox"
+                                          x:FieldModifier="private"
+                                          Margin="0, 10, 0, 0"
+                                          IsChecked="{Binding Path=EnablePlaylistTimeout}">
+                                    <AccessText Text="Enable timeout when adding songs to the playlist"
+                                                TextWrapping="Wrap" />
+                                </CheckBox>
+                                <StackPanel IsEnabled="{Binding ElementName=timeoutCheckbox, Path=IsChecked}"
+                                            Margin="30, 5, 0, 0"
+                                            Orientation="Horizontal">
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        Text="Timeout:" />
+                                    <TextBox Width="30"
+                                             Margin="5, 0, 0, 0"
+                                             VerticalAlignment="Center"
+                                             Text="{Binding Path=PlaylistTimeout}"/>
+                                    <TextBlock VerticalAlignment="Center"
+                                               Margin="5, 0, 0, 0"
+                                               Text="Seconds" />
+                                </StackPanel>
                             </StackPanel>
                             <StackPanel Grid.Row="1"
                                         Orientation="Vertical">

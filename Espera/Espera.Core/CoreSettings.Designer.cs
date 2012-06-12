@@ -13,7 +13,7 @@ namespace Espera.Core {
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "10.0.0.0")]
-    public sealed partial class CoreSettings : global::System.Configuration.ApplicationSettingsBase {
+    internal sealed partial class CoreSettings : global::System.Configuration.ApplicationSettingsBase {
         
         private static CoreSettings defaultInstance = ((CoreSettings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new CoreSettings())));
         
@@ -68,6 +68,30 @@ namespace Espera.Core {
             }
             set {
                 this["AllowSongRemoval"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("00:00:30")]
+        public global::System.TimeSpan PlaylistTimeout {
+            get {
+                return ((global::System.TimeSpan)(this["PlaylistTimeout"]));
+            }
+            set {
+                this["PlaylistTimeout"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool EnablePlaylistTimeout {
+            get {
+                return ((bool)(this["EnablePlaylistTimeout"]));
+            }
+            set {
+                this["EnablePlaylistTimeout"] = value;
             }
         }
     }
