@@ -10,7 +10,7 @@ audio track of the video directly.
 
 ## Features
 
-### Party-Lock (partially implemented)
+### Party-Lock
 
 Espera allows to lock itself, this comes handy on parties, where the guests shouldn't be able to change the volume or 
 stop the music, but still be able to add songs to the playlist.
