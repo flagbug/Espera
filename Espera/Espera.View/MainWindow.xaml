@@ -570,6 +570,26 @@
                                 Orientation="Horizontal"
                                 HorizontalAlignment="Center"
                                 Margin="0, 5, 0, 0">
+                        <StackPanel.Style>
+                            <Style TargetType="{x:Type StackPanel}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=DisplayTimeoutWarning}" Value="True">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
+                                                        <LinearDoubleKeyFrame Value="0" KeyTime="0:0:1" />
+                                                        <LinearDoubleKeyFrame Value="1" KeyTime="0:0:2" />
+                                                        <LinearDoubleKeyFrame Value="0" KeyTime="0:0:3" />
+                                                        <LinearDoubleKeyFrame Value="1" KeyTime="0:0:4" />
+                                                    </DoubleAnimationUsingKeyFrames>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
                         <TextBlock Text="Remaining playlist timeout: " />
                         <TextBlock Text="{Binding Path=RemainingPlaylistTimeout, StringFormat=hh\\:mm\\:ss}" />
                     </StackPanel>

@@ -23,6 +23,7 @@ namespace Espera.View.ViewModels
         private volatile bool isAdding;
         private bool isLocal;
         private bool isYoutube;
+        private bool displayTimeoutWarning;
 
         public AdministratorViewModel AdministratorViewModel { get; private set; }
 
@@ -150,6 +151,20 @@ namespace Espera.View.ViewModels
         public TimeSpan RemainingPlaylistTimeout
         {
             get { return this.library.RemainingPlaylistTimeout; }
+        }
+
+        public bool DisplayTimeoutWarning
+        {
+            get { return this.displayTimeoutWarning; }
+            set
+            {
+                if (this.displayTimeoutWarning != value)
+                {
+                    this.displayTimeoutWarning = value;
+                    this.OnPropertyChanged(vm => vm.DisplayTimeoutWarning);
+                }
+                
+            }
         }
 
         public bool IsLocal
@@ -554,6 +569,15 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
+                        if (!this.library.CanAddSongToPlaylist)
+                        {
+                            // Trigger the animation
+                            this.DisplayTimeoutWarning = true;
+                            this.DisplayTimeoutWarning = false;
+
+                            return;
+                        }
+
                         if (this.IsAdmin)
                         {
                             this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model));
@@ -569,7 +593,7 @@ namespace Espera.View.ViewModels
                         this.OnPropertyChanged(vm => vm.SongsRemaining);
                         this.OnPropertyChanged(vm => vm.TimeRemaining);
                     },
-                    param => this.SelectedSongs != null && this.SelectedSongs.Any() && (this.IsAdmin || this.library.CanAddSongToPlaylist)
+                    param => this.SelectedSongs != null && this.SelectedSongs.Any()
                 );
             }
         }
