@@ -619,6 +619,7 @@ namespace Espera.Core.Library
 
             if (this.isWaitingOnCache)
             {
+                // Let the song that is selected to be played wait here, if there is currently another song caching
                 cacheResetHandle.WaitOne();
             }
 
@@ -646,6 +647,8 @@ namespace Espera.Core.Library
                 {
                     if (this.overrideCurrentCaching)
                     {
+                        // If we wait on a song that is currently caching, but the user wants to play an other song,
+                        // let the other song pass and discard the waiting of the current song
                         this.cacheResetHandle.Set();
                         this.isWaitingOnCache = false;
                         this.overrideCurrentCaching = false;
