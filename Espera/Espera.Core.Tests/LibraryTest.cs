@@ -156,33 +156,6 @@ namespace Espera.Core.Tests
         }
 
         [TestMethod]
-        public void PlaySong_IndexIsFirstSong_EventsCorrectlyRaised()
-        {
-            var audioPlayerMock = new Mock<AudioPlayer>();
-            audioPlayerMock.Setup(p => p.Play()).Raises(p => p.SongFinished += null, EventArgs.Empty);
-
-            var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-            songMock.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayerMock.Object);
-
-            var library = new Library.Library();
-
-            library.AddSongsToPlaylist(new[] { songMock.Object });
-
-            bool songStartedRaised = false;
-            bool songFinishedRaised = false;
-
-            library.SongStarted += (sender, args) => songStartedRaised = true;
-            library.SongFinished += (sender, args) => songFinishedRaised = true;
-
-            library.PlaySong(0);
-
-            Assert.IsTrue(songStartedRaised);
-            Assert.IsTrue(songFinishedRaised);
-
-            library.Dispose();
-        }
-
-        [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void PlayNextSong_UserIsNotAdministrator_ThrowsInvalidOperationException()
         {
