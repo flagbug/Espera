@@ -87,7 +87,7 @@ namespace Espera.View.ViewModels
         {
             this.Index = index;
 
-            if (!this.Wrapped.HasToCache || this.Wrapped.IsCached)
+            if (this.Wrapped.IsCached)
             {
                 this.CacheProgress = 100;
             }

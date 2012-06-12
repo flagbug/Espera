@@ -13,6 +13,9 @@ namespace Espera.Core
     [DebuggerDisplay("{Artist}-{Album}-{Title}")]
     public abstract class Song : IEquatable<Song>
     {
+        private bool isCached;
+        private string streamingPath;
+
         public event EventHandler<DataTransferEventArgs> CachingProgressChanged;
 
         public event EventHandler CachingCompleted;
@@ -64,7 +67,11 @@ namespace Espera.Core
         /// </summary>
         public string OriginalPath { get; private set; }
 
-        public string StreamingPath { get; protected set; }
+        public string StreamingPath
+        {
+            get { return !this.HasToCache ? this.OriginalPath : this.streamingPath; }
+            protected set { this.streamingPath = value; }
+        }
 
         /// <summary>
         /// Gets or sets the type of the audio.
@@ -76,7 +83,11 @@ namespace Espera.Core
         /// </summary>
         public TimeSpan Duration { get; private set; }
 
-        public bool IsCached { get; protected set; }
+        public bool IsCached
+        {
+            get { return !this.HasToCache || this.isCached; }
+            protected set { this.isCached = value; }
+        }
 
         /// <summary>
         /// Gets a value indicating whether the song has to be cached before playing.
