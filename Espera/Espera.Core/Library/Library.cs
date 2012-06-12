@@ -22,7 +22,7 @@ namespace Espera.Core.Library
         private float volume;
         private readonly RemovableDriveWatcher driveWatcher;
         private bool overrideCurrentCaching;
-        private readonly ManualResetEvent cacheResetHandle;
+        private readonly AutoResetEvent cacheResetHandle;
         private bool isWaitingOnCache;
         private DateTime lastSongAddTime;
 
@@ -320,7 +320,7 @@ namespace Espera.Core.Library
             this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
             this.driveWatcher = RemovableDriveWatcher.Create();
             this.driveWatcher.DriveRemoved += (sender, args) => Task.Factory.StartNew(this.Update);
-            this.cacheResetHandle = new ManualResetEvent(false);
+            this.cacheResetHandle = new AutoResetEvent(false);
         }
 
         /// <summary>
@@ -641,7 +641,12 @@ namespace Espera.Core.Library
             {
                 if (song.HasToCache)
                 {
-                    this.AwaitCaching(song);
+                    bool cached = this.AwaitCaching(song);
+
+                    if (!cached)
+                    {
+                        return;
+                    }
                 }
 
                 this.overrideCurrentCaching = false;
@@ -653,7 +658,7 @@ namespace Espera.Core.Library
             });
         }
 
-        private void AwaitCaching(Song song)
+        private bool AwaitCaching(Song song)
         {
             this.isWaitingOnCache = true;
 
@@ -666,13 +671,15 @@ namespace Espera.Core.Library
                     this.isWaitingOnCache = false;
                     this.overrideCurrentCaching = false;
                     this.cacheResetHandle.Set();
-                    return;
+                    return false;
                 }
 
                 Thread.Sleep(250);
             }
 
             this.isWaitingOnCache = false;
+
+            return true;
         }
 
         private void InternPlayNextSong()
