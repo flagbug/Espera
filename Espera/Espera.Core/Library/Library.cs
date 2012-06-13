@@ -634,7 +634,7 @@ namespace Espera.Core.Library
             {
                 var nextReady = this.playlist
                     .Select((song, i) => new { Song = song, Index = i })
-                    .Skip(this.playlist.CurrentSongIndex.Value + 1)
+                    .Skip(nextIndex)
                     .FirstOrDefault(item => !item.Song.HasToCache || item.Song.IsCached);
 
                 if (nextReady != null)
