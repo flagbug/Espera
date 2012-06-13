@@ -208,6 +208,7 @@ namespace Espera.View
         private void CreateAdminButtonClick(object sender, RoutedEventArgs e)
         {
             ICommand command = this.mainViewModel.AdministratorViewModel.CreateAdminCommand;
+
             if (command.CanExecute(null))
             {
                 command.Execute(null);
