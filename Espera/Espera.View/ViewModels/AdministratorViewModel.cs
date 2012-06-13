@@ -10,84 +10,26 @@ namespace Espera.View.ViewModels
         private readonly Library library;
         private bool isWrongPassword;
 
-        public bool StreamYoutube
+        public AdministratorViewModel(Library library)
         {
-            get { return this.library.StreamYoutube; }
-            set { this.library.StreamYoutube = value; }
+            this.library = library;
         }
 
-        public bool LockVolume
+        public ICommand ChangeToPartyCommand
         {
-            get { return this.library.LockVolume; }
-            set { this.library.LockVolume = value; }
-        }
-
-        public bool LockTime
-        {
-            get { return this.library.LockTime; }
-            set { this.library.LockTime = value; }
-        }
-
-        public bool LockSongRemoval
-        {
-            get { return this.library.LockSongRemoval; }
-            set { this.library.LockSongRemoval = value; }
-        }
-
-        public bool EnablePlaylistTimeout
-        {
-            get { return this.library.EnablePlaylistTimeout; }
-            set
+            get
             {
-                if (this.library.EnablePlaylistTimeout != value)
-                {
-                    this.library.EnablePlaylistTimeout = value;
-                    this.OnPropertyChanged(vm => vm.EnablePlaylistTimeout);
-                }
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.library.ChangeToParty();
+                        this.OnPropertyChanged(vm => vm.IsParty);
+                        this.OnPropertyChanged(vm => vm.IsAdmin);
+                    },
+                    param => this.IsAdminCreated
+                );
             }
-        }
-
-        public int PlaylistTimeout
-        {
-            get { return (int)this.library.PlaylistTimeout.TotalSeconds; }
-            set { this.library.PlaylistTimeout = TimeSpan.FromSeconds(value); }
-        }
-
-        public string CreationPassword { get; set; }
-
-        public string LoginPassword { get; set; }
-
-        public bool IsWrongPassword
-        {
-            get { return this.isWrongPassword; }
-            set
-            {
-                if (this.IsWrongPassword != value)
-                {
-                    this.isWrongPassword = value;
-                    this.OnPropertyChanged(vm => vm.IsWrongPassword);
-                }
-            }
-        }
-
-        public bool IsAdminCreated
-        {
-            get { return this.library.IsAdministratorCreated; }
-        }
-
-        public bool IsAdmin
-        {
-            get { return this.library.AccessMode == AccessMode.Administrator; }
-        }
-
-        public bool IsParty
-        {
-            get { return this.library.AccessMode == AccessMode.Party; }
-        }
-
-        public bool IsVlcInstalled
-        {
-            get { return RegistryHelper.IsVlcInstalled(); }
         }
 
         public ICommand CreateAdminCommand
@@ -106,6 +48,72 @@ namespace Espera.View.ViewModels
                     param => !string.IsNullOrWhiteSpace(this.CreationPassword) && !this.IsAdminCreated
                 );
             }
+        }
+
+        public string CreationPassword { get; set; }
+
+        public bool EnablePlaylistTimeout
+        {
+            get { return this.library.EnablePlaylistTimeout; }
+            set
+            {
+                if (this.library.EnablePlaylistTimeout != value)
+                {
+                    this.library.EnablePlaylistTimeout = value;
+                    this.OnPropertyChanged(vm => vm.EnablePlaylistTimeout);
+                }
+            }
+        }
+
+        public bool IsAdmin
+        {
+            get { return this.library.AccessMode == AccessMode.Administrator; }
+        }
+
+        public bool IsAdminCreated
+        {
+            get { return this.library.IsAdministratorCreated; }
+        }
+
+        public bool IsParty
+        {
+            get { return this.library.AccessMode == AccessMode.Party; }
+        }
+
+        public bool IsVlcInstalled
+        {
+            get { return RegistryHelper.IsVlcInstalled(); }
+        }
+
+        public bool IsWrongPassword
+        {
+            get { return this.isWrongPassword; }
+            set
+            {
+                if (this.IsWrongPassword != value)
+                {
+                    this.isWrongPassword = value;
+                    this.OnPropertyChanged(vm => vm.IsWrongPassword);
+                }
+            }
+        }
+
+        public bool LockSongRemoval
+        {
+            get { return this.library.LockSongRemoval; }
+            set { this.library.LockSongRemoval = value; }
+        }
+
+        public bool LockTime
+        {
+            get { return this.library.LockTime; }
+            set { this.library.LockTime = value; }
+        }
+
+        public bool LockVolume
+        {
+            get { return this.library.LockVolume; }
+            set { this.library.LockVolume = value; }
         }
 
         public ICommand LoginCommand
@@ -135,26 +143,18 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public ICommand ChangeToPartyCommand
+        public string LoginPassword { get; set; }
+
+        public int PlaylistTimeout
         {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        this.library.ChangeToParty();
-                        this.OnPropertyChanged(vm => vm.IsParty);
-                        this.OnPropertyChanged(vm => vm.IsAdmin);
-                    },
-                    param => this.IsAdminCreated
-                );
-            }
+            get { return (int)this.library.PlaylistTimeout.TotalSeconds; }
+            set { this.library.PlaylistTimeout = TimeSpan.FromSeconds(value); }
         }
 
-        public AdministratorViewModel(Library library)
+        public bool StreamYoutube
         {
-            this.library = library;
+            get { return this.library.StreamYoutube; }
+            set { this.library.StreamYoutube = value; }
         }
     }
 }

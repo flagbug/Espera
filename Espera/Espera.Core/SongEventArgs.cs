@@ -9,12 +9,6 @@ namespace Espera.Core
     public class SongEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets the song that has been found.
-        /// </summary>
-        /// <value>The song that has been found.</value>
-        public Song Song { get; private set; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="SongEventArgs"/> class.
         /// </summary>
         /// <param name="song">The song that has been found.</param>
@@ -26,5 +20,11 @@ namespace Espera.Core
 
             this.Song = song;
         }
+
+        /// <summary>
+        /// Gets the song that has been found.
+        /// </summary>
+        /// <value>The song that has been found.</value>
+        public Song Song { get; private set; }
     }
 }

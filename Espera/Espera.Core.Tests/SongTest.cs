@@ -17,12 +17,12 @@ namespace Espera.Core.Tests
         }
 
         [TestMethod]
-        public void EqualsSongWithDifferentPathIsFalse()
+        public void EqualsSamePathIsTrue()
         {
             var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-            var song2 = new Mock<Song>("TestPath1", AudioType.Mp3, TimeSpan.Zero);
+            var song2 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
 
-            Assert.IsFalse(song1.Object.Equals(song2.Object));
+            Assert.IsTrue(song1.Object.Equals(song2.Object));
         }
 
         [TestMethod]
@@ -34,12 +34,12 @@ namespace Espera.Core.Tests
         }
 
         [TestMethod]
-        public void EqualsSamePathIsTrue()
+        public void EqualsSongWithDifferentPathIsFalse()
         {
             var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-            var song2 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+            var song2 = new Mock<Song>("TestPath1", AudioType.Mp3, TimeSpan.Zero);
 
-            Assert.IsTrue(song1.Object.Equals(song2.Object));
+            Assert.IsFalse(song1.Object.Equals(song2.Object));
         }
     }
 }

@@ -6,7 +6,10 @@ namespace Espera.View.ViewModels
 {
     public class SongViewModelBase<T> : ViewModelBase<T>
     {
-        protected Song Wrapped { get; private set; }
+        protected SongViewModelBase(Song wrapped)
+        {
+            this.Wrapped = wrapped;
+        }
 
         public string Album
         {
@@ -33,9 +36,6 @@ namespace Espera.View.ViewModels
             get { return this.Wrapped.Title; }
         }
 
-        protected SongViewModelBase(Song wrapped)
-        {
-            this.Wrapped = wrapped;
-        }
+        protected Song Wrapped { get; private set; }
     }
 }

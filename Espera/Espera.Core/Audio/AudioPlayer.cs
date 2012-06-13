@@ -11,12 +11,10 @@ namespace Espera.Core.Audio
         public event EventHandler SongFinished;
 
         /// <summary>
-        /// Gets the current playback state.
+        /// Gets or sets the current time.
         /// </summary>
-        /// <value>
-        /// The current playback state.
-        /// </value>
-        public abstract AudioPlayerState PlaybackState { get; }
+        /// <value>The current time.</value>
+        public abstract TimeSpan CurrentTime { get; set; }
 
         /// <summary>
         /// Gets the song that is currently loaded into the audio player.
@@ -25,22 +23,29 @@ namespace Espera.Core.Audio
         public Song LoadedSong { get; protected set; }
 
         /// <summary>
-        /// Gets or sets the volume (a value from 0.0 to 1.0).
+        /// Gets the current playback state.
         /// </summary>
-        /// <value>The volume.</value>
-        public abstract float Volume { get; set; }
-
-        /// <summary>
-        /// Gets or sets the current time.
-        /// </summary>
-        /// <value>The current time.</value>
-        public abstract TimeSpan CurrentTime { get; set; }
+        /// <value>
+        /// The current playback state.
+        /// </value>
+        public abstract AudioPlayerState PlaybackState { get; }
 
         /// <summary>
         /// Gets the total time.
         /// </summary>
         /// <value>The total time.</value>
         public abstract TimeSpan TotalTime { get; }
+
+        /// <summary>
+        /// Gets or sets the volume (a value from 0.0 to 1.0).
+        /// </summary>
+        /// <value>The volume.</value>
+        public abstract float Volume { get; set; }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public abstract void Dispose();
 
         /// <summary>
         /// Loads the specified song into the <see cref="Espera.Core.Audio.LocalAudioPlayer"/>. This is required before playing a new song.
@@ -53,25 +58,20 @@ namespace Espera.Core.Audio
         }
 
         /// <summary>
+        /// Pauses the playback of the <see cref="LoadedSong"/>.
+        /// </summary>
+        public abstract void Pause();
+
+        /// <summary>
         /// Starts or continues the playback of the <see cref="LoadedSong"/>.
         /// </summary>
         /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
         public abstract void Play();
 
         /// <summary>
-        /// Pauses the playback of the <see cref="LoadedSong"/>.
-        /// </summary>
-        public abstract void Pause();
-
-        /// <summary>
         /// Stops the playback of the <see cref="LoadedSong"/>.
         /// </summary>
         public abstract void Stop();
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public abstract void Dispose();
 
         /// <summary>
         /// Raises the <see cref="SongFinished"/> event.

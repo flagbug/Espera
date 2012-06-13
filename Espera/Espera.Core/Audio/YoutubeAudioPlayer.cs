@@ -40,6 +40,18 @@ namespace Espera.Core.Audio
         }
 
         /// <summary>
+        /// Gets or sets the current time.
+        /// </summary>
+        /// <value>
+        /// The current time.
+        /// </value>
+        public override TimeSpan CurrentTime
+        {
+            get { return this.player.Time; }
+            set { this.player.Time = value; }
+        }
+
+        /// <summary>
         /// Gets the current playback state.
         /// </summary>
         /// <value>
@@ -67,6 +79,17 @@ namespace Espera.Core.Audio
         }
 
         /// <summary>
+        /// Gets the total time.
+        /// </summary>
+        /// <value>
+        /// The total time.
+        /// </value>
+        public override TimeSpan TotalTime
+        {
+            get { return this.LoadedSong.Duration; }
+        }
+
+        /// <summary>
         /// Gets or sets the volume (a value from 0.0 to 1.0).
         /// </summary>
         /// <value>
@@ -79,26 +102,20 @@ namespace Espera.Core.Audio
         }
 
         /// <summary>
-        /// Gets or sets the current time.
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
-        /// <value>
-        /// The current time.
-        /// </value>
-        public override TimeSpan CurrentTime
+        public override void Dispose()
         {
-            get { return this.player.Time; }
-            set { this.player.Time = value; }
+            this.player.Dispose();
+            VlcContext.CloseAll();
         }
 
         /// <summary>
-        /// Gets the total time.
+        /// Pauses the playback of the <see cref="AudioPlayer.LoadedSong"/>.
         /// </summary>
-        /// <value>
-        /// The total time.
-        /// </value>
-        public override TimeSpan TotalTime
+        public override void Pause()
         {
-            get { return this.LoadedSong.Duration; }
+            this.player.Pause();
         }
 
         /// <summary>
@@ -112,28 +129,11 @@ namespace Espera.Core.Audio
         }
 
         /// <summary>
-        /// Pauses the playback of the <see cref="AudioPlayer.LoadedSong"/>.
-        /// </summary>
-        public override void Pause()
-        {
-            this.player.Pause();
-        }
-
-        /// <summary>
         /// Stops the playback of the <see cref="AudioPlayer.LoadedSong"/>.
         /// </summary>
         public override void Stop()
         {
             this.player.Stop();
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public override void Dispose()
-        {
-            this.player.Dispose();
-            VlcContext.CloseAll();
         }
 
         /// <summary>

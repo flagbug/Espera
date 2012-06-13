@@ -9,6 +9,26 @@ namespace Espera.Core
     public class LocalSong : Song
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="LocalSong"/> class.
+        /// </summary>
+        /// <param name="path">The path of the file.</param>
+        /// <param name="audioType">The audio type.</param>
+        /// <param name="duration">The duration of the song.</param>
+        public LocalSong(string path, AudioType audioType, TimeSpan duration)
+            : base(path, audioType, duration)
+        {
+            if (this.IsRemovable)
+            {
+                this.StreamingPath = this.OriginalPath;
+            }
+        }
+
+        public override bool HasToCache
+        {
+            get { return this.IsRemovable; }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether this song is from a removable drive.
         /// </summary>
         /// <value>
@@ -23,26 +43,6 @@ namespace Espera.Core
                 return DriveInfo.GetDrives()
                     .Where(drive => drive.DriveType == DriveType.Fixed)
                     .All(drive => drive.RootDirectory.Name != songDrive);
-            }
-        }
-
-        public override bool HasToCache
-        {
-            get { return this.IsRemovable; }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LocalSong"/> class.
-        /// </summary>
-        /// <param name="path">The path of the file.</param>
-        /// <param name="audioType">The audio type.</param>
-        /// <param name="duration">The duration of the song.</param>
-        public LocalSong(string path, AudioType audioType, TimeSpan duration)
-            : base(path, audioType, duration)
-        {
-            if (this.IsRemovable)
-            {
-                this.StreamingPath = this.OriginalPath;
             }
         }
 

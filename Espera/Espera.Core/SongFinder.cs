@@ -8,20 +8,20 @@ namespace Espera.Core
     {
         private readonly List<T> songsFound;
 
-        protected ICollection<T> InternSongsFound
+        protected SongFinder()
         {
-            get { return this.songsFound; }
+            this.songsFound = new List<T>();
         }
-
-        /// <summary>
-        /// Occurs when a song has been found.
-        /// </summary>
-        public event EventHandler<SongEventArgs> SongFound;
 
         /// <summary>
         /// Occurs when the song crawler has finished.
         /// </summary>
         public event EventHandler Finished;
+
+        /// <summary>
+        /// Occurs when a song has been found.
+        /// </summary>
+        public event EventHandler<SongEventArgs> SongFound;
 
         /// <summary>
         /// Gets the songs that have been found.
@@ -32,9 +32,9 @@ namespace Espera.Core
             get { return this.songsFound; }
         }
 
-        protected SongFinder()
+        protected ICollection<T> InternSongsFound
         {
-            this.songsFound = new List<T>();
+            get { return this.songsFound; }
         }
 
         /// <summary>
@@ -42,14 +42,14 @@ namespace Espera.Core
         /// </summary>
         public abstract void Start();
 
-        protected virtual void OnSongFound(SongEventArgs e)
-        {
-            this.SongFound.RaiseSafe(this, e);
-        }
-
         protected virtual void OnFinished(EventArgs e)
         {
             this.Finished.RaiseSafe(this, e);
+        }
+
+        protected virtual void OnSongFound(SongEventArgs e)
+        {
+            this.SongFound.RaiseSafe(this, e);
         }
     }
 }

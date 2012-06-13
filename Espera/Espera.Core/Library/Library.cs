@@ -13,33 +13,33 @@ namespace Espera.Core.Library
 {
     public class Library : IDisposable
     {
-        private readonly HashSet<Song> songs;
+        private readonly AutoResetEvent cacheResetHandle;
+        private readonly RemovableDriveWatcher driveWatcher;
         private readonly Playlist playlist;
         private readonly object songLock;
-        private string password;
+        private readonly HashSet<Song> songs;
         private AccessMode accessMode;
         private AudioPlayer currentPlayer;
-        private float volume;
-        private readonly RemovableDriveWatcher driveWatcher;
-        private bool overrideCurrentCaching;
-        private readonly AutoResetEvent cacheResetHandle;
         private bool isWaitingOnCache;
         private DateTime lastSongAddTime;
+        private bool overrideCurrentCaching;
+        private string password;
+        private float volume;
 
         /// <summary>
-        /// Occurs when a song has been added to the library.
+        /// Initializes a new instance of the <see cref="Library"/> class.
         /// </summary>
-        public event EventHandler<LibraryFillEventArgs> SongAdded;
-
-        /// <summary>
-        /// Occurs when a song has started the playback.
-        /// </summary>
-        public event EventHandler SongStarted;
-
-        /// <summary>
-        /// Occurs when a song has finished the playback.
-        /// </summary>
-        public event EventHandler SongFinished;
+        public Library()
+        {
+            this.songLock = new object();
+            this.songs = new HashSet<Song>();
+            this.playlist = new Playlist();
+            this.volume = 1.0f;
+            this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
+            this.driveWatcher = RemovableDriveWatcher.Create();
+            this.driveWatcher.DriveRemoved += (sender, args) => Task.Factory.StartNew(this.Update);
+            this.cacheResetHandle = new AutoResetEvent(false);
+        }
 
         /// <summary>
         /// Occurs when <see cref="AccessMode"/> property has changed.
@@ -47,9 +47,19 @@ namespace Espera.Core.Library
         public event EventHandler AccessModeChanged;
 
         /// <summary>
-        /// Occurs when the library is updating.
+        /// Occurs when a song has been added to the library.
         /// </summary>
-        public event EventHandler Updating;
+        public event EventHandler<LibraryFillEventArgs> SongAdded;
+
+        /// <summary>
+        /// Occurs when a song has finished the playback.
+        /// </summary>
+        public event EventHandler SongFinished;
+
+        /// <summary>
+        /// Occurs when a song has started the playback.
+        /// </summary>
+        public event EventHandler SongStarted;
 
         /// <summary>
         /// Occurs when the library is finished with updating.
@@ -57,36 +67,39 @@ namespace Espera.Core.Library
         public event EventHandler Updated;
 
         /// <summary>
-        /// Gets all songs that are currently in the library.
+        /// Occurs when the library is updating.
         /// </summary>
-        public IEnumerable<Song> Songs
+        public event EventHandler Updating;
+
+        /// <summary>
+        /// Gets the access mode that is currently enabled.
+        /// </summary>
+        public AccessMode AccessMode
         {
-            get
+            get { return this.accessMode; }
+            private set
             {
-                lock (songLock)
+                if (this.AccessMode != value)
                 {
-                    return this.songs;
+                    this.accessMode = value;
+                    this.AccessModeChanged.RaiseSafe(this, EventArgs.Empty);
                 }
             }
         }
 
-        /// <summary>
-        /// Gets the songs that are in the playlist.
-        /// </summary>
-        public IEnumerable<Song> Playlist
+        public bool CanAddSongToPlaylist
         {
-            get { return this.playlist; }
+            get { return this.AccessMode == AccessMode.Administrator || this.RemainingPlaylistTimeout <= TimeSpan.Zero; }
         }
 
-        /// <summary>
-        /// Gets the index of the currently played song in the playlist.
-        /// </summary>
-        /// <value>
-        /// The index of the currently played song in the playlist.
-        /// </value>
-        public int? CurrentSongIndex
+        public bool CanChangeTime
         {
-            get { return this.playlist.CurrentSongIndex; }
+            get { return CoreSettings.Default.LockTime && this.AccessMode == AccessMode.Administrator; }
+        }
+
+        public bool CanChangeVolume
+        {
+            get { return CoreSettings.Default.LockVolume && this.AccessMode == AccessMode.Administrator; }
         }
 
         /// <summary>
@@ -109,6 +122,182 @@ namespace Espera.Core.Library
         public bool CanPlayPreviousSong
         {
             get { return this.playlist.CanPlayPreviousSong; }
+        }
+
+        /// <summary>
+        /// Gets the index of the currently played song in the playlist.
+        /// </summary>
+        /// <value>
+        /// The index of the currently played song in the playlist.
+        /// </value>
+        public int? CurrentSongIndex
+        {
+            get { return this.playlist.CurrentSongIndex; }
+        }
+
+        /// <summary>
+        /// Gets or sets the current song's elapsed time.
+        /// </summary>
+        public TimeSpan CurrentTime
+        {
+            get { return this.currentPlayer == null ? TimeSpan.Zero : this.currentPlayer.CurrentTime; }
+            set
+            {
+                if (this.AccessMode != AccessMode.Administrator)
+                    throw new InvalidOperationException("The user is not in administrator mode.");
+
+                this.currentPlayer.CurrentTime = value;
+            }
+        }
+
+        public bool EnablePlaylistTimeout
+        {
+            get { return CoreSettings.Default.EnablePlaylistTimeout; }
+            set
+            {
+                if (this.AccessMode != AccessMode.Administrator)
+                    throw new InvalidOperationException("The user is not in administrator mode.");
+
+                CoreSettings.Default.EnablePlaylistTimeout = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the administrator is created.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if the administrator is created; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsAdministratorCreated { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the playback is paused.
+        /// </summary>
+        /// <value>
+        /// true if the playback is paused; otherwise, false.
+        /// </value>
+        public bool IsPaused
+        {
+            get { return this.currentPlayer != null && this.currentPlayer.PlaybackState == AudioPlayerState.Paused; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the playback is started.
+        /// </summary>
+        /// <value>
+        /// true if the playback is started; otherwise, false.
+        /// </value>
+        public bool IsPlaying
+        {
+            get { return this.currentPlayer != null && this.currentPlayer.PlaybackState == AudioPlayerState.Playing; }
+        }
+
+        /// <summary>
+        /// Gets the song that is currently loaded.
+        /// </summary>
+        public Song LoadedSong
+        {
+            get { return this.currentPlayer == null ? null : this.currentPlayer.LoadedSong; }
+        }
+
+        public bool LockSongRemoval
+        {
+            get { return CoreSettings.Default.LockSongRemoval; }
+            set
+            {
+                if (this.AccessMode != AccessMode.Administrator)
+                    throw new InvalidOperationException("The user is not in administrator mode.");
+
+                CoreSettings.Default.LockSongRemoval = value;
+            }
+        }
+
+        public bool LockTime
+        {
+            get { return CoreSettings.Default.LockTime; }
+            set
+            {
+                if (this.AccessMode != AccessMode.Administrator)
+                    throw new InvalidOperationException("The user is not in administrator mode.");
+
+                CoreSettings.Default.LockTime = value;
+            }
+        }
+
+        public bool LockVolume
+        {
+            get { return CoreSettings.Default.LockVolume; }
+            set
+            {
+                if (this.AccessMode != AccessMode.Administrator)
+                    throw new InvalidOperationException("The user is not in administrator mode.");
+
+                CoreSettings.Default.LockVolume = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the songs that are in the playlist.
+        /// </summary>
+        public IEnumerable<Song> Playlist
+        {
+            get { return this.playlist; }
+        }
+
+        public TimeSpan PlaylistTimeout
+        {
+            get { return CoreSettings.Default.PlaylistTimeout; }
+            set
+            {
+                if (this.AccessMode != AccessMode.Administrator)
+                    throw new InvalidOperationException("The user is not in administrator mode.");
+
+                CoreSettings.Default.PlaylistTimeout = value;
+            }
+        }
+
+        public TimeSpan RemainingPlaylistTimeout
+        {
+            get
+            {
+                return this.lastSongAddTime + this.PlaylistTimeout <= DateTime.Now
+                           ? TimeSpan.Zero
+                           : this.lastSongAddTime - DateTime.Now + this.PlaylistTimeout;
+            }
+        }
+
+        /// <summary>
+        /// Gets all songs that are currently in the library.
+        /// </summary>
+        public IEnumerable<Song> Songs
+        {
+            get
+            {
+                lock (songLock)
+                {
+                    return this.songs;
+                }
+            }
+        }
+
+        public bool StreamYoutube
+        {
+            get { return CoreSettings.Default.StreamYoutube; }
+            set
+            {
+                if (this.AccessMode != AccessMode.Administrator)
+                    throw new InvalidOperationException("The user is not in administrator mode.");
+
+                CoreSettings.Default.StreamYoutube = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the duration of the current song.
+        /// </summary>
+        public TimeSpan TotalTime
+        {
+            get { return this.currentPlayer == null ? TimeSpan.Zero : this.currentPlayer.TotalTime; }
         }
 
         /// <summary>
@@ -135,212 +324,38 @@ namespace Espera.Core.Library
         }
 
         /// <summary>
-        /// Gets the duration of the current song.
+        /// Adds the song that are contained in the specified directory recursively in an asynchronous manner to the library.
         /// </summary>
-        public TimeSpan TotalTime
+        /// <param name="path">The path of the directory to search.</param>
+        /// <returns>The <see cref="Task"/> that did the work.</returns>
+        public Task AddLocalSongsAsync(string path)
         {
-            get { return this.currentPlayer == null ? TimeSpan.Zero : this.currentPlayer.TotalTime; }
+            return Task.Factory.StartNew(() => this.AddLocalSongs(path));
         }
 
         /// <summary>
-        /// Gets or sets the current song's elapsed time.
+        /// Adds the specified song to the end of the playlist.
+        /// This method is only available in administrator mode.
         /// </summary>
-        public TimeSpan CurrentTime
+        /// <param name="songList">The songs to add to the end of the playlist.</param>
+        public void AddSongsToPlaylist(IEnumerable<Song> songList)
         {
-            get { return this.currentPlayer == null ? TimeSpan.Zero : this.currentPlayer.CurrentTime; }
-            set
-            {
-                if (this.AccessMode != AccessMode.Administrator)
-                    throw new InvalidOperationException("The user is not in administrator mode.");
+            if (this.AccessMode != AccessMode.Administrator)
+                throw new InvalidOperationException("The user is not in administrator mode.");
 
-                this.currentPlayer.CurrentTime = value;
-            }
+            this.playlist.AddSongs(songList.ToList()); // Copy the sequence to a list, so that the enumeration doesn't gets modified
         }
 
         /// <summary>
-        /// Gets a value indicating whether the playback is started.
+        /// Adds the song to the end of the playlist.
+        /// This method throws an exception, if there is an outstanding timeout.
         /// </summary>
-        /// <value>
-        /// true if the playback is started; otherwise, false.
-        /// </value>
-        public bool IsPlaying
+        /// <param name="song">The song to add to the end of the playlist.</param>
+        public void AddSongToPlaylist(Song song)
         {
-            get { return this.currentPlayer != null && this.currentPlayer.PlaybackState == AudioPlayerState.Playing; }
-        }
+            this.playlist.AddSongs(new[] { song });
 
-        /// <summary>
-        /// Gets a value indicating whether the playback is paused.
-        /// </summary>
-        /// <value>
-        /// true if the playback is paused; otherwise, false.
-        /// </value>
-        public bool IsPaused
-        {
-            get { return this.currentPlayer != null && this.currentPlayer.PlaybackState == AudioPlayerState.Paused; }
-        }
-
-        /// <summary>
-        /// Gets the song that is currently loaded.
-        /// </summary>
-        public Song LoadedSong
-        {
-            get { return this.currentPlayer == null ? null : this.currentPlayer.LoadedSong; }
-        }
-
-        /// <summary>
-        /// Gets the access mode that is currently enabled.
-        /// </summary>
-        public AccessMode AccessMode
-        {
-            get { return this.accessMode; }
-            private set
-            {
-                if (this.AccessMode != value)
-                {
-                    this.accessMode = value;
-                    this.AccessModeChanged.RaiseSafe(this, EventArgs.Empty);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the administrator is created.
-        /// </summary>
-        /// <value>
-        /// 	<c>true</c> if the administrator is created; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsAdministratorCreated { get; private set; }
-
-        public bool CanChangeVolume
-        {
-            get { return CoreSettings.Default.LockVolume && this.AccessMode == AccessMode.Administrator; }
-        }
-
-        public bool CanChangeTime
-        {
-            get { return CoreSettings.Default.LockTime && this.AccessMode == AccessMode.Administrator; }
-        }
-
-        public bool StreamYoutube
-        {
-            get { return CoreSettings.Default.StreamYoutube; }
-            set
-            {
-                if (this.AccessMode != AccessMode.Administrator)
-                    throw new InvalidOperationException("The user is not in administrator mode.");
-
-                CoreSettings.Default.StreamYoutube = value;
-            }
-        }
-
-        public bool LockVolume
-        {
-            get { return CoreSettings.Default.LockVolume; }
-            set
-            {
-                if (this.AccessMode != AccessMode.Administrator)
-                    throw new InvalidOperationException("The user is not in administrator mode.");
-
-                CoreSettings.Default.LockVolume = value;
-            }
-        }
-
-        public bool LockTime
-        {
-            get { return CoreSettings.Default.LockTime; }
-            set
-            {
-                if (this.AccessMode != AccessMode.Administrator)
-                    throw new InvalidOperationException("The user is not in administrator mode.");
-
-                CoreSettings.Default.LockTime = value;
-            }
-        }
-
-        public bool LockSongRemoval
-        {
-            get { return CoreSettings.Default.LockSongRemoval; }
-            set
-            {
-                if (this.AccessMode != AccessMode.Administrator)
-                    throw new InvalidOperationException("The user is not in administrator mode.");
-
-                CoreSettings.Default.LockSongRemoval = value;
-            }
-        }
-
-        public bool EnablePlaylistTimeout
-        {
-            get { return CoreSettings.Default.EnablePlaylistTimeout; }
-            set
-            {
-                if (this.AccessMode != AccessMode.Administrator)
-                    throw new InvalidOperationException("The user is not in administrator mode.");
-
-                CoreSettings.Default.EnablePlaylistTimeout = value;
-            }
-        }
-
-        public TimeSpan PlaylistTimeout
-        {
-            get { return CoreSettings.Default.PlaylistTimeout; }
-            set
-            {
-                if (this.AccessMode != AccessMode.Administrator)
-                    throw new InvalidOperationException("The user is not in administrator mode.");
-
-                CoreSettings.Default.PlaylistTimeout = value;
-            }
-        }
-
-        public TimeSpan RemainingPlaylistTimeout
-        {
-            get
-            {
-                return this.lastSongAddTime + this.PlaylistTimeout <= DateTime.Now
-                           ? TimeSpan.Zero
-                           : this.lastSongAddTime - DateTime.Now + this.PlaylistTimeout;
-            }
-        }
-
-        public bool CanAddSongToPlaylist
-        {
-            get { return this.AccessMode == AccessMode.Administrator || this.RemainingPlaylistTimeout <= TimeSpan.Zero; }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Library"/> class.
-        /// </summary>
-        public Library()
-        {
-            this.songLock = new object();
-            this.songs = new HashSet<Song>();
-            this.playlist = new Playlist();
-            this.volume = 1.0f;
-            this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
-            this.driveWatcher = RemovableDriveWatcher.Create();
-            this.driveWatcher.DriveRemoved += (sender, args) => Task.Factory.StartNew(this.Update);
-            this.cacheResetHandle = new AutoResetEvent(false);
-        }
-
-        /// <summary>
-        /// Creates the administrator with the specified password.
-        /// </summary>
-        /// <param name="adminPassword">The administrator password.</param>
-        public void CreateAdmin(string adminPassword)
-        {
-            if (adminPassword == null)
-                throw new ArgumentNullException(Reflector.GetMemberName(() => adminPassword));
-
-            if (String.IsNullOrWhiteSpace(adminPassword))
-                throw new ArgumentException("Password cannot consist only of whitespaces.",
-                                            Reflector.GetMemberName(() => adminPassword));
-
-            if (this.IsAdministratorCreated)
-                throw new InvalidOperationException("The administrator is already created.");
-
-            this.password = adminPassword;
-            this.IsAdministratorCreated = true;
+            this.lastSongAddTime = DateTime.Now;
         }
 
         /// <summary>
@@ -367,18 +382,6 @@ namespace Espera.Core.Library
         }
 
         /// <summary>
-        /// Plays the song with the specified index in the playlist.
-        /// </summary>
-        /// <param name="playlistIndex">The index of the song in the playlist.</param>
-        public void PlaySong(int playlistIndex)
-        {
-            if (this.AccessMode != AccessMode.Administrator)
-                throw new InvalidOperationException("The user is not in administrator mode.");
-
-            this.InternPlaySong(playlistIndex);
-        }
-
-        /// <summary>
         /// Continues the currently loaded song.
         /// </summary>
         public void ContinueSong()
@@ -387,6 +390,43 @@ namespace Espera.Core.Library
                 throw new InvalidOperationException("The user is not in administrator mode.");
 
             this.currentPlayer.Play();
+        }
+
+        /// <summary>
+        /// Creates the administrator with the specified password.
+        /// </summary>
+        /// <param name="adminPassword">The administrator password.</param>
+        public void CreateAdmin(string adminPassword)
+        {
+            if (adminPassword == null)
+                throw new ArgumentNullException(Reflector.GetMemberName(() => adminPassword));
+
+            if (String.IsNullOrWhiteSpace(adminPassword))
+                throw new ArgumentException("Password cannot consist only of whitespaces.",
+                                            Reflector.GetMemberName(() => adminPassword));
+
+            if (this.IsAdministratorCreated)
+                throw new InvalidOperationException("The administrator is already created.");
+
+            this.password = adminPassword;
+            this.IsAdministratorCreated = true;
+        }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            if (this.currentPlayer != null)
+            {
+                this.currentPlayer.Dispose();
+            }
+
+            this.driveWatcher.Dispose();
+
+            DisposeSongs(this.songs);
+
+            CoreSettings.Default.Save();
         }
 
         /// <summary>
@@ -426,28 +466,37 @@ namespace Espera.Core.Library
         }
 
         /// <summary>
-        /// Adds the song to the end of the playlist.
-        /// This method throws an exception, if there is an outstanding timeout.
+        /// Plays the song with the specified index in the playlist.
         /// </summary>
-        /// <param name="song">The song to add to the end of the playlist.</param>
-        public void AddSongToPlaylist(Song song)
-        {
-            this.playlist.AddSongs(new[] { song });
-
-            this.lastSongAddTime = DateTime.Now;
-        }
-
-        /// <summary>
-        /// Adds the specified song to the end of the playlist.
-        /// This method is only available in administrator mode.
-        /// </summary>
-        /// <param name="songList">The songs to add to the end of the playlist.</param>
-        public void AddSongsToPlaylist(IEnumerable<Song> songList)
+        /// <param name="playlistIndex">The index of the song in the playlist.</param>
+        public void PlaySong(int playlistIndex)
         {
             if (this.AccessMode != AccessMode.Administrator)
                 throw new InvalidOperationException("The user is not in administrator mode.");
 
-            this.playlist.AddSongs(songList.ToList()); // Copy the sequence to a list, so that the enumeration doesn't gets modified
+            this.InternPlaySong(playlistIndex);
+        }
+
+        /// <summary>
+        /// Removes the specified songs from the library.
+        /// </summary>
+        /// <param name="songList">The list of the songs to remove from the library.</param>
+        public void RemoveFromLibrary(IEnumerable<Song> songList)
+        {
+            if (this.AccessMode != AccessMode.Administrator)
+                throw new InvalidOperationException("The user is not in administrator mode.");
+
+            songList = songList.ToList(); // Avoid multiple enumeration
+
+            DisposeSongs(songList);
+
+            lock (this.songLock)
+            {
+                foreach (Song song in songList)
+                {
+                    this.songs.Remove(song);
+                }
+            }
         }
 
         /// <summary>
@@ -479,81 +528,6 @@ namespace Espera.Core.Library
         public void RemoveFromPlaylist(IEnumerable<Song> songList)
         {
             this.RemoveFromPlaylist(this.playlist.GetIndexes(songList));
-        }
-
-        /// <summary>
-        /// Removes the specified songs from the library.
-        /// </summary>
-        /// <param name="songList">The list of the songs to remove from the library.</param>
-        public void RemoveFromLibrary(IEnumerable<Song> songList)
-        {
-            if (this.AccessMode != AccessMode.Administrator)
-                throw new InvalidOperationException("The user is not in administrator mode.");
-
-            songList = songList.ToList(); // Avoid multiple enumeration
-
-            DisposeSongs(songList);
-
-            lock (this.songLock)
-            {
-                foreach (Song song in songList)
-                {
-                    this.songs.Remove(song);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Adds the song that are contained in the specified directory recursively in an asynchronous manner to the library.
-        /// </summary>
-        /// <param name="path">The path of the directory to search.</param>
-        /// <returns>The <see cref="Task"/> that did the work.</returns>
-        public Task AddLocalSongsAsync(string path)
-        {
-            return Task.Factory.StartNew(() => this.AddLocalSongs(path));
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            if (this.currentPlayer != null)
-            {
-                this.currentPlayer.Dispose();
-            }
-
-            this.driveWatcher.Dispose();
-
-            DisposeSongs(this.songs);
-
-            CoreSettings.Default.Save();
-        }
-
-        private void Update()
-        {
-            this.Updating.RaiseSafe(this, EventArgs.Empty);
-
-            IEnumerable<Song> removable;
-
-            lock (this.songLock)
-            {
-                removable = this.songs
-                    .Where(song => !File.Exists(song.OriginalPath))
-                    .ToList();
-            }
-
-            DisposeSongs(removable);
-
-            foreach (Song song in removable)
-            {
-                lock (this.songLock)
-                {
-                    this.songs.Remove(song);
-                }
-            }
-
-            this.Updated.RaiseSafe(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -611,6 +585,53 @@ namespace Espera.Core.Library
             finder.Start();
         }
 
+        private bool AwaitCaching(Song song)
+        {
+            this.isWaitingOnCache = true;
+
+            while (!song.IsCached)
+            {
+                if (this.overrideCurrentCaching)
+                {
+                    // If we wait on a song that is currently caching, but the user wants to play an other song,
+                    // let the other song pass and discard the waiting of the current song
+                    this.isWaitingOnCache = false;
+                    this.overrideCurrentCaching = false;
+                    this.cacheResetHandle.Set();
+                    return false;
+                }
+
+                Thread.Sleep(250);
+            }
+
+            this.isWaitingOnCache = false;
+
+            return true;
+        }
+
+        private void HandleSongFinish()
+        {
+            if (!this.playlist.CanPlayNextSong)
+            {
+                this.playlist.CurrentSongIndex = null;
+            }
+
+            this.SongFinished.RaiseSafe(this, EventArgs.Empty);
+
+            if (this.playlist.CanPlayNextSong)
+            {
+                this.InternPlayNextSong();
+            }
+        }
+
+        private void InternPlayNextSong()
+        {
+            if (!this.playlist.CanPlayNextSong || !this.playlist.CurrentSongIndex.HasValue)
+                throw new InvalidOperationException("The next song couldn't be played.");
+
+            this.InternPlaySong(this.playlist.CurrentSongIndex.Value + 1);
+        }
+
         private void InternPlaySong(int playlistIndex)
         {
             playlistIndex.ThrowIfLessThan(0, () => playlistIndex);
@@ -658,51 +679,30 @@ namespace Espera.Core.Library
             });
         }
 
-        private bool AwaitCaching(Song song)
+                private void Update()
         {
-            this.isWaitingOnCache = true;
+            this.Updating.RaiseSafe(this, EventArgs.Empty);
 
-            while (!song.IsCached)
+            IEnumerable<Song> removable;
+
+            lock (this.songLock)
             {
-                if (this.overrideCurrentCaching)
+                removable = this.songs
+                    .Where(song => !File.Exists(song.OriginalPath))
+                    .ToList();
+            }
+
+            DisposeSongs(removable);
+
+            foreach (Song song in removable)
+            {
+                lock (this.songLock)
                 {
-                    // If we wait on a song that is currently caching, but the user wants to play an other song,
-                    // let the other song pass and discard the waiting of the current song
-                    this.isWaitingOnCache = false;
-                    this.overrideCurrentCaching = false;
-                    this.cacheResetHandle.Set();
-                    return false;
+                    this.songs.Remove(song);
                 }
-
-                Thread.Sleep(250);
             }
 
-            this.isWaitingOnCache = false;
-
-            return true;
-        }
-
-        private void InternPlayNextSong()
-        {
-            if (!this.playlist.CanPlayNextSong || !this.playlist.CurrentSongIndex.HasValue)
-                throw new InvalidOperationException("The next song couldn't be played.");
-
-            this.InternPlaySong(this.playlist.CurrentSongIndex.Value + 1);
-        }
-
-        private void HandleSongFinish()
-        {
-            if (!this.playlist.CanPlayNextSong)
-            {
-                this.playlist.CurrentSongIndex = null;
-            }
-
-            this.SongFinished.RaiseSafe(this, EventArgs.Empty);
-
-            if (this.playlist.CanPlayNextSong)
-            {
-                this.InternPlayNextSong();
-            }
+            this.Updated.RaiseSafe(this, EventArgs.Empty);
         }
     }
 }

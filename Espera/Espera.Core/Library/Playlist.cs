@@ -12,16 +12,29 @@ namespace Espera.Core.Library
     /// </summary>
     public class Playlist : IEnumerable<Song>
     {
-        private Dictionary<int, Song> playlist;
         private readonly ConcurrentQueue<Song> cachingQueue;
+        private Dictionary<int, Song> playlist;
 
         /// <summary>
-        /// Gets the index of the currently played song in the playlist.
+        /// Initializes a new instance of the <see cref="Playlist"/> class.
         /// </summary>
-        /// <value>
-        /// The index of the currently played song in the playlist.
-        /// </value>
-        public int? CurrentSongIndex { get; set; }
+        public Playlist()
+        {
+            this.playlist = new Dictionary<int, Song>();
+            this.cachingQueue = new ConcurrentQueue<Song>();
+
+            /*
+             * HACK:
+             *
+             * Oh god this is so wrong, i want to punch myself in the face.
+             *
+             * If anyone out there knows how to make a good producer/consumer
+             * construct with a maximum amount of consumers, PLEASE FIX THIS!
+             */
+            Task.Factory.StartNew(Cache);
+            Task.Factory.StartNew(Cache);
+            Task.Factory.StartNew(Cache);
+        }
 
         /// <summary>
         /// Gets a value indicating whether the next song in the playlist can be played.
@@ -46,24 +59,19 @@ namespace Espera.Core.Library
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Playlist"/> class.
+        /// Gets the index of the currently played song in the playlist.
         /// </summary>
-        public Playlist()
-        {
-            this.playlist = new Dictionary<int, Song>();
-            this.cachingQueue = new ConcurrentQueue<Song>();
+        /// <value>
+        /// The index of the currently played song in the playlist.
+        /// </value>
+        public int? CurrentSongIndex { get; set; }
 
-            /*
-             * HACK:
-             *
-             * Oh god this is so wrong, i want to punch myself in the face.
-             *
-             * If anyone out there knows how to make a good producer/consumer
-             * construct with a maximum amount of consumers, PLEASE FIX THIS!
-             */
-            Task.Factory.StartNew(Cache);
-            Task.Factory.StartNew(Cache);
-            Task.Factory.StartNew(Cache);
+        /// <summary>
+        /// Gets the <see cref="Espera.Core.Song"/> at the specified index.
+        /// </summary>
+        public Song this[int index]
+        {
+            get { return this.playlist[index]; }
         }
 
         /// <summary>
@@ -88,6 +96,32 @@ namespace Espera.Core.Library
         }
 
         /// <summary>
+        /// Returns an enumerator that iterates through the collection.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
+        /// </returns>
+        public IEnumerator<Song> GetEnumerator()
+        {
+            return this.playlist
+                .OrderBy(pair => pair.Key)
+                .Select(pair => pair.Value)
+                .GetEnumerator();
+        }
+
+        /// <summary>
+        /// Gets the index in the playlist for each of the specified songs.
+        /// </summary>
+        /// <param name="songs">The songs.</param>
+        /// <returns></returns>
+        public IEnumerable<int> GetIndexes(IEnumerable<Song> songs)
+        {
+            return this.playlist
+                .Where(entry => songs.Contains(entry.Value))
+                .Select(entry => entry.Key);
+        }
+
+        /// <summary>
         /// Removes the songs with the specified indexes from the <see cref="Playlist"/>.
         /// </summary>
         /// <param name="indexes">The indexes of the songs to remove.</param>
@@ -107,37 +141,21 @@ namespace Espera.Core.Library
         }
 
         /// <summary>
-        /// Gets the index in the playlist for each of the specified songs.
+        /// Please kids, don't do that at home.
         /// </summary>
-        /// <param name="songs">The songs.</param>
-        /// <returns></returns>
-        public IEnumerable<int> GetIndexes(IEnumerable<Song> songs)
+        private void Cache()
         {
-            return this.playlist
-                .Where(entry => songs.Contains(entry.Value))
-                .Select(entry => entry.Key);
-        }
+            while (true)
+            {
+                Song song;
 
-        /// <summary>
-        /// Gets the <see cref="Espera.Core.Song"/> at the specified index.
-        /// </summary>
-        public Song this[int index]
-        {
-            get { return this.playlist[index]; }
-        }
+                if (this.cachingQueue.TryDequeue(out song))
+                {
+                    song.LoadToCache();
+                }
 
-        /// <summary>
-        /// Returns an enumerator that iterates through the collection.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
-        /// </returns>
-        public IEnumerator<Song> GetEnumerator()
-        {
-            return this.playlist
-                .OrderBy(pair => pair.Key)
-                .Select(pair => pair.Value)
-                .GetEnumerator();
+                Thread.Sleep(500);
+            }
         }
 
         /// <summary>
@@ -172,24 +190,6 @@ namespace Espera.Core.Library
             }
 
             this.playlist = newPlaylist;
-        }
-
-        /// <summary>
-        /// Please kids, don't do that at home.
-        /// </summary>
-        private void Cache()
-        {
-            while (true)
-            {
-                Song song;
-
-                if (this.cachingQueue.TryDequeue(out song))
-                {
-                    song.LoadToCache();
-                }
-
-                Thread.Sleep(500);
-            }
         }
     }
 }

@@ -5,12 +5,38 @@ namespace Espera.View.ViewModels
 {
     internal class StatusViewModel : ViewModelBase<StatusViewModel>
     {
-        private string path;
-        private int processedTags;
-        private int totalTags;
         private bool isAdding;
         private bool isUpdating;
         private Library library;
+        private string path;
+        private int processedTags;
+        private int totalTags;
+
+        public StatusViewModel(Library library)
+        {
+            this.library = library;
+            this.library.Updating += (sender, e) => this.IsUpdating = true;
+            this.library.Updated += (sender, args) => this.IsUpdating = false;
+        }
+
+        public bool IsAdding
+        {
+            get { return this.isAdding; }
+            set
+            {
+                if (this.IsAdding != value)
+                {
+                    this.isAdding = value;
+                    this.OnPropertyChanged(vm => vm.IsAdding);
+                    this.OnPropertyChanged(vm => vm.IsProgressUnkown);
+                }
+            }
+        }
+
+        public bool IsProgressUnkown
+        {
+            get { return this.ProcessedTags == this.TotalTags && this.IsAdding; }
+        }
 
         public bool IsUpdating
         {
@@ -64,30 +90,12 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public bool IsAdding
+        public void Reset()
         {
-            get { return this.isAdding; }
-            set
-            {
-                if (this.IsAdding != value)
-                {
-                    this.isAdding = value;
-                    this.OnPropertyChanged(vm => vm.IsAdding);
-                    this.OnPropertyChanged(vm => vm.IsProgressUnkown);
-                }
-            }
-        }
-
-        public bool IsProgressUnkown
-        {
-            get { return this.ProcessedTags == this.TotalTags && this.IsAdding; }
-        }
-
-        public StatusViewModel(Library library)
-        {
-            this.library = library;
-            this.library.Updating += (sender, e) => this.IsUpdating = true;
-            this.library.Updated += (sender, args) => this.IsUpdating = false;
+            this.Path = null;
+            this.ProcessedTags = 0;
+            this.TotalTags = 0;
+            this.IsAdding = false;
         }
 
         public void Update(string path, int processedTags, int totalTags)
@@ -97,14 +105,6 @@ namespace Espera.View.ViewModels
             this.TotalTags = totalTags;
 
             this.OnPropertyChanged(vm => vm.IsProgressUnkown);
-        }
-
-        public void Reset()
-        {
-            this.Path = null;
-            this.ProcessedTags = 0;
-            this.TotalTags = 0;
-            this.IsAdding = false;
         }
     }
 }

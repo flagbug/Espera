@@ -11,37 +11,6 @@ namespace Espera.Core
     public class YoutubeSong : Song
     {
         /// <summary>
-        /// Gets or sets the description that was entered by the uploader of the YouTube video.
-        /// </summary>
-        /// <value>
-        /// The description that was entered by the uploader of the YouTube video.
-        /// </value>
-        public string Description { get; set; }
-
-        /// <summary>
-        /// Gets or sets the average rating.
-        /// </summary>
-        /// <value>
-        /// The average rating.
-        /// </value>
-        public double Rating { get; set; }
-
-        /// <summary>
-        /// Gets or sets the thumbnail source.
-        /// </summary>
-        /// <value>
-        /// The thumbnail source.
-        /// </value>
-        public Uri ThumbnailSource { get; set; }
-
-        public bool IsStreaming { get; private set; }
-
-        public override bool HasToCache
-        {
-            get { return !this.IsStreaming; }
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="YoutubeSong"/> class.
         /// </summary>
         /// <param name="path">The path of the song.</param>
@@ -59,6 +28,37 @@ namespace Espera.Core
                 this.StreamingPath = this.OriginalPath;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the description that was entered by the uploader of the YouTube video.
+        /// </summary>
+        /// <value>
+        /// The description that was entered by the uploader of the YouTube video.
+        /// </value>
+        public string Description { get; set; }
+
+        public override bool HasToCache
+        {
+            get { return !this.IsStreaming; }
+        }
+
+        public bool IsStreaming { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the average rating.
+        /// </summary>
+        /// <value>
+        /// The average rating.
+        /// </value>
+        public double Rating { get; set; }
+
+        /// <summary>
+        /// Gets or sets the thumbnail source.
+        /// </summary>
+        /// <value>
+        /// The thumbnail source.
+        /// </value>
+        public Uri ThumbnailSource { get; set; }
 
         public override AudioPlayer CreateAudioPlayer()
         {

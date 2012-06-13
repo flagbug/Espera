@@ -30,11 +30,6 @@ namespace Espera.View
             this.ChangeColor(Settings.Default.AccentColor);
         }
 
-        private void ChangeColor(string color)
-        {
-            ThemeManager.ChangeTheme(this, ThemeManager.DefaultAccents.First(accent => accent.Name == color), Theme.Dark);
-        }
-
         private void AddSongsButtonClick(object sender, RoutedEventArgs e)
         {
             var dialog = new FolderBrowserDialogEx
@@ -52,56 +47,11 @@ namespace Espera.View
             }
         }
 
-        private void SongDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed && this.mainViewModel.AddSelectedSongsToPlaylistCommand.CanExecute(null))
-            {
-                this.mainViewModel.AddSelectedSongsToPlaylistCommand.Execute(null);
-            }
-        }
-
-        private void MetroWindowClosing(object sender, CancelEventArgs e)
-        {
-            Settings.Default.Save();
-
-            this.mainViewModel.Dispose();
-        }
-
-        private void PlaylistDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            if (this.mainViewModel.PlayCommand.CanExecute(null))
-            {
-                this.mainViewModel.PlayCommand.Execute(true);
-            }
-        }
-
-        private void CreationPasswordChanged(object sender, RoutedEventArgs e)
-        {
-            this.mainViewModel.AdministratorViewModel.CreationPassword = ((PasswordBox)sender).Password;
-        }
-
-        private void LoginPasswordChanged(object sender, RoutedEventArgs e)
-        {
-            this.mainViewModel.AdministratorViewModel.LoginPassword = ((PasswordBox)sender).Password;
-        }
-
         private void AdminPanelToggleButtonClick(object sender, RoutedEventArgs e)
         {
             this.showAdministratorPanel = !this.showAdministratorPanel;
 
             this.adminPanel.Visibility = this.showAdministratorPanel ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        private void RedColorButtonButtonClick(object sender, RoutedEventArgs e)
-        {
-            this.ChangeColor("Red");
-            Settings.Default.AccentColor = "Red";
-        }
-
-        private void GreenColorButtonButtonClick(object sender, RoutedEventArgs e)
-        {
-            this.ChangeColor("Green");
-            Settings.Default.AccentColor = "Green";
         }
 
         private void BlueColorButtonButtonClick(object sender, RoutedEventArgs e)
@@ -110,76 +60,55 @@ namespace Espera.View
             Settings.Default.AccentColor = "Blue";
         }
 
-        private void PurpleColorButtonButtonClick(object sender, RoutedEventArgs e)
+        private void ChangeColor(string color)
         {
-            this.ChangeColor("Purple");
-            Settings.Default.AccentColor = "Purple";
+            ThemeManager.ChangeTheme(this, ThemeManager.DefaultAccents.First(accent => accent.Name == color), Theme.Dark);
         }
 
-        private void SearchTextBoxKeyUp(object sender, KeyEventArgs e)
+        private void CreateAdminButtonClick(object sender, RoutedEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            ICommand command = this.mainViewModel.AdministratorViewModel.CreateAdminCommand;
+
+            if (command.CanExecute(null))
             {
-                this.mainViewModel.StartSearch();
+                command.Execute(null);
             }
 
-            e.Handled = true;
+            this.adminPasswordBox.Password = String.Empty;
         }
 
-        private void PlaylistKeyUp(object sender, KeyEventArgs e)
+        private void CreationPasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (e.Key == Key.Delete)
+            this.mainViewModel.AdministratorViewModel.CreationPassword = ((PasswordBox)sender).Password;
+        }
+
+        private void GreenColorButtonButtonClick(object sender, RoutedEventArgs e)
+        {
+            this.ChangeColor("Green");
+            Settings.Default.AccentColor = "Green";
+        }
+
+        private void LoginButtonClick(object sender, RoutedEventArgs e)
+        {
+            ICommand command = this.mainViewModel.AdministratorViewModel.LoginCommand;
+            if (command.CanExecute(null))
             {
-                if (this.mainViewModel.RemoveSelectedPlaylistEntriesCommand.CanExecute(null))
-                {
-                    this.mainViewModel.RemoveSelectedPlaylistEntriesCommand.Execute(null);
-                }
+                command.Execute(null);
             }
 
-            else if (e.Key == Key.Enter)
-            {
-                if (this.mainViewModel.PlayCommand.CanExecute(null))
-                {
-                    this.mainViewModel.PlayCommand.Execute(true);
-                }
-            }
+            this.loginPasswordBox.Password = String.Empty;
         }
 
-        private void SongListKeyUp(object sender, KeyEventArgs e)
+        private void LoginPasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (e.Key == Key.Delete)
-            {
-                if (this.mainViewModel.RemoveSelectedSongsFromLibraryCommand.CanExecute(null))
-                {
-                    this.mainViewModel.RemoveSelectedSongsFromLibraryCommand.Execute(null);
-                }
-            }
+            this.mainViewModel.AdministratorViewModel.LoginPassword = ((PasswordBox)sender).Password;
         }
 
-        private void PlaylistContextMenuOpening(object sender, ContextMenuEventArgs e)
+        private void MetroWindowClosing(object sender, CancelEventArgs e)
         {
-            if (((ListView)sender).Items.IsEmpty)
-            {
-                e.Handled = true;
-            }
-        }
+            Settings.Default.Save();
 
-        private void SongListContextMenuOpening(object sender, ContextMenuEventArgs e)
-        {
-            if (((ListView)sender).Items.IsEmpty)
-            {
-                e.Handled = true;
-            }
-        }
-
-        private void PlaylistSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            this.mainViewModel.SelectedPlaylistEntries = ((ListView)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
-        }
-
-        private void SongListSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            this.mainViewModel.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModel>();
+            this.mainViewModel.Dispose();
         }
 
         private void MetroWindowKeyUp(object sender, KeyEventArgs e)
@@ -204,27 +133,98 @@ namespace Espera.View
             }
         }
 
-        private void CreateAdminButtonClick(object sender, RoutedEventArgs e)
+        private void PlaylistContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            ICommand command = this.mainViewModel.AdministratorViewModel.CreateAdminCommand;
-
-            if (command.CanExecute(null))
+            if (((ListView)sender).Items.IsEmpty)
             {
-                command.Execute(null);
+                e.Handled = true;
             }
-
-            this.adminPasswordBox.Password = String.Empty;
         }
 
-        private void LoginButtonClick(object sender, RoutedEventArgs e)
+        private void PlaylistDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ICommand command = this.mainViewModel.AdministratorViewModel.LoginCommand;
-            if (command.CanExecute(null))
+            if (this.mainViewModel.PlayCommand.CanExecute(null))
             {
-                command.Execute(null);
+                this.mainViewModel.PlayCommand.Execute(true);
+            }
+        }
+
+        private void PlaylistKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                if (this.mainViewModel.RemoveSelectedPlaylistEntriesCommand.CanExecute(null))
+                {
+                    this.mainViewModel.RemoveSelectedPlaylistEntriesCommand.Execute(null);
+                }
             }
 
-            this.loginPasswordBox.Password = String.Empty;
+            else if (e.Key == Key.Enter)
+            {
+                if (this.mainViewModel.PlayCommand.CanExecute(null))
+                {
+                    this.mainViewModel.PlayCommand.Execute(true);
+                }
+            }
+        }
+
+        private void PlaylistSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            this.mainViewModel.SelectedPlaylistEntries = ((ListView)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
+        }
+
+        private void PurpleColorButtonButtonClick(object sender, RoutedEventArgs e)
+        {
+            this.ChangeColor("Purple");
+            Settings.Default.AccentColor = "Purple";
+        }
+
+        private void RedColorButtonButtonClick(object sender, RoutedEventArgs e)
+        {
+            this.ChangeColor("Red");
+            Settings.Default.AccentColor = "Red";
+        }
+
+        private void SearchTextBoxKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                this.mainViewModel.StartSearch();
+            }
+
+            e.Handled = true;
+        }
+
+        private void SongDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed && this.mainViewModel.AddSelectedSongsToPlaylistCommand.CanExecute(null))
+            {
+                this.mainViewModel.AddSelectedSongsToPlaylistCommand.Execute(null);
+            }
+        }
+
+        private void SongListContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if (((ListView)sender).Items.IsEmpty)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void SongListKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                if (this.mainViewModel.RemoveSelectedSongsFromLibraryCommand.CanExecute(null))
+                {
+                    this.mainViewModel.RemoveSelectedSongsFromLibraryCommand.Execute(null);
+                }
+            }
+        }
+
+        private void SongListSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            this.mainViewModel.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModel>();
         }
     }
 }

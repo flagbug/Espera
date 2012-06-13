@@ -10,6 +10,14 @@ namespace Espera.View
             return IsApplicationInstalled("VLC");
         }
 
+        private static bool IsApplicationInKey(RegistryKey key, string applicationName)
+        {
+            return key.GetSubKeyNames()
+                .Select(key.OpenSubKey)
+                .Select(subkey => subkey.GetValue("DisplayName") as string)
+                .Any(displayName => displayName != null && displayName.Contains(applicationName));
+        }
+
         private static bool IsApplicationInstalled(string applicationName)
         {
             using (RegistryKey currentUser = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"))
@@ -24,14 +32,6 @@ namespace Espera.View
                     }
                 }
             }
-        }
-
-        private static bool IsApplicationInKey(RegistryKey key, string applicationName)
-        {
-            return key.GetSubKeyNames()
-                .Select(key.OpenSubKey)
-                .Select(subkey => subkey.GetValue("DisplayName") as string)
-                .Any(displayName => displayName != null && displayName.Contains(applicationName));
         }
     }
 }

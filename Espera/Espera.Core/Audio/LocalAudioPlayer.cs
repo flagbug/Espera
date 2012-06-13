@@ -12,14 +12,33 @@ namespace Espera.Core.Audio
     /// </summary>
     internal sealed class LocalAudioPlayer : AudioPlayer
     {
-        private IWavePlayer wavePlayer;
-        private WaveChannel32 inputStream;
-
         // We need a dispatcher timer for updating the current state of the song,
         // to avoid cross-threading exceptions
         private readonly DispatcherTimer songFinishedTimer;
 
+        private WaveChannel32 inputStream;
         private float volume;
+        private IWavePlayer wavePlayer;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LocalAudioPlayer"/> class.
+        /// </summary>
+        public LocalAudioPlayer()
+        {
+            this.Volume = 1.0f;
+            this.songFinishedTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
+            this.songFinishedTimer.Tick += (sender, e) => this.UpdateSongState();
+        }
+
+        /// <summary>
+        /// Gets or sets the current time.
+        /// </summary>
+        /// <value>The current time.</value>
+        public override TimeSpan CurrentTime
+        {
+            get { return this.inputStream == null ? TimeSpan.Zero : this.inputStream.CurrentTime; }
+            set { this.inputStream.CurrentTime = value; }
+        }
 
         /// <summary>
         /// Gets the current playback state.
@@ -51,6 +70,15 @@ namespace Espera.Core.Audio
         }
 
         /// <summary>
+        /// Gets the total time.
+        /// </summary>
+        /// <value>The total time.</value>
+        public override TimeSpan TotalTime
+        {
+            get { return this.LoadedSong == null ? TimeSpan.Zero : this.inputStream.TotalTime; }
+        }
+
+        /// <summary>
         /// Gets or sets the volume (a value from 0.0 to 1.0).
         /// </summary>
         /// <value>The volume.</value>
@@ -69,32 +97,21 @@ namespace Espera.Core.Audio
         }
 
         /// <summary>
-        /// Gets or sets the current time.
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
-        /// <value>The current time.</value>
-        public override TimeSpan CurrentTime
+        public override void Dispose()
         {
-            get { return this.inputStream == null ? TimeSpan.Zero : this.inputStream.CurrentTime; }
-            set { this.inputStream.CurrentTime = value; }
-        }
+            this.Stop();
 
-        /// <summary>
-        /// Gets the total time.
-        /// </summary>
-        /// <value>The total time.</value>
-        public override TimeSpan TotalTime
-        {
-            get { return this.LoadedSong == null ? TimeSpan.Zero : this.inputStream.TotalTime; }
-        }
+            if (wavePlayer != null)
+            {
+                this.wavePlayer.Dispose();
+            }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LocalAudioPlayer"/> class.
-        /// </summary>
-        public LocalAudioPlayer()
-        {
-            this.Volume = 1.0f;
-            this.songFinishedTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
-            this.songFinishedTimer.Tick += (sender, e) => this.UpdateSongState();
+            if (this.inputStream != null)
+            {
+                this.inputStream.Close();
+            }
         }
 
         /// <summary>
@@ -115,6 +132,18 @@ namespace Espera.Core.Audio
             this.OpenSong(song);
 
             base.Load(song);
+        }
+
+        /// <summary>
+        /// Pauses the playback of the <see cref="AudioPlayer.LoadedSong"/>.
+        /// </summary>
+        public override void Pause()
+        {
+            if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != NAudio.Wave.PlaybackState.Paused)
+            {
+                this.wavePlayer.Pause();
+                this.songFinishedTimer.Stop();
+            }
         }
 
         /// <summary>
@@ -139,18 +168,6 @@ namespace Espera.Core.Audio
         }
 
         /// <summary>
-        /// Pauses the playback of the <see cref="AudioPlayer.LoadedSong"/>.
-        /// </summary>
-        public override void Pause()
-        {
-            if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != NAudio.Wave.PlaybackState.Paused)
-            {
-                this.wavePlayer.Pause();
-                this.songFinishedTimer.Stop();
-            }
-        }
-
-        /// <summary>
         /// Stops the playback of the <see cref="AudioPlayer.LoadedSong"/>.
         /// </summary>
         public override void Stop()
@@ -166,24 +183,6 @@ namespace Espera.Core.Audio
             }
 
             this.CloseStream();
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public override void Dispose()
-        {
-            this.Stop();
-
-            if (wavePlayer != null)
-            {
-                this.wavePlayer.Dispose();
-            }
-
-            if (this.inputStream != null)
-            {
-                this.inputStream.Close();
-            }
         }
 
         private static WaveChannel32 OpenMp3Stream(Stream stream)
@@ -222,12 +221,6 @@ namespace Espera.Core.Audio
             this.LoadedSong = null;
         }
 
-        private void OpenSong(Song song)
-        {
-            this.CreateInputStream(song);
-            this.wavePlayer.Init(inputStream);
-        }
-
         private void CreateInputStream(Song song)
         {
             Stream stream = File.OpenRead(song.StreamingPath);
@@ -245,6 +238,12 @@ namespace Espera.Core.Audio
             }
 
             this.inputStream.Volume = this.Volume;
+        }
+
+        private void OpenSong(Song song)
+        {
+            this.CreateInputStream(song);
+            this.wavePlayer.Init(inputStream);
         }
 
         private void RenewWavePlayer()

@@ -16,83 +16,6 @@ namespace Espera.Core
     {
         private string streamingPath;
 
-        public event EventHandler<DataTransferEventArgs> CachingProgressChanged;
-
-        public event EventHandler CachingCompleted;
-
-        public event EventHandler CachingFailed;
-
-        /// <summary>
-        /// Gets or sets the title.
-        /// </summary>
-        /// <value>
-        /// The title.
-        /// </value>
-        public string Title { get; set; }
-
-        /// <summary>
-        /// Gets or sets the artist.
-        /// </summary>
-        /// <value>
-        /// The artist.
-        /// </value>
-        public string Artist { get; set; }
-
-        /// <summary>
-        /// Gets or sets the album.
-        /// </summary>
-        /// <value>
-        /// The album.
-        /// </value>
-        public string Album { get; set; }
-
-        /// <summary>
-        /// Gets or sets the genre.
-        /// </summary>
-        /// <value>
-        /// The genre.
-        /// </value>
-        public string Genre { get; set; }
-
-        /// <summary>
-        /// Gets or sets the track number.
-        /// </summary>
-        /// <value>
-        /// The track number.
-        /// </value>
-        public int TrackNumber { get; set; }
-
-        /// <summary>
-        /// Gets the path of the song on the local filesystem, or in the internet.
-        /// </summary>
-        public string OriginalPath { get; private set; }
-
-        public string StreamingPath
-        {
-            get { return !this.HasToCache ? this.OriginalPath : this.streamingPath; }
-            protected set { this.streamingPath = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the type of the audio.
-        /// </summary>
-        public AudioType AudioType { get; private set; }
-
-        /// <summary>
-        /// Gets the duration of the song.
-        /// </summary>
-        public TimeSpan Duration { get; private set; }
-
-        public bool IsCached { get; protected set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the song has to be cached before playing.
-        /// </summary>
-        /// <value>
-        /// true if the song has to be cached before playing; otherwise, false.
-        /// </value>
-        public abstract bool HasToCache { get; }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Song"/> class.
         /// </summary>
@@ -115,6 +38,96 @@ namespace Espera.Core
             this.Title = String.Empty;
         }
 
+        public event EventHandler CachingCompleted;
+
+        public event EventHandler CachingFailed;
+
+        public event EventHandler<DataTransferEventArgs> CachingProgressChanged;
+
+        /// <summary>
+        /// Gets or sets the album.
+        /// </summary>
+        /// <value>
+        /// The album.
+        /// </value>
+        public string Album { get; set; }
+
+        /// <summary>
+        /// Gets or sets the artist.
+        /// </summary>
+        /// <value>
+        /// The artist.
+        /// </value>
+        public string Artist { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type of the audio.
+        /// </summary>
+        public AudioType AudioType { get; private set; }
+
+        /// <summary>
+        /// Gets the duration of the song.
+        /// </summary>
+        public TimeSpan Duration { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the genre.
+        /// </summary>
+        /// <value>
+        /// The genre.
+        /// </value>
+        public string Genre { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the song has to be cached before playing.
+        /// </summary>
+        /// <value>
+        /// true if the song has to be cached before playing; otherwise, false.
+        /// </value>
+        public abstract bool HasToCache { get; }
+
+        public bool IsCached { get; protected set; }
+
+        /// <summary>
+        /// Gets the path of the song on the local filesystem, or in the internet.
+        /// </summary>
+        public string OriginalPath { get; private set; }
+
+        public string StreamingPath
+        {
+            get { return !this.HasToCache ? this.OriginalPath : this.streamingPath; }
+            protected set { this.streamingPath = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>
+        /// The title.
+        /// </value>
+        public string Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets the track number.
+        /// </summary>
+        /// <value>
+        /// The track number.
+        /// </value>
+        public int TrackNumber { get; set; }
+
+        public void ClearCache()
+        {
+            if (File.Exists(this.StreamingPath))
+            {
+                File.Delete(this.StreamingPath);
+            }
+
+            this.StreamingPath = null;
+            this.IsCached = false;
+        }
+
+        public abstract AudioPlayer CreateAudioPlayer();
+
         /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
         /// </summary>
@@ -125,17 +138,6 @@ namespace Espera.Core
         public override bool Equals(object obj)
         {
             return this.Equals(obj as Song);
-        }
-
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
-        /// </returns>
-        public override int GetHashCode()
-        {
-            return new { this.OriginalPath, this.Duration, this.AudioType }.GetHashCode();
         }
 
         /// <summary>
@@ -150,20 +152,22 @@ namespace Espera.Core
             return other != null && this.OriginalPath == other.OriginalPath;
         }
 
-        public void ClearCache()
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+        /// </returns>
+        public override int GetHashCode()
         {
-            if (File.Exists(this.StreamingPath))
-            {
-                File.Delete(this.StreamingPath);
-            }
-
-            this.StreamingPath = null;
-            this.IsCached = false;
+            return new { this.OriginalPath, this.Duration, this.AudioType }.GetHashCode();
         }
 
-        internal void OnCachingProgressChanged(DataTransferEventArgs e)
+        public abstract void LoadToCache();
+
+        internal protected void OnCachingFailed(EventArgs e)
         {
-            this.CachingProgressChanged.RaiseSafe(this, e);
+            this.CachingFailed.RaiseSafe(this, e);
         }
 
         internal void OnCachingCompleted(EventArgs e)
@@ -171,13 +175,9 @@ namespace Espera.Core
             this.CachingCompleted.RaiseSafe(this, e);
         }
 
-        internal protected void OnCachingFailed(EventArgs e)
+        internal void OnCachingProgressChanged(DataTransferEventArgs e)
         {
-            this.CachingFailed.RaiseSafe(this, e);
+            this.CachingProgressChanged.RaiseSafe(this, e);
         }
-
-        public abstract AudioPlayer CreateAudioPlayer();
-
-        public abstract void LoadToCache();
     }
 }
