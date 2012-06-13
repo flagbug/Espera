@@ -121,6 +121,11 @@ namespace Espera.Core.Library
                 .Select(entry => entry.Key);
         }
 
+        public bool ContainsIndex(int songIndex)
+        {
+            return this.playlist.ContainsKey(songIndex);
+        }
+
         /// <summary>
         /// Removes the songs with the specified indexes from the <see cref="Playlist"/>.
         /// </summary>
@@ -138,6 +143,18 @@ namespace Espera.Core.Library
             }
 
             this.Rebuild();
+        }
+
+        /// <summary>
+        /// Swaps the positions of the songs at the specified indexes.
+        /// </summary>
+        /// <param name="firstIndex">The index of the first song.</param>
+        /// <param name="secondIndex">The index of the second song.</param>
+        public void SwapSongs(int firstIndex, int secondIndex)
+        {
+            Song firstSong = this[firstIndex];
+            this.playlist[firstIndex] = this[secondIndex];
+            this.playlist[secondIndex] = firstSong;
         }
 
         /// <summary>

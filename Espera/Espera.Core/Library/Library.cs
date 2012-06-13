@@ -626,7 +626,16 @@ namespace Espera.Core.Library
             if (!this.playlist.CanPlayNextSong || !this.playlist.CurrentSongIndex.HasValue)
                 throw new InvalidOperationException("The next song couldn't be played.");
 
-            this.InternPlaySong(this.playlist.CurrentSongIndex.Value + 1);
+            int nextIndex = this.playlist.CurrentSongIndex.Value + 1;
+            Song nextSong = this.playlist[nextIndex];
+
+            // We want the to swap the songs, if the song that should be played next is currently caching
+            if (nextSong.HasToCache && !nextSong.IsCached && this.playlist.ContainsIndex(nextIndex + 1))
+            {
+                this.playlist.SwapSongs(nextIndex, nextIndex + 1);
+            }
+
+            this.InternPlaySong(nextIndex);
         }
 
         private void InternPlaySong(int playlistIndex)
