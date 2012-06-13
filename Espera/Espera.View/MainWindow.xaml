@@ -698,6 +698,7 @@
                                     <TextBox Width="30"
                                              Margin="5, 0, 0, 0"
                                              VerticalAlignment="Center"
+                                             VerticalContentAlignment="Center"
                                              Text="{Binding Path=PlaylistTimeout}"/>
                                     <TextBlock VerticalAlignment="Center"
                                                Margin="5, 0, 0, 0"
