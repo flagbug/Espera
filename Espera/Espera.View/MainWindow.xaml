@@ -37,12 +37,21 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}" Height="20" Width="20" >
-                                <ContentPresenter  />
+                            <Border Background="{TemplateBinding Background}"
+                                    Height="30"
+                                    Width="30"
+                                    Margin="5, 0, 5, 0" >
+                                <ContentPresenter />
                             </Border>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
+            </Style>
+            <Style x:Key="AdminHeaderStyle" TargetType="{x:Type TextBlock}">
+                <Setter Property="FontSize" Value="30" />
+                <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="Margin" Value="0, 15, 0, 5" />
             </Style>
         </ResourceDictionary>
     </Window.Resources>
@@ -620,10 +629,9 @@
                         <Grid Visibility="{Binding Path=IsParty, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel VerticalAlignment="Center"
                                         HorizontalAlignment="Center" >
-                                <TextBlock HorizontalAlignment="Center"
-                                           Text="Enter the administrator password:" />
                                 <PasswordBox Name="loginPasswordBox"
-                                             Margin="0, 5, 0, 0"
+                                             VerticalContentAlignment="Center"
+                                             Controls:TextboxHelper.Watermark="Administrator password"
                                              PasswordChanged="LoginPasswordChanged" />
                                 <Button Margin="0, 10, 0, 0"
                                         Content="Login"
@@ -643,37 +651,26 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <StackPanel Margin="5">
-                                <StackPanel Grid.Row="0"
-                                            HorizontalAlignment="Center"
-                                            Margin="0, 5, 0, 0">
-                                    <TextBlock Text="Color"
-                                               HorizontalAlignment="Center"/>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Button Style="{StaticResource ColorPickerButtonStyle}"
-                                                Background="#CCCB0000"
-                                                Click="RedColorButtonButtonClick" />
-                                        <Button Style="{StaticResource ColorPickerButtonStyle}"
-                                                Background="#CC48CB00"
-                                                Margin="2, 0, 0, 0"
-                                                Click="GreenColorButtonButtonClick" />
-                                        <Button Style="{StaticResource ColorPickerButtonStyle}"
-                                                Background="#FF1C739D"
-                                                Margin="2, 0, 0, 0"
-                                                Click="BlueColorButtonButtonClick" />
-                                        <Button Style="{StaticResource ColorPickerButtonStyle}"
-                                                Background="#CCB400FF"
-                                                Margin="2, 0, 0, 0"
-                                                Click="PurpleColorButtonButtonClick" />
-                                    </StackPanel>
+                                <TextBlock Text="Accent"
+                                            Style="{StaticResource AdminHeaderStyle}" />
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Center">
+                                    <Button Style="{StaticResource ColorPickerButtonStyle}"
+                                            Background="#CCCB0000"
+                                            Click="RedColorButtonButtonClick" />
+                                    <Button Style="{StaticResource ColorPickerButtonStyle}"
+                                            Background="#CC48CB00"
+                                            Click="GreenColorButtonButtonClick" />
+                                    <Button Style="{StaticResource ColorPickerButtonStyle}"
+                                            Background="#FF1C739D"
+                                            Click="BlueColorButtonButtonClick" />
+                                    <Button Style="{StaticResource ColorPickerButtonStyle}"
+                                            Background="#CCB400FF"
+                                            Click="PurpleColorButtonButtonClick" />
                                 </StackPanel>
-                                <CheckBox Margin="0, 10, 0, 0"
-                                          IsEnabled="{Binding Path=IsVlcInstalled}"
-                                          IsChecked="{Binding Path=StreamYoutube}">
-                                    <AccessText Text="Stream from Youtube instead of downloading (Requires VLC media player >= 2.0 to be installed)"
-                                                TextWrapping="Wrap" />
-                                </CheckBox>
-                                <CheckBox Margin="0, 10, 0, 0"
-                                          IsChecked="{Binding Path=LockVolume}">
+                                <TextBlock Text="Party mode"
+                                           Style="{StaticResource AdminHeaderStyle}" />
+                                <CheckBox IsChecked="{Binding Path=LockVolume}">
                                     <AccessText Text="Lock volume when in party mode"
                                                 TextWrapping="Wrap" />
                                 </CheckBox>
@@ -706,13 +703,20 @@
                                                Margin="5, 0, 0, 0"
                                                Text="Seconds" />
                                 </StackPanel>
+                                <TextBlock Text="YouTube"
+                                           Style="{StaticResource AdminHeaderStyle}" />
+                                <CheckBox IsEnabled="{Binding Path=IsVlcInstalled}"
+                                          IsChecked="{Binding Path=StreamYoutube}">
+                                    <AccessText Text="Stream from Youtube instead of downloading (Requires VLC media player >= 2.0 to be installed)"
+                                                TextWrapping="Wrap" />
+                                </CheckBox>
                             </StackPanel>
                             <StackPanel Grid.Row="1"
                                         Orientation="Vertical">
-                                <TextBlock Text="Enter a password"
-                                           HorizontalAlignment="Center" />
                                 <PasswordBox Name="adminPasswordBox"
                                              Margin="0, 5, 0, 0"
+                                             VerticalContentAlignment="Center"
+                                             Controls:TextboxHelper.Watermark="Enter a password"
                                              PasswordChanged="CreationPasswordChanged" />
                                 <Button Content="Create Administrator"
                                         Command="{Binding Path=CreateAdminCommand}"
