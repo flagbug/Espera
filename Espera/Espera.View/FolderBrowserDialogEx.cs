@@ -154,6 +154,7 @@ namespace Ionic.Utils
         {
             // messages FROM the folder browser
             public const int BFFM_INITIALIZED = 1;
+
             public const int BFFM_SELCHANGED = 2;
             public const int BFFM_VALIDATEFAILEDA = 3;
             public const int BFFM_VALIDATEFAILEDW = 4;
@@ -161,6 +162,7 @@ namespace Ionic.Utils
 
             // messages TO the folder browser
             public const int BFFM_SETSTATUSTEXT = 0x464;
+
             public const int BFFM_ENABLEOK = 0x465;
             public const int BFFM_SETSELECTIONA = 0x466;
             public const int BFFM_SETSELECTIONW = 0x467;
@@ -333,7 +335,6 @@ namespace Ionic.Utils
 
         // Properties
         //[SRDescription("FolderBrowserDialogDescription"), SRCategory("CatFolderBrowsing"), Browsable(true), DefaultValue(""), Localizable(true)]
-
         /// <summary>
         /// This description appears near the top of the dialog box, providing direction to the user.
         /// </summary>
@@ -367,7 +368,6 @@ namespace Ionic.Utils
         }
 
         //[Browsable(true), SRDescription("FolderBrowserDialogSelectedPath"), SRCategory("CatFolderBrowsing"), DefaultValue(""), Editor("System.Windows.Forms.Design.SelectedPathEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor)), Localizable(true)]
-
         /// <summary>
         /// Set or get the selected path.
         /// </summary>
@@ -390,7 +390,6 @@ namespace Ionic.Utils
         }
 
         //[SRDescription("FolderBrowserDialogShowNewFolderButton"), Localizable(false), Browsable(true), DefaultValue(true), SRCategory("CatFolderBrowsing")]
-
         /// <summary>
         /// Enable or disable the "New Folder" button in the browser dialog.
         /// </summary>

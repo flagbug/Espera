@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows.Input;
-using Espera.Core;
 using Espera.Core.Library;
 using Rareform.Patterns.MVVM;
 
