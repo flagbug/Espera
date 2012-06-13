@@ -536,19 +536,16 @@ namespace Espera.Core.Library
         /// <param name="songList">The songs to dispose.</param>
         private static void DisposeSongs(IEnumerable<Song> songList)
         {
-            foreach (Song song in songList)
+            foreach (Song song in songList.Where(song => song.IsCached))
             {
-                if (song.IsCached)
+                try
                 {
-                    try
-                    {
-                        song.ClearCache();
-                    }
+                    song.ClearCache();
+                }
 
-                    catch (IOException)
-                    {
-                        // Swallow the exception, we don't care about temporary files that could not be deleted
-                    }
+                catch (IOException)
+                {
+                    // Swallow the exception, we don't care about temporary files that could not be deleted
                 }
             }
         }
@@ -679,7 +676,7 @@ namespace Espera.Core.Library
             });
         }
 
-                private void Update()
+        private void Update()
         {
             this.Updating.RaiseSafe(this, EventArgs.Empty);
 
