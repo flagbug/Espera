@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Espera.Core.Audio;
 using Espera.Core.Library;
+using Espera.Core.Tests.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -21,6 +25,43 @@ namespace Espera.Core.Tests
             library.ChangeToParty();
 
             library.AddSongsToPlaylist(songs);
+
+            library.Dispose();
+        }
+
+        [TestMethod]
+        public void AutoNextSong_SongIsCaching_SwapSongs()
+        {
+            var eventWait = new ManualResetEvent(false); // We need this, because Library.PlaySong() pops up a new thread interally and then returns
+
+            var jumpAudioPlayer = new JumpAudioPlayer();
+            jumpAudioPlayer.SongFinished += (sender, e) => eventWait.Set();
+
+            var jumpSong = new Mock<Song>("JumpSong", AudioType.Mp3, TimeSpan.Zero);
+            jumpSong.Setup(p => p.CreateAudioPlayer()).Returns(jumpAudioPlayer);
+            jumpSong.SetupGet(p => p.HasToCache).Returns(false);
+
+            var cachingSong = new Mock<Song>("CachingSong", AudioType.Mp3, TimeSpan.Zero);
+            cachingSong.SetupGet(p => p.HasToCache).Returns(true);
+
+            var foreverAudioPlayer = new Mock<AudioPlayer>();
+
+            var nextSong = new Mock<Song>("NextSong", AudioType.Mp3, TimeSpan.Zero);
+            nextSong.Setup(p => p.CreateAudioPlayer()).Returns(foreverAudioPlayer.Object);
+            nextSong.SetupGet(p => p.HasToCache).Returns(false);
+
+            var library = new Library.Library();
+
+            IEnumerable<Song> songs = new[] { jumpSong.Object, cachingSong.Object, nextSong.Object };
+            library.AddSongsToPlaylist(songs);
+
+            library.PlaySong(0);
+
+            eventWait.WaitOne();
+
+            IEnumerable<Song> expectedSongs = new[] { jumpSong.Object, nextSong.Object, cachingSong.Object };
+
+            Assert.IsTrue(expectedSongs.SequenceEqual(library.Playlist));
 
             library.Dispose();
         }
