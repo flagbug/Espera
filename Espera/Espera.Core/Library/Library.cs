@@ -143,8 +143,7 @@ namespace Espera.Core.Library
             get { return this.currentPlayer == null ? TimeSpan.Zero : this.currentPlayer.CurrentTime; }
             set
             {
-                if (this.AccessMode != AccessMode.Administrator)
-                    throw new InvalidOperationException("The user is not in administrator mode.");
+                this.ThrowIfNotAdmin();
 
                 this.currentPlayer.CurrentTime = value;
             }
@@ -155,8 +154,7 @@ namespace Espera.Core.Library
             get { return CoreSettings.Default.EnablePlaylistTimeout; }
             set
             {
-                if (this.AccessMode != AccessMode.Administrator)
-                    throw new InvalidOperationException("The user is not in administrator mode.");
+                this.ThrowIfNotAdmin();
 
                 CoreSettings.Default.EnablePlaylistTimeout = value;
             }
@@ -205,8 +203,7 @@ namespace Espera.Core.Library
             get { return CoreSettings.Default.LockSongRemoval; }
             set
             {
-                if (this.AccessMode != AccessMode.Administrator)
-                    throw new InvalidOperationException("The user is not in administrator mode.");
+                this.ThrowIfNotAdmin();
 
                 CoreSettings.Default.LockSongRemoval = value;
             }
@@ -217,8 +214,7 @@ namespace Espera.Core.Library
             get { return CoreSettings.Default.LockTime; }
             set
             {
-                if (this.AccessMode != AccessMode.Administrator)
-                    throw new InvalidOperationException("The user is not in administrator mode.");
+                this.ThrowIfNotAdmin();
 
                 CoreSettings.Default.LockTime = value;
             }
@@ -229,8 +225,7 @@ namespace Espera.Core.Library
             get { return CoreSettings.Default.LockVolume; }
             set
             {
-                if (this.AccessMode != AccessMode.Administrator)
-                    throw new InvalidOperationException("The user is not in administrator mode.");
+                this.ThrowIfNotAdmin();
 
                 CoreSettings.Default.LockVolume = value;
             }
@@ -249,8 +244,7 @@ namespace Espera.Core.Library
             get { return CoreSettings.Default.PlaylistTimeout; }
             set
             {
-                if (this.AccessMode != AccessMode.Administrator)
-                    throw new InvalidOperationException("The user is not in administrator mode.");
+                this.ThrowIfNotAdmin();
 
                 CoreSettings.Default.PlaylistTimeout = value;
             }
@@ -285,8 +279,7 @@ namespace Espera.Core.Library
             get { return CoreSettings.Default.StreamYoutube; }
             set
             {
-                if (this.AccessMode != AccessMode.Administrator)
-                    throw new InvalidOperationException("The user is not in administrator mode.");
+                this.ThrowIfNotAdmin();
 
                 CoreSettings.Default.StreamYoutube = value;
             }
@@ -311,8 +304,7 @@ namespace Espera.Core.Library
             get { return this.currentPlayer == null ? this.volume : this.currentPlayer.Volume; }
             set
             {
-                if (this.AccessMode != AccessMode.Administrator)
-                    throw new InvalidOperationException("The user is not in administrator mode.");
+                this.ThrowIfNotAdmin();
 
                 this.volume = value;
 
@@ -330,6 +322,9 @@ namespace Espera.Core.Library
         /// <returns>The <see cref="Task"/> that did the work.</returns>
         public Task AddLocalSongsAsync(string path)
         {
+            if (path == null)
+                throw new ArgumentNullException("path");
+
             return Task.Factory.StartNew(() => this.AddLocalSongs(path));
         }
 
@@ -340,8 +335,10 @@ namespace Espera.Core.Library
         /// <param name="songList">The songs to add to the end of the playlist.</param>
         public void AddSongsToPlaylist(IEnumerable<Song> songList)
         {
-            if (this.AccessMode != AccessMode.Administrator)
-                throw new InvalidOperationException("The user is not in administrator mode.");
+            if (songList == null)
+                throw new ArgumentNullException("songList");
+
+            this.ThrowIfNotAdmin();
 
             this.playlist.AddSongs(songList.ToList()); // Copy the sequence to a list, so that the enumeration doesn't gets modified
         }
@@ -353,6 +350,9 @@ namespace Espera.Core.Library
         /// <param name="song">The song to add to the end of the playlist.</param>
         public void AddSongToPlaylist(Song song)
         {
+            if (song == null)
+                throw new ArgumentNullException("song");
+
             this.playlist.AddSongs(new[] { song });
 
             this.lastSongAddTime = DateTime.Now;
@@ -365,10 +365,10 @@ namespace Espera.Core.Library
         public void ChangeToAdmin(string adminPassword)
         {
             if (adminPassword == null)
-                throw new ArgumentNullException(Reflector.GetMemberName(() => adminPassword));
+                throw new ArgumentNullException("adminPassword");
 
             if (this.password != adminPassword)
-                throw new InvalidPasswordException("The password is not correct.");
+                throw new InvalidPasswordException("The password is incorrect.");
 
             this.AccessMode = AccessMode.Administrator;
         }
@@ -399,11 +399,10 @@ namespace Espera.Core.Library
         public void CreateAdmin(string adminPassword)
         {
             if (adminPassword == null)
-                throw new ArgumentNullException(Reflector.GetMemberName(() => adminPassword));
+                throw new ArgumentNullException("adminPassword");
 
             if (String.IsNullOrWhiteSpace(adminPassword))
-                throw new ArgumentException("Password cannot consist only of whitespaces.",
-                                            Reflector.GetMemberName(() => adminPassword));
+                throw new ArgumentException("Password cannot consist only of whitespaces.", "adminPassword");
 
             if (this.IsAdministratorCreated)
                 throw new InvalidOperationException("The administrator is already created.");
@@ -434,8 +433,7 @@ namespace Espera.Core.Library
         /// </summary>
         public void PauseSong()
         {
-            if (this.AccessMode != AccessMode.Administrator)
-                throw new InvalidOperationException("The user is not in administrator mode.");
+            this.ThrowIfNotAdmin();
 
             this.currentPlayer.Pause();
         }
@@ -445,8 +443,7 @@ namespace Espera.Core.Library
         /// </summary>
         public void PlayNextSong()
         {
-            if (this.AccessMode != AccessMode.Administrator)
-                throw new InvalidOperationException("The user is not in administrator mode.");
+            this.ThrowIfNotAdmin();
 
             this.InternPlayNextSong();
         }
@@ -456,8 +453,7 @@ namespace Espera.Core.Library
         /// </summary>
         public void PlayPreviousSong()
         {
-            if (this.AccessMode != AccessMode.Administrator)
-                throw new InvalidOperationException("The user is not in administrator mode.");
+            this.ThrowIfNotAdmin();
 
             if (!this.playlist.CanPlayPreviousSong || !this.playlist.CurrentSongIndex.HasValue)
                 throw new InvalidOperationException("The previous song couldn't be played.");
@@ -471,8 +467,8 @@ namespace Espera.Core.Library
         /// <param name="playlistIndex">The index of the song in the playlist.</param>
         public void PlaySong(int playlistIndex)
         {
-            if (this.AccessMode != AccessMode.Administrator)
-                throw new InvalidOperationException("The user is not in administrator mode.");
+            playlistIndex.ThrowIfLessThan(0, () => playlistIndex);
+            this.ThrowIfNotAdmin();
 
             this.InternPlaySong(playlistIndex);
         }
@@ -483,8 +479,10 @@ namespace Espera.Core.Library
         /// <param name="songList">The list of the songs to remove from the library.</param>
         public void RemoveFromLibrary(IEnumerable<Song> songList)
         {
-            if (this.AccessMode != AccessMode.Administrator)
-                throw new InvalidOperationException("The user is not in administrator mode.");
+            if (songList == null)
+                throw new ArgumentNullException("songList");
+
+            this.ThrowIfNotAdmin();
 
             songList = songList.ToList(); // Avoid multiple enumeration
 
@@ -505,6 +503,9 @@ namespace Espera.Core.Library
         /// <param name="indexes">The indexes of the songs to remove from the playlist.</param>
         public void RemoveFromPlaylist(IEnumerable<int> indexes)
         {
+            if (indexes == null)
+                throw new ArgumentNullException("indexes");
+
             if (!CoreSettings.Default.LockSongRemoval && this.AccessMode == AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
 
@@ -527,6 +528,9 @@ namespace Espera.Core.Library
         /// <param name="songList">The songs to remove.</param>
         public void RemoveFromPlaylist(IEnumerable<Song> songList)
         {
+            if (songList == null)
+                throw new ArgumentNullException("songList");
+
             this.RemoveFromPlaylist(this.playlist.GetIndexes(songList));
         }
 
@@ -691,6 +695,12 @@ namespace Espera.Core.Library
 
                 this.SongStarted.RaiseSafe(this, EventArgs.Empty);
             });
+        }
+
+        private void ThrowIfNotAdmin()
+        {
+            if (this.AccessMode != AccessMode.Administrator)
+                throw new InvalidOperationException("Not in administrator mode.");
         }
 
         private void Update()

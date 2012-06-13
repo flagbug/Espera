@@ -1,5 +1,4 @@
 ﻿using System;
-using Rareform.Reflection;
 
 namespace Espera.Core
 {
@@ -16,7 +15,7 @@ namespace Espera.Core
         public SongEventArgs(Song song)
         {
             if (song == null)
-                throw new ArgumentNullException(Reflector.GetMemberName(() => song));
+                throw new ArgumentNullException("song");
 
             this.Song = song;
         }

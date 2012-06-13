@@ -54,6 +54,9 @@ namespace Espera.Core.Audio
         /// <exception cref="ArgumentNullException"><c>song</c> is null.</exception>
         public virtual void Load(Song song)
         {
+            if (song == null)
+                throw new ArgumentNullException("song");
+
             this.LoadedSong = song;
         }
 

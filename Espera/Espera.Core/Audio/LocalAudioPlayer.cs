@@ -3,7 +3,6 @@ using System.IO;
 using System.Windows.Threading;
 using NAudio;
 using NAudio.Wave;
-using Rareform.Reflection;
 
 namespace Espera.Core.Audio
 {
@@ -122,7 +121,7 @@ namespace Espera.Core.Audio
         public override void Load(Song song)
         {
             if (song == null)
-                throw new ArgumentNullException(Reflector.GetMemberName(() => song));
+                throw new ArgumentNullException("song");
 
             this.Stop();
 

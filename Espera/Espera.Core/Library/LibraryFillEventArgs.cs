@@ -1,5 +1,5 @@
 ﻿using System;
-using Rareform.Reflection;
+using Rareform.Extensions;
 
 namespace Espera.Core.Library
 {
@@ -8,7 +8,10 @@ namespace Espera.Core.Library
         public LibraryFillEventArgs(Song song, int processedTagCount, int totalTagCount)
         {
             if (song == null)
-                throw new ArgumentNullException(Reflector.GetMemberName(() => song));
+                throw new ArgumentNullException("song");
+
+            processedTagCount.ThrowIfLessThan(0, () => processedTagCount);
+            totalTagCount.ThrowIfLessThan(0, () => totalTagCount);
 
             this.Song = song;
             this.TotalTagCount = totalTagCount;

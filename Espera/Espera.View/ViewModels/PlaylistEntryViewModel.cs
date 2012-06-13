@@ -1,5 +1,6 @@
 ﻿using System;
 using Espera.Core;
+using Rareform.Extensions;
 
 namespace Espera.View.ViewModels
 {
@@ -13,6 +14,8 @@ namespace Espera.View.ViewModels
         public PlaylistEntryViewModel(Song model, int index)
             : base(model)
         {
+            index.ThrowIfLessThan(0, () => index);
+
             this.Index = index;
 
             if (!this.Wrapped.HasToCache || this.Wrapped.IsCached)

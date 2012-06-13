@@ -12,6 +12,9 @@ namespace Espera.View.ViewModels
 
         public AdministratorViewModel(Library library)
         {
+            if (library == null)
+                throw new ArgumentNullException("library");
+
             this.library = library;
         }
 

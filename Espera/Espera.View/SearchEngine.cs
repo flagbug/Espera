@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Espera.Core;
-using Rareform.Reflection;
 
 namespace Espera.View
 {
@@ -17,7 +16,7 @@ namespace Espera.View
         public static IEnumerable<Song> FilterSongs(this IEnumerable<Song> source, string searchText)
         {
             if (searchText == null)
-                throw new ArgumentNullException(Reflector.GetMemberName(() => searchText));
+                throw new ArgumentNullException("searchText");
 
             if (String.IsNullOrWhiteSpace(searchText))
                 return source;

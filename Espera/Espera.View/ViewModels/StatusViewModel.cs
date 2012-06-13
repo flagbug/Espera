@@ -1,4 +1,6 @@
-﻿using Espera.Core.Library;
+﻿using System;
+using Espera.Core.Library;
+using Rareform.Extensions;
 using Rareform.Patterns.MVVM;
 
 namespace Espera.View.ViewModels
@@ -7,13 +9,16 @@ namespace Espera.View.ViewModels
     {
         private bool isAdding;
         private bool isUpdating;
-        private Library library;
+        private readonly Library library;
         private string path;
         private int processedTags;
         private int totalTags;
 
         public StatusViewModel(Library library)
         {
+            if (library == null)
+                throw new ArgumentNullException("library");
+
             this.library = library;
             this.library.Updating += (sender, e) => this.IsUpdating = true;
             this.library.Updated += (sender, args) => this.IsUpdating = false;
@@ -100,6 +105,12 @@ namespace Espera.View.ViewModels
 
         public void Update(string path, int processedTags, int totalTags)
         {
+            if (path == null)
+                throw new ArgumentNullException("path");
+
+            processedTags.ThrowIfLessThan(0, () => processedTags);
+            totalTags.ThrowIfLessThan(0, () => totalTags);
+
             this.Path = path;
             this.ProcessedTags = processedTags;
             this.TotalTags = totalTags;

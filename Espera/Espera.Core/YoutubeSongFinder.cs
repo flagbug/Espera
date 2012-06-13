@@ -19,6 +19,9 @@ namespace Espera.Core
         /// <param name="searchString">The search string.</param>
         public YoutubeSongFinder(string searchString)
         {
+            if (searchString == null)
+                throw new ArgumentNullException("searchString");
+
             this.searchString = searchString;
         }
 

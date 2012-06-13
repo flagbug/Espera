@@ -1,9 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Rareform.Extensions;
 
 namespace Espera.Core.Library
 {
@@ -80,6 +82,9 @@ namespace Espera.Core.Library
         /// <param name="songList">The songs to add to the end of the playlist.</param>
         public void AddSongs(IEnumerable<Song> songList)
         {
+            if (songList == null)
+                throw new ArgumentNullException("songList");
+
             songList = songList.ToList(); // Avoid multiple enumeration
 
             foreach (Song song in songList)
@@ -133,6 +138,9 @@ namespace Espera.Core.Library
         /// <param name="toIndex">To index to insert the song.</param>
         public void InsertMove(int fromIndex, int toIndex)
         {
+            fromIndex.ThrowIfLessThan(0, () => fromIndex);
+            toIndex.ThrowIfLessThan(0, () => toIndex);
+
             Song from = this[fromIndex];
 
             for (int i = fromIndex; i > toIndex; i--)
@@ -149,6 +157,9 @@ namespace Espera.Core.Library
         /// <param name="indexes">The indexes of the songs to remove.</param>
         public void RemoveSongs(IEnumerable<int> indexes)
         {
+            if (indexes == null)
+                throw new ArgumentNullException("indexes");
+
             foreach (int index in indexes)
             {
                 if (index == this.CurrentSongIndex)

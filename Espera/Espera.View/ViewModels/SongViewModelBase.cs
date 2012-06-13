@@ -8,6 +8,9 @@ namespace Espera.View.ViewModels
     {
         protected SongViewModelBase(Song wrapped)
         {
+            if (wrapped == null)
+                throw new ArgumentNullException("wrapped");
+
             this.Wrapped = wrapped;
         }
 

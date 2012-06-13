@@ -672,6 +672,9 @@ namespace Espera.View.ViewModels
 
         public void AddSongs(string folderPath)
         {
+            if (folderPath == null)
+                throw new ArgumentNullException("folderPath");
+
             string lastArtist = null;
 
             EventHandler<LibraryFillEventArgs> handler = (sender, e) =>

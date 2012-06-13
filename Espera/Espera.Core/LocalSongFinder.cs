@@ -29,6 +29,9 @@ namespace Espera.Core
         /// <param name="path">The path of the directory where the recursive search should start.</param>
         public LocalSongFinder(string path)
         {
+            if (path == null)
+                throw new ArgumentNullException("path");
+
             this.tagLock = new object();
             this.songListLock = new object();
 
