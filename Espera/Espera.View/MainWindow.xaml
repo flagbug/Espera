@@ -37,7 +37,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}" Height="15" Width="15" >
+                            <Border Background="{TemplateBinding Background}" Height="20" Width="20" >
                                 <ContentPresenter  />
                             </Border>
                         </ControlTemplate>
@@ -650,18 +650,18 @@
                                                HorizontalAlignment="Center"/>
                                     <StackPanel Orientation="Horizontal">
                                         <Button Style="{StaticResource ColorPickerButtonStyle}"
-                                                Background="Red"
+                                                Background="#CCCB0000"
                                                 Click="RedColorButtonButtonClick" />
                                         <Button Style="{StaticResource ColorPickerButtonStyle}"
-                                                Background="Green"
+                                                Background="#CC48CB00"
                                                 Margin="2, 0, 0, 0"
                                                 Click="GreenColorButtonButtonClick" />
                                         <Button Style="{StaticResource ColorPickerButtonStyle}"
-                                                Background="Blue"
+                                                Background="#FF1C739D"
                                                 Margin="2, 0, 0, 0"
                                                 Click="BlueColorButtonButtonClick" />
                                         <Button Style="{StaticResource ColorPickerButtonStyle}"
-                                                Background="Purple"
+                                                Background="#CCB400FF"
                                                 Margin="2, 0, 0, 0"
                                                 Click="PurpleColorButtonButtonClick" />
                                     </StackPanel>
