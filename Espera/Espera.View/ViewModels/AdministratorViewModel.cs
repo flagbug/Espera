@@ -29,10 +29,10 @@ namespace Espera.View.ViewModels
             set { this.library.LockTime = value; }
         }
 
-        public bool AllowSongRemoval
+        public bool LockSongRemoval
         {
-            get { return this.library.AllowSongRemoval; }
-            set { this.library.AllowSongRemoval = value; }
+            get { return this.library.LockSongRemoval; }
+            set { this.library.LockSongRemoval = value; }
         }
 
         public bool EnablePlaylistTimeout

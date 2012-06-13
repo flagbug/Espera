@@ -11,8 +11,8 @@
     <Setting Name="LockTime" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="AllowSongRemoval" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+    <Setting Name="LockSongRemoval" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="PlaylistTimeout" Type="System.TimeSpan" Scope="User">
       <Value Profile="(Default)">00:00:30</Value>

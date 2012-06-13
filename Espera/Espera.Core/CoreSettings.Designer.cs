@@ -61,13 +61,13 @@ namespace Espera.Core {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool AllowSongRemoval {
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LockSongRemoval {
             get {
-                return ((bool)(this["AllowSongRemoval"]));
+                return ((bool)(this["LockSongRemoval"]));
             }
             set {
-                this["AllowSongRemoval"] = value;
+                this["LockSongRemoval"] = value;
             }
         }
         

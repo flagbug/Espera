@@ -257,15 +257,15 @@ namespace Espera.Core.Library
             }
         }
 
-        public bool AllowSongRemoval
+        public bool LockSongRemoval
         {
-            get { return CoreSettings.Default.AllowSongRemoval; }
+            get { return CoreSettings.Default.LockSongRemoval; }
             set
             {
                 if (this.AccessMode != AccessMode.Administrator)
                     throw new InvalidOperationException("The user is not in administrator mode.");
 
-                CoreSettings.Default.AllowSongRemoval = value;
+                CoreSettings.Default.LockSongRemoval = value;
             }
         }
 
@@ -456,7 +456,7 @@ namespace Espera.Core.Library
         /// <param name="indexes">The indexes of the songs to remove from the playlist.</param>
         public void RemoveFromPlaylist(IEnumerable<int> indexes)
         {
-            if (!CoreSettings.Default.AllowSongRemoval && this.AccessMode == AccessMode.Party)
+            if (!CoreSettings.Default.LockSongRemoval && this.AccessMode == AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
 
             indexes = indexes.ToList(); // Avoid multiple enumeration

@@ -163,7 +163,6 @@ namespace Espera.View.ViewModels
                     this.displayTimeoutWarning = value;
                     this.OnPropertyChanged(vm => vm.DisplayTimeoutWarning);
                 }
-                
             }
         }
 
@@ -429,17 +428,17 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        /* 
-                         * Some callers want to ignore if a song is paused and want to play the currently 
+                        /*
+                         * Some callers want to ignore if a song is paused and want to play the currently
                          * selected song, instead of continuing the currently paused song.
                          * This decision is passed as parameter.
                          *
-                         * XAML commands pass the parameter as string, code-behind commands pass the parameter 
+                         * XAML commands pass the parameter as string, code-behind commands pass the parameter
                          * as boolean, so we have to check what type it is.
                          */
                         var value = param as string;
 
-                        bool ignorePause = value == null ? (bool) param : Boolean.Parse(value);
+                        bool ignorePause = value == null ? (bool)param : Boolean.Parse(value);
 
                         if (this.library.IsPaused && !ignorePause)
                         {
@@ -453,8 +452,8 @@ namespace Espera.View.ViewModels
                             this.library.PlaySong(this.SelectedPlaylistEntries.First().Index);
                         }
                     },
-                    param => this.IsAdmin && 
-                        ((this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1) || 
+                    param => this.IsAdmin &&
+                        ((this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1) ||
                         (this.library.LoadedSong != null && this.library.IsPaused))
                 );
             }
@@ -556,7 +555,7 @@ namespace Espera.View.ViewModels
                     },
                     param => this.SelectedPlaylistEntries != null
                         && this.SelectedPlaylistEntries.Any()
-                        && (this.IsAdmin || this.library.AllowSongRemoval)
+                        && (this.IsAdmin || !this.library.LockSongRemoval)
                 );
             }
         }
