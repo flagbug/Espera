@@ -9,6 +9,7 @@ namespace Espera.View.ViewModels
     public class AdministratorViewModel : ViewModelBase<AdministratorViewModel>
     {
         private readonly Library library;
+        private bool isWrongPassword;
 
         public bool StreamYoutube
         {
@@ -44,7 +45,6 @@ namespace Espera.View.ViewModels
                     this.library.EnablePlaylistTimeout = value;
                     this.OnPropertyChanged(vm => vm.EnablePlaylistTimeout);
                 }
-                
             }
         }
 
@@ -57,6 +57,19 @@ namespace Espera.View.ViewModels
         public string CreationPassword { get; set; }
 
         public string LoginPassword { get; set; }
+
+        public bool IsWrongPassword
+        {
+            get { return this.isWrongPassword; }
+            set
+            {
+                if (this.IsWrongPassword != value)
+                {
+                    this.isWrongPassword = value;
+                    this.OnPropertyChanged(vm => vm.IsWrongPassword);
+                }
+            }
+        }
 
         public bool IsAdminCreated
         {
@@ -104,7 +117,16 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        this.library.ChangeToAdmin(this.LoginPassword);
+                        try
+                        {
+                            this.library.ChangeToAdmin(this.LoginPassword);
+                            this.IsWrongPassword = false;
+                        }
+
+                        catch (InvalidPasswordException)
+                        {
+                            this.IsWrongPassword = true;
+                        }
 
                         this.OnPropertyChanged(vm => vm.IsAdmin);
                         this.OnPropertyChanged(vm => vm.IsParty);
