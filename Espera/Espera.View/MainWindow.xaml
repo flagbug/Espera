@@ -628,7 +628,8 @@
                     <Grid>
                         <Grid Visibility="{Binding Path=IsParty, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel VerticalAlignment="Center"
-                                        HorizontalAlignment="Center" >
+                                        HorizontalAlignment="Stretch"
+                                        Margin="10, 0, 10, 0">
                                 <PasswordBox Name="loginPasswordBox"
                                              VerticalContentAlignment="Center"
                                              Controls:TextboxHelper.Watermark="Administrator password"
@@ -647,7 +648,6 @@
                         <Grid Visibility="{Binding Path=IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*" />
-                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <StackPanel Margin="5">
@@ -712,7 +712,8 @@
                                 </CheckBox>
                             </StackPanel>
                             <StackPanel Grid.Row="1"
-                                        Orientation="Vertical">
+                                        Orientation="Vertical"
+                                        Margin="10, 0, 10, 10">
                                 <PasswordBox Name="adminPasswordBox"
                                              Margin="0, 5, 0, 0"
                                              VerticalContentAlignment="Center"
@@ -722,11 +723,10 @@
                                         Command="{Binding Path=CreateAdminCommand}"
                                         Margin="0, 5, 0, 0"
                                         Click="CreateAdminButtonClick" />
+                                <Button  Margin="0, 15, 0, 0"
+                                         Content="Enter party mode"
+                                         Command="{Binding Path=ChangeToPartyCommand}" />
                             </StackPanel>
-                            <Button Grid.Row="2"
-                                    Margin="0, 15, 0, 0"
-                                    Content="Enter party mode"
-                                    Command="{Binding Path=ChangeToPartyCommand}" />
                         </Grid>
                     </Grid>
                 </Border>
