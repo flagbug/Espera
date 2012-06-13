@@ -104,7 +104,7 @@ namespace Espera.View.ViewModels
                         this.OnPropertyChanged(vm => vm.IsAdminCreated);
                         this.OnPropertyChanged(vm => vm.IsAdmin);
                     },
-                    param => !string.IsNullOrWhiteSpace(this.CreationPassword)
+                    param => !string.IsNullOrWhiteSpace(this.CreationPassword) && !this.IsAdminCreated
                 );
             }
         }
