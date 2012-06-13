@@ -632,7 +632,15 @@ namespace Espera.Core.Library
             // We want the to swap the songs, if the song that should be played next is currently caching
             if (nextSong.HasToCache && !nextSong.IsCached && this.playlist.ContainsIndex(nextIndex + 1))
             {
-                this.playlist.SwapSongs(nextIndex, nextIndex + 1);
+                var nextReady = this.playlist
+                    .Select((song, i) => new { Song = song, Index = i })
+                    .Skip(this.playlist.CurrentSongIndex.Value + 1)
+                    .FirstOrDefault(item => !item.Song.HasToCache || item.Song.IsCached);
+
+                if (nextReady != null)
+                {
+                    this.playlist.InsertMove(nextReady.Index, nextIndex);
+                }
             }
 
             this.InternPlaySong(nextIndex);

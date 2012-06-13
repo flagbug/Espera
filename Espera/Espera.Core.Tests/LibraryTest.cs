@@ -35,7 +35,6 @@ namespace Espera.Core.Tests
             var eventWait = new ManualResetEvent(false); // We need this, because Library.PlaySong() pops up a new thread interally and then returns
 
             var jumpAudioPlayer = new JumpAudioPlayer();
-            jumpAudioPlayer.SongFinished += (sender, e) => eventWait.Set();
 
             var jumpSong = new Mock<Song>("JumpSong", AudioType.Mp3, TimeSpan.Zero);
             jumpSong.Setup(p => p.CreateAudioPlayer()).Returns(jumpAudioPlayer);
@@ -44,7 +43,11 @@ namespace Espera.Core.Tests
             var cachingSong = new Mock<Song>("CachingSong", AudioType.Mp3, TimeSpan.Zero);
             cachingSong.SetupGet(p => p.HasToCache).Returns(true);
 
+            var cachingSong2 = new Mock<Song>("CachingSong2", AudioType.Mp3, TimeSpan.Zero);
+            cachingSong2.SetupGet(p => p.HasToCache).Returns(true);
+
             var foreverAudioPlayer = new Mock<AudioPlayer>();
+            foreverAudioPlayer.Setup(p => p.Play()).Callback(() => eventWait.Set());
 
             var nextSong = new Mock<Song>("NextSong", AudioType.Mp3, TimeSpan.Zero);
             nextSong.Setup(p => p.CreateAudioPlayer()).Returns(foreverAudioPlayer.Object);
@@ -52,14 +55,14 @@ namespace Espera.Core.Tests
 
             var library = new Library.Library();
 
-            IEnumerable<Song> songs = new[] { jumpSong.Object, cachingSong.Object, nextSong.Object };
+            IEnumerable<Song> songs = new[] { jumpSong.Object, cachingSong.Object, cachingSong2.Object, nextSong.Object };
             library.AddSongsToPlaylist(songs);
 
             library.PlaySong(0);
 
             eventWait.WaitOne();
 
-            IEnumerable<Song> expectedSongs = new[] { jumpSong.Object, nextSong.Object, cachingSong.Object };
+            IEnumerable<Song> expectedSongs = new[] { jumpSong.Object, nextSong.Object, cachingSong.Object, cachingSong2.Object };
 
             Assert.IsTrue(expectedSongs.SequenceEqual(library.Playlist));
 

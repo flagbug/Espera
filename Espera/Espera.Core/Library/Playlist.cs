@@ -95,6 +95,11 @@ namespace Espera.Core.Library
             }
         }
 
+        public bool ContainsIndex(int songIndex)
+        {
+            return this.playlist.ContainsKey(songIndex);
+        }
+
         /// <summary>
         /// Returns an enumerator that iterates through the collection.
         /// </summary>
@@ -121,9 +126,21 @@ namespace Espera.Core.Library
                 .Select(entry => entry.Key);
         }
 
-        public bool ContainsIndex(int songIndex)
+        /// <summary>
+        /// Inserts a song from a specified index to a other index in the playlist and moves all songs in between these indexes one index back.
+        /// </summary>
+        /// <param name="fromIndex">The index of the song to move.</param>
+        /// <param name="toIndex">To index to insert the song.</param>
+        public void InsertMove(int fromIndex, int toIndex)
         {
-            return this.playlist.ContainsKey(songIndex);
+            Song from = this[fromIndex];
+
+            for (int i = fromIndex; i > toIndex; i--)
+            {
+                this.playlist[i] = this[i - 1];
+            }
+
+            this.playlist[toIndex] = from;
         }
 
         /// <summary>
@@ -143,18 +160,6 @@ namespace Espera.Core.Library
             }
 
             this.Rebuild();
-        }
-
-        /// <summary>
-        /// Swaps the positions of the songs at the specified indexes.
-        /// </summary>
-        /// <param name="firstIndex">The index of the first song.</param>
-        /// <param name="secondIndex">The index of the second song.</param>
-        public void SwapSongs(int firstIndex, int secondIndex)
-        {
-            Song firstSong = this[firstIndex];
-            this.playlist[firstIndex] = this[secondIndex];
-            this.playlist[secondIndex] = firstSong;
         }
 
         /// <summary>

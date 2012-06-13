@@ -91,6 +91,21 @@ namespace Espera.Core.Tests
         }
 
         [TestMethod]
+        public void InsertMove_InsertSongToPlaylist_OrderIsCorrent()
+        {
+            Song[] songs = SetupSimpleSongMock(5);
+
+            Playlist playlist = SetupPlaylist(songs);
+
+            playlist.InsertMove(3, 1);
+
+            Assert.AreEqual(songs[0], playlist[0]);
+            Assert.AreEqual(songs[3], playlist[1]);
+            Assert.AreEqual(songs[1], playlist[2]);
+            Assert.AreEqual(songs[2], playlist[3]);
+        }
+
+        [TestMethod]
         public void RemoveSongs_RemoveMultipleSongs_OrderIsCorrect()
         {
             Song[] songs = SetupSimpleSongMock(7);
