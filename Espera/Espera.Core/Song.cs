@@ -95,8 +95,11 @@ namespace Espera.Core
             {
                 this.CachingProgress = 100;
                 this.isCached = value;
+                this.IsCaching = false;
             }
         }
+
+        public bool IsCaching { get; protected set; }
 
         /// <summary>
         /// Gets the path of the song on the local filesystem, or in the internet.

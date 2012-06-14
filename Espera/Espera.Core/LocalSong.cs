@@ -53,6 +53,8 @@ namespace Espera.Core
 
         public override void LoadToCache()
         {
+            this.IsCaching = true;
+
             try
             {
                 this.LoadToTempFile();
@@ -63,6 +65,11 @@ namespace Espera.Core
             catch (IOException)
             {
                 this.OnCachingFailed(EventArgs.Empty);
+            }
+
+            finally
+            {
+                this.IsCaching = false;
             }
         }
 

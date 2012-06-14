@@ -66,6 +66,8 @@ namespace Espera.Core
 
         public override void LoadToCache()
         {
+            this.IsCaching = true;
+
             string tempPath = Path.GetTempFileName();
 
             IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(this.OriginalPath);
