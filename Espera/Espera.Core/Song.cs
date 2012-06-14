@@ -4,7 +4,7 @@ using System.IO;
 using Espera.Core.Audio;
 using Rareform.Extensions;
 using Rareform.IO;
-using Rareform.Reflection;
+using Rareform.Validation;
 
 namespace Espera.Core
 {
@@ -26,7 +26,7 @@ namespace Espera.Core
         protected Song(string path, AudioType audioType, TimeSpan duration)
         {
             if (path == null)
-                throw new ArgumentNullException(Reflector.GetMemberName(() => path));
+                Throw.ArgumentNullException(() => path);
 
             this.OriginalPath = path;
             this.AudioType = audioType;

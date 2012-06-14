@@ -8,6 +8,7 @@ using Espera.Core.Audio;
 using Rareform.Extensions;
 using Rareform.IO;
 using Rareform.Reflection;
+using Rareform.Validation;
 
 namespace Espera.Core.Library
 {
@@ -323,7 +324,7 @@ namespace Espera.Core.Library
         public Task AddLocalSongsAsync(string path)
         {
             if (path == null)
-                throw new ArgumentNullException("path");
+                Throw.ArgumentNullException(() => path);
 
             return Task.Factory.StartNew(() => this.AddLocalSongs(path));
         }
@@ -336,7 +337,7 @@ namespace Espera.Core.Library
         public void AddSongsToPlaylist(IEnumerable<Song> songList)
         {
             if (songList == null)
-                throw new ArgumentNullException("songList");
+                Throw.ArgumentNullException(() => songList);
 
             this.ThrowIfNotAdmin();
 
@@ -351,7 +352,7 @@ namespace Espera.Core.Library
         public void AddSongToPlaylist(Song song)
         {
             if (song == null)
-                throw new ArgumentNullException("song");
+                Throw.ArgumentNullException(() => song);
 
             this.playlist.AddSongs(new[] { song });
 
@@ -365,7 +366,7 @@ namespace Espera.Core.Library
         public void ChangeToAdmin(string adminPassword)
         {
             if (adminPassword == null)
-                throw new ArgumentNullException("adminPassword");
+                Throw.ArgumentNullException(() => adminPassword);
 
             if (this.password != adminPassword)
                 throw new InvalidPasswordException("The password is incorrect.");
@@ -386,8 +387,7 @@ namespace Espera.Core.Library
         /// </summary>
         public void ContinueSong()
         {
-            if (this.AccessMode != AccessMode.Administrator)
-                throw new InvalidOperationException("The user is not in administrator mode.");
+            this.ThrowIfNotAdmin();
 
             this.currentPlayer.Play();
         }
@@ -399,10 +399,10 @@ namespace Espera.Core.Library
         public void CreateAdmin(string adminPassword)
         {
             if (adminPassword == null)
-                throw new ArgumentNullException("adminPassword");
+                Throw.ArgumentNullException(() => adminPassword);
 
             if (String.IsNullOrWhiteSpace(adminPassword))
-                throw new ArgumentException("Password cannot consist only of whitespaces.", "adminPassword");
+                Throw.ArgumentException("Password cannot consist only of whitespaces.", () => adminPassword);
 
             if (this.IsAdministratorCreated)
                 throw new InvalidOperationException("The administrator is already created.");
@@ -467,7 +467,9 @@ namespace Espera.Core.Library
         /// <param name="playlistIndex">The index of the song in the playlist.</param>
         public void PlaySong(int playlistIndex)
         {
-            playlistIndex.ThrowIfLessThan(0, () => playlistIndex);
+            if (playlistIndex < 0)
+                Throw.ArgumentOutOfRangeException(() => playlistIndex, 0);
+
             this.ThrowIfNotAdmin();
 
             this.InternPlaySong(playlistIndex);
@@ -480,11 +482,9 @@ namespace Espera.Core.Library
         public void RemoveFromLibrary(IEnumerable<Song> songList)
         {
             if (songList == null)
-                throw new ArgumentNullException("songList");
+                Throw.ArgumentNullException(() => songList);
 
             this.ThrowIfNotAdmin();
-
-            songList = songList.ToList(); // Avoid multiple enumeration
 
             DisposeSongs(songList);
 
@@ -504,12 +504,10 @@ namespace Espera.Core.Library
         public void RemoveFromPlaylist(IEnumerable<int> indexes)
         {
             if (indexes == null)
-                throw new ArgumentNullException("indexes");
+                Throw.ArgumentNullException(() => indexes);
 
             if (!CoreSettings.Default.LockSongRemoval && this.AccessMode == AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
-
-            indexes = indexes.ToList(); // Avoid multiple enumeration
 
             bool stopCurrentSong = indexes.Any(index => index == this.playlist.CurrentSongIndex);
 
@@ -529,7 +527,7 @@ namespace Espera.Core.Library
         public void RemoveFromPlaylist(IEnumerable<Song> songList)
         {
             if (songList == null)
-                throw new ArgumentNullException("songList");
+                Throw.ArgumentNullException(() => songList);
 
             this.RemoveFromPlaylist(this.playlist.GetIndexes(songList));
         }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Espera.Core.Audio;
 using Rareform.IO;
+using Rareform.Validation;
 using TagLib;
 
 namespace Espera.Core
@@ -30,7 +31,7 @@ namespace Espera.Core
         public LocalSongFinder(string path)
         {
             if (path == null)
-                throw new ArgumentNullException("path");
+                Throw.ArgumentNullException(() => path);
 
             this.tagLock = new object();
             this.songListLock = new object();

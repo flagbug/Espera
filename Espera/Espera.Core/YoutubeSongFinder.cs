@@ -3,6 +3,7 @@ using Espera.Core.Audio;
 using Google.GData.Client;
 using Google.GData.YouTube;
 using Google.YouTube;
+using Rareform.Validation;
 
 namespace Espera.Core
 {
@@ -20,7 +21,7 @@ namespace Espera.Core
         public YoutubeSongFinder(string searchString)
         {
             if (searchString == null)
-                throw new ArgumentNullException("searchString");
+                Throw.ArgumentNullException(() => searchString);
 
             this.searchString = searchString;
         }

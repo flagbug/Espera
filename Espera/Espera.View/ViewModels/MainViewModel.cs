@@ -8,6 +8,7 @@ using Espera.Core;
 using Espera.Core.Library;
 using Espera.View.Properties;
 using Rareform.Patterns.MVVM;
+using Rareform.Validation;
 
 namespace Espera.View.ViewModels
 {
@@ -673,7 +674,7 @@ namespace Espera.View.ViewModels
         public void AddSongs(string folderPath)
         {
             if (folderPath == null)
-                throw new ArgumentNullException("folderPath");
+                Throw.ArgumentNullException(() => folderPath);
 
             string lastArtist = null;
 

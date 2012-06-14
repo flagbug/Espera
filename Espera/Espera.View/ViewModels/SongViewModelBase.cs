@@ -1,6 +1,7 @@
 ﻿using System;
 using Espera.Core;
 using Rareform.Patterns.MVVM;
+using Rareform.Validation;
 
 namespace Espera.View.ViewModels
 {
@@ -9,7 +10,7 @@ namespace Espera.View.ViewModels
         protected SongViewModelBase(Song wrapped)
         {
             if (wrapped == null)
-                throw new ArgumentNullException("wrapped");
+                Throw.ArgumentNullException(() => wrapped);
 
             this.Wrapped = wrapped;
         }

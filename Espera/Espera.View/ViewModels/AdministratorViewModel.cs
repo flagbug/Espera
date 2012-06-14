@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using Espera.Core.Library;
 using Rareform.Patterns.MVVM;
+using Rareform.Validation;
 
 namespace Espera.View.ViewModels
 {
@@ -13,7 +14,7 @@ namespace Espera.View.ViewModels
         public AdministratorViewModel(Library library)
         {
             if (library == null)
-                throw new ArgumentNullException("library");
+                Throw.ArgumentNullException(() => library);
 
             this.library = library;
         }

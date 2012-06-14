@@ -5,7 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Rareform.Extensions;
+using Rareform.Reflection;
+using Rareform.Validation;
 
 namespace Espera.Core.Library
 {
@@ -83,9 +84,7 @@ namespace Espera.Core.Library
         public void AddSongs(IEnumerable<Song> songList)
         {
             if (songList == null)
-                throw new ArgumentNullException("songList");
-
-            songList = songList.ToList(); // Avoid multiple enumeration
+                Throw.ArgumentNullException(() => songList);
 
             foreach (Song song in songList)
             {
@@ -138,8 +137,17 @@ namespace Espera.Core.Library
         /// <param name="toIndex">To index to insert the song.</param>
         public void InsertMove(int fromIndex, int toIndex)
         {
-            fromIndex.ThrowIfLessThan(0, () => fromIndex);
-            toIndex.ThrowIfLessThan(0, () => toIndex);
+            if (fromIndex < 0)
+                Throw.ArgumentOutOfRangeException(() => fromIndex, 0);
+
+            if (toIndex < 0)
+                Throw.ArgumentOutOfRangeException(() => 0);
+
+            if (toIndex >= fromIndex)
+                Throw.ArgumentException(
+                    String.Format("{0} has to be small than {1}",
+                    Reflector.GetMemberName(() => toIndex), Reflector.GetMemberName(() => fromIndex)),
+                    () => toIndex);
 
             Song from = this[fromIndex];
 
@@ -158,7 +166,7 @@ namespace Espera.Core.Library
         public void RemoveSongs(IEnumerable<int> indexes)
         {
             if (indexes == null)
-                throw new ArgumentNullException("indexes");
+                Throw.ArgumentNullException(() => indexes);
 
             foreach (int index in indexes)
             {

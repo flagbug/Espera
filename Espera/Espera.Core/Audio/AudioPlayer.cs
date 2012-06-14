@@ -1,5 +1,6 @@
 ﻿using System;
 using Rareform.Extensions;
+using Rareform.Validation;
 
 namespace Espera.Core.Audio
 {
@@ -55,7 +56,7 @@ namespace Espera.Core.Audio
         public virtual void Load(Song song)
         {
             if (song == null)
-                throw new ArgumentNullException("song");
+                Throw.ArgumentNullException(() => song);
 
             this.LoadedSong = song;
         }
