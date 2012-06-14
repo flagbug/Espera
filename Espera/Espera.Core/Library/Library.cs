@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Espera.Core.Audio;
 using Rareform.Extensions;
 using Rareform.IO;
-using Rareform.Reflection;
 using Rareform.Validation;
 
 namespace Espera.Core.Library
@@ -572,10 +571,10 @@ namespace Espera.Core.Library
         private void AddLocalSongs(string path)
         {
             if (path == null)
-                throw new ArgumentNullException(Reflector.GetMemberName(() => path));
+                Throw.ArgumentNullException(() => path);
 
             if (!Directory.Exists(path))
-                throw new ArgumentException("The directory doesn't exist.", Reflector.GetMemberName(() => path));
+                Throw.ArgumentException("The directory doesn't exist.", () => path);
 
             var finder = new LocalSongFinder(path);
 
@@ -663,7 +662,8 @@ namespace Espera.Core.Library
 
         private void InternPlaySong(int playlistIndex)
         {
-            playlistIndex.ThrowIfLessThan(0, () => playlistIndex);
+            if (playlistIndex < 0)
+                Throw.ArgumentOutOfRangeException(() => playlistIndex, 0);
 
             if (this.isWaitingOnCache)
             {
