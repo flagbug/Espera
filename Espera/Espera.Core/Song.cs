@@ -65,6 +65,8 @@ namespace Espera.Core
         /// </summary>
         public AudioType AudioType { get; private set; }
 
+        public int CachingPercentage { get; set; }
+
         /// <summary>
         /// Gets the duration of the song.
         /// </summary>

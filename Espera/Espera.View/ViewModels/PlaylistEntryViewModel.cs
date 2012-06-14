@@ -6,7 +6,6 @@ namespace Espera.View.ViewModels
 {
     public class PlaylistEntryViewModel : SongViewModelBase<PlaylistEntryViewModel>
     {
-        private int cacheProgress;
         private bool hasCachingFailed;
         private bool isInactive;
         private bool isPlaying;
@@ -37,12 +36,12 @@ namespace Espera.View.ViewModels
 
         public int CacheProgress
         {
-            get { return this.cacheProgress; }
+            get { return this.Wrapped.CachingPercentage; }
             set
             {
                 if (this.CacheProgress != value)
                 {
-                    this.cacheProgress = value;
+                    this.Wrapped.CachingPercentage = value;
                     this.OnPropertyChanged(vm => vm.CacheProgress);
                 }
             }
