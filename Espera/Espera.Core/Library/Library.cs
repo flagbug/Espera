@@ -199,14 +199,25 @@ namespace Espera.Core.Library
             get { return this.currentPlayer == null ? null : this.currentPlayer.LoadedSong; }
         }
 
-        public bool LockSongRemoval
+        public bool LockLibraryRemoval
         {
-            get { return CoreSettings.Default.LockSongRemoval; }
+            get { return CoreSettings.Default.LockLibraryRemoval; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                CoreSettings.Default.LockSongRemoval = value;
+                CoreSettings.Default.LockLibraryRemoval = value;
+            }
+        }
+
+        public bool LockPlaylistRemoval
+        {
+            get { return CoreSettings.Default.LockPlaylistRemoval; }
+            set
+            {
+                this.ThrowIfNotAdmin();
+
+                CoreSettings.Default.LockPlaylistRemoval = value;
             }
         }
 
@@ -484,7 +495,8 @@ namespace Espera.Core.Library
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
 
-            this.ThrowIfNotAdmin();
+            if (!CoreSettings.Default.LockLibraryRemoval && this.AccessMode == AccessMode.Party)
+                throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
 
             DisposeSongs(songList);
 
@@ -506,7 +518,7 @@ namespace Espera.Core.Library
             if (indexes == null)
                 Throw.ArgumentNullException(() => indexes);
 
-            if (!CoreSettings.Default.LockSongRemoval && this.AccessMode == AccessMode.Party)
+            if (!CoreSettings.Default.LockPlaylistRemoval && this.AccessMode == AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
 
             bool stopCurrentSong = indexes.Any(index => index == this.playlist.CurrentSongIndex);

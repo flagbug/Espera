@@ -102,10 +102,16 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public bool LockSongRemoval
+        public bool LockPlaylistRemoval
         {
-            get { return this.library.LockSongRemoval; }
-            set { this.library.LockSongRemoval = value; }
+            get { return this.library.LockPlaylistRemoval; }
+            set { this.library.LockPlaylistRemoval = value; }
+        }
+
+        public bool LockLibraryRemoval
+        {
+            get { return this.library.LockLibraryRemoval; }
+            set { this.library.LockLibraryRemoval = value; }
         }
 
         public bool LockTime

@@ -435,7 +435,7 @@ namespace Espera.View.ViewModels
                     },
                     param => this.SelectedPlaylistEntries != null
                         && this.SelectedPlaylistEntries.Any()
-                        && (this.IsAdmin || !this.library.LockSongRemoval)
+                        && (this.IsAdmin || !this.library.LockPlaylistRemoval)
                 );
             }
         }
@@ -459,7 +459,9 @@ namespace Espera.View.ViewModels
                         this.OnPropertyChanged(vm => vm.TimeRemaining);
                         this.OnPropertyChanged(vm => vm.Artists);
                     },
-                    param => this.SelectedSongs != null && this.SelectedSongs.Any()
+                    param => this.SelectedSongs != null
+                        && this.SelectedSongs.Any()
+                        && (this.IsAdmin || !this.library.LockLibraryRemoval)
                 );
             }
         }
@@ -480,7 +482,9 @@ namespace Espera.View.ViewModels
                         this.OnPropertyChanged(vm => vm.TimeRemaining);
                         this.OnPropertyChanged(vm => vm.Artists);
                     },
-                    param => this.SelectedSongs != null && this.SelectedSongs.Any()
+                    param => this.SelectedSongs != null
+                        && this.SelectedSongs.Any()
+                        && (this.IsAdmin || !this.library.LockLibraryRemoval)
                 );
             }
         }

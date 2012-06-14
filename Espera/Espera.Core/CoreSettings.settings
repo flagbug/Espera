@@ -11,13 +11,16 @@
     <Setting Name="LockTime" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="LockSongRemoval" Type="System.Boolean" Scope="User">
+    <Setting Name="LockPlaylistRemoval" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="PlaylistTimeout" Type="System.TimeSpan" Scope="User">
       <Value Profile="(Default)">00:00:30</Value>
     </Setting>
     <Setting Name="EnablePlaylistTimeout" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="LockLibraryRemoval" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
