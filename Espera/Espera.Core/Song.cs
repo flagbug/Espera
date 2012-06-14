@@ -45,25 +45,10 @@ namespace Espera.Core
 
         public event EventHandler CachingProgressChanged;
 
-        /// <summary>
-        /// Gets or sets the album.
-        /// </summary>
-        /// <value>
-        /// The album.
-        /// </value>
         public string Album { get; set; }
 
-        /// <summary>
-        /// Gets or sets the artist.
-        /// </summary>
-        /// <value>
-        /// The artist.
-        /// </value>
         public string Artist { get; set; }
 
-        /// <summary>
-        /// Gets or sets the type of the audio.
-        /// </summary>
         public AudioType AudioType { get; private set; }
 
         /// <summary>
@@ -72,6 +57,7 @@ namespace Espera.Core
         /// <value>
         /// The caching progress in a range from 0 to 100.
         /// </value>
+        /// <exception cref="ArgumentOutOfRangeException">The value was not from 0 to 100.</exception>
         public int CachingProgress
         {
             get { return this.cachingProgress; }
@@ -87,17 +73,8 @@ namespace Espera.Core
             }
         }
 
-        /// <summary>
-        /// Gets the duration of the song.
-        /// </summary>
         public TimeSpan Duration { get; private set; }
 
-        /// <summary>
-        /// Gets or sets the genre.
-        /// </summary>
-        /// <value>
-        /// The genre.
-        /// </value>
         public string Genre { get; set; }
 
         /// <summary>
@@ -108,6 +85,12 @@ namespace Espera.Core
         /// </value>
         public abstract bool HasToCache { get; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the song is completely cached.
+        /// </summary>
+        /// <value>
+        /// true if the song is completely cached; otherwise, false.
+        /// </value>
         public bool IsCached
         {
             get { return this.isCached; }
@@ -119,6 +102,12 @@ namespace Espera.Core
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the song is currently caching.
+        /// </summary>
+        /// <value>
+        /// true if the song is currently caching; otherwise, false.
+        /// </value>
         public bool IsCaching { get; protected set; }
 
         /// <summary>
@@ -126,30 +115,32 @@ namespace Espera.Core
         /// </summary>
         public string OriginalPath { get; private set; }
 
+        /// <summary>
+        /// Gets or sets the path to stream the audio from.
+        /// This is a path on the local filesystem.
+        /// </summary>
+        /// <value>
+        /// The path to stream the audio from.
+        /// </value>
         public string StreamingPath
         {
             get { return !this.HasToCache ? this.OriginalPath : this.streamingPath; }
             protected set { this.streamingPath = value; }
         }
 
-        /// <summary>
-        /// Gets or sets the title.
-        /// </summary>
-        /// <value>
-        /// The title.
-        /// </value>
         public string Title { get; set; }
 
-        /// <summary>
-        /// Gets or sets the track number.
-        /// </summary>
-        /// <value>
-        /// The track number.
-        /// </value>
         public int TrackNumber { get; set; }
 
+        /// <summary>
+        /// Releases the temporary .
+        /// </summary>
         public void ClearCache()
         {
+            // Safety check, to avoid that our whole local library gets deleted :)
+            if (!this.HasToCache || !this.IsCached)
+                throw new InvalidOperationException("Song should not be deleted, as it is not in a cache!");
+
             if (File.Exists(this.StreamingPath))
             {
                 File.Delete(this.StreamingPath);
@@ -160,6 +151,10 @@ namespace Espera.Core
             this.CachingProgress = 0;
         }
 
+        /// <summary>
+        /// Creates the audio player for the song.
+        /// </summary>
+        /// <returns>The audio player for playback.</returns>
         public abstract AudioPlayer CreateAudioPlayer();
 
         /// <summary>
@@ -197,18 +192,33 @@ namespace Espera.Core
             return new { this.OriginalPath, this.Duration, this.AudioType }.GetHashCode();
         }
 
+        /// <summary>
+        /// Loads the songs to a cache and sets the <see cref="StreamingPath"/> property.
+        /// </summary>
         public abstract void LoadToCache();
 
+        /// <summary>
+        /// Raises the <see cref="CachingFailed"/> event.
+        /// </summary>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         internal protected void OnCachingFailed(EventArgs e)
         {
             this.CachingFailed.RaiseSafe(this, e);
         }
 
+        /// <summary>
+        /// Raises the <see cref="CachingCompleted"/> event.
+        /// </summary>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         internal protected void OnCachingCompleted(EventArgs e)
         {
             this.CachingCompleted.RaiseSafe(this, e);
         }
 
+        /// <summary>
+        /// Raises the <see cref="CachingProgressChanged"/> event.
+        /// </summary>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         internal protected void OnCachingProgressChanged(EventArgs e)
         {
             this.CachingProgressChanged.RaiseSafe(this, e);

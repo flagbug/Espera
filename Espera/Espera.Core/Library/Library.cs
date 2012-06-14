@@ -550,7 +550,8 @@ namespace Espera.Core.Library
         /// <param name="songList">The songs to dispose.</param>
         private static void DisposeSongs(IEnumerable<Song> songList)
         {
-            foreach (Song song in songList.Where(song => song.IsCached))
+            // If the condition is removed, every file that has been added to the library will be deleted...
+            foreach (Song song in songList.Where(song => song.HasToCache && song.IsCached))
             {
                 try
                 {

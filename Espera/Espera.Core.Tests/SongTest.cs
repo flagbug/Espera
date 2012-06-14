@@ -41,5 +41,15 @@ namespace Espera.Core.Tests
 
             Assert.IsFalse(song1.Object.Equals(song2.Object));
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void ClearCache_SongHasNotToBeCached_ThrowsInvalidOperationException()
+        {
+            var song = new Mock<Song>("TestPath1", AudioType.Mp3, TimeSpan.Zero);
+            song.SetupGet(p => p.HasToCache).Returns(false);
+
+            song.Object.ClearCache();
+        }
     }
 }
