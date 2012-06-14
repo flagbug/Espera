@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Espera.Core.Audio;
-using Rareform.IO;
 using YoutubeExtractor;
 
 namespace Espera.Core
@@ -81,12 +80,8 @@ namespace Espera.Core
 
             downloader.ProgressChanged += (sender, args) =>
             {
-                // HACK: We don't know the total or transferred bytes, so we fake them
-                // The zero check is needed, because the DataTransferEventArgs class doesn't allow zero transferred bytes
-                if ((int)args.ProgressPercentage > 0)
-                {
-                    this.OnCachingProgressChanged(new DataTransferEventArgs(100, (int)args.ProgressPercentage));
-                }
+                this.CachingProgress = (int)args.ProgressPercentage;
+                this.OnCachingProgressChanged(EventArgs.Empty);
             };
 
             downloader.Execute();

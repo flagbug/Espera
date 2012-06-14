@@ -543,7 +543,7 @@
                                                                     <Setter Property="Text" Value="Caching failed!" />
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding Path=HasCachingFailed}" Value="False">
-                                                                    <Setter Property="Text" Value="{Binding Path=CacheProgress, StringFormat=Caching... \{0\}%}" />
+                                                                    <Setter Property="Text" Value="{Binding Path=CacheProgress, StringFormat=Caching... \{0\}%, IsAsync=True}" />
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>

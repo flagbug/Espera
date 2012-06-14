@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using Espera.Core.Audio;
 using Rareform.Extensions;
-using Rareform.IO;
 using Rareform.Validation;
 
 namespace Espera.Core
@@ -15,6 +14,7 @@ namespace Espera.Core
     public abstract class Song : IEquatable<Song>
     {
         private string streamingPath;
+        private bool isCached;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Song"/> class.
@@ -42,7 +42,7 @@ namespace Espera.Core
 
         public event EventHandler CachingFailed;
 
-        public event EventHandler<DataTransferEventArgs> CachingProgressChanged;
+        public event EventHandler CachingProgressChanged;
 
         /// <summary>
         /// Gets or sets the album.
@@ -65,7 +65,7 @@ namespace Espera.Core
         /// </summary>
         public AudioType AudioType { get; private set; }
 
-        public int CachingPercentage { get; set; }
+        public int CachingProgress { get; protected set; }
 
         /// <summary>
         /// Gets the duration of the song.
@@ -88,7 +88,15 @@ namespace Espera.Core
         /// </value>
         public abstract bool HasToCache { get; }
 
-        public bool IsCached { get; protected set; }
+        public bool IsCached
+        {
+            get { return this.isCached; }
+            protected set
+            {
+                this.CachingProgress = 100;
+                this.isCached = value;
+            }
+        }
 
         /// <summary>
         /// Gets the path of the song on the local filesystem, or in the internet.
@@ -172,12 +180,12 @@ namespace Espera.Core
             this.CachingFailed.RaiseSafe(this, e);
         }
 
-        internal void OnCachingCompleted(EventArgs e)
+        internal protected void OnCachingCompleted(EventArgs e)
         {
             this.CachingCompleted.RaiseSafe(this, e);
         }
 
-        internal void OnCachingProgressChanged(DataTransferEventArgs e)
+        internal protected void OnCachingProgressChanged(EventArgs e)
         {
             this.CachingProgressChanged.RaiseSafe(this, e);
         }

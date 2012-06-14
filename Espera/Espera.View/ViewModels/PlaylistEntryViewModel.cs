@@ -18,33 +18,19 @@ namespace Espera.View.ViewModels
 
             this.Index = index;
 
-            if (!this.Wrapped.HasToCache || this.Wrapped.IsCached)
+            if (this.Wrapped.HasToCache && !this.Wrapped.IsCached)
             {
-                this.CacheProgress = 100;
-            }
-
-            else
-            {
-                this.Wrapped.CachingProgressChanged +=
-                    (sender, e) => this.CacheProgress = (int)e.ProgressPercentage;
+                this.Wrapped.CachingProgressChanged += (sender, e) => this.OnPropertyChanged(vm => vm.CacheProgress);
 
                 this.Wrapped.CachingFailed += (sender, args) => this.HasCachingFailed = true;
 
-                this.Wrapped.CachingCompleted += (sender, e) => this.CacheProgress = 100;
+                this.Wrapped.CachingCompleted += (sender, e) => this.OnPropertyChanged(vm => vm.CacheProgress);
             }
         }
 
         public int CacheProgress
         {
-            get { return this.Wrapped.CachingPercentage; }
-            set
-            {
-                if (this.CacheProgress != value)
-                {
-                    this.Wrapped.CachingPercentage = value;
-                    this.OnPropertyChanged(vm => vm.CacheProgress);
-                }
-            }
+            get { return this.Wrapped.CachingProgress; }
         }
 
         public bool HasCachingFailed
