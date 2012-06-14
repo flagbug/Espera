@@ -15,6 +15,7 @@ namespace Espera.Core
     {
         private string streamingPath;
         private bool isCached;
+        private int cachingProgress;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Song"/> class.
@@ -65,7 +66,26 @@ namespace Espera.Core
         /// </summary>
         public AudioType AudioType { get; private set; }
 
-        public int CachingProgress { get; protected set; }
+        /// <summary>
+        /// Gets or sets the caching progress in a range from 0 to 100.
+        /// </summary>
+        /// <value>
+        /// The caching progress in a range from 0 to 100.
+        /// </value>
+        public int CachingProgress
+        {
+            get { return this.cachingProgress; }
+            protected set
+            {
+                if (value < 0)
+                    Throw.ArgumentOutOfRangeException(() => value, 0);
+
+                if (value > 100)
+                    Throw.ArgumentOutOfRangeException(() => value, 100);
+
+                this.cachingProgress = value;
+            }
+        }
 
         /// <summary>
         /// Gets the duration of the song.
