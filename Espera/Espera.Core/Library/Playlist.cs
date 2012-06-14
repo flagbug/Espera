@@ -88,7 +88,8 @@ namespace Espera.Core.Library
 
             foreach (Song song in songList)
             {
-                if (song.HasToCache)
+                if (song.HasToCache
+                    && !this.playlist.ContainsValue(song)) // We don't want a song that is already in the playlist to be cached multiple times
                 {
                     this.cachingQueue.Enqueue(song);
                 }
