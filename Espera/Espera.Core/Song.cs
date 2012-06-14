@@ -134,6 +134,7 @@ namespace Espera.Core
 
             this.StreamingPath = null;
             this.IsCached = false;
+            this.CachingProgress = 0;
         }
 
         public abstract AudioPlayer CreateAudioPlayer();
