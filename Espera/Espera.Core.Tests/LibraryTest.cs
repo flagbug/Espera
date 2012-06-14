@@ -40,20 +40,36 @@ namespace Espera.Core.Tests
             jumpSong.Setup(p => p.CreateAudioPlayer()).Returns(jumpAudioPlayer);
             jumpSong.SetupGet(p => p.HasToCache).Returns(false);
 
+            var foreverAudioPlayer = new Mock<AudioPlayer>();
+            foreverAudioPlayer.SetupProperty(p => p.Volume);
+            foreverAudioPlayer.Setup(p => p.Play()).Callback(() => { }); // Never raises SongFinished
+
             var cachingSong = new Mock<Song>("CachingSong", AudioType.Mp3, TimeSpan.Zero);
             cachingSong.SetupGet(p => p.HasToCache).Returns(true);
+            cachingSong.Setup(p => p.CreateAudioPlayer()).Returns(foreverAudioPlayer.Object);
 
             var cachingSong2 = new Mock<Song>("CachingSong2", AudioType.Mp3, TimeSpan.Zero);
             cachingSong2.SetupGet(p => p.HasToCache).Returns(true);
 
-            var foreverAudioPlayer = new Mock<AudioPlayer>();
-            foreverAudioPlayer.Setup(p => p.Play()).Callback(() => eventWait.Set());
-
             var nextSong = new Mock<Song>("NextSong", AudioType.Mp3, TimeSpan.Zero);
-            nextSong.Setup(p => p.CreateAudioPlayer()).Returns(foreverAudioPlayer.Object);
+            nextSong.Setup(p => p.CreateAudioPlayer()).Returns(jumpAudioPlayer);
             nextSong.SetupGet(p => p.HasToCache).Returns(false);
 
             var library = new Library.Library();
+
+            int finished = 0;
+
+            // We need to wait till the second played song has finished and then release our lock,
+            // otherwise it would directly call the assertion, without anything changed
+            library.SongFinished += (sender, e) =>
+            {
+                finished++;
+
+                if (finished == 2)
+                {
+                    eventWait.Set();
+                }
+            };
 
             IEnumerable<Song> songs = new[] { jumpSong.Object, cachingSong.Object, cachingSong2.Object, nextSong.Object };
             library.AddSongsToPlaylist(songs);
