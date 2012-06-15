@@ -142,7 +142,7 @@ namespace Espera.Core
         public int TrackNumber { get; set; }
 
         /// <summary>
-        /// Releases the temporary .
+        /// Deletes the temporary cache file and resets all attributes that are associated with caching.
         /// </summary>
         public void ClearCache()
         {
