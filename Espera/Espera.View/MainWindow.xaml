@@ -529,7 +529,7 @@
                                                 <Grid.Style>
                                                     <Style TargetType="{x:Type Grid}">
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Path=CacheProgress}" Value="100">
+                                                            <DataTrigger Binding="{Binding Path=ShowCaching}" Value="False">
                                                                 <Setter Property="Visibility" Value="Hidden" />
                                                             </DataTrigger>
                                                         </Style.Triggers>

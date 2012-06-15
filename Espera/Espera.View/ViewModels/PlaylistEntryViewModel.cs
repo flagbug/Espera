@@ -24,7 +24,7 @@ namespace Espera.View.ViewModels
 
                 this.Wrapped.CachingFailed += (sender, args) => this.HasCachingFailed = true;
 
-                this.Wrapped.CachingCompleted += (sender, e) => this.OnPropertyChanged(vm => vm.CacheProgress);
+                this.Wrapped.CachingCompleted += (sender, e) => this.OnPropertyChanged(vm => vm.ShowCaching);
             }
         }
 
@@ -72,6 +72,11 @@ namespace Espera.View.ViewModels
                     this.OnPropertyChanged(vm => vm.IsPlaying);
                 }
             }
+        }
+
+        public bool ShowCaching
+        {
+            get { return this.Wrapped.HasToCache && this.CacheProgress != 100 || this.HasCachingFailed; }
         }
 
         public string Source
