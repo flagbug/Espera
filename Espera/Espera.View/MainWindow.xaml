@@ -671,17 +671,17 @@
                                 <TextBlock Text="Party mode"
                                            Style="{StaticResource AdminHeaderStyle}" />
                                 <CheckBox IsChecked="{Binding Path=LockVolume}">
-                                    <AccessText Text="Lock volume when in party mode"
+                                    <AccessText Text="Lock volume"
                                                 TextWrapping="Wrap" />
                                 </CheckBox>
                                 <CheckBox Margin="0, 10, 0, 0"
                                           IsChecked="{Binding Path=LockTime}">
-                                    <AccessText Text="Lock time when in party mode"
+                                    <AccessText Text="Lock time"
                                                 TextWrapping="Wrap" />
                                 </CheckBox>
                                 <CheckBox Margin="0, 10, 0, 0"
                                           IsChecked="{Binding Path=LockPlaylistRemoval}">
-                                    <AccessText Text="Lock song removal from playlist when in party mode"
+                                    <AccessText Text="Lock song removal from playlist"
                                                 TextWrapping="Wrap" />
                                 </CheckBox>
                                 <CheckBox Margin="0, 10, 0, 0"
@@ -713,7 +713,8 @@
                                            Style="{StaticResource AdminHeaderStyle}" />
                                 <CheckBox IsEnabled="{Binding Path=IsVlcInstalled}"
                                           IsChecked="{Binding Path=StreamYoutube}">
-                                    <AccessText Text="Stream from Youtube instead of downloading (Requires VLC media player >= 2.0 to be installed)"
+                                    <AccessText Text="Stream from Youtube instead of downloading (Requires VLC media player >= 2.0 to be installed).
+                                                This is an experimental feature and may not work properly."
                                                 TextWrapping="Wrap" />
                                 </CheckBox>
                             </StackPanel>
