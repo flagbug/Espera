@@ -83,7 +83,6 @@ namespace Espera.Core
             downloader.ProgressChanged += (sender, args) =>
             {
                 this.CachingProgress = (int)args.ProgressPercentage;
-                this.OnCachingProgressChanged(EventArgs.Empty);
             };
 
             downloader.Execute();

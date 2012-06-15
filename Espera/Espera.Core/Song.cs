@@ -69,7 +69,11 @@ namespace Espera.Core
                 if (value > 100)
                     Throw.ArgumentOutOfRangeException(() => value, 100);
 
-                this.cachingProgress = value;
+                if (this.cachingProgress != value)
+                {
+                    this.cachingProgress = value;
+                    this.OnCachingProgressChanged(EventArgs.Empty);
+                }
             }
         }
 

@@ -86,7 +86,6 @@ namespace Espera.Core
                     operation.CopyProgressChanged += (sender, e) =>
                     {
                         this.CachingProgress = (int)e.ProgressPercentage;
-                        this.OnCachingProgressChanged(EventArgs.Empty);
                     };
 
                     operation.Execute();
