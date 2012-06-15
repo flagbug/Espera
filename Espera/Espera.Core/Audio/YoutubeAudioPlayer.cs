@@ -36,7 +36,7 @@ namespace Espera.Core.Audio
 
             this.player = new VlcControl();
 
-            this.player.TimeChanged += (sender, e) => this.OnSongFinished(EventArgs.Empty);
+            this.player.TimeChanged += (sender, e) => this.CheckSongFinished();
         }
 
         /// <summary>
@@ -136,16 +136,13 @@ namespace Espera.Core.Audio
             this.player.Stop();
         }
 
-        /// <summary>
-        /// Raises the <see cref="AudioPlayer.SongFinished"/> event.
-        /// </summary>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected override void OnSongFinished(EventArgs e)
+        private void CheckSongFinished()
         {
             // HACK: Cut the time one second before it really ends, so that the current time reaches the duration
-            if (this.player.Time >= this.player.Duration - TimeSpan.FromSeconds(1))
+            // Also we have to check if the players duration isn't zero, because the TimeChanged event sometimes fires at the beginning of the song
+            if (this.player.Duration != TimeSpan.Zero && this.player.Time >= this.player.Duration - TimeSpan.FromSeconds(1))
             {
-                base.OnSongFinished(e);
+                this.OnSongFinished(EventArgs.Empty);
             }
         }
     }
