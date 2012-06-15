@@ -59,7 +59,6 @@ namespace Espera.Core
             {
                 this.LoadToTempFile();
                 this.IsCached = true;
-                this.OnCachingCompleted(EventArgs.Empty);
             }
 
             catch (IOException)

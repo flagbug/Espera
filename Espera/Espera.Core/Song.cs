@@ -100,9 +100,14 @@ namespace Espera.Core
             get { return this.isCached; }
             protected set
             {
-                this.CachingProgress = 100;
                 this.isCached = value;
-                this.IsCaching = false;
+
+                if (this.isCached)
+                {
+                    this.CachingProgress = 100;
+                    this.IsCaching = false;
+                    this.OnCachingCompleted(EventArgs.Empty);
+                }
             }
         }
 

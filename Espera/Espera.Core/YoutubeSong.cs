@@ -89,7 +89,6 @@ namespace Espera.Core
             this.StreamingPath = tempPath;
 
             this.IsCached = true;
-            this.OnCachingCompleted(EventArgs.Empty);
         }
     }
 }
