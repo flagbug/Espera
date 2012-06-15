@@ -51,7 +51,7 @@
                 <Setter Property="FontSize" Value="30" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
                 <Setter Property="HorizontalAlignment" Value="Center" />
-                <Setter Property="Margin" Value="0, 15, 0, 5" />
+                <Setter Property="Margin" Value="0, 20, 0, 10" />
             </Style>
         </ResourceDictionary>
     </Window.Resources>
