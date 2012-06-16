@@ -17,6 +17,11 @@ namespace Espera.View
             return sortOrder == SortOrder.Ascending ? source.ThenBy(keySelector) : source.ThenByDescending(keySelector);
         }
 
+        public static IOrderedEnumerable<Song> OrderBy(this IEnumerable<Song> source, Func<IEnumerable<Song>, IOrderedEnumerable<Song>> keySelector)
+        {
+            return keySelector(source);
+        }
+
         public static Func<IEnumerable<Song>, IOrderedEnumerable<Song>> GetOrderByTitle(SortOrder sortOrder)
         {
             return songs => songs
@@ -53,9 +58,9 @@ namespace Espera.View
                 .ThenBy(song => song.TrackNumber, sortOrder);
         }
 
-        public static SortOrder GetInverseOrder(this SortOrder sortOrder)
+        public static void InverseOrder(ref SortOrder sortOrder)
         {
-            return sortOrder == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
+            sortOrder = sortOrder == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
         }
     }
 }

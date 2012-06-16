@@ -226,5 +226,30 @@ namespace Espera.View
         {
             this.mainViewModel.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModel>();
         }
+
+        private void SortLocalSongTitle(object sender, RoutedEventArgs e)
+        {
+            this.mainViewModel.OrderLocalSongsByTitle();
+        }
+
+        private void SortLocalSongDuration(object sender, RoutedEventArgs e)
+        {
+            this.mainViewModel.OrderLocalSongsByDuration();
+        }
+
+        private void SortLocalSongArtist(object sender, RoutedEventArgs e)
+        {
+            this.mainViewModel.OrderLocalSongsByArtist();
+        }
+
+        private void SortLocalSongAlbum(object sender, RoutedEventArgs e)
+        {
+            this.mainViewModel.OrderLocalSongsByAlbum();
+        }
+
+        private void SortLocalSongGenre(object sender, RoutedEventArgs e)
+        {
+            this.mainViewModel.OrderLocalSongsByGenre();
+        }
     }
 }

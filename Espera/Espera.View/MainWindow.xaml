@@ -293,8 +293,8 @@
                             </ListView.ItemContainerStyle>
                             <ListView.View>
                                 <GridView>
-                                    <GridViewColumn Header="Title"
-                                                    Width="{Binding Path=LocalTitleColumnWidth, Mode=TwoWay}">
+                                    <GridViewColumn Width="{Binding Path=LocalTitleColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumnHeader Content="Title" Click="SortLocalSongTitle" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding Path=Title}"
@@ -302,8 +302,8 @@
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
-                                    <GridViewColumn Header="Duration"
-                                                    Width="{Binding Path=LocalDurationColumnWidth, Mode=TwoWay}">
+                                    <GridViewColumn Width="{Binding Path=LocalDurationColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumnHeader Content="Duration" Click="SortLocalSongDuration" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding Path=Duration, StringFormat=mm\\:ss}"
@@ -311,8 +311,8 @@
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
-                                    <GridViewColumn Header="Artist"
-                                                    Width="{Binding Path=LocalArtistColumnWidth, Mode=TwoWay}">
+                                    <GridViewColumn Width="{Binding Path=LocalArtistColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumnHeader Content="Artist" Click="SortLocalSongArtist" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding Path=Artist}"
@@ -320,8 +320,8 @@
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
-                                    <GridViewColumn Header="Album"
-                                                    Width="{Binding Path=LocalAlbumColumnWidth, Mode=TwoWay}">
+                                    <GridViewColumn Width="{Binding Path=LocalAlbumColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumnHeader Content="Album" Click="SortLocalSongAlbum" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding Path=Album}"
@@ -329,8 +329,8 @@
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
-                                    <GridViewColumn Header="Genre"
-                                                    Width="{Binding Path=LocalGenreColumnWidth, Mode=TwoWay}">
+                                    <GridViewColumn Width="{Binding Path=LocalGenreColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumnHeader Content="Genre" Click="SortLocalSongGenre" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding Path=Genre}"

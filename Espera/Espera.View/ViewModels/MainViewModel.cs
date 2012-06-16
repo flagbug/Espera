@@ -25,6 +25,12 @@ namespace Espera.View.ViewModels
         private string selectedArtist;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
         private IEnumerable<SongViewModel> selectedSongs;
+        private Func<IEnumerable<Song>, IOrderedEnumerable<Song>> localSongOrderFunc;
+        private SortOrder currentLocalSongTitleOrder;
+        private SortOrder currentLocalSongArtistOrder;
+        private SortOrder currentLocalSongAlbumOrder;
+        private SortOrder currentLocalSongDurationOrder;
+        private SortOrder currentLocalSongGenreOrder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -52,6 +58,8 @@ namespace Espera.View.ViewModels
             this.playlistTimeoutUpdateTimer.Start();
 
             this.searchText = String.Empty;
+
+            this.OrderLocalSongsByArtist(); // We need a default sorting order
         }
 
         public ICommand AddSelectedSongsToPlaylistCommand
@@ -518,8 +526,7 @@ namespace Espera.View.ViewModels
                     .Where(song => song.Artist == this.SelectedArtist);
 
                 return songs.FilterSongs(this.SearchText)
-                    .OrderBy(song => song.Album)
-                    .ThenBy(song => song.TrackNumber)
+                    .OrderBy(this.localSongOrderFunc)
                     .Select(song => new SongViewModel(song));
             }
         }
@@ -717,6 +724,46 @@ namespace Espera.View.ViewModels
         {
             this.library.Dispose();
             this.updateTimer.Dispose();
+        }
+
+        public void OrderLocalSongsByTitle()
+        {
+            this.localSongOrderFunc = SortHelpers.GetOrderByTitle(this.currentLocalSongTitleOrder);
+            SortHelpers.InverseOrder(ref this.currentLocalSongTitleOrder);
+
+            this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
+        }
+
+        public void OrderLocalSongsByArtist()
+        {
+            this.localSongOrderFunc = SortHelpers.GetOrderByArtist(this.currentLocalSongArtistOrder);
+            SortHelpers.InverseOrder(ref this.currentLocalSongArtistOrder);
+
+            this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
+        }
+
+        public void OrderLocalSongsByAlbum()
+        {
+            this.localSongOrderFunc = SortHelpers.GetOrderByAlbum(this.currentLocalSongAlbumOrder);
+            SortHelpers.InverseOrder(ref this.currentLocalSongAlbumOrder);
+
+            this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
+        }
+
+        public void OrderLocalSongsByDuration()
+        {
+            this.localSongOrderFunc = SortHelpers.GetOrderByDuration(this.currentLocalSongDurationOrder);
+            SortHelpers.InverseOrder(ref this.currentLocalSongDurationOrder);
+
+            this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
+        }
+
+        public void OrderLocalSongsByGenre()
+        {
+            this.localSongOrderFunc = SortHelpers.GetOrderByGenre(this.currentLocalSongGenreOrder);
+            SortHelpers.InverseOrder(ref this.currentLocalSongGenreOrder);
+
+            this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
         }
 
         public void StartSearch()
