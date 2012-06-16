@@ -251,5 +251,20 @@ namespace Espera.View
         {
             this.mainViewModel.OrderLocalSongsByGenre();
         }
+
+        private void SortYoutubeSongTitle(object sender, RoutedEventArgs e)
+        {
+            this.mainViewModel.OrderYoutubeSongsByTitle();
+        }
+
+        private void SortYoutubeSongDuration(object sender, RoutedEventArgs e)
+        {
+            this.mainViewModel.OrderYoutubeSongsByDuration();
+        }
+
+        private void SortYoutubeSongRating(object sender, RoutedEventArgs e)
+        {
+            this.mainViewModel.OrderYoutubeSongsByRating();
+        }
     }
 }

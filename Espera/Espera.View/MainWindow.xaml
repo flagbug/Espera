@@ -379,8 +379,8 @@
                             </ListView.ItemContainerStyle>
                             <ListView.View>
                                 <GridView>
-                                    <GridViewColumn Header="Title"
-                                                    Width="{Binding Path=YoutubeTitleColumnWidth, Mode=TwoWay}">
+                                    <GridViewColumn Width="{Binding Path=YoutubeTitleColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumnHeader Content="Title" Click="SortYoutubeSongTitle" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding Path=Title}"
@@ -388,8 +388,8 @@
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
-                                    <GridViewColumn Header="Duration"
-                                                    Width="{Binding Path=YoutubeDurationColumnWidth, Mode=TwoWay}">
+                                    <GridViewColumn Width="{Binding Path=YoutubeDurationColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumnHeader Content="Duration" Click="SortYoutubeSongDuration" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding Path=Duration, StringFormat=mm\\:ss}"
@@ -397,8 +397,8 @@
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
-                                    <GridViewColumn Header="Rating"
-                                                    Width="{Binding Path=YoutubeRatingColumnWidth, Mode=TwoWay}">
+                                    <GridViewColumn Width="{Binding Path=YoutubeRatingColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumnHeader Content="Rating" Click="SortYoutubeSongRating" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding Path=Rating, StringFormat=\{0:0.0\}, TargetNullValue=n/a}"

@@ -31,6 +31,10 @@ namespace Espera.View.ViewModels
         private SortOrder currentLocalSongAlbumOrder;
         private SortOrder currentLocalSongDurationOrder;
         private SortOrder currentLocalSongGenreOrder;
+        private Func<IEnumerable<YoutubeSong>, IOrderedEnumerable<YoutubeSong>> youtubeSongOrderFunc;
+        private SortOrder currentYoutubeSongTitleOrder;
+        private SortOrder currentYoutubeSongDurationOrder;
+        private SortOrder currentYoutubeSongRatingOrder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -59,7 +63,9 @@ namespace Espera.View.ViewModels
 
             this.searchText = String.Empty;
 
-            this.OrderLocalSongsByArtist(); // We need a default sorting order
+            // We need a default sorting order
+            this.OrderLocalSongsByArtist();
+            this.OrderYoutubeSongsByTitle();
         }
 
         public ICommand AddSelectedSongsToPlaylistCommand
@@ -539,6 +545,7 @@ namespace Espera.View.ViewModels
                 finder.Start();
 
                 return finder.SongsFound
+                    .OrderBy(this.youtubeSongOrderFunc)
                     .Select(song => new SongViewModel(song));
             }
         }
@@ -728,7 +735,7 @@ namespace Espera.View.ViewModels
 
         public void OrderLocalSongsByTitle()
         {
-            this.localSongOrderFunc = SortHelpers.GetOrderByTitle(this.currentLocalSongTitleOrder);
+            this.localSongOrderFunc = SortHelpers.GetOrderByTitle<Song>(this.currentLocalSongTitleOrder);
             SortHelpers.InverseOrder(ref this.currentLocalSongTitleOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
@@ -736,7 +743,7 @@ namespace Espera.View.ViewModels
 
         public void OrderLocalSongsByArtist()
         {
-            this.localSongOrderFunc = SortHelpers.GetOrderByArtist(this.currentLocalSongArtistOrder);
+            this.localSongOrderFunc = SortHelpers.GetOrderByArtist<Song>(this.currentLocalSongArtistOrder);
             SortHelpers.InverseOrder(ref this.currentLocalSongArtistOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
@@ -744,7 +751,7 @@ namespace Espera.View.ViewModels
 
         public void OrderLocalSongsByAlbum()
         {
-            this.localSongOrderFunc = SortHelpers.GetOrderByAlbum(this.currentLocalSongAlbumOrder);
+            this.localSongOrderFunc = SortHelpers.GetOrderByAlbum<Song>(this.currentLocalSongAlbumOrder);
             SortHelpers.InverseOrder(ref this.currentLocalSongAlbumOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
@@ -752,7 +759,7 @@ namespace Espera.View.ViewModels
 
         public void OrderLocalSongsByDuration()
         {
-            this.localSongOrderFunc = SortHelpers.GetOrderByDuration(this.currentLocalSongDurationOrder);
+            this.localSongOrderFunc = SortHelpers.GetOrderByDuration<Song>(this.currentLocalSongDurationOrder);
             SortHelpers.InverseOrder(ref this.currentLocalSongDurationOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
@@ -760,10 +767,34 @@ namespace Espera.View.ViewModels
 
         public void OrderLocalSongsByGenre()
         {
-            this.localSongOrderFunc = SortHelpers.GetOrderByGenre(this.currentLocalSongGenreOrder);
+            this.localSongOrderFunc = SortHelpers.GetOrderByGenre<Song>(this.currentLocalSongGenreOrder);
             SortHelpers.InverseOrder(ref this.currentLocalSongGenreOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
+        }
+
+        public void OrderYoutubeSongsByTitle()
+        {
+            this.youtubeSongOrderFunc = SortHelpers.GetOrderByTitle<YoutubeSong>(this.currentYoutubeSongTitleOrder);
+            SortHelpers.InverseOrder(ref this.currentYoutubeSongTitleOrder);
+
+            this.OnPropertyChanged(vm => vm.SelectableYoutubeSongs);
+        }
+
+        public void OrderYoutubeSongsByDuration()
+        {
+            this.youtubeSongOrderFunc = SortHelpers.GetOrderByDuration<YoutubeSong>(this.currentYoutubeSongDurationOrder);
+            SortHelpers.InverseOrder(ref this.currentYoutubeSongDurationOrder);
+
+            this.OnPropertyChanged(vm => vm.SelectableYoutubeSongs);
+        }
+
+        public void OrderYoutubeSongsByRating()
+        {
+            this.youtubeSongOrderFunc = SortHelpers.GetOrderByRating(this.currentYoutubeSongRatingOrder);
+            SortHelpers.InverseOrder(ref this.currentYoutubeSongRatingOrder);
+
+            this.OnPropertyChanged(vm => vm.SelectableYoutubeSongs);
         }
 
         public void StartSearch()

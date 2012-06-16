@@ -17,25 +17,25 @@ namespace Espera.View
             return sortOrder == SortOrder.Ascending ? source.ThenBy(keySelector) : source.ThenByDescending(keySelector);
         }
 
-        public static IOrderedEnumerable<Song> OrderBy(this IEnumerable<Song> source, Func<IEnumerable<Song>, IOrderedEnumerable<Song>> keySelector)
+        public static IOrderedEnumerable<T> OrderBy<T>(this IEnumerable<T> source, Func<IEnumerable<T>, IOrderedEnumerable<T>> keySelector)
         {
             return keySelector(source);
         }
 
-        public static Func<IEnumerable<Song>, IOrderedEnumerable<Song>> GetOrderByTitle(SortOrder sortOrder)
+        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByTitle<T>(SortOrder sortOrder) where T : Song
         {
             return songs => songs
                 .OrderBy(song => song.Title, sortOrder);
         }
 
-        public static Func<IEnumerable<Song>, IOrderedEnumerable<Song>> GetOrderByAlbum(SortOrder sortOrder)
+        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByAlbum<T>(SortOrder sortOrder) where T : Song
         {
             return songs => songs
                 .OrderBy(song => song.Album, sortOrder)
                 .ThenBy(song => song.TrackNumber, sortOrder);
         }
 
-        public static Func<IEnumerable<Song>, IOrderedEnumerable<Song>> GetOrderByArtist(SortOrder sortOrder)
+        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByArtist<T>(SortOrder sortOrder) where T : Song
         {
             return songs => songs
                 .OrderBy(song => song.Artist, sortOrder)
@@ -43,19 +43,25 @@ namespace Espera.View
                 .ThenBy(song => song.TrackNumber, sortOrder);
         }
 
-        public static Func<IEnumerable<Song>, IOrderedEnumerable<Song>> GetOrderByDuration(SortOrder sortOrder)
+        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByDuration<T>(SortOrder sortOrder) where T : Song
         {
             return songs => songs
                 .OrderBy(song => song.Duration, sortOrder);
         }
 
-        public static Func<IEnumerable<Song>, IOrderedEnumerable<Song>> GetOrderByGenre(SortOrder sortOrder)
+        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByGenre<T>(SortOrder sortOrder) where T : Song
         {
             return songs => songs
                 .OrderBy(song => song.Genre, sortOrder)
                 .ThenBy(song => song.Artist, sortOrder)
                 .ThenBy(song => song.Album, sortOrder)
                 .ThenBy(song => song.TrackNumber, sortOrder);
+        }
+
+        public static Func<IEnumerable<YoutubeSong>, IOrderedEnumerable<YoutubeSong>> GetOrderByRating(SortOrder sortOrder)
+        {
+            return songs => songs
+                .OrderBy(song => song.Rating);
         }
 
         public static void InverseOrder(ref SortOrder sortOrder)
