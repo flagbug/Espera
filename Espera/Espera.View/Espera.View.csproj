@@ -97,6 +97,8 @@
     </Compile>
     <Compile Include="RegistryHelper.cs" />
     <Compile Include="SearchEngine.cs" />
+    <Compile Include="SortHelpers.cs" />
+    <Compile Include="SortOrder.cs" />
     <Compile Include="ViewModels\AdministratorViewModel.cs" />
     <Compile Include="ViewModels\PlaylistEntryViewModel.cs" />
     <Compile Include="ViewModels\SongViewModel.cs" />
