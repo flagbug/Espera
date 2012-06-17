@@ -227,14 +227,9 @@ namespace Espera.View
             this.mainViewModel.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModel>();
         }
 
-        private void SortLocalSongTitle(object sender, RoutedEventArgs e)
+        private void SortLocalSongAlbum(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.OrderLocalSongsByTitle();
-        }
-
-        private void SortLocalSongDuration(object sender, RoutedEventArgs e)
-        {
-            this.mainViewModel.OrderLocalSongsByDuration();
+            this.mainViewModel.OrderLocalSongsByAlbum();
         }
 
         private void SortLocalSongArtist(object sender, RoutedEventArgs e)
@@ -242,9 +237,9 @@ namespace Espera.View
             this.mainViewModel.OrderLocalSongsByArtist();
         }
 
-        private void SortLocalSongAlbum(object sender, RoutedEventArgs e)
+        private void SortLocalSongDuration(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.OrderLocalSongsByAlbum();
+            this.mainViewModel.OrderLocalSongsByDuration();
         }
 
         private void SortLocalSongGenre(object sender, RoutedEventArgs e)
@@ -252,9 +247,9 @@ namespace Espera.View
             this.mainViewModel.OrderLocalSongsByGenre();
         }
 
-        private void SortYoutubeSongTitle(object sender, RoutedEventArgs e)
+        private void SortLocalSongTitle(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.OrderYoutubeSongsByTitle();
+            this.mainViewModel.OrderLocalSongsByTitle();
         }
 
         private void SortYoutubeSongDuration(object sender, RoutedEventArgs e)
@@ -265,6 +260,11 @@ namespace Espera.View
         private void SortYoutubeSongRating(object sender, RoutedEventArgs e)
         {
             this.mainViewModel.OrderYoutubeSongsByRating();
+        }
+
+        private void SortYoutubeSongTitle(object sender, RoutedEventArgs e)
+        {
+            this.mainViewModel.OrderYoutubeSongsByTitle();
         }
     }
 }

@@ -102,16 +102,22 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public bool LockLibraryRemoval
+        {
+            get { return this.library.LockLibraryRemoval; }
+            set { this.library.LockLibraryRemoval = value; }
+        }
+
         public bool LockPlaylistRemoval
         {
             get { return this.library.LockPlaylistRemoval; }
             set { this.library.LockPlaylistRemoval = value; }
         }
 
-        public bool LockLibraryRemoval
+        public bool LockPlayPause
         {
-            get { return this.library.LockLibraryRemoval; }
-            set { this.library.LockLibraryRemoval = value; }
+            get { return this.library.LockPlayPause; }
+            set { this.library.LockPlayPause = value; }
         }
 
         public bool LockTime
@@ -124,12 +130,6 @@ namespace Espera.View.ViewModels
         {
             get { return this.library.LockVolume; }
             set { this.library.LockVolume = value; }
-        }
-
-        public bool LockPlayPause
-        {
-            get { return this.library.LockPlayPause; }
-            set { this.library.LockPlayPause = value; }
         }
 
         public ICommand LoginCommand

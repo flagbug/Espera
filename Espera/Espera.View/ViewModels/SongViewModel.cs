@@ -29,6 +29,11 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public bool HasThumbnail
+        {
+            get { return this.thumbnail != null; }
+        }
+
         public Song Model
         {
             get { return this.Wrapped; }
@@ -52,11 +57,6 @@ namespace Espera.View.ViewModels
 
                 return song != null && song.Rating > 0 ? (double?)song.Rating : null;
             }
-        }
-
-        public bool HasThumbnail
-        {
-            get { return this.thumbnail != null; }
         }
 
         public ImageSource Thumbnail

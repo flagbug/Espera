@@ -7,27 +7,6 @@ namespace Espera.View
 {
     internal static class SortHelpers
     {
-        public static IOrderedEnumerable<TSource> OrderBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, SortOrder sortOrder)
-        {
-            return sortOrder == SortOrder.Ascending ? source.OrderBy(keySelector) : source.OrderByDescending(keySelector);
-        }
-
-        public static IOrderedEnumerable<TSource> ThenBy<TSource, TKey>(this IOrderedEnumerable<TSource> source, Func<TSource, TKey> keySelector, SortOrder sortOrder)
-        {
-            return sortOrder == SortOrder.Ascending ? source.ThenBy(keySelector) : source.ThenByDescending(keySelector);
-        }
-
-        public static IOrderedEnumerable<T> OrderBy<T>(this IEnumerable<T> source, Func<IEnumerable<T>, IOrderedEnumerable<T>> keySelector)
-        {
-            return keySelector(source);
-        }
-
-        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByTitle<T>(SortOrder sortOrder) where T : Song
-        {
-            return songs => songs
-                .OrderBy(song => song.Title, sortOrder);
-        }
-
         public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByAlbum<T>(SortOrder sortOrder) where T : Song
         {
             return songs => songs
@@ -64,9 +43,30 @@ namespace Espera.View
                 .OrderBy(song => song.Rating);
         }
 
+        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByTitle<T>(SortOrder sortOrder) where T : Song
+        {
+            return songs => songs
+                .OrderBy(song => song.Title, sortOrder);
+        }
+
         public static void InverseOrder(ref SortOrder sortOrder)
         {
             sortOrder = sortOrder == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
+        }
+
+        public static IOrderedEnumerable<TSource> OrderBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, SortOrder sortOrder)
+        {
+            return sortOrder == SortOrder.Ascending ? source.OrderBy(keySelector) : source.OrderByDescending(keySelector);
+        }
+
+        public static IOrderedEnumerable<T> OrderBy<T>(this IEnumerable<T> source, Func<IEnumerable<T>, IOrderedEnumerable<T>> keySelector)
+        {
+            return keySelector(source);
+        }
+
+        public static IOrderedEnumerable<TSource> ThenBy<TSource, TKey>(this IOrderedEnumerable<TSource> source, Func<TSource, TKey> keySelector, SortOrder sortOrder)
+        {
+            return sortOrder == SortOrder.Ascending ? source.ThenBy(keySelector) : source.ThenByDescending(keySelector);
         }
     }
 }

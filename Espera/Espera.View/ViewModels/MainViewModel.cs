@@ -17,25 +17,25 @@ namespace Espera.View.ViewModels
         private readonly Library library;
         private readonly Timer playlistTimeoutUpdateTimer;
         private readonly Timer updateTimer;
+        private SortOrder currentLocalSongAlbumOrder;
+        private SortOrder currentLocalSongArtistOrder;
+        private SortOrder currentLocalSongDurationOrder;
+        private SortOrder currentLocalSongGenreOrder;
+        private SortOrder currentLocalSongTitleOrder;
+        private SortOrder currentYoutubeSongDurationOrder;
+        private SortOrder currentYoutubeSongRatingOrder;
+        private SortOrder currentYoutubeSongTitleOrder;
         private bool displayTimeoutWarning;
         private volatile bool isAdding;
         private bool isLocal;
         private bool isYoutube;
         private bool isYoutubeSearching;
+        private Func<IEnumerable<Song>, IOrderedEnumerable<Song>> localSongOrderFunc;
         private string searchText;
         private string selectedArtist;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
         private IEnumerable<SongViewModel> selectedSongs;
-        private Func<IEnumerable<Song>, IOrderedEnumerable<Song>> localSongOrderFunc;
-        private SortOrder currentLocalSongTitleOrder;
-        private SortOrder currentLocalSongArtistOrder;
-        private SortOrder currentLocalSongAlbumOrder;
-        private SortOrder currentLocalSongDurationOrder;
-        private SortOrder currentLocalSongGenreOrder;
         private Func<IEnumerable<YoutubeSong>, IOrderedEnumerable<YoutubeSong>> youtubeSongOrderFunc;
-        private SortOrder currentYoutubeSongTitleOrder;
-        private SortOrder currentYoutubeSongDurationOrder;
-        private SortOrder currentYoutubeSongRatingOrder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -188,6 +188,11 @@ namespace Espera.View.ViewModels
         public bool IsPlaying
         {
             get { return this.library.IsPlaying; }
+        }
+
+        public bool IsSongSelected
+        {
+            get { return this.selectedSongs != null && this.SelectedSongs.Any(); }
         }
 
         public bool IsYoutube
@@ -612,11 +617,6 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public bool IsSongSelected
-        {
-            get { return this.selectedSongs != null && this.SelectedSongs.Any(); }
-        }
-
         /// <summary>
         /// Gets the number of songs that come after the currently played song.
         /// </summary>
@@ -757,10 +757,10 @@ namespace Espera.View.ViewModels
             this.updateTimer.Dispose();
         }
 
-        public void OrderLocalSongsByTitle()
+        public void OrderLocalSongsByAlbum()
         {
-            this.localSongOrderFunc = SortHelpers.GetOrderByTitle<Song>(this.currentLocalSongTitleOrder);
-            SortHelpers.InverseOrder(ref this.currentLocalSongTitleOrder);
+            this.localSongOrderFunc = SortHelpers.GetOrderByAlbum<Song>(this.currentLocalSongAlbumOrder);
+            SortHelpers.InverseOrder(ref this.currentLocalSongAlbumOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
         }
@@ -769,14 +769,6 @@ namespace Espera.View.ViewModels
         {
             this.localSongOrderFunc = SortHelpers.GetOrderByArtist<Song>(this.currentLocalSongArtistOrder);
             SortHelpers.InverseOrder(ref this.currentLocalSongArtistOrder);
-
-            this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
-        }
-
-        public void OrderLocalSongsByAlbum()
-        {
-            this.localSongOrderFunc = SortHelpers.GetOrderByAlbum<Song>(this.currentLocalSongAlbumOrder);
-            SortHelpers.InverseOrder(ref this.currentLocalSongAlbumOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
         }
@@ -797,12 +789,12 @@ namespace Espera.View.ViewModels
             this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
         }
 
-        public void OrderYoutubeSongsByTitle()
+        public void OrderLocalSongsByTitle()
         {
-            this.youtubeSongOrderFunc = SortHelpers.GetOrderByTitle<YoutubeSong>(this.currentYoutubeSongTitleOrder);
-            SortHelpers.InverseOrder(ref this.currentYoutubeSongTitleOrder);
+            this.localSongOrderFunc = SortHelpers.GetOrderByTitle<Song>(this.currentLocalSongTitleOrder);
+            SortHelpers.InverseOrder(ref this.currentLocalSongTitleOrder);
 
-            this.OnPropertyChanged(vm => vm.SelectableYoutubeSongs);
+            this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
         }
 
         public void OrderYoutubeSongsByDuration()
@@ -817,6 +809,14 @@ namespace Espera.View.ViewModels
         {
             this.youtubeSongOrderFunc = SortHelpers.GetOrderByRating(this.currentYoutubeSongRatingOrder);
             SortHelpers.InverseOrder(ref this.currentYoutubeSongRatingOrder);
+
+            this.OnPropertyChanged(vm => vm.SelectableYoutubeSongs);
+        }
+
+        public void OrderYoutubeSongsByTitle()
+        {
+            this.youtubeSongOrderFunc = SortHelpers.GetOrderByTitle<YoutubeSong>(this.currentYoutubeSongTitleOrder);
+            SortHelpers.InverseOrder(ref this.currentYoutubeSongTitleOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableYoutubeSongs);
         }

@@ -13,9 +13,9 @@ namespace Espera.Core
     [DebuggerDisplay("{Artist}-{Album}-{Title}")]
     public abstract class Song : IEquatable<Song>
     {
-        private string streamingPath;
-        private bool isCached;
         private int cachingProgress;
+        private bool isCached;
+        private string streamingPath;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Song"/> class.
@@ -207,21 +207,21 @@ namespace Espera.Core
         public abstract void LoadToCache();
 
         /// <summary>
-        /// Raises the <see cref="CachingFailed"/> event.
-        /// </summary>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        internal protected void OnCachingFailed(EventArgs e)
-        {
-            this.CachingFailed.RaiseSafe(this, e);
-        }
-
-        /// <summary>
         /// Raises the <see cref="CachingCompleted"/> event.
         /// </summary>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         internal protected void OnCachingCompleted(EventArgs e)
         {
             this.CachingCompleted.RaiseSafe(this, e);
+        }
+
+        /// <summary>
+        /// Raises the <see cref="CachingFailed"/> event.
+        /// </summary>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        internal protected void OnCachingFailed(EventArgs e)
+        {
+            this.CachingFailed.RaiseSafe(this, e);
         }
 
         /// <summary>

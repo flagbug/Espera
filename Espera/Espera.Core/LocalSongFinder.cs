@@ -21,9 +21,9 @@ namespace Espera.Core
         private readonly DirectoryScanner scanner;
         private readonly object songListLock;
         private readonly object tagLock;
+        private volatile bool abort;
         private volatile bool isSearching;
         private volatile bool isTagging;
-        private volatile bool abort;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalSongFinder"/> class.

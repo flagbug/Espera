@@ -6,9 +6,9 @@ namespace Espera.View.ViewModels
 {
     internal class StatusViewModel : ViewModelBase<StatusViewModel>
     {
+        private readonly Library library;
         private bool isAdding;
         private bool isUpdating;
-        private readonly Library library;
         private string path;
         private int processedTags;
         private int totalTags;

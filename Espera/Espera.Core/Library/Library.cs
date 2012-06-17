@@ -14,11 +14,15 @@ namespace Espera.Core.Library
     public class Library : IDisposable
     {
         private readonly AutoResetEvent cacheResetHandle;
+
+        // We need a lock when disposing songs to prevent a modification of the enumerator
+        private readonly object disposeLock;
+
         private readonly RemovableDriveWatcher driveWatcher;
         private readonly Playlist playlist;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
-        private readonly object disposeLock; // We need a lock when disposing songs to prevent a modification of the enumerator
+        private bool abortSongAdding;
         private AccessMode accessMode;
         private AudioPlayer currentPlayer;
         private bool isWaitingOnCache;
@@ -26,7 +30,6 @@ namespace Espera.Core.Library
         private bool overrideCurrentCaching;
         private string password;
         private float volume;
-        private bool abortSongAdding;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Library"/> class.
@@ -223,6 +226,17 @@ namespace Espera.Core.Library
             }
         }
 
+        public bool LockPlayPause
+        {
+            get { return CoreSettings.Default.LockPlayPause; }
+            set
+            {
+                this.ThrowIfNotAdmin();
+
+                CoreSettings.Default.LockPlayPause = value;
+            }
+        }
+
         public bool LockTime
         {
             get { return CoreSettings.Default.LockTime; }
@@ -242,17 +256,6 @@ namespace Espera.Core.Library
                 this.ThrowIfNotAdmin();
 
                 CoreSettings.Default.LockVolume = value;
-            }
-        }
-
-        public bool LockPlayPause
-        {
-            get { return CoreSettings.Default.LockPlayPause; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                CoreSettings.Default.LockPlayPause = value;
             }
         }
 
