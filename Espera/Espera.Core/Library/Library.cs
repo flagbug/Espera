@@ -507,7 +507,7 @@ namespace Espera.Core.Library
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
 
-            if (!CoreSettings.Default.LockLibraryRemoval && this.AccessMode == AccessMode.Party)
+            if (this.LockLibraryRemoval && this.AccessMode == AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
 
             DisposeSongs(songList);
@@ -530,7 +530,7 @@ namespace Espera.Core.Library
             if (indexes == null)
                 Throw.ArgumentNullException(() => indexes);
 
-            if (!CoreSettings.Default.LockPlaylistRemoval && this.AccessMode == AccessMode.Party)
+            if (this.LockPlaylistRemoval && this.AccessMode == AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
 
             bool stopCurrentSong = indexes.Any(index => index == this.playlist.CurrentSongIndex);
