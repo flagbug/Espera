@@ -607,8 +607,14 @@ namespace Espera.View.ViewModels
                 {
                     this.selectedSongs = value;
                     this.OnPropertyChanged(vm => vm.SelectedSongs);
+                    this.OnPropertyChanged(vm => vm.IsSongSelected);
                 }
             }
+        }
+
+        public bool IsSongSelected
+        {
+            get { return this.selectedSongs != null && this.SelectedSongs.Any(); }
         }
 
         /// <summary>

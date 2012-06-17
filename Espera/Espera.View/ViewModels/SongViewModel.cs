@@ -54,6 +54,11 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public bool HasThumbnail
+        {
+            get { return this.thumbnail != null; }
+        }
+
         public ImageSource Thumbnail
         {
             get
@@ -122,6 +127,7 @@ namespace Espera.View.ViewModels
                 {
                     this.thumbnail = bitmapImage;
                     this.OnPropertyChanged(vm => vm.Thumbnail);
+                    this.OnPropertyChanged(vm => vm.HasThumbnail);
                 }
 
                 worker.Dispose();

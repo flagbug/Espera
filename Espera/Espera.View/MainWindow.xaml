@@ -239,20 +239,27 @@
                     BorderBrush="{DynamicResource TextBoxBorderBrush}"
                     BorderThickness="0.5"
                     Visibility="{Binding Path=IsYoutube, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Grid DataContext="{Binding Path=SelectedSongs/}"
-                            Margin="5">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <Image Grid.Row="0"
-                           Source="{Binding Path=Thumbnail}" />
-                    <ScrollViewer Grid.Row="1"
-                                  Margin="0, 10, 0, 0 "
-                                  VerticalScrollBarVisibility="Auto">
-                        <TextBlock Text="{Binding Path=Description}"
-                                   TextWrapping="Wrap" />
-                    </ScrollViewer>
+                <Grid Visibility="{Binding Path=IsSongSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid DataContext="{Binding Path=SelectedSongs/}"
+                          Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0">
+                            <Controls:ProgressRing IsActive="True"
+                                                   Margin="0, 35, 0, 0" />
+                            <Image Grid.Row="0"
+                                   Source="{Binding Path=Thumbnail}"
+                                   Visibility="{Binding Path=HasThumbnail, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        </Grid>
+                        <ScrollViewer Grid.Row="1"
+                                      Margin="0, 10, 0, 0 "
+                                      VerticalScrollBarVisibility="Auto">
+                            <TextBlock Text="{Binding Path=Description}"
+                                       TextWrapping="Wrap" />
+                        </ScrollViewer>
+                    </Grid>
                 </Grid>
             </Border>
             <Grid Grid.Column="1">
