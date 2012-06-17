@@ -126,6 +126,12 @@ namespace Espera.View.ViewModels
             set { this.library.LockVolume = value; }
         }
 
+        public bool LockPlayPause
+        {
+            get { return this.library.LockPlayPause; }
+            set { this.library.LockPlayPause = value; }
+        }
+
         public ICommand LoginCommand
         {
             get

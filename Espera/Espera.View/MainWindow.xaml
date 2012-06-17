@@ -670,7 +670,12 @@
                                 </StackPanel>
                                 <TextBlock Text="Party mode"
                                            Style="{StaticResource AdminHeaderStyle}" />
-                                <CheckBox IsChecked="{Binding Path=LockVolume}">
+                                <CheckBox IsChecked="{Binding Path=LockPlayPause}">
+                                    <AccessText Text="Lock play/pause"
+                                                TextWrapping="Wrap" />
+                                </CheckBox>
+                                <CheckBox Margin="0, 10, 0, 0"
+                                          IsChecked="{Binding Path=LockVolume}">
                                     <AccessText Text="Lock volume"
                                                 TextWrapping="Wrap" />
                                 </CheckBox>

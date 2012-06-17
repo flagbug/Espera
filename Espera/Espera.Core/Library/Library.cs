@@ -242,6 +242,17 @@ namespace Espera.Core.Library
             }
         }
 
+        public bool LockPlayPause
+        {
+            get { return CoreSettings.Default.LockPlayPause; }
+            set
+            {
+                this.ThrowIfNotAdmin();
+
+                CoreSettings.Default.LockPlayPause = value;
+            }
+        }
+
         /// <summary>
         /// Gets the songs that are in the playlist.
         /// </summary>
@@ -443,7 +454,8 @@ namespace Espera.Core.Library
         /// </summary>
         public void PauseSong()
         {
-            this.ThrowIfNotAdmin();
+            if (this.LockPlayPause && this.AccessMode == AccessMode.Party)
+                throw new InvalidOperationException("Not allowed to play when in party mode.");
 
             this.currentPlayer.Pause();
         }
@@ -480,7 +492,8 @@ namespace Espera.Core.Library
             if (playlistIndex < 0)
                 Throw.ArgumentOutOfRangeException(() => playlistIndex, 0);
 
-            this.ThrowIfNotAdmin();
+            if (this.LockPlayPause && this.AccessMode == AccessMode.Party)
+                throw new InvalidOperationException("Not allowed to play when in party mode.");
 
             this.InternPlaySong(playlistIndex);
         }

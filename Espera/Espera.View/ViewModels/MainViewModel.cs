@@ -288,7 +288,7 @@ namespace Espera.View.ViewModels
                         this.updateTimer.Stop();
                         this.OnPropertyChanged(vm => vm.IsPlaying);
                     },
-                    param => this.IsAdmin
+                    param => this.IsAdmin || !this.library.LockPlayPause
                 );
             }
         }
@@ -328,7 +328,7 @@ namespace Espera.View.ViewModels
                             this.library.PlaySong(this.SelectedPlaylistEntries.First().Index);
                         }
                     },
-                    param => this.IsAdmin &&
+                    param => (this.IsAdmin || !this.library.LockPlayPause) &&
                         ((this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1) ||
                         (this.library.LoadedSong != null && this.library.IsPaused))
                 );
