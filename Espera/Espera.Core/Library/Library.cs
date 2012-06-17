@@ -18,6 +18,7 @@ namespace Espera.Core.Library
         private readonly Playlist playlist;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
+        private readonly object disposeLock; // We need a lock when disposing songs to prevent a modification of the enumerator
         private AccessMode accessMode;
         private AudioPlayer currentPlayer;
         private bool isWaitingOnCache;
@@ -25,6 +26,7 @@ namespace Espera.Core.Library
         private bool overrideCurrentCaching;
         private string password;
         private float volume;
+        private bool abortSongAdding;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Library"/> class.
@@ -39,6 +41,7 @@ namespace Espera.Core.Library
             this.driveWatcher = RemovableDriveWatcher.Create();
             this.driveWatcher.DriveRemoved += (sender, args) => Task.Factory.StartNew(this.Update);
             this.cacheResetHandle = new AutoResetEvent(false);
+            this.disposeLock = new object();
         }
 
         /// <summary>
@@ -444,7 +447,12 @@ namespace Espera.Core.Library
 
             this.driveWatcher.Dispose();
 
-            DisposeSongs(this.songs);
+            this.abortSongAdding = true;
+
+            lock (this.disposeLock)
+            {
+                DisposeSongs(this.songs);
+            }
 
             CoreSettings.Default.Save();
         }
@@ -593,11 +601,20 @@ namespace Espera.Core.Library
 
             finder.SongFound += (sender, e) =>
             {
+                if (this.abortSongAdding)
+                {
+                    finder.Abort();
+                    return;
+                }
+
                 bool added;
 
                 lock (this.songLock)
                 {
-                    added = this.songs.Add(e.Song);
+                    lock (this.disposeLock)
+                    {
+                        added = this.songs.Add(e.Song);
+                    }
                 }
 
                 if (added)

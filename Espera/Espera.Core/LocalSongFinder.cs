@@ -23,6 +23,7 @@ namespace Espera.Core
         private readonly object tagLock;
         private volatile bool isSearching;
         private volatile bool isTagging;
+        private volatile bool abort;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalSongFinder"/> class.
@@ -89,6 +90,11 @@ namespace Espera.Core
 
                 return songCount;
             }
+        }
+
+        public void Abort()
+        {
+            this.abort = true;
         }
 
         /// <summary>
@@ -176,12 +182,12 @@ namespace Espera.Core
 
         private void ScannerFileFound(object sender, FileEventArgs e)
         {
-            if (AllowedExtensions.Contains(e.File.Extension))
+            if (this.abort || !AllowedExtensions.Contains(e.File.Extension))
+                return;
+
+            lock (this.tagLock)
             {
-                lock (this.tagLock)
-                {
-                    this.pathQueue.Enqueue(e.File.FullName);
-                }
+                this.pathQueue.Enqueue(e.File.FullName);
             }
         }
 
@@ -195,7 +201,7 @@ namespace Espera.Core
         {
             this.isTagging = true;
 
-            while (this.isSearching || this.isTagging)
+            while ((this.isSearching || this.isTagging) && !this.abort)
             {
                 string filePath = null;
 
