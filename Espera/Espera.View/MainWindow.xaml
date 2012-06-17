@@ -354,74 +354,79 @@
                     <TabItem Header="YouTube"
                              IsEnabled="{Binding Path=CanUseYoutube}"
                              IsSelected="{Binding Path=IsYoutube}">
-                        <ListView ItemsSource="{Binding Path=SelectableYoutubeSongs, IsAsync=True}"
-                                  SelectionChanged="SongListSelectionChanged"
-                                  ContextMenuOpening="SongListContextMenuOpening">
-                            <ListView.Style>
-                                <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="{x:Type ListView}">
-                                    <Setter Property="SelectionMode" Value="Extended" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=IsAdmin}" Value="False">
-                                            <Setter Property="SelectionMode" Value="Single" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </ListView.Style>
-                            <ListView.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongsToPlaylistCommand}" />
-                                </ContextMenu>
-                            </ListView.ContextMenu>
-                            <ListView.ItemContainerStyle>
-                                <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
-                                    <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick"/>
-                                </Style>
-                            </ListView.ItemContainerStyle>
-                            <ListView.View>
-                                <GridView>
-                                    <GridViewColumn Width="{Binding Path=YoutubeTitleColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Content="Title" Click="SortYoutubeSongTitle" />
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Title}"
-                                                           TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=YoutubeDurationColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Content="Duration" Click="SortYoutubeSongDuration" />
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Duration, StringFormat=mm\\:ss}"
-                                                           TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=YoutubeRatingColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Content="Rating" Click="SortYoutubeSongRating" />
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Rating, StringFormat=\{0:0.0\}, TargetNullValue=n/a}"
-                                                           TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Header="Link"
-                                                    Width="{Binding Path=YoutubeLinkColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock>
-                                                    <Hyperlink Foreground="White" Command="{Binding Path=OpenPathCommand}">
-                                                        <TextBlock Text="{Binding Path=Path}"
-                                                                   TextTrimming="CharacterEllipsis" />
-                                                    </Hyperlink>
-                                                </TextBlock>
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
+                        <Grid>
+                            <ListView ItemsSource="{Binding Path=SelectableYoutubeSongs, IsAsync=True}"
+                                      SelectionChanged="SongListSelectionChanged"
+                                      ContextMenuOpening="SongListContextMenuOpening">
+                                <ListView.Style>
+                                    <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="{x:Type ListView}">
+                                        <Setter Property="SelectionMode" Value="Extended" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=IsAdmin}" Value="False">
+                                                <Setter Property="SelectionMode" Value="Single" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListView.Style>
+                                <ListView.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongsToPlaylistCommand}" />
+                                    </ContextMenu>
+                                </ListView.ContextMenu>
+                                <ListView.ItemContainerStyle>
+                                    <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
+                                        <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick"/>
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn Width="{Binding Path=YoutubeTitleColumnWidth, Mode=TwoWay}">
+                                            <GridViewColumnHeader Content="Title" Click="SortYoutubeSongTitle" />
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Path=Title}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Width="{Binding Path=YoutubeDurationColumnWidth, Mode=TwoWay}">
+                                            <GridViewColumnHeader Content="Duration" Click="SortYoutubeSongDuration" />
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Path=Duration, StringFormat=mm\\:ss}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Width="{Binding Path=YoutubeRatingColumnWidth, Mode=TwoWay}">
+                                            <GridViewColumnHeader Content="Rating" Click="SortYoutubeSongRating" />
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Path=Rating, StringFormat=\{0:0.0\}, TargetNullValue=n/a}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="Link"
+                                                        Width="{Binding Path=YoutubeLinkColumnWidth, Mode=TwoWay}">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock>
+                                                        <Hyperlink Foreground="White" Command="{Binding Path=OpenPathCommand}">
+                                                            <TextBlock Text="{Binding Path=Path}"
+                                                                       TextTrimming="CharacterEllipsis" />
+                                                        </Hyperlink>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                            <Grid Visibility="{Binding Path=IsYoutubeSearching, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Controls:ProgressRing IsActive="True" />
+                            </Grid>
+                        </Grid>
                     </TabItem>
                 </TabControl>
                 <GridSplitter Grid.Row="1"

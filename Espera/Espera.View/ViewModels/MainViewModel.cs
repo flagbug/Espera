@@ -21,6 +21,7 @@ namespace Espera.View.ViewModels
         private volatile bool isAdding;
         private bool isLocal;
         private bool isYoutube;
+        private bool isYoutubeSearching;
         private string searchText;
         private string selectedArtist;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
@@ -203,6 +204,19 @@ namespace Espera.View.ViewModels
                     {
                         this.SearchText = String.Empty;
                     }
+                }
+            }
+        }
+
+        public bool IsYoutubeSearching
+        {
+            get { return this.isYoutubeSearching; }
+            private set
+            {
+                if (this.IsYoutubeSearching != value)
+                {
+                    this.isYoutubeSearching = value;
+                    this.OnPropertyChanged(vm => vm.IsYoutubeSearching);
                 }
             }
         }
@@ -541,8 +555,12 @@ namespace Espera.View.ViewModels
         {
             get
             {
+                this.IsYoutubeSearching = true;
+
                 var finder = new YoutubeSongFinder(this.SearchText);
                 finder.Start();
+
+                this.IsYoutubeSearching = false;
 
                 return finder.SongsFound
                     .OrderBy(this.youtubeSongOrderFunc)
