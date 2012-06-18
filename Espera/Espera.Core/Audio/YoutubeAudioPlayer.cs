@@ -102,6 +102,13 @@ namespace Espera.Core.Audio
             set { this.player.AudioProperties.Volume = (int)(value * 100); }
         }
 
+        public override void Load(Song song)
+        {
+            this.player.Media = new LocationMedia(song.StreamingPath);
+
+            base.Load(song);
+        }
+
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
@@ -132,7 +139,6 @@ namespace Espera.Core.Audio
         /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
         public override void Play()
         {
-            this.player.Media = new LocationMedia(this.LoadedSong.StreamingPath);
             this.player.Play();
         }
 
