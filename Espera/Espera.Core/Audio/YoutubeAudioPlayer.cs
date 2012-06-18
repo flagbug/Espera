@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Vlc.DotNet.Core;
 using Vlc.DotNet.Core.Interops.Signatures.LibVlc.Media;
 using Vlc.DotNet.Core.Medias;
@@ -116,6 +117,13 @@ namespace Espera.Core.Audio
         public override void Pause()
         {
             this.player.Pause();
+
+            // Wait till the player has finally paused
+            // This is a workaround, because the VlcControl does not raise the Paused event properly
+            while (!this.player.IsPaused)
+            {
+                Thread.Sleep(100);
+            }
         }
 
         /// <summary>
