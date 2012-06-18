@@ -722,7 +722,7 @@ namespace Espera.Core.Library
 
             Task.Factory.StartNew(() =>
             {
-                if (song.HasToCache)
+                if (song.HasToCache && !song.IsCached)
                 {
                     bool cached = this.AwaitCaching(song);
 
