@@ -118,7 +118,7 @@ namespace Espera.Core
             return new LocalSong(filePath, audioType, duration)
                        {
                            Album = tag.Album ?? String.Empty,
-                           Artist = tag.FirstPerformer ?? String.Empty,
+                           Artist = tag.FirstPerformer ?? "Unknown Artist",
                            Genre = tag.FirstGenre ?? String.Empty,
                            Title = tag.Title ?? Path.GetFileNameWithoutExtension(filePath),
                            TrackNumber = (int)tag.Track
