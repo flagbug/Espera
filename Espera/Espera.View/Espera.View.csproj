@@ -27,7 +27,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>false</MapFileExtensions>
-    <InstallUrl>https://espera.codeplex.com/releases/clickonce/</InstallUrl>
+    <InstallUrl>http://espera.codeplex.com/releases/clickonce/</InstallUrl>
     <SupportUrl>https://github.com/flagbug/Espera</SupportUrl>
     <ErrorReportUrl>https://github.com/flagbug/Espera</ErrorReportUrl>
     <ProductName>Espera</ProductName>
