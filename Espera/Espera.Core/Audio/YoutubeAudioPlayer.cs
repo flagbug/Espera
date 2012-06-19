@@ -114,6 +114,7 @@ namespace Espera.Core.Audio
         /// </summary>
         public override void Dispose()
         {
+            this.Stop();
             this.player.Dispose();
             VlcContext.CloseAll();
         }
@@ -140,6 +141,13 @@ namespace Espera.Core.Audio
         public override void Play()
         {
             this.player.Play();
+
+            // Wait till the player is playing
+            // We need this, because the playback state sometimes doesn't get updated immediately
+            while (!this.player.IsPlaying)
+            {
+                Thread.Sleep(100);
+            }
         }
 
         /// <summary>
@@ -156,6 +164,11 @@ namespace Espera.Core.Audio
             // Also we have to check if the players duration isn't zero, because the TimeChanged event sometimes fires at the beginning of the song
             if (this.player.Duration != TimeSpan.Zero && this.player.Time >= this.player.Duration - TimeSpan.FromSeconds(1))
             {
+                while (this.player.IsPlaying)
+                {
+                    Thread.Sleep(100);
+                }
+
                 this.OnSongFinished(EventArgs.Empty);
             }
         }
