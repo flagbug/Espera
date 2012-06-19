@@ -734,8 +734,7 @@
                                            Style="{StaticResource AdminHeaderStyle}" />
                                 <CheckBox IsEnabled="{Binding Path=IsVlcInstalled}"
                                           IsChecked="{Binding Path=StreamYoutube}">
-                                    <AccessText Text="Stream from Youtube instead of downloading (Requires VLC media player >= 2.0 to be installed).
-                                                This is an experimental feature and may not work properly."
+                                    <AccessText Text="Stream from Youtube instead of downloading (Requires VLC media player >= 2.0 to be installed)."
                                                 TextWrapping="Wrap" />
                                 </CheckBox>
                             </StackPanel>
