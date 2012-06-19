@@ -668,7 +668,8 @@
                             </Grid.RowDefinitions>
                             <StackPanel Margin="5">
                                 <TextBlock Text="accent"
-                                            Style="{StaticResource AdminHeaderStyle}" />
+                                           Style="{StaticResource AdminHeaderStyle}"
+                                           Margin="0, 0, 0, 10"/>
                                 <StackPanel Orientation="Horizontal"
                                             HorizontalAlignment="Center">
                                     <Button Style="{StaticResource ColorPickerButtonStyle}"
