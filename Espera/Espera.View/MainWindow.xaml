@@ -272,7 +272,7 @@
                     <RowDefinition Height="{Binding Path=PlaylistHeight}" />
                 </Grid.RowDefinitions>
                 <TabControl Grid.Row="0">
-                    <TabItem Header="Local"
+                    <TabItem Header="local"
                              IsSelected="{Binding Path=IsLocal}">
                         <ListView DataContext="{Binding Path=LocalViewModel}"
                                   ItemsSource="{Binding Path=SelectableSongs}"
@@ -362,7 +362,7 @@
                             </ListView.View>
                         </ListView>
                     </TabItem>
-                    <TabItem Header="YouTube"
+                    <TabItem Header="youtube"
                              IsEnabled="{Binding Path=CanUseYoutube}"
                              IsSelected="{Binding Path=IsYoutube}">
                         <Grid DataContext="{Binding Path=YoutubeViewModel}">
@@ -667,7 +667,7 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <StackPanel Margin="5">
-                                <TextBlock Text="Accent"
+                                <TextBlock Text="accent"
                                             Style="{StaticResource AdminHeaderStyle}" />
                                 <StackPanel Orientation="Horizontal"
                                             HorizontalAlignment="Center">
@@ -684,7 +684,7 @@
                                             Background="#CCB400FF"
                                             Click="PurpleColorButtonButtonClick" />
                                 </StackPanel>
-                                <TextBlock Text="Party mode"
+                                <TextBlock Text="party mode"
                                            Style="{StaticResource AdminHeaderStyle}" />
                                 <CheckBox IsChecked="{Binding Path=LockPlayPause}">
                                     <AccessText Text="Lock play/pause"
@@ -730,7 +730,7 @@
                                                Margin="5, 0, 0, 0"
                                                Text="Seconds" />
                                 </StackPanel>
-                                <TextBlock Text="YouTube"
+                                <TextBlock Text="youtube"
                                            Style="{StaticResource AdminHeaderStyle}" />
                                 <CheckBox IsEnabled="{Binding Path=IsVlcInstalled}"
                                           IsChecked="{Binding Path=StreamYoutube}">
