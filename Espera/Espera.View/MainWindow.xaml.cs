@@ -43,7 +43,7 @@ namespace Espera.View
 
             if (!String.IsNullOrEmpty(selectedPath))
             {
-                this.mainViewModel.AddSongs(selectedPath);
+                this.mainViewModel.LocalViewModel.AddSongs(selectedPath);
             }
         }
 
@@ -189,7 +189,7 @@ namespace Espera.View
         {
             if (e.Key == Key.Enter)
             {
-                this.mainViewModel.StartSearch();
+                this.mainViewModel.YoutubeViewModel.StartSearch();
             }
 
             e.Handled = true;
@@ -197,9 +197,11 @@ namespace Espera.View
 
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed && this.mainViewModel.AddSelectedSongsToPlaylistCommand.CanExecute(null))
+            ICommand addToPlaylist = this.mainViewModel.CurrentSongSource.AddToPlaylistCommand;
+
+            if (e.LeftButton == MouseButtonState.Pressed && addToPlaylist.CanExecute(null))
             {
-                this.mainViewModel.AddSelectedSongsToPlaylistCommand.Execute(null);
+                addToPlaylist.Execute(null);
             }
         }
 
@@ -213,58 +215,60 @@ namespace Espera.View
 
         private void SongListKeyUp(object sender, KeyEventArgs e)
         {
+            ICommand removeFromLibrary = this.mainViewModel.LocalViewModel.RemoveFromLibraryCommand;
+
             if (e.Key == Key.Delete)
             {
-                if (this.mainViewModel.RemoveSelectedSongsFromLibraryCommand.CanExecute(null))
+                if (removeFromLibrary.CanExecute(null))
                 {
-                    this.mainViewModel.RemoveSelectedSongsFromLibraryCommand.Execute(null);
+                    removeFromLibrary.Execute(null);
                 }
             }
         }
 
         private void SongListSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            this.mainViewModel.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModel>();
+            this.mainViewModel.CurrentSongSource.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModel>();
         }
 
         private void SortLocalSongAlbum(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.OrderLocalSongsByAlbum();
+            this.mainViewModel.LocalViewModel.OrderByAlbum();
         }
 
         private void SortLocalSongArtist(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.OrderLocalSongsByArtist();
+            this.mainViewModel.LocalViewModel.OrderByArtist();
         }
 
         private void SortLocalSongDuration(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.OrderLocalSongsByDuration();
+            this.mainViewModel.LocalViewModel.OrderByDuration();
         }
 
         private void SortLocalSongGenre(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.OrderLocalSongsByGenre();
+            this.mainViewModel.LocalViewModel.OrderByGenre();
         }
 
         private void SortLocalSongTitle(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.OrderLocalSongsByTitle();
+            this.mainViewModel.LocalViewModel.OrderByTitle();
         }
 
         private void SortYoutubeSongDuration(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.OrderYoutubeSongsByDuration();
+            this.mainViewModel.YoutubeViewModel.OrderByDuration();
         }
 
         private void SortYoutubeSongRating(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.OrderYoutubeSongsByRating();
+            this.mainViewModel.YoutubeViewModel.OrderByRating();
         }
 
         private void SortYoutubeSongTitle(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.OrderYoutubeSongsByTitle();
+            this.mainViewModel.YoutubeViewModel.OrderByTitle();
         }
     }
 }

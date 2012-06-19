@@ -168,7 +168,7 @@
                      Width="150"
                      Controls:TextboxHelper.Watermark="Search"
                      Controls:TextboxHelper.ClearTextButton="True"
-                     Text="{Binding Path=SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Text="{Binding Path=CurrentSongSource.SearchText, UpdateSourceTrigger=PropertyChanged}"
                      KeyUp="SearchTextBoxKeyUp" />
             <ToggleButton Grid.Column="5"
                     Margin="10, 0, 0, 0"
@@ -185,8 +185,10 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Grid Grid.Column="0" Visibility="{Binding Path=IsLocal, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <ListBox ItemsSource="{Binding Path=Artists}"
+            <Grid Grid.Column="0"
+                  Visibility="{Binding Path=IsLocal, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ListBox DataContext="{Binding Path=LocalViewModel}"
+                         ItemsSource="{Binding Path=Artists}"
                          SelectedItem="{Binding Path=SelectedArtist}">
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="{x:Type ListBoxItem}">
@@ -239,7 +241,8 @@
                     BorderBrush="{DynamicResource TextBoxBorderBrush}"
                     BorderThickness="0.5"
                     Visibility="{Binding Path=IsYoutube, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Grid Visibility="{Binding Path=IsSongSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid DataContext="{Binding Path=YoutubeViewModel}"
+                      Visibility="{Binding Path=IsSongSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Grid DataContext="{Binding Path=SelectedSongs/}"
                           Margin="5">
                         <Grid.RowDefinitions>
@@ -271,7 +274,8 @@
                 <TabControl Grid.Row="0">
                     <TabItem Header="Local"
                              IsSelected="{Binding Path=IsLocal}">
-                        <ListView ItemsSource="{Binding Path=SelectableLocalSongs}"
+                        <ListView DataContext="{Binding Path=LocalViewModel}"
+                                  ItemsSource="{Binding Path=SelectableSongs}"
                                   SelectionChanged="SongListSelectionChanged"
                                   KeyUp="SongListKeyUp"
                                   ScrollViewer.CanContentScroll="True"
@@ -288,9 +292,9 @@
                             </ListView.Style>
                             <ListView.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongsToPlaylistCommand}" />
-                                    <MenuItem Header="Remove from library" Command="{Binding Path=RemoveSelectedSongsFromLibraryCommand}" />
-                                    <MenuItem Header="Remove from library and playlist" Command="{Binding Path=RemoveSelectedSongsFromLibraryAndPlaylistCommand}" />
+                                    <MenuItem Header="Add to playlist" Command="{Binding Path=AddToPlaylistCommand}" />
+                                    <MenuItem Header="Remove from library" Command="{Binding Path=RemoveFromLibraryCommand}" />
+                                    <MenuItem Header="Remove from library and playlist" Command="{Binding Path=RemoveFromLibraryAndPlaylistCommand}" />
                                 </ContextMenu>
                             </ListView.ContextMenu>
                             <ListView.ItemContainerStyle>
@@ -300,7 +304,7 @@
                             </ListView.ItemContainerStyle>
                             <ListView.View>
                                 <GridView>
-                                    <GridViewColumn Width="{Binding Path=LocalTitleColumnWidth, Mode=TwoWay}">
+                                    <GridViewColumn Width="{Binding Path=TitleColumnWidth, Mode=TwoWay}">
                                         <GridViewColumnHeader Content="Title" Click="SortLocalSongTitle" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
@@ -309,7 +313,7 @@
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=LocalDurationColumnWidth, Mode=TwoWay}">
+                                    <GridViewColumn Width="{Binding Path=DurationColumnWidth, Mode=TwoWay}">
                                         <GridViewColumnHeader Content="Duration" Click="SortLocalSongDuration" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
@@ -318,7 +322,7 @@
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=LocalArtistColumnWidth, Mode=TwoWay}">
+                                    <GridViewColumn Width="{Binding Path=ArtistColumnWidth, Mode=TwoWay}">
                                         <GridViewColumnHeader Content="Artist" Click="SortLocalSongArtist" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
@@ -327,7 +331,7 @@
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=LocalAlbumColumnWidth, Mode=TwoWay}">
+                                    <GridViewColumn Width="{Binding Path=AlbumColumnWidth, Mode=TwoWay}">
                                         <GridViewColumnHeader Content="Album" Click="SortLocalSongAlbum" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
@@ -336,7 +340,7 @@
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=LocalGenreColumnWidth, Mode=TwoWay}">
+                                    <GridViewColumn Width="{Binding Path=GenreColumnWidth, Mode=TwoWay}">
                                         <GridViewColumnHeader Content="Genre" Click="SortLocalSongGenre" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
@@ -346,7 +350,7 @@
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
                                     <GridViewColumn Header="Path"
-                                                    Width="{Binding Path=LocalPathColumnWidth, Mode=TwoWay}">
+                                                    Width="{Binding Path=PathColumnWidth, Mode=TwoWay}">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding Path=Path}"
@@ -361,8 +365,8 @@
                     <TabItem Header="YouTube"
                              IsEnabled="{Binding Path=CanUseYoutube}"
                              IsSelected="{Binding Path=IsYoutube}">
-                        <Grid>
-                            <ListView ItemsSource="{Binding Path=SelectableYoutubeSongs, IsAsync=True}"
+                        <Grid DataContext="{Binding Path=YoutubeViewModel}">
+                            <ListView ItemsSource="{Binding Path=SelectableSongs, IsAsync=True}"
                                       SelectionChanged="SongListSelectionChanged"
                                       ContextMenuOpening="SongListContextMenuOpening">
                                 <ListView.Style>
@@ -377,7 +381,7 @@
                                 </ListView.Style>
                                 <ListView.ContextMenu>
                                     <ContextMenu>
-                                        <MenuItem Header="Add to playlist" Command="{Binding Path=AddSelectedSongsToPlaylistCommand}" />
+                                        <MenuItem Header="Add to playlist" Command="{Binding Path=AddToPlaylistCommand}" />
                                     </ContextMenu>
                                 </ListView.ContextMenu>
                                 <ListView.ItemContainerStyle>
@@ -387,7 +391,7 @@
                                 </ListView.ItemContainerStyle>
                                 <ListView.View>
                                     <GridView>
-                                        <GridViewColumn Width="{Binding Path=YoutubeTitleColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumn Width="{Binding Path=TitleColumnWidth, Mode=TwoWay}">
                                             <GridViewColumnHeader Content="Title" Click="SortYoutubeSongTitle" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
@@ -396,7 +400,7 @@
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
-                                        <GridViewColumn Width="{Binding Path=YoutubeDurationColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumn Width="{Binding Path=DurationColumnWidth, Mode=TwoWay}">
                                             <GridViewColumnHeader Content="Duration" Click="SortYoutubeSongDuration" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
@@ -405,7 +409,7 @@
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
-                                        <GridViewColumn Width="{Binding Path=YoutubeRatingColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumn Width="{Binding Path=RatingColumnWidth, Mode=TwoWay}">
                                             <GridViewColumnHeader Content="Rating" Click="SortYoutubeSongRating" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
@@ -415,7 +419,7 @@
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
                                         <GridViewColumn Header="Link"
-                                                        Width="{Binding Path=YoutubeLinkColumnWidth, Mode=TwoWay}">
+                                                        Width="{Binding Path=LinkColumnWidth, Mode=TwoWay}">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock>
@@ -430,7 +434,7 @@
                                     </GridView>
                                 </ListView.View>
                             </ListView>
-                            <Grid Visibility="{Binding Path=IsYoutubeSearching, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid Visibility="{Binding Path=IsSearching, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Controls:ProgressRing IsActive="True" />
                             </Grid>
                         </Grid>
@@ -761,7 +765,7 @@
                    Height="25"
                    Visibility="{Binding Path=IsUpdating, Converter={StaticResource BooleanToVisibilityConverter}}"
                    Background="#FF454545"
-                   DataContext="{Binding Path=StatusViewModel}">
+                   DataContext="{Binding Path=LocalViewModel.StatusViewModel}">
             <StatusBarItem Content="Updating library..." />
         </StatusBar>
         <StatusBar Grid.Row="2"
@@ -769,7 +773,7 @@
                    Height="25"
                    Visibility="{Binding Path=IsAdding, Converter={StaticResource BooleanToVisibilityConverter}}"
                    Background="#FF454545"
-                   DataContext="{Binding Path=StatusViewModel}">
+                   DataContext="{Binding Path=LocalViewModel.StatusViewModel}">
             <StatusBarItem>
                 <ProgressBar Width="200"
                              Value="{Binding Path=ProcessedTags, Mode=OneWay}"

@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Input;
-using Espera.Core;
 using Espera.Core.Library;
 using Espera.View.Properties;
 using Rareform.Patterns.MVVM;
-using Rareform.Validation;
 
 namespace Espera.View.ViewModels
 {
@@ -17,43 +14,27 @@ namespace Espera.View.ViewModels
         private readonly Library library;
         private readonly Timer playlistTimeoutUpdateTimer;
         private readonly Timer updateTimer;
-        private SortOrder currentLocalSongAlbumOrder;
-        private SortOrder currentLocalSongArtistOrder;
-        private SortOrder currentLocalSongDurationOrder;
-        private SortOrder currentLocalSongGenreOrder;
-        private SortOrder currentLocalSongTitleOrder;
-        private SortOrder currentYoutubeSongDurationOrder;
-        private SortOrder currentYoutubeSongRatingOrder;
-        private SortOrder currentYoutubeSongTitleOrder;
+        private ISongSourceViewModel currentSongSource;
         private bool displayTimeoutWarning;
-        private volatile bool isAdding;
         private bool isLocal;
         private bool isYoutube;
-        private bool isYoutubeSearching;
-        private Func<IEnumerable<Song>, IOrderedEnumerable<Song>> localSongOrderFunc;
-        private string searchText;
-        private string selectedArtist;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
-        private IEnumerable<SongViewModel> selectedSongs;
-        private Func<IEnumerable<YoutubeSong>, IOrderedEnumerable<YoutubeSong>> youtubeSongOrderFunc;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MainViewModel"/> class.
-        /// </summary>
         public MainViewModel()
         {
             this.library = new Library();
             this.library.SongStarted += LibraryRaisedSongStarted;
             this.library.SongFinished += LibraryRaisedSongFinished;
             this.library.AccessModeChanged += (sender, e) => this.UpdateUserAccess();
-            this.library.Updated += (sender, args) =>
-            {
-                this.OnPropertyChanged(vm => vm.Artists);
-                this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
-            };
+            this.library.PlaylistChanged += (sender, e) => this.UpdatePlaylist();
 
             this.AdministratorViewModel = new AdministratorViewModel(this.library);
-            this.StatusViewModel = new StatusViewModel(this.library);
+
+            this.LocalViewModel = new LocalViewModel(this.library);
+            this.LocalViewModel.TimeoutWarning += (sender, e) => this.TriggerTimeoutWarning();
+
+            this.YoutubeViewModel = new YoutubeViewModel(this.library);
+            this.YoutubeViewModel.TimeoutWarning += (sender, e) => this.TriggerTimeoutWarning();
 
             this.updateTimer = new Timer(333);
             this.updateTimer.Elapsed += (sender, e) => this.UpdateCurrentTime();
@@ -61,67 +42,9 @@ namespace Espera.View.ViewModels
             this.playlistTimeoutUpdateTimer = new Timer(333);
             this.playlistTimeoutUpdateTimer.Elapsed += (sender, e) => this.UpdateRemainingPlaylistTimeout();
             this.playlistTimeoutUpdateTimer.Start();
-
-            this.searchText = String.Empty;
-
-            // We need a default sorting order
-            this.OrderLocalSongsByArtist();
-            this.OrderYoutubeSongsByTitle();
-        }
-
-        public ICommand AddSelectedSongsToPlaylistCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        if (!this.library.CanAddSongToPlaylist)
-                        {
-                            // Trigger the animation
-                            this.DisplayTimeoutWarning = true;
-                            this.DisplayTimeoutWarning = false;
-
-                            return;
-                        }
-
-                        if (this.IsAdmin)
-                        {
-                            this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model));
-                        }
-
-                        else
-                        {
-                            this.library.AddSongToPlaylist(this.SelectedSongs.Select(song => song.Model).Single());
-                            this.OnPropertyChanged(vm => vm.RemainingPlaylistTimeout);
-                        }
-
-                        this.OnPropertyChanged(vm => vm.Playlist);
-                        this.OnPropertyChanged(vm => vm.SongsRemaining);
-                        this.OnPropertyChanged(vm => vm.TimeRemaining);
-                    },
-                    param => this.SelectedSongs != null && this.SelectedSongs.Any()
-                );
-            }
         }
 
         public AdministratorViewModel AdministratorViewModel { get; private set; }
-
-        public IEnumerable<string> Artists
-        {
-            get
-            {
-                // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
-                IEnumerable<Song> songs = this.isAdding ? this.library.Songs.ToList() : this.library.Songs;
-
-                return songs.FilterSongs(this.SearchText)
-                    .Where(song => !String.IsNullOrWhiteSpace(song.Artist))
-                    .GroupBy(song => song.Artist)
-                    .Select(group => group.Key)
-                    .OrderBy(artist => artist);
-            }
-        }
 
         public bool CanChangeTime
         {
@@ -142,6 +65,19 @@ namespace Espera.View.ViewModels
         {
             get { return (int)this.CurrentTime.TotalSeconds; }
             set { this.library.CurrentTime = TimeSpan.FromSeconds(value); }
+        }
+
+        public ISongSourceViewModel CurrentSongSource
+        {
+            get { return this.currentSongSource; }
+            private set
+            {
+                if (this.CurrentSongSource != value)
+                {
+                    this.currentSongSource = value;
+                    this.OnPropertyChanged(vm => vm.CurrentSongSource);
+                }
+            }
         }
 
         public TimeSpan CurrentTime
@@ -179,7 +115,7 @@ namespace Espera.View.ViewModels
 
                     if (this.IsLocal)
                     {
-                        this.SearchText = String.Empty;
+                        this.CurrentSongSource = this.LocalViewModel;
                     }
                 }
             }
@@ -188,11 +124,6 @@ namespace Espera.View.ViewModels
         public bool IsPlaying
         {
             get { return this.library.IsPlaying; }
-        }
-
-        public bool IsSongSelected
-        {
-            get { return this.selectedSongs != null && this.SelectedSongs.Any(); }
         }
 
         public bool IsYoutube
@@ -207,60 +138,13 @@ namespace Espera.View.ViewModels
 
                     if (this.IsYoutube)
                     {
-                        this.SearchText = String.Empty;
+                        this.CurrentSongSource = this.YoutubeViewModel;
                     }
                 }
             }
         }
 
-        public bool IsYoutubeSearching
-        {
-            get { return this.isYoutubeSearching; }
-            private set
-            {
-                if (this.IsYoutubeSearching != value)
-                {
-                    this.isYoutubeSearching = value;
-                    this.OnPropertyChanged(vm => vm.IsYoutubeSearching);
-                }
-            }
-        }
-
-        public int LocalAlbumColumnWidth
-        {
-            get { return Settings.Default.LocalAlbumColumnWidth; }
-            set { Settings.Default.LocalAlbumColumnWidth = value; }
-        }
-
-        public int LocalArtistColumnWidth
-        {
-            get { return Settings.Default.LocalArtistColumnWidth; }
-            set { Settings.Default.LocalArtistColumnWidth = value; }
-        }
-
-        public int LocalDurationColumnWidth
-        {
-            get { return Settings.Default.LocalDurationColumnWidth; }
-            set { Settings.Default.LocalDurationColumnWidth = value; }
-        }
-
-        public int LocalGenreColumnWidth
-        {
-            get { return Settings.Default.LocalGenreColumnWidth; }
-            set { Settings.Default.LocalGenreColumnWidth = value; }
-        }
-
-        public int LocalPathColumnWidth
-        {
-            get { return Settings.Default.LocalPathColumnWidth; }
-            set { Settings.Default.LocalPathColumnWidth = value; }
-        }
-
-        public int LocalTitleColumnWidth
-        {
-            get { return Settings.Default.LocalTitleColumnWidth; }
-            set { Settings.Default.LocalTitleColumnWidth = value; }
-        }
+        public LocalViewModel LocalViewModel { get; private set; }
 
         /// <summary>
         /// Sets the volume to the lowest possible value.
@@ -473,122 +357,6 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public object RemoveSelectedSongsFromLibraryAndPlaylistCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        var songs = this.SelectedSongs.Select(song => song.Model).ToList();
-
-                        this.library.RemoveFromLibrary(songs);
-                        this.library.RemoveFromPlaylist(songs);
-
-                        this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
-                        this.OnPropertyChanged(vm => vm.Playlist);
-                        this.OnPropertyChanged(vm => vm.SongsRemaining);
-                        this.OnPropertyChanged(vm => vm.TimeRemaining);
-                        this.OnPropertyChanged(vm => vm.Artists);
-                    },
-                    param => this.SelectedSongs != null
-                        && this.SelectedSongs.Any()
-                        && (this.IsAdmin || !this.library.LockLibraryRemoval)
-                );
-            }
-        }
-
-        public ICommand RemoveSelectedSongsFromLibraryCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        this.library.RemoveFromLibrary(this.SelectedSongs.Select(song => song.Model));
-
-                        this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
-                        this.OnPropertyChanged(vm => vm.Playlist);
-                        this.OnPropertyChanged(vm => vm.SongsRemaining);
-                        this.OnPropertyChanged(vm => vm.TimeRemaining);
-                        this.OnPropertyChanged(vm => vm.Artists);
-                    },
-                    param => this.SelectedSongs != null
-                        && this.SelectedSongs.Any()
-                        && (this.IsAdmin || !this.library.LockLibraryRemoval)
-                );
-            }
-        }
-
-        public string SearchText
-        {
-            get { return this.searchText; }
-            set
-            {
-                if (this.SearchText != value)
-                {
-                    this.searchText = value;
-                    this.OnPropertyChanged(vm => vm.SearchText);
-
-                    if (this.IsLocal)
-                    {
-                        this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
-                        this.OnPropertyChanged(vm => vm.Artists);
-                    }
-                }
-            }
-        }
-
-        public IEnumerable<SongViewModel> SelectableLocalSongs
-        {
-            get
-            {
-                // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
-                var songs = (this.isAdding ? this.library.Songs.ToList() : this.library.Songs)
-                    .AsParallel()
-                    .Where(song => song.Artist == this.SelectedArtist);
-
-                return songs.FilterSongs(this.SearchText)
-                    .OrderBy(this.localSongOrderFunc)
-                    .Select(song => new SongViewModel(song));
-            }
-        }
-
-        public IEnumerable<SongViewModel> SelectableYoutubeSongs
-        {
-            get
-            {
-                this.IsYoutubeSearching = true;
-
-                var finder = new YoutubeSongFinder(this.SearchText);
-                finder.Start();
-
-                this.IsYoutubeSearching = false;
-
-                return finder.SongsFound
-                    .OrderBy(this.youtubeSongOrderFunc)
-                    .Select(song => new SongViewModel(song));
-            }
-        }
-
-        public string SelectedArtist
-        {
-            get { return this.selectedArtist; }
-            set
-            {
-                if (this.SelectedArtist != value)
-                {
-                    this.selectedArtist = value;
-                    this.OnPropertyChanged(vm => vm.SelectedArtist);
-                    this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
-                    this.IsLocal = true;
-                    this.IsYoutube = false;
-                }
-            }
-        }
-
         public IEnumerable<PlaylistEntryViewModel> SelectedPlaylistEntries
         {
             get { return this.selectedPlaylistEntries; }
@@ -599,20 +367,6 @@ namespace Espera.View.ViewModels
                     this.selectedPlaylistEntries = value;
                     this.OnPropertyChanged(vm => vm.SelectedPlaylistEntries);
                     this.OnPropertyChanged(vm => vm.PlayCommand);
-                }
-            }
-        }
-
-        public IEnumerable<SongViewModel> SelectedSongs
-        {
-            get { return this.selectedSongs; }
-            set
-            {
-                if (this.SelectedSongs != value)
-                {
-                    this.selectedSongs = value;
-                    this.OnPropertyChanged(vm => vm.SelectedSongs);
-                    this.OnPropertyChanged(vm => vm.IsSongSelected);
                 }
             }
         }
@@ -629,8 +383,6 @@ namespace Espera.View.ViewModels
                     .Count();
             }
         }
-
-        public StatusViewModel StatusViewModel { get; private set; }
 
         /// <summary>
         /// Gets the total remaining time of all songs that come after the currently played song.
@@ -689,64 +441,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public int YoutubeDurationColumnWidth
-        {
-            get { return Settings.Default.YoutubeDurationColumnWidth; }
-            set { Settings.Default.YoutubeDurationColumnWidth = value; }
-        }
-
-        public int YoutubeLinkColumnWidth
-        {
-            get { return Settings.Default.YoutubeLinkColumnWidth; }
-            set { Settings.Default.YoutubeLinkColumnWidth = value; }
-        }
-
-        public int YoutubeRatingColumnWidth
-        {
-            get { return Settings.Default.YoutubeRatingColumnWidth; }
-            set { Settings.Default.YoutubeRatingColumnWidth = value; }
-        }
-
-        public int YoutubeTitleColumnWidth
-        {
-            get { return Settings.Default.YoutubeTitleColumnWidth; }
-            set { Settings.Default.YoutubeTitleColumnWidth = value; }
-        }
-
-        public void AddSongs(string folderPath)
-        {
-            if (folderPath == null)
-                Throw.ArgumentNullException(() => folderPath);
-
-            string lastArtist = null;
-
-            EventHandler<LibraryFillEventArgs> handler = (sender, e) =>
-            {
-                this.StatusViewModel.Update(e.Song.OriginalPath, e.ProcessedTagCount, e.TotalTagCount);
-
-                if (e.Song.Artist != lastArtist)
-                {
-                    lastArtist = e.Song.Artist;
-                    this.OnPropertyChanged(vm => vm.Artists);
-                }
-            };
-
-            this.library.SongAdded += handler;
-
-            this.isAdding = true;
-            this.StatusViewModel.IsAdding = true;
-
-            this.library
-                .AddLocalSongsAsync(folderPath)
-                .ContinueWith(task =>
-                {
-                    this.library.SongAdded -= handler;
-
-                    this.OnPropertyChanged(vm => vm.Artists);
-                    this.isAdding = false;
-                    this.StatusViewModel.Reset();
-                });
-        }
+        public YoutubeViewModel YoutubeViewModel { get; private set; }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
@@ -755,83 +450,6 @@ namespace Espera.View.ViewModels
         {
             this.library.Dispose();
             this.updateTimer.Dispose();
-        }
-
-        public void OrderLocalSongsByAlbum()
-        {
-            this.localSongOrderFunc = SortHelpers.GetOrderByAlbum<Song>(this.currentLocalSongAlbumOrder);
-            SortHelpers.InverseOrder(ref this.currentLocalSongAlbumOrder);
-
-            this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
-        }
-
-        public void OrderLocalSongsByArtist()
-        {
-            this.localSongOrderFunc = SortHelpers.GetOrderByArtist<Song>(this.currentLocalSongArtistOrder);
-            SortHelpers.InverseOrder(ref this.currentLocalSongArtistOrder);
-
-            this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
-        }
-
-        public void OrderLocalSongsByDuration()
-        {
-            this.localSongOrderFunc = SortHelpers.GetOrderByDuration<Song>(this.currentLocalSongDurationOrder);
-            SortHelpers.InverseOrder(ref this.currentLocalSongDurationOrder);
-
-            this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
-        }
-
-        public void OrderLocalSongsByGenre()
-        {
-            this.localSongOrderFunc = SortHelpers.GetOrderByGenre<Song>(this.currentLocalSongGenreOrder);
-            SortHelpers.InverseOrder(ref this.currentLocalSongGenreOrder);
-
-            this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
-        }
-
-        public void OrderLocalSongsByTitle()
-        {
-            this.localSongOrderFunc = SortHelpers.GetOrderByTitle<Song>(this.currentLocalSongTitleOrder);
-            SortHelpers.InverseOrder(ref this.currentLocalSongTitleOrder);
-
-            this.OnPropertyChanged(vm => vm.SelectableLocalSongs);
-        }
-
-        public void OrderYoutubeSongsByDuration()
-        {
-            this.youtubeSongOrderFunc = SortHelpers.GetOrderByDuration<YoutubeSong>(this.currentYoutubeSongDurationOrder);
-            SortHelpers.InverseOrder(ref this.currentYoutubeSongDurationOrder);
-
-            this.OnPropertyChanged(vm => vm.SelectableYoutubeSongs);
-        }
-
-        public void OrderYoutubeSongsByRating()
-        {
-            this.youtubeSongOrderFunc = SortHelpers.GetOrderByRating(this.currentYoutubeSongRatingOrder);
-            SortHelpers.InverseOrder(ref this.currentYoutubeSongRatingOrder);
-
-            this.OnPropertyChanged(vm => vm.SelectableYoutubeSongs);
-        }
-
-        public void OrderYoutubeSongsByTitle()
-        {
-            this.youtubeSongOrderFunc = SortHelpers.GetOrderByTitle<YoutubeSong>(this.currentYoutubeSongTitleOrder);
-            SortHelpers.InverseOrder(ref this.currentYoutubeSongTitleOrder);
-
-            this.OnPropertyChanged(vm => vm.SelectableYoutubeSongs);
-        }
-
-        public void StartSearch()
-        {
-            if (this.IsYoutube)
-            {
-                Task.Factory.StartNew(() => this.OnPropertyChanged(vm => vm.SelectableYoutubeSongs));
-            }
-
-            else
-            {
-                Task.Factory.StartNew(() => this.OnPropertyChanged(vm => vm.SelectableLocalSongs));
-            }
         }
 
         private void LibraryRaisedSongFinished(object sender, EventArgs e)
@@ -861,10 +479,28 @@ namespace Espera.View.ViewModels
             this.updateTimer.Start();
         }
 
+        private void TriggerTimeoutWarning()
+        {
+            this.DisplayTimeoutWarning = true;
+            this.DisplayTimeoutWarning = false;
+        }
+
         private void UpdateCurrentTime()
         {
             this.OnPropertyChanged(vm => vm.CurrentSeconds);
             this.OnPropertyChanged(vm => vm.CurrentTime);
+        }
+
+        private void UpdatePlaylist()
+        {
+            this.OnPropertyChanged(vm => vm.Playlist);
+            this.OnPropertyChanged(vm => vm.SongsRemaining);
+            this.OnPropertyChanged(vm => vm.TimeRemaining);
+
+            if (this.library.EnablePlaylistTimeout)
+            {
+                this.OnPropertyChanged(vm => vm.RemainingPlaylistTimeout);
+            }
         }
 
         private void UpdateRemainingPlaylistTimeout()

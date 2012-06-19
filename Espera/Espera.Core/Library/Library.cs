@@ -53,6 +53,11 @@ namespace Espera.Core.Library
         public event EventHandler AccessModeChanged;
 
         /// <summary>
+        /// Occurs when the playlist has changed.
+        /// </summary>
+        public event EventHandler PlaylistChanged;
+
+        /// <summary>
         /// Occurs when a song has been added to the library.
         /// </summary>
         public event EventHandler<LibraryFillEventArgs> SongAdded;
@@ -369,6 +374,8 @@ namespace Espera.Core.Library
             this.ThrowIfNotAdmin();
 
             this.playlist.AddSongs(songList.ToList()); // Copy the sequence to a list, so that the enumeration doesn't gets modified
+
+            this.PlaylistChanged.RaiseSafe(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -384,6 +391,8 @@ namespace Espera.Core.Library
             this.playlist.AddSongs(new[] { song });
 
             this.lastSongAddTime = DateTime.Now;
+
+            this.PlaylistChanged.RaiseSafe(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -547,6 +556,8 @@ namespace Espera.Core.Library
             bool stopCurrentSong = indexes.Any(index => index == this.playlist.CurrentSongIndex);
 
             this.playlist.RemoveSongs(indexes);
+
+            this.PlaylistChanged.RaiseSafe(this, EventArgs.Empty);
 
             if (stopCurrentSong)
             {

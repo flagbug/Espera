@@ -100,10 +100,14 @@
     <Compile Include="SortHelpers.cs" />
     <Compile Include="SortOrder.cs" />
     <Compile Include="ViewModels\AdministratorViewModel.cs" />
+    <Compile Include="ViewModels\ISongSourceViewModel.cs" />
+    <Compile Include="ViewModels\LocalViewModel.cs" />
     <Compile Include="ViewModels\PlaylistEntryViewModel.cs" />
+    <Compile Include="ViewModels\SongSourceViewModel.cs" />
     <Compile Include="ViewModels\SongViewModel.cs" />
     <Compile Include="ViewModels\SongViewModelBase.cs" />
     <Compile Include="ViewModels\StatusViewModel.cs" />
+    <Compile Include="ViewModels\YoutubeViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
