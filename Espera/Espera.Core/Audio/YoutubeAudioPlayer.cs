@@ -13,6 +13,7 @@ namespace Espera.Core.Audio
     internal sealed class YoutubeAudioPlayer : AudioPlayer
     {
         private readonly VlcControl player;
+        private TimeSpan? currentTime;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="YoutubeAudioPlayer"/> class.
@@ -48,7 +49,7 @@ namespace Espera.Core.Audio
         /// </value>
         public override TimeSpan CurrentTime
         {
-            get { return this.player.Time; }
+            get { return this.currentTime ?? this.player.Time; }
             set { this.player.Time = value; }
         }
 
@@ -124,6 +125,9 @@ namespace Espera.Core.Audio
         /// </summary>
         public override void Pause()
         {
+            // We need to temporarly store the current time, because when paused, the player sets it to 0
+            this.currentTime = this.CurrentTime;
+
             this.player.Pause();
 
             // Wait till the player has finally paused
@@ -140,6 +144,8 @@ namespace Espera.Core.Audio
         /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
         public override void Play()
         {
+            this.currentTime = null;
+
             this.player.Play();
 
             // Wait till the player is playing
