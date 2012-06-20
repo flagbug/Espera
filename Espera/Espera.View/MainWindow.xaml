@@ -1,15 +1,16 @@
-﻿<Controls:MetroWindow x:Class="Espera.View.MainWindow"
-                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                      xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-                      xmlns:ViewModels="clr-namespace:Espera.View.ViewModels"
-                      Title="Espera"
-                      Height="600"
-                      Width="800"
-                      WindowState="Maximized"
-                      Icon="/Espera;component/Images/ApplicationIcon.png"
-                      Closing="MetroWindowClosing"
-                      KeyUp="MetroWindowKeyUp">
+﻿<Controls:MetroWindow
+    x:Class="Espera.View.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+    xmlns:ViewModels="clr-namespace:Espera.View.ViewModels"
+    Title="Espera"
+    Height="600"
+    Width="800"
+    WindowState="Maximized"
+    Icon="/Espera;component/Images/ApplicationIcon.png"
+    Closing="MetroWindowClosing"
+    KeyUp="MetroWindowKeyUp">
     <Window.DataContext>
         <ViewModels:MainViewModel x:Name="mainViewModel" />
     </Window.DataContext>
@@ -26,7 +27,10 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border Background="Transparent" Height="25" Width="25" >
+                            <Border
+                                Background="Transparent"
+                                Height="25"
+                                Width="25" >
                                 <ContentPresenter  />
                             </Border>
                         </ControlTemplate>
@@ -37,10 +41,11 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}"
-                                    Height="25"
-                                    Width="25"
-                                    Margin="5, 0, 5, 0" >
+                            <Border
+                                Background="{TemplateBinding Background}"
+                                Height="25"
+                                Width="25"
+                                Margin="5, 0, 5, 0" >
                                 <ContentPresenter />
                             </Border>
                         </ControlTemplate>
@@ -66,8 +71,9 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0"
-              Height="30">
+        <Grid
+            Grid.Row="0"
+            Height="30">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -76,16 +82,19 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0"
-                        Orientation="Horizontal">
-                <Button Padding="0"
-                        ToolTip="Add music"
-                        Click="AddSongsButtonClick">
+            <StackPanel
+                Grid.Column="0"
+                Orientation="Horizontal">
+                <Button
+                    Padding="0"
+                    ToolTip="Add music"
+                    Click="AddSongsButtonClick">
                     <Image Source="/Espera;component/Images/Add.png" />
                 </Button>
-                <Button Padding="0"
-                        Margin="15, 0, 0, 0"
-                        Width="30">
+                <Button
+                    Padding="0"
+                    Margin="15, 0, 0, 0"
+                    Width="30">
                     <Button.Style>
                         <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="{x:Type Button}">
                             <Style.Triggers>
@@ -116,86 +125,102 @@
                         </Image.Style>
                     </Image>
                 </Button>
-                <Button Padding="0"
-                        Margin="5, 0, 0, 0"
-                        ToolTip="Previous song"
-                        Command="{Binding Path=PreviousSongCommand}">
+                <Button
+                    Padding="0"
+                    Margin="5, 0, 0, 0"
+                    ToolTip="Previous song"
+                    Command="{Binding Path=PreviousSongCommand}">
                     <Image Source="/Espera;component/Images/Previous.png" />
                 </Button>
-                <Button Padding="0"
-                        Margin="5, 0, 0, 0"
-                        ToolTip="Next song"
-                        Command="{Binding Path=NextSongCommand}">
+                <Button
+                    Padding="0"
+                    Margin="5, 0, 0, 0"
+                    ToolTip="Next song"
+                    Command="{Binding Path=NextSongCommand}">
                     <Image Source="/Espera;component/Images/Next.png" />
                 </Button>
             </StackPanel>
-            <StackPanel Grid.Column="1"
-                        Margin="10, 0, 0, 0"
-                        Orientation="Horizontal">
-                <Button Style="{StaticResource VolumeButtonStyle}"
-                        ToolTip="Mute"
-                        Command="{Binding Path=MuteCommand}"
-                        VerticalAlignment="Center">
+            <StackPanel
+                Grid.Column="1"
+                Margin="10, 0, 0, 0"
+                Orientation="Horizontal">
+                <Button
+                    Style="{StaticResource VolumeButtonStyle}"
+                    ToolTip="Mute"
+                    Command="{Binding Path=MuteCommand}"
+                    VerticalAlignment="Center">
                     <Image Source="/Espera;component/Images/Mute.png" />
                 </Button>
-                <Slider Width="200"
-                        IsMoveToPointEnabled="True"
-                        Maximum="1"
-                        IsEnabled="{Binding Path=CanChangeVolume}"
-                        Value="{Binding Path=Volume}" />
-                <Button Style="{StaticResource VolumeButtonStyle}"
-                        ToolTip="Unmute"
-                        Command="{Binding Path=UnMuteCommand}"
-                        VerticalAlignment="Center">
+                <Slider
+                    Width="200"
+                    IsMoveToPointEnabled="True"
+                    Maximum="1"
+                    IsEnabled="{Binding Path=CanChangeVolume}"
+                    Value="{Binding Path=Volume}" />
+                <Button
+                    Style="{StaticResource VolumeButtonStyle}"
+                    ToolTip="Unmute"
+                    Command="{Binding Path=UnMuteCommand}"
+                    VerticalAlignment="Center">
                     <Image Source="/Espera;component/Images/Unmute.png" />
                 </Button>
             </StackPanel>
-            <Slider Grid.Column="2"
-                    Margin="5, 0, 0, 0"
-                    IsMoveToPointEnabled="True"
-                    IsEnabled="{Binding Path=CanChangeTime}"
-                    Value="{Binding Path=CurrentSeconds}"
-                    Maximum="{Binding Path=TotalSeconds}" />
-            <StackPanel Grid.Column="3"
-                        Orientation="Horizontal"
-                        Margin="5, 0, 0, 0">
-                <TextBlock VerticalAlignment="Center"
-                           Text="{Binding Path=CurrentTime, StringFormat=mm\\:ss}" />
-                <TextBlock VerticalAlignment="Center"
-                           Text="/" />
-                <TextBlock VerticalAlignment="Center"
-                           Text="{Binding Path=TotalTime, StringFormat=mm\\:ss}" />
+            <Slider
+                Grid.Column="2"
+                Margin="5, 0, 0, 0"
+                IsMoveToPointEnabled="True"
+                IsEnabled="{Binding Path=CanChangeTime}"
+                Value="{Binding Path=CurrentSeconds}"
+                Maximum="{Binding Path=TotalSeconds}" />
+            <StackPanel
+                Grid.Column="3"
+                Orientation="Horizontal"
+                Margin="5, 0, 0, 0">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Text="{Binding Path=CurrentTime, StringFormat=mm\\:ss}" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Text="/" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Text="{Binding Path=TotalTime, StringFormat=mm\\:ss}" />
             </StackPanel>
-            <TextBox Grid.Column="4"
-                     Margin="10, 0, 0, 0"
-                     VerticalAlignment="Center"
-                     VerticalContentAlignment="Center"
-                     Width="150"
-                     Controls:TextboxHelper.Watermark="Search"
-                     Controls:TextboxHelper.ClearTextButton="True"
-                     Text="{Binding Path=CurrentSongSource.SearchText, UpdateSourceTrigger=PropertyChanged}"
-                     KeyUp="SearchTextBoxKeyUp" />
-            <ToggleButton Grid.Column="5"
-                    Margin="10, 0, 0, 0"
-                    Padding="0"
-                    ToolTip="Settings"
-                    Click="AdminPanelToggleButtonClick">
+            <TextBox
+                Grid.Column="4"
+                Margin="10, 0, 0, 0"
+                VerticalAlignment="Center"
+                VerticalContentAlignment="Center"
+                Width="150"
+                Controls:TextboxHelper.Watermark="Search"
+                Controls:TextboxHelper.ClearTextButton="True"
+                Text="{Binding Path=CurrentSongSource.SearchText, UpdateSourceTrigger=PropertyChanged}"
+                KeyUp="SearchTextBoxKeyUp" />
+            <ToggleButton
+                Grid.Column="5"
+                Margin="10, 0, 0, 0"
+                Padding="0"
+                ToolTip="Settings"
+                Click="AdminPanelToggleButtonClick">
                 <Image Source="/Espera;component/Images/Settings.png" />
             </ToggleButton>
         </Grid>
-        <Grid Grid.Row="1"
-              Margin="0, 10, 0, 0">
+        <Grid
+            Grid.Row="1"
+            Margin="0, 10, 0, 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Grid Grid.Column="0"
-                  Visibility="{Binding Path=IsLocal, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <ListBox DataContext="{Binding Path=LocalViewModel}"
-                         ItemsSource="{Binding Path=Artists}"
-                         SelectedItem="{Binding Path=SelectedArtist}"
-                         BorderBrush="Transparent">
+            <Grid
+                Grid.Column="0"
+                Visibility="{Binding Path=IsLocal, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ListBox
+                    DataContext="{Binding Path=LocalViewModel}"
+                    ItemsSource="{Binding Path=Artists}"
+                    SelectedItem="{Binding Path=SelectedArtist}"
+                    BorderBrush="Transparent">
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="{x:Type ListBoxItem}">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -205,11 +230,13 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                                        <Border x:Name="Border"
-                                                Background="{TemplateBinding Background}"
-                                                SnapsToDevicePixels="true">
-                                            <ContentPresenter Margin="5, 0, 0, 0"
-                                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                        <Border
+                                            x:Name="Border"
+                                            Background="{TemplateBinding Background}"
+                                            SnapsToDevicePixels="true">
+                                            <ContentPresenter
+                                                Margin="5, 0, 0, 0"
+                                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsSelected" Value="True">
@@ -243,28 +270,35 @@
                     </ListBox.ItemContainerStyle>
                 </ListBox>
             </Grid>
-            <Grid Grid.Column="0"
-                  Visibility="{Binding Path=IsYoutube, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Grid DataContext="{Binding Path=YoutubeViewModel}"
-                      Visibility="{Binding Path=IsSongSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Grid DataContext="{Binding Path=SelectedSongs/}"
-                          Margin="5">
+            <Grid
+                Grid.Column="0"
+                Visibility="{Binding Path=IsYoutube, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid
+                    DataContext="{Binding Path=YoutubeViewModel}"
+                    Visibility="{Binding Path=IsSongSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid
+                        DataContext="{Binding Path=SelectedSongs/}"
+                        Margin="5">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
                         <Grid Grid.Row="0">
-                            <Controls:ProgressRing IsActive="True"
-                                                   Margin="0, 35, 0, 0" />
-                            <Image Grid.Row="0"
-                                   Source="{Binding Path=Thumbnail}"
-                                   Visibility="{Binding Path=HasThumbnail, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            <Controls:ProgressRing
+                                IsActive="True"
+                                Margin="0, 35, 0, 0" />
+                            <Image
+                                Grid.Row="0"
+                                Source="{Binding Path=Thumbnail}"
+                                Visibility="{Binding Path=HasThumbnail, Converter={StaticResource BooleanToVisibilityConverter}}" />
                         </Grid>
-                        <ScrollViewer Grid.Row="1"
-                                      Margin="0, 10, 0, 0 "
-                                      VerticalScrollBarVisibility="Auto">
-                            <TextBlock Text="{Binding Path=Description}"
-                                       TextWrapping="Wrap" />
+                        <ScrollViewer
+                            Grid.Row="1"
+                            Margin="0, 10, 0, 0 "
+                            VerticalScrollBarVisibility="Auto">
+                            <TextBlock
+                                Text="{Binding Path=Description}"
+                                TextWrapping="Wrap" />
                         </ScrollViewer>
                     </Grid>
                 </Grid>
@@ -276,14 +310,16 @@
                     <RowDefinition Height="{Binding Path=PlaylistHeight}" />
                 </Grid.RowDefinitions>
                 <TabControl Grid.Row="0">
-                    <TabItem Header="local"
-                             IsSelected="{Binding Path=IsLocal}">
-                        <ListView DataContext="{Binding Path=LocalViewModel}"
-                                  ItemsSource="{Binding Path=SelectableSongs}"
-                                  SelectionChanged="SongListSelectionChanged"
-                                  KeyUp="SongListKeyUp"
-                                  ScrollViewer.CanContentScroll="True"
-                                  ContextMenuOpening="SongListContextMenuOpening">
+                    <TabItem
+                        Header="local"
+                        IsSelected="{Binding Path=IsLocal}">
+                        <ListView
+                            DataContext="{Binding Path=LocalViewModel}"
+                            ItemsSource="{Binding Path=SelectableSongs}"
+                            SelectionChanged="SongListSelectionChanged"
+                            KeyUp="SongListKeyUp"
+                            ScrollViewer.CanContentScroll="True"
+                            ContextMenuOpening="SongListContextMenuOpening">
                             <ListView.Style>
                                 <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="{x:Type ListView}">
                                     <Setter Property="SelectionMode" Value="Extended" />
@@ -296,9 +332,15 @@
                             </ListView.Style>
                             <ListView.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="Add to playlist" Command="{Binding Path=AddToPlaylistCommand}" />
-                                    <MenuItem Header="Remove from library" Command="{Binding Path=RemoveFromLibraryCommand}" />
-                                    <MenuItem Header="Remove from library and playlist" Command="{Binding Path=RemoveFromLibraryAndPlaylistCommand}" />
+                                    <MenuItem
+                                        Header="Add to playlist"
+                                        Command="{Binding Path=AddToPlaylistCommand}" />
+                                    <MenuItem
+                                        Header="Remove from library"
+                                        Command="{Binding Path=RemoveFromLibraryCommand}" />
+                                    <MenuItem
+                                        Header="Remove from library and playlist"
+                                        Command="{Binding Path=RemoveFromLibraryAndPlaylistCommand}" />
                                 </ContextMenu>
                             </ListView.ContextMenu>
                             <ListView.ItemContainerStyle>
@@ -309,56 +351,73 @@
                             <ListView.View>
                                 <GridView>
                                     <GridViewColumn Width="{Binding Path=TitleColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Content="Title" Click="SortLocalSongTitle" />
+                                        <GridViewColumnHeader
+                                            Content="Title"
+                                            Click="SortLocalSongTitle" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Title}"
-                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock
+                                                    Text="{Binding Path=Title}"
+                                                    TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
                                     <GridViewColumn Width="{Binding Path=DurationColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Content="Duration" Click="SortLocalSongDuration" />
+                                        <GridViewColumnHeader
+                                            Content="Duration"
+                                            Click="SortLocalSongDuration" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Duration, StringFormat=mm\\:ss}"
-                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock
+                                                    Text="{Binding Path=Duration, StringFormat=mm\\:ss}"
+                                                    TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
                                     <GridViewColumn Width="{Binding Path=ArtistColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Content="Artist" Click="SortLocalSongArtist" />
+                                        <GridViewColumnHeader
+                                            Content="Artist"
+                                            Click="SortLocalSongArtist" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Artist}"
-                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock
+                                                    Text="{Binding Path=Artist}"
+                                                    TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
                                     <GridViewColumn Width="{Binding Path=AlbumColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Content="Album" Click="SortLocalSongAlbum" />
+                                        <GridViewColumnHeader
+                                            Content="Album"
+                                            Click="SortLocalSongAlbum" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Album}"
-                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock
+                                                    Text="{Binding Path=Album}"
+                                                    TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
                                     <GridViewColumn Width="{Binding Path=GenreColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Content="Genre" Click="SortLocalSongGenre" />
+                                        <GridViewColumnHeader
+                                            Content="Genre"
+                                            Click="SortLocalSongGenre" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Genre}"
-                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock
+                                                    Text="{Binding Path=Genre}"
+                                                    TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
-                                    <GridViewColumn Header="Path"
-                                                    Width="{Binding Path=PathColumnWidth, Mode=TwoWay}">
+                                    <GridViewColumn
+                                        Header="Path"
+                                        Width="{Binding Path=PathColumnWidth, Mode=TwoWay}">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Path}"
-                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock
+                                                    Text="{Binding Path=Path}"
+                                                    TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
@@ -366,13 +425,15 @@
                             </ListView.View>
                         </ListView>
                     </TabItem>
-                    <TabItem Header="youtube"
-                             IsEnabled="{Binding Path=CanUseYoutube}"
-                             IsSelected="{Binding Path=IsYoutube}">
+                    <TabItem
+                        Header="youtube"
+                        IsEnabled="{Binding Path=CanUseYoutube}"
+                        IsSelected="{Binding Path=IsYoutube}">
                         <Grid DataContext="{Binding Path=YoutubeViewModel}">
-                            <ListView ItemsSource="{Binding Path=SelectableSongs, IsAsync=True}"
-                                      SelectionChanged="SongListSelectionChanged"
-                                      ContextMenuOpening="SongListContextMenuOpening">
+                            <ListView
+                                ItemsSource="{Binding Path=SelectableSongs, IsAsync=True}"
+                                SelectionChanged="SongListSelectionChanged"
+                                ContextMenuOpening="SongListContextMenuOpening">
                                 <ListView.Style>
                                     <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="{x:Type ListView}">
                                         <Setter Property="SelectionMode" Value="Extended" />
@@ -385,7 +446,9 @@
                                 </ListView.Style>
                                 <ListView.ContextMenu>
                                     <ContextMenu>
-                                        <MenuItem Header="Add to playlist" Command="{Binding Path=AddToPlaylistCommand}" />
+                                        <MenuItem
+                                            Header="Add to playlist"
+                                            Command="{Binding Path=AddToPlaylistCommand}" />
                                     </ContextMenu>
                                 </ListView.ContextMenu>
                                 <ListView.ItemContainerStyle>
@@ -396,40 +459,53 @@
                                 <ListView.View>
                                     <GridView>
                                         <GridViewColumn Width="{Binding Path=TitleColumnWidth, Mode=TwoWay}">
-                                            <GridViewColumnHeader Content="Title" Click="SortYoutubeSongTitle" />
+                                            <GridViewColumnHeader
+                                                Content="Title"
+                                                Click="SortYoutubeSongTitle" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding Path=Title}"
-                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock
+                                                        Text="{Binding Path=Title}"
+                                                        TextTrimming="CharacterEllipsis" />
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
                                         <GridViewColumn Width="{Binding Path=DurationColumnWidth, Mode=TwoWay}">
-                                            <GridViewColumnHeader Content="Duration" Click="SortYoutubeSongDuration" />
+                                            <GridViewColumnHeader
+                                                Content="Duration"
+                                                Click="SortYoutubeSongDuration" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding Path=Duration, StringFormat=mm\\:ss}"
-                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock
+                                                        Text="{Binding Path=Duration, StringFormat=mm\\:ss}"
+                                                        TextTrimming="CharacterEllipsis" />
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
                                         <GridViewColumn Width="{Binding Path=RatingColumnWidth, Mode=TwoWay}">
-                                            <GridViewColumnHeader Content="Rating" Click="SortYoutubeSongRating" />
+                                            <GridViewColumnHeader
+                                                Content="Rating"
+                                                Click="SortYoutubeSongRating" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding Path=Rating, StringFormat=\{0:0.0\}, TargetNullValue=n/a}"
-                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock
+                                                        Text="{Binding Path=Rating, StringFormat=\{0:0.0\}, TargetNullValue=n/a}"
+                                                        TextTrimming="CharacterEllipsis" />
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
-                                        <GridViewColumn Header="Link"
-                                                        Width="{Binding Path=LinkColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumn
+                                            Header="Link"
+                                            Width="{Binding Path=LinkColumnWidth, Mode=TwoWay}">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock>
-                                                        <Hyperlink Foreground="White" Command="{Binding Path=OpenPathCommand}">
-                                                            <TextBlock Text="{Binding Path=Path}"
-                                                                       TextTrimming="CharacterEllipsis" />
+                                                        <Hyperlink
+                                                            Foreground="White"
+                                                            Command="{Binding Path=OpenPathCommand}">
+                                                            <TextBlock
+                                                                Text="{Binding Path=Path}"
+                                                                TextTrimming="CharacterEllipsis" />
                                                         </Hyperlink>
                                                     </TextBlock>
                                                 </DataTemplate>
@@ -444,27 +520,33 @@
                         </Grid>
                     </TabItem>
                 </TabControl>
-                <GridSplitter Grid.Row="1"
-                              Height="3"
-                              Foreground="Transparent"
-                              Background="Transparent"
-                              HorizontalAlignment="Stretch" />
+                <GridSplitter
+                    Grid.Row="1"
+                    Height="3"
+                    Foreground="Transparent"
+                    Background="Transparent"
+                    HorizontalAlignment="Stretch" />
                 <Grid Grid.Row="2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <ListView Grid.Row="0"
-                              ItemsSource="{Binding Path=Playlist}"
-                              SelectionChanged="PlaylistSelectionChanged"
-                              KeyUp="PlaylistKeyUp"
-                              ScrollViewer.CanContentScroll="True"
-                              ContextMenuOpening="PlaylistContextMenuOpening">
+                    <ListView
+                        Grid.Row="0"
+                        ItemsSource="{Binding Path=Playlist}"
+                        SelectionChanged="PlaylistSelectionChanged"
+                        KeyUp="PlaylistKeyUp"
+                        ScrollViewer.CanContentScroll="True"
+                        ContextMenuOpening="PlaylistContextMenuOpening">
                         <ListView.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="Play" Command="{Binding Path=PlayCommand}" />
-                                <MenuItem Header="Remove" Command="{Binding Path=RemoveSelectedPlaylistEntriesCommand}" />
+                                <MenuItem
+                                    Header="Play"
+                                    Command="{Binding Path=PlayCommand}" />
+                                <MenuItem
+                                    Header="Remove"
+                                    Command="{Binding Path=RemoveSelectedPlaylistEntriesCommand}" />
                             </ContextMenu>
                         </ListView.ContextMenu>
                         <ListView.ItemContainerStyle>
@@ -482,63 +564,77 @@
                                 <GridViewColumn Width="35">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Image Source="/Espera;component/Images/CurrentSongIcon.png"
-                                                   Visibility="{Binding Path=IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                   Width="25"
-                                                   Height="25" />
+                                            <Image
+                                                Source="/Espera;component/Images/CurrentSongIcon.png"
+                                                Visibility="{Binding Path=IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                Width="25"
+                                                Height="25" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Title"
-                                                Width="{Binding Path=PlaylistTitleColumnWidth, Mode=TwoWay}">
+                                <GridViewColumn
+                                    Header="Title"
+                                    Width="{Binding Path=PlaylistTitleColumnWidth, Mode=TwoWay}">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Path=Title}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock
+                                                Text="{Binding Path=Title}"
+                                                TextTrimming="CharacterEllipsis" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Duration"
-                                                Width="{Binding Path=PlaylistDurationColumnWidth, Mode=TwoWay}">
+                                <GridViewColumn
+                                    Header="Duration"
+                                    Width="{Binding Path=PlaylistDurationColumnWidth, Mode=TwoWay}">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Path=Duration, StringFormat=mm\\:ss}"
-                                                   TextTrimming="CharacterEllipsis" />
+                                            <TextBlock
+                                                Text="{Binding Path=Duration, StringFormat=mm\\:ss}"
+                                                TextTrimming="CharacterEllipsis" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Artist"
-                                                Width="{Binding Path=PlaylistArtistColumnWidth, Mode=TwoWay}">
+                                <GridViewColumn
+                                    Header="Artist"
+                                    Width="{Binding Path=PlaylistArtistColumnWidth, Mode=TwoWay}">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Path=Artist}"
-                                                   TextTrimming="CharacterEllipsis" />
+                                            <TextBlock
+                                                Text="{Binding Path=Artist}"
+                                                TextTrimming="CharacterEllipsis" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Album"
-                                                Width="{Binding Path=PlaylistAlbumColumnWidth, Mode=TwoWay}">
+                                <GridViewColumn
+                                    Header="Album"
+                                    Width="{Binding Path=PlaylistAlbumColumnWidth, Mode=TwoWay}">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Path=Album}"
-                                                   TextTrimming="CharacterEllipsis" />
+                                            <TextBlock
+                                                Text="{Binding Path=Album}"
+                                                TextTrimming="CharacterEllipsis" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Genre"
-                                                Width="{Binding Path=PlaylistGenreColumnWidth, Mode=TwoWay}">
+                                <GridViewColumn
+                                    Header="Genre"
+                                    Width="{Binding Path=PlaylistGenreColumnWidth, Mode=TwoWay}">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Path=Genre}"
-                                                   TextTrimming="CharacterEllipsis" />
+                                            <TextBlock
+                                                Text="{Binding Path=Genre}"
+                                                TextTrimming="CharacterEllipsis" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Source"
-                                                Width="{Binding Path=PlaylistSourceColumnWidth, Mode=TwoWay}">
+                                <GridViewColumn
+                                    Header="Source"
+                                    Width="{Binding Path=PlaylistSourceColumnWidth, Mode=TwoWay}">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Path=Source}"
-                                                   TextTrimming="CharacterEllipsis" />
+                                            <TextBlock
+                                                Text="{Binding Path=Source}"
+                                                TextTrimming="CharacterEllipsis" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
@@ -576,9 +672,10 @@
                             </GridView>
                         </ListView.View>
                     </ListView>
-                    <StackPanel Grid.Row="1"
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Center">
+                    <StackPanel
+                        Grid.Row="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center">
                         <TextBlock Text="{Binding Path=SongsRemaining}" />
                         <TextBlock Text=" song" />
                         <TextBlock Text="s">
@@ -596,11 +693,12 @@
                         <TextBlock Text="{Binding Path=TimeRemaining.TotalMinutes, FallbackValue=0, StringFormat=\{0:0.0\}}" />
                         <TextBlock Text=" minutes play time" />
                     </StackPanel>
-                    <StackPanel Grid.Row="2"
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Center"
-                                Margin="0, 5, 0, 0"
-                                Visibility="{Binding Path=AdministratorViewModel.EnablePlaylistTimeout, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel
+                        Grid.Row="2"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Margin="0, 5, 0, 0"
+                        Visibility="{Binding Path=AdministratorViewModel.EnablePlaylistTimeout, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel.Style>
                             <Style TargetType="{x:Type StackPanel}">
                                 <Style.Triggers>
@@ -626,10 +724,11 @@
                     </StackPanel>
                 </Grid>
             </Grid>
-            <Grid Grid.Column="2"
-                  Name="adminPanel"
-                  Width="200"
-                  DataContext="{Binding Path=AdministratorViewModel}">
+            <Grid
+                Grid.Column="2"
+                Name="adminPanel"
+                Width="200"
+                DataContext="{Binding Path=AdministratorViewModel}">
                 <Grid.Style>
                     <Style TargetType="{x:Type Grid}">
                         <Style.Triggers>
@@ -643,22 +742,26 @@
                     </Style>
                 </Grid.Style>
                 <Grid Visibility="{Binding Path=IsParty, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel VerticalAlignment="Center"
-                                        HorizontalAlignment="Stretch"
-                                        Margin="10, 0, 10, 0">
-                        <PasswordBox Name="loginPasswordBox"
-                                             VerticalContentAlignment="Center"
-                                             Controls:TextboxHelper.Watermark="Administrator password"
-                                             PasswordChanged="LoginPasswordChanged" />
-                        <Button Margin="0, 10, 0, 0"
-                                        Content="Login"
-                                        Command="{Binding Path=LoginCommand}"
-                                        Click="LoginButtonClick"/>
-                        <TextBlock HorizontalAlignment="Center"
-                                           Text="Wrong password!"
-                                           Margin="0, 10, 0, 0"
-                                           Foreground="Red"
-                                           Visibility="{Binding Path=IsWrongPassword, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <StackPanel
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Stretch"
+                        Margin="10, 0, 10, 0">
+                        <PasswordBox
+                            Name="loginPasswordBox"
+                            VerticalContentAlignment="Center"
+                            Controls:TextboxHelper.Watermark="Administrator password"
+                            PasswordChanged="LoginPasswordChanged" />
+                        <Button
+                            Margin="0, 10, 0, 0"
+                            Content="Login"
+                            Command="{Binding Path=LoginCommand}"
+                            Click="LoginButtonClick"/>
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            Text="Wrong password!"
+                            Margin="0, 10, 0, 0"
+                            Foreground="Red"
+                            Visibility="{Binding Path=IsWrongPassword, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     </StackPanel>
                 </Grid>
                 <Grid Visibility="{Binding Path=IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -667,118 +770,150 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <StackPanel Margin="5">
-                        <TextBlock Text="settings"
-                                   Style="{StaticResource SettingsHeaderStyle}" />
-                        <TextBlock Text="accent"
-                                           Style="{StaticResource AdminHeaderStyle}" />
-                        <StackPanel Orientation="Horizontal"
-                                            HorizontalAlignment="Left"
-                                    Margin="-5, 0, 0, 0">
-                            <Button Style="{StaticResource ColorPickerButtonStyle}"
-                                            Background="#CCCB0000"
-                                            Click="RedColorButtonButtonClick" />
-                            <Button Style="{StaticResource ColorPickerButtonStyle}"
-                                            Background="#CC48CB00"
-                                            Click="GreenColorButtonButtonClick" />
-                            <Button Style="{StaticResource ColorPickerButtonStyle}"
-                                            Background="#FF1C739D"
-                                            Click="BlueColorButtonButtonClick" />
-                            <Button Style="{StaticResource ColorPickerButtonStyle}"
-                                            Background="#CCB400FF"
-                                            Click="PurpleColorButtonButtonClick" />
+                        <TextBlock
+                            Text="settings"
+                            Style="{StaticResource SettingsHeaderStyle}" />
+                        <TextBlock
+                            Text="accent"
+                            Style="{StaticResource AdminHeaderStyle}" />
+                        <StackPanel
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            Margin="-5, 0, 0, 0">
+                            <Button
+                                Style="{StaticResource ColorPickerButtonStyle}"
+                                Background="#CCCB0000"
+                                Click="RedColorButtonButtonClick" />
+                            <Button
+                                Style="{StaticResource ColorPickerButtonStyle}"
+                                Background="#CC48CB00"
+                                Click="GreenColorButtonButtonClick" />
+                            <Button
+                                Style="{StaticResource ColorPickerButtonStyle}"
+                                Background="#FF1C739D"
+                                Click="BlueColorButtonButtonClick" />
+                            <Button
+                                Style="{StaticResource ColorPickerButtonStyle}"
+                                Background="#CCB400FF"
+                                Click="PurpleColorButtonButtonClick" />
                         </StackPanel>
-                        <TextBlock Text="party mode"
-                                           Style="{StaticResource AdminHeaderStyle}" />
+                        <TextBlock
+                            Text="party mode"
+                            Style="{StaticResource AdminHeaderStyle}" />
                         <CheckBox IsChecked="{Binding Path=LockPlayPause}">
-                            <AccessText Text="Lock play/pause"
-                                                TextWrapping="Wrap" />
+                            <AccessText
+                                Text="Lock play/pause"
+                                TextWrapping="Wrap" />
                         </CheckBox>
-                        <CheckBox Margin="0, 10, 0, 0"
-                                          IsChecked="{Binding Path=LockVolume}">
-                            <AccessText Text="Lock volume"
-                                                TextWrapping="Wrap" />
+                        <CheckBox
+                            Margin="0, 10, 0, 0"
+                            IsChecked="{Binding Path=LockVolume}">
+                            <AccessText
+                                Text="Lock volume"
+                                TextWrapping="Wrap" />
                         </CheckBox>
-                        <CheckBox Margin="0, 10, 0, 0"
-                                          IsChecked="{Binding Path=LockTime}">
-                            <AccessText Text="Lock time"
-                                                TextWrapping="Wrap" />
+                        <CheckBox
+                            Margin="0, 10, 0, 0"
+                            IsChecked="{Binding Path=LockTime}">
+                            <AccessText
+                                Text="Lock time"
+                                TextWrapping="Wrap" />
                         </CheckBox>
-                        <CheckBox Margin="0, 10, 0, 0"
-                                          IsChecked="{Binding Path=LockPlaylistRemoval}">
-                            <AccessText Text="Lock song removal from playlist"
-                                                TextWrapping="Wrap" />
+                        <CheckBox
+                            Margin="0, 10, 0, 0"
+                            IsChecked="{Binding Path=LockPlaylistRemoval}">
+                            <AccessText
+                                Text="Lock song removal from playlist"
+                                TextWrapping="Wrap" />
                         </CheckBox>
-                        <CheckBox Margin="0, 10, 0, 0"
-                                          IsChecked="{Binding Path=LockLibraryRemoval}">
-                            <AccessText Text="Lock song removal from library"
-                                                TextWrapping="Wrap" />
+                        <CheckBox
+                            Margin="0, 10, 0, 0"
+                            IsChecked="{Binding Path=LockLibraryRemoval}">
+                            <AccessText
+                                Text="Lock song removal from library"
+                                TextWrapping="Wrap" />
                         </CheckBox>
-                        <CheckBox Margin="0, 10, 0, 0"
-                                          IsChecked="{Binding Path=EnablePlaylistTimeout}">
-                            <AccessText Text="Enable timeout when adding songs to the playlist"
-                                                TextWrapping="Wrap" />
+                        <CheckBox
+                            Margin="0, 10, 0, 0"
+                            IsChecked="{Binding Path=EnablePlaylistTimeout}">
+                            <AccessText
+                                Text="Enable timeout when adding songs to the playlist"
+                                TextWrapping="Wrap" />
                         </CheckBox>
-                        <StackPanel IsEnabled="{Binding Path=EnablePlaylistTimeout}"
-                                            Margin="30, 5, 0, 0"
-                                            Orientation="Horizontal">
+                        <StackPanel
+                            IsEnabled="{Binding Path=EnablePlaylistTimeout}"
+                            Margin="30, 5, 0, 0"
+                            Orientation="Horizontal">
                             <TextBlock
-                                        VerticalAlignment="Center"
-                                        Text="Timeout:" />
-                            <TextBox Width="30"
-                                             Margin="5, 0, 0, 0"
-                                             VerticalAlignment="Center"
-                                             VerticalContentAlignment="Center"
-                                             Text="{Binding Path=PlaylistTimeout}"/>
-                            <TextBlock VerticalAlignment="Center"
-                                               Margin="5, 0, 0, 0"
-                                               Text="Seconds" />
+                                VerticalAlignment="Center"
+                                Text="Timeout:" />
+                            <TextBox
+                                Width="30"
+                                Margin="5, 0, 0, 0"
+                                VerticalAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                Text="{Binding Path=PlaylistTimeout}"/>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Margin="5, 0, 0, 0"
+                                Text="Seconds" />
                         </StackPanel>
-                        <TextBlock Text="youtube"
-                                           Style="{StaticResource AdminHeaderStyle}" />
-                        <CheckBox IsEnabled="{Binding Path=IsVlcInstalled}"
-                                          IsChecked="{Binding Path=StreamYoutube}">
-                            <AccessText Text="Stream from Youtube instead of downloading (Requires VLC media player >= 2.0 to be installed)."
-                                                TextWrapping="Wrap" />
+                        <TextBlock
+                            Text="youtube"
+                            Style="{StaticResource AdminHeaderStyle}" />
+                        <CheckBox
+                            IsEnabled="{Binding Path=IsVlcInstalled}"
+                            IsChecked="{Binding Path=StreamYoutube}">
+                            <AccessText
+                                Text="Stream from Youtube instead of downloading (Requires VLC media player >= 2.0 to be installed)."
+                                TextWrapping="Wrap" />
                         </CheckBox>
                     </StackPanel>
-                    <StackPanel Grid.Row="1"
-                                        Orientation="Vertical"
-                                        Margin="10, 0, 10, 10">
-                        <PasswordBox Name="adminPasswordBox"
-                                             Margin="0, 5, 0, 0"
-                                             VerticalContentAlignment="Center"
-                                             Controls:TextboxHelper.Watermark="Enter a password"
-                                             PasswordChanged="CreationPasswordChanged" />
-                        <Button Content="Create Administrator"
-                                        Command="{Binding Path=CreateAdminCommand}"
-                                        Margin="0, 5, 0, 0"
-                                        Click="CreateAdminButtonClick" />
-                        <Button  Margin="0, 15, 0, 0"
-                                         Content="Enter party mode"
-                                         Command="{Binding Path=ChangeToPartyCommand}" />
+                    <StackPanel
+                        Grid.Row="1"
+                        Orientation="Vertical"
+                        Margin="10, 0, 10, 10">
+                        <PasswordBox
+                            Name="adminPasswordBox"
+                            Margin="0, 5, 0, 0"
+                            VerticalContentAlignment="Center"
+                            Controls:TextboxHelper.Watermark="Enter a password"
+                            PasswordChanged="CreationPasswordChanged" />
+                        <Button
+                            Content="Create Administrator"
+                            Command="{Binding Path=CreateAdminCommand}"
+                            Margin="0, 5, 0, 0"
+                            Click="CreateAdminButtonClick" />
+                        <Button
+                            Margin="0, 15, 0, 0"
+                            Content="Enter party mode"
+                            Command="{Binding Path=ChangeToPartyCommand}" />
                     </StackPanel>
                 </Grid>
             </Grid>
         </Grid>
-        <StatusBar Grid.Row="2"
-                   Margin="0, 5, 0, 0"
-                   Height="25"
-                   Visibility="{Binding Path=IsUpdating, Converter={StaticResource BooleanToVisibilityConverter}}"
-                   Background="#FF454545"
-                   DataContext="{Binding Path=LocalViewModel.StatusViewModel}">
+        <StatusBar
+            Grid.Row="2"
+            Margin="0, 5, 0, 0"
+            Height="25"
+            Visibility="{Binding Path=IsUpdating, Converter={StaticResource BooleanToVisibilityConverter}}"
+            Background="#FF454545"
+            DataContext="{Binding Path=LocalViewModel.StatusViewModel}">
             <StatusBarItem Content="Updating library..." />
         </StatusBar>
-        <StatusBar Grid.Row="2"
-                   Margin="0, 5, 0, 0"
-                   Height="25"
-                   Visibility="{Binding Path=IsAdding, Converter={StaticResource BooleanToVisibilityConverter}}"
-                   Background="#FF454545"
-                   DataContext="{Binding Path=LocalViewModel.StatusViewModel}">
+        <StatusBar
+            Grid.Row="2"
+            Margin="0, 5, 0, 0"
+            Height="25"
+            Visibility="{Binding Path=IsAdding, Converter={StaticResource BooleanToVisibilityConverter}}"
+            Background="#FF454545"
+            DataContext="{Binding Path=LocalViewModel.StatusViewModel}">
             <StatusBarItem>
-                <ProgressBar Width="200"
-                             Value="{Binding Path=ProcessedTags, Mode=OneWay}"
-                             Maximum="{Binding Path=TotalTags}"
-                             IsIndeterminate="{Binding Path=IsProgressUnkown}"/>
+                <ProgressBar
+                    Width="200"
+                    Value="{Binding Path=ProcessedTags, Mode=OneWay}"
+                    Maximum="{Binding Path=TotalTags}"
+                    IsIndeterminate="{Binding Path=IsProgressUnkown}"/>
             </StatusBarItem>
             <StatusBarItem Foreground="White">
                 <Grid>
@@ -799,7 +934,9 @@
                         <TextBlock Text=" found Songs: " />
                         <TextBlock Text="{Binding Path=Path}" />
                     </StackPanel>
-                    <TextBlock Text="Searching..." Visibility="{Binding Path=IsProgressUnkown, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock
+                        Text="Searching..."
+                        Visibility="{Binding Path=IsProgressUnkown, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </Grid>
             </StatusBarItem>
         </StatusBar>
