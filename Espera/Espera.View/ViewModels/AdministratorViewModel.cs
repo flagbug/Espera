@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Reflection;
 using System.Windows.Input;
 using Espera.Core.Library;
 using Rareform.Patterns.MVVM;
@@ -67,6 +69,11 @@ namespace Espera.View.ViewModels
                     this.OnPropertyChanged(vm => vm.EnablePlaylistTimeout);
                 }
             }
+        }
+
+        public string Homepage
+        {
+            get { return "http://github.com/flagbug/Espera"; }
         }
 
         public bool IsAdmin
@@ -161,6 +168,17 @@ namespace Espera.View.ViewModels
 
         public string LoginPassword { get; set; }
 
+        public ICommand OpenHomepageCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param => Process.Start(this.Homepage)
+                );
+            }
+        }
+
         public int PlaylistTimeout
         {
             get { return (int)this.library.PlaylistTimeout.TotalSeconds; }
@@ -171,6 +189,16 @@ namespace Espera.View.ViewModels
         {
             get { return this.library.StreamYoutube; }
             set { this.library.StreamYoutube = value; }
+        }
+
+        public string Version
+        {
+            get
+            {
+                Version version = Assembly.GetExecutingAssembly().GetName().Version;
+
+                return String.Format("{0}.{1}.{2}", version.Major, version.Minor, version.Revision);
+            }
         }
     }
 }

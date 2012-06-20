@@ -890,6 +890,16 @@
                                 Text="Stream from Youtube instead of downloading (Requires VLC media player >= 2.0 to be installed)."
                                 TextWrapping="Wrap" />
                         </CheckBox>
+                        <TextBlock
+                            Text="about"
+                            Style="{StaticResource AdminHeaderStyle}" />
+                        <TextBlock Text="{Binding Path=Version, StringFormat=Espera v\{0\}}" />
+                        <TextBlock Text="Author: Dennis Daume" />
+                        <TextBlock>
+                            <Hyperlink Command="{Binding Path=OpenHomepageCommand}">
+                                <Run Text="{Binding Path=Homepage, Mode=OneTime}" Foreground="#FF00B7C0" />
+                            </Hyperlink>
+                        </TextBlock>
                     </StackPanel>
                     <StackPanel
                         Grid.Row="1"
