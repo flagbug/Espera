@@ -189,7 +189,8 @@
                   Visibility="{Binding Path=IsLocal, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <ListBox DataContext="{Binding Path=LocalViewModel}"
                          ItemsSource="{Binding Path=Artists}"
-                         SelectedItem="{Binding Path=SelectedArtist}">
+                         SelectedItem="{Binding Path=SelectedArtist}"
+                         BorderBrush="Transparent">
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="{x:Type ListBoxItem}">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -237,10 +238,8 @@
                     </ListBox.ItemContainerStyle>
                 </ListBox>
             </Grid>
-            <Border Grid.Column="0"
-                    BorderBrush="{DynamicResource TextBoxBorderBrush}"
-                    BorderThickness="0.5"
-                    Visibility="{Binding Path=IsYoutube, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid Grid.Column="0"
+                  Visibility="{Binding Path=IsYoutube, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid DataContext="{Binding Path=YoutubeViewModel}"
                       Visibility="{Binding Path=IsSongSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Grid DataContext="{Binding Path=SelectedSongs/}"
@@ -264,7 +263,7 @@
                         </ScrollViewer>
                     </Grid>
                 </Grid>
-            </Border>
+            </Grid>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
@@ -638,126 +637,120 @@
                         </Style.Triggers>
                     </Style>
                 </Grid.Style>
-                <Border BorderBrush="{DynamicResource TextBoxBorderBrush}"
-                        BorderThickness="0.5"
-                        Padding="5">
-                    <Grid>
-                        <Grid Visibility="{Binding Path=IsParty, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <StackPanel VerticalAlignment="Center"
+                <Grid Visibility="{Binding Path=IsParty, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel VerticalAlignment="Center"
                                         HorizontalAlignment="Stretch"
                                         Margin="10, 0, 10, 0">
-                                <PasswordBox Name="loginPasswordBox"
+                        <PasswordBox Name="loginPasswordBox"
                                              VerticalContentAlignment="Center"
                                              Controls:TextboxHelper.Watermark="Administrator password"
                                              PasswordChanged="LoginPasswordChanged" />
-                                <Button Margin="0, 10, 0, 0"
+                        <Button Margin="0, 10, 0, 0"
                                         Content="Login"
                                         Command="{Binding Path=LoginCommand}"
                                         Click="LoginButtonClick"/>
-                                <TextBlock HorizontalAlignment="Center"
+                        <TextBlock HorizontalAlignment="Center"
                                            Text="Wrong password!"
                                            Margin="0, 10, 0, 0"
                                            Foreground="Red"
                                            Visibility="{Binding Path=IsWrongPassword, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                            </StackPanel>
-                        </Grid>
-                        <Grid Visibility="{Binding Path=IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <StackPanel Margin="5">
-                                <TextBlock Text="accent"
+                    </StackPanel>
+                </Grid>
+                <Grid Visibility="{Binding Path=IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Margin="5">
+                        <TextBlock Text="accent"
                                            Style="{StaticResource AdminHeaderStyle}"
                                            Margin="0, 0, 0, 10"/>
-                                <StackPanel Orientation="Horizontal"
+                        <StackPanel Orientation="Horizontal"
                                             HorizontalAlignment="Center">
-                                    <Button Style="{StaticResource ColorPickerButtonStyle}"
+                            <Button Style="{StaticResource ColorPickerButtonStyle}"
                                             Background="#CCCB0000"
                                             Click="RedColorButtonButtonClick" />
-                                    <Button Style="{StaticResource ColorPickerButtonStyle}"
+                            <Button Style="{StaticResource ColorPickerButtonStyle}"
                                             Background="#CC48CB00"
                                             Click="GreenColorButtonButtonClick" />
-                                    <Button Style="{StaticResource ColorPickerButtonStyle}"
+                            <Button Style="{StaticResource ColorPickerButtonStyle}"
                                             Background="#FF1C739D"
                                             Click="BlueColorButtonButtonClick" />
-                                    <Button Style="{StaticResource ColorPickerButtonStyle}"
+                            <Button Style="{StaticResource ColorPickerButtonStyle}"
                                             Background="#CCB400FF"
                                             Click="PurpleColorButtonButtonClick" />
-                                </StackPanel>
-                                <TextBlock Text="party mode"
+                        </StackPanel>
+                        <TextBlock Text="party mode"
                                            Style="{StaticResource AdminHeaderStyle}" />
-                                <CheckBox IsChecked="{Binding Path=LockPlayPause}">
-                                    <AccessText Text="Lock play/pause"
+                        <CheckBox IsChecked="{Binding Path=LockPlayPause}">
+                            <AccessText Text="Lock play/pause"
                                                 TextWrapping="Wrap" />
-                                </CheckBox>
-                                <CheckBox Margin="0, 10, 0, 0"
+                        </CheckBox>
+                        <CheckBox Margin="0, 10, 0, 0"
                                           IsChecked="{Binding Path=LockVolume}">
-                                    <AccessText Text="Lock volume"
+                            <AccessText Text="Lock volume"
                                                 TextWrapping="Wrap" />
-                                </CheckBox>
-                                <CheckBox Margin="0, 10, 0, 0"
+                        </CheckBox>
+                        <CheckBox Margin="0, 10, 0, 0"
                                           IsChecked="{Binding Path=LockTime}">
-                                    <AccessText Text="Lock time"
+                            <AccessText Text="Lock time"
                                                 TextWrapping="Wrap" />
-                                </CheckBox>
-                                <CheckBox Margin="0, 10, 0, 0"
+                        </CheckBox>
+                        <CheckBox Margin="0, 10, 0, 0"
                                           IsChecked="{Binding Path=LockPlaylistRemoval}">
-                                    <AccessText Text="Lock song removal from playlist"
+                            <AccessText Text="Lock song removal from playlist"
                                                 TextWrapping="Wrap" />
-                                </CheckBox>
-                                <CheckBox Margin="0, 10, 0, 0"
+                        </CheckBox>
+                        <CheckBox Margin="0, 10, 0, 0"
                                           IsChecked="{Binding Path=LockLibraryRemoval}">
-                                    <AccessText Text="Lock song removal from library"
+                            <AccessText Text="Lock song removal from library"
                                                 TextWrapping="Wrap" />
-                                </CheckBox>
-                                <CheckBox Margin="0, 10, 0, 0"
+                        </CheckBox>
+                        <CheckBox Margin="0, 10, 0, 0"
                                           IsChecked="{Binding Path=EnablePlaylistTimeout}">
-                                    <AccessText Text="Enable timeout when adding songs to the playlist"
+                            <AccessText Text="Enable timeout when adding songs to the playlist"
                                                 TextWrapping="Wrap" />
-                                </CheckBox>
-                                <StackPanel IsEnabled="{Binding Path=EnablePlaylistTimeout}"
+                        </CheckBox>
+                        <StackPanel IsEnabled="{Binding Path=EnablePlaylistTimeout}"
                                             Margin="30, 5, 0, 0"
                                             Orientation="Horizontal">
-                                    <TextBlock
+                            <TextBlock
                                         VerticalAlignment="Center"
                                         Text="Timeout:" />
-                                    <TextBox Width="30"
+                            <TextBox Width="30"
                                              Margin="5, 0, 0, 0"
                                              VerticalAlignment="Center"
                                              VerticalContentAlignment="Center"
                                              Text="{Binding Path=PlaylistTimeout}"/>
-                                    <TextBlock VerticalAlignment="Center"
+                            <TextBlock VerticalAlignment="Center"
                                                Margin="5, 0, 0, 0"
                                                Text="Seconds" />
-                                </StackPanel>
-                                <TextBlock Text="youtube"
+                        </StackPanel>
+                        <TextBlock Text="youtube"
                                            Style="{StaticResource AdminHeaderStyle}" />
-                                <CheckBox IsEnabled="{Binding Path=IsVlcInstalled}"
+                        <CheckBox IsEnabled="{Binding Path=IsVlcInstalled}"
                                           IsChecked="{Binding Path=StreamYoutube}">
-                                    <AccessText Text="Stream from Youtube instead of downloading (Requires VLC media player >= 2.0 to be installed)."
+                            <AccessText Text="Stream from Youtube instead of downloading (Requires VLC media player >= 2.0 to be installed)."
                                                 TextWrapping="Wrap" />
-                                </CheckBox>
-                            </StackPanel>
-                            <StackPanel Grid.Row="1"
+                        </CheckBox>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1"
                                         Orientation="Vertical"
                                         Margin="10, 0, 10, 10">
-                                <PasswordBox Name="adminPasswordBox"
+                        <PasswordBox Name="adminPasswordBox"
                                              Margin="0, 5, 0, 0"
                                              VerticalContentAlignment="Center"
                                              Controls:TextboxHelper.Watermark="Enter a password"
                                              PasswordChanged="CreationPasswordChanged" />
-                                <Button Content="Create Administrator"
+                        <Button Content="Create Administrator"
                                         Command="{Binding Path=CreateAdminCommand}"
                                         Margin="0, 5, 0, 0"
                                         Click="CreateAdminButtonClick" />
-                                <Button  Margin="0, 15, 0, 0"
+                        <Button  Margin="0, 15, 0, 0"
                                          Content="Enter party mode"
                                          Command="{Binding Path=ChangeToPartyCommand}" />
-                            </StackPanel>
-                        </Grid>
-                    </Grid>
-                </Border>
+                    </StackPanel>
+                </Grid>
             </Grid>
         </Grid>
         <StatusBar Grid.Row="2"
