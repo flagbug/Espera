@@ -918,8 +918,8 @@
             Grid.Row="2"
             Margin="0, 5, 0, 0"
             Height="25"
+            Background="Transparent"
             Visibility="{Binding Path=IsUpdating, Converter={StaticResource BooleanToVisibilityConverter}}"
-            Background="#FF454545"
             DataContext="{Binding Path=LocalViewModel.StatusViewModel}">
             <StatusBarItem Content="Updating library..." />
         </StatusBar>
@@ -927,8 +927,8 @@
             Grid.Row="2"
             Margin="0, 5, 0, 0"
             Height="25"
+            Background="Transparent"
             Visibility="{Binding Path=IsAdding, Converter={StaticResource BooleanToVisibilityConverter}}"
-            Background="#FF454545"
             DataContext="{Binding Path=LocalViewModel.StatusViewModel}">
             <StatusBarItem>
                 <ProgressBar
@@ -937,7 +937,7 @@
                     Maximum="{Binding Path=TotalTags}"
                     IsIndeterminate="{Binding Path=IsProgressUnkown}"/>
             </StatusBarItem>
-            <StatusBarItem Foreground="White">
+            <StatusBarItem>
                 <Grid>
                     <StackPanel Orientation="Horizontal">
                         <StackPanel.Style>
