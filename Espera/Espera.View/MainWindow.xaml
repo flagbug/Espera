@@ -53,20 +53,20 @@
                 </Setter>
             </Style>
             <Style x:Key="AdminHeaderStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="20" />
+                <Setter Property="FontSize" Value="26.667" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
                 <Setter Property="Margin" Value="0, 15, 0, 10" />
             </Style>
             <Style x:Key="SettingsHeaderStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="42" />
+                <Setter Property="FontSize" Value="48" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
             </Style>
             <Style x:Key="ArtistsHeaderStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="42" />
+                <Setter Property="FontSize" Value="48" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
             </Style>
             <Style x:Key="VideoInfoHeaderStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="42" />
+                <Setter Property="FontSize" Value="48" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
             </Style>
         </ResourceDictionary>
