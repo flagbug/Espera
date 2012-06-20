@@ -38,8 +38,8 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
                             <Border Background="{TemplateBinding Background}"
-                                    Height="30"
-                                    Width="30"
+                                    Height="25"
+                                    Width="25"
                                     Margin="5, 0, 5, 0" >
                                 <ContentPresenter />
                             </Border>
@@ -48,10 +48,15 @@
                 </Setter>
             </Style>
             <Style x:Key="AdminHeaderStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="30" />
+                <Setter Property="FontSize" Value="20" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
-                <Setter Property="HorizontalAlignment" Value="Center" />
-                <Setter Property="Margin" Value="0, 20, 0, 10" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="Margin" Value="0, 15, 0, 10" />
+            </Style>
+            <Style x:Key="SettingsHeaderStyle" TargetType="{x:Type TextBlock}">
+                <Setter Property="FontSize" Value="42" />
+                <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
             </Style>
         </ResourceDictionary>
     </Window.Resources>
@@ -662,11 +667,13 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <StackPanel Margin="5">
+                        <TextBlock Text="settings"
+                                   Style="{StaticResource SettingsHeaderStyle}" />
                         <TextBlock Text="accent"
-                                           Style="{StaticResource AdminHeaderStyle}"
-                                           Margin="0, 0, 0, 10"/>
+                                           Style="{StaticResource AdminHeaderStyle}" />
                         <StackPanel Orientation="Horizontal"
-                                            HorizontalAlignment="Center">
+                                            HorizontalAlignment="Left"
+                                    Margin="-5, 0, 0, 0">
                             <Button Style="{StaticResource ColorPickerButtonStyle}"
                                             Background="#CCCB0000"
                                             Click="RedColorButtonButtonClick" />
