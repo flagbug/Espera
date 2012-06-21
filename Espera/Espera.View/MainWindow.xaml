@@ -23,6 +23,51 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <Style TargetType="{x:Type ListBoxItem}">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="MinHeight" Value="25" />
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                            <Border
+                                x:Name="Border"
+                                Background="{TemplateBinding Background}"
+                                SnapsToDevicePixels="true">
+                                <ContentPresenter
+                                    Margin="5, 0, 0, 0"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="Border" Property="BorderBrush" Value="#FF143C65" />
+                                    <Setter Property="Background" TargetName="Border" Value="{DynamicResource AccentColorBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Border" Property="Background">
+                                        <Setter.Value>
+                                            <SolidColorBrush Color="{DynamicResource AccentColor3}" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="IsSelected" Value="True" />
+                                        <Condition Property="Selector.IsSelectionActive" Value="True" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="Background" TargetName="Border">
+                                        <Setter.Value>
+                                            <SolidColorBrush Color="{DynamicResource AccentColor2}" />
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="BorderBrush" TargetName="Border" Value="#FF143C65" />
+                                </MultiTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
             <Style x:Key="VolumeButtonStyle" TargetType="{x:Type Button}">
                 <Setter Property="Template">
                     <Setter.Value>
@@ -66,6 +111,10 @@
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
             </Style>
             <Style x:Key="VideoInfoHeaderStyle" TargetType="{x:Type TextBlock}">
+                <Setter Property="FontSize" Value="48" />
+                <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
+            </Style>
+            <Style x:Key="PlaylistsHeaderStyle" TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="48" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
             </Style>
@@ -234,53 +283,6 @@
                     ItemsSource="{Binding Path=Artists}"
                     SelectedItem="{Binding Path=SelectedArtist}"
                     BorderBrush="Transparent">
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="{x:Type ListBoxItem}">
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                            <Setter Property="VerticalContentAlignment" Value="Center" />
-                            <Setter Property="MinHeight" Value="25" />
-                            <Setter Property="Margin" Value="0" />
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                                        <Border
-                                            x:Name="Border"
-                                            Background="{TemplateBinding Background}"
-                                            SnapsToDevicePixels="true">
-                                            <ContentPresenter
-                                                Margin="5, 0, 0, 0"
-                                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter TargetName="Border" Property="BorderBrush" Value="#FF143c65" />
-                                                <Setter Property="Background" TargetName="Border" Value="{DynamicResource AccentColorBrush}" />
-                                            </Trigger>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Border" Property="Background">
-                                                    <Setter.Value>
-                                                        <SolidColorBrush Color="{DynamicResource AccentColor3}" />
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </Trigger>
-                                            <MultiTrigger>
-                                                <MultiTrigger.Conditions>
-                                                    <Condition Property="IsSelected" Value="True" />
-                                                    <Condition Property="Selector.IsSelectionActive" Value="True" />
-                                                </MultiTrigger.Conditions>
-                                                <Setter Property="Background" TargetName="Border">
-                                                    <Setter.Value>
-                                                        <SolidColorBrush Color="{DynamicResource AccentColor2}" />
-                                                    </Setter.Value>
-                                                </Setter>
-                                                <Setter Property="BorderBrush" TargetName="Border" Value="#FF143c65" />
-                                            </MultiTrigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </ListBox.ItemContainerStyle>
                 </ListBox>
             </Grid>
             <Grid
@@ -554,146 +556,167 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <ListView
-                        Grid.Row="0"
-                        ItemsSource="{Binding Path=Playlist}"
-                        SelectionChanged="PlaylistSelectionChanged"
-                        KeyUp="PlaylistKeyUp"
-                        ScrollViewer.CanContentScroll="True"
-                        ContextMenuOpening="PlaylistContextMenuOpening">
-                        <ListView.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem
-                                    Header="Play"
-                                    Command="{Binding Path=PlayCommand}" />
-                                <MenuItem
-                                    Header="Remove"
-                                    Command="{Binding Path=RemoveSelectedPlaylistEntriesCommand}" />
-                            </ContextMenu>
-                        </ListView.ContextMenu>
-                        <ListView.ItemContainerStyle>
-                            <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
-                                <EventSetter Event="MouseDoubleClick" Handler="PlaylistDoubleClick"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=IsInactive}" Value="True">
-                                        <Setter Property="Foreground" Value="Gray" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ListView.ItemContainerStyle>
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn Width="35">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Image
-                                                Source="/Espera;component/Images/CurrentSongIcon.png"
-                                                Visibility="{Binding Path=IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                Width="25"
-                                                Height="25" />
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                                <GridViewColumn
-                                    Header="Title"
-                                    Width="{Binding Path=PlaylistTitleColumnWidth, Mode=TwoWay}">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock
-                                                Text="{Binding Path=Title}"
-                                                TextTrimming="CharacterEllipsis" />
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                                <GridViewColumn
-                                    Header="Duration"
-                                    Width="{Binding Path=PlaylistDurationColumnWidth, Mode=TwoWay}">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock
-                                                Text="{Binding Path=Duration, StringFormat=mm\\:ss}"
-                                                TextTrimming="CharacterEllipsis" />
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                                <GridViewColumn
-                                    Header="Artist"
-                                    Width="{Binding Path=PlaylistArtistColumnWidth, Mode=TwoWay}">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock
-                                                Text="{Binding Path=Artist}"
-                                                TextTrimming="CharacterEllipsis" />
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                                <GridViewColumn
-                                    Header="Album"
-                                    Width="{Binding Path=PlaylistAlbumColumnWidth, Mode=TwoWay}">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock
-                                                Text="{Binding Path=Album}"
-                                                TextTrimming="CharacterEllipsis" />
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                                <GridViewColumn
-                                    Header="Genre"
-                                    Width="{Binding Path=PlaylistGenreColumnWidth, Mode=TwoWay}">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock
-                                                Text="{Binding Path=Genre}"
-                                                TextTrimming="CharacterEllipsis" />
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                                <GridViewColumn
-                                    Header="Source"
-                                    Width="{Binding Path=PlaylistSourceColumnWidth, Mode=TwoWay}">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock
-                                                Text="{Binding Path=Source}"
-                                                TextTrimming="CharacterEllipsis" />
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                                <GridViewColumn Width="{Binding Path=PlaylistCachingProgressColumnWidth, Mode=TwoWay}">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Grid>
-                                                <Grid.Style>
-                                                    <Style TargetType="{x:Type Grid}">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Path=ShowCaching}" Value="False">
-                                                                <Setter Property="Visibility" Value="Hidden" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Grid.Style>
-                                                <TextBlock VerticalAlignment="Center">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="{x:Type TextBlock}">
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid
+                            Grid.Column="0"
+                            Width="175">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Text="playlists"
+                                Style="{StaticResource PlaylistsHeaderStyle}"/>
+                            <ListBox
+                                Grid.Column="1"
+                                BorderBrush="Transparent" />
+                        </Grid>
+                        <ListView
+                            Grid.Column="1"
+                            ItemsSource="{Binding Path=Playlist}"
+                            SelectionChanged="PlaylistSelectionChanged"
+                            KeyUp="PlaylistKeyUp"
+                            ScrollViewer.CanContentScroll="True"
+                            ContextMenuOpening="PlaylistContextMenuOpening">
+                            <ListView.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem
+                                        Header="Play"
+                                        Command="{Binding Path=PlayCommand}" />
+                                    <MenuItem
+                                        Header="Remove"
+                                        Command="{Binding Path=RemoveSelectedPlaylistEntriesCommand}" />
+                                </ContextMenu>
+                            </ListView.ContextMenu>
+                            <ListView.ItemContainerStyle>
+                                <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
+                                    <EventSetter Event="MouseDoubleClick" Handler="PlaylistDoubleClick"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=IsInactive}" Value="True">
+                                            <Setter Property="Foreground" Value="Gray" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Width="35">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Image
+                                                    Source="/Espera;component/Images/CurrentSongIcon.png"
+                                                    Visibility="{Binding Path=IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                    Width="25"
+                                                    Height="25" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn
+                                        Header="Title"
+                                        Width="{Binding Path=PlaylistTitleColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock
+                                                    Text="{Binding Path=Title}"
+                                                    TextTrimming="CharacterEllipsis" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn
+                                        Header="Duration"
+                                        Width="{Binding Path=PlaylistDurationColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock
+                                                    Text="{Binding Path=Duration, StringFormat=mm\\:ss}"
+                                                    TextTrimming="CharacterEllipsis" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn
+                                        Header="Artist"
+                                        Width="{Binding Path=PlaylistArtistColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock
+                                                    Text="{Binding Path=Artist}"
+                                                    TextTrimming="CharacterEllipsis" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn
+                                        Header="Album"
+                                        Width="{Binding Path=PlaylistAlbumColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock
+                                                    Text="{Binding Path=Album}"
+                                                    TextTrimming="CharacterEllipsis" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn
+                                        Header="Genre"
+                                        Width="{Binding Path=PlaylistGenreColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock
+                                                    Text="{Binding Path=Genre}"
+                                                    TextTrimming="CharacterEllipsis" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn
+                                        Header="Source"
+                                        Width="{Binding Path=PlaylistSourceColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock
+                                                    Text="{Binding Path=Source}"
+                                                    TextTrimming="CharacterEllipsis" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn Width="{Binding Path=PlaylistCachingProgressColumnWidth, Mode=TwoWay}">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Grid.Style>
+                                                        <Style TargetType="{x:Type Grid}">
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Path=HasCachingFailed}" Value="True">
-                                                                    <Setter Property="Text" Value="Caching failed!" />
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Path=HasCachingFailed}" Value="False">
-                                                                    <Setter Property="Text" Value="{Binding Path=CacheProgress, StringFormat=Caching... \{0\}%, IsAsync=True}" />
+                                                                <DataTrigger Binding="{Binding Path=ShowCaching}" Value="False">
+                                                                    <Setter Property="Visibility" Value="Hidden" />
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
+                                                    </Grid.Style>
+                                                    <TextBlock VerticalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="{x:Type TextBlock}">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Path=HasCachingFailed}" Value="True">
+                                                                        <Setter Property="Text" Value="Caching failed!" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Path=HasCachingFailed}" Value="False">
+                                                                        <Setter Property="Text" Value="{Binding Path=CacheProgress, StringFormat=Caching... \{0\}%, IsAsync=True}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </Grid>
                     <StackPanel
                         Grid.Row="1"
                         Orientation="Horizontal"
