@@ -82,6 +82,7 @@
     <Compile Include="Library\Library.cs" />
     <Compile Include="Library\LibraryFillEventArgs.cs" />
     <Compile Include="Library\Playlist.cs" />
+    <Compile Include="Library\PlaylistInfo.cs" />
     <Compile Include="LocalSong.cs" />
     <Compile Include="Audio\PlaybackException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

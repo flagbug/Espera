@@ -21,8 +21,9 @@ namespace Espera.Core.Library
         /// <summary>
         /// Initializes a new instance of the <see cref="Playlist"/> class.
         /// </summary>
-        public Playlist()
+        public Playlist(string name)
         {
+            this.Name = name;
             this.playlist = new Dictionary<int, Song>();
             this.cachingQueue = new ConcurrentQueue<Song>();
 
@@ -68,6 +69,8 @@ namespace Espera.Core.Library
         /// The index of the currently played song in the playlist.
         /// </value>
         public int? CurrentSongIndex { get; set; }
+
+        public string Name { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="Espera.Core.Song"/> at the specified index.

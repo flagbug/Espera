@@ -238,35 +238,6 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public IEnumerable<PlaylistEntryViewModel> Playlist
-        {
-            get
-            {
-                var playlist = this.library.Playlist
-                    .Select((song, index) => new PlaylistEntryViewModel(song, index))
-                    .ToList(); // We want a list, so that ReSharper doesn't complain about multiple enumerations
-
-                if (this.library.CurrentSongIndex.HasValue)
-                {
-                    playlist[this.library.CurrentSongIndex.Value].IsPlaying = true;
-
-                    // If there are more than 5 songs from the beginning of the playlist to the current played song,
-                    // skip all, but 5 songs to the position of the currently played song
-                    if (playlist.TakeWhile(song => !song.IsPlaying).Count() > 5)
-                    {
-                        playlist = playlist.Skip(this.library.CurrentSongIndex.Value - 5).ToList();
-                    }
-
-                    foreach (var model in playlist.TakeWhile(song => !song.IsPlaying))
-                    {
-                        model.IsInactive = true;
-                    }
-                }
-
-                return playlist;
-            }
-        }
-
         public int PlaylistAlbumColumnWidth
         {
             get { return Settings.Default.PlaylistAlbumColumnWidth; }
@@ -316,6 +287,56 @@ namespace Espera.View.ViewModels
             set { Settings.Default.PlaylistTitleColumnWidth = value; }
         }
 
+        public IEnumerable<PlaylistViewModel> Playlists
+        {
+            get { return this.library.Playlists.Select(playlist => new PlaylistViewModel(playlist)); }
+        }
+
+        public PlaylistViewModel CurrentPlaylist
+        {
+            get { return new PlaylistViewModel(this.library.CurrentPlaylist); }
+            set
+            {
+                this.library.ChangeToPlaylist(value.Name);
+                this.OnPropertyChanged(vm => vm.CurrentPlaylist);
+            }
+        }
+
+        /// <summary>
+        /// Gets the number of songs that come after the currently played song.
+        /// </summary>
+        public int SongsRemaining
+        {
+            get
+            {
+                return this.CurrentPlaylist.Songs
+                    .SkipWhile(song => song.IsInactive)
+                    .Count();
+            }
+        }
+
+        /// <summary>
+        /// Gets the total remaining time of all songs that come after the currently played song.
+        /// </summary>
+        public TimeSpan? TimeRemaining
+        {
+            get
+            {
+                var songs = this.CurrentPlaylist.Songs
+                    .SkipWhile(song => song.IsInactive)
+                    .ToList();
+
+                if (songs.Any())
+                {
+                    return songs
+                        .Select(song => song.Duration)
+                        .Aggregate((t1, t2) => t1 + t2);
+                }
+
+                return null;
+            }
+        }
+
         /// <summary>
         /// Plays the song that is before the currently played song in the playlist.
         /// </summary>
@@ -346,7 +367,7 @@ namespace Espera.View.ViewModels
                     {
                         this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index));
 
-                        this.OnPropertyChanged(vm => vm.Playlist);
+                        this.OnPropertyChanged(vm => vm.CurrentPlaylist);
                         this.OnPropertyChanged(vm => vm.SongsRemaining);
                         this.OnPropertyChanged(vm => vm.TimeRemaining);
                     },
@@ -368,41 +389,6 @@ namespace Espera.View.ViewModels
                     this.OnPropertyChanged(vm => vm.SelectedPlaylistEntries);
                     this.OnPropertyChanged(vm => vm.PlayCommand);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Gets the number of songs that come after the currently played song.
-        /// </summary>
-        public int SongsRemaining
-        {
-            get
-            {
-                return this.Playlist
-                    .SkipWhile(song => song.IsInactive)
-                    .Count();
-            }
-        }
-
-        /// <summary>
-        /// Gets the total remaining time of all songs that come after the currently played song.
-        /// </summary>
-        public TimeSpan? TimeRemaining
-        {
-            get
-            {
-                var songs = this.Playlist
-                    .SkipWhile(song => song.IsInactive)
-                    .ToList();
-
-                if (songs.Any())
-                {
-                    return songs
-                        .Select(song => song.Duration)
-                        .Aggregate((t1, t2) => t1 + t2);
-                }
-
-                return null;
             }
         }
 
@@ -461,7 +447,7 @@ namespace Espera.View.ViewModels
                 this.OnPropertyChanged(vm => vm.IsPlaying);
             }
 
-            this.OnPropertyChanged(vm => vm.Playlist);
+            this.OnPropertyChanged(vm => vm.CurrentPlaylist);
 
             this.updateTimer.Stop();
         }
@@ -471,7 +457,7 @@ namespace Espera.View.ViewModels
             this.UpdateTotalTime();
 
             this.OnPropertyChanged(vm => vm.IsPlaying);
-            this.OnPropertyChanged(vm => vm.Playlist);
+            this.OnPropertyChanged(vm => vm.CurrentPlaylist);
 
             this.OnPropertyChanged(vm => vm.SongsRemaining);
             this.OnPropertyChanged(vm => vm.TimeRemaining);
@@ -493,7 +479,7 @@ namespace Espera.View.ViewModels
 
         private void UpdatePlaylist()
         {
-            this.OnPropertyChanged(vm => vm.Playlist);
+            this.OnPropertyChanged(vm => vm.CurrentPlaylist);
             this.OnPropertyChanged(vm => vm.SongsRemaining);
             this.OnPropertyChanged(vm => vm.TimeRemaining);
 

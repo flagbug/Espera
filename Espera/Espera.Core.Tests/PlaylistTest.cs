@@ -136,7 +136,7 @@ namespace Espera.Core.Tests
 
         private static Playlist SetupPlaylist(IEnumerable<Song> songs)
         {
-            var playlist = new Playlist();
+            var playlist = new Playlist("Test Playlist");
 
             playlist.AddSongs(songs);
 

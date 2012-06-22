@@ -564,21 +564,30 @@
                         <Grid
                             Grid.Column="0"
                             Width="175">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
                             <TextBlock
-                                Grid.Column="0"
+                                Grid.Row="0"
                                 Text="playlists"
                                 Style="{StaticResource PlaylistsHeaderStyle}"/>
                             <ListBox
-                                Grid.Column="1"
-                                BorderBrush="Transparent" />
+                                Grid.Row="1"
+                                Margin="0, 10, 0, 0"
+                                BorderBrush="Transparent"
+                                ItemsSource="{Binding Path=Playlists}"
+                                SelectedItem="{Binding Path=CurrentPlaylist}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Path=Name}" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                         </Grid>
                         <ListView
                             Grid.Column="1"
-                            ItemsSource="{Binding Path=Playlist}"
+                            ItemsSource="{Binding Path=CurrentPlaylist.Songs}"
                             SelectionChanged="PlaylistSelectionChanged"
                             KeyUp="PlaylistKeyUp"
                             ScrollViewer.CanContentScroll="True"

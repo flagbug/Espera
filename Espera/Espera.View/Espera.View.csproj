@@ -128,6 +128,7 @@
     <Compile Include="ViewModels\ISongSourceViewModel.cs" />
     <Compile Include="ViewModels\LocalViewModel.cs" />
     <Compile Include="ViewModels\PlaylistEntryViewModel.cs" />
+    <Compile Include="ViewModels\PlaylistViewModel.cs" />
     <Compile Include="ViewModels\SongSourceViewModel.cs" />
     <Compile Include="ViewModels\SongViewModel.cs" />
     <Compile Include="ViewModels\SongViewModelBase.cs" />

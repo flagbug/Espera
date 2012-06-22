@@ -86,7 +86,7 @@ namespace Espera.Core.Tests
                     jumpSong.Object, nextSong.Object, cachingSong.Object, cachingSong2.Object
                 };
 
-                Assert.IsTrue(expectedSongs.SequenceEqual(library.Playlist));
+                Assert.IsTrue(expectedSongs.SequenceEqual(library.CurrentPlaylist.Songs));
             }
         }
 
