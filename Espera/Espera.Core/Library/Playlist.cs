@@ -145,7 +145,7 @@ namespace Espera.Core.Library
 
             if (toIndex >= fromIndex)
                 Throw.ArgumentException(
-                    String.Format("{0} has to be small than {1}",
+                    String.Format("{0} has to be smaller than {1}",
                     Reflector.GetMemberName(() => toIndex), Reflector.GetMemberName(() => fromIndex)),
                     () => toIndex);
 
