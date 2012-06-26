@@ -245,5 +245,28 @@ namespace Espera.Core.Tests
                 audioPlayerMock.Verify(p => p.Stop(), Times.Once());
             }
         }
+
+        [TestMethod]
+        public void AddPlaylist_AddSecondPlaylist_NameIsCorrect()
+        {
+            using (var library = new Library.Library())
+            {
+                library.AddPlaylist();
+
+                Assert.AreEqual("New Playlist 2", library.Playlists.ToList()[1].Name);
+            }
+        }
+
+        [TestMethod]
+        public void AddPlaylist_AddThirdPlaylist_NameIsCorrect()
+        {
+            using (var library = new Library.Library())
+            {
+                library.AddPlaylist();
+                library.AddPlaylist();
+
+                Assert.AreEqual("New Playlist 3", library.Playlists.ToList()[2].Name);
+            }
+        }
     }
 }
