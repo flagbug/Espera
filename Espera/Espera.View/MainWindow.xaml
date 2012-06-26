@@ -566,14 +566,19 @@
                             Width="175">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
                             <TextBlock
                                 Grid.Row="0"
                                 Text="playlists"
-                                Style="{StaticResource PlaylistsHeaderStyle}"/>
-                            <ListBox
+                                Style="{StaticResource PlaylistsHeaderStyle}" />
+                            <Button
                                 Grid.Row="1"
+                                Content="Add playlist"
+                                Command="{Binding Path=AddPlaylistCommand}" />
+                            <ListBox
+                                Grid.Row="2"
                                 Margin="0, 10, 0, 0"
                                 BorderBrush="Transparent"
                                 ItemsSource="{Binding Path=Playlists}"

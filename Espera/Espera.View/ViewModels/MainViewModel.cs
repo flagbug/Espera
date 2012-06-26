@@ -44,6 +44,21 @@ namespace Espera.View.ViewModels
             this.playlistTimeoutUpdateTimer.Start();
         }
 
+        public ICommand AddPlaylistCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.library.AddPlaylist();
+                        this.OnPropertyChanged(vm => vm.Playlists);
+                    }
+                );
+            }
+        }
+
         public AdministratorViewModel AdministratorViewModel { get; private set; }
 
         public bool CanChangeTime
