@@ -16,6 +16,7 @@ namespace Espera.View.ViewModels
         private bool isSearching;
         private string searchText;
         private Func<IEnumerable<YoutubeSong>, IOrderedEnumerable<YoutubeSong>> songOrderFunc;
+        private IEnumerable<YoutubeSong> currentSongs;
 
         public YoutubeViewModel(Library library)
             : base(library)
@@ -74,14 +75,17 @@ namespace Espera.View.ViewModels
         {
             get
             {
-                this.IsSearching = true;
+                if (this.IsSearching || this.currentSongs == null)
+                {
+                    var finder = new YoutubeSongFinder(this.SearchText);
+                    finder.Start();
 
-                var finder = new YoutubeSongFinder(this.SearchText);
-                finder.Start();
+                    this.IsSearching = false;
 
-                this.IsSearching = false;
+                    this.currentSongs = finder.SongsFound;
+                }
 
-                return finder.SongsFound
+                return currentSongs
                     .OrderBy(this.songOrderFunc)
                     .Select(song => new SongViewModel(song));
             }
@@ -119,6 +123,8 @@ namespace Espera.View.ViewModels
 
         public void StartSearch()
         {
+            this.IsSearching = true;
+
             Task.Factory.StartNew(() => this.OnPropertyChanged(vm => vm.SelectableSongs));
         }
     }

@@ -454,7 +454,7 @@
                         IsSelected="{Binding Path=IsYoutube}">
                         <Grid DataContext="{Binding Path=YoutubeViewModel}">
                             <ListView
-                                ItemsSource="{Binding Path=SelectableSongs, IsAsync=True}"
+                                ItemsSource="{Binding Path=SelectableSongs}"
                                 SelectionChanged="SongListSelectionChanged"
                                 ContextMenuOpening="SongListContextMenuOpening">
                                 <ListView.Style>
