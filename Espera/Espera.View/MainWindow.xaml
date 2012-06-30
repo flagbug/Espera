@@ -74,7 +74,7 @@
                             <Border
                                 Background="Transparent"
                                 Height="25"
-                                Width="25" >
+                                Width="25">
                                 <ContentPresenter  />
                             </Border>
                         </ControlTemplate>
@@ -89,7 +89,7 @@
                                 Background="{TemplateBinding Background}"
                                 Height="25"
                                 Width="25"
-                                Margin="5, 0, 5, 0" >
+                                Margin="5, 0, 5, 0">
                                 <ContentPresenter />
                             </Border>
                         </ControlTemplate>
@@ -275,7 +275,7 @@
                 <TextBlock
                     Grid.Row="0"
                     Text="artists"
-                    Style="{StaticResource ArtistsHeaderStyle}"/>
+                    Style="{StaticResource ArtistsHeaderStyle}" />
                 <ListBox
                     Grid.Row="1"
                     DataContext="{Binding Path=LocalViewModel}"
@@ -294,7 +294,7 @@
                 <TextBlock
                     Grid.Row="0"
                     Text="video info"
-                    Style="{StaticResource VideoInfoHeaderStyle}"/>
+                    Style="{StaticResource VideoInfoHeaderStyle}" />
                 <Grid
                     Grid.Row="1"
                     DataContext="{Binding Path=YoutubeViewModel}"
@@ -368,7 +368,7 @@
                             </ListView.ContextMenu>
                             <ListView.ItemContainerStyle>
                                 <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
-                                    <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick"/>
+                                    <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick" />
                                 </Style>
                             </ListView.ItemContainerStyle>
                             <ListView.View>
@@ -476,7 +476,7 @@
                                 </ListView.ContextMenu>
                                 <ListView.ItemContainerStyle>
                                     <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
-                                        <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick"/>
+                                        <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick" />
                                     </Style>
                                 </ListView.ItemContainerStyle>
                                 <ListView.View>
@@ -608,7 +608,7 @@
                             </ListView.ContextMenu>
                             <ListView.ItemContainerStyle>
                                 <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
-                                    <EventSetter Event="MouseDoubleClick" Handler="PlaylistDoubleClick"/>
+                                    <EventSetter Event="MouseDoubleClick" Handler="PlaylistDoubleClick" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Path=IsInactive}" Value="True">
                                             <Setter Property="Foreground" Value="Gray" />
