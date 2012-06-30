@@ -40,7 +40,7 @@ namespace Espera.View
         public static Func<IEnumerable<YoutubeSong>, IOrderedEnumerable<YoutubeSong>> GetOrderByRating(SortOrder sortOrder)
         {
             return songs => songs
-                .OrderBy(song => song.Rating);
+                .OrderBy(song => song.Rating, sortOrder);
         }
 
         public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByTitle<T>(SortOrder sortOrder) where T : Song
