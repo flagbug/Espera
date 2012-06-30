@@ -51,6 +51,9 @@ can play songs from the local hard drive or from YouTube.
 - [Rareform](http://github.com/flagbug/Rareform)
 - [YoutubeExtractor](http://github.com/flagbug/YoutubeExtractor)
 - [MahApps.Metro](http://github.com/flagbug/MahApps.Metro)
+- [NAudio](http://naudio.codeplex.com)
+- [Taglib#](http://github.com/mono/taglib-sharp)
+- [Moq](http://code.google.com/p/moq/)
 
 ## Screenshot
 
