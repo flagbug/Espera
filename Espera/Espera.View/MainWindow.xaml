@@ -254,8 +254,8 @@
                 Grid.Column="5"
                 Margin="10, 0, 0, 0"
                 Padding="0"
-                ToolTip="Settings"
-                Click="AdminPanelToggleButtonClick">
+                IsChecked="{Binding Path=AdministratorViewModel.Show}"
+                ToolTip="Settings">
                 <Image Source="/Espera;component/Images/Settings.png" />
             </ToggleButton>
         </Grid>
@@ -784,7 +784,7 @@
             </Grid>
             <Grid
                 Grid.Column="2"
-                Name="adminPanel"
+                Visibility="{Binding Path=Show, Converter={StaticResource BooleanToVisibilityConverter}}"
                 Width="200"
                 DataContext="{Binding Path=AdministratorViewModel}">
                 <Grid.Style>

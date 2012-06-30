@@ -47,13 +47,6 @@ namespace Espera.View
             }
         }
 
-        private void AdminPanelToggleButtonClick(object sender, RoutedEventArgs e)
-        {
-            this.showAdministratorPanel = !this.showAdministratorPanel;
-
-            this.adminPanel.Visibility = this.showAdministratorPanel ? Visibility.Visible : Visibility.Collapsed;
-        }
-
         private void BlueColorButtonButtonClick(object sender, RoutedEventArgs e)
         {
             this.ChangeColor("Blue");

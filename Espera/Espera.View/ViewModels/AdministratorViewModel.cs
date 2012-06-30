@@ -12,6 +12,7 @@ namespace Espera.View.ViewModels
     {
         private readonly Library library;
         private bool isWrongPassword;
+        private bool show;
 
         public AdministratorViewModel(Library library)
         {
@@ -183,6 +184,19 @@ namespace Espera.View.ViewModels
         {
             get { return (int)this.library.PlaylistTimeout.TotalSeconds; }
             set { this.library.PlaylistTimeout = TimeSpan.FromSeconds(value); }
+        }
+
+        public bool Show
+        {
+            get { return this.show; }
+            set
+            {
+                if (this.Show != value)
+                {
+                    this.show = value;
+                    this.OnPropertyChanged(vm => vm.Show);
+                }
+            }
         }
 
         public bool StreamYoutube
