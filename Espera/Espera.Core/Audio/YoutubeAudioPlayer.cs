@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using Rareform.Validation;
 using Vlc.DotNet.Core;
 using Vlc.DotNet.Core.Interops.Signatures.LibVlc.Media;
 using Vlc.DotNet.Core.Medias;
@@ -105,6 +106,9 @@ namespace Espera.Core.Audio
 
         public override void Load(Song song)
         {
+            if(song == null)
+                Throw.ArgumentNullException(() => song);
+
             this.player.Media = new LocationMedia(song.StreamingPath);
 
             base.Load(song);

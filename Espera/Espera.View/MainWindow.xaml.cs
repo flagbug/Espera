@@ -19,8 +19,6 @@ namespace Espera.View
     /// </summary>
     public partial class MainWindow
     {
-        private bool showAdministratorPanel;
-
         public MainWindow()
         {
             InitializeComponent();

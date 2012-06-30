@@ -5,6 +5,7 @@ namespace Espera.Core.Library
     /// <summary>
     /// The exception that is thrown, when an invalid password has been entered.
     /// </summary>
+    [Serializable]
     public class InvalidPasswordException : Exception
     {
         /// <summary>

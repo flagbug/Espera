@@ -491,6 +491,8 @@ namespace Espera.Core.Library
 
             this.abortSongAdding = true;
 
+            this.cacheResetHandle.Dispose();
+
             lock (this.disposeLock)
             {
                 DisposeSongs(this.songs);

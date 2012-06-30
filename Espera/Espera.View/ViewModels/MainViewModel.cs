@@ -450,6 +450,7 @@ namespace Espera.View.ViewModels
         public void Dispose()
         {
             this.library.Dispose();
+            this.playlistTimeoutUpdateTimer.Dispose();
             this.updateTimer.Dispose();
         }
 
