@@ -618,6 +618,7 @@
                                                             <Setter Property="BorderBrush" Value="Transparent" />
                                                             <Setter Property="BorderThickness" Value="0" />
                                                             <Setter Property="IsReadOnly" Value="True" />
+                                                            <Setter Property="IsHitTestVisible" Value="False" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
