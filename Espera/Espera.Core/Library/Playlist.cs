@@ -70,7 +70,7 @@ namespace Espera.Core.Library
         /// </value>
         public int? CurrentSongIndex { get; set; }
 
-        public string Name { get; private set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Gets the <see cref="Espera.Core.Song"/> at the specified index.

@@ -19,6 +19,7 @@ namespace Espera.Core.Library
         public string Name
         {
             get { return this.playlist.Name; }
+            set { this.playlist.Name = value; }
         }
 
         public int? CurrentSongIndex

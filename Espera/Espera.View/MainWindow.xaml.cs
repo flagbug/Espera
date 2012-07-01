@@ -261,5 +261,18 @@ namespace Espera.View
         {
             this.mainViewModel.YoutubeViewModel.OrderByTitle();
         }
+
+        private void PlaylistNameTextBoxLostFocus(object sender, RoutedEventArgs e)
+        {
+            this.mainViewModel.CurrentPlaylist.EditName = false;
+        }
+
+        private void PlaylistNameTextBoxKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                this.mainViewModel.CurrentPlaylist.EditName = false;
+            }
+        }
     }
 }

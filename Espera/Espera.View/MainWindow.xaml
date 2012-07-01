@@ -572,21 +572,69 @@
                                 Grid.Row="0"
                                 Text="playlists"
                                 Style="{StaticResource PlaylistsHeaderStyle}" />
-                            <Button
+                            <StackPanel
                                 Grid.Row="1"
-                                Content="Add playlist"
-                                Command="{Binding Path=AddPlaylistCommand}" />
+                                Margin="0, 5, 0, 0"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Left"
+                                Height="30">
+                                <Button
+                                    Padding="0"
+                                    Width="30"
+                                    Command="{Binding Path=AddPlaylistCommand}">
+                                    <Image Source="/Espera;component/Images/NewPlaylist.png" />
+                                </Button>
+                                <Button
+                                    Padding="0"
+                                    Width="30"
+                                    Margin="10, 0, 0, 0"
+                                    Command="{Binding Path=EditPlaylistNameCommand}">
+                                    <Image Source="/Espera;component/Images/EditPlaylistName.png" />
+                                </Button>
+                            </StackPanel>
                             <ListBox
                                 Grid.Row="2"
-                                Margin="0, 10, 0, 0"
+                                Margin="0, 5, 0, 0"
                                 BorderBrush="Transparent"
                                 ItemsSource="{Binding Path=Playlists}"
                                 SelectedItem="{Binding Path=CurrentPlaylist}">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Path=Name}" />
+                                        <TextBox
+                                            Text="{Binding Path=Name, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                                            Margin="0, 0, 5, 0"
+                                            Padding="0"
+                                            MinHeight="25"
+                                            Height="25"
+                                            VerticalAlignment="Center"
+                                            VerticalContentAlignment="Center"
+                                            LostFocus="PlaylistNameTextBoxLostFocus"
+                                            KeyUp="PlaylistNameTextBoxKeyUp">
+                                            <TextBox.Style>
+                                                <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="{x:Type TextBox}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=EditName}" Value="False">
+                                                            <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource TemplatedParent}}" />
+                                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                                            <Setter Property="BorderThickness" Value="0" />
+                                                            <Setter Property="IsReadOnly" Value="True" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBox.Style>
+                                        </TextBox>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
+                                <ListBox.ItemContainerStyle>
+                                    <Style BasedOn="{StaticResource {x:Type ListBoxItem}}" TargetType="{x:Type ListBoxItem}">
+                                        <Setter Property="Height" Value="35" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                                <Setter Property="IsSelected" Value="True"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
                             </ListBox>
                         </Grid>
                         <ListView

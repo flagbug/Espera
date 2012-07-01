@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Timers;
 using System.Windows.Input;
@@ -19,6 +20,7 @@ namespace Espera.View.ViewModels
         private bool isLocal;
         private bool isYoutube;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
+        private ObservableCollection<PlaylistViewModel> playlists;
 
         public MainViewModel()
         {
@@ -53,7 +55,8 @@ namespace Espera.View.ViewModels
                     param =>
                     {
                         this.library.AddPlaylist();
-                        this.OnPropertyChanged(vm => vm.Playlists);
+
+                        this.playlists.Add(this.CreatePlaylistViewModel(this.library.Playlists.Last()));
                     }
                 );
             }
@@ -110,6 +113,20 @@ namespace Espera.View.ViewModels
                     this.displayTimeoutWarning = value;
                     this.OnPropertyChanged(vm => vm.DisplayTimeoutWarning);
                 }
+            }
+        }
+
+        public ICommand EditPlaylistNameCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.CurrentPlaylist.EditName = true;
+                    }
+                );
             }
         }
 
@@ -302,18 +319,27 @@ namespace Espera.View.ViewModels
             set { Settings.Default.PlaylistTitleColumnWidth = value; }
         }
 
-        public IEnumerable<PlaylistViewModel> Playlists
+        public ObservableCollection<PlaylistViewModel> Playlists
         {
-            get { return this.library.Playlists.Select(playlist => new PlaylistViewModel(playlist)); }
+            get
+            {
+                var vms = this.library.Playlists.Select(this.CreatePlaylistViewModel);
+
+                return this.playlists ??
+                    (this.playlists = new ObservableCollection<PlaylistViewModel>(vms));
+            }
         }
 
         public PlaylistViewModel CurrentPlaylist
         {
-            get { return new PlaylistViewModel(this.library.CurrentPlaylist); }
+            get { return this.playlists.Single(vm => vm.Name == this.library.CurrentPlaylist.Name); }
             set
             {
-                this.library.ChangeToPlaylist(value.Name);
-                this.OnPropertyChanged(vm => vm.CurrentPlaylist);
+                if (value != null) // There always has to be a playlist selected
+                {
+                    this.library.ChangeToPlaylist(value.Name);
+                    this.OnPropertyChanged(vm => vm.CurrentPlaylist);
+                }
             }
         }
 
@@ -524,6 +550,11 @@ namespace Espera.View.ViewModels
             this.OnPropertyChanged(vm => vm.IsAdmin);
             this.OnPropertyChanged(vm => vm.CanChangeVolume);
             this.OnPropertyChanged(vm => vm.CanChangeTime);
+        }
+
+        private PlaylistViewModel CreatePlaylistViewModel(PlaylistInfo playlist)
+        {
+            return new PlaylistViewModel(playlist, name => this.playlists.Count(p => p.Name == name) == 1);
         }
     }
 }

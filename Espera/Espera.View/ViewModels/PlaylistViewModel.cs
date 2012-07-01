@@ -1,22 +1,42 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Espera.Core.Library;
 using Rareform.Patterns.MVVM;
+using Rareform.Reflection;
 
 namespace Espera.View.ViewModels
 {
-    internal class PlaylistViewModel : ViewModelBase<PlaylistViewModel>
+    internal class PlaylistViewModel : ViewModelBase<PlaylistViewModel>, IDataErrorInfo
     {
         private readonly PlaylistInfo playlist;
+        private bool editName;
+        private readonly Func<string, bool> renameRequest;
 
-        public PlaylistViewModel(PlaylistInfo playlist)
+        public PlaylistViewModel(PlaylistInfo playlist, Func<string, bool> renameRequest)
         {
             this.playlist = playlist;
+            this.renameRequest = renameRequest;
+        }
+
+        public bool EditName
+        {
+            get { return this.editName; }
+            set
+            {
+                if (this.EditName != value)
+                {
+                    this.editName = value;
+                    this.OnPropertyChanged(vm => vm.EditName);
+                }
+            }
         }
 
         public string Name
         {
             get { return this.playlist.Name; }
+            set { this.playlist.Name = value; }
         }
 
         public IEnumerable<PlaylistEntryViewModel> Songs
@@ -46,6 +66,26 @@ namespace Espera.View.ViewModels
 
                 return songs;
             }
+        }
+
+        public string this[string columnName]
+        {
+            get
+            {
+                string error = null;
+
+                if (columnName == Reflector.GetMemberName(() => this.Name) && !this.renameRequest(this.Name))
+                {
+                    error = "Name already exists.";
+                }
+
+                return error;
+            }
+        }
+
+        public string Error
+        {
+            get { return null; }
         }
     }
 }

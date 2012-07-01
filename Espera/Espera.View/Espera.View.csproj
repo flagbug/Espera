@@ -220,6 +220,12 @@
   <ItemGroup>
     <Resource Include="ApplicationIcon.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\NewPlaylist.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\EditPlaylistName.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
