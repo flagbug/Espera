@@ -597,8 +597,7 @@
                                 Margin="0, 5, 0, 0"
                                 BorderBrush="Transparent"
                                 ItemsSource="{Binding Path=Playlists}"
-                                SelectedItem="{Binding Path=CurrentPlaylist}"
-                                DisplayMemberPath="{Binding Path=Name}">
+                                SelectedItem="{Binding Path=CurrentPlaylist}">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBox
