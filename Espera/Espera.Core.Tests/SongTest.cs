@@ -8,13 +8,13 @@ namespace Espera.Core.Tests
     [TestFixture]
     public class SongTest
     {
-        [Test, ExpectedException(typeof(InvalidOperationException))]
+        [Test]
         public void ClearCache_SongHasNotToBeCached_ThrowsInvalidOperationException()
         {
             var song = new Mock<Song>("TestPath1", AudioType.Mp3, TimeSpan.Zero);
             song.SetupGet(p => p.HasToCache).Returns(false);
 
-            song.Object.ClearCache();
+            Assert.Throws<InvalidOperationException>(() => song.Object.ClearCache());
         }
 
         [Test]

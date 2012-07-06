@@ -13,7 +13,7 @@ namespace Espera.Core.Tests
     [TestFixture]
     public class LibraryTest
     {
-        [Test, ExpectedException(typeof(InvalidOperationException))]
+        [Test]
         public void AddSongsToPlaylist_PartyModeAndMultipleSongsAdded_ThrowsInvalidOperationException()
         {
             var songs = new[] { new LocalSong("TestPath", AudioType.Mp3, TimeSpan.Zero), new LocalSong("TestPath", AudioType.Mp3, TimeSpan.Zero) };
@@ -23,7 +23,7 @@ namespace Espera.Core.Tests
                 library.CreateAdmin("TestPassword");
                 library.ChangeToParty();
 
-                library.AddSongsToPlaylist(songs);
+                Assert.Throws<InvalidOperationException>(() => library.AddSongsToPlaylist(songs));
             }
         }
 
@@ -101,41 +101,41 @@ namespace Espera.Core.Tests
             }
         }
 
-        [Test, ExpectedException(typeof(InvalidPasswordException))]
+        [Test]
         public void ChangeToAdmin_PasswordIsNotCorrent_ThrowsInvalidOperationException()
         {
             using (var library = new Library.Library())
             {
                 library.CreateAdmin("TestPassword");
 
-                library.ChangeToAdmin("WrongPassword");
+                Assert.Throws<InvalidPasswordException>(() => library.ChangeToAdmin("WrongPassword"));
             }
         }
 
-        [Test, ExpectedException(typeof(ArgumentNullException))]
+        [Test]
         public void ChangeToAdmin_PasswordIsNull_ThrowsArgumentNullException()
         {
             using (var library = new Library.Library())
             {
-                library.ChangeToAdmin(null);
+                Assert.Throws<ArgumentNullException>(() => library.ChangeToAdmin(null));
             }
         }
 
-        [Test, ExpectedException(typeof(ArgumentException))]
+        [Test]
         public void CreateAdmin_PasswordIsEmpty_ThrowsArgumentException()
         {
             using (var library = new Library.Library())
             {
-                library.CreateAdmin(String.Empty);
+                Assert.Throws<ArgumentException>(() => library.CreateAdmin(String.Empty));
             }
         }
 
-        [Test, ExpectedException(typeof(ArgumentNullException))]
+        [Test]
         public void CreateAdmin_PasswordIsNull_ThrowsArgumentNullException()
         {
             using (var library = new Library.Library())
             {
-                library.CreateAdmin(null);
+                Assert.Throws<ArgumentNullException>(() => library.CreateAdmin(null));
             }
         }
 
@@ -150,45 +150,46 @@ namespace Espera.Core.Tests
             }
         }
 
-        [Test, ExpectedException(typeof(ArgumentException))]
+        [Test]
         public void CreateAdmin_PasswordIsWhitespace_ThrowsArgumentException()
         {
             using (var library = new Library.Library())
             {
-                library.CreateAdmin(" ");
+                Assert.Throws<ArgumentException>(() => library.CreateAdmin(" "));
             }
         }
 
-        [Test, ExpectedException(typeof(InvalidOperationException))]
+        [Test]
         public void PlayNextSong_UserIsNotAdministrator_ThrowsInvalidOperationException()
         {
             using (var library = new Library.Library())
             {
                 library.CreateAdmin("TestPassword");
                 library.ChangeToParty();
-                library.PlayNextSong();
+
+                Assert.Throws<InvalidOperationException>(() => library.PlayNextSong());
             }
         }
 
-        [Test, ExpectedException(typeof(InvalidOperationException))]
+        [Test]
         public void PlayPreviousSong_PlaylistIsEmpty_ThrowsInvalidOperationException()
         {
             using (var library = new Library.Library())
             {
-                library.PlayPreviousSong();
+                Assert.Throws<InvalidOperationException>(() => library.PlayPreviousSong());
             }
         }
 
-        [Test, ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [Test]
         public void PlaySong_IndexIsLessThanZero_ThrowsArgumentOutOfRangeException()
         {
             using (var library = new Library.Library())
             {
-                library.PlaySong(-1);
+                Assert.Throws<ArgumentOutOfRangeException>(() => library.PlaySong(-1));
             }
         }
 
-        [Test, ExpectedException(typeof(InvalidOperationException))]
+        [Test]
         public void PlaySong_UserIsNotAdministrator_ThrowsInvalidOperationException()
         {
             using (var library = new Library.Library())
@@ -196,22 +197,22 @@ namespace Espera.Core.Tests
                 library.CreateAdmin("TestPassword");
                 library.ChangeToParty();
 
-                library.PlaySong(0);
+                Assert.Throws<InvalidOperationException>(() => library.PlaySong(0));
             }
         }
 
-        [Test, ExpectedException(typeof(InvalidOperationException))]
+        [Test]
         public void RemoveFromPlaylist_AccessModeIsParty_ThrowsInvalidOperationException()
         {
             var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
 
             using (var library = new Library.Library())
             {
-                library.ChangeToParty();
-
                 library.AddSongsToPlaylist(new[] { songMock.Object });
 
-                library.RemoveFromPlaylist(new[] { 0 });
+                library.ChangeToParty();
+
+                Assert.Throws<InvalidOperationException>(() => library.RemoveFromPlaylist(new[] { 0 }));
             }
         }
 
