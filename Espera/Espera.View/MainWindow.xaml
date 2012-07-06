@@ -597,7 +597,8 @@
                                 Margin="0, 5, 0, 0"
                                 BorderBrush="Transparent"
                                 ItemsSource="{Binding Path=Playlists}"
-                                SelectedItem="{Binding Path=CurrentPlaylist}">
+                                SelectedItem="{Binding Path=CurrentPlaylist}"
+                                DisplayMemberPath="{Binding Path=Name}">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBox
@@ -629,11 +630,6 @@
                                 <ListBox.ItemContainerStyle>
                                     <Style BasedOn="{StaticResource {x:Type ListBoxItem}}" TargetType="{x:Type ListBoxItem}">
                                         <Setter Property="Height" Value="35" />
-                                        <Style.Triggers>
-                                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                                <Setter Property="IsSelected" Value="True"/>
-                                            </Trigger>
-                                        </Style.Triggers>
                                     </Style>
                                 </ListBox.ItemContainerStyle>
                             </ListBox>

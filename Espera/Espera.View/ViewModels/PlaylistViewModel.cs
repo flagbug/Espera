@@ -13,7 +13,13 @@ namespace Espera.View.ViewModels
         private readonly PlaylistInfo playlist;
         private bool editName;
         private readonly Func<string, bool> renameRequest;
+        private string saveName;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PlaylistViewModel"/> class.
+        /// </summary>
+        /// <param name="playlist">The playlist info.</param>
+        /// <param name="renameRequest">A function that requests the rename of the playlist. Return true, if the rename is granted, otherwise false.</param>
         public PlaylistViewModel(PlaylistInfo playlist, Func<string, bool> renameRequest)
         {
             this.playlist = playlist;
@@ -28,6 +34,18 @@ namespace Espera.View.ViewModels
                 if (this.EditName != value)
                 {
                     this.editName = value;
+
+                    if (this.EditName)
+                    {
+                        this.saveName = this.Name;
+                    }
+
+                    else if (!this.renameRequest(this.playlist.Name))
+                    {
+                        this.Name = this.saveName;
+                        this.saveName = null;
+                    }
+
                     this.OnPropertyChanged(vm => vm.EditName);
                 }
             }
@@ -36,7 +54,14 @@ namespace Espera.View.ViewModels
         public string Name
         {
             get { return this.playlist.Name; }
-            set { this.playlist.Name = value; }
+            set
+            {
+                if (this.Name != value)
+                {
+                    this.playlist.Name = value;
+                    this.OnPropertyChanged(vm => vm.Name);
+                }
+            }
         }
 
         public IEnumerable<PlaylistEntryViewModel> Songs

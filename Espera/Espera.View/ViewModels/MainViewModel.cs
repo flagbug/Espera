@@ -79,6 +79,11 @@ namespace Espera.View.ViewModels
             get { return !this.library.StreamYoutube || RegistryHelper.IsVlcInstalled(); }
         }
 
+        public PlaylistViewModel CurrentEditedPlaylist
+        {
+            get { return this.Playlists.Single(playlist => playlist.EditName); }
+        }
+
         public int CurrentSeconds
         {
             get { return (int)this.CurrentTime.TotalSeconds; }
