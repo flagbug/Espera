@@ -1,15 +1,14 @@
 ﻿using System;
 using Espera.Core.Audio;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using NUnit.Framework;
 
 namespace Espera.Core.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class SongTest
     {
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Test, ExpectedException(typeof(InvalidOperationException))]
         public void ClearCache_SongHasNotToBeCached_ThrowsInvalidOperationException()
         {
             var song = new Mock<Song>("TestPath1", AudioType.Mp3, TimeSpan.Zero);
@@ -18,7 +17,7 @@ namespace Espera.Core.Tests
             song.Object.ClearCache();
         }
 
-        [TestMethod]
+        [Test]
         public void EqualsNullIsFalse()
         {
             var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
@@ -26,7 +25,7 @@ namespace Espera.Core.Tests
             Assert.IsFalse(song.Object.Equals(null));
         }
 
-        [TestMethod]
+        [Test]
         public void EqualsSamePathIsTrue()
         {
             var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
@@ -35,7 +34,7 @@ namespace Espera.Core.Tests
             Assert.IsTrue(song1.Object.Equals(song2.Object));
         }
 
-        [TestMethod]
+        [Test]
         public void EqualsSameReferenceIsTrue()
         {
             var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
@@ -43,7 +42,7 @@ namespace Espera.Core.Tests
             Assert.IsTrue(song.Object.Equals(song.Object));
         }
 
-        [TestMethod]
+        [Test]
         public void EqualsSongWithDifferentPathIsFalse()
         {
             var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);

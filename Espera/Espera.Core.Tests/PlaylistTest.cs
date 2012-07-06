@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using Espera.Core.Audio;
 using Espera.Core.Library;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using NUnit.Framework;
 
 namespace Espera.Core.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class PlaylistTest
     {
-        [TestMethod]
+        [Test]
         public void AddSongsTest()
         {
             Song[] songs = SetupSimpleSongMock(4);
@@ -24,7 +24,7 @@ namespace Espera.Core.Tests
             Assert.AreEqual(songs[3], playlist[3]);
         }
 
-        [TestMethod]
+        [Test]
         public void CanPlayNextSong_CurrentSongIndexIsNull_ReturnsFalse()
         {
             Song[] songs = SetupSimpleSongMock(4);
@@ -35,7 +35,7 @@ namespace Espera.Core.Tests
             Assert.IsFalse(playlist.CanPlayNextSong);
         }
 
-        [TestMethod]
+        [Test]
         public void CanPlayNextSong_CurrentSongIndexIsPlaylistCount_ReturnsFalse()
         {
             Song[] songs = SetupSimpleSongMock(4);
@@ -46,7 +46,7 @@ namespace Espera.Core.Tests
             Assert.IsFalse(playlist.CanPlayNextSong);
         }
 
-        [TestMethod]
+        [Test]
         public void CanPlayNextSong_CurrentSongIndexIsZero_ReturnsTrue()
         {
             Song[] songs = SetupSimpleSongMock(4);
@@ -57,7 +57,7 @@ namespace Espera.Core.Tests
             Assert.IsTrue(playlist.CanPlayNextSong);
         }
 
-        [TestMethod]
+        [Test]
         public void CanPlayPreviousSong_CurrentSongIndexIsNull_ReturnsFalse()
         {
             Song[] songs = SetupSimpleSongMock(4);
@@ -68,7 +68,7 @@ namespace Espera.Core.Tests
             Assert.IsFalse(playlist.CanPlayPreviousSong);
         }
 
-        [TestMethod]
+        [Test]
         public void CanPlayPreviousSong_CurrentSongIndexIsPlaylistCount_ReturnsTrue()
         {
             Song[] songs = SetupSimpleSongMock(4);
@@ -79,7 +79,7 @@ namespace Espera.Core.Tests
             Assert.IsTrue(playlist.CanPlayPreviousSong);
         }
 
-        [TestMethod]
+        [Test]
         public void CanPlayPreviousSong_CurrentSongIndexIsZero_ReturnsFalse()
         {
             Song[] songs = SetupSimpleSongMock(4);
@@ -90,7 +90,7 @@ namespace Espera.Core.Tests
             Assert.IsFalse(playlist.CanPlayPreviousSong);
         }
 
-        [TestMethod]
+        [Test]
         public void InsertMove_InsertSongToPlaylist_OrderIsCorrent()
         {
             Song[] songs = SetupSimpleSongMock(5);
@@ -105,7 +105,7 @@ namespace Espera.Core.Tests
             Assert.AreEqual(songs[2], playlist[3]);
         }
 
-        [TestMethod]
+        [Test]
         public void RemoveSongs_RemoveMultipleSongs_OrderIsCorrect()
         {
             Song[] songs = SetupSimpleSongMock(7);
@@ -120,7 +120,7 @@ namespace Espera.Core.Tests
             Assert.AreEqual(songs[6], playlist[3]);
         }
 
-        [TestMethod]
+        [Test]
         public void RemoveSongs_RemoveOneSong_OrderIsCorrect()
         {
             Song[] songs = SetupSimpleSongMock(4);

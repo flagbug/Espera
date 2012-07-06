@@ -5,16 +5,15 @@ using System.Threading;
 using Espera.Core.Audio;
 using Espera.Core.Library;
 using Espera.Core.Tests.Mocks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using NUnit.Framework;
 
 namespace Espera.Core.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class LibraryTest
     {
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Test, ExpectedException(typeof(InvalidOperationException))]
         public void AddSongsToPlaylist_PartyModeAndMultipleSongsAdded_ThrowsInvalidOperationException()
         {
             var songs = new[] { new LocalSong("TestPath", AudioType.Mp3, TimeSpan.Zero), new LocalSong("TestPath", AudioType.Mp3, TimeSpan.Zero) };
@@ -28,7 +27,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void AutoNextSong_SongIsCaching_SwapSongs()
         {
             var eventWait = new ManualResetEvent(false); // We need this, because Library.PlaySong() pops up a new thread interally and then returns
@@ -90,7 +89,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void ChangeToAdmin_PasswordIsCorrent_AccessModeIsAdministrator()
         {
             using (var library = new Library.Library())
@@ -102,8 +101,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidPasswordException))]
+        [Test, ExpectedException(typeof(InvalidPasswordException))]
         public void ChangeToAdmin_PasswordIsNotCorrent_ThrowsInvalidOperationException()
         {
             using (var library = new Library.Library())
@@ -114,8 +112,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Test, ExpectedException(typeof(ArgumentNullException))]
         public void ChangeToAdmin_PasswordIsNull_ThrowsArgumentNullException()
         {
             using (var library = new Library.Library())
@@ -124,8 +121,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Test, ExpectedException(typeof(ArgumentException))]
         public void CreateAdmin_PasswordIsEmpty_ThrowsArgumentException()
         {
             using (var library = new Library.Library())
@@ -134,8 +130,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Test, ExpectedException(typeof(ArgumentNullException))]
         public void CreateAdmin_PasswordIsNull_ThrowsArgumentNullException()
         {
             using (var library = new Library.Library())
@@ -144,7 +139,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void CreateAdmin_PasswordIsTestPassword_AdministratorIsCreated()
         {
             using (var library = new Library.Library())
@@ -155,8 +150,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Test, ExpectedException(typeof(ArgumentException))]
         public void CreateAdmin_PasswordIsWhitespace_ThrowsArgumentException()
         {
             using (var library = new Library.Library())
@@ -165,8 +159,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Test, ExpectedException(typeof(InvalidOperationException))]
         public void PlayNextSong_UserIsNotAdministrator_ThrowsInvalidOperationException()
         {
             using (var library = new Library.Library())
@@ -177,8 +170,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Test, ExpectedException(typeof(InvalidOperationException))]
         public void PlayPreviousSong_PlaylistIsEmpty_ThrowsInvalidOperationException()
         {
             using (var library = new Library.Library())
@@ -187,8 +179,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [Test, ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void PlaySong_IndexIsLessThanZero_ThrowsArgumentOutOfRangeException()
         {
             using (var library = new Library.Library())
@@ -197,8 +188,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Test, ExpectedException(typeof(InvalidOperationException))]
         public void PlaySong_UserIsNotAdministrator_ThrowsInvalidOperationException()
         {
             using (var library = new Library.Library())
@@ -210,8 +200,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Test, ExpectedException(typeof(InvalidOperationException))]
         public void RemoveFromPlaylist_AccessModeIsParty_ThrowsInvalidOperationException()
         {
             var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
@@ -226,7 +215,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void RemoveFromPlaylist_SongIsPlaying_CurrentPlayerIsStopped()
         {
             var audioPlayerMock = new Mock<AudioPlayer>();
@@ -246,7 +235,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void AddPlaylist_AddSecondPlaylist_NameIsCorrect()
         {
             using (var library = new Library.Library())
@@ -257,7 +246,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void AddPlaylist_AddThirdPlaylist_NameIsCorrect()
         {
             using (var library = new Library.Library())
