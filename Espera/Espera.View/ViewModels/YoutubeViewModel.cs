@@ -10,9 +10,9 @@ namespace Espera.View.ViewModels
 {
     internal class YoutubeViewModel : SongSourceViewModel<YoutubeViewModel>
     {
-        private SortOrder currentYoutubeSongDurationOrder;
-        private SortOrder currentYoutubeSongRatingOrder;
-        private SortOrder currentYoutubeSongTitleOrder;
+        private SortOrder durationOrder;
+        private SortOrder ratingOrder;
+        private SortOrder titleOrder;
         private bool isSearching;
         private string searchText;
         private Func<IEnumerable<YoutubeSong>, IOrderedEnumerable<YoutubeSong>> songOrderFunc;
@@ -99,24 +99,24 @@ namespace Espera.View.ViewModels
 
         public void OrderByDuration()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByDuration<YoutubeSong>(this.currentYoutubeSongDurationOrder);
-            SortHelpers.InverseOrder(ref this.currentYoutubeSongDurationOrder);
+            this.songOrderFunc = SortHelpers.GetOrderByDuration<YoutubeSong>(this.durationOrder);
+            SortHelpers.InverseOrder(ref this.durationOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableSongs);
         }
 
         public void OrderByRating()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByRating(this.currentYoutubeSongRatingOrder);
-            SortHelpers.InverseOrder(ref this.currentYoutubeSongRatingOrder);
+            this.songOrderFunc = SortHelpers.GetOrderByRating(this.ratingOrder);
+            SortHelpers.InverseOrder(ref this.ratingOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableSongs);
         }
 
         public void OrderByTitle()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByTitle<YoutubeSong>(this.currentYoutubeSongTitleOrder);
-            SortHelpers.InverseOrder(ref this.currentYoutubeSongTitleOrder);
+            this.songOrderFunc = SortHelpers.GetOrderByTitle<YoutubeSong>(this.titleOrder);
+            SortHelpers.InverseOrder(ref this.titleOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableSongs);
         }

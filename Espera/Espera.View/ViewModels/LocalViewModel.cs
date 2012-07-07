@@ -12,11 +12,11 @@ namespace Espera.View.ViewModels
 {
     internal class LocalViewModel : SongSourceViewModel<LocalViewModel>
     {
-        private SortOrder currentLocalSongAlbumOrder;
-        private SortOrder currentLocalSongArtistOrder;
-        private SortOrder currentLocalSongDurationOrder;
-        private SortOrder currentLocalSongGenreOrder;
-        private SortOrder currentLocalSongTitleOrder;
+        private SortOrder albumOrder;
+        private SortOrder artistOrder;
+        private SortOrder durationOrder;
+        private SortOrder genreOrder;
+        private SortOrder titleOrder;
         private volatile bool isAdding;
         private string searchText;
         private string selectedArtist;
@@ -216,40 +216,40 @@ namespace Espera.View.ViewModels
 
         public void OrderByAlbum()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByAlbum<Song>(this.currentLocalSongAlbumOrder);
-            SortHelpers.InverseOrder(ref this.currentLocalSongAlbumOrder);
+            this.songOrderFunc = SortHelpers.GetOrderByAlbum<Song>(this.albumOrder);
+            SortHelpers.InverseOrder(ref this.albumOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableSongs);
         }
 
         public void OrderByArtist()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByArtist<Song>(this.currentLocalSongArtistOrder);
-            SortHelpers.InverseOrder(ref this.currentLocalSongArtistOrder);
+            this.songOrderFunc = SortHelpers.GetOrderByArtist<Song>(this.artistOrder);
+            SortHelpers.InverseOrder(ref this.artistOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableSongs);
         }
 
         public void OrderByDuration()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByDuration<Song>(this.currentLocalSongDurationOrder);
-            SortHelpers.InverseOrder(ref this.currentLocalSongDurationOrder);
+            this.songOrderFunc = SortHelpers.GetOrderByDuration<Song>(this.durationOrder);
+            SortHelpers.InverseOrder(ref this.durationOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableSongs);
         }
 
         public void OrderByGenre()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByGenre<Song>(this.currentLocalSongGenreOrder);
-            SortHelpers.InverseOrder(ref this.currentLocalSongGenreOrder);
+            this.songOrderFunc = SortHelpers.GetOrderByGenre<Song>(this.genreOrder);
+            SortHelpers.InverseOrder(ref this.genreOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableSongs);
         }
 
         public void OrderByTitle()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByTitle<Song>(this.currentLocalSongTitleOrder);
-            SortHelpers.InverseOrder(ref this.currentLocalSongTitleOrder);
+            this.songOrderFunc = SortHelpers.GetOrderByTitle<Song>(this.titleOrder);
+            SortHelpers.InverseOrder(ref this.titleOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableSongs);
         }
