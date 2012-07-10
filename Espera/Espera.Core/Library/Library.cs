@@ -37,8 +37,6 @@ namespace Espera.Core.Library
             this.songLock = new object();
             this.songs = new HashSet<Song>();
             this.playlists = new List<Playlist>();
-            this.AddPlaylist();
-            this.currentPlaylist = this.playlists[0];
             this.volume = 1.0f;
             this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
             this.driveWatcher = RemovableDriveWatcher.Create();
@@ -363,27 +361,12 @@ namespace Espera.Core.Library
             return Task.Factory.StartNew(() => this.AddLocalSongs(path));
         }
 
-        public void AddPlaylist()
+        public void AddPlaylist(string name)
         {
-            string name;
+            if (this.playlists.Any(playlist => playlist.Name == name))
+                throw new InvalidOperationException("A playlist with this name already exists.");
 
-            int i = 1;
-            string suffix = String.Empty;
-
-            do
-            {
-                name = "New Playlist";
-
-                if (i > 1)
-                {
-                    suffix = " " + i;
-                }
-
-                i++;
-            }
-            while (this.playlists.Any(playlist => playlist.Name == name + suffix));
-
-            this.playlists.Add(new Playlist(name + suffix));
+            this.playlists.Add(new Playlist(name));
         }
 
         /// <summary>

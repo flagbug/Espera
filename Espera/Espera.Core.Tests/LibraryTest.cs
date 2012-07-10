@@ -55,6 +55,9 @@ namespace Espera.Core.Tests
 
             using (var library = new Library.Library())
             {
+                library.AddPlaylist("Playlist");
+                library.ChangeToPlaylist("Playlist");
+
                 int finished = 0;
 
                 // We need to wait till the second played song has finished and then release our lock,
@@ -167,7 +170,7 @@ namespace Espera.Core.Tests
                 library.CreateAdmin("TestPassword");
                 library.ChangeToParty();
 
-                Assert.Throws<InvalidOperationException>(() => library.PlayNextSong());
+                Assert.Throws<InvalidOperationException>(library.PlayNextSong);
             }
         }
 
@@ -176,7 +179,10 @@ namespace Espera.Core.Tests
         {
             using (var library = new Library.Library())
             {
-                Assert.Throws<InvalidOperationException>(() => library.PlayPreviousSong());
+                library.AddPlaylist("Playlist");
+                library.ChangeToPlaylist("Playlist");
+
+                Assert.Throws<InvalidOperationException>(library.PlayPreviousSong);
             }
         }
 
@@ -208,6 +214,8 @@ namespace Espera.Core.Tests
 
             using (var library = new Library.Library())
             {
+                library.AddPlaylist("Playlist");
+                library.ChangeToPlaylist("Playlist");
                 library.AddSongsToPlaylist(new[] { songMock.Object });
 
                 library.ChangeToParty();
@@ -226,6 +234,8 @@ namespace Espera.Core.Tests
 
             using (var library = new Library.Library())
             {
+                library.AddPlaylist("Playlist");
+                library.ChangeToPlaylist("Playlist");
                 library.AddSongsToPlaylist(new[] { songMock.Object });
 
                 library.PlaySong(0);
@@ -237,25 +247,41 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void AddPlaylist_AddSecondPlaylist_NameIsCorrect()
+        public void AddPlayist_AddTwoPlaylistsWithSameName_ThrowInvalidOperationException()
         {
             using (var library = new Library.Library())
             {
-                library.AddPlaylist();
+                library.AddPlaylist("Playlist");
 
-                Assert.AreEqual("New Playlist 2", library.Playlists.ToList()[1].Name);
+                Assert.Throws<InvalidOperationException>(() => library.AddPlaylist("Playlist"));
             }
         }
 
         [Test]
-        public void AddPlaylist_AddThirdPlaylist_NameIsCorrect()
+        public void ChangeToPlaylist_ChangeToOtherPlaylistAndPlayFirstSong_CurrentSongIndexIsCorrectlySet()
         {
+            var blockingPlayer = new Mock<AudioPlayer>();
+            blockingPlayer.Setup(p => p.Play()).Callback(() => { });
+
+            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+            song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
+
             using (var library = new Library.Library())
             {
-                library.AddPlaylist();
-                library.AddPlaylist();
+                library.AddPlaylist("Playlist");
+                library.ChangeToPlaylist("Playlist");
+                library.AddSongToPlaylist(song.Object);
 
-                Assert.AreEqual("New Playlist 3", library.Playlists.ToList()[2].Name);
+                library.PlaySong(0);
+
+                library.AddPlaylist("Playlist 2");
+                library.ChangeToPlaylist("Playlist 2");
+                library.AddSongToPlaylist(song.Object);
+
+                library.PlaySong(0);
+
+                Assert.AreEqual(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
+                Assert.AreEqual(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
             }
         }
     }

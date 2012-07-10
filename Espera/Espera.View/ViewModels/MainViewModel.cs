@@ -25,10 +25,14 @@ namespace Espera.View.ViewModels
         public MainViewModel()
         {
             this.library = new Library();
+
             this.library.SongStarted += LibraryRaisedSongStarted;
             this.library.SongFinished += LibraryRaisedSongFinished;
             this.library.AccessModeChanged += (sender, e) => this.UpdateUserAccess();
             this.library.PlaylistChanged += (sender, e) => this.UpdatePlaylist();
+
+            this.AddPlaylist();
+            this.library.ChangeToPlaylist(this.Playlists.First().Name);
 
             this.AdministratorViewModel = new AdministratorViewModel(this.library);
 
@@ -52,12 +56,7 @@ namespace Espera.View.ViewModels
             {
                 return new RelayCommand
                 (
-                    param =>
-                    {
-                        this.library.AddPlaylist();
-
-                        this.playlists.Add(this.CreatePlaylistViewModel(this.library.Playlists.Last()));
-                    }
+                    param => this.AddPlaylist()
                 );
             }
         }
@@ -560,6 +559,31 @@ namespace Espera.View.ViewModels
         private PlaylistViewModel CreatePlaylistViewModel(PlaylistInfo playlist)
         {
             return new PlaylistViewModel(playlist, name => this.playlists.Count(p => p.Name == name) == 1);
+        }
+
+        private void AddPlaylist()
+        {
+            string name;
+
+            int i = 1;
+            string suffix = String.Empty;
+
+            do
+            {
+                name = "New Playlist";
+
+                if (i > 1)
+                {
+                    suffix = " " + i;
+                }
+
+                i++;
+            }
+            while (this.library.Playlists.Any(playlist => playlist.Name == name + suffix));
+
+            this.library.AddPlaylist(name);
+
+            this.Playlists.Add(this.CreatePlaylistViewModel(this.library.Playlists.Last()));
         }
     }
 }
