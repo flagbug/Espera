@@ -53,11 +53,8 @@ namespace Espera.Core.Tests
             nextSong.Setup(p => p.CreateAudioPlayer()).Returns(jumpAudioPlayer);
             nextSong.SetupGet(p => p.HasToCache).Returns(false);
 
-            using (var library = new Library.Library())
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
             {
-                library.AddPlaylist("Playlist");
-                library.ChangeToPlaylist("Playlist");
-
                 int finished = 0;
 
                 // We need to wait till the second played song has finished and then release our lock,
@@ -177,11 +174,8 @@ namespace Espera.Core.Tests
         [Test]
         public void PlayPreviousSong_PlaylistIsEmpty_ThrowsInvalidOperationException()
         {
-            using (var library = new Library.Library())
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
             {
-                library.AddPlaylist("Playlist");
-                library.ChangeToPlaylist("Playlist");
-
                 Assert.Throws<InvalidOperationException>(library.PlayPreviousSong);
             }
         }
@@ -212,10 +206,8 @@ namespace Espera.Core.Tests
         {
             var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
 
-            using (var library = new Library.Library())
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
             {
-                library.AddPlaylist("Playlist");
-                library.ChangeToPlaylist("Playlist");
                 library.AddSongsToPlaylist(new[] { songMock.Object });
 
                 library.ChangeToParty();
@@ -232,10 +224,8 @@ namespace Espera.Core.Tests
             var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
             songMock.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayerMock.Object);
 
-            using (var library = new Library.Library())
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
             {
-                library.AddPlaylist("Playlist");
-                library.ChangeToPlaylist("Playlist");
                 library.AddSongsToPlaylist(new[] { songMock.Object });
 
                 library.PlaySong(0);
@@ -266,10 +256,8 @@ namespace Espera.Core.Tests
             var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
             song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
 
-            using (var library = new Library.Library())
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
             {
-                library.AddPlaylist("Playlist");
-                library.ChangeToPlaylist("Playlist");
                 library.AddSongToPlaylist(song.Object);
 
                 library.PlaySong(0);
@@ -283,6 +271,15 @@ namespace Espera.Core.Tests
                 Assert.AreEqual(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
                 Assert.AreEqual(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
             }
+        }
+
+        private static Library.Library CreateLibraryWithPlaylist(string playlistName)
+        {
+            var library = new Library.Library();
+            library.AddPlaylist(playlistName);
+            library.ChangeToPlaylist(playlistName);
+
+            return library;
         }
     }
 }
