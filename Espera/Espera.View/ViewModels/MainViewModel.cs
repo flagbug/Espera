@@ -562,9 +562,13 @@ namespace Espera.View.ViewModels
 
         private void AddPlaylist()
         {
-            this.library.AddPlaylist(this.GetNewPlaylistName());
+            this.library.AddAndChangeToPlaylist(this.GetNewPlaylistName());
 
-            this.Playlists.Add(this.CreatePlaylistViewModel(this.library.Playlists.Last()));
+            PlaylistViewModel newPlaylist = this.CreatePlaylistViewModel(this.library.Playlists.Last());
+            this.Playlists.Add(newPlaylist);
+
+            this.CurrentPlaylist = newPlaylist;
+            this.CurrentPlaylist.EditName = true;
         }
 
         private string GetNewPlaylistName()
