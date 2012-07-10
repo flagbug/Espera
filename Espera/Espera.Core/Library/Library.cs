@@ -364,7 +364,7 @@ namespace Espera.Core.Library
         /// <summary>
         /// Adds a new playlist with the specified name to the library.
         /// </summary>
-        /// <param name="name">The name of the playlist. It is requiered that no other playlist has this name.</param>
+        /// <param name="name">The name of the playlist. It is required that no other playlist has this name.</param>
         /// <exception cref="InvalidOperationException">A playlist with the specified name already exists.</exception>
         public void AddPlaylist(string name)
         {
@@ -372,6 +372,17 @@ namespace Espera.Core.Library
                 throw new InvalidOperationException("A playlist with this name already exists.");
 
             this.playlists.Add(new Playlist(name));
+        }
+
+        /// <summary>
+        /// Adds a new playlist to the library and immediately sets it as the current playlist.
+        /// </summary>
+        /// <param name="name">The name of the playlist, It is required that no other playlist has this name.</param>
+        /// <exception cref="InvalidOperationException">A playlist with the specified name already exists.</exception>
+        public void AddAndChangeToPlaylist(string name)
+        {
+            this.AddPlaylist(name);
+            this.ChangeToPlaylist(name);
         }
 
         /// <summary>

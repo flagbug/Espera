@@ -273,11 +273,34 @@ namespace Espera.Core.Tests
             }
         }
 
+        [Test]
+        public void AddAndChangeToPlaylist_SomeGenericName_WorksAsExpected()
+        {
+            using (var library = new Library.Library())
+            {
+                library.AddAndChangeToPlaylist("Playlist");
+
+                Assert.AreEqual("Playlist", library.CurrentPlaylist.Name);
+                Assert.AreEqual("Playlist", library.Playlists.First().Name);
+                Assert.AreEqual(1, library.Playlists.Count());
+            }
+        }
+
+        [Test]
+        public void AddAndChangeToPlaylist_TwoPlaylistsWithSameName_ThrowsInvalidOperationException()
+        {
+            using (var library = new Library.Library())
+            {
+                library.AddAndChangeToPlaylist("Playlist");
+
+                Assert.Throws<InvalidOperationException>(() => library.AddAndChangeToPlaylist("Playlist"));
+            }
+        }
+
         private static Library.Library CreateLibraryWithPlaylist(string playlistName)
         {
             var library = new Library.Library();
-            library.AddPlaylist(playlistName);
-            library.ChangeToPlaylist(playlistName);
+            library.AddAndChangeToPlaylist(playlistName);
 
             return library;
         }

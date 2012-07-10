@@ -31,8 +31,7 @@ namespace Espera.View.ViewModels
             this.library.AccessModeChanged += (sender, e) => this.UpdateUserAccess();
             this.library.PlaylistChanged += (sender, e) => this.UpdatePlaylist();
 
-            this.AddPlaylist();
-            this.library.ChangeToPlaylist(this.Playlists.First().Name);
+            this.library.AddAndChangeToPlaylist(this.GetNewPlaylistName());
 
             this.AdministratorViewModel = new AdministratorViewModel(this.library);
 
@@ -563,6 +562,13 @@ namespace Espera.View.ViewModels
 
         private void AddPlaylist()
         {
+            this.library.AddPlaylist(this.GetNewPlaylistName());
+
+            this.Playlists.Add(this.CreatePlaylistViewModel(this.library.Playlists.Last()));
+        }
+
+        private string GetNewPlaylistName()
+        {
             string name;
 
             int i = 1;
@@ -581,9 +587,7 @@ namespace Espera.View.ViewModels
             }
             while (this.library.Playlists.Any(playlist => playlist.Name == name + suffix));
 
-            this.library.AddPlaylist(name);
-
-            this.Playlists.Add(this.CreatePlaylistViewModel(this.library.Playlists.Last()));
+            return name + suffix;
         }
     }
 }
