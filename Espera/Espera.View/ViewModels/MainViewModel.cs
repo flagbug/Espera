@@ -81,7 +81,7 @@ namespace Espera.View.ViewModels
 
         public PlaylistViewModel CurrentEditedPlaylist
         {
-            get { return this.Playlists.Single(playlist => playlist.EditName); }
+            get { return this.Playlists.SingleOrDefault(playlist => playlist.EditName); }
         }
 
         public int CurrentSeconds

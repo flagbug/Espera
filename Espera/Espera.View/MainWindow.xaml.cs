@@ -264,14 +264,19 @@ namespace Espera.View
 
         private void PlaylistNameTextBoxLostFocus(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.CurrentEditedPlaylist.EditName = false;
+            PlaylistViewModel playlist = this.mainViewModel.CurrentEditedPlaylist;
+
+            if (playlist != null)
+            {
+                playlist.EditName = false;
+            }
         }
 
         private void PlaylistNameTextBoxKeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                this.mainViewModel.CurrentPlaylist.EditName = false;
+                this.mainViewModel.CurrentEditedPlaylist.EditName = false;
             }
         }
     }
