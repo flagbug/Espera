@@ -279,5 +279,18 @@ namespace Espera.View
                 this.mainViewModel.CurrentEditedPlaylist.EditName = false;
             }
         }
+
+        private void MainWindowMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            // We want to lose the focus of a textbox when the user clicks anywhere in the application
+            this.mainGrid.Focus();
+        }
+
+        private void PlaylistNameTextBoxGotFocus(object sender, RoutedEventArgs e)
+        {
+            var textBox = ((TextBox)sender);
+
+            textBox.CaretIndex = textBox.Text.Length;
+        }
     }
 }
