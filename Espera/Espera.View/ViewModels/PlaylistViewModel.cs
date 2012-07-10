@@ -40,7 +40,7 @@ namespace Espera.View.ViewModels
                         this.saveName = this.Name;
                     }
 
-                    else if (!this.renameRequest(this.playlist.Name))
+                    else if (this.HasErrors())
                     {
                         this.Name = this.saveName;
                         this.saveName = null;
@@ -99,9 +99,17 @@ namespace Espera.View.ViewModels
             {
                 string error = null;
 
-                if (columnName == Reflector.GetMemberName(() => this.Name) && !this.renameRequest(this.Name))
+                if (columnName == Reflector.GetMemberName(() => this.Name))
                 {
-                    error = "Name already exists.";
+                    if (!this.renameRequest(this.Name))
+                    {
+                        error = "Name already exists.";
+                    }
+
+                    else if (String.IsNullOrWhiteSpace(this.Name))
+                    {
+                        error = "Name cannot be empty or whitespace.";
+                    }
                 }
 
                 return error;
@@ -111,6 +119,11 @@ namespace Espera.View.ViewModels
         public string Error
         {
             get { return null; }
+        }
+
+        private bool HasErrors()
+        {
+            return this.GetType().GetProperties().Any(p => this[p.Name] != null);
         }
     }
 }
