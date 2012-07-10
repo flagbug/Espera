@@ -297,6 +297,39 @@ namespace Espera.Core.Tests
             }
         }
 
+        [Test]
+        public void RemovePlaylist_RemoveFirstPlaylist_PlaylistIsRemoved()
+        {
+            using (var library = new Library.Library())
+            {
+                library.AddPlaylist("Playlist");
+
+                library.RemovePlaylist("Playlist");
+
+                Assert.IsEmpty(library.Playlists);
+            }
+        }
+
+        [Test]
+        public void RemovePlaylist_NoPlaylistExists_ThrowsInvalidOperationException()
+        {
+            using (var library = new Library.Library())
+            {
+                Assert.Throws<InvalidOperationException>(() => library.RemovePlaylist("Playlist"));
+            }
+        }
+
+        [Test]
+        public void RemovePlaylist_PlaylistDoesNotExist_ThrowsInvalidOperationException()
+        {
+            using (var library = new Library.Library())
+            {
+                library.AddPlaylist("Playlist");
+
+                Assert.Throws<InvalidOperationException>(() => library.RemovePlaylist("Playlist 2"));
+            }
+        }
+
         private static Library.Library CreateLibraryWithPlaylist(string playlistName)
         {
             var library = new Library.Library();

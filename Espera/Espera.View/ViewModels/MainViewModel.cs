@@ -335,7 +335,7 @@ namespace Espera.View.ViewModels
 
         public PlaylistViewModel CurrentPlaylist
         {
-            get { return this.playlists.Single(vm => vm.Name == this.library.CurrentPlaylist.Name); }
+            get { return this.playlists == null ? null : this.playlists.Single(vm => vm.Name == this.library.CurrentPlaylist.Name); }
             set
             {
                 if (value != null) // There always has to be a playlist selected
@@ -399,6 +399,34 @@ namespace Espera.View.ViewModels
         public TimeSpan RemainingPlaylistTimeout
         {
             get { return this.library.RemainingPlaylistTimeout; }
+        }
+
+        public ICommand RemovePlaylistCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        int index = this.Playlists.IndexOf(this.CurrentPlaylist);
+
+                        this.library.RemovePlaylist(this.CurrentPlaylist.Name);
+
+                        this.Playlists.Remove(this.CurrentPlaylist);
+
+                        if (!this.library.Playlists.Any())
+                        {
+                            this.AddPlaylist();
+                        }
+
+                        this.CurrentPlaylist = this.Playlists.Count > index ? this.Playlists[index] : this.Playlists[0];
+
+                        this.OnPropertyChanged(vm => vm.Playlists);
+                    },
+                    param => this.CurrentPlaylist != null
+                );
+            }
         }
 
         public ICommand RemoveSelectedPlaylistEntriesCommand

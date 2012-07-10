@@ -15,7 +15,7 @@ namespace Espera.Core.Library
     {
         private readonly AutoResetEvent cacheResetHandle;
 
-        // We need a lock when disposing songs to prevent a modification of the enumerator
+        // We need a lock when disposing songs to prevent a modification of the enumeration
         private readonly object disposeLock;
 
         private readonly RemovableDriveWatcher driveWatcher;
@@ -607,6 +607,25 @@ namespace Espera.Core.Library
                 Throw.ArgumentNullException(() => songList);
 
             this.RemoveFromPlaylist(this.currentPlaylist.GetIndexes(songList));
+        }
+
+        /// <summary>
+        /// Removed the playlist with the specified name.
+        /// </summary>
+        /// <param name="playlistName">The name of the playlist to remove.</param>
+        /// <exception cref="InvalidOperationException">No playlist exists, or np playlist with the specified name exists.</exception>
+        public void RemovePlaylist(string playlistName)
+        {
+            if (playlistName == null)
+                Throw.ArgumentNullException(() => playlistName);
+
+            if (!this.Playlists.Any())
+                throw new InvalidOperationException("There are no playlists.");
+
+            int removed = this.playlists.RemoveAll(playlist => playlist.Name == playlistName);
+
+            if (removed == 0)
+                throw new InvalidOperationException("No playlist with the specified name exists.");
         }
 
         /// <summary>

@@ -484,6 +484,12 @@
                                 </Button>
                                 <Button Width="30"
                                         Margin="10, 0, 0, 0"
+                                        Command="{Binding Path=RemovePlaylistCommand}"
+                                        Padding="0">
+                                    <Image Source="/Espera;component/Images/RemovePlaylist.png" />
+                                </Button>
+                                <Button Width="30"
+                                        Margin="10, 0, 0, 0"
                                         Command="{Binding Path=EditPlaylistNameCommand}"
                                         Padding="0">
                                     <Image Source="/Espera;component/Images/EditPlaylistName.png" />
