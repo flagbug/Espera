@@ -292,5 +292,18 @@ namespace Espera.View
 
             textBox.CaretIndex = textBox.Text.Length;
         }
+
+        private void PlaylistsKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                var command = this.mainViewModel.RemovePlaylistCommand;
+
+                if (command.CanExecute(null))
+                {
+                    command.Execute(null);
+                }
+            }
+        }
     }
 }

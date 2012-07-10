@@ -499,7 +499,8 @@
                                      Margin="0, 5, 0, 0"
                                      BorderBrush="Transparent"
                                      ItemsSource="{Binding Path=Playlists}"
-                                     SelectedItem="{Binding Path=CurrentPlaylist}">
+                                     SelectedItem="{Binding Path=CurrentPlaylist}"
+                                     KeyUp="PlaylistsKeyUp">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBox Height="25"
