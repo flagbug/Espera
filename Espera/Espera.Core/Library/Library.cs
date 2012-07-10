@@ -361,6 +361,11 @@ namespace Espera.Core.Library
             return Task.Factory.StartNew(() => this.AddLocalSongs(path));
         }
 
+        /// <summary>
+        /// Adds a new playlist with the specified name to the library.
+        /// </summary>
+        /// <param name="name">The name of the playlist. It is requiered that no other playlist has this name.</param>
+        /// <exception cref="InvalidOperationException">A playlist with the specified name already exists.</exception>
         public void AddPlaylist(string name)
         {
             if (this.playlists.Any(playlist => playlist.Name == name))
