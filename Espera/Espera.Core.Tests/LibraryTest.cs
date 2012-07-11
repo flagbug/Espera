@@ -274,6 +274,34 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void ChangeToPlaylist_ChangeToOtherPlaylistPlaySongAndChangeBack_CurrentSongIndexIsCorrectlySet()
+        {
+            var blockingPlayer = new Mock<AudioPlayer>();
+            blockingPlayer.Setup(p => p.Play()).Callback(() => { });
+
+            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+            song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
+
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
+            {
+                library.AddSongToPlaylist(song.Object);
+
+                library.PlaySong(0);
+
+                library.AddPlaylist("Playlist 2");
+                library.ChangeToPlaylist("Playlist 2");
+                library.AddSongToPlaylist(song.Object);
+
+                library.PlaySong(0);
+
+                library.ChangeToPlaylist("Playlist");
+
+                Assert.AreEqual(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
+                Assert.AreEqual(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
+            }
+        }
+
+        [Test]
         public void AddAndChangeToPlaylist_SomeGenericName_WorksAsExpected()
         {
             using (var library = new Library.Library())
