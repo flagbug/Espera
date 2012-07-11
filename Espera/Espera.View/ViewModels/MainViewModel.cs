@@ -420,7 +420,20 @@ namespace Espera.View.ViewModels
                             this.AddPlaylist();
                         }
 
-                        this.CurrentPlaylist = this.Playlists.Count > index ? this.Playlists[index] : this.Playlists[0];
+                        if (this.Playlists.Count > index)
+                        {
+                            this.CurrentPlaylist = this.Playlists[index];
+                        }
+
+                        else if (this.Playlists.Count >= 1)
+                        {
+                            this.CurrentPlaylist = this.Playlists[index - 1];
+                        }
+
+                        else
+                        {
+                            this.CurrentPlaylist = this.Playlists[0];
+                        }
 
                         this.OnPropertyChanged(vm => vm.Playlists);
                     },
