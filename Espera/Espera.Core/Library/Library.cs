@@ -31,6 +31,7 @@ namespace Espera.Core.Library
         private string password;
         private float volume;
         private readonly List<Playlist> playlists;
+        private Playlist currentPlayingPlaylist;
 
         public Library()
         {
@@ -766,6 +767,13 @@ namespace Espera.Core.Library
                 // Let the song that is selected to be played wait here, if there is currently another song caching
                 cacheResetHandle.WaitOne();
             }
+
+            if (this.currentPlayingPlaylist != null)
+            {
+                this.currentPlayingPlaylist.CurrentSongIndex = null;
+            }
+
+            this.currentPlayingPlaylist = this.currentPlaylist;
 
             this.currentPlaylist.CurrentSongIndex = playlistIndex;
 
