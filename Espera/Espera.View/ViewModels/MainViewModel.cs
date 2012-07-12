@@ -19,8 +19,8 @@ namespace Espera.View.ViewModels
         private bool displayTimeoutWarning;
         private bool isLocal;
         private bool isYoutube;
-        private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
         private ObservableCollection<PlaylistViewModel> playlists;
+        private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
 
         public MainViewModel()
         {
@@ -80,6 +80,19 @@ namespace Espera.View.ViewModels
         public PlaylistViewModel CurrentEditedPlaylist
         {
             get { return this.Playlists.SingleOrDefault(playlist => playlist.EditName); }
+        }
+
+        public PlaylistViewModel CurrentPlaylist
+        {
+            get { return this.playlists == null ? null : this.playlists.Single(vm => vm.Name == this.library.CurrentPlaylist.Name); }
+            set
+            {
+                if (value != null) // There always has to be a playlist selected
+                {
+                    this.library.ChangeToPlaylist(value.Name);
+                    this.OnPropertyChanged(vm => vm.CurrentPlaylist);
+                }
+            }
         }
 
         public int CurrentSeconds
@@ -310,18 +323,6 @@ namespace Espera.View.ViewModels
             set { Settings.Default.PlaylistHeight = value; }
         }
 
-        public int PlaylistSourceColumnWidth
-        {
-            get { return Settings.Default.PlaylistSourceColumnWidth; }
-            set { Settings.Default.PlaylistSourceColumnWidth = value; }
-        }
-
-        public int PlaylistTitleColumnWidth
-        {
-            get { return Settings.Default.PlaylistTitleColumnWidth; }
-            set { Settings.Default.PlaylistTitleColumnWidth = value; }
-        }
-
         public ObservableCollection<PlaylistViewModel> Playlists
         {
             get
@@ -333,52 +334,16 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public PlaylistViewModel CurrentPlaylist
+        public int PlaylistSourceColumnWidth
         {
-            get { return this.playlists == null ? null : this.playlists.Single(vm => vm.Name == this.library.CurrentPlaylist.Name); }
-            set
-            {
-                if (value != null) // There always has to be a playlist selected
-                {
-                    this.library.ChangeToPlaylist(value.Name);
-                    this.OnPropertyChanged(vm => vm.CurrentPlaylist);
-                }
-            }
+            get { return Settings.Default.PlaylistSourceColumnWidth; }
+            set { Settings.Default.PlaylistSourceColumnWidth = value; }
         }
 
-        /// <summary>
-        /// Gets the number of songs that come after the currently played song.
-        /// </summary>
-        public int SongsRemaining
+        public int PlaylistTitleColumnWidth
         {
-            get
-            {
-                return this.CurrentPlaylist.Songs
-                    .SkipWhile(song => song.IsInactive)
-                    .Count();
-            }
-        }
-
-        /// <summary>
-        /// Gets the total remaining time of all songs that come after the currently played song.
-        /// </summary>
-        public TimeSpan? TimeRemaining
-        {
-            get
-            {
-                var songs = this.CurrentPlaylist.Songs
-                    .SkipWhile(song => song.IsInactive)
-                    .ToList();
-
-                if (songs.Any())
-                {
-                    return songs
-                        .Select(song => song.Duration)
-                        .Aggregate((t1, t2) => t1 + t2);
-                }
-
-                return null;
-            }
+            get { return Settings.Default.PlaylistTitleColumnWidth; }
+            set { Settings.Default.PlaylistTitleColumnWidth = value; }
         }
 
         /// <summary>
@@ -477,6 +442,41 @@ namespace Espera.View.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets the number of songs that come after the currently played song.
+        /// </summary>
+        public int SongsRemaining
+        {
+            get
+            {
+                return this.CurrentPlaylist.Songs
+                    .SkipWhile(song => song.IsInactive)
+                    .Count();
+            }
+        }
+
+        /// <summary>
+        /// Gets the total remaining time of all songs that come after the currently played song.
+        /// </summary>
+        public TimeSpan? TimeRemaining
+        {
+            get
+            {
+                var songs = this.CurrentPlaylist.Songs
+                    .SkipWhile(song => song.IsInactive)
+                    .ToList();
+
+                if (songs.Any())
+                {
+                    return songs
+                        .Select(song => song.Duration)
+                        .Aggregate((t1, t2) => t1 + t2);
+                }
+
+                return null;
+            }
+        }
+
         public int TotalSeconds
         {
             get { return (int)this.TotalTime.TotalSeconds; }
@@ -522,6 +522,45 @@ namespace Espera.View.ViewModels
             this.library.Dispose();
             this.playlistTimeoutUpdateTimer.Dispose();
             this.updateTimer.Dispose();
+        }
+
+        private void AddPlaylist()
+        {
+            this.library.AddAndChangeToPlaylist(this.GetNewPlaylistName());
+
+            PlaylistViewModel newPlaylist = this.CreatePlaylistViewModel(this.library.Playlists.Last());
+            this.Playlists.Add(newPlaylist);
+
+            this.CurrentPlaylist = newPlaylist;
+            this.CurrentPlaylist.EditName = true;
+        }
+
+        private PlaylistViewModel CreatePlaylistViewModel(PlaylistInfo playlist)
+        {
+            return new PlaylistViewModel(playlist, name => this.playlists.Count(p => p.Name == name) == 1);
+        }
+
+        private string GetNewPlaylistName()
+        {
+            string name;
+
+            int i = 1;
+            string suffix = String.Empty;
+
+            do
+            {
+                name = "New Playlist";
+
+                if (i > 1)
+                {
+                    suffix = " " + i;
+                }
+
+                i++;
+            }
+            while (this.library.Playlists.Any(playlist => playlist.Name == name + suffix));
+
+            return name + suffix;
         }
 
         private void LibraryRaisedSongFinished(object sender, EventArgs e)
@@ -594,45 +633,6 @@ namespace Espera.View.ViewModels
             this.OnPropertyChanged(vm => vm.IsAdmin);
             this.OnPropertyChanged(vm => vm.CanChangeVolume);
             this.OnPropertyChanged(vm => vm.CanChangeTime);
-        }
-
-        private PlaylistViewModel CreatePlaylistViewModel(PlaylistInfo playlist)
-        {
-            return new PlaylistViewModel(playlist, name => this.playlists.Count(p => p.Name == name) == 1);
-        }
-
-        private void AddPlaylist()
-        {
-            this.library.AddAndChangeToPlaylist(this.GetNewPlaylistName());
-
-            PlaylistViewModel newPlaylist = this.CreatePlaylistViewModel(this.library.Playlists.Last());
-            this.Playlists.Add(newPlaylist);
-
-            this.CurrentPlaylist = newPlaylist;
-            this.CurrentPlaylist.EditName = true;
-        }
-
-        private string GetNewPlaylistName()
-        {
-            string name;
-
-            int i = 1;
-            string suffix = String.Empty;
-
-            do
-            {
-                name = "New Playlist";
-
-                if (i > 1)
-                {
-                    suffix = " " + i;
-                }
-
-                i++;
-            }
-            while (this.library.Playlists.Any(playlist => playlist.Name == name + suffix));
-
-            return name + suffix;
         }
     }
 }

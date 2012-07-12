@@ -11,8 +11,8 @@ namespace Espera.View.ViewModels
     internal class PlaylistViewModel : ViewModelBase<PlaylistViewModel>, IDataErrorInfo
     {
         private readonly PlaylistInfo playlist;
-        private bool editName;
         private readonly Func<string, bool> renameRequest;
+        private bool editName;
         private string saveName;
 
         /// <summary>
@@ -49,6 +49,11 @@ namespace Espera.View.ViewModels
                     this.OnPropertyChanged(vm => vm.EditName);
                 }
             }
+        }
+
+        public string Error
+        {
+            get { return null; }
         }
 
         public string Name
@@ -114,11 +119,6 @@ namespace Espera.View.ViewModels
 
                 return error;
             }
-        }
-
-        public string Error
-        {
-            get { return null; }
         }
 
         private bool HasErrors()

@@ -19,19 +19,19 @@ namespace Espera.Core.Library
         private readonly object disposeLock;
 
         private readonly RemovableDriveWatcher driveWatcher;
-        private Playlist currentPlaylist;
+        private readonly List<Playlist> playlists;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
         private bool abortSongAdding;
         private AccessMode accessMode;
         private AudioPlayer currentPlayer;
+        private Playlist currentPlayingPlaylist;
+        private Playlist currentPlaylist;
         private bool isWaitingOnCache;
         private DateTime lastSongAddTime;
         private bool overrideCurrentCaching;
         private string password;
         private float volume;
-        private readonly List<Playlist> playlists;
-        private Playlist currentPlayingPlaylist;
 
         public Library()
         {
@@ -132,6 +132,11 @@ namespace Espera.Core.Library
         public bool CanPlayPreviousSong
         {
             get { return this.currentPlaylist.CanPlayPreviousSong; }
+        }
+
+        public PlaylistInfo CurrentPlaylist
+        {
+            get { return new PlaylistInfo(this.currentPlaylist); }
         }
 
         /// <summary>
@@ -263,11 +268,6 @@ namespace Espera.Core.Library
             }
         }
 
-        public PlaylistInfo CurrentPlaylist
-        {
-            get { return new PlaylistInfo(this.currentPlaylist); }
-        }
-
         public IEnumerable<PlaylistInfo> Playlists
         {
             get { return this.playlists.Select(playlist => new PlaylistInfo(playlist)); }
@@ -350,6 +350,17 @@ namespace Espera.Core.Library
         }
 
         /// <summary>
+        /// Adds a new playlist to the library and immediately sets it as the current playlist.
+        /// </summary>
+        /// <param name="name">The name of the playlist, It is required that no other playlist has this name.</param>
+        /// <exception cref="InvalidOperationException">A playlist with the specified name already exists.</exception>
+        public void AddAndChangeToPlaylist(string name)
+        {
+            this.AddPlaylist(name);
+            this.ChangeToPlaylist(name);
+        }
+
+        /// <summary>
         /// Adds the song that are contained in the specified directory recursively in an asynchronous manner to the library.
         /// </summary>
         /// <param name="path">The path of the directory to search.</param>
@@ -373,17 +384,6 @@ namespace Espera.Core.Library
                 throw new InvalidOperationException("A playlist with this name already exists.");
 
             this.playlists.Add(new Playlist(name));
-        }
-
-        /// <summary>
-        /// Adds a new playlist to the library and immediately sets it as the current playlist.
-        /// </summary>
-        /// <param name="name">The name of the playlist, It is required that no other playlist has this name.</param>
-        /// <exception cref="InvalidOperationException">A playlist with the specified name already exists.</exception>
-        public void AddAndChangeToPlaylist(string name)
-        {
-            this.AddPlaylist(name);
-            this.ChangeToPlaylist(name);
         }
 
         /// <summary>

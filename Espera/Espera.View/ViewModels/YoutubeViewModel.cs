@@ -10,13 +10,13 @@ namespace Espera.View.ViewModels
 {
     internal class YoutubeViewModel : SongSourceViewModel<YoutubeViewModel>
     {
+        private IEnumerable<YoutubeSong> currentSongs;
         private SortOrder durationOrder;
-        private SortOrder ratingOrder;
-        private SortOrder titleOrder;
         private bool isSearching;
+        private SortOrder ratingOrder;
         private string searchText;
         private Func<IEnumerable<YoutubeSong>, IOrderedEnumerable<YoutubeSong>> songOrderFunc;
-        private IEnumerable<YoutubeSong> currentSongs;
+        private SortOrder titleOrder;
 
         public YoutubeViewModel(Library library)
             : base(library)

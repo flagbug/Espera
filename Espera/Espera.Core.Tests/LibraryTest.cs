@@ -14,6 +14,41 @@ namespace Espera.Core.Tests
     public class LibraryTest
     {
         [Test]
+        public void AddAndChangeToPlaylist_SomeGenericName_WorksAsExpected()
+        {
+            using (var library = new Library.Library())
+            {
+                library.AddAndChangeToPlaylist("Playlist");
+
+                Assert.AreEqual("Playlist", library.CurrentPlaylist.Name);
+                Assert.AreEqual("Playlist", library.Playlists.First().Name);
+                Assert.AreEqual(1, library.Playlists.Count());
+            }
+        }
+
+        [Test]
+        public void AddAndChangeToPlaylist_TwoPlaylistsWithSameName_ThrowsInvalidOperationException()
+        {
+            using (var library = new Library.Library())
+            {
+                library.AddAndChangeToPlaylist("Playlist");
+
+                Assert.Throws<InvalidOperationException>(() => library.AddAndChangeToPlaylist("Playlist"));
+            }
+        }
+
+        [Test]
+        public void AddPlayist_AddTwoPlaylistsWithSameName_ThrowInvalidOperationException()
+        {
+            using (var library = new Library.Library())
+            {
+                library.AddPlaylist("Playlist");
+
+                Assert.Throws<InvalidOperationException>(() => library.AddPlaylist("Playlist"));
+            }
+        }
+
+        [Test]
         public void AddSongsToPlaylist_PartyModeAndMultipleSongsAdded_ThrowsInvalidOperationException()
         {
             var songs = new[] { new LocalSong("TestPath", AudioType.Mp3, TimeSpan.Zero), new LocalSong("TestPath", AudioType.Mp3, TimeSpan.Zero) };
@@ -122,6 +157,90 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void ChangeToPlaylist_ChangeToOtherPlaylistAndPlayFirstSong_CurrentSongIndexIsCorrectlySet()
+        {
+            var blockingPlayer = new Mock<AudioPlayer>();
+            blockingPlayer.Setup(p => p.Play()).Callback(() => { });
+
+            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+            song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
+
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
+            {
+                library.AddSongToPlaylist(song.Object);
+
+                library.PlaySong(0);
+
+                library.AddPlaylist("Playlist 2");
+                library.ChangeToPlaylist("Playlist 2");
+                library.AddSongToPlaylist(song.Object);
+
+                library.PlaySong(0);
+
+                Assert.AreEqual(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
+                Assert.AreEqual(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
+            }
+        }
+
+        [Test]
+        public void ChangeToPlaylist_ChangeToOtherPlaylistPlaySongAndChangeBack_CurrentSongIndexIsCorrectlySet()
+        {
+            var blockingPlayer = new Mock<AudioPlayer>();
+            blockingPlayer.Setup(p => p.Play()).Callback(() => { });
+
+            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+            song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
+
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
+            {
+                library.AddSongToPlaylist(song.Object);
+
+                library.PlaySong(0);
+
+                library.AddPlaylist("Playlist 2");
+                library.ChangeToPlaylist("Playlist 2");
+                library.AddSongToPlaylist(song.Object);
+
+                library.PlaySong(0);
+
+                library.ChangeToPlaylist("Playlist");
+
+                Assert.AreEqual(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
+                Assert.AreEqual(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
+            }
+        }
+
+        [Test]
+        public void ChangeToPlaylist_PlaySongThenChangePlaylist_NextSongDoesNotPlayWhenSongFinishes()
+        {
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
+            {
+                var handle = new ManualResetEvent(false);
+
+                var player = new HandledAudioPlayer(handle);
+
+                var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+                song.Setup(p => p.CreateAudioPlayer()).Returns(player);
+
+                bool played = false;
+
+                var notPlayedSong = new Mock<Song>("TestPath2", AudioType.Mp3, TimeSpan.Zero);
+                notPlayedSong.Setup(p => p.CreateAudioPlayer())
+                    .Returns(new Mock<AudioPlayer>().Object)
+                    .Callback(() => played = true);
+
+                library.AddSongToPlaylist(song.Object);
+                library.PlaySong(0);
+
+                library.AddAndChangeToPlaylist("Playlist2");
+
+                handle.Set();
+
+                Assert.IsFalse(played);
+            }
+        }
+
+        [Test]
         public void CreateAdmin_PasswordIsEmpty_ThrowsArgumentException()
         {
             using (var library = new Library.Library())
@@ -177,6 +296,41 @@ namespace Espera.Core.Tests
             using (var library = CreateLibraryWithPlaylist("Playlist"))
             {
                 Assert.Throws<InvalidOperationException>(library.PlayPreviousSong);
+            }
+        }
+
+        [Test]
+        public void PlaysNextSongAutomatically()
+        {
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
+            {
+                var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+                song1.Setup(p => p.CreateAudioPlayer()).Returns(() => new JumpAudioPlayer());
+
+                var song2 = new Mock<Song>("TestPath2", AudioType.Mp3, TimeSpan.Zero);
+                song2.Setup(p => p.CreateAudioPlayer()).Returns(() => new JumpAudioPlayer());
+
+                library.AddSongsToPlaylist(new[] { song1.Object, song2.Object });
+
+                var handle = new ManualResetEvent(false);
+                int played = 0;
+
+                library.SongStarted += (sender, e) =>
+                {
+                    played++;
+
+                    if (played == 2)
+                    {
+                        handle.Set();
+                    }
+                };
+
+                library.PlaySong(0);
+
+                if (!handle.WaitOne(5000))
+                {
+                    Assert.Fail("Timout");
+                }
             }
         }
 
@@ -237,108 +391,6 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void AddPlayist_AddTwoPlaylistsWithSameName_ThrowInvalidOperationException()
-        {
-            using (var library = new Library.Library())
-            {
-                library.AddPlaylist("Playlist");
-
-                Assert.Throws<InvalidOperationException>(() => library.AddPlaylist("Playlist"));
-            }
-        }
-
-        [Test]
-        public void ChangeToPlaylist_ChangeToOtherPlaylistAndPlayFirstSong_CurrentSongIndexIsCorrectlySet()
-        {
-            var blockingPlayer = new Mock<AudioPlayer>();
-            blockingPlayer.Setup(p => p.Play()).Callback(() => { });
-
-            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-            song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
-
-            using (var library = CreateLibraryWithPlaylist("Playlist"))
-            {
-                library.AddSongToPlaylist(song.Object);
-
-                library.PlaySong(0);
-
-                library.AddPlaylist("Playlist 2");
-                library.ChangeToPlaylist("Playlist 2");
-                library.AddSongToPlaylist(song.Object);
-
-                library.PlaySong(0);
-
-                Assert.AreEqual(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
-                Assert.AreEqual(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
-            }
-        }
-
-        [Test]
-        public void ChangeToPlaylist_ChangeToOtherPlaylistPlaySongAndChangeBack_CurrentSongIndexIsCorrectlySet()
-        {
-            var blockingPlayer = new Mock<AudioPlayer>();
-            blockingPlayer.Setup(p => p.Play()).Callback(() => { });
-
-            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-            song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
-
-            using (var library = CreateLibraryWithPlaylist("Playlist"))
-            {
-                library.AddSongToPlaylist(song.Object);
-
-                library.PlaySong(0);
-
-                library.AddPlaylist("Playlist 2");
-                library.ChangeToPlaylist("Playlist 2");
-                library.AddSongToPlaylist(song.Object);
-
-                library.PlaySong(0);
-
-                library.ChangeToPlaylist("Playlist");
-
-                Assert.AreEqual(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
-                Assert.AreEqual(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
-            }
-        }
-
-        [Test]
-        public void AddAndChangeToPlaylist_SomeGenericName_WorksAsExpected()
-        {
-            using (var library = new Library.Library())
-            {
-                library.AddAndChangeToPlaylist("Playlist");
-
-                Assert.AreEqual("Playlist", library.CurrentPlaylist.Name);
-                Assert.AreEqual("Playlist", library.Playlists.First().Name);
-                Assert.AreEqual(1, library.Playlists.Count());
-            }
-        }
-
-        [Test]
-        public void AddAndChangeToPlaylist_TwoPlaylistsWithSameName_ThrowsInvalidOperationException()
-        {
-            using (var library = new Library.Library())
-            {
-                library.AddAndChangeToPlaylist("Playlist");
-
-                Assert.Throws<InvalidOperationException>(() => library.AddAndChangeToPlaylist("Playlist"));
-            }
-        }
-
-        [Test]
-        public void RemovePlaylist_RemoveFirstPlaylist_PlaylistIsRemoved()
-        {
-            using (var library = new Library.Library())
-            {
-                library.AddPlaylist("Playlist");
-
-                library.RemovePlaylist("Playlist");
-
-                Assert.IsEmpty(library.Playlists);
-            }
-        }
-
-        [Test]
         public void RemovePlaylist_NoPlaylistExists_ThrowsInvalidOperationException()
         {
             using (var library = new Library.Library())
@@ -359,67 +411,15 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void ChangeToPlaylist_PlaySongThenChangePlaylist_NextSongDoesNotPlayWhenSongFinishes()
+        public void RemovePlaylist_RemoveFirstPlaylist_PlaylistIsRemoved()
         {
-            using (var library = CreateLibraryWithPlaylist("Playlist"))
+            using (var library = new Library.Library())
             {
-                var handle = new ManualResetEvent(false);
+                library.AddPlaylist("Playlist");
 
-                var player = new HandledAudioPlayer(handle);
+                library.RemovePlaylist("Playlist");
 
-                var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-                song.Setup(p => p.CreateAudioPlayer()).Returns(player);
-
-                bool played = false;
-
-                var notPlayedSong = new Mock<Song>("TestPath2", AudioType.Mp3, TimeSpan.Zero);
-                notPlayedSong.Setup(p => p.CreateAudioPlayer())
-                    .Returns(new Mock<AudioPlayer>().Object)
-                    .Callback(() => played = true);
-
-                library.AddSongToPlaylist(song.Object);
-                library.PlaySong(0);
-
-                library.AddAndChangeToPlaylist("Playlist2");
-
-                handle.Set();
-
-                Assert.IsFalse(played);
-            }
-        }
-
-        [Test]
-        public void PlaysNextSongAutomatically()
-        {
-            using (var library = CreateLibraryWithPlaylist("Playlist"))
-            {
-                var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-                song1.Setup(p => p.CreateAudioPlayer()).Returns(() => new JumpAudioPlayer());
-
-                var song2 = new Mock<Song>("TestPath2", AudioType.Mp3, TimeSpan.Zero);
-                song2.Setup(p => p.CreateAudioPlayer()).Returns(() => new JumpAudioPlayer());
-
-                library.AddSongsToPlaylist(new[] { song1.Object, song2.Object });
-
-                var handle = new ManualResetEvent(false);
-                int played = 0;
-
-                library.SongStarted += (sender, e) =>
-                {
-                    played++;
-
-                    if (played == 2)
-                    {
-                        handle.Set();
-                    }
-                };
-
-                library.PlaySong(0);
-
-                if (!handle.WaitOne(5000))
-                {
-                    Assert.Fail("Timout");
-                }
+                Assert.IsEmpty(library.Playlists);
             }
         }
 

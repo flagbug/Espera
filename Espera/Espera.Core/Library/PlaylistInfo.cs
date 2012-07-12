@@ -11,9 +11,9 @@ namespace Espera.Core.Library
             this.playlist = playlist;
         }
 
-        public IEnumerable<Song> Songs
+        public int? CurrentSongIndex
         {
-            get { return this.playlist; }
+            get { return this.playlist.CurrentSongIndex; }
         }
 
         public string Name
@@ -22,9 +22,9 @@ namespace Espera.Core.Library
             set { this.playlist.Name = value; }
         }
 
-        public int? CurrentSongIndex
+        public IEnumerable<Song> Songs
         {
-            get { return this.playlist.CurrentSongIndex; }
+            get { return this.playlist; }
         }
     }
 }

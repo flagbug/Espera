@@ -95,6 +95,12 @@ namespace Espera.View
             this.mainViewModel.AdministratorViewModel.LoginPassword = ((PasswordBox)sender).Password;
         }
 
+        private void MainWindowMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            // We want to lose the focus of a textbox when the user clicks anywhere in the application
+            this.mainGrid.Focus();
+        }
+
         private void MetroWindowClosing(object sender, CancelEventArgs e)
         {
             Settings.Default.Save();
@@ -159,9 +165,47 @@ namespace Espera.View
             }
         }
 
+        private void PlaylistNameTextBoxGotFocus(object sender, RoutedEventArgs e)
+        {
+            var textBox = ((TextBox)sender);
+
+            textBox.CaretIndex = textBox.Text.Length;
+        }
+
+        private void PlaylistNameTextBoxKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                this.mainViewModel.CurrentEditedPlaylist.EditName = false;
+            }
+        }
+
+        private void PlaylistNameTextBoxLostFocus(object sender, RoutedEventArgs e)
+        {
+            PlaylistViewModel playlist = this.mainViewModel.CurrentEditedPlaylist;
+
+            if (playlist != null)
+            {
+                playlist.EditName = false;
+            }
+        }
+
         private void PlaylistSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             this.mainViewModel.SelectedPlaylistEntries = ((ListView)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
+        }
+
+        private void PlaylistsKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                var command = this.mainViewModel.RemovePlaylistCommand;
+
+                if (command.CanExecute(null))
+                {
+                    command.Execute(null);
+                }
+            }
         }
 
         private void PurpleColorButtonButtonClick(object sender, RoutedEventArgs e)
@@ -260,50 +304,6 @@ namespace Espera.View
         private void SortYoutubeSongTitle(object sender, RoutedEventArgs e)
         {
             this.mainViewModel.YoutubeViewModel.OrderByTitle();
-        }
-
-        private void PlaylistNameTextBoxLostFocus(object sender, RoutedEventArgs e)
-        {
-            PlaylistViewModel playlist = this.mainViewModel.CurrentEditedPlaylist;
-
-            if (playlist != null)
-            {
-                playlist.EditName = false;
-            }
-        }
-
-        private void PlaylistNameTextBoxKeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                this.mainViewModel.CurrentEditedPlaylist.EditName = false;
-            }
-        }
-
-        private void MainWindowMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            // We want to lose the focus of a textbox when the user clicks anywhere in the application
-            this.mainGrid.Focus();
-        }
-
-        private void PlaylistNameTextBoxGotFocus(object sender, RoutedEventArgs e)
-        {
-            var textBox = ((TextBox)sender);
-
-            textBox.CaretIndex = textBox.Text.Length;
-        }
-
-        private void PlaylistsKeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Delete)
-            {
-                var command = this.mainViewModel.RemovePlaylistCommand;
-
-                if (command.CanExecute(null))
-                {
-                    command.Execute(null);
-                }
-            }
         }
     }
 }

@@ -16,11 +16,11 @@ namespace Espera.View.ViewModels
         private SortOrder artistOrder;
         private SortOrder durationOrder;
         private SortOrder genreOrder;
-        private SortOrder titleOrder;
         private volatile bool isAdding;
         private string searchText;
         private string selectedArtist;
         private Func<IEnumerable<Song>, IOrderedEnumerable<Song>> songOrderFunc;
+        private SortOrder titleOrder;
 
         public LocalViewModel(Library library)
             : base(library)

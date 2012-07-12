@@ -230,6 +230,7 @@ namespace Espera.Core.Audio
                 case AudioType.Wav:
                     this.inputStream = OpenWavStream(stream);
                     break;
+
                 case AudioType.Mp3:
                     this.inputStream = OpenMp3Stream(stream);
                     break;
