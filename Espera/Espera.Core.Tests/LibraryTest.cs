@@ -375,7 +375,7 @@ namespace Espera.Core.Tests
                 var notPlayedSong = new Mock<Song>("TestPath2", AudioType.Mp3, TimeSpan.Zero);
                 notPlayedSong.Setup(p => p.CreateAudioPlayer())
                     .Returns(new Mock<AudioPlayer>().Object)
-                    .Callback(() => played = false);
+                    .Callback(() => played = true);
 
                 library.AddSongToPlaylist(song.Object);
                 library.PlaySong(0);
