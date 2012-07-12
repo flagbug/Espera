@@ -358,6 +358,36 @@ namespace Espera.Core.Tests
             }
         }
 
+        [Test]
+        public void ChangeToPlaylist_PlaySongThenChangePlaylist_NextSongDoesNotPlayWhenSongFinishes()
+        {
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
+            {
+                var handle = new ManualResetEvent(false);
+
+                var player = new HandledAudioPlayer(handle);
+
+                var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+                song.Setup(p => p.CreateAudioPlayer()).Returns(player);
+
+                bool played = false;
+
+                var notPlayedSong = new Mock<Song>("TestPath2", AudioType.Mp3, TimeSpan.Zero);
+                notPlayedSong.Setup(p => p.CreateAudioPlayer())
+                    .Returns(new Mock<AudioPlayer>().Object)
+                    .Callback(() => played = false);
+
+                library.AddSongToPlaylist(song.Object);
+                library.PlaySong(0);
+
+                library.AddAndChangeToPlaylist("Playlist2");
+
+                handle.Set();
+
+                Assert.IsFalse(played);
+            }
+        }
+
         private static Library.Library CreateLibraryWithPlaylist(string playlistName)
         {
             var library = new Library.Library();

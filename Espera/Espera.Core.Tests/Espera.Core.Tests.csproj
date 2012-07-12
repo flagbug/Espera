@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LibraryTest.cs" />
+    <Compile Include="Mocks\HandledAudioPlayer.cs" />
     <Compile Include="Mocks\JumpAudioPlayer.cs" />
     <Compile Include="PlaylistTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
