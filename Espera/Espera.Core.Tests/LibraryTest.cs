@@ -388,6 +388,41 @@ namespace Espera.Core.Tests
             }
         }
 
+        [Test]
+        public void PlaysNextSongAutomatically()
+        {
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
+            {
+                var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+                song1.Setup(p => p.CreateAudioPlayer()).Returns(() => new JumpAudioPlayer());
+
+                var song2 = new Mock<Song>("TestPath2", AudioType.Mp3, TimeSpan.Zero);
+                song2.Setup(p => p.CreateAudioPlayer()).Returns(() => new JumpAudioPlayer());
+
+                library.AddSongsToPlaylist(new[] { song1.Object, song2.Object });
+
+                var handle = new ManualResetEvent(false);
+                int played = 0;
+
+                library.SongStarted += (sender, e) =>
+                {
+                    played++;
+
+                    if (played == 2)
+                    {
+                        handle.Set();
+                    }
+                };
+
+                library.PlaySong(0);
+
+                if (!handle.WaitOne(5000))
+                {
+                    Assert.Fail("Timout");
+                }
+            }
+        }
+
         private static Library.Library CreateLibraryWithPlaylist(string playlistName)
         {
             var library = new Library.Library();
