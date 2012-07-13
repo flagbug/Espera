@@ -402,7 +402,7 @@ namespace Espera.View.ViewModels
 
                         this.OnPropertyChanged(vm => vm.Playlists);
                     },
-                    param => this.CurrentPlaylist != null
+                    param => this.CurrentEditedPlaylist != null || this.CurrentPlaylist != null
                 );
             }
         }
