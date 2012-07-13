@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Espera.Core.Library
+namespace Espera.Core.Management
 {
     /// <summary>
     /// The exception that is thrown, when an invalid password has been entered.

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Espera.Core;
-using Espera.Core.Library;
+using Espera.Core.Management;
 using Espera.View.Properties;
 
 namespace Espera.View.ViewModels

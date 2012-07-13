@@ -77,17 +77,17 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>CoreSettings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Library\AccessMode.cs" />
+    <Compile Include="Management\AccessMode.cs" />
     <Compile Include="Audio\AudioPlayer.cs" />
     <Compile Include="Audio\LocalAudioPlayer.cs" />
     <Compile Include="Audio\AudioPlayerState.cs" />
     <Compile Include="Audio\AudioType.cs" />
     <Compile Include="Audio\YoutubeAudioPlayer.cs" />
-    <Compile Include="Library\InvalidPasswordException.cs" />
-    <Compile Include="Library\Library.cs" />
-    <Compile Include="Library\LibraryFillEventArgs.cs" />
-    <Compile Include="Library\Playlist.cs" />
-    <Compile Include="Library\PlaylistInfo.cs" />
+    <Compile Include="Management\InvalidPasswordException.cs" />
+    <Compile Include="Management\Library.cs" />
+    <Compile Include="Management\LibraryFillEventArgs.cs" />
+    <Compile Include="Management\Playlist.cs" />
+    <Compile Include="Management\PlaylistInfo.cs" />
     <Compile Include="LocalSong.cs" />
     <Compile Include="Audio\PlaybackException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

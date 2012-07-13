@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Timers;
 using System.Windows.Input;
-using Espera.Core.Library;
+using Espera.Core.Management;
 using Espera.View.Properties;
 using Rareform.Patterns.MVVM;
 

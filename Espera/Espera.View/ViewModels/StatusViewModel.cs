@@ -1,4 +1,4 @@
-﻿using Espera.Core.Library;
+﻿using Espera.Core.Management;
 using Rareform.Patterns.MVVM;
 using Rareform.Validation;
 

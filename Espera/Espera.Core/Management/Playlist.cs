@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Rareform.Reflection;
 using Rareform.Validation;
 
-namespace Espera.Core.Library
+namespace Espera.Core.Management
 {
     /// <summary>
     /// Represents a playlist where songs are stored with an associated index.
@@ -81,7 +81,7 @@ namespace Espera.Core.Library
         }
 
         /// <summary>
-        /// Adds the specified song to end of the playlist.
+        /// Adds the specified songs to end of the playlist.
         /// </summary>
         /// <param name="songList">The songs to add to the end of the playlist.</param>
         public void AddSongs(IEnumerable<Song> songList)

@@ -1,4 +1,4 @@
-﻿namespace Espera.Core.Library
+﻿namespace Espera.Core.Management
 {
     public enum AccessMode
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using Espera.Core.Library;
+using Espera.Core.Management;
 using Rareform.Patterns.MVVM;
 using Rareform.Reflection;
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
 using Espera.Core;
-using Espera.Core.Library;
+using Espera.Core.Management;
 using Espera.View.Properties;
 using Rareform.Patterns.MVVM;
 using Rareform.Validation;

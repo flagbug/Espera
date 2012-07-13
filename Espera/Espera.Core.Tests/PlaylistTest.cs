@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Espera.Core.Audio;
-using Espera.Core.Library;
+using Espera.Core.Management;
 using Moq;
 using NUnit.Framework;
 

@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows.Input;
-using Espera.Core.Library;
+using Espera.Core.Management;
 using Rareform.Patterns.MVVM;
 using Rareform.Validation;
 

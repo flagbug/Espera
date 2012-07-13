@@ -9,7 +9,7 @@ using Rareform.Extensions;
 using Rareform.IO;
 using Rareform.Validation;
 
-namespace Espera.Core.Library
+namespace Espera.Core.Management
 {
     public class Library : IDisposable
     {

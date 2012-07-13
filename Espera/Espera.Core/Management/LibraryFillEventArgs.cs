@@ -1,7 +1,7 @@
 ﻿using System;
 using Rareform.Extensions;
 
-namespace Espera.Core.Library
+namespace Espera.Core.Management
 {
     public class LibraryFillEventArgs : EventArgs
     {

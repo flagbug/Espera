@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Espera.Core.Library
+namespace Espera.Core.Management
 {
     public class PlaylistInfo
     {
