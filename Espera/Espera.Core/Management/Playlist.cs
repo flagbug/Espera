@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Rareform.Reflection;
 using Rareform.Validation;
 
@@ -15,7 +12,6 @@ namespace Espera.Core.Management
     /// </summary>
     public class Playlist : IEnumerable<Song>
     {
-        private readonly ConcurrentQueue<Song> cachingQueue;
         private Dictionary<int, Song> playlist;
 
         /// <summary>
@@ -25,19 +21,6 @@ namespace Espera.Core.Management
         {
             this.Name = name;
             this.playlist = new Dictionary<int, Song>();
-            this.cachingQueue = new ConcurrentQueue<Song>();
-
-            /*
-             * HACK:
-             *
-             * Oh god this is so wrong, i want to punch myself in the face.
-             *
-             * If anyone out there knows how to make a good producer/consumer
-             * construct with a maximum amount of consumers, PLEASE FIX THIS!
-             */
-            Task.Factory.StartNew(Cache);
-            Task.Factory.StartNew(Cache);
-            Task.Factory.StartNew(Cache);
         }
 
         /// <summary>
@@ -93,7 +76,7 @@ namespace Espera.Core.Management
             {
                 if (song.HasToCache && !song.IsCaching)
                 {
-                    this.cachingQueue.Enqueue(song);
+                    GlobalSongCacheQueue.Instance.Enqueue(song);
                 }
 
                 int index = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
@@ -182,24 +165,6 @@ namespace Espera.Core.Management
             }
 
             this.Rebuild();
-        }
-
-        /// <summary>
-        /// Please kids, don't do that at home.
-        /// </summary>
-        private void Cache()
-        {
-            while (true)
-            {
-                Song song;
-
-                if (this.cachingQueue.TryDequeue(out song))
-                {
-                    song.LoadToCache();
-                }
-
-                Thread.Sleep(500);
-            }
         }
 
         /// <summary>

@@ -83,6 +83,7 @@
     <Compile Include="Audio\AudioPlayerState.cs" />
     <Compile Include="Audio\AudioType.cs" />
     <Compile Include="Audio\YoutubeAudioPlayer.cs" />
+    <Compile Include="Management\GlobalSongCache.cs" />
     <Compile Include="Management\InvalidPasswordException.cs" />
     <Compile Include="Management\Library.cs" />
     <Compile Include="Management\LibraryFillEventArgs.cs" />
