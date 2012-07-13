@@ -388,6 +388,9 @@
                                             <DataTrigger Binding="{Binding Path=IsAdmin}" Value="False">
                                                 <Setter Property="SelectionMode" Value="Single" />
                                             </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=IsSearching}" Value="True">
+                                                <Setter Property="Visibility" Value="Hidden" />
+                                            </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </ListView.Style>
