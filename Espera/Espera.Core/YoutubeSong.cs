@@ -59,7 +59,7 @@ namespace Espera.Core
         /// </value>
         public Uri ThumbnailSource { get; set; }
 
-        public override AudioPlayer CreateAudioPlayer()
+        internal override AudioPlayer CreateAudioPlayer()
         {
             return this.IsStreaming ? (AudioPlayer)new YoutubeAudioPlayer() : new LocalAudioPlayer();
         }

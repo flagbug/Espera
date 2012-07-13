@@ -164,7 +164,7 @@ namespace Espera.Core
         /// Creates the audio player for the song.
         /// </summary>
         /// <returns>The audio player for playback.</returns>
-        public abstract AudioPlayer CreateAudioPlayer();
+        internal abstract AudioPlayer CreateAudioPlayer();
 
         /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.

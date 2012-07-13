@@ -4,7 +4,7 @@ using Rareform.Validation;
 
 namespace Espera.Core.Audio
 {
-    public abstract class AudioPlayer : IDisposable
+    internal abstract class AudioPlayer : IDisposable
     {
         /// <summary>
         /// Occurs when the <see cref="LoadedSong"/> has finished it's playback.

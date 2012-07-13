@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using Rareform.Validation;
 
 namespace Espera.Core.Management
 {
@@ -26,6 +27,9 @@ namespace Espera.Core.Management
 
         public void Enqueue(Song song)
         {
+            if (song == null)
+                Throw.ArgumentNullException(() => song);
+
             this.cachingQueue.Enqueue(song);
         }
 

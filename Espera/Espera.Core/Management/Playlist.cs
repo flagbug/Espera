@@ -10,7 +10,7 @@ namespace Espera.Core.Management
     /// <summary>
     /// Represents a playlist where songs are stored with an associated index.
     /// </summary>
-    public class Playlist : IEnumerable<Song>
+    internal class Playlist : IEnumerable<Song>
     {
         private Dictionary<int, Song> playlist;
 

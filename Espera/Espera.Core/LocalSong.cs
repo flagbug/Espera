@@ -46,7 +46,7 @@ namespace Espera.Core
             }
         }
 
-        public override AudioPlayer CreateAudioPlayer()
+        internal override AudioPlayer CreateAudioPlayer()
         {
             return new LocalAudioPlayer();
         }
