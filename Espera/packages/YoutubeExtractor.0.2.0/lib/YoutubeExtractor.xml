@@ -15,6 +15,8 @@
             </summary>
             <param name="videoUrl">The URL of the YouTube video.</param>
             <returns>A list of <see cref="T:YoutubeExtractor.VideoInfo"/>s that can be used to download the video.</returns>
+            <exception cref="T:System.ArgumentException">videoUrl is not a valid YouTube URL.</exception>
+            <exception cref="T:System.Net.WebException">An error occured while downloading the video infos.</exception>
         </member>
         <member name="M:YoutubeExtractor.Downloader.#ctor(YoutubeExtractor.VideoInfo,System.String)">
             <summary>
@@ -28,6 +30,11 @@
             Starts the work of the <see cref="T:YoutubeExtractor.Downloader"/>.
             </summary>
         </member>
+        <member name="E:YoutubeExtractor.Downloader.DownloadFinished">
+            <summary>
+            Occurs when the download finished.
+            </summary>
+        </member>
         <member name="E:YoutubeExtractor.Downloader.DownloadStarted">
             <summary>
             Occurs when the download is starts.
@@ -38,19 +45,14 @@
             Occurs when the progress has changed.
             </summary>
         </member>
-        <member name="E:YoutubeExtractor.Downloader.DownloadFinished">
+        <member name="P:YoutubeExtractor.Downloader.SavePath">
             <summary>
-            Occurs when the download finished.
+            Gets the path to save the video/audio.
             </summary>
         </member>
         <member name="P:YoutubeExtractor.Downloader.Video">
             <summary>
             Gets the video to download/convert.
-            </summary>
-        </member>
-        <member name="P:YoutubeExtractor.Downloader.SavePath">
-            <summary>
-            Gets the path to save the video/audio.
             </summary>
         </member>
         <member name="M:YoutubeExtractor.VideoInfo.#ctor(System.String,System.String,System.Int32)">
@@ -61,27 +63,9 @@
             <param name="title">The video title.</param>
             <param name="formatCode">The format code.</param>
         </member>
-        <member name="P:YoutubeExtractor.VideoInfo.DownloadUrl">
+        <member name="P:YoutubeExtractor.VideoInfo.AudioExtension">
             <summary>
-            Gets the download URL.
-            </summary>
-        </member>
-        <member name="P:YoutubeExtractor.VideoInfo.Title">
-            <summary>
-            Gets the video title.
-            </summary>
-        </member>
-        <member name="P:YoutubeExtractor.VideoInfo.VideoType">
-            <summary>
-            Gets the type of the video.
-            </summary>
-            <value>
-            The type of the video.
-            </value>
-        </member>
-        <member name="P:YoutubeExtractor.VideoInfo.VideoFormat">
-            <summary>
-            Gets the video format.
+            Gets the audio extension.
             </summary>
         </member>
         <member name="P:YoutubeExtractor.VideoInfo.CanExtractAudio">
@@ -92,9 +76,19 @@
             	<c>true</c> if the audio of this video can be extracted by YoutubeExtractor; otherwise, <c>false</c>.
             </value>
         </member>
-        <member name="P:YoutubeExtractor.VideoInfo.AudioExtension">
+        <member name="P:YoutubeExtractor.VideoInfo.DownloadUrl">
             <summary>
-            Gets the audio extension.
+            Gets the download URL.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.FormatCode">
+            <summary>
+            Gets the format code.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.Title">
+            <summary>
+            Gets the video title.
             </summary>
         </member>
         <member name="P:YoutubeExtractor.VideoInfo.VideoExtension">
@@ -102,10 +96,18 @@
             Gets the video extension.
             </summary>
         </member>
-        <member name="P:YoutubeExtractor.VideoInfo.FormatCode">
+        <member name="P:YoutubeExtractor.VideoInfo.VideoFormat">
             <summary>
-            Gets the format code.
+            Gets the video format.
             </summary>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.VideoType">
+            <summary>
+            Gets the type of the video.
+            </summary>
+            <value>
+            The type of the video.
+            </value>
         </member>
         <member name="T:YoutubeExtractor.VideoDownloader">
             <summary>
@@ -144,6 +146,11 @@
         <member name="M:YoutubeExtractor.AudioDownloader.Execute">
             <summary>
             Starts the download and then extracts the audio track of the video.
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoFormat.WebM1080">
+            <summary>
+            A WebM video with 1080p resolution (.webm).
             </summary>
         </member>
         <member name="F:YoutubeExtractor.VideoFormat.WebM720">

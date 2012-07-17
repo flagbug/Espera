@@ -66,9 +66,9 @@
       <HintPath>..\lib\Vlc.DotNet.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
-    <Reference Include="YoutubeExtractor, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="YoutubeExtractor, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\YoutubeExtractor.0.1.0\lib\YoutubeExtractor.dll</HintPath>
+      <HintPath>..\packages\YoutubeExtractor.0.2.0\lib\YoutubeExtractor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
