@@ -125,6 +125,43 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void CanSwitchPlaylist_IsAdministrator_IsTrue()
+        {
+            using(var library = new Library())
+            {
+                Assert.IsTrue(library.CanSwitchPlaylist);
+            }
+        }
+
+        [Test]
+        public void CanSwitchPlaylist_IsNotAdministratorAndLockPlaylistSwitchingIsFalse_IsTrue()
+        {
+            using(var library = new Library())
+            {
+                library.LockPlaylistSwitching = false;
+
+                library.CreateAdmin("password");
+                library.ChangeToParty();
+
+                Assert.IsTrue(library.CanSwitchPlaylist);
+            }
+        }
+
+        [Test]
+        public void CanSwitchPlaylist_IsNotAdministratorAndLockPlaylistSwitchingIsTrue_IsFalse()
+        {
+            using(var library = new Library())
+            {
+                library.LockPlaylistSwitching = true;
+
+                library.CreateAdmin("password");
+                library.ChangeToParty();
+
+                Assert.IsFalse(library.CanSwitchPlaylist);
+            }
+        }
+
+        [Test]
         public void ChangeToAdmin_PasswordIsCorrent_AccessModeIsAdministrator()
         {
             using (var library = new Library())
@@ -243,10 +280,10 @@ namespace Espera.Core.Tests
         [Test]
         public void SwitchToPlaylist_PartyModeAndLockPlaylistSwitchingIsTrue_ThrowsInvalidOperationException()
         {
-            CoreSettings.Default.LockPlaylistSwitching = true;
-
             using(var library = CreateLibraryWithPlaylist("Playlist"))
             {
+                library.LockPlaylistSwitching = true;
+
                 library.AddPlaylist("Playlist 2");
 
                 library.CreateAdmin("Password");

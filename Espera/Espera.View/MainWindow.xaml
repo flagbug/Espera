@@ -816,6 +816,9 @@
                             <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=LockTime}">
                                 <AccessText Text="Lock time" TextWrapping="Wrap" />
                             </CheckBox>
+                            <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=LockPlaylistSwitching}">
+                                <AccessText Text="Lock playlist switching" TextWrapping="Wrap" />
+                            </CheckBox>
                             <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=LockPlaylistRemoval}">
                                 <AccessText Text="Lock song removal from playlist" TextWrapping="Wrap" />
                             </CheckBox>

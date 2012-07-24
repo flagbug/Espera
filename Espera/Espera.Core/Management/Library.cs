@@ -136,7 +136,7 @@ namespace Espera.Core.Management
 
         public bool CanSwitchPlaylist
         {
-            get { return CoreSettings.Default.LockPlaylistSwitching && this.AccessMode == AccessMode.Administrator; }
+            get { return this.AccessMode == AccessMode.Administrator || !this.LockPlaylistSwitching; }
         }
 
         public PlaylistInfo CurrentPlaylist
@@ -226,6 +226,17 @@ namespace Espera.Core.Management
                 this.ThrowIfNotAdmin();
 
                 CoreSettings.Default.LockLibraryRemoval = value;
+            }
+        }
+
+        public bool LockPlaylistSwitching
+        {
+            get { return CoreSettings.Default.LockPlaylistSwitching; }
+            set
+            {
+                this.ThrowIfNotAdmin();
+
+                CoreSettings.Default.LockPlaylistSwitching = value;
             }
         }
 
