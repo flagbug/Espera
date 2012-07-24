@@ -102,6 +102,11 @@ namespace Espera.Core.Management
             get { return this.AccessMode == AccessMode.Administrator || this.RemainingPlaylistTimeout <= TimeSpan.Zero; }
         }
 
+        public bool CanChangePlaylist
+        {
+            get { return CoreSettings.Default.LockPlaylistChanging && this.AccessMode == AccessMode.Administrator; }
+        }
+
         public bool CanChangeTime
         {
             get { return CoreSettings.Default.LockTime && this.AccessMode == AccessMode.Administrator; }
@@ -445,6 +450,9 @@ namespace Espera.Core.Management
 
         public void ChangeToPlaylist(string name)
         {
+            if (CoreSettings.Default.LockPlaylistChanging && this.AccessMode == AccessMode.Party)
+                throw new InvalidOperationException("Not allowed to change playlist when in party mode.");
+
             this.currentPlaylist = this.playlists.Single(playlist => playlist.Name == name);
         }
 

@@ -67,6 +67,11 @@ namespace Espera.View.ViewModels
             get { return this.library.CanChangeTime; }
         }
 
+        public bool CanChangePlaylist
+        {
+            get { return this.library.CanChangePlaylist; }
+        }
+
         public bool CanChangeVolume
         {
             get { return this.library.CanChangeVolume; }
@@ -633,6 +638,7 @@ namespace Espera.View.ViewModels
             this.OnPropertyChanged(vm => vm.IsAdmin);
             this.OnPropertyChanged(vm => vm.CanChangeVolume);
             this.OnPropertyChanged(vm => vm.CanChangeTime);
+            this.OnPropertyChanged(vm => vm.CanChangePlaylist);
         }
     }
 }

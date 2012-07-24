@@ -22,6 +22,18 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <Style TargetType="{x:Type ListBox}">
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ListBox}">
+                            <ScrollViewer>
+                                <ItemsPresenter/>
+                            </ScrollViewer>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
             <Style TargetType="{x:Type ListBoxItem}">
                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                 <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -32,12 +44,11 @@
                         <ControlTemplate TargetType="{x:Type ListBoxItem}">
                             <Border x:Name="Border"
                                     Background="{TemplateBinding Background}"
-                                    SnapsToDevicePixels="true">
+                                    SnapsToDevicePixels="True">
                                 <ContentPresenter Margin="5, 0, 0, 0" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsSelected" Value="True">
-                                    <Setter TargetName="Border" Property="BorderBrush" Value="#FF143C65" />
                                     <Setter TargetName="Border" Property="Background" Value="{DynamicResource AccentColorBrush}" />
                                 </Trigger>
                                 <Trigger Property="IsMouseOver" Value="True">
@@ -49,6 +60,15 @@
                                 </Trigger>
                                 <MultiTrigger>
                                     <MultiTrigger.Conditions>
+                                        <Condition Property="IsEnabled" Value="False" />
+                                        <Condition Property="IsSelected" Value="True" />
+                                    </MultiTrigger.Conditions>
+                                    <MultiTrigger.Setters>
+                                        <Setter TargetName="Border" Property="Background" Value="#353535" />
+                                    </MultiTrigger.Setters>
+                                </MultiTrigger>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
                                         <Condition Property="IsSelected" Value="True" />
                                         <Condition Property="Selector.IsSelectionActive" Value="True" />
                                     </MultiTrigger.Conditions>
@@ -57,8 +77,7 @@
                                             <SolidColorBrush Color="{DynamicResource AccentColor2}" />
                                         </Setter.Value>
                                     </Setter>
-                                    <Setter TargetName="Border" Property="BorderBrush" Value="#FF143C65" />
-                                </MultiTrigger>
+                                </MultiTrigger>                    
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Setter.Value>
@@ -248,7 +267,6 @@
                            Style="{StaticResource ArtistsHeaderStyle}"
                            Text="artists" />
                 <ListBox Grid.Row="1"
-                         BorderBrush="Transparent"
                          DataContext="{Binding Path=LocalViewModel}"
                          ItemsSource="{Binding Path=Artists}"
                          SelectedItem="{Binding Path=SelectedArtist}" />
@@ -500,41 +518,60 @@
                             </StackPanel>
                             <ListBox Grid.Row="2"
                                      Margin="0, 5, 0, 0"
-                                     BorderBrush="Transparent"
                                      ItemsSource="{Binding Path=Playlists}"
                                      SelectedItem="{Binding Path=CurrentPlaylist}"
+                                     IsEnabled="{Binding Path=CanChangePlaylist}"
                                      KeyUp="PlaylistsKeyUp">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBox Height="25"
-                                                 MinHeight="25"
-                                                 Margin="0, 0, 5, 0"
-                                                 VerticalAlignment="Center"
-                                                 VerticalContentAlignment="Center"
-                                                 KeyUp="PlaylistNameTextBoxKeyUp"
-                                                 LostFocus="PlaylistNameTextBoxLostFocus"
-                                                 GotFocus="PlaylistNameTextBoxGotFocus"
-                                                 Padding="0"
-                                                 Text="{Binding Path=Name,
-                                                                ValidatesOnDataErrors=True,
-                                                                UpdateSourceTrigger=PropertyChanged}">
-                                            <TextBox.Style>
-                                                <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="{x:Type TextBox}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Path=EditName}" Value="False">
-                                                            <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource TemplatedParent}}" />
-                                                            <Setter Property="BorderBrush" Value="Transparent" />
-                                                            <Setter Property="BorderThickness" Value="0" />
-                                                            <Setter Property="IsReadOnly" Value="True" />
-                                                            <Setter Property="IsHitTestVisible" Value="False" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Path=EditName}" Value="True">
-                                                            <Setter Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={RelativeSource Self}}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBox.Style>
-                                        </TextBox>
+                                        <Grid>
+                                            <TextBox Height="25"
+                                                     MinHeight="25"
+                                                     Margin="0, 0, 5, 0"
+                                                     VerticalAlignment="Center"
+                                                     VerticalContentAlignment="Center"
+                                                     KeyUp="PlaylistNameTextBoxKeyUp"
+                                                     LostFocus="PlaylistNameTextBoxLostFocus"
+                                                     GotFocus="PlaylistNameTextBoxGotFocus"
+                                                     Padding="0"
+                                                     Text="{Binding Path=Name,
+                                                                    ValidatesOnDataErrors=True,
+                                                                    UpdateSourceTrigger=PropertyChanged}">
+                                                <TextBox.Style>
+                                                    <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="{x:Type TextBox}">
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsEnabled" Value="False">
+                                                                <Setter Property="Visibility" Value="Hidden" />
+                                                            </Trigger>
+                                                            <DataTrigger Binding="{Binding Path=EditName}" Value="False">
+                                                                <Setter Property="Background" Value="Transparent" />
+                                                                <Setter Property="BorderThickness" Value="0" />
+                                                                <Setter Property="IsReadOnly" Value="True" />
+                                                                <Setter Property="IsHitTestVisible" Value="False" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Path=EditName}" Value="True">
+                                                                <Setter Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={RelativeSource Self}}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBox.Style>
+                                            </TextBox>
+                                            <TextBlock VerticalAlignment="Center"
+                                                       Text="{Binding Path=Name}"
+                                                       Margin="5, 0, 5, 0"
+                                                       FontFamily="{DynamicResource ContentFontFamily}"
+                                                       FontSize="{DynamicResource ContentFontSize}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="{x:Type TextBlock}">
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsEnabled" Value="True">
+                                                                <Setter Property="Visibility" Value="Hidden" />
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                                 <ListBox.ItemContainerStyle>

@@ -241,6 +241,22 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void ChangeToPlaylist_PartyModeAndLockPlaylistSwitchingIsTrue_ThrowsInvalidOperationException()
+        {
+            CoreSettings.Default.LockPlaylistChanging = true;
+
+            using(var library = CreateLibraryWithPlaylist("Playlist"))
+            {
+                library.AddPlaylist("Playlist 2");
+
+                library.CreateAdmin("Password");
+                library.ChangeToParty();
+
+                Assert.Throws<InvalidOperationException>(() => library.ChangeToPlaylist("Playlist 2"));
+            }
+        }
+
+        [Test]
         public void CreateAdmin_PasswordIsEmpty_ThrowsArgumentException()
         {
             using (var library = new Library())
