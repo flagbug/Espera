@@ -229,17 +229,6 @@ namespace Espera.Core.Management
             }
         }
 
-        public bool LockPlaylistSwitching
-        {
-            get { return CoreSettings.Default.LockPlaylistSwitching; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                CoreSettings.Default.LockPlaylistSwitching = value;
-            }
-        }
-
         public bool LockPlaylistRemoval
         {
             get { return CoreSettings.Default.LockPlaylistRemoval; }
@@ -251,6 +240,16 @@ namespace Espera.Core.Management
             }
         }
 
+        public bool LockPlaylistSwitching
+        {
+            get { return CoreSettings.Default.LockPlaylistSwitching; }
+            set
+            {
+                this.ThrowIfNotAdmin();
+
+                CoreSettings.Default.LockPlaylistSwitching = value;
+            }
+        }
         public bool LockPlayPause
         {
             get { return CoreSettings.Default.LockPlayPause; }

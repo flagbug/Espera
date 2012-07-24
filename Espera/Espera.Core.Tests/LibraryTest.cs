@@ -125,43 +125,6 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void CanChangeVolume_IsAdministrator_IsTrue()
-        {
-            using (var library = new Library())
-            {
-                Assert.IsTrue(library.CanChangeVolume);
-            }
-        }
-
-        [Test]
-        public void CanChangeVolume_IsNotAdministratorAndLockVolumeIsFalse_IsTrue()
-        {
-            using (var library = new Library())
-            {
-                library.LockVolume = false;
-
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.IsTrue(library.CanChangeVolume);
-            }
-        }
-
-        [Test]
-        public void CanChangeVolume_IsNotAdministratorAndLockVolumeIsTrue_IsFalse()
-        {
-            using (var library = new Library())
-            {
-                library.LockVolume = true;
-
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.IsFalse(library.CanChangeVolume);
-            }
-        }
-
-        [Test]
         public void CanChangeTime_IsAdministrator_IsTrue()
         {
             using (var library = new Library())
@@ -198,6 +161,42 @@ namespace Espera.Core.Tests
             }
         }
 
+        [Test]
+        public void CanChangeVolume_IsAdministrator_IsTrue()
+        {
+            using (var library = new Library())
+            {
+                Assert.IsTrue(library.CanChangeVolume);
+            }
+        }
+
+        [Test]
+        public void CanChangeVolume_IsNotAdministratorAndLockVolumeIsFalse_IsTrue()
+        {
+            using (var library = new Library())
+            {
+                library.LockVolume = false;
+
+                library.CreateAdmin("password");
+                library.ChangeToParty();
+
+                Assert.IsTrue(library.CanChangeVolume);
+            }
+        }
+
+        [Test]
+        public void CanChangeVolume_IsNotAdministratorAndLockVolumeIsTrue_IsFalse()
+        {
+            using (var library = new Library())
+            {
+                library.LockVolume = true;
+
+                library.CreateAdmin("password");
+                library.ChangeToParty();
+
+                Assert.IsFalse(library.CanChangeVolume);
+            }
+        }
         [Test]
         public void CanSwitchPlaylist_IsAdministrator_IsTrue()
         {
@@ -264,106 +263,6 @@ namespace Espera.Core.Tests
             using (var library = new Library())
             {
                 Assert.Throws<ArgumentNullException>(() => library.ChangeToAdmin(null));
-            }
-        }
-
-        [Test]
-        public void SwitchToPlaylist_ChangeToOtherPlaylistAndPlayFirstSong_CurrentSongIndexIsCorrectlySet()
-        {
-            var blockingPlayer = new Mock<AudioPlayer>();
-            blockingPlayer.Setup(p => p.Play()).Callback(() => { });
-
-            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-            song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
-
-            using (var library = CreateLibraryWithPlaylist("Playlist"))
-            {
-                library.AddSongToPlaylist(song.Object);
-
-                library.PlaySong(0);
-
-                library.AddPlaylist("Playlist 2");
-                library.SwitchToPlaylist("Playlist 2");
-                library.AddSongToPlaylist(song.Object);
-
-                library.PlaySong(0);
-
-                Assert.AreEqual(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
-                Assert.AreEqual(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
-            }
-        }
-
-        [Test]
-        public void SwitchToPlaylist_ChangeToOtherPlaylistPlaySongAndChangeBack_CurrentSongIndexIsCorrectlySet()
-        {
-            var blockingPlayer = new Mock<AudioPlayer>();
-            blockingPlayer.Setup(p => p.Play()).Callback(() => { });
-
-            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-            song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
-
-            using (var library = CreateLibraryWithPlaylist("Playlist"))
-            {
-                library.AddSongToPlaylist(song.Object);
-
-                library.PlaySong(0);
-
-                library.AddPlaylist("Playlist 2");
-                library.SwitchToPlaylist("Playlist 2");
-                library.AddSongToPlaylist(song.Object);
-
-                library.PlaySong(0);
-
-                library.SwitchToPlaylist("Playlist");
-
-                Assert.AreEqual(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
-                Assert.AreEqual(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
-            }
-        }
-
-        [Test]
-        public void SwitchToPlaylist_PlaySongThenChangePlaylist_NextSongDoesNotPlayWhenSongFinishes()
-        {
-            using (var library = CreateLibraryWithPlaylist("Playlist"))
-            {
-                var handle = new ManualResetEvent(false);
-
-                var player = new HandledAudioPlayer(handle);
-
-                var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-                song.Setup(p => p.CreateAudioPlayer()).Returns(player);
-
-                bool played = false;
-
-                var notPlayedSong = new Mock<Song>("TestPath2", AudioType.Mp3, TimeSpan.Zero);
-                notPlayedSong.Setup(p => p.CreateAudioPlayer())
-                    .Returns(new Mock<AudioPlayer>().Object)
-                    .Callback(() => played = true);
-
-                library.AddSongToPlaylist(song.Object);
-                library.PlaySong(0);
-
-                library.AddAndSwitchToPlaylist("Playlist2");
-
-                handle.Set();
-
-                Assert.IsFalse(played);
-            }
-        }
-
-        [Test]
-        public void SwitchToPlaylist_PartyModeAndLockPlaylistSwitchingIsTrue_ThrowsInvalidOperationException()
-        {
-            using(var library = CreateLibraryWithPlaylist("Playlist"))
-            {
-                library.LockPlaylistSwitching = true;
-
-                library.AddPlaylist("Playlist 2");
-
-                library.CreateAdmin("Password");
-                library.ChangeToParty();
-
-                Assert.Throws<InvalidOperationException>(() => library.SwitchToPlaylist("Playlist 2"));
             }
         }
 
@@ -550,6 +449,105 @@ namespace Espera.Core.Tests
             }
         }
 
+        [Test]
+        public void SwitchToPlaylist_ChangeToOtherPlaylistAndPlayFirstSong_CurrentSongIndexIsCorrectlySet()
+        {
+            var blockingPlayer = new Mock<AudioPlayer>();
+            blockingPlayer.Setup(p => p.Play()).Callback(() => { });
+
+            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+            song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
+
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
+            {
+                library.AddSongToPlaylist(song.Object);
+
+                library.PlaySong(0);
+
+                library.AddPlaylist("Playlist 2");
+                library.SwitchToPlaylist("Playlist 2");
+                library.AddSongToPlaylist(song.Object);
+
+                library.PlaySong(0);
+
+                Assert.AreEqual(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
+                Assert.AreEqual(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
+            }
+        }
+
+        [Test]
+        public void SwitchToPlaylist_ChangeToOtherPlaylistPlaySongAndChangeBack_CurrentSongIndexIsCorrectlySet()
+        {
+            var blockingPlayer = new Mock<AudioPlayer>();
+            blockingPlayer.Setup(p => p.Play()).Callback(() => { });
+
+            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+            song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
+
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
+            {
+                library.AddSongToPlaylist(song.Object);
+
+                library.PlaySong(0);
+
+                library.AddPlaylist("Playlist 2");
+                library.SwitchToPlaylist("Playlist 2");
+                library.AddSongToPlaylist(song.Object);
+
+                library.PlaySong(0);
+
+                library.SwitchToPlaylist("Playlist");
+
+                Assert.AreEqual(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
+                Assert.AreEqual(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
+            }
+        }
+
+        [Test]
+        public void SwitchToPlaylist_PartyModeAndLockPlaylistSwitchingIsTrue_ThrowsInvalidOperationException()
+        {
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
+            {
+                library.LockPlaylistSwitching = true;
+
+                library.AddPlaylist("Playlist 2");
+
+                library.CreateAdmin("Password");
+                library.ChangeToParty();
+
+                Assert.Throws<InvalidOperationException>(() => library.SwitchToPlaylist("Playlist 2"));
+            }
+        }
+
+        [Test]
+        public void SwitchToPlaylist_PlaySongThenChangePlaylist_NextSongDoesNotPlayWhenSongFinishes()
+        {
+            using (var library = CreateLibraryWithPlaylist("Playlist"))
+            {
+                var handle = new ManualResetEvent(false);
+
+                var player = new HandledAudioPlayer(handle);
+
+                var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
+                song.Setup(p => p.CreateAudioPlayer()).Returns(player);
+
+                bool played = false;
+
+                var notPlayedSong = new Mock<Song>("TestPath2", AudioType.Mp3, TimeSpan.Zero);
+                notPlayedSong.Setup(p => p.CreateAudioPlayer())
+                    .Returns(new Mock<AudioPlayer>().Object)
+                    .Callback(() => played = true);
+
+                library.AddSongToPlaylist(song.Object);
+                library.PlaySong(0);
+
+                library.AddAndSwitchToPlaylist("Playlist2");
+
+                handle.Set();
+
+                Assert.IsFalse(played);
+            }
+        }
         private static Library CreateLibraryWithPlaylist(string playlistName)
         {
             var library = new Library();

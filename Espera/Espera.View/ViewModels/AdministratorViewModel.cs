@@ -116,18 +116,17 @@ namespace Espera.View.ViewModels
             set { this.library.LockLibraryRemoval = value; }
         }
 
-        public bool LockPlaylistSwitching
-        {
-            get { return this.library.LockPlaylistSwitching; }
-            set { this.library.LockPlaylistSwitching = value; }
-        }
-
         public bool LockPlaylistRemoval
         {
             get { return this.library.LockPlaylistRemoval; }
             set { this.library.LockPlaylistRemoval = value; }
         }
 
+        public bool LockPlaylistSwitching
+        {
+            get { return this.library.LockPlaylistSwitching; }
+            set { this.library.LockPlaylistSwitching = value; }
+        }
         public bool LockPlayPause
         {
             get { return this.library.LockPlayPause; }

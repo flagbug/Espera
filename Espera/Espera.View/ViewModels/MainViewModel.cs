@@ -62,16 +62,15 @@ namespace Espera.View.ViewModels
 
         public AdministratorViewModel AdministratorViewModel { get; private set; }
 
-        public bool CanChangeTime
-        {
-            get { return this.library.CanChangeTime; }
-        }
-
         public bool CanChangePlaylist
         {
             get { return this.library.CanSwitchPlaylist; }
         }
 
+        public bool CanChangeTime
+        {
+            get { return this.library.CanChangeTime; }
+        }
         public bool CanChangeVolume
         {
             get { return this.library.CanChangeVolume; }
