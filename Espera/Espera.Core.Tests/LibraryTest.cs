@@ -125,6 +125,80 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void CanChangeVolume_IsAdministrator_IsTrue()
+        {
+            using (var library = new Library())
+            {
+                Assert.IsTrue(library.CanChangeVolume);
+            }
+        }
+
+        [Test]
+        public void CanChangeVolume_IsNotAdministratorAndLockVolumeIsFalse_IsTrue()
+        {
+            using (var library = new Library())
+            {
+                library.LockVolume = false;
+
+                library.CreateAdmin("password");
+                library.ChangeToParty();
+
+                Assert.IsTrue(library.CanChangeVolume);
+            }
+        }
+
+        [Test]
+        public void CanChangeVolume_IsNotAdministratorAndLockVolumeIsTrue_IsFalse()
+        {
+            using (var library = new Library())
+            {
+                library.LockVolume = true;
+
+                library.CreateAdmin("password");
+                library.ChangeToParty();
+
+                Assert.IsFalse(library.CanChangeVolume);
+            }
+        }
+
+        [Test]
+        public void CanChangeTime_IsAdministrator_IsTrue()
+        {
+            using (var library = new Library())
+            {
+                Assert.IsTrue(library.CanChangeTime);
+            }
+        }
+
+        [Test]
+        public void CanChangeTime_IsNotAdministratorAndLockTimeIsFalse_IsTrue()
+        {
+            using (var library = new Library())
+            {
+                library.LockTime = false;
+
+                library.CreateAdmin("password");
+                library.ChangeToParty();
+
+                Assert.IsTrue(library.CanChangeTime);
+            }
+        }
+
+        [Test]
+        public void CanChangeTime_IsNotAdministratorAndLockTimeIsTrue_IsFalse()
+        {
+            using (var library = new Library())
+            {
+                library.LockTime = true;
+
+                library.CreateAdmin("password");
+                library.ChangeToParty();
+
+                Assert.IsFalse(library.CanChangeTime);
+            }
+        }
+
+        [Test]
         public void CanSwitchPlaylist_IsAdministrator_IsTrue()
         {
             using(var library = new Library())

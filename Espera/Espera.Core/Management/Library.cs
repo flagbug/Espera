@@ -104,12 +104,12 @@ namespace Espera.Core.Management
 
         public bool CanChangeTime
         {
-            get { return CoreSettings.Default.LockTime && this.AccessMode == AccessMode.Administrator; }
+            get { return this.AccessMode == AccessMode.Administrator || !this.LockTime; }
         }
 
         public bool CanChangeVolume
         {
-            get { return CoreSettings.Default.LockVolume && this.AccessMode == AccessMode.Administrator; }
+            get { return this.AccessMode == AccessMode.Administrator || !this.LockVolume; }
         }
 
         /// <summary>
