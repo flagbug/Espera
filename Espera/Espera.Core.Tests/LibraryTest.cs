@@ -14,11 +14,11 @@ namespace Espera.Core.Tests
     public class LibraryTest
     {
         [Test]
-        public void AddAndChangeToPlaylist_SomeGenericName_WorksAsExpected()
+        public void AddAndSwitchToPlaylist_SomeGenericName_WorksAsExpected()
         {
             using (var library = new Library())
             {
-                library.AddAndChangeToPlaylist("Playlist");
+                library.AddAndSwitchToPlaylist("Playlist");
 
                 Assert.AreEqual("Playlist", library.CurrentPlaylist.Name);
                 Assert.AreEqual("Playlist", library.Playlists.First().Name);
@@ -27,13 +27,13 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void AddAndChangeToPlaylist_TwoPlaylistsWithSameName_ThrowsInvalidOperationException()
+        public void AddAndSwitchToPlaylist_TwoPlaylistsWithSameName_ThrowsInvalidOperationException()
         {
             using (var library = new Library())
             {
-                library.AddAndChangeToPlaylist("Playlist");
+                library.AddAndSwitchToPlaylist("Playlist");
 
-                Assert.Throws<InvalidOperationException>(() => library.AddAndChangeToPlaylist("Playlist"));
+                Assert.Throws<InvalidOperationException>(() => library.AddAndSwitchToPlaylist("Playlist"));
             }
         }
 
@@ -157,7 +157,7 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void ChangeToPlaylist_ChangeToOtherPlaylistAndPlayFirstSong_CurrentSongIndexIsCorrectlySet()
+        public void SwitchToPlaylist_ChangeToOtherPlaylistAndPlayFirstSong_CurrentSongIndexIsCorrectlySet()
         {
             var blockingPlayer = new Mock<AudioPlayer>();
             blockingPlayer.Setup(p => p.Play()).Callback(() => { });
@@ -172,7 +172,7 @@ namespace Espera.Core.Tests
                 library.PlaySong(0);
 
                 library.AddPlaylist("Playlist 2");
-                library.ChangeToPlaylist("Playlist 2");
+                library.SwitchToPlaylist("Playlist 2");
                 library.AddSongToPlaylist(song.Object);
 
                 library.PlaySong(0);
@@ -183,7 +183,7 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void ChangeToPlaylist_ChangeToOtherPlaylistPlaySongAndChangeBack_CurrentSongIndexIsCorrectlySet()
+        public void SwitchToPlaylist_ChangeToOtherPlaylistPlaySongAndChangeBack_CurrentSongIndexIsCorrectlySet()
         {
             var blockingPlayer = new Mock<AudioPlayer>();
             blockingPlayer.Setup(p => p.Play()).Callback(() => { });
@@ -198,12 +198,12 @@ namespace Espera.Core.Tests
                 library.PlaySong(0);
 
                 library.AddPlaylist("Playlist 2");
-                library.ChangeToPlaylist("Playlist 2");
+                library.SwitchToPlaylist("Playlist 2");
                 library.AddSongToPlaylist(song.Object);
 
                 library.PlaySong(0);
 
-                library.ChangeToPlaylist("Playlist");
+                library.SwitchToPlaylist("Playlist");
 
                 Assert.AreEqual(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
                 Assert.AreEqual(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
@@ -211,7 +211,7 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void ChangeToPlaylist_PlaySongThenChangePlaylist_NextSongDoesNotPlayWhenSongFinishes()
+        public void SwitchToPlaylist_PlaySongThenChangePlaylist_NextSongDoesNotPlayWhenSongFinishes()
         {
             using (var library = CreateLibraryWithPlaylist("Playlist"))
             {
@@ -232,7 +232,7 @@ namespace Espera.Core.Tests
                 library.AddSongToPlaylist(song.Object);
                 library.PlaySong(0);
 
-                library.AddAndChangeToPlaylist("Playlist2");
+                library.AddAndSwitchToPlaylist("Playlist2");
 
                 handle.Set();
 
@@ -241,9 +241,9 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void ChangeToPlaylist_PartyModeAndLockPlaylistSwitchingIsTrue_ThrowsInvalidOperationException()
+        public void SwitchToPlaylist_PartyModeAndLockPlaylistSwitchingIsTrue_ThrowsInvalidOperationException()
         {
-            CoreSettings.Default.LockPlaylistChanging = true;
+            CoreSettings.Default.LockPlaylistSwitching = true;
 
             using(var library = CreateLibraryWithPlaylist("Playlist"))
             {
@@ -252,7 +252,7 @@ namespace Espera.Core.Tests
                 library.CreateAdmin("Password");
                 library.ChangeToParty();
 
-                Assert.Throws<InvalidOperationException>(() => library.ChangeToPlaylist("Playlist 2"));
+                Assert.Throws<InvalidOperationException>(() => library.SwitchToPlaylist("Playlist 2"));
             }
         }
 
@@ -442,7 +442,7 @@ namespace Espera.Core.Tests
         private static Library CreateLibraryWithPlaylist(string playlistName)
         {
             var library = new Library();
-            library.AddAndChangeToPlaylist(playlistName);
+            library.AddAndSwitchToPlaylist(playlistName);
 
             return library;
         }

@@ -122,12 +122,12 @@ namespace Espera.Core {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool LockPlaylistChanging {
+        public bool LockPlaylistSwitching {
             get {
-                return ((bool)(this["LockPlaylistChanging"]));
+                return ((bool)(this["LockPlaylistSwitching"]));
             }
             set {
-                this["LockPlaylistChanging"] = value;
+                this["LockPlaylistSwitching"] = value;
             }
         }
     }

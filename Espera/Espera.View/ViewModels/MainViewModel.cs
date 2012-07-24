@@ -31,7 +31,7 @@ namespace Espera.View.ViewModels
             this.library.AccessModeChanged += (sender, e) => this.UpdateUserAccess();
             this.library.PlaylistChanged += (sender, e) => this.UpdatePlaylist();
 
-            this.library.AddAndChangeToPlaylist(this.GetNewPlaylistName());
+            this.library.AddAndSwitchToPlaylist(this.GetNewPlaylistName());
 
             this.AdministratorViewModel = new AdministratorViewModel(this.library);
 
@@ -69,7 +69,7 @@ namespace Espera.View.ViewModels
 
         public bool CanChangePlaylist
         {
-            get { return this.library.CanChangePlaylist; }
+            get { return this.library.CanSwitchPlaylist; }
         }
 
         public bool CanChangeVolume
@@ -94,7 +94,7 @@ namespace Espera.View.ViewModels
             {
                 if (value != null) // There always has to be a playlist selected
                 {
-                    this.library.ChangeToPlaylist(value.Name);
+                    this.library.SwitchToPlaylist(value.Name);
                     this.OnPropertyChanged(vm => vm.CurrentPlaylist);
                 }
             }
@@ -531,7 +531,7 @@ namespace Espera.View.ViewModels
 
         private void AddPlaylist()
         {
-            this.library.AddAndChangeToPlaylist(this.GetNewPlaylistName());
+            this.library.AddAndSwitchToPlaylist(this.GetNewPlaylistName());
 
             PlaylistViewModel newPlaylist = this.CreatePlaylistViewModel(this.library.Playlists.Last());
             this.Playlists.Add(newPlaylist);

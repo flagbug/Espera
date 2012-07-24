@@ -102,11 +102,6 @@ namespace Espera.Core.Management
             get { return this.AccessMode == AccessMode.Administrator || this.RemainingPlaylistTimeout <= TimeSpan.Zero; }
         }
 
-        public bool CanChangePlaylist
-        {
-            get { return CoreSettings.Default.LockPlaylistChanging && this.AccessMode == AccessMode.Administrator; }
-        }
-
         public bool CanChangeTime
         {
             get { return CoreSettings.Default.LockTime && this.AccessMode == AccessMode.Administrator; }
@@ -137,6 +132,11 @@ namespace Espera.Core.Management
         public bool CanPlayPreviousSong
         {
             get { return this.currentPlaylist.CanPlayPreviousSong; }
+        }
+
+        public bool CanSwitchPlaylist
+        {
+            get { return CoreSettings.Default.LockPlaylistSwitching && this.AccessMode == AccessMode.Administrator; }
         }
 
         public PlaylistInfo CurrentPlaylist
@@ -359,10 +359,10 @@ namespace Espera.Core.Management
         /// </summary>
         /// <param name="name">The name of the playlist, It is required that no other playlist has this name.</param>
         /// <exception cref="InvalidOperationException">A playlist with the specified name already exists.</exception>
-        public void AddAndChangeToPlaylist(string name)
+        public void AddAndSwitchToPlaylist(string name)
         {
             this.AddPlaylist(name);
-            this.ChangeToPlaylist(name);
+            this.SwitchToPlaylist(name);
         }
 
         /// <summary>
@@ -446,14 +446,6 @@ namespace Espera.Core.Management
         public void ChangeToParty()
         {
             this.AccessMode = AccessMode.Party;
-        }
-
-        public void ChangeToPlaylist(string name)
-        {
-            if (CoreSettings.Default.LockPlaylistChanging && this.AccessMode == AccessMode.Party)
-                throw new InvalidOperationException("Not allowed to change playlist when in party mode.");
-
-            this.currentPlaylist = this.playlists.Single(playlist => playlist.Name == name);
         }
 
         /// <summary>
@@ -637,6 +629,13 @@ namespace Espera.Core.Management
                 throw new InvalidOperationException("No playlist with the specified name exists.");
         }
 
+        public void SwitchToPlaylist(string name)
+        {
+            if (CoreSettings.Default.LockPlaylistSwitching && this.AccessMode == AccessMode.Party)
+                throw new InvalidOperationException("Not allowed to change playlist when in party mode.");
+
+            this.currentPlaylist = this.playlists.Single(playlist => playlist.Name == name);
+        }
         /// <summary>
         /// Disposes the all songs and clear their cache.
         /// </summary>
