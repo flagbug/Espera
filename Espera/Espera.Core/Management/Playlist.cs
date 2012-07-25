@@ -173,15 +173,26 @@ namespace Espera.Core.Management
 
             var random = new Random();
 
-            for (int i = 0; i < count; i++)
+            for (int index = 0; index < count; index++)
             {
-                int number = random.Next(count);
+                int newIndex = random.Next(count);
 
-                Song temp = this.playlist[i];
+                // Migrate the CurrentSongIndex to the new position
+                if (index == this.CurrentSongIndex)
+                {
+                    this.CurrentSongIndex = newIndex;
+                }
 
-                this.playlist[i] = this.playlist[number];
+                else if (newIndex == this.CurrentSongIndex)
+                {
+                    this.CurrentSongIndex = index;
+                }
 
-                this.playlist[number] = temp;
+                Song temp = this.playlist[index];
+
+                this.playlist[index] = this.playlist[newIndex];
+
+                this.playlist[newIndex] = temp;
             }
         }
 
