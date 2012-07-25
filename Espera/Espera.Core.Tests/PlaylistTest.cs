@@ -134,6 +134,22 @@ namespace Espera.Core.Tests
             Assert.AreEqual(songs[3], playlist[2]);
         }
 
+        [Test]
+        public void ShuffleMigratesCurrentSongIndex()
+        {
+            Song[] songs = SetupSimpleSongMock(100, true);
+
+            Playlist playlist = SetupPlaylist(songs);
+
+            playlist.CurrentSongIndex = 0;
+
+            playlist.Shuffle();
+
+            int newIndex = playlist.GetIndexes(new[] { songs[0] }).First();
+
+            Assert.AreEqual(newIndex, playlist.CurrentSongIndex);
+        }
+
         private static Playlist SetupPlaylist(IEnumerable<Song> songs)
         {
             var playlist = new Playlist("Test Playlist");
@@ -143,13 +159,15 @@ namespace Espera.Core.Tests
             return playlist;
         }
 
-        private static Song[] SetupSimpleSongMock(int count)
+        private static Song[] SetupSimpleSongMock(int count, bool callBase = false)
         {
             var songs = new Song[count];
 
             for (int i = 0; i < count; i++)
             {
-                songs[i] = new Mock<Song>("Song" + i, AudioType.Mp3, TimeSpan.Zero).Object;
+                var song = new Mock<Song>("Song" + i, AudioType.Mp3, TimeSpan.Zero) { CallBase = callBase };
+
+                songs[i] = song.Object;
             }
 
             return songs;
