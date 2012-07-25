@@ -639,10 +639,15 @@ namespace Espera.Core.Management
                 throw new InvalidOperationException("No playlist with the specified name exists.");
         }
 
+        public void ShufflePlaylist()
+        {
+            this.currentPlaylist.Shuffle();
+        }
+
         public void SwitchToPlaylist(string name)
         {
-            if (CoreSettings.Default.LockPlaylistSwitching && this.AccessMode == AccessMode.Party)
-                throw new InvalidOperationException("Not allowed to change playlist when in party mode.");
+            if (!this.CanSwitchPlaylist)
+                throw new InvalidOperationException("Not allowed to switch playlist.");
 
             this.currentPlaylist = this.playlists.Single(playlist => playlist.Name == name);
         }

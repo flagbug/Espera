@@ -432,6 +432,22 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public ICommand ShufflePlaylistCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param => 
+                    {
+                        this.library.ShufflePlaylist();
+
+                        this.UpdatePlaylist();
+                    }
+                );
+            }
+        }
+
         public IEnumerable<PlaylistEntryViewModel> SelectedPlaylistEntries
         {
             get { return this.selectedPlaylistEntries; }

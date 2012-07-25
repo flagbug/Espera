@@ -167,6 +167,24 @@ namespace Espera.Core.Management
             this.Rebuild();
         }
 
+        public void Shuffle()
+        {
+            int count = this.playlist.Count;
+
+            var random = new Random();
+
+            for (int i = 0; i < count; i++)
+            {
+                int number = random.Next(count);
+
+                Song temp = this.playlist[i];
+
+                this.playlist[i] = this.playlist[number];
+
+                this.playlist[number] = temp;
+            }
+        }
+
         /// <summary>
         /// Returns an enumerator that iterates through a collection.
         /// </summary>
