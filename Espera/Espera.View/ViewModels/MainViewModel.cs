@@ -62,7 +62,7 @@ namespace Espera.View.ViewModels
 
         public AdministratorViewModel AdministratorViewModel { get; private set; }
 
-        public bool CanChangePlaylist
+        public bool CanSwitchPlaylist
         {
             get { return this.library.CanSwitchPlaylist; }
         }
@@ -637,7 +637,7 @@ namespace Espera.View.ViewModels
             this.OnPropertyChanged(vm => vm.IsAdmin);
             this.OnPropertyChanged(vm => vm.CanChangeVolume);
             this.OnPropertyChanged(vm => vm.CanChangeTime);
-            this.OnPropertyChanged(vm => vm.CanChangePlaylist);
+            this.OnPropertyChanged(vm => vm.CanSwitchPlaylist);
         }
     }
 }
