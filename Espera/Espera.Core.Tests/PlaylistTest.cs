@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace Espera.Core.Tests
 {
     [TestFixture]
-    public class PlaylistTest
+    public sealed class PlaylistTest
     {
         [Test]
         public void AddSongsTest()

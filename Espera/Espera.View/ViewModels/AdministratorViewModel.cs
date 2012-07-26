@@ -8,7 +8,7 @@ using Rareform.Validation;
 
 namespace Espera.View.ViewModels
 {
-    public class AdministratorViewModel : ViewModelBase<AdministratorViewModel>
+    public sealed class AdministratorViewModel : ViewModelBase<AdministratorViewModel>
     {
         private readonly Library library;
         private bool isWrongPassword;
@@ -127,6 +127,7 @@ namespace Espera.View.ViewModels
             get { return this.library.LockPlaylistSwitching; }
             set { this.library.LockPlaylistSwitching = value; }
         }
+
         public bool LockPlayPause
         {
             get { return this.library.LockPlayPause; }

@@ -11,7 +11,7 @@ using Rareform.Validation;
 
 namespace Espera.Core.Management
 {
-    public class Library : IDisposable
+    public sealed class Library : IDisposable
     {
         private readonly AutoResetEvent cacheResetHandle;
 
@@ -250,6 +250,7 @@ namespace Espera.Core.Management
                 CoreSettings.Default.LockPlaylistSwitching = value;
             }
         }
+
         public bool LockPlayPause
         {
             get { return CoreSettings.Default.LockPlayPause; }
@@ -651,6 +652,7 @@ namespace Espera.Core.Management
 
             this.currentPlaylist = this.playlists.Single(playlist => playlist.Name == name);
         }
+
         /// <summary>
         /// Disposes the all songs and clear their cache.
         /// </summary>

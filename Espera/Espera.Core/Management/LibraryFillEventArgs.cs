@@ -3,7 +3,7 @@ using Rareform.Extensions;
 
 namespace Espera.Core.Management
 {
-    public class LibraryFillEventArgs : EventArgs
+    public sealed class LibraryFillEventArgs : EventArgs
     {
         public LibraryFillEventArgs(Song song, int processedTagCount, int totalTagCount)
         {

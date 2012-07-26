@@ -6,7 +6,7 @@ using Rareform.IO;
 
 namespace Espera.Core
 {
-    public class LocalSong : Song
+    public sealed class LocalSong : Song
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalSong"/> class.

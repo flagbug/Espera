@@ -6,7 +6,7 @@ namespace Espera.Core.Management
     /// The exception that is thrown, when an invalid password has been entered.
     /// </summary>
     [Serializable]
-    public class InvalidPasswordException : Exception
+    public sealed class InvalidPasswordException : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InvalidPasswordException"/> class.

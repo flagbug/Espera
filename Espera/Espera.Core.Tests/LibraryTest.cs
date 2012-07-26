@@ -11,7 +11,7 @@ using NUnit.Framework;
 namespace Espera.Core.Tests
 {
     [TestFixture]
-    public class LibraryTest
+    public sealed class LibraryTest
     {
         [Test]
         public void AddAndSwitchToPlaylist_SomeGenericName_WorksAsExpected()
@@ -197,10 +197,11 @@ namespace Espera.Core.Tests
                 Assert.IsFalse(library.CanChangeVolume);
             }
         }
+
         [Test]
         public void CanSwitchPlaylist_IsAdministrator_IsTrue()
         {
-            using(var library = new Library())
+            using (var library = new Library())
             {
                 Assert.IsTrue(library.CanSwitchPlaylist);
             }
@@ -209,7 +210,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanSwitchPlaylist_IsNotAdministratorAndLockPlaylistSwitchingIsFalse_IsTrue()
         {
-            using(var library = new Library())
+            using (var library = new Library())
             {
                 library.LockPlaylistSwitching = false;
 
@@ -223,7 +224,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanSwitchPlaylist_IsNotAdministratorAndLockPlaylistSwitchingIsTrue_IsFalse()
         {
-            using(var library = new Library())
+            using (var library = new Library())
             {
                 library.LockPlaylistSwitching = true;
 
@@ -548,6 +549,7 @@ namespace Espera.Core.Tests
                 Assert.IsFalse(played);
             }
         }
+
         private static Library CreateLibraryWithPlaylist(string playlistName)
         {
             var library = new Library();

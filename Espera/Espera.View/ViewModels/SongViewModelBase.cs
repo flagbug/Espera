@@ -5,7 +5,7 @@ using Rareform.Validation;
 
 namespace Espera.View.ViewModels
 {
-    public class SongViewModelBase<T> : ViewModelBase<T>
+    public abstract class SongViewModelBase<T> : ViewModelBase<T>
     {
         protected SongViewModelBase(Song wrapped)
         {

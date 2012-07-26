@@ -10,7 +10,7 @@ using Rareform.Validation;
 
 namespace Espera.View.ViewModels
 {
-    internal class LocalViewModel : SongSourceViewModel<LocalViewModel>
+    internal sealed class LocalViewModel : SongSourceViewModel<LocalViewModel>
     {
         private SortOrder albumOrder;
         private SortOrder artistOrder;

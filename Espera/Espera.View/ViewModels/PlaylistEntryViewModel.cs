@@ -4,7 +4,7 @@ using Rareform.Validation;
 
 namespace Espera.View.ViewModels
 {
-    public class PlaylistEntryViewModel : SongViewModelBase<PlaylistEntryViewModel>
+    public sealed class PlaylistEntryViewModel : SongViewModelBase<PlaylistEntryViewModel>
     {
         private bool hasCachingFailed;
         private bool isInactive;

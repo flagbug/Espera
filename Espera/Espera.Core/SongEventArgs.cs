@@ -6,7 +6,7 @@ namespace Espera.Core
     /// <summary>
     /// Provides data for the <see cref="LocalSongFinder.SongFound"/> event.
     /// </summary>
-    public class SongEventArgs : EventArgs
+    public sealed class SongEventArgs : EventArgs
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SongEventArgs"/> class.

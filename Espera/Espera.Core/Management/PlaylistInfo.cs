@@ -2,7 +2,7 @@
 
 namespace Espera.Core.Management
 {
-    public class PlaylistInfo
+    public sealed class PlaylistInfo
     {
         private readonly Playlist playlist;
 

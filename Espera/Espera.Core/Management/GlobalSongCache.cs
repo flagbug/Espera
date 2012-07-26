@@ -5,7 +5,7 @@ using Rareform.Validation;
 
 namespace Espera.Core.Management
 {
-    internal class GlobalSongCacheQueue
+    internal sealed class GlobalSongCacheQueue
     {
         private static GlobalSongCacheQueue instance;
         private readonly ConcurrentQueue<Song> cachingQueue;

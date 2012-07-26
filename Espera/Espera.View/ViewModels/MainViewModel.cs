@@ -10,7 +10,7 @@ using Rareform.Patterns.MVVM;
 
 namespace Espera.View.ViewModels
 {
-    internal class MainViewModel : ViewModelBase<MainViewModel>, IDisposable
+    internal sealed class MainViewModel : ViewModelBase<MainViewModel>, IDisposable
     {
         private readonly Library library;
         private readonly Timer playlistTimeoutUpdateTimer;
@@ -71,6 +71,7 @@ namespace Espera.View.ViewModels
         {
             get { return this.library.CanChangeTime; }
         }
+
         public bool CanChangeVolume
         {
             get { return this.library.CanChangeVolume; }
@@ -438,7 +439,7 @@ namespace Espera.View.ViewModels
             {
                 return new RelayCommand
                 (
-                    param => 
+                    param =>
                     {
                         this.library.ShufflePlaylist();
 

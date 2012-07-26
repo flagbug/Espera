@@ -7,7 +7,7 @@ using YoutubeExtractor;
 
 namespace Espera.Core
 {
-    public class YoutubeSong : Song
+    public sealed class YoutubeSong : Song
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="YoutubeSong"/> class.

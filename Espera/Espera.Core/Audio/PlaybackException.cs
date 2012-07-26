@@ -6,7 +6,7 @@ namespace Espera.Core.Audio
     /// The exception that is thrown, when the <see cref="LocalAudioPlayer"/> couldn't play a song.
     /// </summary>
     [Serializable]
-    public class PlaybackException : Exception
+    public sealed class PlaybackException : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PlaybackException"/> class.

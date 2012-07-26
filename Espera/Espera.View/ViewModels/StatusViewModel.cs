@@ -4,7 +4,7 @@ using Rareform.Validation;
 
 namespace Espera.View.ViewModels
 {
-    internal class StatusViewModel : ViewModelBase<StatusViewModel>
+    internal sealed class StatusViewModel : ViewModelBase<StatusViewModel>
     {
         private readonly Library library;
         private bool isAdding;

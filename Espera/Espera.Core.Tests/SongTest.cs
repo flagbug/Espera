@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Espera.Core.Tests
 {
     [TestFixture]
-    public class SongTest
+    public sealed class SongTest
     {
         [Test]
         public void ClearCache_SongHasNotToBeCached_ThrowsInvalidOperationException()

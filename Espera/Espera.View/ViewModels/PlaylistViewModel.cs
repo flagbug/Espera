@@ -8,7 +8,7 @@ using Rareform.Reflection;
 
 namespace Espera.View.ViewModels
 {
-    internal class PlaylistViewModel : ViewModelBase<PlaylistViewModel>, IDataErrorInfo
+    internal sealed class PlaylistViewModel : ViewModelBase<PlaylistViewModel>, IDataErrorInfo
     {
         private readonly PlaylistInfo playlist;
         private readonly Func<string, bool> renameRequest;

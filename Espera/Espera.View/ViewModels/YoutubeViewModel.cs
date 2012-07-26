@@ -8,7 +8,7 @@ using Espera.View.Properties;
 
 namespace Espera.View.ViewModels
 {
-    internal class YoutubeViewModel : SongSourceViewModel<YoutubeViewModel>
+    internal sealed class YoutubeViewModel : SongSourceViewModel<YoutubeViewModel>
     {
         private IEnumerable<YoutubeSong> currentSongs;
         private SortOrder durationOrder;

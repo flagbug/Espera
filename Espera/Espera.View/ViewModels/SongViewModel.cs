@@ -11,7 +11,7 @@ using Rareform.Patterns.MVVM;
 
 namespace Espera.View.ViewModels
 {
-    public class SongViewModel : SongViewModelBase<SongViewModel>
+    public sealed class SongViewModel : SongViewModelBase<SongViewModel>
     {
         private BitmapImage thumbnail;
 
