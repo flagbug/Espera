@@ -14,7 +14,7 @@ namespace Espera.Core.Tests
         [Test]
         public void AddSongsTest()
         {
-            Song[] songs = SetupSimpleSongMock(4);
+            Song[] songs = SetupSongMocks(4);
             Playlist playlist = SetupPlaylist(songs);
 
             Assert.AreEqual(4, playlist.Count());
@@ -27,7 +27,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanPlayNextSong_CurrentSongIndexIsNull_ReturnsFalse()
         {
-            Song[] songs = SetupSimpleSongMock(4);
+            Song[] songs = SetupSongMocks(4);
             Playlist playlist = SetupPlaylist(songs);
 
             playlist.CurrentSongIndex = null;
@@ -38,7 +38,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanPlayNextSong_CurrentSongIndexIsPlaylistCount_ReturnsFalse()
         {
-            Song[] songs = SetupSimpleSongMock(4);
+            Song[] songs = SetupSongMocks(4);
             Playlist playlist = SetupPlaylist(songs);
 
             playlist.CurrentSongIndex = playlist.Count();
@@ -49,7 +49,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanPlayNextSong_CurrentSongIndexIsZero_ReturnsTrue()
         {
-            Song[] songs = SetupSimpleSongMock(4);
+            Song[] songs = SetupSongMocks(4);
             Playlist playlist = SetupPlaylist(songs);
 
             playlist.CurrentSongIndex = 0;
@@ -60,7 +60,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanPlayPreviousSong_CurrentSongIndexIsNull_ReturnsFalse()
         {
-            Song[] songs = SetupSimpleSongMock(4);
+            Song[] songs = SetupSongMocks(4);
             Playlist playlist = SetupPlaylist(songs);
 
             playlist.CurrentSongIndex = null;
@@ -71,7 +71,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanPlayPreviousSong_CurrentSongIndexIsPlaylistCount_ReturnsTrue()
         {
-            Song[] songs = SetupSimpleSongMock(4);
+            Song[] songs = SetupSongMocks(4);
             Playlist playlist = SetupPlaylist(songs);
 
             playlist.CurrentSongIndex = playlist.Count();
@@ -82,7 +82,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanPlayPreviousSong_CurrentSongIndexIsZero_ReturnsFalse()
         {
-            Song[] songs = SetupSimpleSongMock(4);
+            Song[] songs = SetupSongMocks(4);
             Playlist playlist = SetupPlaylist(songs);
 
             playlist.CurrentSongIndex = 0;
@@ -91,9 +91,57 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void GetIndexes_OneSong_ReturnsCorrectIndexes()
+        {
+            Song song = SetupSongMock("Song", true);
+
+            Playlist playlist = SetupPlaylist(song);
+
+            int index = playlist.GetIndexes(new[] { song }).Single();
+
+            Assert.AreEqual(0, index);
+        }
+
+        [Test]
+        public void GetIndexes_OneSongWithMultipleReferences_ReturnsCorrectIndexes()
+        {
+            Song song = SetupSongMock("Song", true);
+
+            Playlist playlist = SetupPlaylist(Enumerable.Repeat(song, 3));
+
+            IEnumerable<int> indexes = playlist.GetIndexes(new[] { song });
+
+            Assert.IsTrue(indexes.SequenceEqual(new[] { 0, 1, 2 }));
+        }
+
+        [Test]
+        public void GetIndexes_MultipleSongs_ReturnsCorrectIndexes()
+        {
+            Song[] songs = SetupSongMocks(3, true);
+
+            Playlist playlist = SetupPlaylist(songs);
+
+            IEnumerable<int> indexes = playlist.GetIndexes(songs);
+
+            Assert.IsTrue(indexes.SequenceEqual(new[] { 0, 1, 2 }));
+        }
+
+        [Test]
+        public void GetIndexes_PassSongsThatAreNotInPlaylist_ReturnsNoIndexes()
+        {
+            Song[] songs = SetupSongMocks(4, true);
+
+            Playlist playlist = SetupPlaylist(songs.Take(2));
+
+            IEnumerable<int> indexes = playlist.GetIndexes(songs.Skip(2));
+
+            Assert.IsEmpty(indexes);
+        }
+
+        [Test]
         public void InsertMove_InsertSongToPlaylist_OrderIsCorrent()
         {
-            Song[] songs = SetupSimpleSongMock(5);
+            Song[] songs = SetupSongMocks(5);
 
             Playlist playlist = SetupPlaylist(songs);
 
@@ -108,7 +156,7 @@ namespace Espera.Core.Tests
         [Test]
         public void RemoveSongs_RemoveMultipleSongs_OrderIsCorrect()
         {
-            Song[] songs = SetupSimpleSongMock(7);
+            Song[] songs = SetupSongMocks(7);
             Playlist playlist = SetupPlaylist(songs);
 
             playlist.RemoveSongs(new[] { 1, 3, 4 });
@@ -123,7 +171,7 @@ namespace Espera.Core.Tests
         [Test]
         public void RemoveSongs_RemoveOneSong_OrderIsCorrect()
         {
-            Song[] songs = SetupSimpleSongMock(4);
+            Song[] songs = SetupSongMocks(4);
             Playlist playlist = SetupPlaylist(songs);
 
             playlist.RemoveSongs(new[] { 1 });
@@ -137,7 +185,7 @@ namespace Espera.Core.Tests
         [Test]
         public void ShuffleMigratesCurrentSongIndex()
         {
-            Song[] songs = SetupSimpleSongMock(100, true);
+            Song[] songs = SetupSongMocks(100, true);
 
             Playlist playlist = SetupPlaylist(songs);
 
@@ -150,6 +198,11 @@ namespace Espera.Core.Tests
             Assert.AreEqual(newIndex, playlist.CurrentSongIndex);
         }
 
+        private static Playlist SetupPlaylist(Song song)
+        {
+            return SetupPlaylist(new[] { song });
+        }
+
         private static Playlist SetupPlaylist(IEnumerable<Song> songs)
         {
             var playlist = new Playlist("Test Playlist");
@@ -159,15 +212,23 @@ namespace Espera.Core.Tests
             return playlist;
         }
 
-        private static Song[] SetupSimpleSongMock(int count, bool callBase = false)
+        private static Song SetupSongMock(string name = "Song", bool callBase = false, AudioType audioType = AudioType.Mp3, TimeSpan? duration = null)
+        {
+            if (duration == null)
+            {
+                duration = TimeSpan.Zero;
+            }
+
+            return new Mock<Song>(name, audioType, duration) { CallBase = callBase }.Object;
+        }
+
+        private static Song[] SetupSongMocks(int count, bool callBase = false)
         {
             var songs = new Song[count];
 
             for (int i = 0; i < count; i++)
             {
-                var song = new Mock<Song>("Song" + i, AudioType.Mp3, TimeSpan.Zero) { CallBase = callBase };
-
-                songs[i] = song.Object;
+                songs[i] = SetupSongMock("Song" + i, callBase);
             }
 
             return songs;
