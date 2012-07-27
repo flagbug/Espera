@@ -43,11 +43,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LibraryTest.cs" />
+    <Compile Include="LocalAudioPlayerTest.cs" />
     <Compile Include="Mocks\HandledAudioPlayer.cs" />
     <Compile Include="Mocks\JumpAudioPlayer.cs" />
     <Compile Include="PlaylistTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SongTest.cs" />
+    <Compile Include="AudioPlayerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Espera.Core\Espera.Core.csproj">
