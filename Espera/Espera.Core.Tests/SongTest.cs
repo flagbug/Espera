@@ -50,5 +50,14 @@ namespace Espera.Core.Tests
 
             Assert.IsFalse(song1.Object.Equals(song2.Object));
         }
+
+        [Test]
+        public void GetHashcode_EqualObjects_ReturnsSameHashCode()
+        {
+            var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero) { CallBase = true };
+            var song2 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero) { CallBase = true };
+
+            Assert.AreEqual(song1.GetHashCode(), song2.GetHashCode());
+        }
     }
 }
