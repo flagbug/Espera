@@ -2,3 +2,5 @@
 *.suo
 *.user
 *.ncrunchsolution
+*.psess
+*.vsp

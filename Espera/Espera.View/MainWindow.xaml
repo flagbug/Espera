@@ -28,15 +28,13 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ListBox}">
                             <ScrollViewer>
-                                <ItemsPresenter/>
+                                <ItemsPresenter />
                             </ScrollViewer>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
             </Style>
             <Style TargetType="{x:Type ListBoxItem}">
-                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                <Setter Property="VerticalContentAlignment" Value="Center" />
                 <Setter Property="MinHeight" Value="25" />
                 <Setter Property="Margin" Value="0" />
                 <Setter Property="Template">
@@ -479,7 +477,8 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0">
+                    <Grid Grid.Row="0"
+                          Margin="5, 0, 0, 0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
