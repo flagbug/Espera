@@ -127,7 +127,7 @@ namespace Espera.Core.Management
                 Throw.ArgumentOutOfRangeException(() => fromIndex, 0);
 
             if (toIndex < 0)
-                Throw.ArgumentOutOfRangeException(() => 0);
+                Throw.ArgumentOutOfRangeException(() => toIndex, 0);
 
             if (toIndex >= fromIndex)
                 Throw.ArgumentException(
