@@ -133,7 +133,7 @@ namespace Espera.Core
         /// </value>
         public string StreamingPath
         {
-            get { return !this.HasToCache ? this.OriginalPath : this.streamingPath; }
+            get { return this.HasToCache ? this.streamingPath : this.OriginalPath; }
             protected set { this.streamingPath = value; }
         }
 
