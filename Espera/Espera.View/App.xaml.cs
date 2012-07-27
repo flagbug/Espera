@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Espera.View.Properties;
 
 namespace Espera.View
 {
@@ -7,5 +8,11 @@ namespace Espera.View
     /// </summary>
     public partial class App : Application
     {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            Settings.Default.Upgrade();
+
+            base.OnStartup(e);
+        }
     }
 }

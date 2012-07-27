@@ -24,6 +24,12 @@ namespace Espera.View.ViewModels
 
         public MainViewModel()
         {
+            if (Settings.Default.UpgradeRequired)
+            {
+                Settings.Default.Upgrade();
+                Settings.Default.UpgradeRequired = false;
+            }
+
             this.library = new Library();
 
             this.library.SongStarted += LibraryRaisedSongStarted;
@@ -540,6 +546,8 @@ namespace Espera.View.ViewModels
         /// </summary>
         public void Dispose()
         {
+            Settings.Default.Save();
+
             this.library.Dispose();
             this.playlistTimeoutUpdateTimer.Dispose();
             this.updateTimer.Dispose();

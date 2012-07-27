@@ -103,8 +103,6 @@ namespace Espera.View
 
         private void MetroWindowClosing(object sender, CancelEventArgs e)
         {
-            Settings.Default.Save();
-
             this.mainViewModel.Dispose();
         }
 

@@ -35,6 +35,12 @@ namespace Espera.Core.Management
 
         public Library()
         {
+            if (CoreSettings.Default.UpgradeRequired)
+            {
+                CoreSettings.Default.Upgrade();
+                CoreSettings.Default.UpgradeRequired = false;
+            }
+
             this.songLock = new object();
             this.songs = new HashSet<Song>();
             this.playlists = new List<Playlist>();
