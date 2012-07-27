@@ -52,7 +52,7 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void GetHashcode_EqualObjects_ReturnsSameHashCode()
+        public void GetHashcode_EqualObjects_ReturnsEqualHashCodes()
         {
             var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero) { CallBase = true }.Object;
             var song2 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero) { CallBase = true }.Object;
