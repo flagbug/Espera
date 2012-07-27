@@ -1,0 +1,23 @@
+----------------------------------- v1.1.0 -----------------------------------
+
+FEATURES:
+- Multiple playlists.
+- Shuffle playlists.
+
+- CHANGES:
+- Increased the number of songs that can cache at one time from three to 10.
+
+BUGFIXES:
+- Fixed a bug that causes the application to hang sometimes when adding songs 
+  to the library.
+- Fixed a bug that caused the sorting order of the YouTube rating not to 
+  change.
+- Fixed a bug that caused the volume to lock, even if the user was in 
+  administrator mode.
+- Fixed a bug that caused the time to lock, even if the user was in 
+  administrator mode.
+
+----------------------------------- v1.0.1 -----------------------------------
+
+CHANGES:
+- UI style changes
