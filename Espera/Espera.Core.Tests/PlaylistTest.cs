@@ -12,7 +12,7 @@ namespace Espera.Core.Tests
     public sealed class PlaylistTest
     {
         [Test]
-        public void AddSongsTest()
+        public void AddSongs_PlaylistContainsSongs()
         {
             Song[] songs = SetupSongMocks(4);
             Playlist playlist = SetupPlaylist(songs);
@@ -22,6 +22,14 @@ namespace Espera.Core.Tests
             Assert.AreEqual(songs[1], playlist[1]);
             Assert.AreEqual(songs[2], playlist[2]);
             Assert.AreEqual(songs[3], playlist[3]);
+        }
+
+        [Test]
+        public void AddSongs_ArgumentIsNull_ThrowsArgumentNullException()
+        {
+            var playlist = new Playlist("Playlist");
+
+            Assert.Throws<ArgumentNullException>(() => playlist.AddSongs(null));
         }
 
         [Test]
@@ -139,6 +147,38 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void InsertMove_FromIndexIsLessThanZero_ThrowsArgumentOutOfRangeException()
+        {
+            var playlist = new Playlist("Playlist");
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.InsertMove(-1, 0));
+        }
+
+        [Test]
+        public void InsertMove_ToIndexIsLessThanZero_ThrowsArgumentOutOfRangeException()
+        {
+            var playlist = new Playlist("Playlist");
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.InsertMove(0, -1));
+        }
+
+        [Test]
+        public void InsertMove_ToIndexIsEqualFromIndex_ThrowsArgumentException()
+        {
+            var playlist = new Playlist("Playlist");
+
+            Assert.Throws<ArgumentException>(() => playlist.InsertMove(0, 0));
+        }
+
+        [Test]
+        public void InsertMove_ToIndexIsBiggerThanFromIndex_ThrowsArgumentException()
+        {
+            var playlist = new Playlist("Playlist");
+
+            Assert.Throws<ArgumentException>(() => playlist.InsertMove(0, 1));
+        }
+
+        [Test]
         public void InsertMove_InsertSongToPlaylist_OrderIsCorrent()
         {
             Song[] songs = SetupSongMocks(5);
@@ -169,6 +209,14 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void RemoveSongs_ArgumentIsNull_ThrowsArgumentNullException()
+        {
+            var playlist = new Playlist("Playlist");
+
+            Assert.Throws<ArgumentNullException>(() => playlist.RemoveSongs(null));
+        }
+
+        [Test]
         public void RemoveSongs_RemoveOneSong_OrderIsCorrect()
         {
             Song[] songs = SetupSongMocks(4);
@@ -180,6 +228,20 @@ namespace Espera.Core.Tests
             Assert.AreEqual(songs[0], playlist[0]);
             Assert.AreEqual(songs[2], playlist[1]);
             Assert.AreEqual(songs[3], playlist[2]);
+        }
+
+        [Test]
+        public void RemoveSongsCorrectsCurrentSongIndex()
+        {
+            Song[] songs = SetupSongMocks(2);
+
+            Playlist playlist = SetupPlaylist(songs);
+
+            playlist.CurrentSongIndex = 1;
+
+            playlist.RemoveSongs(new[] { 0 });
+
+            Assert.AreEqual(0, playlist.CurrentSongIndex);
         }
 
         [Test]
