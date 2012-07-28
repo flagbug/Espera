@@ -36,5 +36,30 @@ namespace Espera.Core.Tests
             Assert.AreEqual("Title2", song2.Title);
             Assert.AreEqual(2, song2.TrackNumber);
         }
+
+        [Test]
+        public void ReadPlaylists()
+        {
+            Playlist[] playlists = LibraryReader.ReadPlaylists(Helpers.SaveFile.ToStream()).ToArray();
+
+            Playlist playlist1 = playlists[0];
+            Song[] songs1 = playlist1.ToArray();
+
+            Assert.AreEqual("Playlist1", playlist1.Name);
+            Assert.AreEqual("Path1", songs1[0].OriginalPath);
+            Assert.IsInstanceOf(typeof(LocalSong), songs1[0]);
+            Assert.AreEqual("Path2", songs1[1].OriginalPath);
+            Assert.IsInstanceOf(typeof(LocalSong), songs1[1]);
+
+            Playlist playlist2 = playlists[1];
+            Song[] songs2 = playlist2.ToArray();
+
+            Assert.AreEqual("Playlist2", playlist2.Name);
+            Assert.AreEqual("Path1", songs2[0].OriginalPath);
+            Assert.IsInstanceOf(typeof(LocalSong), songs2[0]);
+            Assert.AreEqual("www.youtube.com?watch=xyz", songs2[1].OriginalPath);
+            Assert.AreEqual(1, songs2[1].Duration.Ticks);
+            Assert.IsInstanceOf(typeof(YoutubeSong), songs2[1]);
+        }
     }
 }

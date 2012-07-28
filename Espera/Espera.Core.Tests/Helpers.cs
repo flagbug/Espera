@@ -13,16 +13,16 @@ namespace Espera.Core.Tests
             "       <Song Album=\"Album2\" Artist=\"Artist2\" AudioType=\"Wav\" Duration=\"2\" Genre=\"Genre2\" Path=\"Path2\" Title=\"Title2\" TrackNumber=\"2\" />" +
             "   </Songs>" +
             "   <Playlists>" +
-            "       <Playlist Name=\"New Playlist 1\">" +
+            "       <Playlist Name=\"Playlist1\">" +
             "           <Entries>" +
-            "               <Entry Path=\"PlaylistPath1\" Type=\"Local\" />" +
-            "               <Entry Path=\"PlaylistPath2\" Type=\"YouTube\" />" +
+            "               <Entry Path=\"Path1\" Type=\"Local\" />" +
+            "               <Entry Path=\"Path2\" Type=\"Local\" />" +
             "           </Entries>" +
             "       </Playlist>" +
-            "       <Playlist Name=\"New Playlist 2\">" +
+            "       <Playlist Name=\"Playlist2\">" +
             "           <Entries>" +
-            "               <Entry Path=\"PlaylistPath1\" Type=\"Local\" />" +
-            "               <Entry Path=\"PlaylistPath3\" Type=\"YouTube\" />" +
+            "               <Entry Path=\"Path1\" Type=\"Local\" />" +
+            "               <Entry Path=\"www.youtube.com?watch=xyz\" Type=\"YouTube\" Duration=\"1\" />" +
             "           </Entries>" +
             "       </Playlist>" +
             "   </Playlists>" +

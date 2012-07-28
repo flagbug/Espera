@@ -1,11 +1,12 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace Espera.Core.Management
 {
     internal class LibraryWriter
     {
-        public static void Write(Library library)
+        public static void Write(Library library, Stream targetStream)
         {
             var document = new XDocument(
                 new XElement("Root",
@@ -26,7 +27,7 @@ namespace Espera.Core.Management
                             new XElement("Songs", playlist.Songs.Select(song =>
                                 new XElement("Path", song.OriginalPath))))))));
 
-            document.Save("library.xml");
+            document.Save(targetStream);
         }
     }
 }

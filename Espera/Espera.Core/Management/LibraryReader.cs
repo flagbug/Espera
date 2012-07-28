@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,33 +8,101 @@ using Espera.Core.Audio;
 
 namespace Espera.Core.Management
 {
-    public class LibraryReader
+    internal class LibraryReader
     {
         public static IEnumerable<Song> ReadSongs(Stream stream)
         {
-            var document = XDocument.Load(stream);
-
-            return document
+            return XDocument.Load(stream)
                 .Descendants("Root")
                 .Descendants("Songs")
                 .Elements("Song")
                 .Select
                 (
-                    element =>
+                    song =>
                         new LocalSong
                         (
-                            element.Attribute("Path").Value,
-                            (AudioType)Enum.Parse(typeof(AudioType), element.Attribute("AudioType").Value),
-                            TimeSpan.FromTicks(Int64.Parse(element.Attribute("Duration").Value))
+                            song.Attribute("Path").Value,
+                            (AudioType)Enum.Parse(typeof(AudioType), song.Attribute("AudioType").Value),
+                            TimeSpan.FromTicks(Int64.Parse(song.Attribute("Duration").Value))
                         )
                         {
-                            Album = element.Attribute("Album").Value,
-                            Artist = element.Attribute("Artist").Value,
-                            Genre = element.Attribute("Genre").Value,
-                            Title = element.Attribute("Title").Value,
-                            TrackNumber = Int32.Parse(element.Attribute("TrackNumber").Value)
+                            Album = song.Attribute("Album").Value,
+                            Artist = song.Attribute("Artist").Value,
+                            Genre = song.Attribute("Genre").Value,
+                            Title = song.Attribute("Title").Value,
+                            TrackNumber = Int32.Parse(song.Attribute("TrackNumber").Value)
                         }
                 );
+        }
+
+        public static IEnumerable<Playlist> ReadPlaylists(Stream stream)
+        {
+            IEnumerable<Song> songs = ReadSongs(stream);
+
+            stream.Position = 0;
+
+            var playlists = XDocument.Load(stream)
+                .Descendants("Root")
+                .Descendants("Playlists")
+                .Elements("Playlist")
+                .Select
+                (
+                    playlist =>
+                        new
+                        {
+                            Name = playlist.Attribute("Name").Value,
+                            Entries = playlist
+                                .Descendants("Entries")
+                                .Elements("Entry")
+                                .Select
+                                (
+                                    entry =>
+                                    {
+                                        var type = entry.Attribute("Type").Value == "Local" ? typeof(LocalSong) : typeof(YoutubeSong);
+
+                                        TimeSpan? duration = null;
+
+                                        if (type == typeof(YoutubeSong))
+                                        {
+                                            duration = TimeSpan.FromTicks(Int64.Parse(entry.Attribute("Duration").Value));
+                                        }
+
+                                        return new
+                                        {
+                                            Path = entry.Attribute("Path").Value,
+                                            Type = type,
+                                            Duration = duration
+                                        };
+                                    }
+                                )
+                        }
+                );
+
+            return playlists.Select
+            (
+                p =>
+                {
+                    var playlist = new Playlist(p.Name);
+
+                    var s = p.Entries
+                        .Select
+                        (
+                            entry =>
+                            {
+                                if (entry.Type == typeof(YoutubeSong))
+                                {
+                                    return new YoutubeSong(entry.Path, AudioType.Mp3, entry.Duration.Value, CoreSettings.Default.StreamYoutube);
+                                }
+
+                                return songs.First(song => song.OriginalPath == entry.Path);
+                            }
+                        );
+
+                    playlist.AddSongs(s);
+
+                    return playlist;
+                }
+            );
         }
     }
 }
