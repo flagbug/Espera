@@ -12,7 +12,7 @@ namespace Espera.Core.Tests
         [Test]
         public void ReadSongs()
         {
-            Song[] songs = LibraryReader.ReadSongs(Helpers.SaveFile.ToStream()).ToArray();
+            Song[] songs = LibraryReader.ReadSongs(Helpers.GenerateSaveFile().ToStream()).ToArray();
 
             Song song1 = songs[0];
 
@@ -40,26 +40,29 @@ namespace Espera.Core.Tests
         [Test]
         public void ReadPlaylists()
         {
-            Playlist[] playlists = LibraryReader.ReadPlaylists(Helpers.SaveFile.ToStream()).ToArray();
+            Playlist[] playlists = LibraryReader.ReadPlaylists(Helpers.GenerateSaveFile().ToStream()).ToArray();
 
             Playlist playlist1 = playlists[0];
             Song[] songs1 = playlist1.ToArray();
+            Song localSong1 = Helpers.LocalSong1;
+            Song localSong2 = Helpers.LocalSong2;
 
             Assert.AreEqual("Playlist1", playlist1.Name);
-            Assert.AreEqual("Path1", songs1[0].OriginalPath);
-            Assert.IsInstanceOf(typeof(LocalSong), songs1[0]);
-            Assert.AreEqual("Path2", songs1[1].OriginalPath);
-            Assert.IsInstanceOf(typeof(LocalSong), songs1[1]);
+            Assert.AreEqual(localSong1.OriginalPath, songs1[0].OriginalPath);
+            Assert.IsInstanceOf(localSong1.GetType(), songs1[0]);
+            Assert.AreEqual(localSong2.OriginalPath, songs1[1].OriginalPath);
+            Assert.IsInstanceOf(localSong2.GetType(), songs1[1]);
 
             Playlist playlist2 = playlists[1];
             Song[] songs2 = playlist2.ToArray();
+            Song youtubeSong1 = Helpers.YoutubeSong1;
 
             Assert.AreEqual("Playlist2", playlist2.Name);
-            Assert.AreEqual("Path1", songs2[0].OriginalPath);
-            Assert.IsInstanceOf(typeof(LocalSong), songs2[0]);
-            Assert.AreEqual("www.youtube.com?watch=xyz", songs2[1].OriginalPath);
-            Assert.AreEqual(1, songs2[1].Duration.Ticks);
-            Assert.IsInstanceOf(typeof(YoutubeSong), songs2[1]);
+            Assert.AreEqual(localSong1.OriginalPath, songs2[0].OriginalPath);
+            Assert.IsInstanceOf(localSong1.GetType(), songs2[0]);
+            Assert.AreEqual(youtubeSong1.OriginalPath, songs2[1].OriginalPath);
+            Assert.AreEqual(youtubeSong1.Duration.Ticks, songs2[1].Duration.Ticks);
+            Assert.IsInstanceOf(youtubeSong1.GetType(), songs2[1]);
         }
     }
 }
