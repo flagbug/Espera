@@ -54,6 +54,8 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Management" />
     <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="taglib-sharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\taglib.2.1.0.0\lib\taglib-sharp.dll</HintPath>
@@ -87,6 +89,7 @@
     <Compile Include="Management\InvalidPasswordException.cs" />
     <Compile Include="Management\Library.cs" />
     <Compile Include="Management\LibraryFillEventArgs.cs" />
+    <Compile Include="Management\LibraryWriter.cs" />
     <Compile Include="Management\Playlist.cs" />
     <Compile Include="Management\PlaylistInfo.cs" />
     <Compile Include="LocalSong.cs" />
