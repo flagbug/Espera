@@ -42,7 +42,9 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers.cs" />
     <Compile Include="LibraryFillEventArgsTest.cs" />
+    <Compile Include="LibraryReaderTest.cs" />
     <Compile Include="LibraryTest.cs" />
     <Compile Include="LocalAudioPlayerTest.cs" />
     <Compile Include="Mocks\HandledAudioPlayer.cs" />
