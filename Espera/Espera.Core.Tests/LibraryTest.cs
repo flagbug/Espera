@@ -38,6 +38,15 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void AddLocalSongsAsync_PathIsNull_ThrowsArgumentNullException()
+        {
+            using (var library = new Library())
+            {
+                Assert.Throws<ArgumentNullException>(() => library.AddLocalSongsAsync(null));
+            }
+        }
+
+        [Test]
         public void AddPlayist_AddTwoPlaylistsWithSameName_ThrowInvalidOperationException()
         {
             using (var library = new Library())
@@ -45,6 +54,15 @@ namespace Espera.Core.Tests
                 library.AddPlaylist("Playlist");
 
                 Assert.Throws<InvalidOperationException>(() => library.AddPlaylist("Playlist"));
+            }
+        }
+
+        [Test]
+        public void AddSongToPlaylist_SongIsNull_ThrowsArgumentNullException()
+        {
+            using (var library = new Library())
+            {
+                Assert.Throws<ArgumentNullException>(() => library.AddSongToPlaylist(null));
             }
         }
 
@@ -59,6 +77,15 @@ namespace Espera.Core.Tests
                 library.ChangeToParty();
 
                 Assert.Throws<InvalidOperationException>(() => library.AddSongsToPlaylist(songs));
+            }
+        }
+
+        [Test]
+        public void AddSongsToPlaylist_SongListIsNull_ThrowsArgumentNullException()
+        {
+            using (var library = new Library())
+            {
+                Assert.Throws<ArgumentNullException>(() => library.AddSongsToPlaylist(null));
             }
         }
 
@@ -265,6 +292,16 @@ namespace Espera.Core.Tests
             {
                 Assert.Throws<ArgumentNullException>(() => library.ChangeToAdmin(null));
             }
+        }
+
+        [Test]
+        public void ConstructorUpgradesCoreSettingsIfRequired()
+        {
+            CoreSettings.Default.UpgradeRequired = true;
+
+            new Library();
+
+            Assert.IsFalse(CoreSettings.Default.UpgradeRequired);
         }
 
         [Test]
