@@ -8,6 +8,8 @@ namespace Espera.Core
 {
     public sealed class LocalSong : Song
     {
+        private bool? isRemovable;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalSong"/> class.
         /// </summary>
@@ -16,12 +18,7 @@ namespace Espera.Core
         /// <param name="duration">The duration of the song.</param>
         public LocalSong(string path, AudioType audioType, TimeSpan duration)
             : base(path, audioType, duration)
-        {
-            if (this.IsRemovable)
-            {
-                this.StreamingPath = this.OriginalPath;
-            }
-        }
+        { }
 
         public override bool HasToCache
         {
@@ -38,11 +35,16 @@ namespace Espera.Core
         {
             get
             {
-                string songDrive = Path.GetPathRoot(this.OriginalPath);
+                if (this.isRemovable == null)
+                {
+                    string songDrive = Path.GetPathRoot(this.OriginalPath);
 
-                return DriveInfo.GetDrives()
-                    .Where(drive => drive.DriveType == DriveType.Fixed)
-                    .All(drive => drive.RootDirectory.Name != songDrive);
+                    this.isRemovable = DriveInfo.GetDrives()
+                        .Where(drive => drive.DriveType == DriveType.Fixed)
+                        .All(drive => drive.RootDirectory.Name != songDrive);
+                }
+
+                return this.isRemovable.Value;
             }
         }
 
