@@ -18,7 +18,7 @@ namespace Espera.Core.Management
         // We need a lock when disposing songs to prevent a modification of the enumeration
         private readonly object disposeLock;
 
-        private readonly RemovableDriveWatcher driveWatcher;
+        private readonly IRemovableDriveWatcher driveWatcher;
         private readonly List<Playlist> playlists;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
@@ -33,7 +33,7 @@ namespace Espera.Core.Management
         private string password;
         private float volume;
 
-        public Library()
+        public Library(IRemovableDriveWatcher driveWatcher)
         {
             if (CoreSettings.Default.UpgradeRequired)
             {
@@ -46,7 +46,7 @@ namespace Espera.Core.Management
             this.playlists = new List<Playlist>();
             this.volume = 1.0f;
             this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
-            this.driveWatcher = RemovableDriveWatcher.Create();
+            this.driveWatcher = driveWatcher;
             this.driveWatcher.DriveRemoved += (sender, args) => Task.Factory.StartNew(this.Update);
             this.cacheResetHandle = new AutoResetEvent(false);
             this.disposeLock = new object();

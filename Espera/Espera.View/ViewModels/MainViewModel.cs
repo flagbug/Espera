@@ -30,7 +30,7 @@ namespace Espera.View.ViewModels
                 Settings.Default.UpgradeRequired = false;
             }
 
-            this.library = new Library();
+            this.library = new Library(new RemovableDriveWatcher());
             this.library.Load();
 
             this.library.SongStarted += LibraryRaisedSongStarted;
