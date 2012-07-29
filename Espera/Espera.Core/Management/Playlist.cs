@@ -113,7 +113,8 @@ namespace Espera.Core.Management
         {
             return this.playlist
                 .Where(entry => songs.Contains(entry.Value))
-                .Select(entry => entry.Key);
+                .Select(entry => entry.Key)
+                .ToList();
         }
 
         /// <summary>
