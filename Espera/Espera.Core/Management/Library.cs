@@ -518,11 +518,6 @@ namespace Espera.Core.Management
             CoreSettings.Default.Save();
         }
 
-        public void Save()
-        {
-            LibraryWriter.Write(this, null);
-        }
-
         /// <summary>
         /// Pauses the currently loaded song.
         /// </summary>
