@@ -10,7 +10,7 @@ namespace Espera.Core.Management
 {
     internal class LibraryReader
     {
-        public static IEnumerable<Song> ReadSongs(Stream stream)
+        public static IEnumerable<LocalSong> ReadSongs(Stream stream)
         {
             return XDocument.Load(stream)
                 .Descendants("Root")
@@ -32,7 +32,8 @@ namespace Espera.Core.Management
                             Title = song.Attribute("Title").Value,
                             TrackNumber = Int32.Parse(song.Attribute("TrackNumber").Value)
                         }
-                );
+                )
+                .ToList();
         }
 
         public static IEnumerable<Playlist> ReadPlaylists(Stream stream)
@@ -108,7 +109,8 @@ namespace Espera.Core.Management
 
                     return playlist;
                 }
-            );
+            )
+            .ToList();
         }
     }
 }
