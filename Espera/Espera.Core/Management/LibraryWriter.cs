@@ -25,8 +25,11 @@ namespace Espera.Core.Management
                     new XElement("Playlists", playlists.Select(playlist =>
                         new XElement("Playlist",
                             new XAttribute("Name", playlist.Name),
-                            new XElement("Songs", playlist.Songs.Select(song =>
-                                new XElement("Path", song.OriginalPath))))))));
+                            new XElement("Entries", playlist.Songs.Select(song =>
+                                new XElement("Entry",
+                                    new XAttribute("Path", song.OriginalPath),
+                                    new XAttribute("Type", (song is LocalSong) ? "Local" : "YouTube"),
+                                    song is YoutubeSong ? new XAttribute("Duration", song.Duration.Ticks) : null))))))));
 
             document.Save(targetStream);
         }
