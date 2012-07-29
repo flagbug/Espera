@@ -463,6 +463,42 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void RemoveFromPlaylist_RemoveByIndexes_SongsAreRemovedFromPlaylist()
+        {
+            using (var library = Helpers.CreateLibraryWithPlaylist("Playlist"))
+            {
+                Song[] songs = Helpers.SetupSongMocks(4);
+
+                library.AddSongsToPlaylist(songs);
+
+                library.RemoveFromPlaylist(new[] { 0, 2 });
+
+                Song[] remaining = library.CurrentPlaylist.Songs.ToArray();
+
+                Assert.AreEqual(songs[1], remaining[0]);
+                Assert.AreEqual(songs[3], remaining[1]);
+            }
+        }
+
+        [Test]
+        public void RemoveFromPlaylist_RemoveBySongReference_SongsAreRemovedFromPlaylist()
+        {
+            using (var library = Helpers.CreateLibraryWithPlaylist("Playlist"))
+            {
+                Song[] songs = Helpers.SetupSongMocks(4, true);
+
+                library.AddSongsToPlaylist(songs);
+
+                library.RemoveFromPlaylist(new[] { songs[0], songs[2] });
+
+                Song[] remaining = library.CurrentPlaylist.Songs.ToArray();
+
+                Assert.AreEqual(songs[1], remaining[0]);
+                Assert.AreEqual(songs[3], remaining[1]);
+            }
+        }
+
+        [Test]
         public void RemoveFromPlaylist_SongListIsNull_ThrowsArgumentNullException()
         {
             using (var library = Helpers.CreateLibrary())

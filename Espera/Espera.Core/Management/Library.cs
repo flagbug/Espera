@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Espera.Core.Audio;
 using Rareform.Extensions;
-using Rareform.IO;
 using Rareform.Validation;
 
 namespace Espera.Core.Management
