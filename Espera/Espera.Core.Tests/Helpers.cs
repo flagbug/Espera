@@ -37,25 +37,25 @@ namespace Espera.Core.Tests
             return
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
                 "<Root>" +
-                "   <Version>1.0.0</Version>" +
-                "   <Songs>" +
-                "       <Song Album=\"" + LocalSong1.Album + "\" Artist=\"" + LocalSong1.Artist + "\" AudioType=\"" + LocalSong1.AudioType + "\" Duration=\"" + LocalSong1.Duration.Ticks + "\" Genre=\"" + LocalSong1.Genre + "\" Path=\"" + LocalSong1.OriginalPath + "\" Title=\"" + LocalSong1.Title + "\" TrackNumber=\"" + LocalSong1.TrackNumber + "\" />" +
-                "       <Song Album=\"" + LocalSong2.Album + "\" Artist=\"" + LocalSong2.Artist + "\" AudioType=\"" + LocalSong2.AudioType + "\" Duration=\"" + LocalSong2.Duration.Ticks + "\" Genre=\"" + LocalSong2.Genre + "\" Path=\"" + LocalSong2.OriginalPath + "\" Title=\"" + LocalSong2.Title + "\" TrackNumber=\"" + LocalSong2.TrackNumber + "\" />" +
-                "   </Songs>" +
-                "   <Playlists>" +
-                "       <Playlist Name=\"" + Playlist1.Name + "\">" +
-                "           <Entries>" +
-                "               <Entry Path=\"" + LocalSong1.OriginalPath + "\" Type=\"Local\" />" +
-                "               <Entry Path=\"" + LocalSong2.OriginalPath + "\" Type=\"Local\" />" +
-                "           </Entries>" +
-                "       </Playlist>" +
-                "       <Playlist Name=\"" + Playlist2.Name + "\">" +
-                "           <Entries>" +
-                "               <Entry Path=\"" + LocalSong1.OriginalPath + "\" Type=\"Local\" />" +
-                "               <Entry Path=\"" + YoutubeSong1.OriginalPath + "\" Type=\"YouTube\" Duration=\"" + YoutubeSong1.Duration.Ticks + "\" />" +
-                "           </Entries>" +
-                "       </Playlist>" +
-                "   </Playlists>" +
+                "  <Version>1.0.0</Version>" +
+                "  <Songs>" +
+                "    <Song Album=\"" + LocalSong1.Album + "\" Artist=\"" + LocalSong1.Artist + "\" AudioType=\"" + LocalSong1.AudioType + "\" Duration=\"" + LocalSong1.Duration.Ticks + "\" Genre=\"" + LocalSong1.Genre + "\" Path=\"" + LocalSong1.OriginalPath + "\" Title=\"" + LocalSong1.Title + "\" TrackNumber=\"" + LocalSong1.TrackNumber + "\" />" +
+                "    <Song Album=\"" + LocalSong2.Album + "\" Artist=\"" + LocalSong2.Artist + "\" AudioType=\"" + LocalSong2.AudioType + "\" Duration=\"" + LocalSong2.Duration.Ticks + "\" Genre=\"" + LocalSong2.Genre + "\" Path=\"" + LocalSong2.OriginalPath + "\" Title=\"" + LocalSong2.Title + "\" TrackNumber=\"" + LocalSong2.TrackNumber + "\" />" +
+                "  </Songs>" +
+                "  <Playlists>" +
+                "    <Playlist Name=\"" + Playlist1.Name + "\">" +
+                "      <Entries>" +
+                "        <Entry Path=\"" + LocalSong1.OriginalPath + "\" Type=\"Local\" />" +
+                "        <Entry Path=\"" + LocalSong2.OriginalPath + "\" Type=\"Local\" />" +
+                "      </Entries>" +
+                "    </Playlist>" +
+                "    <Playlist Name=\"" + Playlist2.Name + "\">" +
+                "      <Entries>" +
+                "        <Entry Path=\"" + LocalSong1.OriginalPath + "\" Type=\"Local\" />" +
+                "        <Entry Path=\"" + YoutubeSong1.OriginalPath + "\" Type=\"YouTube\" Duration=\"" + YoutubeSong1.Duration.Ticks + "\" />" +
+                "      </Entries>" +
+                "    </Playlist>" +
+                "  </Playlists>" +
                 "</Root>";
         }
 
