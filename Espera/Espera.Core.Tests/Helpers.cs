@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Espera.Core.Audio;
+using Espera.Core.Management;
 
 namespace Espera.Core.Tests
 {
@@ -27,6 +28,10 @@ namespace Espera.Core.Tests
         public static readonly YoutubeSong YoutubeSong1 =
             new YoutubeSong("www.youtube.com?watch=xyz", AudioType.Mp3, TimeSpan.FromTicks(1), true);
 
+        public static readonly Playlist Playlist1;
+
+        public static readonly Playlist Playlist2;
+
         public static string GenerateSaveFile()
         {
             return
@@ -38,13 +43,13 @@ namespace Espera.Core.Tests
                 "       <Song Album=\"" + LocalSong2.Album + "\" Artist=\"" + LocalSong2.Artist + "\" AudioType=\"" + LocalSong2.AudioType + "\" Duration=\"" + LocalSong2.Duration.Ticks + "\" Genre=\"" + LocalSong2.Genre + "\" Path=\"" + LocalSong2.OriginalPath + "\" Title=\"" + LocalSong2.Title + "\" TrackNumber=\"" + LocalSong2.TrackNumber + "\" />" +
                 "   </Songs>" +
                 "   <Playlists>" +
-                "       <Playlist Name=\"Playlist1\">" +
+                "       <Playlist Name=\"" + Playlist1.Name + "\">" +
                 "           <Entries>" +
                 "               <Entry Path=\"" + LocalSong1.OriginalPath + "\" Type=\"Local\" />" +
                 "               <Entry Path=\"" + LocalSong2.OriginalPath + "\" Type=\"Local\" />" +
                 "           </Entries>" +
                 "       </Playlist>" +
-                "       <Playlist Name=\"Playlist2\">" +
+                "       <Playlist Name=\"" + Playlist2.Name + "\">" +
                 "           <Entries>" +
                 "               <Entry Path=\"" + LocalSong1.OriginalPath + "\" Type=\"Local\" />" +
                 "               <Entry Path=\"" + YoutubeSong1.OriginalPath + "\" Type=\"YouTube\" Duration=\"" + YoutubeSong1.Duration.Ticks + "\" />" +
@@ -62,6 +67,15 @@ namespace Espera.Core.Tests
             writer.Flush();
             stream.Position = 0;
             return stream;
+        }
+
+        static Helpers()
+        {
+            Playlist1 = new Playlist("Playlist1");
+            Playlist1.AddSongs(new[] { LocalSong1, LocalSong2 });
+
+            Playlist2 = new Playlist("Playlist2");
+            Playlist2.AddSongs(new[] { (Song)LocalSong1, YoutubeSong1 });
         }
     }
 }
