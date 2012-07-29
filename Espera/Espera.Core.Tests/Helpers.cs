@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Espera.Core.Audio;
 using Espera.Core.Management;
+using Moq;
 
 namespace Espera.Core.Tests
 {
@@ -25,12 +27,34 @@ namespace Espera.Core.Tests
             TrackNumber = 2
         };
 
-        public static readonly YoutubeSong YoutubeSong1 =
-            new YoutubeSong("www.youtube.com?watch=xyz", AudioType.Mp3, TimeSpan.FromTicks(1), true) { Title = "Title1" };
-
         public static readonly Playlist Playlist1;
 
         public static readonly Playlist Playlist2;
+
+        public static readonly YoutubeSong YoutubeSong1 =
+            new YoutubeSong("www.youtube.com?watch=xyz", AudioType.Mp3, TimeSpan.FromTicks(1), true) { Title = "Title1" };
+
+        static Helpers()
+        {
+            Playlist1 = new Playlist("Playlist1");
+            Playlist1.AddSongs(new[] { LocalSong1, LocalSong2 });
+
+            Playlist2 = new Playlist("Playlist2");
+            Playlist2.AddSongs(new[] { (Song)LocalSong1, YoutubeSong1 });
+        }
+
+        public static Library CreateLibrary()
+        {
+            return new Library(new Mock<IRemovableDriveWatcher>().Object);
+        }
+
+        public static Library CreateLibraryWithPlaylist(string playlistName)
+        {
+            var library = new Library(new Mock<IRemovableDriveWatcher>().Object);
+            library.AddAndSwitchToPlaylist(playlistName);
+
+            return library;
+        }
 
         public static string GenerateSaveFile()
         {
@@ -59,6 +83,38 @@ namespace Espera.Core.Tests
                 "</Root>";
         }
 
+        public static Song SetupSongMock(string name = "Song", bool callBase = false, AudioType audioType = AudioType.Mp3, TimeSpan? duration = null)
+        {
+            if (duration == null)
+            {
+                duration = TimeSpan.Zero;
+            }
+
+            return new Mock<Song>(name, audioType, duration) { CallBase = callBase }.Object;
+        }
+
+        public static Song[] SetupSongMocks(int count, bool callBase = false)
+        {
+            var songs = new Song[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                songs[i] = SetupSongMock("Song" + i, callBase);
+            }
+
+            return songs;
+        }
+
+        public static string StreamToString(Stream stream)
+        {
+            using (var reader = new StreamReader(stream))
+            {
+                stream.Position = 0;
+
+                return reader.ReadToEnd();
+            }
+        }
+
         public static Stream ToStream(this string s)
         {
             var stream = new MemoryStream();
@@ -69,13 +125,18 @@ namespace Espera.Core.Tests
             return stream;
         }
 
-        static Helpers()
+        internal static Playlist SetupPlaylist(Song song)
         {
-            Playlist1 = new Playlist("Playlist1");
-            Playlist1.AddSongs(new[] { LocalSong1, LocalSong2 });
+            return SetupPlaylist(new[] { song });
+        }
 
-            Playlist2 = new Playlist("Playlist2");
-            Playlist2.AddSongs(new[] { (Song)LocalSong1, YoutubeSong1 });
+        internal static Playlist SetupPlaylist(IEnumerable<Song> songs)
+        {
+            var playlist = new Playlist("Test Playlist");
+
+            playlist.AddSongs(songs);
+
+            return playlist;
         }
     }
 }

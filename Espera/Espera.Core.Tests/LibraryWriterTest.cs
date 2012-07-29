@@ -20,19 +20,9 @@ namespace Espera.Core.Tests
                 LibraryWriter.Write(songs, playlists, targetStream);
 
                 string expected = Helpers.GenerateSaveFile();
-                string actual = StreamToString(targetStream).Replace("\r\n", String.Empty);
+                string actual = Helpers.StreamToString(targetStream).Replace("\r\n", String.Empty);
 
                 Assert.AreEqual(expected, actual);
-            }
-        }
-
-        private static string StreamToString(Stream stream)
-        {
-            using (var reader = new StreamReader(stream))
-            {
-                stream.Position = 0;
-
-                return reader.ReadToEnd();
             }
         }
     }
