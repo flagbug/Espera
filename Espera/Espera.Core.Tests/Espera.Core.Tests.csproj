@@ -46,6 +46,7 @@
     <Compile Include="LibraryFillEventArgsTest.cs" />
     <Compile Include="LibraryReaderTest.cs" />
     <Compile Include="LibraryTest.cs" />
+    <Compile Include="LibraryWriterTest.cs" />
     <Compile Include="LocalAudioPlayerTest.cs" />
     <Compile Include="Mocks\HandledAudioPlayer.cs" />
     <Compile Include="Mocks\JumpAudioPlayer.cs" />
