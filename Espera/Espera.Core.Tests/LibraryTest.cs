@@ -299,7 +299,7 @@ namespace Espera.Core.Tests
         {
             CoreSettings.Default.UpgradeRequired = true;
 
-            new Library();
+            using (new Library()) { }
 
             Assert.IsFalse(CoreSettings.Default.UpgradeRequired);
         }
