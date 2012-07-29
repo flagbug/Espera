@@ -48,7 +48,7 @@ namespace Espera.Core.Tests
             return new Library(new Mock<IRemovableDriveWatcher>().Object);
         }
 
-        public static Library CreateLibraryWithPlaylist(string playlistName)
+        public static Library CreateLibraryWithPlaylist(string playlistName = "Playlist")
         {
             var library = new Library(new Mock<IRemovableDriveWatcher>().Object);
             library.AddAndSwitchToPlaylist(playlistName);
@@ -85,12 +85,7 @@ namespace Espera.Core.Tests
 
         public static Song SetupSongMock(string name = "Song", bool callBase = false, AudioType audioType = AudioType.Mp3, TimeSpan? duration = null)
         {
-            if (duration == null)
-            {
-                duration = TimeSpan.Zero;
-            }
-
-            return new Mock<Song>(name, audioType, duration) { CallBase = callBase }.Object;
+            return CreateSongMock(name, callBase, audioType, duration).Object;
         }
 
         public static Song[] SetupSongMocks(int count, bool callBase = false)
@@ -100,6 +95,28 @@ namespace Espera.Core.Tests
             for (int i = 0; i < count; i++)
             {
                 songs[i] = SetupSongMock("Song" + i, callBase);
+            }
+
+            return songs;
+        }
+
+        public static Mock<Song> CreateSongMock(string name = "Song", bool callBase = false, AudioType audioType = AudioType.Mp3, TimeSpan? duration = null)
+        {
+            if (duration == null)
+            {
+                duration = TimeSpan.Zero;
+            }
+
+            return new Mock<Song>(name, audioType, duration) { CallBase = callBase };
+        }
+
+        public static Mock<Song>[] CreateSongMocks(int count, bool callBase)
+        {
+            var songs = new Mock<Song>[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                songs[i] = CreateSongMock("Song" + i, callBase);
             }
 
             return songs;

@@ -152,6 +152,33 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void CanAddSongToPlaylist_IsAdministrator_ReturnsTrue()
+        {
+            using (var library = Helpers.CreateLibrary())
+            {
+                Assert.IsTrue(library.CanAddSongToPlaylist);
+            }
+        }
+
+        [Test]
+        public void CanAddSongToPlaylist_IsPartyModeAndRemainingTimeIsBiggerThanZero_ReturnsTrue()
+        {
+            using (var library = Helpers.CreateLibraryWithPlaylist("Playlist"))
+            {
+                library.PlaylistTimeout = TimeSpan.FromMinutes(1);
+
+                library.CreateAdmin("Password");
+                library.ChangeToParty();
+
+                Song song = Helpers.SetupSongMock();
+
+                library.AddSongToPlaylist(song);
+
+                Assert.IsFalse(library.CanAddSongToPlaylist);
+            }
+        }
+
+        [Test]
         public void CanChangeTime_IsAdministrator_IsTrue()
         {
             using (var library = Helpers.CreateLibrary())
@@ -295,6 +322,45 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void ContinueSong_IsNotAdmin_ThrowsInvalidOperationException()
+        {
+            using (var library = Helpers.CreateLibrary())
+            {
+                library.CreateAdmin("Password");
+                library.ChangeToParty();
+
+                Assert.Throws<InvalidOperationException>(library.ContinueSong);
+            }
+        }
+
+        [Test]
+        public void ContinueSongCallsAudioPlayerPlay()
+        {
+            var handle = new ManualResetEvent(false);
+
+            using (var library = Helpers.CreateLibraryWithPlaylist())
+            {
+                Mock<Song> song = Helpers.CreateSongMock();
+                var audioPlayer = new Mock<AudioPlayer>();
+                audioPlayer.Setup(p => p.Play()).Callback(() => handle.Set());
+
+                song.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
+
+                library.AddSongToPlaylist(song.Object);
+
+                library.PlaySong(0);
+
+                // The library starts a new thread when playing a song, we want to wait till it called the audio player
+                // to avoid threading issues and a wrong test result
+                handle.WaitOne();
+
+                library.ContinueSong();
+
+                audioPlayer.Verify(p => p.Play(), Times.Exactly(2));
+            }
+        }
+
+        [Test]
         public void ConstructorUpgradesCoreSettingsIfRequired()
         {
             CoreSettings.Default.UpgradeRequired = true;
@@ -349,6 +415,38 @@ namespace Espera.Core.Tests
             {
                 library.CreateAdmin("Password");
                 Assert.Throws<InvalidOperationException>(() => library.CreateAdmin("Password"));
+            }
+        }
+
+        [Test]
+        public void PauseSongCallsAudioPlayerPause()
+        {
+            using (var library = Helpers.CreateLibraryWithPlaylist())
+            {
+                Mock<Song> song = Helpers.CreateSongMock();
+                var audioPlayer = new Mock<AudioPlayer>();
+
+                song.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
+
+                library.AddSongToPlaylist(song.Object);
+
+                library.PlaySong(0);
+
+                library.PauseSong();
+
+                audioPlayer.Verify(p => p.Pause(), Times.Once());
+            }
+        }
+
+        [Test]
+        public void PauseSong_IsNotAdministratorAndPausingIsLocked_ThrowsInvalidOperationException()
+        {
+            using (var library = Helpers.CreateLibrary())
+            {
+                library.CreateAdmin("Password");
+                library.ChangeToParty();
+
+                Assert.Throws<InvalidOperationException>(library.PauseSong);
             }
         }
 
@@ -435,6 +533,20 @@ namespace Espera.Core.Tests
             using (var library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentNullException>(() => library.RemoveFromLibrary(null));
+            }
+        }
+
+        [Test]
+        public void RemoveFromLibrary_IsNotAdministratorAndRemovalIsLocked_ThrowsInvalidOperationException()
+        {
+            using (var library = Helpers.CreateLibrary())
+            {
+                library.LockLibraryRemoval = true;
+
+                library.CreateAdmin("Password");
+                library.ChangeToParty();
+
+                Assert.Throws<InvalidOperationException>(() => library.RemoveFromLibrary(Helpers.SetupSongMocks(1)));
             }
         }
 
