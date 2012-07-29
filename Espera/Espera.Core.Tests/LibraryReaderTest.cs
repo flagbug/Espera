@@ -56,6 +56,7 @@ namespace Espera.Core.Tests
                 Assert.AreEqual("Playlist1", playlist1.Name);
                 Assert.AreEqual(localSong1.OriginalPath, songs1[0].OriginalPath);
                 Assert.IsInstanceOf(localSong1.GetType(), songs1[0]);
+
                 Assert.AreEqual(localSong2.OriginalPath, songs1[1].OriginalPath);
                 Assert.IsInstanceOf(localSong2.GetType(), songs1[1]);
 
@@ -66,7 +67,9 @@ namespace Espera.Core.Tests
                 Assert.AreEqual("Playlist2", playlist2.Name);
                 Assert.AreEqual(localSong1.OriginalPath, songs2[0].OriginalPath);
                 Assert.IsInstanceOf(localSong1.GetType(), songs2[0]);
+
                 Assert.AreEqual(youtubeSong1.OriginalPath, songs2[1].OriginalPath);
+                Assert.AreEqual(youtubeSong1.Title, songs2[1].Title);
                 Assert.AreEqual(youtubeSong1.Duration.Ticks, songs2[1].Duration.Ticks);
                 Assert.IsInstanceOf(youtubeSong1.GetType(), songs2[1]);
             }

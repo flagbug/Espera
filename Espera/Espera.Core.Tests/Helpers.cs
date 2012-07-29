@@ -26,7 +26,7 @@ namespace Espera.Core.Tests
         };
 
         public static readonly YoutubeSong YoutubeSong1 =
-            new YoutubeSong("www.youtube.com?watch=xyz", AudioType.Mp3, TimeSpan.FromTicks(1), true);
+            new YoutubeSong("www.youtube.com?watch=xyz", AudioType.Mp3, TimeSpan.FromTicks(1), true) { Title = "Title1" };
 
         public static readonly Playlist Playlist1;
 
@@ -52,7 +52,7 @@ namespace Espera.Core.Tests
                 "    <Playlist Name=\"" + Playlist2.Name + "\">" +
                 "      <Entries>" +
                 "        <Entry Path=\"" + LocalSong1.OriginalPath + "\" Type=\"Local\" />" +
-                "        <Entry Path=\"" + YoutubeSong1.OriginalPath + "\" Type=\"YouTube\" Duration=\"" + YoutubeSong1.Duration.Ticks + "\" />" +
+                "        <Entry Path=\"" + YoutubeSong1.OriginalPath + "\" Title=\"" + YoutubeSong1.Title + "\" Type=\"YouTube\" Duration=\"" + YoutubeSong1.Duration.Ticks + "\" />" +
                 "      </Entries>" +
                 "    </Playlist>" +
                 "  </Playlists>" +

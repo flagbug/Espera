@@ -61,17 +61,20 @@ namespace Espera.Core.Management
                                         var type = entry.Attribute("Type").Value == "Local" ? typeof(LocalSong) : typeof(YoutubeSong);
 
                                         TimeSpan? duration = null;
+                                        string title = null;
 
                                         if (type == typeof(YoutubeSong))
                                         {
                                             duration = TimeSpan.FromTicks(Int64.Parse(entry.Attribute("Duration").Value));
+                                            title = entry.Attribute("Title").Value;
                                         }
 
                                         return new
                                         {
                                             Path = entry.Attribute("Path").Value,
                                             Type = type,
-                                            Duration = duration
+                                            Duration = duration,
+                                            Title = title
                                         };
                                     }
                                 )
@@ -91,7 +94,10 @@ namespace Espera.Core.Management
                             {
                                 if (entry.Type == typeof(YoutubeSong))
                                 {
-                                    return new YoutubeSong(entry.Path, AudioType.Mp3, entry.Duration.Value, CoreSettings.Default.StreamYoutube);
+                                    return new YoutubeSong(entry.Path, AudioType.Mp3, entry.Duration.Value, CoreSettings.Default.StreamYoutube)
+                                    {
+                                        Title = entry.Title
+                                    };
                                 }
 
                                 return songs.First(song => song.OriginalPath == entry.Path);
