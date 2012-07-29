@@ -31,13 +31,22 @@ namespace Espera.View.ViewModels
             }
 
             this.library = new Library();
+            this.library.Load();
 
             this.library.SongStarted += LibraryRaisedSongStarted;
             this.library.SongFinished += LibraryRaisedSongFinished;
             this.library.AccessModeChanged += (sender, e) => this.UpdateUserAccess();
             this.library.PlaylistChanged += (sender, e) => this.UpdatePlaylist();
 
-            this.library.AddAndSwitchToPlaylist(this.GetNewPlaylistName());
+            if (!library.Playlists.Any())
+            {
+                this.library.AddAndSwitchToPlaylist(this.GetNewPlaylistName());
+            }
+
+            else
+            {
+                library.SwitchToPlaylist(this.library.Playlists.First().Name);
+            }
 
             this.AdministratorViewModel = new AdministratorViewModel(this.library);
 
@@ -548,7 +557,9 @@ namespace Espera.View.ViewModels
         {
             Settings.Default.Save();
 
+            this.library.Save();
             this.library.Dispose();
+
             this.playlistTimeoutUpdateTimer.Dispose();
             this.updateTimer.Dispose();
         }

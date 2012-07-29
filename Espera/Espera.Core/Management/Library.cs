@@ -518,6 +518,38 @@ namespace Espera.Core.Management
             CoreSettings.Default.Save();
         }
 
+        public void Load()
+        {
+            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Espera\Library.xml");
+
+            if (File.Exists(filePath))
+            {
+                IEnumerable<Song> savedSongs = LibraryReader.ReadSongs(File.OpenRead(filePath));
+
+                foreach (Song song in savedSongs)
+                {
+                    this.songs.Add(song);
+                }
+
+                IEnumerable<Playlist> savedPlaylists = LibraryReader.ReadPlaylists(File.OpenRead(filePath));
+
+                this.playlists.AddRange(savedPlaylists);
+            }
+        }
+
+        public void Save()
+        {
+            string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Espera\");
+            string filePath = Path.Combine(directoryPath, "Library.xml");
+
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            LibraryWriter.Write(this.songs.Cast<LocalSong>(), this.playlists.Select(playlist => new PlaylistInfo(playlist)), File.Create(filePath));
+        }
+
         /// <summary>
         /// Pauses the currently loaded song.
         /// </summary>
