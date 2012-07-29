@@ -21,11 +21,6 @@ namespace Espera.Core
             : base(path, audioType, duration)
         {
             this.IsStreaming = isStreaming;
-
-            if (this.IsStreaming)
-            {
-                this.StreamingPath = this.OriginalPath;
-            }
         }
 
         /// <summary>
