@@ -343,6 +343,16 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void CreateAdmin_AdminAlreadyCreated_ThrowsInvalidOperationException()
+        {
+            using (var library = CreateLibrary())
+            {
+                library.CreateAdmin("Password");
+                Assert.Throws<InvalidOperationException>(() => library.CreateAdmin("Password"));
+            }
+        }
+
+        [Test]
         public void PlayNextSong_UserIsNotAdministrator_ThrowsInvalidOperationException()
         {
             using (var library = CreateLibrary())
@@ -420,6 +430,15 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void RemoveFromLibrary_SongListIsNull_ThrowsArgumentNullException()
+        {
+            using (var library = CreateLibrary())
+            {
+                Assert.Throws<ArgumentNullException>(() => library.RemoveFromLibrary(null));
+            }
+        }
+
+        [Test]
         public void RemoveFromPlaylist_AccessModeIsParty_ThrowsInvalidOperationException()
         {
             var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
@@ -431,6 +450,24 @@ namespace Espera.Core.Tests
                 library.ChangeToParty();
 
                 Assert.Throws<InvalidOperationException>(() => library.RemoveFromPlaylist(new[] { 0 }));
+            }
+        }
+
+        [Test]
+        public void RemoveFromPlaylist_IndexesIsNull_ThrowsArgumentNullException()
+        {
+            using (var library = CreateLibrary())
+            {
+                Assert.Throws<ArgumentNullException>(() => library.RemoveFromPlaylist((IEnumerable<int>)null));
+            }
+        }
+
+        [Test]
+        public void RemoveFromPlaylist_SongListIsNull_ThrowsArgumentNullException()
+        {
+            using (var library = CreateLibrary())
+            {
+                Assert.Throws<ArgumentNullException>(() => library.RemoveFromPlaylist((IEnumerable<Song>)null));
             }
         }
 
@@ -451,6 +488,15 @@ namespace Espera.Core.Tests
                 library.RemoveFromPlaylist(new[] { 0 });
 
                 audioPlayerMock.Verify(p => p.Stop(), Times.Once());
+            }
+        }
+
+        [Test]
+        public void RemovePlaylist_PlaylistNameIsNull_ThrowsArgumentNullException()
+        {
+            using (var library = CreateLibrary())
+            {
+                Assert.Throws<ArgumentNullException>(() => library.RemovePlaylist(null));
             }
         }
 
