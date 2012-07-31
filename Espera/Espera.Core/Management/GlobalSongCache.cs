@@ -44,7 +44,10 @@ namespace Espera.Core.Management
                     song.LoadToCache();
                 }
 
-                Thread.Sleep(500);
+                else
+                {
+                    Thread.Sleep(500);
+                }
             }
         }
     }
