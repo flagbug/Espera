@@ -451,7 +451,7 @@ namespace Espera.Core.Management
                 Throw.ArgumentNullException(() => adminPassword);
 
             if (this.password != adminPassword)
-                throw new InvalidPasswordException("The password is incorrect.");
+                throw new WrongPasswordException("The password is incorrect.");
 
             this.AccessMode = AccessMode.Administrator;
         }

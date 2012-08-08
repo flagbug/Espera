@@ -302,13 +302,13 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void ChangeToAdmin_PasswordIsNotCorrent_ThrowsInvalidOperationException()
+        public void ChangeToAdmin_PasswordIsNotCorrent_ThrowsWrongPasswordException()
         {
             using (var library = Helpers.CreateLibrary())
             {
                 library.CreateAdmin("TestPassword");
 
-                Assert.Throws<InvalidPasswordException>(() => library.ChangeToAdmin("WrongPassword"));
+                Assert.Throws<WrongPasswordException>(() => library.ChangeToAdmin("WrongPassword"));
             }
         }
 

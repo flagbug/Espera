@@ -160,7 +160,7 @@ namespace Espera.View.ViewModels
                             this.IsWrongPassword = false;
                         }
 
-                        catch (InvalidPasswordException)
+                        catch (WrongPasswordException)
                         {
                             this.IsWrongPassword = true;
                         }

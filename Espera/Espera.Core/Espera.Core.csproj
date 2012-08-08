@@ -87,7 +87,7 @@
     <Compile Include="Audio\YoutubeAudioPlayer.cs" />
     <Compile Include="Management\GlobalSongCache.cs" />
     <Compile Include="Management\IDriveWatcher.cs" />
-    <Compile Include="Management\InvalidPasswordException.cs" />
+    <Compile Include="Management\WrongPasswordException.cs" />
     <Compile Include="Management\Library.cs" />
     <Compile Include="Management\LibraryFillEventArgs.cs" />
     <Compile Include="Management\LibraryReader.cs" />
