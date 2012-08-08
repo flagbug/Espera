@@ -71,26 +71,6 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public IEnumerable<SongViewModel> SelectableSongs
-        {
-            get
-            {
-                if (this.IsSearching || this.currentSongs == null)
-                {
-                    var finder = new YoutubeSongFinder(this.SearchText);
-                    finder.Start();
-
-                    this.IsSearching = false;
-
-                    this.currentSongs = finder.SongsFound;
-                }
-
-                return currentSongs
-                    .OrderBy(this.songOrderFunc)
-                    .Select(song => new SongViewModel(song));
-            }
-        }
-
         public int TitleColumnWidth
         {
             get { return Settings.Default.YoutubeTitleColumnWidth; }
@@ -125,7 +105,25 @@ namespace Espera.View.ViewModels
         {
             this.IsSearching = true;
 
-            Task.Factory.StartNew(() => this.OnPropertyChanged(vm => vm.SelectableSongs));
+            Task.Factory.StartNew(this.UpdateSelectableSongs);
+        }
+
+        protected override void UpdateSelectableSongs()
+        {
+            if (this.IsSearching || this.currentSongs == null)
+            {
+                var finder = new YoutubeSongFinder(this.SearchText);
+                finder.Start();
+
+                this.IsSearching = false;
+
+                this.currentSongs = finder.SongsFound;
+            }
+
+            this.SelectableSongs = currentSongs
+                .OrderBy(this.songOrderFunc)
+                .Select(song => new SongViewModel(song))
+                .ToList();
         }
     }
 }

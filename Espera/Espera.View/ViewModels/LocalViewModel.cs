@@ -135,25 +135,13 @@ namespace Espera.View.ViewModels
                 if (this.SearchText != value)
                 {
                     this.searchText = value;
+
                     this.OnPropertyChanged(vm => vm.SearchText);
-                    this.OnPropertyChanged(vm => vm.SelectableSongs);
+
                     this.OnPropertyChanged(vm => vm.Artists);
+
+                    this.UpdateSelectableSongs();
                 }
-            }
-        }
-
-        public IEnumerable<SongViewModel> SelectableSongs
-        {
-            get
-            {
-                // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
-                var songs = (this.isAdding ? this.Library.Songs.ToList() : this.Library.Songs)
-                    .AsParallel()
-                    .Where(song => song.Artist == this.SelectedArtist);
-
-                return songs.FilterSongs(this.SearchText)
-                    .OrderBy(this.songOrderFunc)
-                    .Select(song => new SongViewModel(song));
             }
         }
 
@@ -166,7 +154,8 @@ namespace Espera.View.ViewModels
                 {
                     this.selectedArtist = value;
                     this.OnPropertyChanged(vm => vm.SelectedArtist);
-                    this.OnPropertyChanged(vm => vm.SelectableSongs);
+
+                    this.UpdateSelectableSongs();
                 }
             }
         }
@@ -252,6 +241,19 @@ namespace Espera.View.ViewModels
             SortHelpers.InverseOrder(ref this.titleOrder);
 
             this.OnPropertyChanged(vm => vm.SelectableSongs);
+        }
+
+        protected override void UpdateSelectableSongs()
+        {
+            // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
+            var songs = (this.isAdding ? this.Library.Songs.ToList() : this.Library.Songs)
+                .AsParallel()
+                .Where(song => song.Artist == this.SelectedArtist);
+
+            this.SelectableSongs = songs.FilterSongs(this.SearchText)
+                .OrderBy(this.songOrderFunc)
+                .Select(song => new SongViewModel(song))
+                .ToList();
         }
     }
 }

@@ -38,14 +38,14 @@ namespace Espera.View.ViewModels
             this.library.AccessModeChanged += (sender, e) => this.UpdateUserAccess();
             this.library.PlaylistChanged += (sender, e) => this.UpdatePlaylist();
 
-            if (!library.Playlists.Any())
+            if (!this.library.Playlists.Any())
             {
                 this.library.AddAndSwitchToPlaylist(this.GetNewPlaylistName());
             }
 
             else
             {
-                library.SwitchToPlaylist(this.library.Playlists.First().Name);
+                this.library.SwitchToPlaylist(this.library.Playlists.First().Name);
             }
 
             this.AdministratorViewModel = new AdministratorViewModel(this.library);

@@ -12,6 +12,7 @@ namespace Espera.View.ViewModels
         where T : SongSourceViewModel<T>
     {
         private readonly Library library;
+        private IEnumerable<SongViewModel> selectableSongs;
         private IEnumerable<SongViewModel> selectedSongs;
 
         protected SongSourceViewModel(Library library)
@@ -69,6 +70,19 @@ namespace Espera.View.ViewModels
 
         public abstract string SearchText { get; set; }
 
+        public IEnumerable<SongViewModel> SelectableSongs
+        {
+            get { return this.selectableSongs; }
+            protected set
+            {
+                if (this.selectableSongs != value)
+                {
+                    this.selectableSongs = value;
+                    this.OnPropertyChanged(vm => vm.SelectableSongs);
+                }
+            }
+        }
+
         public IEnumerable<SongViewModel> SelectedSongs
         {
             get { return this.selectedSongs; }
@@ -87,5 +101,7 @@ namespace Espera.View.ViewModels
         {
             get { return this.library; }
         }
+
+        protected abstract void UpdateSelectableSongs();
     }
 }
