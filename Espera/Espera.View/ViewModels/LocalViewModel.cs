@@ -37,6 +37,12 @@ namespace Espera.View.ViewModels
 
             // We need a default sorting order
             this.OrderByArtist();
+
+            // Selected the first artist, if there is any (there is always an artist, if there is a song (Unknown Artist))
+            if (this.Library.Songs.Any())
+            {
+                this.SelectedArtist = this.Artists.First();
+            }
         }
 
         public int AlbumColumnWidth
@@ -254,6 +260,8 @@ namespace Espera.View.ViewModels
                 .OrderBy(this.songOrderFunc)
                 .Select(song => new SongViewModel(song))
                 .ToList();
+
+            this.SelectedSongs = this.SelectableSongs.Take(1);
         }
     }
 }
