@@ -33,7 +33,7 @@ without affecting the playback.
 
 ### Metro-Style
 
-Espera uses [MahApps.Metro](http://github.com/MahApps/MahApps.Metro) for  theming. This gives Espera a beautiful and 
+Espera uses [MahApps.Metro](http://github.com/MahApps/MahApps.Metro) for theming. This gives Espera a beautiful and 
 very clean look.
 
 ## Requirements
@@ -42,9 +42,8 @@ very clean look.
  - VLC media player >= 2.0 (only if YouTube streaming is enabled)
 
 ## Development
- 
-Espera is currently in a verly early stage of development and has to be compiled from the source code, but it already 
-can play songs from the local hard drive or from YouTube.
+
+If you want to contribute to Espera, just send me a pull request at [GitHub](https://github.com/flagbug/Espera)!
 
 **Used libraries**
 
