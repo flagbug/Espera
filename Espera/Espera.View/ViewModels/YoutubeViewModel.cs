@@ -25,6 +25,9 @@ namespace Espera.View.ViewModels
 
             // We need a default sorting order
             this.OrderByTitle();
+
+            // Create a default list
+            this.UpdateSelectableSongs();
         }
 
         public int DurationColumnWidth
