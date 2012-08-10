@@ -19,7 +19,7 @@ stop the music, but still be able to add songs to the playlist.
 
 Espera can search songs at YouTube, add them to the playlist and download/stream the audio track.
 
-When adding a songs from YouTube to the playlist, the video gets silently downloaded in the background.
+When adding songs from YouTube to the playlist, the video gets silently downloaded in the background.
 Afterwards the audio track gets extracted and the song can be played.
 
 Streaming requires the VLC media player to be installed, as it streams the YouTube audio track in the background 
