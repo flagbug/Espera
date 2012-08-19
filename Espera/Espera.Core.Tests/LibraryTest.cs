@@ -142,7 +142,7 @@ namespace Espera.Core.Tests
 
                 eventWait.WaitOne();
 
-                IEnumerable<Song> expectedSongs = new[]
+                var expectedSongs = new[]
                 {
                     jumpSong.Object, nextSong.Object, cachingSong.Object, cachingSong2.Object
                 };
