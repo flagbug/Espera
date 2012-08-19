@@ -1,11 +1,14 @@
 
-/Espera/_ReSharper.Espera
-/Espera/Espera.Core/bin
-/Espera/Espera.Core/obj
-/Espera/Espera.View/bin
-/Espera/Espera.View/obj
-/Espera/Espera.Core.Tests/bin
-/Espera/Espera.Core.Tests/obj
-/Espera/TestResults
-/Espera/Espera.View/publish
-/Espera/_NCrunch_Espera
+_ReSharper*
+[Bb]in/
+[Oo]bj/
+TestResults
+publish
+_NCrunch*
+
+*.suo
+*.user
+*.psess
+*.vsp
+*.ncrunchproject
+*.ncrunchsolution
