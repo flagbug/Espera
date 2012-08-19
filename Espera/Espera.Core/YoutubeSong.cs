@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using Espera.Core.Audio;
 using YoutubeExtractor;
 
@@ -54,18 +55,46 @@ namespace Espera.Core
         /// </value>
         public Uri ThumbnailSource { get; set; }
 
+        public override void LoadToCache()
+        {
+            this.IsCaching = true;
+
+            try
+            {
+                string tempPath = Path.GetTempFileName();
+
+                VideoInfo video = GetVideoInfo(this.OriginalPath);
+
+                this.DownloadVideo(video, tempPath);
+
+                this.StreamingPath = tempPath;
+                this.IsCached = true;
+            }
+
+            catch (IOException)
+            {
+                this.OnCachingFailed(EventArgs.Empty);
+            }
+
+            catch (WebException)
+            {
+                this.OnCachingFailed(EventArgs.Empty);
+            }
+
+            finally
+            {
+                this.IsCaching = false;
+            }
+        }
+
         internal override AudioPlayer CreateAudioPlayer()
         {
             return this.IsStreaming ? (AudioPlayer)new YoutubeAudioPlayer() : new LocalAudioPlayer();
         }
 
-        public override void LoadToCache()
+        private static VideoInfo GetVideoInfo(string youtubeLink)
         {
-            this.IsCaching = true;
-
-            string tempPath = Path.GetTempFileName();
-
-            IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(this.OriginalPath);
+            IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(youtubeLink);
 
             VideoInfo video = videoInfos
                 .Where(info => info.CanExtractAudio)
@@ -73,6 +102,11 @@ namespace Espera.Core
                         info.VideoFormat == VideoFormat.FlashMp3HighQuality ||
                         info.VideoFormat == VideoFormat.FlashMp3LowQuality);
 
+            return video;
+        }
+
+        private void DownloadVideo(VideoInfo video, string tempPath)
+        {
             var downloader = new AudioDownloader(video, tempPath);
 
             downloader.ProgressChanged += (sender, args) =>
@@ -81,9 +115,6 @@ namespace Espera.Core
             };
 
             downloader.Execute();
-            this.StreamingPath = tempPath;
-
-            this.IsCached = true;
         }
     }
 }
