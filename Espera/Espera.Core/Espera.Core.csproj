@@ -63,7 +63,9 @@
     <Reference Include="Vlc.DotNet.Core">
       <HintPath>..\lib\Vlc.DotNet.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Vlc.DotNet.Core.Interops, Version=1.2.0.0, Culture=neutral, PublicKeyToken=84529da31f4eb963, processorArchitecture=MSIL" />
+    <Reference Include="Vlc.DotNet.Core.Interops">
+      <HintPath>..\lib\Vlc.DotNet.Core.Interops.dll</HintPath>
+    </Reference>
     <Reference Include="Vlc.DotNet.Wpf">
       <HintPath>..\lib\Vlc.DotNet.Wpf.dll</HintPath>
     </Reference>
@@ -112,6 +114,9 @@
       <LastGenOutput>CoreSettings.Designer.cs</LastGenOutput>
     </None>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
