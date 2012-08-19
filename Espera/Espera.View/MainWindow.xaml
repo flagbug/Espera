@@ -859,7 +859,7 @@
                             </StackPanel>
                             <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="youtube" />
                             <CheckBox IsChecked="{Binding Path=StreamYoutube}" IsEnabled="{Binding Path=IsVlcInstalled}">
-                                <AccessText Text="Stream from Youtube instead of downloading (Requires VLC media player &gt;= 2.0 to be installed)." TextWrapping="Wrap" />
+                                <AccessText Text="Stream from Youtube instead of downloading (Requires VLC media player &gt;= 2.0 to be installed).&#x0a;Changing this option requires a restart." TextWrapping="Wrap" />
                             </CheckBox>
                             <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="about" />
                             <TextBlock Text="{Binding Path=Version, StringFormat=Espera v\{0\}}" />
