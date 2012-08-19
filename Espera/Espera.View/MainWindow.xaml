@@ -565,7 +565,7 @@
                                                                 <Setter Property="IsHitTestVisible" Value="False" />
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Path=EditName}" Value="True">
-                                                                <Setter Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={RelativeSource Self}}" />
+                                                                <Setter Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={x:Static RelativeSource.Self}}" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -601,7 +601,8 @@
                                   ItemsSource="{Binding Path=CurrentPlaylist.Songs}"
                                   KeyUp="PlaylistKeyUp"
                                   ScrollViewer.CanContentScroll="True"
-                                  SelectionChanged="PlaylistSelectionChanged">
+                                  SelectionChanged="PlaylistSelectionChanged"
+                                  Margin="5, 0, 0, 0">
                             <ListView.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Command="{Binding Path=PlayCommand}" Header="Play" />
