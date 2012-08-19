@@ -92,7 +92,7 @@ namespace Espera.Core.Tests
         [Test]
         public void AutoNextSong_SongIsCaching_SwapSongs()
         {
-            var eventWait = new ManualResetEvent(false); // We need this, because Library.PlaySong() pops up a new thread interally and then returns
+            var eventWait = new ManualResetEvent(false); // We need this, because Library.PlaySong() pops up a new thread internally and then returns
 
             var jumpAudioPlayer = new JumpAudioPlayer();
 
