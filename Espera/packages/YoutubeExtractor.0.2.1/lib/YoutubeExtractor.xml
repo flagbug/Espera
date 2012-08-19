@@ -4,19 +4,10 @@
         <name>YoutubeExtractor</name>
     </assembly>
     <members>
-        <member name="T:YoutubeExtractor.DownloadUrlResolver">
+        <member name="T:YoutubeExtractor.AudioDownloader">
             <summary>
-            Provides a method to get the download link of a YouTube video.
+            Provides a method to download a video and extract its audio track.
             </summary>
-        </member>
-        <member name="M:YoutubeExtractor.DownloadUrlResolver.GetDownloadUrls(System.String)">
-            <summary>
-            Gets a list of <see cref="T:YoutubeExtractor.VideoInfo"/>s for the specified URL.
-            </summary>
-            <param name="videoUrl">The URL of the YouTube video.</param>
-            <returns>A list of <see cref="T:YoutubeExtractor.VideoInfo"/>s that can be used to download the video.</returns>
-            <exception cref="T:System.ArgumentException">videoUrl is not a valid YouTube URL.</exception>
-            <exception cref="T:System.Net.WebException">An error occured while downloading the video infos.</exception>
         </member>
         <member name="M:YoutubeExtractor.Downloader.#ctor(YoutubeExtractor.VideoInfo,System.String)">
             <summary>
@@ -55,59 +46,45 @@
             Gets the video to download/convert.
             </summary>
         </member>
-        <member name="M:YoutubeExtractor.VideoInfo.#ctor(System.String,System.String,System.Int32)">
+        <member name="M:YoutubeExtractor.AudioDownloader.#ctor(YoutubeExtractor.VideoInfo,System.String)">
             <summary>
-            Initializes a new instance of the <see cref="T:YoutubeExtractor.VideoInfo"/> class.
+            Initializes a new instance of the <see cref="T:YoutubeExtractor.AudioDownloader"/> class.
             </summary>
-            <param name="downloadUrl">The download URL.</param>
-            <param name="title">The video title.</param>
-            <param name="formatCode">The format code.</param>
+            <param name="video">The video to convert.</param>
+            <param name="savePath">The path to save the audio.</param>
         </member>
-        <member name="P:YoutubeExtractor.VideoInfo.AudioExtension">
+        <member name="M:YoutubeExtractor.AudioDownloader.Execute">
             <summary>
-            Gets the audio extension.
-            </summary>
-        </member>
-        <member name="P:YoutubeExtractor.VideoInfo.CanExtractAudio">
-            <summary>
-            Gets a value indicating whether the audio of this video can be extracted by YoutubeExtractor.
-            </summary>
-            <value>
-            	<c>true</c> if the audio of this video can be extracted by YoutubeExtractor; otherwise, <c>false</c>.
-            </value>
-        </member>
-        <member name="P:YoutubeExtractor.VideoInfo.DownloadUrl">
-            <summary>
-            Gets the download URL.
+            Starts the download and then extracts the audio track of the video.
             </summary>
         </member>
-        <member name="P:YoutubeExtractor.VideoInfo.FormatCode">
+        <member name="T:YoutubeExtractor.DownloadUrlResolver">
             <summary>
-            Gets the format code.
+            Provides a method to get the download link of a YouTube video.
             </summary>
         </member>
-        <member name="P:YoutubeExtractor.VideoInfo.Title">
+        <member name="M:YoutubeExtractor.DownloadUrlResolver.GetDownloadUrls(System.String)">
             <summary>
-            Gets the video title.
+            Gets a list of <see cref="T:YoutubeExtractor.VideoInfo"/>s for the specified URL.
             </summary>
+            <param name="videoUrl">The URL of the YouTube video.</param>
+            <returns>A list of <see cref="T:YoutubeExtractor.VideoInfo"/>s that can be used to download the video.</returns>
+            <exception cref="T:System.ArgumentNullException">The <paramref name="videoUrl"/> parameter is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentException">The <paramref name="videoUrl"/> parameter is not a valid YouTube URL.</exception>
+            <exception cref="T:System.Net.WebException">An error occurred while downloading the YouTube page html.</exception>
+            <exception cref="T:YoutubeExtractor.YoutubeParseException">The Youtube page could not be parsed.</exception>
         </member>
-        <member name="P:YoutubeExtractor.VideoInfo.VideoExtension">
+        <member name="M:YoutubeExtractor.FlvFile.#ctor(System.String,System.String)">
             <summary>
-            Gets the video extension.
+            Initializes a new instance of the <see cref="T:YoutubeExtractor.FlvFile"/> class.
             </summary>
+            <param name="inputPath">The path of the input.</param>
+            <param name="outputPath">The path of the output without extension.</param>
         </member>
-        <member name="P:YoutubeExtractor.VideoInfo.VideoFormat">
+        <member name="P:YoutubeExtractor.ProgressEventArgs.ProgressPercentage">
             <summary>
-            Gets the video format.
+            Gets the progress percentage in a range from 0.0 to 100.0.
             </summary>
-        </member>
-        <member name="P:YoutubeExtractor.VideoInfo.VideoType">
-            <summary>
-            Gets the type of the video.
-            </summary>
-            <value>
-            The type of the video.
-            </value>
         </member>
         <member name="T:YoutubeExtractor.VideoDownloader">
             <summary>
@@ -124,28 +101,6 @@
         <member name="M:YoutubeExtractor.VideoDownloader.Execute">
             <summary>
             Starts the video download.
-            </summary>
-        </member>
-        <member name="P:YoutubeExtractor.ProgressEventArgs.ProgressPercentage">
-            <summary>
-            Gets the progress percentage in a range from 0.0 to 100.0.
-            </summary>
-        </member>
-        <member name="T:YoutubeExtractor.AudioDownloader">
-            <summary>
-            Provides a method to download a video and extract its audio track.
-            </summary>
-        </member>
-        <member name="M:YoutubeExtractor.AudioDownloader.#ctor(YoutubeExtractor.VideoInfo,System.String)">
-            <summary>
-            Initializes a new instance of the <see cref="T:YoutubeExtractor.AudioDownloader"/> class.
-            </summary>
-            <param name="video">The video to convert.</param>
-            <param name="savePath">The path to save the audio.</param>
-        </member>
-        <member name="M:YoutubeExtractor.AudioDownloader.Execute">
-            <summary>
-            Starts the download and then extracts the audio track of the video.
             </summary>
         </member>
         <member name="F:YoutubeExtractor.VideoFormat.WebM1080">
@@ -228,12 +183,68 @@
             Unkown format
             </summary>
         </member>
-        <member name="M:YoutubeExtractor.FlvFile.#ctor(System.String,System.String)">
+        <member name="M:YoutubeExtractor.VideoInfo.#ctor(System.String,System.String,System.Int32)">
             <summary>
-            Initializes a new instance of the <see cref="T:YoutubeExtractor.FlvFile"/> class.
+            Initializes a new instance of the <see cref="T:YoutubeExtractor.VideoInfo"/> class.
             </summary>
-            <param name="inputPath">The path of the input.</param>
-            <param name="outputPath">The path of the output without extension.</param>
+            <param name="downloadUrl">The download URL.</param>
+            <param name="title">The video title.</param>
+            <param name="formatCode">The format code.</param>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.AudioExtension">
+            <summary>
+            Gets the audio extension.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.CanExtractAudio">
+            <summary>
+            Gets a value indicating whether the audio of this video can be extracted by YoutubeExtractor.
+            </summary>
+            <value>
+            	<c>true</c> if the audio of this video can be extracted by YoutubeExtractor; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.DownloadUrl">
+            <summary>
+            Gets the download URL.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.FormatCode">
+            <summary>
+            Gets the format code.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.Title">
+            <summary>
+            Gets the video title.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.VideoExtension">
+            <summary>
+            Gets the video extension.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.VideoFormat">
+            <summary>
+            Gets the video format.
+            </summary>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.VideoType">
+            <summary>
+            Gets the type of the video.
+            </summary>
+            <value>
+            The type of the video.
+            </value>
+        </member>
+        <member name="T:YoutubeExtractor.YoutubeParseException">
+            <summary>
+            <para>
+            The exception that is thrown when the YouTube page could not be parsed.
+            This happens, when YouTube changes the structure of their page.
+            </para>
+            Please report when this exception happens at www.github.com/flagbug/YoutubeExtractor/issues
+            </summary>
         </member>
     </members>
 </doc>
