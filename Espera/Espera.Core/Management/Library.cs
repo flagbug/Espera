@@ -34,12 +34,6 @@ namespace Espera.Core.Management
 
         public Library(IRemovableDriveWatcher driveWatcher)
         {
-            if (CoreSettings.Default.UpgradeRequired)
-            {
-                CoreSettings.Default.Upgrade();
-                CoreSettings.Default.UpgradeRequired = false;
-            }
-
             this.songLock = new object();
             this.songs = new HashSet<Song>();
             this.playlists = new List<Playlist>();
@@ -518,6 +512,12 @@ namespace Espera.Core.Management
 
         public void Initialize()
         {
+            if (CoreSettings.Default.UpgradeRequired)
+            {
+                CoreSettings.Default.Upgrade();
+                CoreSettings.Default.UpgradeRequired = false;
+            }
+
             this.driveWatcher.Initialize();
             this.driveWatcher.DriveRemoved += (sender, args) => Task.Factory.StartNew(this.Update);
 

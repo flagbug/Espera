@@ -322,16 +322,6 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void ConstructorUpgradesCoreSettingsIfRequired()
-        {
-            CoreSettings.Default.UpgradeRequired = true;
-
-            using (Helpers.CreateLibrary()) { }
-
-            Assert.IsFalse(CoreSettings.Default.UpgradeRequired);
-        }
-
-        [Test]
         public void ContinueSong_IsNotAdmin_ThrowsInvalidOperationException()
         {
             using (var library = Helpers.CreateLibrary())
@@ -416,6 +406,19 @@ namespace Espera.Core.Tests
             {
                 Assert.Throws<ArgumentException>(() => library.CreateAdmin(" "));
             }
+        }
+
+        [Test]
+        public void InitializeUpgradesCoreSettingsIfRequired()
+        {
+            CoreSettings.Default.UpgradeRequired = true;
+
+            using (var library = Helpers.CreateLibrary())
+            {
+                library.Initialize();
+            }
+
+            Assert.IsFalse(CoreSettings.Default.UpgradeRequired);
         }
 
         [Test]
