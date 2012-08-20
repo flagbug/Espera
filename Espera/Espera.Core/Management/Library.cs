@@ -662,7 +662,10 @@ namespace Espera.Core.Management
                 Directory.CreateDirectory(directoryPath);
             }
 
-            LibraryWriter.Write(this.songs.Cast<LocalSong>(), this.playlists.Select(playlist => new PlaylistInfo(playlist)), File.Create(filePath));
+            using (Stream targetStream = File.Create(filePath))
+            {
+                LibraryWriter.Write(this.songs.Cast<LocalSong>(), this.playlists.Select(playlist => new PlaylistInfo(playlist)), targetStream);
+            }
         }
 
         public void ShufflePlaylist()
@@ -865,16 +868,21 @@ namespace Espera.Core.Management
 
             if (File.Exists(filePath))
             {
-                IEnumerable<Song> savedSongs = LibraryReader.ReadSongs(File.OpenRead(filePath));
-
-                foreach (Song song in savedSongs)
+                using (Stream sourceStream = File.OpenRead(filePath))
                 {
-                    this.songs.Add(song);
+                    IEnumerable<Song> savedSongs = LibraryReader.ReadSongs(sourceStream);
+
+                    foreach (Song song in savedSongs)
+                    {
+                        this.songs.Add(song);
+                    }
+
+                    sourceStream.Position = 0;
+
+                    IEnumerable<Playlist> savedPlaylists = LibraryReader.ReadPlaylists(sourceStream);
+
+                    this.playlists.AddRange(savedPlaylists);
                 }
-
-                IEnumerable<Playlist> savedPlaylists = LibraryReader.ReadPlaylists(File.OpenRead(filePath));
-
-                this.playlists.AddRange(savedPlaylists);
             }
         }
 
