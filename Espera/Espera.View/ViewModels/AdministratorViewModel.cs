@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows.Input;
+using Espera.Core;
 using Espera.Core.Management;
 using Rareform.Patterns.MVVM;
 using Rareform.Validation;
@@ -99,7 +100,7 @@ namespace Espera.View.ViewModels
 
         public bool IsVlcInstalled
         {
-            get { return RegistryHelper.IsVlcInstalled(); }
+            get { return ApplicationHelper.IsVlcInstalled(); }
         }
 
         public bool IsWrongPassword

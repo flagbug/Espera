@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Timers;
 using System.Windows.Input;
+using Espera.Core;
 using Espera.Core.Management;
 using Espera.View.Properties;
 using Rareform.Patterns.MVVM;
@@ -94,7 +95,7 @@ namespace Espera.View.ViewModels
 
         public bool CanUseYoutube
         {
-            get { return !this.library.StreamYoutube || RegistryHelper.IsVlcInstalled(); }
+            get { return !this.library.StreamYoutube || ApplicationHelper.IsVlcInstalled(); }
         }
 
         public PlaylistViewModel CurrentEditedPlaylist
