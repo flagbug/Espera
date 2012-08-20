@@ -518,6 +518,11 @@ namespace Espera.Core.Management
                 CoreSettings.Default.UpgradeRequired = false;
             }
 
+            if (CoreSettings.Default.StreamYoutube && !ApplicationHelper.IsVlcInstalled())
+            {
+                CoreSettings.Default.StreamYoutube = false;
+            }
+
             this.driveWatcher.Initialize();
             this.driveWatcher.DriveRemoved += (sender, args) => Task.Factory.StartNew(this.Update);
 
