@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
 using Rareform.Validation;
 using Vlc.DotNet.Core;
@@ -21,17 +22,10 @@ namespace Espera.Core.Audio
         /// </summary>
         public YoutubeAudioPlayer()
         {
-            if (Environment.Is64BitOperatingSystem)
-            {
-                VlcContext.LibVlcDllsPath = CommonStrings.LIBVLC_DLLS_PATH_DEFAULT_VALUE_AMD64;
-                VlcContext.LibVlcPluginsPath = CommonStrings.PLUGINS_PATH_DEFAULT_VALUE_AMD64;
-            }
+            string vlcPath = ApplicationHelper.DetectVlcFolderPath();
 
-            else
-            {
-                VlcContext.LibVlcDllsPath = CommonStrings.LIBVLC_DLLS_PATH_DEFAULT_VALUE_X86;
-                VlcContext.LibVlcPluginsPath = CommonStrings.PLUGINS_PATH_DEFAULT_VALUE_X86;
-            }
+            VlcContext.LibVlcDllsPath = vlcPath;
+            VlcContext.LibVlcPluginsPath = Path.Combine(vlcPath, "plugins");
 
             VlcContext.StartupOptions.IgnoreConfig = true;
 
