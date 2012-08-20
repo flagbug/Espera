@@ -4,17 +4,7 @@ namespace Espera.Core.Management
 {
     public class RemovableDriveWatcher : IRemovableDriveWatcher
     {
-        private readonly Rareform.IO.RemovableDriveWatcher driveWatcher;
-
-        public RemovableDriveWatcher()
-        {
-            driveWatcher = Rareform.IO.RemovableDriveWatcher.Create();
-        }
-
-        public void Dispose()
-        {
-            this.driveWatcher.Dispose();
-        }
+        private Rareform.IO.RemovableDriveWatcher driveWatcher;
 
         public event EventHandler DriveRemoved
         {
@@ -27,6 +17,16 @@ namespace Espera.Core.Management
             {
                 this.driveWatcher.DriveRemoved -= value;
             }
+        }
+
+        public void Dispose()
+        {
+            this.driveWatcher.Dispose();
+        }
+
+        public void Initialize()
+        {
+            this.driveWatcher = Rareform.IO.RemovableDriveWatcher.Create();
         }
     }
 }

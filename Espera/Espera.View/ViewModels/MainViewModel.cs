@@ -31,7 +31,7 @@ namespace Espera.View.ViewModels
             }
 
             this.library = new Library(new RemovableDriveWatcher());
-            this.library.Load();
+            this.library.Initialize();
 
             this.library.SongStarted += LibraryRaisedSongStarted;
             this.library.SongFinished += LibraryRaisedSongFinished;
@@ -77,11 +77,6 @@ namespace Espera.View.ViewModels
 
         public AdministratorViewModel AdministratorViewModel { get; private set; }
 
-        public bool CanSwitchPlaylist
-        {
-            get { return this.library.CanSwitchPlaylist; }
-        }
-
         public bool CanChangeTime
         {
             get { return this.library.CanChangeTime; }
@@ -90,6 +85,11 @@ namespace Espera.View.ViewModels
         public bool CanChangeVolume
         {
             get { return this.library.CanChangeVolume; }
+        }
+
+        public bool CanSwitchPlaylist
+        {
+            get { return this.library.CanSwitchPlaylist; }
         }
 
         public bool CanUseYoutube
@@ -448,6 +448,20 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public IEnumerable<PlaylistEntryViewModel> SelectedPlaylistEntries
+        {
+            get { return this.selectedPlaylistEntries; }
+            set
+            {
+                if (this.SelectedPlaylistEntries != value)
+                {
+                    this.selectedPlaylistEntries = value;
+                    this.OnPropertyChanged(vm => vm.SelectedPlaylistEntries);
+                    this.OnPropertyChanged(vm => vm.PlayCommand);
+                }
+            }
+        }
+
         public ICommand ShufflePlaylistCommand
         {
             get
@@ -461,20 +475,6 @@ namespace Espera.View.ViewModels
                         this.UpdatePlaylist();
                     }
                 );
-            }
-        }
-
-        public IEnumerable<PlaylistEntryViewModel> SelectedPlaylistEntries
-        {
-            get { return this.selectedPlaylistEntries; }
-            set
-            {
-                if (this.SelectedPlaylistEntries != value)
-                {
-                    this.selectedPlaylistEntries = value;
-                    this.OnPropertyChanged(vm => vm.SelectedPlaylistEntries);
-                    this.OnPropertyChanged(vm => vm.PlayCommand);
-                }
             }
         }
 

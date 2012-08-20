@@ -45,9 +45,8 @@ namespace Espera.Core.Management
             this.playlists = new List<Playlist>();
             this.volume = 1.0f;
             this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
-            this.driveWatcher = driveWatcher;
-            this.driveWatcher.DriveRemoved += (sender, args) => Task.Factory.StartNew(this.Update);
             this.cacheResetHandle = new AutoResetEvent(false);
+            this.driveWatcher = driveWatcher;
             this.disposeLock = new object();
         }
 
@@ -517,36 +516,12 @@ namespace Espera.Core.Management
             CoreSettings.Default.Save();
         }
 
-        public void Load()
+        public void Initialize()
         {
-            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Espera\Library.xml");
+            this.driveWatcher.Initialize();
+            this.driveWatcher.DriveRemoved += (sender, args) => Task.Factory.StartNew(this.Update);
 
-            if (File.Exists(filePath))
-            {
-                IEnumerable<Song> savedSongs = LibraryReader.ReadSongs(File.OpenRead(filePath));
-
-                foreach (Song song in savedSongs)
-                {
-                    this.songs.Add(song);
-                }
-
-                IEnumerable<Playlist> savedPlaylists = LibraryReader.ReadPlaylists(File.OpenRead(filePath));
-
-                this.playlists.AddRange(savedPlaylists);
-            }
-        }
-
-        public void Save()
-        {
-            string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Espera\");
-            string filePath = Path.Combine(directoryPath, "Library.xml");
-
-            if (!Directory.Exists(directoryPath))
-            {
-                Directory.CreateDirectory(directoryPath);
-            }
-
-            LibraryWriter.Write(this.songs.Cast<LocalSong>(), this.playlists.Select(playlist => new PlaylistInfo(playlist)), File.Create(filePath));
+            this.Load();
         }
 
         /// <summary>
@@ -675,6 +650,19 @@ namespace Espera.Core.Management
 
             if (removed == 0)
                 throw new InvalidOperationException("No playlist with the specified name exists.");
+        }
+
+        public void Save()
+        {
+            string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Espera\");
+            string filePath = Path.Combine(directoryPath, "Library.xml");
+
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            LibraryWriter.Write(this.songs.Cast<LocalSong>(), this.playlists.Select(playlist => new PlaylistInfo(playlist)), File.Create(filePath));
         }
 
         public void ShufflePlaylist()
@@ -869,6 +857,25 @@ namespace Espera.Core.Management
 
                 this.SongStarted.RaiseSafe(this, EventArgs.Empty);
             });
+        }
+
+        private void Load()
+        {
+            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Espera\Library.xml");
+
+            if (File.Exists(filePath))
+            {
+                IEnumerable<Song> savedSongs = LibraryReader.ReadSongs(File.OpenRead(filePath));
+
+                foreach (Song song in savedSongs)
+                {
+                    this.songs.Add(song);
+                }
+
+                IEnumerable<Playlist> savedPlaylists = LibraryReader.ReadPlaylists(File.OpenRead(filePath));
+
+                this.playlists.AddRange(savedPlaylists);
+            }
         }
 
         private void ThrowIfNotAdmin()
