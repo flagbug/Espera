@@ -12,3 +12,4 @@ _NCrunch*
 *.vsp
 *.ncrunchproject
 *.ncrunchsolution
+*.pdb
