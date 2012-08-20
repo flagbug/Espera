@@ -865,8 +865,13 @@
                             <TextBlock Text="{Binding Path=Version, StringFormat=Espera v\{0\}}" />
                             <TextBlock Text="Author: Dennis Daume" />
                             <TextBlock>
-                                <Hyperlink Command="{Binding Path=OpenHomepageCommand}">
+                                <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=Homepage}">
                                     <Run Foreground="#FF00B7C0" Text="{Binding Path=Homepage, Mode=OneTime}" />
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBlock>
+                                <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=IssuesPage}">
+                                    <Run Foreground="#FF00B7C0" Text="Report a bug" />
                                 </Hyperlink>
                             </TextBlock>
                         </StackPanel>

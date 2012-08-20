@@ -92,6 +92,11 @@ namespace Espera.View.ViewModels
             get { return this.library.AccessMode == AccessMode.Party; }
         }
 
+        public string IssuesPage
+        {
+            get { return "http://github.com/flagbug/Espera/issues"; }
+        }
+
         public bool IsVlcInstalled
         {
             get { return RegistryHelper.IsVlcInstalled(); }
@@ -175,13 +180,13 @@ namespace Espera.View.ViewModels
 
         public string LoginPassword { get; set; }
 
-        public ICommand OpenHomepageCommand
+        public ICommand OpenLinkCommand
         {
             get
             {
                 return new RelayCommand
                 (
-                    param => Process.Start(this.Homepage)
+                    param => Process.Start((string)param)
                 );
             }
         }
