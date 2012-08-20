@@ -726,7 +726,7 @@
                             </TextBlock.Style>
                         </TextBlock>
                         <TextBlock Text=" remaining, with " />
-                        <TextBlock Text="{Binding Path=TimeRemaining.Value.TotalMinutes, FallbackValue=0, StringFormat=\{0:0.0\}}" />
+                        <TextBlock Text="{Binding Path=TimeRemaining.TotalMinutes, FallbackValue=0, StringFormat=\{0:0.0\}}" />
                         <TextBlock Text=" minutes play time" />
                     </StackPanel>
                     <StackPanel Grid.Row="2"
