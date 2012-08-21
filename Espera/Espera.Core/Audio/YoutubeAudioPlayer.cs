@@ -20,8 +20,11 @@ namespace Espera.Core.Audio
         /// <summary>
         /// Initializes a new instance of the <see cref="YoutubeAudioPlayer"/> class.
         /// </summary>
-        public YoutubeAudioPlayer()
+        public YoutubeAudioPlayer(YoutubeSong song)
         {
+            if (song == null)
+                Throw.ArgumentNullException(() => song);
+
             string vlcPath = ApplicationHelper.DetectVlcFolderPath();
 
             VlcContext.LibVlcDllsPath = vlcPath;
@@ -83,7 +86,7 @@ namespace Espera.Core.Audio
         /// </value>
         public override TimeSpan TotalTime
         {
-            get { return this.LoadedSong.Duration; }
+            get { return this.Song.Duration; }
         }
 
         /// <summary>
@@ -108,18 +111,15 @@ namespace Espera.Core.Audio
             VlcContext.CloseAll();
         }
 
-        public override void Load(Song song)
+        public override void Load()
         {
-            if (song == null)
-                Throw.ArgumentNullException(() => song);
+            this.player.Media = new LocationMedia(this.Song.StreamingPath);
 
-            this.player.Media = new LocationMedia(song.StreamingPath);
-
-            base.Load(song);
+            base.Load();
         }
 
         /// <summary>
-        /// Pauses the playback of the <see cref="AudioPlayer.LoadedSong"/>.
+        /// Pauses the playback of the <see cref="AudioPlayer.Song"/>.
         /// </summary>
         public override void Pause()
         {
@@ -137,7 +137,7 @@ namespace Espera.Core.Audio
         }
 
         /// <summary>
-        /// Starts or continues the playback of the <see cref="AudioPlayer.LoadedSong"/>.
+        /// Starts or continues the playback of the <see cref="AudioPlayer.Song"/>.
         /// </summary>
         /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
         public override void Play()
@@ -155,7 +155,7 @@ namespace Espera.Core.Audio
         }
 
         /// <summary>
-        /// Stops the playback of the <see cref="AudioPlayer.LoadedSong"/>.
+        /// Stops the playback of the <see cref="AudioPlayer.Song"/>.
         /// </summary>
         public override void Stop()
         {

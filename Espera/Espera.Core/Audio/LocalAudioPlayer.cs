@@ -23,8 +23,12 @@ namespace Espera.Core.Audio
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalAudioPlayer"/> class.
         /// </summary>
-        public LocalAudioPlayer()
+        public LocalAudioPlayer(Song song)
         {
+            if (song == null)
+                Throw.ArgumentNullException(() => song);
+
+            this.Song = song;
             this.Volume = 1.0f;
             this.songFinishedTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
             this.songFinishedTimer.Tick += (sender, e) => this.UpdateSongState();
@@ -75,7 +79,7 @@ namespace Espera.Core.Audio
         /// <value>The total time.</value>
         public override TimeSpan TotalTime
         {
-            get { return this.LoadedSong == null ? TimeSpan.Zero : this.inputStream.TotalTime; }
+            get { return this.IsLoaded ? this.inputStream.TotalTime : TimeSpan.Zero; }
         }
 
         /// <summary>
@@ -114,28 +118,29 @@ namespace Espera.Core.Audio
             }
         }
 
-        /// <summary>
-        /// Loads the specified song into the <see cref="LocalAudioPlayer"/>. This is required before playing a new song.
-        /// </summary>
-        /// <param name="song">The song to load into the player.</param>
-        /// <exception cref="ArgumentNullException"><c>song</c> is null.</exception>
-        public override void Load(Song song)
+        public override void Load()
         {
-            if (song == null)
-                Throw.ArgumentNullException(() => song);
-
             this.Stop();
 
             // NAudio requires that we renew the current wave player.
             this.RenewWavePlayer();
 
-            this.OpenSong(song);
+            try
+            {
+                this.OpenSong(this.Song);
+            }
 
-            base.Load(song);
+            // NAudio can throw a broad range of exceptions when opening a song, so we catch everything
+            catch (Exception ex)
+            {
+                throw new SongLoadException("Song could not be loaded.", ex);
+            }
+
+            base.Load();
         }
 
         /// <summary>
-        /// Pauses the playback of the <see cref="AudioPlayer.LoadedSong"/>.
+        /// Pauses the playback of the <see cref="AudioPlayer.Song"/>.
         /// </summary>
         public override void Pause()
         {
@@ -147,7 +152,7 @@ namespace Espera.Core.Audio
         }
 
         /// <summary>
-        /// Starts or continues the playback of the <see cref="AudioPlayer.LoadedSong"/>.
+        /// Starts or continues the playback of the <see cref="AudioPlayer.Song"/>.
         /// </summary>
         /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
         public override void Play()
@@ -168,7 +173,7 @@ namespace Espera.Core.Audio
         }
 
         /// <summary>
-        /// Stops the playback of the <see cref="AudioPlayer.LoadedSong"/>.
+        /// Stops the playback of the <see cref="AudioPlayer.Song"/>.
         /// </summary>
         public override void Stop()
         {
@@ -218,7 +223,7 @@ namespace Espera.Core.Audio
                 this.inputStream.Dispose();
             }
 
-            this.LoadedSong = null;
+            this.IsLoaded = false;
         }
 
         private void CreateInputStream(Song song)

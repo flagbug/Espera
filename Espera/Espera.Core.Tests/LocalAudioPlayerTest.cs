@@ -8,9 +8,15 @@ namespace Espera.Core.Tests
     public class LocalAudioPlayerTest
     {
         [Test]
+        public void Constructor_SongIsNull_ThrowArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => new LocalAudioPlayer(null));
+        }
+
+        [Test]
         public void CurrentTime_NoSongLoaded_ReturnsTimeSpandZero()
         {
-            var audioPlayer = new LocalAudioPlayer();
+            var audioPlayer = new LocalAudioPlayer(Helpers.SetupSongMock());
 
             Assert.AreEqual(TimeSpan.Zero, audioPlayer.CurrentTime);
         }
@@ -18,7 +24,7 @@ namespace Espera.Core.Tests
         [Test]
         public void PlaybackState_NoSongLoaded_ReturnsNone()
         {
-            var audioPlayer = new LocalAudioPlayer();
+            var audioPlayer = new LocalAudioPlayer(Helpers.SetupSongMock());
 
             Assert.AreEqual(AudioPlayerState.None, audioPlayer.PlaybackState);
         }
@@ -26,7 +32,7 @@ namespace Espera.Core.Tests
         [Test]
         public void TotalTime_NoSongLoaded_ReturnsTimeSpanZero()
         {
-            var audioPlayer = new LocalAudioPlayer();
+            var audioPlayer = new LocalAudioPlayer(Helpers.SetupSongMock());
 
             Assert.AreEqual(TimeSpan.Zero, audioPlayer.TotalTime);
         }
@@ -34,17 +40,9 @@ namespace Espera.Core.Tests
         [Test]
         public void Volume_NoSongLoadedAndVolumeIsSet_ReturnsSettedVolume()
         {
-            var audioPlayer = new LocalAudioPlayer { Volume = 0.5f };
+            var audioPlayer = new LocalAudioPlayer(Helpers.SetupSongMock()) { Volume = 0.5f };
 
             Assert.AreEqual(0.5f, audioPlayer.Volume);
-        }
-
-        [Test]
-        public void Load_ArgumentIsNull_ThrowsArgumentNullException()
-        {
-            var audioPlayer = new LocalAudioPlayer();
-
-            Assert.Throws<ArgumentNullException>(() => audioPlayer.Load(null));
         }
     }
 }

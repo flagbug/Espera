@@ -15,6 +15,7 @@ namespace Espera.Core
     {
         private int cachingProgress;
         private bool isCached;
+        private bool isCorrupted;
         private string streamingPath;
 
         /// <summary>
@@ -44,6 +45,8 @@ namespace Espera.Core
         public event EventHandler CachingFailed;
 
         public event EventHandler CachingProgressChanged;
+
+        public event EventHandler Corrupted;
 
         public string Album { get; set; }
 
@@ -120,6 +123,24 @@ namespace Espera.Core
         public bool IsCaching { get; protected set; }
 
         /// <summary>
+        /// Gets a value indicating whether the song is corrupted and can't be played.
+        /// </summary>
+        /// <value><c>true</c> if the song is corrupted; otherwise, <c>false</c>.</value>
+        public bool IsCorrupted
+        {
+            get { return this.isCorrupted; }
+            internal set
+            {
+                this.isCorrupted = value;
+
+                if (this.isCorrupted)
+                {
+                    this.Corrupted.RaiseSafe(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the path of the song on the local filesystem, or in the internet.
         /// </summary>
         public string OriginalPath { get; private set; }
@@ -161,12 +182,6 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Creates the audio player for the song.
-        /// </summary>
-        /// <returns>The audio player for playback.</returns>
-        internal abstract AudioPlayer CreateAudioPlayer();
-
-        /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
         /// </summary>
         /// <param name="obj">The <see cref="System.Object"/> to compare with this instance.</param>
@@ -205,6 +220,12 @@ namespace Espera.Core
         /// Loads the songs to a cache and sets the <see cref="StreamingPath"/> property.
         /// </summary>
         public abstract void LoadToCache();
+
+        /// <summary>
+        /// Creates the audio player for the song.
+        /// </summary>
+        /// <returns>The audio player for playback.</returns>
+        internal abstract AudioPlayer CreateAudioPlayer();
 
         /// <summary>
         /// Raises the <see cref="CachingCompleted"/> event.

@@ -89,7 +89,7 @@ namespace Espera.Core
 
         internal override AudioPlayer CreateAudioPlayer()
         {
-            return this.IsStreaming ? (AudioPlayer)new YoutubeAudioPlayer() : new LocalAudioPlayer();
+            return this.IsStreaming ? (AudioPlayer)new YoutubeAudioPlayer(this) : new LocalAudioPlayer(this);
         }
 
         private static VideoInfo GetVideoInfo(string youtubeLink)

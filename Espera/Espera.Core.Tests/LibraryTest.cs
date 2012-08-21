@@ -454,6 +454,56 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void Play_ThrowsPlaybackException_SetsSongIsCorruptedToTrue()
+        {
+            using (var library = Helpers.CreateLibraryWithPlaylist())
+            {
+                var audioPlayer = new Mock<AudioPlayer>();
+                audioPlayer.Setup(p => p.Play()).Throws(new PlaybackException());
+
+                Mock<Song> song = Helpers.CreateSongMock();
+                song.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
+
+                library.AddSongToPlaylist(song.Object);
+
+                var handle = new ManualResetEvent(false);
+
+                song.Object.Corrupted += (sender, args) => handle.Set();
+
+                library.PlaySong(0);
+
+                handle.WaitOne();
+
+                Assert.IsTrue(song.Object.IsCorrupted);
+            }
+        }
+
+        [Test]
+        public void Play_ThrowsSongLoadException_SetsSongIsCorruptedToTrue()
+        {
+            using (var library = Helpers.CreateLibraryWithPlaylist())
+            {
+                var audioPlayer = new Mock<AudioPlayer>();
+                audioPlayer.Setup(p => p.Load()).Throws(new SongLoadException());
+
+                Mock<Song> song = Helpers.CreateSongMock();
+                song.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
+
+                library.AddSongToPlaylist(song.Object);
+
+                var handle = new ManualResetEvent(false);
+
+                song.Object.Corrupted += (sender, args) => handle.Set();
+
+                library.PlaySong(0);
+
+                handle.WaitOne();
+
+                Assert.IsTrue(song.Object.IsCorrupted);
+            }
+        }
+
+        [Test]
         public void PlayNextSong_UserIsNotAdministrator_ThrowsInvalidOperationException()
         {
             using (var library = Helpers.CreateLibrary())

@@ -1,13 +1,12 @@
 ﻿using System;
 using Rareform.Extensions;
-using Rareform.Validation;
 
 namespace Espera.Core.Audio
 {
     internal abstract class AudioPlayer : IDisposable
     {
         /// <summary>
-        /// Occurs when the <see cref="LoadedSong"/> has finished it's playback.
+        /// Occurs when the <see cref="Song"/> has finished it's playback.
         /// </summary>
         public event EventHandler SongFinished;
 
@@ -18,10 +17,10 @@ namespace Espera.Core.Audio
         public abstract TimeSpan CurrentTime { get; set; }
 
         /// <summary>
-        /// Gets the song that is currently loaded into the audio player.
+        /// Gets or sets a value indicating whether the <see cref="AudioPlayer"/> has loaded the song.
         /// </summary>
-        /// <value>The song that is currently loaded into the audio player.</value>
-        public Song LoadedSong { get; protected set; }
+        /// <value><c>true</c> if  the <see cref="AudioPlayer"/> has loaded the song.; otherwise, <c>false</c>.</value>
+        public bool IsLoaded { get; protected set; }
 
         /// <summary>
         /// Gets the current playback state.
@@ -30,6 +29,12 @@ namespace Espera.Core.Audio
         /// The current playback state.
         /// </value>
         public abstract AudioPlayerState PlaybackState { get; }
+
+        /// <summary>
+        /// Gets the song that the <see cref="AudioPlayer"/> is assigned to.
+        /// </summary>
+        /// <value>The song that the <see cref="AudioPlayer"/> is assigned to.</value>
+        public Song Song { get; protected set; }
 
         /// <summary>
         /// Gets the total time.
@@ -43,37 +48,30 @@ namespace Espera.Core.Audio
         /// <value>The volume.</value>
         public abstract float Volume { get; set; }
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
         public abstract void Dispose();
 
         /// <summary>
         /// Loads the specified song into the <see cref="Espera.Core.Audio.LocalAudioPlayer"/>. This is required before playing a new song.
         /// </summary>
-        /// <param name="song">The song to load into the player.</param>
-        /// <exception cref="ArgumentNullException"><c>song</c> is null.</exception>
-        public virtual void Load(Song song)
+        /// <exception cref="SongLoadException">The song could not be loaded.</exception>
+        public virtual void Load()
         {
-            if (song == null)
-                Throw.ArgumentNullException(() => song);
-
-            this.LoadedSong = song;
+            this.IsLoaded = true;
         }
 
         /// <summary>
-        /// Pauses the playback of the <see cref="LoadedSong"/>.
+        /// Pauses the playback of the <see cref="Song"/>.
         /// </summary>
         public abstract void Pause();
 
         /// <summary>
-        /// Starts or continues the playback of the <see cref="LoadedSong"/>.
+        /// Starts or continues the playback of the <see cref="Song"/>.
         /// </summary>
         /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
         public abstract void Play();
 
         /// <summary>
-        /// Stops the playback of the <see cref="LoadedSong"/>.
+        /// Stops the playback of the <see cref="Song"/>.
         /// </summary>
         public abstract void Stop();
 

@@ -26,6 +26,8 @@ namespace Espera.View.ViewModels
 
                 this.Wrapped.CachingCompleted += (sender, e) => this.OnPropertyChanged(vm => vm.ShowCaching);
             }
+
+            this.Wrapped.Corrupted += (sender, args) => this.OnPropertyChanged(vm => vm.IsCorrupted);
         }
 
         public int CacheProgress
@@ -47,6 +49,11 @@ namespace Espera.View.ViewModels
         }
 
         public int Index { get; private set; }
+
+        public bool IsCorrupted
+        {
+            get { return this.Wrapped.IsCorrupted; }
+        }
 
         public bool IsInactive
         {

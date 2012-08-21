@@ -506,28 +506,32 @@
                                         Grid.Column="0"
                                         Command="{Binding Path=AddPlaylistCommand}"
                                         Padding="0"
-                                        IsEnabled="{Binding Path=CanSwitchPlaylist}">
+                                        IsEnabled="{Binding Path=CanSwitchPlaylist}"
+                                        ToolTip="Add playlist">
                                     <Image Source="/Espera;component/Images/NewPlaylist.png" />
                                 </Button>
                                 <Button Width="30"
                                         Grid.Column="1"
                                         Command="{Binding Path=RemovePlaylistCommand}"
                                         Padding="0"
-                                        IsEnabled="{Binding Path=CanSwitchPlaylist}">
+                                        IsEnabled="{Binding Path=CanSwitchPlaylist}"
+                                        ToolTip="Remove playlist">
                                     <Image Source="/Espera;component/Images/RemovePlaylist.png" />
                                 </Button>
                                 <Button Width="30"
                                         Grid.Column="2"
                                         Command="{Binding Path=EditPlaylistNameCommand}"
                                         Padding="0"
-                                        IsEnabled="{Binding Path=CanSwitchPlaylist}">
+                                        IsEnabled="{Binding Path=CanSwitchPlaylist}"
+                                        ToolTip="Edit playlist name">
                                     <Image Source="/Espera;component/Images/EditPlaylistName.png" />
                                 </Button>
                                 <Button Width="30"
                                         Grid.Column="3"
                                         Command="{Binding Path=ShufflePlaylistCommand}"
                                         Padding="0"
-                                        IsEnabled="{Binding Path=CanSwitchPlaylist}">
+                                        IsEnabled="{Binding Path=CanSwitchPlaylist}"
+                                        ToolTip="Shuffle playlist">
                                     <Image Source="/Espera;component/Images/ShufflePlaylist.png" />
                                 </Button>
                             </Grid>
@@ -624,11 +628,19 @@
                                     <GridViewColumn Width="35">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Image Width="25"
+                                                <Grid>
+                                                    <Image Width="25"
                                                        Height="25"
                                                        Source="/Espera;component/Images/CurrentSongIcon.png"
                                                        Visibility="{Binding Path=IsPlaying,
                                                                             Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                    <Image Width="25"
+                                                       Height="25"
+                                                       Source="/Espera;component/Images/CorruptedSong.png"
+                                                       Visibility="{Binding Path=IsCorrupted,
+                                                                            Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                        ToolTip="Song is corrupted. Cannot play!" />
+                                                </Grid>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>

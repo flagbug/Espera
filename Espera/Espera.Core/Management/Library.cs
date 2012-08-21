@@ -60,6 +60,11 @@ namespace Espera.Core.Management
         public event EventHandler<LibraryFillEventArgs> SongAdded;
 
         /// <summary>
+        /// Occurs when a corrupted song has been attempted to be played.
+        /// </summary>
+        public event EventHandler SongCorrupted;
+
+        /// <summary>
         /// Occurs when a song has finished the playback.
         /// </summary>
         public event EventHandler SongFinished;
@@ -213,7 +218,7 @@ namespace Espera.Core.Management
         /// </summary>
         public Song LoadedSong
         {
-            get { return this.currentPlayer == null ? null : this.currentPlayer.LoadedSong; }
+            get { return this.currentPlayer == null ? null : this.currentPlayer.Song; }
         }
 
         public bool LockLibraryRemoval
@@ -860,8 +865,31 @@ namespace Espera.Core.Management
 
                 this.overrideCurrentCaching = false;
 
-                this.currentPlayer.Load(song);
-                this.currentPlayer.Play();
+                try
+                {
+                    this.currentPlayer.Load();
+                }
+
+                catch (SongLoadException)
+                {
+                    song.IsCorrupted = true;
+                    this.SongCorrupted.RaiseSafe(this, EventArgs.Empty);
+
+                    return;
+                }
+
+                try
+                {
+                    this.currentPlayer.Play();
+                }
+
+                catch (PlaybackException)
+                {
+                    song.IsCorrupted = true;
+                    this.SongCorrupted.RaiseSafe(this, EventArgs.Empty);
+
+                    return;
+                }
 
                 this.SongStarted.RaiseSafe(this, EventArgs.Empty);
             });

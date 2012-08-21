@@ -48,11 +48,6 @@ namespace Espera.Core
             }
         }
 
-        internal override AudioPlayer CreateAudioPlayer()
-        {
-            return new LocalAudioPlayer();
-        }
-
         public override void LoadToCache()
         {
             this.IsCaching = true;
@@ -72,6 +67,11 @@ namespace Espera.Core
             {
                 this.IsCaching = false;
             }
+        }
+
+        internal override AudioPlayer CreateAudioPlayer()
+        {
+            return new LocalAudioPlayer(this);
         }
 
         private void LoadToTempFile()

@@ -79,7 +79,12 @@ namespace Espera.View.ViewModels
 
                 if (this.playlist.CurrentSongIndex.HasValue)
                 {
-                    songs[this.playlist.CurrentSongIndex.Value].IsPlaying = true;
+                    PlaylistEntryViewModel entry = songs[this.playlist.CurrentSongIndex.Value];
+
+                    if (!entry.IsCorrupted)
+                    {
+                        entry.IsPlaying = true;
+                    }
 
                     // If there are more than 5 songs from the beginning of the playlist to the current played song,
                     // skip all, but 5 songs to the position of the currently played song

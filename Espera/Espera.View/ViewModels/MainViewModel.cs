@@ -34,8 +34,9 @@ namespace Espera.View.ViewModels
             this.library = new Library(new RemovableDriveWatcher());
             this.library.Initialize();
 
-            this.library.SongStarted += LibraryRaisedSongStarted;
-            this.library.SongFinished += LibraryRaisedSongFinished;
+            this.library.SongStarted += (sender, args) => this.HandleSongStarted();
+            this.library.SongFinished += (sender, args) => this.HandleSongFinished();
+            this.library.SongCorrupted += (sender, args) => this.HandleSongCorrupted();
             this.library.AccessModeChanged += (sender, e) => this.UpdateUserAccess();
             this.library.PlaylistChanged += (sender, e) => this.UpdatePlaylist();
 
@@ -604,7 +605,13 @@ namespace Espera.View.ViewModels
             return name + suffix;
         }
 
-        private void LibraryRaisedSongFinished(object sender, EventArgs e)
+        private void HandleSongCorrupted()
+        {
+            this.OnPropertyChanged(vm => vm.IsPlaying);
+            this.OnPropertyChanged(vm => vm.CurrentPlaylist);
+        }
+
+        private void HandleSongFinished()
         {
             // We need this check, to avoid that the pause/play button changes its state,
             // when the library starts the next song
@@ -618,7 +625,7 @@ namespace Espera.View.ViewModels
             this.updateTimer.Stop();
         }
 
-        private void LibraryRaisedSongStarted(object sender, EventArgs e)
+        private void HandleSongStarted()
         {
             this.UpdateTotalTime();
 
