@@ -454,12 +454,42 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void Play_SongIsCorrupted_PlaysNextSong()
+        {
+            using (var library = Helpers.CreateLibraryWithPlaylist())
+            {
+                var audioPlayer = new Mock<AudioPlayer>();
+                audioPlayer.Setup(p => p.Play()).Throws<PlaybackException>();
+
+                Mock<Song> corruptedSong = Helpers.CreateSongMock();
+                corruptedSong.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
+
+                Mock<Song> nextSong = Helpers.CreateSongMock();
+                nextSong.Setup(p => p.CreateAudioPlayer()).Returns(new JumpAudioPlayer());
+
+                library.AddSongsToPlaylist(new[] { corruptedSong.Object, nextSong.Object });
+
+                var handle = new AutoResetEvent(false);
+
+                library.SongCorrupted += (sender, args) => handle.Set();
+                library.SongStarted += (sender, args) => handle.Set();
+
+                library.PlaySong(0);
+
+                handle.WaitOne();
+                handle.WaitOne();
+
+                // The test will fail, if the last wait timeouts
+            }
+        }
+
+        [Test]
         public void Play_ThrowsPlaybackException_SetsSongIsCorruptedToTrue()
         {
             using (var library = Helpers.CreateLibraryWithPlaylist())
             {
                 var audioPlayer = new Mock<AudioPlayer>();
-                audioPlayer.Setup(p => p.Play()).Throws(new PlaybackException());
+                audioPlayer.Setup(p => p.Play()).Throws<PlaybackException>();
 
                 Mock<Song> song = Helpers.CreateSongMock();
                 song.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
@@ -484,7 +514,7 @@ namespace Espera.Core.Tests
             using (var library = Helpers.CreateLibraryWithPlaylist())
             {
                 var audioPlayer = new Mock<AudioPlayer>();
-                audioPlayer.Setup(p => p.Load()).Throws(new SongLoadException());
+                audioPlayer.Setup(p => p.Load()).Throws<SongLoadException>();
 
                 Mock<Song> song = Helpers.CreateSongMock();
                 song.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);

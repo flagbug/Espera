@@ -777,6 +777,19 @@ namespace Espera.Core.Management
             return true;
         }
 
+        private void HandleSongCorruption()
+        {
+            if (!this.currentPlaylist.CanPlayNextSong)
+            {
+                this.currentPlaylist.CurrentSongIndex = null;
+            }
+
+            else
+            {
+                this.InternPlayNextSong();
+            }
+        }
+
         private void HandleSongFinish()
         {
             if (!this.currentPlaylist.CanPlayNextSong)
@@ -875,6 +888,8 @@ namespace Espera.Core.Management
                     song.IsCorrupted = true;
                     this.SongCorrupted.RaiseSafe(this, EventArgs.Empty);
 
+                    this.HandleSongCorruption();
+
                     return;
                 }
 
@@ -887,6 +902,8 @@ namespace Espera.Core.Management
                 {
                     song.IsCorrupted = true;
                     this.SongCorrupted.RaiseSafe(this, EventArgs.Empty);
+
+                    this.HandleSongCorruption();
 
                     return;
                 }
