@@ -106,28 +106,20 @@ namespace Espera.Core.Audio
         public override void Dispose()
         {
             this.Stop();
-
-            if (wavePlayer != null)
-            {
-                this.wavePlayer.Dispose();
-            }
-
-            if (this.inputStream != null)
-            {
-                this.inputStream.Close();
-            }
         }
 
         public override void Load()
         {
             this.Stop();
 
-            // NAudio requires that we renew the current wave player.
-            this.RenewWavePlayer();
+            // There is currently a problem with the WaveOut player, that causes it to hang if the UI does expensive operations.
+            // The problem is, that the other wave players, such as DirectOut or WasapiOut also have problems.
+            this.wavePlayer = new WaveOut(WaveCallbackInfo.FunctionCallback());
 
             try
             {
-                this.OpenSong(this.Song);
+                this.CreateInputStream(this.Song);
+                this.wavePlayer.Init(inputStream);
             }
 
             // NAudio can throw a broad range of exceptions when opening a song, so we catch everything
@@ -181,14 +173,15 @@ namespace Espera.Core.Audio
             if (wavePlayer != null)
             {
                 this.wavePlayer.Stop();
+                this.wavePlayer.Dispose();
             }
 
-            if (this.songFinishedTimer != null)
+            if (inputStream != null)
             {
-                this.songFinishedTimer.Stop();
+                this.inputStream.Dispose();
             }
 
-            this.CloseStream();
+            this.IsLoaded = false;
         }
 
         private static WaveChannel32 OpenMp3Stream(Stream stream)
@@ -217,16 +210,6 @@ namespace Espera.Core.Audio
             return new WaveChannel32(readerStream);
         }
 
-        private void CloseStream()
-        {
-            if (inputStream != null)
-            {
-                this.inputStream.Dispose();
-            }
-
-            this.IsLoaded = false;
-        }
-
         private void CreateInputStream(Song song)
         {
             Stream stream = File.OpenRead(song.StreamingPath);
@@ -245,24 +228,6 @@ namespace Espera.Core.Audio
             }
 
             this.inputStream.Volume = this.Volume;
-        }
-
-        private void OpenSong(Song song)
-        {
-            this.CreateInputStream(song);
-            this.wavePlayer.Init(inputStream);
-        }
-
-        private void RenewWavePlayer()
-        {
-            if (wavePlayer != null)
-            {
-                this.wavePlayer.Dispose();
-            }
-
-            // There is currently a problem with the WaveOut player, that causes it to hang if the UI does expensive operations.
-            // The problem is, that the other wave players, such as DirectOut or WasapiOut also have problems.
-            this.wavePlayer = new WaveOut(WaveCallbackInfo.FunctionCallback());
         }
 
         private void UpdateSongState()
