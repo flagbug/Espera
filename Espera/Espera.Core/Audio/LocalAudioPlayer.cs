@@ -162,13 +162,14 @@ namespace Espera.Core.Audio
                 try
                 {
                     this.wavePlayer.Play();
-                    this.songFinishedTimer.Start();
                 }
 
                 catch (MmException ex)
                 {
                     throw new PlaybackException("The playback couldn't be started.", ex);
                 }
+
+                this.songFinishedTimer.Start();
             }
         }
 
