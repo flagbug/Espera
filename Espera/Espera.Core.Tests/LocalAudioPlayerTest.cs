@@ -8,7 +8,7 @@ namespace Espera.Core.Tests
     public class LocalAudioPlayerTest
     {
         [Test]
-        public void Constructor_SongIsNull_ThrowArgumentNullException()
+        public void Constructor_SongIsNull_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new LocalAudioPlayer(null));
         }
