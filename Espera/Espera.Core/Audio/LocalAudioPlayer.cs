@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Windows.Threading;
+using System.Threading;
+using System.Threading.Tasks;
 using NAudio;
 using NAudio.Wave;
 using Rareform.Validation;
@@ -12,10 +13,6 @@ namespace Espera.Core.Audio
     /// </summary>
     internal sealed class LocalAudioPlayer : AudioPlayer
     {
-        // We need a dispatcher timer for updating the current state of the song,
-        // to avoid cross-threading exceptions
-        private readonly DispatcherTimer songFinishedTimer;
-
         private WaveChannel32 inputStream;
         private float volume;
         private IWavePlayer wavePlayer;
@@ -30,8 +27,6 @@ namespace Espera.Core.Audio
 
             this.Song = song;
             this.Volume = 1.0f;
-            this.songFinishedTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
-            this.songFinishedTimer.Tick += (sender, e) => this.UpdateSongState();
         }
 
         /// <summary>
@@ -139,7 +134,6 @@ namespace Espera.Core.Audio
             if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != NAudio.Wave.PlaybackState.Paused)
             {
                 this.wavePlayer.Pause();
-                this.songFinishedTimer.Stop();
             }
         }
 
@@ -151,17 +145,29 @@ namespace Espera.Core.Audio
         {
             if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != NAudio.Wave.PlaybackState.Playing)
             {
-                try
+                Task.Factory.StartNew(() =>
                 {
-                    this.wavePlayer.Play();
-                }
+                    bool wasPaused = this.PlaybackState == AudioPlayerState.Paused;
 
-                catch (MmException ex)
-                {
-                    throw new PlaybackException("The playback couldn't be started.", ex);
-                }
+                    try
+                    {
+                        this.wavePlayer.Play();
+                    }
 
-                this.songFinishedTimer.Start();
+                    catch (MmException ex)
+                    {
+                        throw new PlaybackException("The playback couldn't be started.", ex);
+                    }
+
+                    if (!wasPaused)
+                    {
+                        while (this.PlaybackState != AudioPlayerState.Stopped)
+                        {
+                            this.UpdateSongState();
+                            Thread.Sleep(250);
+                        }
+                    }
+                });
             }
         }
 
