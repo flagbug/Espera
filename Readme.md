@@ -52,6 +52,7 @@ If you want to contribute to Espera, just send me a pull request at [GitHub](htt
 - [MahApps.Metro](http://github.com/flagbug/MahApps.Metro)
 - [NAudio](http://naudio.codeplex.com)
 - [Taglib#](http://github.com/mono/taglib-sharp)
+- [VLC.NET](http://vlcdotnet.codeplex.com/)
 - [Moq](http://code.google.com/p/moq/)
 
 ## Screenshot
