@@ -878,7 +878,7 @@
                             <TextBlock Text="Author: Dennis Daume" />
                             <TextBlock>
                                 <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=Homepage}">
-                                    <Run Foreground="#FF00B7C0" Text="{Binding Path=Homepage, Mode=OneTime}" />
+                                    <Run Foreground="#FF00B7C0" Text="Project Website" />
                                 </Hyperlink>
                             </TextBlock>
                             <TextBlock>
