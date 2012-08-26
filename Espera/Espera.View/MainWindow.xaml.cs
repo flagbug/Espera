@@ -118,13 +118,11 @@ namespace Espera.View
                     }
                 }
 
-                else
+                else if (this.mainViewModel.PlayCommand.CanExecute(null))
                 {
-                    if (this.mainViewModel.PlayCommand.CanExecute(null))
-                    {
-                        this.mainViewModel.PlayCommand.Execute(false);
-                    }
+                    this.mainViewModel.PlayCommand.Execute(false);
                 }
+                
             }
         }
 
@@ -176,6 +174,8 @@ namespace Espera.View
             {
                 this.mainViewModel.CurrentEditedPlaylist.EditName = false;
             }
+
+            e.Handled = true; // Don't send key events when renaming a playlist
         }
 
         private void PlaylistNameTextBoxLostFocus(object sender, RoutedEventArgs e)
