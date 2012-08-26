@@ -301,8 +301,12 @@ namespace Espera.View.ViewModels
                             this.library.PlaySong(this.SelectedPlaylistEntries.First().Index);
                         }
                     },
-                    param => (this.IsAdmin || !this.library.LockPlayPause) &&
+                    param => 
+                        // The admin can always play, but if we are in party mode, we have to check wheter it is allowed to play
+                        (this.IsAdmin || !this.library.LockPlayPause) &&
+                        // If exactly one song is selected, the command can be executed
                         ((this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1) ||
+                        // If the current song is paused, the command can be executed
                         (this.library.LoadedSong != null || this.library.IsPaused))
                 );
             }
