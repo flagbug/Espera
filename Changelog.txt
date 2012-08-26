@@ -1,10 +1,24 @@
+----------------------------------- v1.2.0 -----------------------------------
+
+FEATURES:
+- The songs and playlist informations are now stored, so that they don't get 
+  lost when closing the application.
+- Added a link to report a bug
+- Songs that can't be played are now marked as corrupt.
+
+BUGFIXES:
+- Fixed a bug, that caused the application to crash or start/pause a song when 
+  editing the name of a playlist.
+- Fixed a bug, that caused the application to crash when playing a song from 
+  YouTube.
+
 ----------------------------------- v1.1.0 -----------------------------------
 
 FEATURES:
 - Multiple playlists.
 - Shuffle playlists.
 
-- CHANGES:
+CHANGES:
 - Increased the number of songs that can cache at one time from three to 10.
 
 BUGFIXES:

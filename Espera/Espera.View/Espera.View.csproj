@@ -26,17 +26,17 @@
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>false</MapFileExtensions>
+    <MapFileExtensions>true</MapFileExtensions>
     <InstallUrl>http://espera.codeplex.com/releases/clickonce/</InstallUrl>
-    <SupportUrl>https://github.com/flagbug/Espera</SupportUrl>
-    <ErrorReportUrl>https://github.com/flagbug/Espera</ErrorReportUrl>
+    <SupportUrl>http://github.com/flagbug/Espera</SupportUrl>
+    <ErrorReportUrl>http://github.com/flagbug/Espera/issues</ErrorReportUrl>
     <ProductName>Espera</ProductName>
     <PublisherName>Espera</PublisherName>
     <MinimumRequiredVersion>1.0.0.0</MinimumRequiredVersion>
     <WebPage>publish.htm</WebPage>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.1.0.0</ApplicationVersion>
+    <ApplicationVersion>1.2.0.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
