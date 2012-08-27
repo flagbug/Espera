@@ -30,14 +30,12 @@ namespace Espera.Core.Management
         private DateTime lastSongAddTime;
         private bool overrideCurrentCaching;
         private string password;
-        private float volume;
 
         public Library(IRemovableDriveWatcher driveWatcher)
         {
             this.songLock = new object();
             this.songs = new HashSet<Song>();
             this.playlists = new List<Playlist>();
-            this.volume = 1.0f;
             this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
             this.cacheResetHandle = new AutoResetEvent(false);
             this.driveWatcher = driveWatcher;
@@ -354,12 +352,12 @@ namespace Espera.Core.Management
         /// </value>
         public float Volume
         {
-            get { return this.currentPlayer == null ? this.volume : this.currentPlayer.Volume; }
+            get { return CoreSettings.Default.Volume; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                this.volume = value;
+                CoreSettings.Default.Volume = value;
 
                 if (this.currentPlayer != null)
                 {
@@ -862,7 +860,7 @@ namespace Espera.Core.Management
             this.currentPlayer = song.CreateAudioPlayer();
 
             this.currentPlayer.SongFinished += (sender, e) => this.HandleSongFinish();
-            this.currentPlayer.Volume = this.volume;
+            this.currentPlayer.Volume = this.Volume;
 
             Task.Factory.StartNew(() =>
             {
