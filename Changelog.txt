@@ -1,3 +1,14 @@
+----------------------------------- v1.2.1 -----------------------------------
+
+FEATURE:
+- The volume is now saved when closing the application.
+
+BUGFIXED:
+- Fixed a bug, that caused the application to crash, when the user paused a 
+  song, switched to another playlist and then continued the song.
+- Fixed application crash when rapidly clicking the play/pause button.
+
+
 ----------------------------------- v1.2.0 -----------------------------------
 
 FEATURES:
