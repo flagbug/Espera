@@ -9,7 +9,7 @@ using Rareform.Validation;
 namespace Espera.Core.Audio
 {
     /// <summary>
-    /// Provides methods for playing a song.
+    /// An <see cref="AudioPlayer"/> that plays songs from the local harddrive.
     /// </summary>
     internal sealed class LocalAudioPlayer : AudioPlayer
     {
@@ -17,9 +17,6 @@ namespace Espera.Core.Audio
         private float volume;
         private IWavePlayer wavePlayer;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LocalAudioPlayer"/> class.
-        /// </summary>
         public LocalAudioPlayer(Song song)
         {
             if (song == null)
@@ -29,22 +26,12 @@ namespace Espera.Core.Audio
             this.Volume = 1.0f;
         }
 
-        /// <summary>
-        /// Gets or sets the current time.
-        /// </summary>
-        /// <value>The current time.</value>
         public override TimeSpan CurrentTime
         {
             get { return this.inputStream == null ? TimeSpan.Zero : this.inputStream.CurrentTime; }
             set { this.inputStream.CurrentTime = value; }
         }
 
-        /// <summary>
-        /// Gets the current playback state.
-        /// </summary>
-        /// <value>
-        /// The current playback state.
-        /// </value>
         public override AudioPlayerState PlaybackState
         {
             get
@@ -68,19 +55,11 @@ namespace Espera.Core.Audio
             }
         }
 
-        /// <summary>
-        /// Gets the total time.
-        /// </summary>
-        /// <value>The total time.</value>
         public override TimeSpan TotalTime
         {
             get { return this.IsLoaded ? this.inputStream.TotalTime : TimeSpan.Zero; }
         }
 
-        /// <summary>
-        /// Gets or sets the volume (a value from 0.0 to 1.0).
-        /// </summary>
-        /// <value>The volume.</value>
         public override float Volume
         {
             get { return this.volume; }
@@ -95,9 +74,6 @@ namespace Espera.Core.Audio
             }
         }
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
         public override void Dispose()
         {
             this.Stop();
@@ -126,9 +102,6 @@ namespace Espera.Core.Audio
             base.Load();
         }
 
-        /// <summary>
-        /// Pauses the playback of the <see cref="AudioPlayer.Song"/>.
-        /// </summary>
         public override void Pause()
         {
             if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != NAudio.Wave.PlaybackState.Paused)
@@ -142,10 +115,6 @@ namespace Espera.Core.Audio
             }
         }
 
-        /// <summary>
-        /// Starts or continues the playback of the <see cref="AudioPlayer.Song"/>.
-        /// </summary>
-        /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
         public override void Play()
         {
             if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != NAudio.Wave.PlaybackState.Playing)
@@ -183,9 +152,6 @@ namespace Espera.Core.Audio
             }
         }
 
-        /// <summary>
-        /// Stops the playback of the <see cref="AudioPlayer.Song"/>.
-        /// </summary>
         public override void Stop()
         {
             if (wavePlayer != null)

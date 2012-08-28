@@ -17,9 +17,6 @@ namespace Espera.Core.Audio
         private readonly VlcControl player;
         private TimeSpan? currentTime;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="YoutubeAudioPlayer"/> class.
-        /// </summary>
         public YoutubeAudioPlayer(YoutubeSong song)
         {
             if (song == null)
@@ -39,24 +36,12 @@ namespace Espera.Core.Audio
             this.player.TimeChanged += (sender, e) => this.CheckSongFinished();
         }
 
-        /// <summary>
-        /// Gets or sets the current time.
-        /// </summary>
-        /// <value>
-        /// The current time.
-        /// </value>
         public override TimeSpan CurrentTime
         {
             get { return this.currentTime ?? this.player.Time; }
             set { this.player.Time = value; }
         }
 
-        /// <summary>
-        /// Gets the current playback state.
-        /// </summary>
-        /// <value>
-        /// The current playback state.
-        /// </value>
         public override AudioPlayerState PlaybackState
         {
             get
@@ -78,32 +63,17 @@ namespace Espera.Core.Audio
             }
         }
 
-        /// <summary>
-        /// Gets the total time.
-        /// </summary>
-        /// <value>
-        /// The total time.
-        /// </value>
         public override TimeSpan TotalTime
         {
             get { return this.Song.Duration; }
         }
 
-        /// <summary>
-        /// Gets or sets the volume (a value from 0.0 to 1.0).
-        /// </summary>
-        /// <value>
-        /// The volume.
-        /// </value>
         public override float Volume
         {
             get { return this.player.AudioProperties.Volume / 100.0f; }
             set { this.player.AudioProperties.Volume = (int)(value * 100); }
         }
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
         public override void Dispose()
         {
             this.Stop();
@@ -118,9 +88,6 @@ namespace Espera.Core.Audio
             base.Load();
         }
 
-        /// <summary>
-        /// Pauses the playback of the <see cref="AudioPlayer.Song"/>.
-        /// </summary>
         public override void Pause()
         {
             // We need to temporarly store the current time, because when paused, the player sets it to 0
@@ -136,10 +103,6 @@ namespace Espera.Core.Audio
             }
         }
 
-        /// <summary>
-        /// Starts or continues the playback of the <see cref="AudioPlayer.Song"/>.
-        /// </summary>
-        /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
         public override void Play()
         {
             this.currentTime = null;
@@ -154,9 +117,6 @@ namespace Espera.Core.Audio
             }
         }
 
-        /// <summary>
-        /// Stops the playback of the <see cref="AudioPlayer.Song"/>.
-        /// </summary>
         public override void Stop()
         {
             this.player.Stop();
