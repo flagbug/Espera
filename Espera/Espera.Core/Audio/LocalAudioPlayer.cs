@@ -134,6 +134,11 @@ namespace Espera.Core.Audio
             if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != NAudio.Wave.PlaybackState.Paused)
             {
                 this.wavePlayer.Pause();
+
+                while (this.PlaybackState != AudioPlayerState.Paused)
+                {
+                    Thread.Sleep(100);
+                }
             }
         }
 
@@ -170,6 +175,11 @@ namespace Espera.Core.Audio
                         }
                     }
                 });
+
+                while (this.PlaybackState != AudioPlayerState.Playing)
+                {
+                    Thread.Sleep(100);
+                }
             }
         }
 

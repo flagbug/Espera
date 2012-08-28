@@ -130,7 +130,7 @@ namespace Espera.Core.Audio
 
             // Wait till the player has finally paused
             // This is a workaround, because the VlcControl does not raise the Paused event properly
-            while (!this.player.IsPaused)
+            while (this.PlaybackState != AudioPlayerState.Paused)
             {
                 Thread.Sleep(100);
             }
@@ -148,7 +148,7 @@ namespace Espera.Core.Audio
 
             // Wait till the player is playing
             // We need this, because the playback state sometimes doesn't get updated immediately
-            while (!this.player.IsPlaying)
+            while (this.PlaybackState != AudioPlayerState.Playing)
             {
                 Thread.Sleep(100);
             }
