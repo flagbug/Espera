@@ -28,7 +28,7 @@ namespace Espera.View.ViewModels
             library.Updated += (sender, args) =>
             {
                 this.OnPropertyChanged(vm => vm.Artists);
-                this.OnPropertyChanged(vm => vm.SelectableSongs);
+                this.UpdateSelectableSongs();
             };
 
             this.StatusViewModel = new StatusViewModel(library);
