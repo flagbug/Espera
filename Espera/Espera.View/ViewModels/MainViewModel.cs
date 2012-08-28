@@ -25,12 +25,6 @@ namespace Espera.View.ViewModels
 
         public MainViewModel()
         {
-            if (Settings.Default.UpgradeRequired)
-            {
-                Settings.Default.Upgrade();
-                Settings.Default.UpgradeRequired = false;
-            }
-
             this.library = new Library(new RemovableDriveWatcher());
             this.library.Initialize();
 

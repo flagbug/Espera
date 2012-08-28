@@ -519,6 +519,7 @@ namespace Espera.Core.Management
             {
                 CoreSettings.Default.Upgrade();
                 CoreSettings.Default.UpgradeRequired = false;
+                CoreSettings.Default.Save();
             }
 
             if (CoreSettings.Default.StreamYoutube && !ApplicationHelper.IsVlcInstalled())
