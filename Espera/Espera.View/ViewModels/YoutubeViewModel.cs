@@ -15,7 +15,6 @@ namespace Espera.View.ViewModels
         private bool isSearching;
         private SortOrder ratingOrder;
         private string searchText;
-        private Func<IEnumerable<YoutubeSong>, IOrderedEnumerable<YoutubeSong>> songOrderFunc;
         private SortOrder titleOrder;
 
         public YoutubeViewModel(Library library)
@@ -82,26 +81,26 @@ namespace Espera.View.ViewModels
 
         public void OrderByDuration()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByDuration<YoutubeSong>(this.durationOrder);
+            this.SongOrderFunc = SortHelpers.GetOrderByDuration<SongViewModel>(this.durationOrder);
             SortHelpers.InverseOrder(ref this.durationOrder);
 
-            this.OnPropertyChanged(vm => vm.SelectableSongs);
+            this.ApplyOrder();
         }
 
         public void OrderByRating()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByRating(this.ratingOrder);
+            this.SongOrderFunc = SortHelpers.GetOrderByRating(this.ratingOrder);
             SortHelpers.InverseOrder(ref this.ratingOrder);
 
-            this.OnPropertyChanged(vm => vm.SelectableSongs);
+            this.ApplyOrder();
         }
 
         public void OrderByTitle()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByTitle<YoutubeSong>(this.titleOrder);
+            this.SongOrderFunc = SortHelpers.GetOrderByTitle<SongViewModel>(this.titleOrder);
             SortHelpers.InverseOrder(ref this.titleOrder);
 
-            this.OnPropertyChanged(vm => vm.SelectableSongs);
+            this.ApplyOrder();
         }
 
         public void StartSearch()
@@ -124,8 +123,8 @@ namespace Espera.View.ViewModels
             }
 
             this.SelectableSongs = currentSongs
-                .OrderBy(this.songOrderFunc)
                 .Select(song => new SongViewModel(song))
+                .OrderBy(this.SongOrderFunc)
                 .ToList();
         }
     }

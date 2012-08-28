@@ -18,6 +18,7 @@ namespace Espera.View.ViewModels
         protected SongSourceViewModel(Library library)
         {
             this.library = library;
+            this.SelectableSongs = Enumerable.Empty<SongViewModel>();
         }
 
         public event EventHandler TimeoutWarning;
@@ -100,6 +101,13 @@ namespace Espera.View.ViewModels
         protected Library Library
         {
             get { return this.library; }
+        }
+
+        protected Func<IEnumerable<SongViewModel>, IOrderedEnumerable<SongViewModel>> SongOrderFunc { get; set; }
+
+        protected void ApplyOrder()
+        {
+            this.SelectableSongs = this.SongOrderFunc(this.SelectableSongs);
         }
 
         protected abstract void UpdateSelectableSongs();

@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Espera.Core;
+using Espera.View.ViewModels;
 
 namespace Espera.View
 {
     internal static class SortHelpers
     {
-        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByAlbum<T>(SortOrder sortOrder) where T : Song
+        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByAlbum<T>(SortOrder sortOrder) where T : SongViewModelBase<T>
         {
             return songs => songs
                 .OrderBy(song => song.Album, sortOrder)
                 .ThenBy(song => song.TrackNumber, sortOrder);
         }
 
-        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByArtist<T>(SortOrder sortOrder) where T : Song
+        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByArtist<T>(SortOrder sortOrder) where T : SongViewModelBase<T>
         {
             return songs => songs
                 .OrderBy(song => song.Artist, sortOrder)
@@ -22,13 +22,13 @@ namespace Espera.View
                 .ThenBy(song => song.TrackNumber, sortOrder);
         }
 
-        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByDuration<T>(SortOrder sortOrder) where T : Song
+        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByDuration<T>(SortOrder sortOrder) where T : SongViewModelBase<T>
         {
             return songs => songs
                 .OrderBy(song => song.Duration, sortOrder);
         }
 
-        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByGenre<T>(SortOrder sortOrder) where T : Song
+        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByGenre<T>(SortOrder sortOrder) where T : SongViewModelBase<T>
         {
             return songs => songs
                 .OrderBy(song => song.Genre, sortOrder)
@@ -37,13 +37,13 @@ namespace Espera.View
                 .ThenBy(song => song.TrackNumber, sortOrder);
         }
 
-        public static Func<IEnumerable<YoutubeSong>, IOrderedEnumerable<YoutubeSong>> GetOrderByRating(SortOrder sortOrder)
+        public static Func<IEnumerable<SongViewModel>, IOrderedEnumerable<SongViewModel>> GetOrderByRating(SortOrder sortOrder)
         {
             return songs => songs
                 .OrderBy(song => song.Rating, sortOrder);
         }
 
-        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByTitle<T>(SortOrder sortOrder) where T : Song
+        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByTitle<T>(SortOrder sortOrder) where T : SongViewModelBase<T>
         {
             return songs => songs
                 .OrderBy(song => song.Title, sortOrder);

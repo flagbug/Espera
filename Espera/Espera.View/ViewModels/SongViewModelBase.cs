@@ -40,6 +40,11 @@ namespace Espera.View.ViewModels
             get { return this.Wrapped.Title; }
         }
 
+        public int TrackNumber
+        {
+            get { return this.Wrapped.TrackNumber; }
+        }
+
         protected Song Wrapped { get; private set; }
     }
 }

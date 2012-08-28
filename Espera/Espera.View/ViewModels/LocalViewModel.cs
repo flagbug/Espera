@@ -19,7 +19,6 @@ namespace Espera.View.ViewModels
         private volatile bool isAdding;
         private string searchText;
         private string selectedArtist;
-        private Func<IEnumerable<Song>, IOrderedEnumerable<Song>> songOrderFunc;
         private SortOrder titleOrder;
 
         public LocalViewModel(Library library)
@@ -211,42 +210,42 @@ namespace Espera.View.ViewModels
 
         public void OrderByAlbum()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByAlbum<Song>(this.albumOrder);
+            this.SongOrderFunc = SortHelpers.GetOrderByAlbum<SongViewModel>(this.albumOrder);
             SortHelpers.InverseOrder(ref this.albumOrder);
 
-            this.OnPropertyChanged(vm => vm.SelectableSongs);
+            this.ApplyOrder();
         }
 
         public void OrderByArtist()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByArtist<Song>(this.artistOrder);
+            this.SongOrderFunc = SortHelpers.GetOrderByArtist<SongViewModel>(this.artistOrder);
             SortHelpers.InverseOrder(ref this.artistOrder);
 
-            this.OnPropertyChanged(vm => vm.SelectableSongs);
+            this.ApplyOrder();
         }
 
         public void OrderByDuration()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByDuration<Song>(this.durationOrder);
+            this.SongOrderFunc = SortHelpers.GetOrderByDuration<SongViewModel>(this.durationOrder);
             SortHelpers.InverseOrder(ref this.durationOrder);
 
-            this.OnPropertyChanged(vm => vm.SelectableSongs);
+            this.ApplyOrder();
         }
 
         public void OrderByGenre()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByGenre<Song>(this.genreOrder);
+            this.SongOrderFunc = SortHelpers.GetOrderByGenre<SongViewModel>(this.genreOrder);
             SortHelpers.InverseOrder(ref this.genreOrder);
 
-            this.OnPropertyChanged(vm => vm.SelectableSongs);
+            this.ApplyOrder();
         }
 
         public void OrderByTitle()
         {
-            this.songOrderFunc = SortHelpers.GetOrderByTitle<Song>(this.titleOrder);
+            this.SongOrderFunc = SortHelpers.GetOrderByTitle<SongViewModel>(this.titleOrder);
             SortHelpers.InverseOrder(ref this.titleOrder);
 
-            this.OnPropertyChanged(vm => vm.SelectableSongs);
+            this.ApplyOrder();
         }
 
         protected override void UpdateSelectableSongs()
@@ -257,8 +256,8 @@ namespace Espera.View.ViewModels
                 .Where(song => song.Artist == this.SelectedArtist);
 
             this.SelectableSongs = songs.FilterSongs(this.SearchText)
-                .OrderBy(this.songOrderFunc)
                 .Select(song => new SongViewModel(song))
+                .OrderBy(this.SongOrderFunc)
                 .ToList();
 
             this.SelectedSongs = this.SelectableSongs.Take(1);
