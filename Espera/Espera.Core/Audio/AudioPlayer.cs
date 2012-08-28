@@ -62,11 +62,19 @@ namespace Espera.Core.Audio
         /// <summary>
         /// Pauses the playback of the <see cref="Song"/>.
         /// </summary>
+        /// <remarks>
+        /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Paused"/>
+        /// before leaving the method.
+        /// </remarks>
         public abstract void Pause();
 
         /// <summary>
         /// Starts or continues the playback of the <see cref="Song"/>.
         /// </summary>
+        /// <remarks>
+        /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Playing"/>
+        /// before leaving the method.
+        /// </remarks>
         /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
         public abstract void Play();
 
