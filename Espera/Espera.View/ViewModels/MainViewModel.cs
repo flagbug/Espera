@@ -289,7 +289,7 @@ namespace Espera.View.ViewModels
 
                         bool ignorePause = value == null ? (bool)param : Boolean.Parse(value);
 
-                        if (this.library.IsPaused && !ignorePause)
+                        if ((this.library.IsPaused || this.library.LoadedSong != null) && !ignorePause)
                         {
                             this.library.ContinueSong();
                             this.updateTimer.Start();
@@ -301,11 +301,14 @@ namespace Espera.View.ViewModels
                             this.library.PlaySong(this.SelectedPlaylistEntries.First().Index);
                         }
                     },
-                    param => 
+                    param =>
+
                         // The admin can always play, but if we are in party mode, we have to check wheter it is allowed to play
                         (this.IsAdmin || !this.library.LockPlayPause) &&
+
                         // If exactly one song is selected, the command can be executed
                         ((this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1) ||
+
                         // If the current song is paused, the command can be executed
                         (this.library.LoadedSong != null || this.library.IsPaused))
                 );
