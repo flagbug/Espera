@@ -45,7 +45,11 @@ very clean look.
 
 If you want to contribute to Espera, just send me a pull request at [GitHub](https://github.com/flagbug/Espera)!
 
-**Used libraries**
+### License
+
+Espera is released under the [MIT-License](http://opensource.org/licenses/mit-license.php)
+
+### Used libraries
 
 - [Rareform](http://github.com/flagbug/Rareform)
 - [YoutubeExtractor](http://github.com/flagbug/YoutubeExtractor)
