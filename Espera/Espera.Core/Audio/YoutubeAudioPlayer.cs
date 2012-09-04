@@ -22,6 +22,8 @@ namespace Espera.Core.Audio
             if (song == null)
                 Throw.ArgumentNullException(() => song);
 
+            this.Song = song;
+
             string vlcPath = ApplicationHelper.DetectVlcFolderPath();
 
             VlcContext.LibVlcDllsPath = vlcPath;
