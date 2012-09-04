@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Espera.Core.Audio;
+using Rareform.Extensions;
+using Rareform.Validation;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Espera.Core.Audio;
-using Rareform.Extensions;
-using Rareform.Validation;
 
 namespace Espera.Core.Management
 {
@@ -853,15 +853,7 @@ namespace Espera.Core.Management
 
             Song song = this.currentPlaylist[playlistIndex];
 
-            if (this.currentPlayer != null)
-            {
-                this.currentPlayer.Dispose();
-            }
-
-            this.currentPlayer = song.CreateAudioPlayer();
-
-            this.currentPlayer.SongFinished += (sender, e) => this.HandleSongFinish();
-            this.currentPlayer.Volume = this.Volume;
+            this.RenewCurrentPlayer(song);
 
             Task.Factory.StartNew(() =>
             {
@@ -933,6 +925,19 @@ namespace Espera.Core.Management
                     this.playlists.AddRange(savedPlaylists);
                 }
             }
+        }
+
+        private void RenewCurrentPlayer(Song song)
+        {
+            if (this.currentPlayer != null)
+            {
+                this.currentPlayer.Dispose();
+            }
+
+            this.currentPlayer = song.CreateAudioPlayer();
+
+            this.currentPlayer.SongFinished += (sender, e) => this.HandleSongFinish();
+            this.currentPlayer.Volume = this.Volume;
         }
 
         private void ThrowIfNotAdmin()
