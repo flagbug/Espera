@@ -102,7 +102,7 @@ namespace Espera.View.ViewModels
                         this.Library.RemoveFromLibrary(songs);
                         this.Library.RemoveFromPlaylist(songs);
 
-                        this.OnPropertyChanged(vm => vm.SelectableSongs);
+                        this.UpdateSelectableSongs();
                         this.OnPropertyChanged(vm => vm.Artists);
                     },
                     param => this.SelectedSongs != null
@@ -122,7 +122,7 @@ namespace Espera.View.ViewModels
                     {
                         this.Library.RemoveFromLibrary(this.SelectedSongs.Select(song => song.Model));
 
-                        this.OnPropertyChanged(vm => vm.SelectableSongs);
+                        this.UpdateSelectableSongs();
                         this.OnPropertyChanged(vm => vm.Artists);
                     },
                     param => this.SelectedSongs != null
