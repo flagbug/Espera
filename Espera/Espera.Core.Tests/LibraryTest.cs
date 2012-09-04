@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using Espera.Core.Audio;
+﻿using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Tests.Mocks;
 using Moq;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 
 namespace Espera.Core.Tests
 {

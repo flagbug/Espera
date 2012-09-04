@@ -89,29 +89,6 @@ namespace Espera.View.ViewModels
             set { Settings.Default.LocalPathColumnWidth = value; }
         }
 
-        public ICommand RemoveFromLibraryAndPlaylistCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        var songs = this.SelectedSongs.Select(song => song.Model).ToList();
-
-                        this.Library.RemoveFromLibrary(songs);
-                        this.Library.RemoveFromPlaylist(songs);
-
-                        this.UpdateSelectableSongs();
-                        this.OnPropertyChanged(vm => vm.Artists);
-                    },
-                    param => this.SelectedSongs != null
-                        && this.SelectedSongs.Any()
-                        && (this.IsAdmin || !this.Library.LockLibraryRemoval)
-                );
-            }
-        }
-
         public ICommand RemoveFromLibraryCommand
         {
             get

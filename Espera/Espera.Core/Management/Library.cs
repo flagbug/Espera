@@ -598,6 +598,8 @@ namespace Espera.Core.Management
 
             lock (this.songLock)
             {
+                this.playlists.ForEach(p => this.RemoveFromPlaylist(songList));
+
                 foreach (Song song in songList)
                 {
                     this.songs.Remove(song);
