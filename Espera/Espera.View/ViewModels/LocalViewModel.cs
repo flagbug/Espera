@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Input;
-using Espera.Core;
+﻿using Espera.Core;
 using Espera.Core.Management;
 using Espera.View.Properties;
 using Rareform.Patterns.MVVM;
 using Rareform.Validation;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
@@ -67,7 +67,7 @@ namespace Espera.View.ViewModels
                     .Where(song => !String.IsNullOrWhiteSpace(song.Artist))
                     .GroupBy(song => song.Artist)
                     .Select(group => group.Key)
-                    .OrderBy(artist => artist);
+                    .OrderBy(artist => RemoveArtistPrefixes(artist, new[] { "A", "The" }));
             }
         }
 
@@ -261,6 +261,21 @@ namespace Espera.View.ViewModels
                 .ToList();
 
             this.SelectedSongs = this.SelectableSongs.Take(1);
+        }
+
+        private static string RemoveArtistPrefixes(string artistName, IEnumerable<string> prefixes)
+        {
+            foreach (string s in prefixes)
+            {
+                int lengthWithSpace = s.Length + 1;
+
+                if (artistName.Length >= lengthWithSpace && artistName.Substring(0, lengthWithSpace) == s + " ")
+                {
+                    return artistName.Substring(lengthWithSpace);
+                }
+            }
+
+            return artistName;
         }
     }
 }
