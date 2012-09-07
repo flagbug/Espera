@@ -8,3 +8,4 @@
 - Let user download from YouTube
 - Show a different message when a song is missing on the physical drive (currently it says that the song is corrupt)
 - Handle songs from a removable drive in a playlist when the application is started, but the original path doesn't exists anymore
+- Show YouTube video views
