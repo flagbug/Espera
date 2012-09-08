@@ -409,7 +409,7 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void CreateAdmin_PasswordIsWhitespace_ThrowsArgumentException()
+        public void CreateAdmin_PasswordIsWhiteSpace_ThrowsArgumentException()
         {
             using (var library = Helpers.CreateLibrary())
             {
