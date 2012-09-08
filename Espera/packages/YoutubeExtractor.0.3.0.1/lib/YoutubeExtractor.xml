@@ -71,6 +71,7 @@
             <returns>A list of <see cref="T:YoutubeExtractor.VideoInfo"/>s that can be used to download the video.</returns>
             <exception cref="T:System.ArgumentNullException">The <paramref name="videoUrl"/> parameter is <c>null</c>.</exception>
             <exception cref="T:System.ArgumentException">The <paramref name="videoUrl"/> parameter is not a valid YouTube URL.</exception>
+            <exception cref="T:YoutubeExtractor.VideoNotAvailableException">The video is not available.</exception>
             <exception cref="T:System.Net.WebException">An error occurred while downloading the YouTube page html.</exception>
             <exception cref="T:YoutubeExtractor.YoutubeParseException">The Youtube page could not be parsed.</exception>
         </member>
@@ -103,97 +104,25 @@
             Starts the video download.
             </summary>
         </member>
-        <member name="F:YoutubeExtractor.VideoFormat.WebM1080">
+        <member name="P:YoutubeExtractor.VideoInfo.AudioBitrate">
             <summary>
-            A WebM video with 1080p resolution (.webm).
+            The approximate audio bitrate in kbit/s.
             </summary>
-        </member>
-        <member name="F:YoutubeExtractor.VideoFormat.WebM720">
-            <summary>
-            A WebM video with 720p resolution (.webm).
-            </summary>
-        </member>
-        <member name="F:YoutubeExtractor.VideoFormat.WebM480">
-            <summary>
-            A WebM video with 480p resolution (.webm).
-            </summary>
-        </member>
-        <member name="F:YoutubeExtractor.VideoFormat.WebM360">
-            <summary>
-            A WebM video with 360p resolution (.webm).
-            </summary>
-        </member>
-        <member name="F:YoutubeExtractor.VideoFormat.HighDefinition4K">
-            <summary>
-            A high definition video with 4K resolution (.mp4).
-            </summary>
-        </member>
-        <member name="F:YoutubeExtractor.VideoFormat.HighDefinition1080">
-            <summary>
-            A high definition video with 1080p resolution (.mp4).
-            </summary>
-        </member>
-        <member name="F:YoutubeExtractor.VideoFormat.HighDefinition720">
-            <summary>
-            A high definition video with 720p resolution (.mp4).
-            </summary>
-        </member>
-        <member name="F:YoutubeExtractor.VideoFormat.HighDefinition720_3D">
-            <summary>
-            A high definition video with 720p resolution and 3D (.mp4).
-            </summary>
-        </member>
-        <member name="F:YoutubeExtractor.VideoFormat.Standard360">
-            <summary>
-            A standard video with 360p solution (.mp4).
-            </summary>
-        </member>
-        <member name="F:YoutubeExtractor.VideoFormat.Standard360_3D">
-            <summary>
-            A standard video with 360p solution and 3D (.mp4).
-            </summary>
-        </member>
-        <member name="F:YoutubeExtractor.VideoFormat.FlashAacHighQuality">
-            <summary>
-            A flash video with 480p resolution and 44KHz stereo AAC audio (.flv).
-            </summary>
-        </member>
-        <member name="F:YoutubeExtractor.VideoFormat.FlashAacLowQuality">
-            <summary>
-            A flash video with 240p resolution and 22KHz stereo AAC audio (.flv).
-            </summary>
-        </member>
-        <member name="F:YoutubeExtractor.VideoFormat.FlashMp3HighQuality">
-            <summary>
-            A flash video with 360p resolution and 44KHz mono Mp3 audio (.flv).
-            </summary>
-        </member>
-        <member name="F:YoutubeExtractor.VideoFormat.FlashMp3LowQuality">
-            <summary>
-            A flash video with 240p resolution and 44KHz mono Mp3 audio (.flv).
-            </summary>
-        </member>
-        <member name="F:YoutubeExtractor.VideoFormat.Mobile">
-            <summary>
-            A 3GP video for mobile devices (.3gp).
-            </summary>
-        </member>
-        <member name="F:YoutubeExtractor.VideoFormat.Unkown">
-            <summary>
-            Unkown format
-            </summary>
-        </member>
-        <member name="M:YoutubeExtractor.VideoInfo.#ctor(System.String,System.String,System.Int32)">
-            <summary>
-            Initializes a new instance of the <see cref="T:YoutubeExtractor.VideoInfo"/> class.
-            </summary>
-            <param name="downloadUrl">The download URL.</param>
-            <param name="title">The video title.</param>
-            <param name="formatCode">The format code.</param>
+            <value>
+            The approximate audio bitrate in kbit/s, or 0 if the bitrate is unknown.
+            </value>
         </member>
         <member name="P:YoutubeExtractor.VideoInfo.AudioExtension">
             <summary>
             Gets the audio extension.
+            </summary>
+            <value>
+            The audio extension, or <c>null</c> if the audio extension is unknown.
+            </value>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.AudioType">
+            <summary>
+            Gets the audio type (encoding).
             </summary>
         </member>
         <member name="P:YoutubeExtractor.VideoInfo.CanExtractAudio">
@@ -211,8 +140,16 @@
         </member>
         <member name="P:YoutubeExtractor.VideoInfo.FormatCode">
             <summary>
-            Gets the format code.
+            Gets the format code, that is used by YouTube internally to differentiate between quality profiles.
             </summary>
+        </member>
+        <member name="P:YoutubeExtractor.VideoInfo.Resolution">
+            <summary>
+            Gets the resolution of the video.
+            </summary>
+            <value>
+            The resolution of the video, or 0 if the resolution is unkown.
+            </value>
         </member>
         <member name="P:YoutubeExtractor.VideoInfo.Title">
             <summary>
@@ -223,19 +160,35 @@
             <summary>
             Gets the video extension.
             </summary>
-        </member>
-        <member name="P:YoutubeExtractor.VideoInfo.VideoFormat">
-            <summary>
-            Gets the video format.
-            </summary>
+            <value>
+            The video extension, or <c>null</c> if the video extension is unknown.
+            </value>
         </member>
         <member name="P:YoutubeExtractor.VideoInfo.VideoType">
             <summary>
-            Gets the type of the video.
+            Gets the video type (container).
             </summary>
-            <value>
-            The type of the video.
-            </value>
+        </member>
+        <member name="T:YoutubeExtractor.VideoNotAvailableException">
+            <summary>
+            The exception that is thrown when the video is not available for viewing.
+            This can happen when the uploader restricts the video to specific countries.
+            </summary>
+        </member>
+        <member name="T:YoutubeExtractor.VideoType">
+            <summary>
+            The video type. Also known as video container.
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoType.Mobile">
+            <summary>
+            Video for mobile devices (3GP).
+            </summary>
+        </member>
+        <member name="F:YoutubeExtractor.VideoType.Unknown">
+            <summary>
+            The video type is unknown.
+            </summary>
         </member>
         <member name="T:YoutubeExtractor.YoutubeParseException">
             <summary>

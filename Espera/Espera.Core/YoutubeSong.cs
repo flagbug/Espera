@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Espera.Core.Audio;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using Espera.Core.Audio;
 using YoutubeExtractor;
+using AudioType = Espera.Core.Audio.AudioType;
 
 namespace Espera.Core
 {
@@ -81,6 +82,16 @@ namespace Espera.Core
                 this.OnCachingFailed(EventArgs.Empty);
             }
 
+            catch (VideoNotAvailableException)
+            {
+                this.OnCachingFailed(EventArgs.Empty);
+            }
+
+            catch (YoutubeParseException)
+            {
+                this.OnCachingFailed(EventArgs.Empty);
+            }
+
             finally
             {
                 this.IsCaching = false;
@@ -97,10 +108,9 @@ namespace Espera.Core
             IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(youtubeLink);
 
             VideoInfo video = videoInfos
-                .Where(info => info.CanExtractAudio)
-                .First(info =>
-                        info.VideoFormat == VideoFormat.FlashMp3HighQuality ||
-                        info.VideoFormat == VideoFormat.FlashMp3LowQuality);
+                .Where(info => info.CanExtractAudio && info.AudioType == YoutubeExtractor.AudioType.Mp3)
+                .OrderByDescending(info => info.AudioBitrate)
+                .First();
 
             return video;
         }
