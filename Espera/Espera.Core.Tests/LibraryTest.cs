@@ -16,7 +16,7 @@ namespace Espera.Core.Tests
         [Test]
         public void AddAndSwitchToPlaylist_SomeGenericName_WorksAsExpected()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.AddAndSwitchToPlaylist("Playlist");
 
@@ -29,7 +29,7 @@ namespace Espera.Core.Tests
         [Test]
         public void AddAndSwitchToPlaylist_TwoPlaylistsWithSameName_ThrowsInvalidOperationException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.AddAndSwitchToPlaylist("Playlist");
 
@@ -40,7 +40,7 @@ namespace Espera.Core.Tests
         [Test]
         public void AddLocalSongsAsync_PathIsNull_ThrowsArgumentNullException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentNullException>(() => library.AddLocalSongsAsync(null));
             }
@@ -49,7 +49,7 @@ namespace Espera.Core.Tests
         [Test]
         public void AddPlayist_AddTwoPlaylistsWithSameName_ThrowInvalidOperationException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.AddPlaylist("Playlist");
 
@@ -71,7 +71,7 @@ namespace Espera.Core.Tests
         {
             var songs = new[] { new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero).Object, new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero).Object };
 
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.CreateAdmin("TestPassword");
                 library.ChangeToParty();
@@ -83,7 +83,7 @@ namespace Espera.Core.Tests
         [Test]
         public void AddSongsToPlaylist_SongListIsNull_ThrowsArgumentNullException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentNullException>(() => library.AddSongsToPlaylist(null));
             }
@@ -92,7 +92,7 @@ namespace Espera.Core.Tests
         [Test]
         public void AddSongToPlaylist_SongIsNull_ThrowsArgumentNullException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentNullException>(() => library.AddSongToPlaylist(null));
             }
@@ -124,7 +124,7 @@ namespace Espera.Core.Tests
             nextSong.Setup(p => p.CreateAudioPlayer()).Returns(jumpAudioPlayer);
             nextSong.SetupGet(p => p.HasToCache).Returns(false);
 
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 int finished = 0;
 
@@ -163,7 +163,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanAddSongToPlaylist_IsAdministrator_ReturnsTrue()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.IsTrue(library.CanAddSongToPlaylist);
             }
@@ -172,7 +172,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanAddSongToPlaylist_IsPartyModeAndRemainingTimeIsBiggerThanZero_ReturnsTrue()
         {
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 library.PlaylistTimeout = TimeSpan.FromMinutes(1);
 
@@ -190,7 +190,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanChangeTime_IsAdministrator_IsTrue()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.IsTrue(library.CanChangeTime);
             }
@@ -199,7 +199,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanChangeTime_IsNotAdministratorAndLockTimeIsFalse_IsTrue()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.LockTime = false;
 
@@ -213,7 +213,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanChangeTime_IsNotAdministratorAndLockTimeIsTrue_IsFalse()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.LockTime = true;
 
@@ -227,7 +227,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanChangeVolume_IsAdministrator_IsTrue()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.IsTrue(library.CanChangeVolume);
             }
@@ -236,7 +236,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanChangeVolume_IsNotAdministratorAndLockVolumeIsFalse_IsTrue()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.LockVolume = false;
 
@@ -250,7 +250,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanChangeVolume_IsNotAdministratorAndLockVolumeIsTrue_IsFalse()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.LockVolume = true;
 
@@ -264,7 +264,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanSwitchPlaylist_IsAdministrator_IsTrue()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.IsTrue(library.CanSwitchPlaylist);
             }
@@ -273,7 +273,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanSwitchPlaylist_IsNotAdministratorAndLockPlaylistSwitchingIsFalse_IsTrue()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.LockPlaylistSwitching = false;
 
@@ -287,7 +287,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CanSwitchPlaylist_IsNotAdministratorAndLockPlaylistSwitchingIsTrue_IsFalse()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.LockPlaylistSwitching = true;
 
@@ -301,7 +301,7 @@ namespace Espera.Core.Tests
         [Test]
         public void ChangeToAdmin_PasswordIsCorrent_AccessModeIsAdministrator()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.CreateAdmin("TestPassword");
                 library.ChangeToAdmin("TestPassword");
@@ -313,7 +313,7 @@ namespace Espera.Core.Tests
         [Test]
         public void ChangeToAdmin_PasswordIsNotCorrent_ThrowsWrongPasswordException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.CreateAdmin("TestPassword");
 
@@ -324,7 +324,7 @@ namespace Espera.Core.Tests
         [Test]
         public void ChangeToAdmin_PasswordIsNull_ThrowsArgumentNullException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentNullException>(() => library.ChangeToAdmin(null));
             }
@@ -333,7 +333,7 @@ namespace Espera.Core.Tests
         [Test]
         public void ContinueSong_IsNotAdmin_ThrowsInvalidOperationException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.CreateAdmin("Password");
                 library.ChangeToParty();
@@ -347,7 +347,7 @@ namespace Espera.Core.Tests
         {
             var handle = new ManualResetEvent(false);
 
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 Mock<Song> song = Helpers.CreateSongMock();
                 var audioPlayer = new Mock<AudioPlayer>();
@@ -372,7 +372,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CreateAdmin_AdminAlreadyCreated_ThrowsInvalidOperationException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.CreateAdmin("Password");
                 Assert.Throws<InvalidOperationException>(() => library.CreateAdmin("Password"));
@@ -382,7 +382,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CreateAdmin_PasswordIsEmpty_ThrowsArgumentException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentException>(() => library.CreateAdmin(String.Empty));
             }
@@ -391,7 +391,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CreateAdmin_PasswordIsNull_ThrowsArgumentNullException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentNullException>(() => library.CreateAdmin(null));
             }
@@ -400,7 +400,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CreateAdmin_PasswordIsTestPassword_AdministratorIsCreated()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.CreateAdmin("TestPassword");
 
@@ -411,7 +411,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CreateAdmin_PasswordIsWhiteSpace_ThrowsArgumentException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentException>(() => library.CreateAdmin(" "));
             }
@@ -422,7 +422,7 @@ namespace Espera.Core.Tests
         {
             CoreSettings.Default.UpgradeRequired = true;
 
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.Initialize();
             }
@@ -433,7 +433,7 @@ namespace Espera.Core.Tests
         [Test]
         public void PauseSong_IsNotAdministratorAndPausingIsLocked_ThrowsInvalidOperationException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.CreateAdmin("Password");
                 library.ChangeToParty();
@@ -445,7 +445,7 @@ namespace Espera.Core.Tests
         [Test]
         public void PauseSongCallsAudioPlayerPause()
         {
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 Mock<Song> song = Helpers.CreateSongMock();
                 var audioPlayer = new Mock<AudioPlayer>();
@@ -465,7 +465,7 @@ namespace Espera.Core.Tests
         [Test]
         public void Play_SongIsCorrupted_PlaysNextSong()
         {
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 var audioPlayer = new Mock<AudioPlayer>();
                 audioPlayer.Setup(p => p.Play()).Throws<PlaybackException>();
@@ -495,7 +495,7 @@ namespace Espera.Core.Tests
         [Test]
         public void Play_ThrowsPlaybackException_SetsSongIsCorruptedToTrue()
         {
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 var audioPlayer = new Mock<AudioPlayer>();
                 audioPlayer.Setup(p => p.Play()).Throws<PlaybackException>();
@@ -520,7 +520,7 @@ namespace Espera.Core.Tests
         [Test]
         public void Play_ThrowsSongLoadException_SetsSongIsCorruptedToTrue()
         {
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 var audioPlayer = new Mock<AudioPlayer>();
                 audioPlayer.Setup(p => p.Load()).Throws<SongLoadException>();
@@ -545,7 +545,7 @@ namespace Espera.Core.Tests
         [Test]
         public void PlayNextSong_UserIsNotAdministrator_ThrowsInvalidOperationException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.CreateAdmin("TestPassword");
                 library.ChangeToParty();
@@ -557,7 +557,7 @@ namespace Espera.Core.Tests
         [Test]
         public void PlayPreviousSong_PlaylistIsEmpty_ThrowsInvalidOperationException()
         {
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 Assert.Throws<InvalidOperationException>(library.PlayPreviousSong);
             }
@@ -566,7 +566,7 @@ namespace Espera.Core.Tests
         [Test]
         public void PlaysNextSongAutomatically()
         {
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
                 song1.Setup(p => p.CreateAudioPlayer()).Returns(() => new JumpAudioPlayer());
@@ -601,7 +601,7 @@ namespace Espera.Core.Tests
         [Test]
         public void PlaySong_IndexIsLessThanZero_ThrowsArgumentOutOfRangeException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentOutOfRangeException>(() => library.PlaySong(-1));
             }
@@ -610,7 +610,7 @@ namespace Espera.Core.Tests
         [Test]
         public void PlaySong_UserIsNotAdministrator_ThrowsInvalidOperationException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.CreateAdmin("TestPassword");
                 library.ChangeToParty();
@@ -622,7 +622,7 @@ namespace Espera.Core.Tests
         [Test]
         public void RemoveFromLibrary_IsNotAdministratorAndRemovalIsLocked_ThrowsInvalidOperationException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.LockLibraryRemoval = true;
 
@@ -636,7 +636,7 @@ namespace Espera.Core.Tests
         [Test]
         public void RemoveFromLibrary_SongListIsNull_ThrowsArgumentNullException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentNullException>(() => library.RemoveFromLibrary(null));
             }
@@ -647,7 +647,7 @@ namespace Espera.Core.Tests
         {
             var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
 
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 library.AddSongsToPlaylist(new[] { songMock.Object });
 
@@ -660,7 +660,7 @@ namespace Espera.Core.Tests
         [Test]
         public void RemoveFromPlaylist_IndexesIsNull_ThrowsArgumentNullException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentNullException>(() => library.RemoveFromPlaylist((IEnumerable<int>)null));
             }
@@ -669,7 +669,7 @@ namespace Espera.Core.Tests
         [Test]
         public void RemoveFromPlaylist_RemoveByIndexes_SongsAreRemovedFromPlaylist()
         {
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 Song[] songs = Helpers.SetupSongMocks(4);
 
@@ -687,7 +687,7 @@ namespace Espera.Core.Tests
         [Test]
         public void RemoveFromPlaylist_RemoveBySongReference_SongsAreRemovedFromPlaylist()
         {
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 Song[] songs = Helpers.SetupSongMocks(4, true);
 
@@ -710,7 +710,7 @@ namespace Espera.Core.Tests
             var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
             songMock.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayerMock.Object);
 
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 library.AddSongsToPlaylist(new[] { songMock.Object });
 
@@ -725,7 +725,7 @@ namespace Espera.Core.Tests
         [Test]
         public void RemoveFromPlaylist_SongListIsNull_ThrowsArgumentNullException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentNullException>(() => library.RemoveFromPlaylist((IEnumerable<Song>)null));
             }
@@ -734,7 +734,7 @@ namespace Espera.Core.Tests
         [Test]
         public void RemovePlaylist_NoPlaylistExists_ThrowsInvalidOperationException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<InvalidOperationException>(() => library.RemovePlaylist("Playlist"));
             }
@@ -743,7 +743,7 @@ namespace Espera.Core.Tests
         [Test]
         public void RemovePlaylist_PlaylistDoesNotExist_ThrowsInvalidOperationException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.AddPlaylist("Playlist");
 
@@ -754,7 +754,7 @@ namespace Espera.Core.Tests
         [Test]
         public void RemovePlaylist_PlaylistNameIsNull_ThrowsArgumentNullException()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentNullException>(() => library.RemovePlaylist(null));
             }
@@ -763,7 +763,7 @@ namespace Espera.Core.Tests
         [Test]
         public void RemovePlaylist_RemoveFirstPlaylist_PlaylistIsRemoved()
         {
-            using (var library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary())
             {
                 library.AddPlaylist("Playlist");
 
@@ -782,7 +782,7 @@ namespace Espera.Core.Tests
             var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
             song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
 
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 library.AddSongToPlaylist(song.Object);
 
@@ -808,7 +808,7 @@ namespace Espera.Core.Tests
             var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
             song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
 
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 library.AddSongToPlaylist(song.Object);
 
@@ -830,7 +830,7 @@ namespace Espera.Core.Tests
         [Test]
         public void SwitchToPlaylist_PartyModeAndLockPlaylistSwitchingIsTrue_ThrowsInvalidOperationException()
         {
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 library.LockPlaylistSwitching = true;
 
@@ -846,7 +846,7 @@ namespace Espera.Core.Tests
         [Test]
         public void SwitchToPlaylist_PlaySongThenChangePlaylist_NextSongDoesNotPlayWhenSongFinishes()
         {
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 var handle = new ManualResetEvent(false);
 
