@@ -397,6 +397,9 @@ namespace Espera.Core.Management
         /// <exception cref="InvalidOperationException">A playlist with the specified name already exists.</exception>
         public void AddPlaylist(string name)
         {
+            if (name == null)
+                Throw.ArgumentNullException(() => name);
+
             if (this.playlists.Any(playlist => playlist.Name == name))
                 throw new InvalidOperationException("A playlist with this name already exists.");
 
