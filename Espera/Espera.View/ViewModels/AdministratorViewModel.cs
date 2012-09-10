@@ -1,11 +1,11 @@
-﻿using System;
-using System.Diagnostics;
-using System.Reflection;
-using System.Windows.Input;
-using Espera.Core;
+﻿using Espera.Core;
 using Espera.Core.Management;
 using Rareform.Patterns.MVVM;
 using Rareform.Validation;
+using System;
+using System.Diagnostics;
+using System.Reflection;
+using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
@@ -68,6 +68,7 @@ namespace Espera.View.ViewModels
                 if (this.library.EnablePlaylistTimeout != value)
                 {
                     this.library.EnablePlaylistTimeout = value;
+
                     this.OnPropertyChanged(vm => vm.EnablePlaylistTimeout);
                 }
             }

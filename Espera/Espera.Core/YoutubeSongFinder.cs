@@ -1,9 +1,9 @@
-﻿using System;
-using Espera.Core.Audio;
+﻿using Espera.Core.Audio;
 using Google.GData.Client;
 using Google.GData.YouTube;
 using Google.YouTube;
 using Rareform.Validation;
+using System;
 
 namespace Espera.Core
 {
@@ -54,7 +54,8 @@ namespace Espera.Core
                                    Title = video.Title,
                                    Description = video.Description,
                                    Rating = video.RatingAverage,
-                                   ThumbnailSource = new Uri(video.Thumbnails[0].Url)
+                                   ThumbnailSource = new Uri(video.Thumbnails[0].Url),
+                                   Views = video.ViewCount
                                };
 
                 this.InternSongsFound.Add(song);

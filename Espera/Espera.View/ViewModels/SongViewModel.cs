@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Espera.Core;
+using Rareform.Patterns.MVVM;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -6,8 +8,6 @@ using System.Net;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Espera.Core;
-using Rareform.Patterns.MVVM;
 
 namespace Espera.View.ViewModels
 {
@@ -74,6 +74,16 @@ namespace Espera.View.ViewModels
                 }
 
                 return this.thumbnail;
+            }
+        }
+
+        public int? Views
+        {
+            get
+            {
+                var song = this.Model as YoutubeSong;
+
+                return song == null ? (int?)null : song.Views;
             }
         }
 

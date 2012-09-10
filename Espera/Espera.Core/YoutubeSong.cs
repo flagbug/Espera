@@ -18,7 +18,7 @@ namespace Espera.Core
         /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
         /// <param name="isStreaming">if set to true, the song streams from YouTube, instead of downloading.</param>
-        /// <exception cref="ArgumentNullException"><c>path</c> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="path"/> is null.</exception>
         public YoutubeSong(string path, AudioType audioType, TimeSpan duration, bool isStreaming)
             : base(path, audioType, duration)
         {
@@ -28,9 +28,6 @@ namespace Espera.Core
         /// <summary>
         /// Gets or sets the description that was entered by the uploader of the YouTube video.
         /// </summary>
-        /// <value>
-        /// The description that was entered by the uploader of the YouTube video.
-        /// </value>
         public string Description { get; set; }
 
         public override bool HasToCache
@@ -43,18 +40,17 @@ namespace Espera.Core
         /// <summary>
         /// Gets or sets the average rating.
         /// </summary>
-        /// <value>
-        /// The average rating.
-        /// </value>
         public double Rating { get; set; }
 
         /// <summary>
         /// Gets or sets the thumbnail source.
         /// </summary>
-        /// <value>
-        /// The thumbnail source.
-        /// </value>
         public Uri ThumbnailSource { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of views for the YouTube video.
+        /// </summary>
+        public int Views { get; set; }
 
         public override void LoadToCache()
         {
