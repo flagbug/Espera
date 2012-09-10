@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Espera.Core;
+using Espera.Core.Management;
+using Espera.View.Properties;
+using Rareform.Patterns.MVVM;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Timers;
 using System.Windows.Input;
-using Espera.Core;
-using Espera.Core.Management;
-using Espera.View.Properties;
-using Rareform.Patterns.MVVM;
 
 namespace Espera.View.ViewModels
 {
@@ -465,6 +465,11 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public bool ShowPlaylistTimeOut
+        {
+            get { return this.AdministratorViewModel.EnablePlaylistTimeout && !this.IsAdmin; }
+        }
+
         public ICommand ShufflePlaylistCommand
         {
             get
@@ -683,6 +688,7 @@ namespace Espera.View.ViewModels
             this.OnPropertyChanged(vm => vm.CanChangeVolume);
             this.OnPropertyChanged(vm => vm.CanChangeTime);
             this.OnPropertyChanged(vm => vm.CanSwitchPlaylist);
+            this.OnPropertyChanged(vm => vm.ShowPlaylistTimeOut);
         }
     }
 }

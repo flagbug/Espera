@@ -744,7 +744,7 @@
                                 Margin="0, 5, 0, 0"
                                 HorizontalAlignment="Center"
                                 Orientation="Horizontal"
-                                Visibility="{Binding Path=AdministratorViewModel.EnablePlaylistTimeout,
+                                Visibility="{Binding Path=ShowPlaylistTimeOut,
                                                      Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel.Style>
                             <Style TargetType="{x:Type StackPanel}">
