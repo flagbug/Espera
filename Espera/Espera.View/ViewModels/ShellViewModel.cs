@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class MainViewModel : PropertyChangedBase, IDisposable
+    internal sealed class ShellViewModel : PropertyChangedBase, IDisposable
     {
         private readonly Library library;
         private readonly Timer playlistTimeoutUpdateTimer;
@@ -24,7 +24,7 @@ namespace Espera.View.ViewModels
         private ObservableCollection<PlaylistViewModel> playlists;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
 
-        public MainViewModel()
+        public ShellViewModel()
         {
             this.library = new Library(new RemovableDriveWatcher());
             this.library.Initialize();

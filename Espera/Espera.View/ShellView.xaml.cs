@@ -14,12 +14,9 @@ using ListView = System.Windows.Controls.ListView;
 
 namespace Espera.View
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow
+    public partial class ShellView
     {
-        public MainWindow()
+        public ShellView()
         {
             InitializeComponent();
 
@@ -41,7 +38,7 @@ namespace Espera.View
 
             if (!String.IsNullOrEmpty(selectedPath))
             {
-                this.mainViewModel.LocalViewModel.AddSongs(selectedPath);
+                this.shellViewModel.LocalViewModel.AddSongs(selectedPath);
             }
         }
 
@@ -58,7 +55,7 @@ namespace Espera.View
 
         private void CreateAdminButtonClick(object sender, RoutedEventArgs e)
         {
-            ICommand command = this.mainViewModel.AdministratorViewModel.CreateAdminCommand;
+            ICommand command = this.shellViewModel.AdministratorViewModel.CreateAdminCommand;
 
             if (command.CanExecute(null))
             {
@@ -70,7 +67,7 @@ namespace Espera.View
 
         private void CreationPasswordChanged(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.AdministratorViewModel.CreationPassword = ((PasswordBox)sender).Password;
+            this.shellViewModel.AdministratorViewModel.CreationPassword = ((PasswordBox)sender).Password;
         }
 
         private void GreenColorButtonButtonClick(object sender, RoutedEventArgs e)
@@ -81,7 +78,7 @@ namespace Espera.View
 
         private void LoginButtonClick(object sender, RoutedEventArgs e)
         {
-            ICommand command = this.mainViewModel.AdministratorViewModel.LoginCommand;
+            ICommand command = this.shellViewModel.AdministratorViewModel.LoginCommand;
             if (command.CanExecute(null))
             {
                 command.Execute(null);
@@ -92,7 +89,7 @@ namespace Espera.View
 
         private void LoginPasswordChanged(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.AdministratorViewModel.LoginPassword = ((PasswordBox)sender).Password;
+            this.shellViewModel.AdministratorViewModel.LoginPassword = ((PasswordBox)sender).Password;
         }
 
         private void MainWindowMouseDown(object sender, MouseButtonEventArgs e)
@@ -103,24 +100,24 @@ namespace Espera.View
 
         private void MetroWindowClosing(object sender, CancelEventArgs e)
         {
-            this.mainViewModel.Dispose();
+            this.shellViewModel.Dispose();
         }
 
         private void MetroWindowKeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Space)
             {
-                if (this.mainViewModel.IsPlaying)
+                if (this.shellViewModel.IsPlaying)
                 {
-                    if (this.mainViewModel.PauseCommand.CanExecute(null))
+                    if (this.shellViewModel.PauseCommand.CanExecute(null))
                     {
-                        this.mainViewModel.PauseCommand.Execute(null);
+                        this.shellViewModel.PauseCommand.Execute(null);
                     }
                 }
 
-                else if (this.mainViewModel.PlayCommand.CanExecute(null))
+                else if (this.shellViewModel.PlayCommand.CanExecute(null))
                 {
-                    this.mainViewModel.PlayCommand.Execute(false);
+                    this.shellViewModel.PlayCommand.Execute(false);
                 }
             }
         }
@@ -135,9 +132,9 @@ namespace Espera.View
 
         private void PlaylistDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (this.mainViewModel.PlayCommand.CanExecute(null))
+            if (this.shellViewModel.PlayCommand.CanExecute(null))
             {
-                this.mainViewModel.PlayCommand.Execute(true);
+                this.shellViewModel.PlayCommand.Execute(true);
             }
         }
 
@@ -145,17 +142,17 @@ namespace Espera.View
         {
             if (e.Key == Key.Delete)
             {
-                if (this.mainViewModel.RemoveSelectedPlaylistEntriesCommand.CanExecute(null))
+                if (this.shellViewModel.RemoveSelectedPlaylistEntriesCommand.CanExecute(null))
                 {
-                    this.mainViewModel.RemoveSelectedPlaylistEntriesCommand.Execute(null);
+                    this.shellViewModel.RemoveSelectedPlaylistEntriesCommand.Execute(null);
                 }
             }
 
             else if (e.Key == Key.Enter)
             {
-                if (this.mainViewModel.PlayCommand.CanExecute(null))
+                if (this.shellViewModel.PlayCommand.CanExecute(null))
                 {
-                    this.mainViewModel.PlayCommand.Execute(true);
+                    this.shellViewModel.PlayCommand.Execute(true);
                 }
             }
         }
@@ -171,7 +168,7 @@ namespace Espera.View
         {
             if (e.Key == Key.Enter)
             {
-                this.mainViewModel.CurrentEditedPlaylist.EditName = false;
+                this.shellViewModel.CurrentEditedPlaylist.EditName = false;
             }
 
             e.Handled = true; // Don't send key events when renaming a playlist
@@ -179,7 +176,7 @@ namespace Espera.View
 
         private void PlaylistNameTextBoxLostFocus(object sender, RoutedEventArgs e)
         {
-            PlaylistViewModel playlist = this.mainViewModel.CurrentEditedPlaylist;
+            PlaylistViewModel playlist = this.shellViewModel.CurrentEditedPlaylist;
 
             if (playlist != null)
             {
@@ -189,14 +186,14 @@ namespace Espera.View
 
         private void PlaylistSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            this.mainViewModel.SelectedPlaylistEntries = ((ListView)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
+            this.shellViewModel.SelectedPlaylistEntries = ((ListView)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
         }
 
         private void PlaylistsKeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Delete)
             {
-                var command = this.mainViewModel.RemovePlaylistCommand;
+                var command = this.shellViewModel.RemovePlaylistCommand;
 
                 if (command.CanExecute(null))
                 {
@@ -221,7 +218,7 @@ namespace Espera.View
         {
             if (e.Key == Key.Enter)
             {
-                this.mainViewModel.YoutubeViewModel.StartSearch();
+                this.shellViewModel.YoutubeViewModel.StartSearch();
             }
 
             e.Handled = true;
@@ -229,7 +226,7 @@ namespace Espera.View
 
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ICommand addToPlaylist = this.mainViewModel.CurrentSongSource.AddToPlaylistCommand;
+            ICommand addToPlaylist = this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
 
             if (e.LeftButton == MouseButtonState.Pressed && addToPlaylist.CanExecute(null))
             {
@@ -247,7 +244,7 @@ namespace Espera.View
 
         private void SongListKeyUp(object sender, KeyEventArgs e)
         {
-            ICommand removeFromLibrary = this.mainViewModel.LocalViewModel.RemoveFromLibraryCommand;
+            ICommand removeFromLibrary = this.shellViewModel.LocalViewModel.RemoveFromLibraryCommand;
 
             if (e.Key == Key.Delete)
             {
@@ -260,47 +257,47 @@ namespace Espera.View
 
         private void SongListSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            this.mainViewModel.CurrentSongSource.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModelBase>();
+            this.shellViewModel.CurrentSongSource.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModelBase>();
         }
 
         private void SortLocalSongAlbum(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.LocalViewModel.OrderByAlbum();
+            this.shellViewModel.LocalViewModel.OrderByAlbum();
         }
 
         private void SortLocalSongArtist(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.LocalViewModel.OrderByArtist();
+            this.shellViewModel.LocalViewModel.OrderByArtist();
         }
 
         private void SortLocalSongDuration(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.LocalViewModel.OrderByDuration();
+            this.shellViewModel.LocalViewModel.OrderByDuration();
         }
 
         private void SortLocalSongGenre(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.LocalViewModel.OrderByGenre();
+            this.shellViewModel.LocalViewModel.OrderByGenre();
         }
 
         private void SortLocalSongTitle(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.LocalViewModel.OrderByTitle();
+            this.shellViewModel.LocalViewModel.OrderByTitle();
         }
 
         private void SortYoutubeSongDuration(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.YoutubeViewModel.OrderByDuration();
+            this.shellViewModel.YoutubeViewModel.OrderByDuration();
         }
 
         private void SortYoutubeSongRating(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.YoutubeViewModel.OrderByRating();
+            this.shellViewModel.YoutubeViewModel.OrderByRating();
         }
 
         private void SortYoutubeSongTitle(object sender, RoutedEventArgs e)
         {
-            this.mainViewModel.YoutubeViewModel.OrderByTitle();
+            this.shellViewModel.YoutubeViewModel.OrderByTitle();
         }
     }
 }

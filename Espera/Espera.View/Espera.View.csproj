@@ -139,7 +139,7 @@
     <Compile Include="ViewModels\StatusViewModel.cs" />
     <Compile Include="ViewModels\YoutubeSongViewModel.cs" />
     <Compile Include="ViewModels\YoutubeViewModel.cs" />
-    <Page Include="MainWindow.xaml">
+    <Page Include="ShellView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -147,9 +147,9 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ViewModels\MainViewModel.cs" />
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
+    <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Compile Include="ShellView.xaml.cs">
+      <DependentUpon>ShellView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
