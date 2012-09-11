@@ -445,8 +445,8 @@
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
-                                        <GridViewColumn Width="{Binding Path=RatingColumnWidth, Mode=TwoWay}">
-                                            <GridViewColumnHeader Click="SortYoutubeSongRating" Content="Views" />
+                                        <GridViewColumn Width="{Binding Path=ViewsColumnWidth, Mode=TwoWay}">
+                                            <GridViewColumnHeader Click="SortYoutubeSongViews" Content="Views" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock Text="{Binding Path=Views, TargetNullValue=n/a}" TextTrimming="CharacterEllipsis" />

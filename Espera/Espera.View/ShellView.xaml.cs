@@ -299,5 +299,10 @@ namespace Espera.View
         {
             this.shellViewModel.YoutubeViewModel.OrderByTitle();
         }
+
+        private void SortYoutubeSongViews(object sender, RoutedEventArgs e)
+        {
+            this.shellViewModel.YoutubeViewModel.OrderByViews();
+        }
     }
 }

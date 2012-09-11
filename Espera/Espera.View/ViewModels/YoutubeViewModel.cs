@@ -16,6 +16,7 @@ namespace Espera.View.ViewModels
         private SortOrder ratingOrder;
         private string searchText;
         private SortOrder titleOrder;
+        private SortOrder viewsOrder;
 
         public YoutubeViewModel(Library library)
             : base(library)
@@ -99,6 +100,14 @@ namespace Espera.View.ViewModels
         {
             this.SongOrderFunc = SortHelpers.GetOrderByTitle<YoutubeSongViewModel>(this.titleOrder);
             SortHelpers.InverseOrder(ref this.titleOrder);
+
+            this.ApplyOrder();
+        }
+
+        public void OrderByViews()
+        {
+            this.SongOrderFunc = SortHelpers.GetOrderByViews(this.viewsOrder);
+            SortHelpers.InverseOrder(ref this.viewsOrder);
 
             this.ApplyOrder();
         }
