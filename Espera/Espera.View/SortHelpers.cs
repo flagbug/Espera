@@ -37,7 +37,7 @@ namespace Espera.View
                 .ThenBy(song => song.TrackNumber, sortOrder);
         }
 
-        public static Func<IEnumerable<SongViewModel>, IOrderedEnumerable<SongViewModel>> GetOrderByRating(SortOrder sortOrder)
+        public static Func<IEnumerable<YoutubeSongViewModel>, IOrderedEnumerable<YoutubeSongViewModel>> GetOrderByRating(SortOrder sortOrder)
         {
             return songs => songs
                 .OrderBy(song => song.Rating, sortOrder);

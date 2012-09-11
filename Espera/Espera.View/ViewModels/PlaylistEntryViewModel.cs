@@ -18,21 +18,21 @@ namespace Espera.View.ViewModels
 
             this.Index = index;
 
-            if (this.Wrapped.HasToCache && !this.Wrapped.IsCached)
+            if (this.Model.HasToCache && !this.Model.IsCached)
             {
-                this.Wrapped.CachingProgressChanged += (sender, e) => this.NotifyOfPropertyChange(() => this.CacheProgress);
+                this.Model.CachingProgressChanged += (sender, e) => this.NotifyOfPropertyChange(() => this.CacheProgress);
 
-                this.Wrapped.CachingFailed += (sender, args) => this.HasCachingFailed = true;
+                this.Model.CachingFailed += (sender, args) => this.HasCachingFailed = true;
 
-                this.Wrapped.CachingCompleted += (sender, e) => this.NotifyOfPropertyChange(() => this.ShowCaching);
+                this.Model.CachingCompleted += (sender, e) => this.NotifyOfPropertyChange(() => this.ShowCaching);
             }
 
-            this.Wrapped.Corrupted += (sender, args) => this.NotifyOfPropertyChange(() => this.IsCorrupted);
+            this.Model.Corrupted += (sender, args) => this.NotifyOfPropertyChange(() => this.IsCorrupted);
         }
 
         public int CacheProgress
         {
-            get { return this.Wrapped.CachingProgress; }
+            get { return this.Model.CachingProgress; }
         }
 
         public bool HasCachingFailed
@@ -52,7 +52,7 @@ namespace Espera.View.ViewModels
 
         public bool IsCorrupted
         {
-            get { return this.Wrapped.IsCorrupted; }
+            get { return this.Model.IsCorrupted; }
         }
 
         public bool IsInactive
@@ -83,19 +83,19 @@ namespace Espera.View.ViewModels
 
         public bool ShowCaching
         {
-            get { return this.Wrapped.HasToCache && this.CacheProgress != 100 || this.HasCachingFailed; }
+            get { return this.Model.HasToCache && this.CacheProgress != 100 || this.HasCachingFailed; }
         }
 
         public string Source
         {
             get
             {
-                if (this.Wrapped is LocalSong)
+                if (this.Model is LocalSong)
                 {
                     return "Local";
                 }
 
-                if (this.Wrapped is YoutubeSong)
+                if (this.Model is YoutubeSong)
                 {
                     return "YouTube";
                 }

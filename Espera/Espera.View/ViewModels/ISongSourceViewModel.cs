@@ -9,6 +9,6 @@ namespace Espera.View.ViewModels
 
         string SearchText { get; set; }
 
-        IEnumerable<SongViewModel> SelectedSongs { set; }
+        IEnumerable<SongViewModelBase> SelectedSongs { set; }
     }
 }

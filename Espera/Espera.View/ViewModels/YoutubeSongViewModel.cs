@@ -1,22 +1,25 @@
 ﻿using Espera.Core;
 using Rareform.Patterns.MVVM;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Text;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace Espera.View.ViewModels
 {
-    public sealed class SongViewModel : SongViewModelBase
+    internal sealed class YoutubeSongViewModel : SongViewModelBase
     {
         private BitmapImage thumbnail;
 
-        public SongViewModel(Song model)
-            : base(model)
+        public YoutubeSongViewModel(Song wrapped)
+            : base(wrapped)
         { }
 
         public string Description
@@ -32,11 +35,6 @@ namespace Espera.View.ViewModels
         public bool HasThumbnail
         {
             get { return this.thumbnail != null; }
-        }
-
-        public Song Model
-        {
-            get { return this.Wrapped; }
         }
 
         public ICommand OpenPathCommand

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class YoutubeViewModel : SongSourceViewModel
+    internal sealed class YoutubeViewModel : SongSourceViewModel<YoutubeSongViewModel>
     {
         private IEnumerable<YoutubeSong> currentSongs;
         private SortOrder durationOrder;
@@ -81,7 +81,7 @@ namespace Espera.View.ViewModels
 
         public void OrderByDuration()
         {
-            this.SongOrderFunc = SortHelpers.GetOrderByDuration<SongViewModel>(this.durationOrder);
+            this.SongOrderFunc = SortHelpers.GetOrderByDuration<YoutubeSongViewModel>(this.durationOrder);
             SortHelpers.InverseOrder(ref this.durationOrder);
 
             this.ApplyOrder();
@@ -97,7 +97,7 @@ namespace Espera.View.ViewModels
 
         public void OrderByTitle()
         {
-            this.SongOrderFunc = SortHelpers.GetOrderByTitle<SongViewModel>(this.titleOrder);
+            this.SongOrderFunc = SortHelpers.GetOrderByTitle<YoutubeSongViewModel>(this.titleOrder);
             SortHelpers.InverseOrder(ref this.titleOrder);
 
             this.ApplyOrder();
@@ -123,7 +123,7 @@ namespace Espera.View.ViewModels
             }
 
             this.SelectableSongs = currentSongs
-                .Select(song => new SongViewModel(song))
+                .Select(song => new YoutubeSongViewModel(song))
                 .OrderBy(this.SongOrderFunc)
                 .ToList();
         }

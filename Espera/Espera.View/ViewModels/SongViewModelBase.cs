@@ -7,44 +7,44 @@ namespace Espera.View.ViewModels
 {
     public abstract class SongViewModelBase : PropertyChangedBase
     {
-        protected SongViewModelBase(Song wrapped)
+        protected SongViewModelBase(Song model)
         {
-            if (wrapped == null)
-                Throw.ArgumentNullException(() => wrapped);
+            if (model == null)
+                Throw.ArgumentNullException(() => model);
 
-            this.Wrapped = wrapped;
+            this.Model = model;
         }
 
         public string Album
         {
-            get { return this.Wrapped.Album; }
+            get { return this.Model.Album; }
         }
 
         public string Artist
         {
-            get { return this.Wrapped.Artist; }
+            get { return this.Model.Artist; }
         }
 
         public TimeSpan Duration
         {
-            get { return this.Wrapped.Duration; }
+            get { return this.Model.Duration; }
         }
 
         public string Genre
         {
-            get { return this.Wrapped.Genre; }
+            get { return this.Model.Genre; }
         }
+
+        public Song Model { get; private set; }
 
         public string Title
         {
-            get { return this.Wrapped.Title; }
+            get { return this.Model.Title; }
         }
 
         public int TrackNumber
         {
-            get { return this.Wrapped.TrackNumber; }
+            get { return this.Model.TrackNumber; }
         }
-
-        protected Song Wrapped { get; private set; }
     }
 }

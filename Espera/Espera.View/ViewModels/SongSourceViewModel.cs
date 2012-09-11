@@ -9,16 +9,17 @@ using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal abstract class SongSourceViewModel : PropertyChangedBase, ISongSourceViewModel
+    internal abstract class SongSourceViewModel<T> : PropertyChangedBase, ISongSourceViewModel
+        where T : SongViewModelBase
     {
         private readonly Library library;
-        private IEnumerable<SongViewModel> selectableSongs;
-        private IEnumerable<SongViewModel> selectedSongs;
+        private IEnumerable<T> selectableSongs;
+        private IEnumerable<SongViewModelBase> selectedSongs;
 
         protected SongSourceViewModel(Library library)
         {
             this.library = library;
-            this.SelectableSongs = Enumerable.Empty<SongViewModel>();
+            this.SelectableSongs = Enumerable.Empty<T>();
         }
 
         public event EventHandler TimeoutWarning;
@@ -28,7 +29,7 @@ namespace Espera.View.ViewModels
             get
             {
                 return new RelayCommand
-                (
+                    (
                     param =>
                     {
                         if (!this.Library.CanAddSongToPlaylist)
@@ -50,7 +51,7 @@ namespace Espera.View.ViewModels
                         }
                     },
                     param => this.SelectedSongs != null && this.SelectedSongs.Any()
-                );
+                    );
             }
         }
 
@@ -71,7 +72,7 @@ namespace Espera.View.ViewModels
 
         public abstract string SearchText { get; set; }
 
-        public IEnumerable<SongViewModel> SelectableSongs
+        public IEnumerable<T> SelectableSongs
         {
             get { return this.selectableSongs; }
             protected set
@@ -84,7 +85,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public IEnumerable<SongViewModel> SelectedSongs
+        public IEnumerable<SongViewModelBase> SelectedSongs
         {
             get { return this.selectedSongs; }
             set
@@ -103,7 +104,7 @@ namespace Espera.View.ViewModels
             get { return this.library; }
         }
 
-        protected Func<IEnumerable<SongViewModel>, IOrderedEnumerable<SongViewModel>> SongOrderFunc { get; set; }
+        protected Func<IEnumerable<T>, IOrderedEnumerable<T>> SongOrderFunc { get; set; }
 
         protected void ApplyOrder()
         {

@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Espera.View.Properties;
+using Espera.View.ViewModels;
+using Ionic.Utils;
+using MahApps.Metro;
+using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
@@ -6,10 +10,6 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Espera.View.Properties;
-using Espera.View.ViewModels;
-using Ionic.Utils;
-using MahApps.Metro;
 using ListView = System.Windows.Controls.ListView;
 
 namespace Espera.View
@@ -122,7 +122,6 @@ namespace Espera.View
                 {
                     this.mainViewModel.PlayCommand.Execute(false);
                 }
-                
             }
         }
 
@@ -261,7 +260,7 @@ namespace Espera.View
 
         private void SongListSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            this.mainViewModel.CurrentSongSource.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModel>();
+            this.mainViewModel.CurrentSongSource.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModelBase>();
         }
 
         private void SortLocalSongAlbum(object sender, RoutedEventArgs e)
