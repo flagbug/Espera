@@ -11,7 +11,7 @@ using System.Windows.Media.Imaging;
 
 namespace Espera.View.ViewModels
 {
-    public sealed class SongViewModel : SongViewModelBase<SongViewModel>
+    public sealed class SongViewModel : SongViewModelBase
     {
         private BitmapImage thumbnail;
 
@@ -136,8 +136,8 @@ namespace Espera.View.ViewModels
                 if (bitmapImage != null)
                 {
                     this.thumbnail = bitmapImage;
-                    this.OnPropertyChanged(vm => vm.Thumbnail);
-                    this.OnPropertyChanged(vm => vm.HasThumbnail);
+                    this.NotifyOfPropertyChange(() => this.Thumbnail);
+                    this.NotifyOfPropertyChange(() => this.HasThumbnail);
                 }
 
                 worker.Dispose();

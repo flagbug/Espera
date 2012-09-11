@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Espera.Core;
+using Espera.Core.Management;
+using Espera.View.Properties;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Espera.Core;
-using Espera.Core.Management;
-using Espera.View.Properties;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class YoutubeViewModel : SongSourceViewModel<YoutubeViewModel>
+    internal sealed class YoutubeViewModel : SongSourceViewModel
     {
         private IEnumerable<YoutubeSong> currentSongs;
         private SortOrder durationOrder;
@@ -43,7 +43,7 @@ namespace Espera.View.ViewModels
                 if (this.IsSearching != value)
                 {
                     this.isSearching = value;
-                    this.OnPropertyChanged(vm => vm.IsSearching);
+                    this.NotifyOfPropertyChange(() => this.IsSearching);
                 }
             }
         }
@@ -68,7 +68,7 @@ namespace Espera.View.ViewModels
                 if (this.SearchText != value)
                 {
                     this.searchText = value;
-                    this.OnPropertyChanged(vm => vm.SearchText);
+                    this.NotifyOfPropertyChange(() => this.SearchText);
                 }
             }
         }

@@ -1,4 +1,5 @@
-﻿using Espera.Core;
+﻿using Caliburn.Micro;
+using Espera.Core;
 using Espera.Core.Management;
 using Rareform.Patterns.MVVM;
 using Rareform.Validation;
@@ -9,7 +10,7 @@ using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    public sealed class AdministratorViewModel : ViewModelBase<AdministratorViewModel>
+    public sealed class AdministratorViewModel : PropertyChangedBase
     {
         private readonly Library library;
         private bool isWrongPassword;
@@ -32,8 +33,8 @@ namespace Espera.View.ViewModels
                     param =>
                     {
                         this.library.ChangeToParty();
-                        this.OnPropertyChanged(vm => vm.IsParty);
-                        this.OnPropertyChanged(vm => vm.IsAdmin);
+                        this.NotifyOfPropertyChange(() => this.IsParty);
+                        this.NotifyOfPropertyChange(() => this.IsAdmin);
                     },
                     param => this.IsAdminCreated
                 );
@@ -50,8 +51,8 @@ namespace Espera.View.ViewModels
                     {
                         this.library.CreateAdmin(this.CreationPassword);
 
-                        this.OnPropertyChanged(vm => vm.IsAdminCreated);
-                        this.OnPropertyChanged(vm => vm.IsAdmin);
+                        this.NotifyOfPropertyChange(() => this.IsAdminCreated);
+                        this.NotifyOfPropertyChange(() => this.IsAdmin);
                     },
                     param => !string.IsNullOrWhiteSpace(this.CreationPassword) && !this.IsAdminCreated
                 );
@@ -69,7 +70,7 @@ namespace Espera.View.ViewModels
                 {
                     this.library.EnablePlaylistTimeout = value;
 
-                    this.OnPropertyChanged(vm => vm.EnablePlaylistTimeout);
+                    this.NotifyOfPropertyChange(() => this.EnablePlaylistTimeout);
                 }
             }
         }
@@ -112,7 +113,7 @@ namespace Espera.View.ViewModels
                 if (this.IsWrongPassword != value)
                 {
                     this.isWrongPassword = value;
-                    this.OnPropertyChanged(vm => vm.IsWrongPassword);
+                    this.NotifyOfPropertyChange(() => this.IsWrongPassword);
                 }
             }
         }
@@ -172,8 +173,8 @@ namespace Espera.View.ViewModels
                             this.IsWrongPassword = true;
                         }
 
-                        this.OnPropertyChanged(vm => vm.IsAdmin);
-                        this.OnPropertyChanged(vm => vm.IsParty);
+                        this.NotifyOfPropertyChange(() => this.IsAdmin);
+                        this.NotifyOfPropertyChange(() => this.IsParty);
                     },
                     param => !string.IsNullOrWhiteSpace(this.LoginPassword)
                 );
@@ -207,7 +208,7 @@ namespace Espera.View.ViewModels
                 if (this.Show != value)
                 {
                     this.show = value;
-                    this.OnPropertyChanged(vm => vm.Show);
+                    this.NotifyOfPropertyChange(() => this.Show);
                 }
             }
         }

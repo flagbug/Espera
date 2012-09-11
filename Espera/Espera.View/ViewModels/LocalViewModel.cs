@@ -10,7 +10,7 @@ using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class LocalViewModel : SongSourceViewModel<LocalViewModel>
+    internal sealed class LocalViewModel : SongSourceViewModel
     {
         private SortOrder albumOrder;
         private SortOrder artistOrder;
@@ -26,7 +26,7 @@ namespace Espera.View.ViewModels
         {
             library.Updated += (sender, args) =>
             {
-                this.OnPropertyChanged(vm => vm.Artists);
+                this.NotifyOfPropertyChange(() => this.Artists);
                 this.UpdateSelectableSongs();
             };
 
@@ -100,7 +100,7 @@ namespace Espera.View.ViewModels
                         this.Library.RemoveFromLibrary(this.SelectedSongs.Select(song => song.Model));
 
                         this.UpdateSelectableSongs();
-                        this.OnPropertyChanged(vm => vm.Artists);
+                        this.NotifyOfPropertyChange(() => this.Artists);
                     },
                     param => this.SelectedSongs != null
                         && this.SelectedSongs.Any()
@@ -118,9 +118,9 @@ namespace Espera.View.ViewModels
                 {
                     this.searchText = value;
 
-                    this.OnPropertyChanged(vm => vm.SearchText);
+                    this.NotifyOfPropertyChange(() => this.SearchText);
 
-                    this.OnPropertyChanged(vm => vm.Artists);
+                    this.NotifyOfPropertyChange(() => this.Artists);
 
                     this.UpdateSelectableSongs();
                 }
@@ -135,7 +135,7 @@ namespace Espera.View.ViewModels
                 if (this.SelectedArtist != value)
                 {
                     this.selectedArtist = value;
-                    this.OnPropertyChanged(vm => vm.SelectedArtist);
+                    this.NotifyOfPropertyChange(() => this.SelectedArtist);
 
                     this.UpdateSelectableSongs();
                 }
@@ -164,7 +164,7 @@ namespace Espera.View.ViewModels
                 if (e.Song.Artist != lastArtist)
                 {
                     lastArtist = e.Song.Artist;
-                    this.OnPropertyChanged(vm => vm.Artists);
+                    this.NotifyOfPropertyChange(() => this.Artists);
                 }
             };
 
@@ -179,7 +179,7 @@ namespace Espera.View.ViewModels
                 {
                     this.Library.SongAdded -= handler;
 
-                    this.OnPropertyChanged(vm => vm.Artists);
+                    this.NotifyOfPropertyChange(() => this.Artists);
                     this.isAdding = false;
                     this.StatusViewModel.Reset();
                 });

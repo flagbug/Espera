@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Input;
+﻿using Caliburn.Micro;
 using Espera.Core.Management;
 using Rareform.Extensions;
 using Rareform.Patterns.MVVM;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal abstract class SongSourceViewModel<T> : ViewModelBase<T>, ISongSourceViewModel
-        where T : SongSourceViewModel<T>
+    internal abstract class SongSourceViewModel : PropertyChangedBase, ISongSourceViewModel
     {
         private readonly Library library;
         private IEnumerable<SongViewModel> selectableSongs;
@@ -79,7 +79,7 @@ namespace Espera.View.ViewModels
                 if (this.selectableSongs != value)
                 {
                     this.selectableSongs = value;
-                    this.OnPropertyChanged(vm => vm.SelectableSongs);
+                    this.NotifyOfPropertyChange(() => this.SelectableSongs);
                 }
             }
         }
@@ -92,8 +92,8 @@ namespace Espera.View.ViewModels
                 if (this.selectedSongs != value)
                 {
                     this.selectedSongs = value;
-                    this.OnPropertyChanged(vm => vm.SelectedSongs);
-                    this.OnPropertyChanged(vm => vm.IsSongSelected);
+                    this.NotifyOfPropertyChange(() => this.SelectedSongs);
+                    this.NotifyOfPropertyChange(() => this.IsSongSelected);
                 }
             }
         }

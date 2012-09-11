@@ -1,4 +1,5 @@
-﻿using Espera.Core;
+﻿using Caliburn.Micro;
+using Espera.Core;
 using Espera.Core.Management;
 using Espera.View.Properties;
 using Rareform.Patterns.MVVM;
@@ -11,7 +12,7 @@ using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class MainViewModel : ViewModelBase<MainViewModel>, IDisposable
+    internal sealed class MainViewModel : PropertyChangedBase, IDisposable
     {
         private readonly Library library;
         private readonly Timer playlistTimeoutUpdateTimer;
@@ -106,7 +107,7 @@ namespace Espera.View.ViewModels
                 if (value != null) // There always has to be a playlist selected
                 {
                     this.library.SwitchToPlaylist(value.Name);
-                    this.OnPropertyChanged(vm => vm.CurrentPlaylist);
+                    this.NotifyOfPropertyChange(() => this.CurrentPlaylist);
                 }
             }
         }
@@ -125,7 +126,7 @@ namespace Espera.View.ViewModels
                 if (this.CurrentSongSource != value)
                 {
                     this.currentSongSource = value;
-                    this.OnPropertyChanged(vm => vm.CurrentSongSource);
+                    this.NotifyOfPropertyChange(() => this.CurrentSongSource);
                 }
             }
         }
@@ -143,7 +144,7 @@ namespace Espera.View.ViewModels
                 if (this.displayTimeoutWarning != value)
                 {
                     this.displayTimeoutWarning = value;
-                    this.OnPropertyChanged(vm => vm.DisplayTimeoutWarning);
+                    this.NotifyOfPropertyChange(() => this.DisplayTimeoutWarning);
                 }
             }
         }
@@ -175,7 +176,7 @@ namespace Espera.View.ViewModels
                 if (this.IsLocal != value)
                 {
                     this.isLocal = value;
-                    this.OnPropertyChanged(vm => vm.IsLocal);
+                    this.NotifyOfPropertyChange(() => this.IsLocal);
 
                     if (this.IsLocal)
                     {
@@ -198,7 +199,7 @@ namespace Espera.View.ViewModels
                 if (this.IsYoutube != value)
                 {
                     this.isYoutube = value;
-                    this.OnPropertyChanged(vm => vm.IsYoutube);
+                    this.NotifyOfPropertyChange(() => this.IsYoutube);
 
                     if (this.IsYoutube)
                     {
@@ -253,7 +254,7 @@ namespace Espera.View.ViewModels
                     {
                         this.library.PauseSong();
                         this.updateTimer.Stop();
-                        this.OnPropertyChanged(vm => vm.IsPlaying);
+                        this.NotifyOfPropertyChange(() => this.IsPlaying);
                     },
                     param => (this.IsAdmin || !this.library.LockPlayPause) && this.IsPlaying
                 );
@@ -287,7 +288,7 @@ namespace Espera.View.ViewModels
                         {
                             this.library.ContinueSong();
                             this.updateTimer.Start();
-                            this.OnPropertyChanged(vm => vm.IsPlaying);
+                            this.NotifyOfPropertyChange(() => this.IsPlaying);
                         }
 
                         else
@@ -423,7 +424,7 @@ namespace Espera.View.ViewModels
                             this.CurrentPlaylist = this.Playlists[0];
                         }
 
-                        this.OnPropertyChanged(vm => vm.Playlists);
+                        this.NotifyOfPropertyChange(() => this.Playlists);
                     },
                     param => this.CurrentEditedPlaylist != null || this.CurrentPlaylist != null
                 );
@@ -440,9 +441,9 @@ namespace Espera.View.ViewModels
                     {
                         this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index));
 
-                        this.OnPropertyChanged(vm => vm.CurrentPlaylist);
-                        this.OnPropertyChanged(vm => vm.SongsRemaining);
-                        this.OnPropertyChanged(vm => vm.TimeRemaining);
+                        this.NotifyOfPropertyChange(() => this.CurrentPlaylist);
+                        this.NotifyOfPropertyChange(() => this.SongsRemaining);
+                        this.NotifyOfPropertyChange(() => this.TimeRemaining);
                     },
                     param => this.SelectedPlaylistEntries != null
                         && this.SelectedPlaylistEntries.Any()
@@ -459,8 +460,8 @@ namespace Espera.View.ViewModels
                 if (this.SelectedPlaylistEntries != value)
                 {
                     this.selectedPlaylistEntries = value;
-                    this.OnPropertyChanged(vm => vm.SelectedPlaylistEntries);
-                    this.OnPropertyChanged(vm => vm.PlayCommand);
+                    this.NotifyOfPropertyChange(() => this.SelectedPlaylistEntries);
+                    this.NotifyOfPropertyChange(() => this.PlayCommand);
                 }
             }
         }
@@ -552,7 +553,7 @@ namespace Espera.View.ViewModels
             set
             {
                 this.library.Volume = (float)value;
-                this.OnPropertyChanged(vm => vm.Volume);
+                this.NotifyOfPropertyChange(() => this.Volume);
             }
         }
 
@@ -613,8 +614,8 @@ namespace Espera.View.ViewModels
 
         private void HandleSongCorrupted()
         {
-            this.OnPropertyChanged(vm => vm.IsPlaying);
-            this.OnPropertyChanged(vm => vm.CurrentPlaylist);
+            this.NotifyOfPropertyChange(() => this.IsPlaying);
+            this.NotifyOfPropertyChange(() => this.CurrentPlaylist);
         }
 
         private void HandleSongFinished()
@@ -623,10 +624,10 @@ namespace Espera.View.ViewModels
             // when the library starts the next song
             if (!this.library.CanPlayNextSong)
             {
-                this.OnPropertyChanged(vm => vm.IsPlaying);
+                this.NotifyOfPropertyChange(() => this.IsPlaying);
             }
 
-            this.OnPropertyChanged(vm => vm.CurrentPlaylist);
+            this.NotifyOfPropertyChange(() => this.CurrentPlaylist);
 
             this.updateTimer.Stop();
         }
@@ -635,11 +636,11 @@ namespace Espera.View.ViewModels
         {
             this.UpdateTotalTime();
 
-            this.OnPropertyChanged(vm => vm.IsPlaying);
-            this.OnPropertyChanged(vm => vm.CurrentPlaylist);
+            this.NotifyOfPropertyChange(() => this.IsPlaying);
+            this.NotifyOfPropertyChange(() => this.CurrentPlaylist);
 
-            this.OnPropertyChanged(vm => vm.SongsRemaining);
-            this.OnPropertyChanged(vm => vm.TimeRemaining);
+            this.NotifyOfPropertyChange(() => this.SongsRemaining);
+            this.NotifyOfPropertyChange(() => this.TimeRemaining);
 
             this.updateTimer.Start();
         }
@@ -652,19 +653,19 @@ namespace Espera.View.ViewModels
 
         private void UpdateCurrentTime()
         {
-            this.OnPropertyChanged(vm => vm.CurrentSeconds);
-            this.OnPropertyChanged(vm => vm.CurrentTime);
+            this.NotifyOfPropertyChange(() => this.CurrentSeconds);
+            this.NotifyOfPropertyChange(() => this.CurrentTime);
         }
 
         private void UpdatePlaylist()
         {
-            this.OnPropertyChanged(vm => vm.CurrentPlaylist);
-            this.OnPropertyChanged(vm => vm.SongsRemaining);
-            this.OnPropertyChanged(vm => vm.TimeRemaining);
+            this.NotifyOfPropertyChange(() => this.CurrentPlaylist);
+            this.NotifyOfPropertyChange(() => this.SongsRemaining);
+            this.NotifyOfPropertyChange(() => this.TimeRemaining);
 
             if (this.library.EnablePlaylistTimeout)
             {
-                this.OnPropertyChanged(vm => vm.RemainingPlaylistTimeout);
+                this.NotifyOfPropertyChange(() => this.RemainingPlaylistTimeout);
             }
         }
 
@@ -672,23 +673,23 @@ namespace Espera.View.ViewModels
         {
             if (this.RemainingPlaylistTimeout > TimeSpan.Zero)
             {
-                this.OnPropertyChanged(vm => vm.RemainingPlaylistTimeout);
+                this.NotifyOfPropertyChange(() => this.RemainingPlaylistTimeout);
             }
         }
 
         private void UpdateTotalTime()
         {
-            this.OnPropertyChanged(vm => vm.TotalSeconds);
-            this.OnPropertyChanged(vm => vm.TotalTime);
+            this.NotifyOfPropertyChange(() => this.TotalSeconds);
+            this.NotifyOfPropertyChange(() => this.TotalTime);
         }
 
         private void UpdateUserAccess()
         {
-            this.OnPropertyChanged(vm => vm.IsAdmin);
-            this.OnPropertyChanged(vm => vm.CanChangeVolume);
-            this.OnPropertyChanged(vm => vm.CanChangeTime);
-            this.OnPropertyChanged(vm => vm.CanSwitchPlaylist);
-            this.OnPropertyChanged(vm => vm.ShowPlaylistTimeOut);
+            this.NotifyOfPropertyChange(() => this.IsAdmin);
+            this.NotifyOfPropertyChange(() => this.CanChangeVolume);
+            this.NotifyOfPropertyChange(() => this.CanChangeTime);
+            this.NotifyOfPropertyChange(() => this.CanSwitchPlaylist);
+            this.NotifyOfPropertyChange(() => this.ShowPlaylistTimeOut);
         }
     }
 }

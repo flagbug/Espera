@@ -1,10 +1,10 @@
-﻿using System;
-using Espera.Core;
+﻿using Espera.Core;
 using Rareform.Validation;
+using System;
 
 namespace Espera.View.ViewModels
 {
-    public sealed class PlaylistEntryViewModel : SongViewModelBase<PlaylistEntryViewModel>
+    public sealed class PlaylistEntryViewModel : SongViewModelBase
     {
         private bool hasCachingFailed;
         private bool isInactive;
@@ -20,14 +20,14 @@ namespace Espera.View.ViewModels
 
             if (this.Wrapped.HasToCache && !this.Wrapped.IsCached)
             {
-                this.Wrapped.CachingProgressChanged += (sender, e) => this.OnPropertyChanged(vm => vm.CacheProgress);
+                this.Wrapped.CachingProgressChanged += (sender, e) => this.NotifyOfPropertyChange(() => this.CacheProgress);
 
                 this.Wrapped.CachingFailed += (sender, args) => this.HasCachingFailed = true;
 
-                this.Wrapped.CachingCompleted += (sender, e) => this.OnPropertyChanged(vm => vm.ShowCaching);
+                this.Wrapped.CachingCompleted += (sender, e) => this.NotifyOfPropertyChange(() => this.ShowCaching);
             }
 
-            this.Wrapped.Corrupted += (sender, args) => this.OnPropertyChanged(vm => vm.IsCorrupted);
+            this.Wrapped.Corrupted += (sender, args) => this.NotifyOfPropertyChange(() => this.IsCorrupted);
         }
 
         public int CacheProgress
@@ -43,7 +43,7 @@ namespace Espera.View.ViewModels
                 if (this.HasCachingFailed != value)
                 {
                     this.hasCachingFailed = value;
-                    this.OnPropertyChanged(vm => vm.HasCachingFailed);
+                    this.NotifyOfPropertyChange(() => this.HasCachingFailed);
                 }
             }
         }
@@ -63,7 +63,7 @@ namespace Espera.View.ViewModels
                 if (this.IsInactive != value)
                 {
                     this.isInactive = value;
-                    this.OnPropertyChanged(vm => vm.IsInactive);
+                    this.NotifyOfPropertyChange(() => this.IsInactive);
                 }
             }
         }
@@ -76,7 +76,7 @@ namespace Espera.View.ViewModels
                 if (this.IsPlaying != value)
                 {
                     this.isPlaying = value;
-                    this.OnPropertyChanged(vm => vm.IsPlaying);
+                    this.NotifyOfPropertyChange(() => this.IsPlaying);
                 }
             }
         }

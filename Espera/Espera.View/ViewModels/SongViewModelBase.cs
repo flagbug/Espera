@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Caliburn.Micro;
 using Espera.Core;
-using Rareform.Patterns.MVVM;
 using Rareform.Validation;
+using System;
 
 namespace Espera.View.ViewModels
 {
-    public abstract class SongViewModelBase<T> : ViewModelBase<T>
+    public abstract class SongViewModelBase : PropertyChangedBase
     {
         protected SongViewModelBase(Song wrapped)
         {

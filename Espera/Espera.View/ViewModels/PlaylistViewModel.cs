@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Caliburn.Micro;
+using Espera.Core.Management;
+using Rareform.Reflection;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using Espera.Core.Management;
-using Rareform.Patterns.MVVM;
-using Rareform.Reflection;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class PlaylistViewModel : ViewModelBase<PlaylistViewModel>, IDataErrorInfo
+    internal sealed class PlaylistViewModel : PropertyChangedBase, IDataErrorInfo
     {
         private readonly PlaylistInfo playlist;
         private readonly Func<string, bool> renameRequest;
@@ -46,7 +46,7 @@ namespace Espera.View.ViewModels
                         this.saveName = null;
                     }
 
-                    this.OnPropertyChanged(vm => vm.EditName);
+                    this.NotifyOfPropertyChange(() => this.EditName);
                 }
             }
         }
@@ -64,7 +64,7 @@ namespace Espera.View.ViewModels
                 if (this.Name != value)
                 {
                     this.playlist.Name = value;
-                    this.OnPropertyChanged(vm => vm.Name);
+                    this.NotifyOfPropertyChange(() => this.Name);
                 }
             }
         }

@@ -1,10 +1,10 @@
-﻿using Espera.Core.Management;
-using Rareform.Patterns.MVVM;
+﻿using Caliburn.Micro;
+using Espera.Core.Management;
 using Rareform.Validation;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class StatusViewModel : ViewModelBase<StatusViewModel>
+    internal sealed class StatusViewModel : PropertyChangedBase
     {
         private readonly Library library;
         private bool isAdding;
@@ -31,8 +31,8 @@ namespace Espera.View.ViewModels
                 if (this.IsAdding != value)
                 {
                     this.isAdding = value;
-                    this.OnPropertyChanged(vm => vm.IsAdding);
-                    this.OnPropertyChanged(vm => vm.IsProgressUnkown);
+                    this.NotifyOfPropertyChange(() => this.IsAdding);
+                    this.NotifyOfPropertyChange(() => this.IsProgressUnkown);
                 }
             }
         }
@@ -50,7 +50,7 @@ namespace Espera.View.ViewModels
                 if (this.isUpdating != value)
                 {
                     this.isUpdating = value;
-                    this.OnPropertyChanged(vm => vm.IsUpdating);
+                    this.NotifyOfPropertyChange(() => this.IsUpdating);
                 }
             }
         }
@@ -63,7 +63,7 @@ namespace Espera.View.ViewModels
                 if (this.Path != value)
                 {
                     this.path = value;
-                    this.OnPropertyChanged(vm => vm.Path);
+                    this.NotifyOfPropertyChange(() => this.Path);
                 }
             }
         }
@@ -76,7 +76,7 @@ namespace Espera.View.ViewModels
                 if (this.ProcessedTags != value)
                 {
                     this.processedTags = value;
-                    this.OnPropertyChanged(vm => vm.ProcessedTags);
+                    this.NotifyOfPropertyChange(() => this.ProcessedTags);
                 }
             }
         }
@@ -89,7 +89,7 @@ namespace Espera.View.ViewModels
                 if (this.totalTags != value)
                 {
                     this.totalTags = value;
-                    this.OnPropertyChanged(vm => vm.TotalTags);
+                    this.NotifyOfPropertyChange(() => this.TotalTags);
                 }
             }
         }
@@ -117,7 +117,7 @@ namespace Espera.View.ViewModels
             this.ProcessedTags = processedTags;
             this.TotalTags = totalTags;
 
-            this.OnPropertyChanged(vm => vm.IsProgressUnkown);
+            this.NotifyOfPropertyChange(() => this.IsProgressUnkown);
         }
     }
 }
