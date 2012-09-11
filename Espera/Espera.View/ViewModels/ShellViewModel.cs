@@ -2,6 +2,7 @@
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.View.Properties;
+using Rareform.Extensions;
 using Rareform.Patterns.MVVM;
 using System;
 using System.Collections.Generic;
@@ -591,25 +592,21 @@ namespace Espera.View.ViewModels
 
         private string GetNewPlaylistName()
         {
-            string name;
+            string newName = this.playlists
+                .Select(playlist => playlist.Name)
+                .CreateUnique(i =>
+                    {
+                        string name = "New Playlist";
 
-            int i = 1;
-            string suffix = String.Empty;
+                        if (i > 1)
+                        {
+                            name += " " + i;
+                        }
 
-            do
-            {
-                name = "New Playlist";
+                        return name;
+                    });
 
-                if (i > 1)
-                {
-                    suffix = " " + i;
-                }
-
-                i++;
-            }
-            while (this.library.Playlists.Any(playlist => playlist.Name == name + suffix));
-
-            return name + suffix;
+            return newName;
         }
 
         private void HandleSongCorrupted()
