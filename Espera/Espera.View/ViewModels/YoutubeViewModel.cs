@@ -80,6 +80,12 @@ namespace Espera.View.ViewModels
             set { Settings.Default.YoutubeTitleColumnWidth = value; }
         }
 
+        public int ViewsColumnWidth
+        {
+            get { return Settings.Default.YoutubeViewsColumnWidth; }
+            set { Settings.Default.YoutubeViewsColumnWidth = value; }
+        }
+
         public void OrderByDuration()
         {
             this.SongOrderFunc = SortHelpers.GetOrderByDuration<YoutubeSongViewModel>(this.durationOrder);
