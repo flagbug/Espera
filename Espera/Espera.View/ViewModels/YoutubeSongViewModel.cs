@@ -1,13 +1,10 @@
 ﻿using Espera.Core;
 using Rareform.Patterns.MVVM;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -75,13 +72,13 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public int? Views
+        public string Views
         {
             get
             {
                 var song = this.Model as YoutubeSong;
 
-                return song == null ? (int?)null : song.Views;
+                return song == null ? null : String.Format("{0:N0}", song.Views);
             }
         }
 
@@ -91,7 +88,7 @@ namespace Espera.View.ViewModels
 
             worker.DoWork += (s, e) =>
             {
-                var uri = e.Argument as Uri;
+                var uri = (Uri)e.Argument;
 
                 using (var webClient = new WebClient())
                 {
