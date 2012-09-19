@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Espera.Core.Audio;
+using Rareform.IO;
+using System;
 using System.IO;
 using System.Linq;
-using Espera.Core.Audio;
-using Rareform.IO;
 
 namespace Espera.Core
 {
@@ -46,6 +46,12 @@ namespace Espera.Core
 
                 return this.isRemovable.Value;
             }
+        }
+
+        public override string StreamingPath
+        {
+            get { return this.HasToCache ? base.StreamingPath : this.OriginalPath; }
+            protected set { base.StreamingPath = value; }
         }
 
         public override void LoadToCache()

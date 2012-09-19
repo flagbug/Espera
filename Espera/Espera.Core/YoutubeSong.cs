@@ -60,7 +60,7 @@ namespace Espera.Core
             {
                 string tempPath = Path.GetTempFileName();
 
-                VideoInfo video = GetVideoInfo(this.OriginalPath);
+                VideoInfo video = GetVideoInfoForDownload(this.OriginalPath);
 
                 this.DownloadVideo(video, tempPath);
 
@@ -96,10 +96,16 @@ namespace Espera.Core
 
         internal override AudioPlayer CreateAudioPlayer()
         {
+            if (this.IsStreaming)
+            {
+                VideoInfo video = GetVideoInfoForStreaming(this.OriginalPath);
+
+                this.StreamingPath = video.DownloadUrl;
+            }
             return this.IsStreaming ? (AudioPlayer)new YoutubeAudioPlayer(this) : new LocalAudioPlayer(this);
         }
 
-        private static VideoInfo GetVideoInfo(string youtubeLink)
+        private static VideoInfo GetVideoInfoForDownload(string youtubeLink)
         {
             IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(youtubeLink);
 
@@ -107,6 +113,16 @@ namespace Espera.Core
                 .Where(info => info.CanExtractAudio && info.AudioType == YoutubeExtractor.AudioType.Mp3)
                 .OrderByDescending(info => info.AudioBitrate)
                 .First();
+
+            return video;
+        }
+
+        private static VideoInfo GetVideoInfoForStreaming(string youtubeLink)
+        {
+            IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(youtubeLink);
+
+            VideoInfo video = videoInfos
+                .First(info => !info.Is3D && info.VideoType == VideoType.Mp4 && info.Resolution == 360);
 
             return video;
         }

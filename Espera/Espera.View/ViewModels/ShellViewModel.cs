@@ -62,6 +62,12 @@ namespace Espera.View.ViewModels
             this.playlistTimeoutUpdateTimer.Start();
         }
 
+        public event EventHandler VideoPlayerCallbackChanged
+        {
+            add { this.library.VideoPlayerCallbackChanged += value; }
+            remove { this.library.VideoPlayerCallbackChanged -= value; }
+        }
+
         public ICommand AddPlaylistCommand
         {
             get
@@ -88,11 +94,6 @@ namespace Espera.View.ViewModels
         public bool CanSwitchPlaylist
         {
             get { return this.library.CanSwitchPlaylist; }
-        }
-
-        public bool CanUseYoutube
-        {
-            get { return !this.library.StreamYoutube || ApplicationHelper.IsVlcInstalled(); }
         }
 
         public PlaylistViewModel CurrentEditedPlaylist
@@ -281,6 +282,7 @@ namespace Espera.View.ViewModels
                          * XAML commands pass the parameter as string, code-behind commands pass the parameter
                          * as boolean, so we have to check what type it is.
                          */
+
                         var value = param as string;
 
                         bool ignorePause = value == null ? (bool)param : Boolean.Parse(value);
@@ -533,9 +535,6 @@ namespace Espera.View.ViewModels
             get { return this.library.TotalTime; }
         }
 
-        /// <summary>
-        /// Sets the volume to the highest possible value.
-        /// </summary>
         public ICommand UnMuteCommand
         {
             get
@@ -546,6 +545,11 @@ namespace Espera.View.ViewModels
                     param => this.IsAdmin
                 );
             }
+        }
+
+        public IVideoPlayerCallback VideoPlayerCallback
+        {
+            get { return this.library.VideoPlayerCallback; }
         }
 
         public double Volume

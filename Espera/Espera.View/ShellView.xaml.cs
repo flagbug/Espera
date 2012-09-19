@@ -1,4 +1,5 @@
-﻿using Espera.View.Properties;
+﻿using Espera.Core;
+using Espera.View.Properties;
 using Espera.View.ViewModels;
 using Ionic.Utils;
 using MahApps.Metro;
@@ -23,6 +24,8 @@ namespace Espera.View
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("en-us");
 
             this.ChangeColor(Settings.Default.AccentColor);
+
+            this.shellViewModel.VideoPlayerCallbackChanged += (sender, args) => this.SetupVideoPlayer();
         }
 
         private void AddSongsButtonClick(object sender, RoutedEventArgs e)
@@ -224,6 +227,21 @@ namespace Espera.View
             e.Handled = true;
         }
 
+        private void SetupVideoPlayer()
+        {
+            IVideoPlayerCallback callback = this.shellViewModel.VideoPlayerCallback;
+
+            callback.GetTime = () => (TimeSpan)Dispatcher.Invoke(new Func<TimeSpan>(() => this.videoPlayer.Position));
+            callback.SetTime = time => Dispatcher.Invoke(new Action(() => this.videoPlayer.Position = time));
+
+            callback.VolumeChangeRequest = volume => Dispatcher.Invoke(new Action(() => this.videoPlayer.Volume = volume));
+
+            callback.LoadRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Source = callback.VideoUrl));
+            callback.PauseRequest = () => Dispatcher.Invoke(new Action(() => this.videoPlayer.Pause()));
+            callback.PlayRequest = () => Dispatcher.Invoke(new Action(() => this.videoPlayer.Play()));
+            callback.StopRequest = () => Dispatcher.Invoke(new Action(() => this.videoPlayer.Stop()));
+        }
+
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
         {
             ICommand addToPlaylist = this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
@@ -303,6 +321,11 @@ namespace Espera.View
         private void SortYoutubeSongViews(object sender, RoutedEventArgs e)
         {
             this.shellViewModel.YoutubeViewModel.OrderByViews();
+        }
+
+        private void VideoPlayerMediaEnded(object sender, RoutedEventArgs e)
+        {
+            this.shellViewModel.VideoPlayerCallback.Finished();
         }
     }
 }

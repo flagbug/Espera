@@ -1,9 +1,9 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using Espera.Core.Audio;
+﻿using Espera.Core.Audio;
 using Rareform.Extensions;
 using Rareform.Validation;
+using System;
+using System.Diagnostics;
+using System.IO;
 
 namespace Espera.Core
 {
@@ -146,17 +146,12 @@ namespace Espera.Core
         public string OriginalPath { get; private set; }
 
         /// <summary>
-        /// Gets or sets the path to stream the audio from.
-        /// This is a path on the local filesystem.
+        /// Gets the path to stream the audio from.
         /// </summary>
         /// <value>
         /// The path to stream the audio from.
         /// </value>
-        public string StreamingPath
-        {
-            get { return this.HasToCache ? this.streamingPath : this.OriginalPath; }
-            protected set { this.streamingPath = value; }
-        }
+        public virtual string StreamingPath { get; protected set; }
 
         public string Title { get; set; }
 

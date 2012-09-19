@@ -1,5 +1,4 @@
 ﻿using Caliburn.Micro;
-using Espera.Core;
 using Espera.Core.Management;
 using Rareform.Patterns.MVVM;
 using Rareform.Validation;
@@ -98,11 +97,6 @@ namespace Espera.View.ViewModels
         public string IssuesPage
         {
             get { return "http://github.com/flagbug/Espera/issues"; }
-        }
-
-        public bool IsVlcInstalled
-        {
-            get { return ApplicationHelper.IsVlcInstalled(); }
         }
 
         public bool IsWrongPassword

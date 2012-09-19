@@ -82,6 +82,8 @@ namespace Espera.Core.Management
         /// </summary>
         public event EventHandler Updating;
 
+        public event EventHandler VideoPlayerCallbackChanged;
+
         /// <summary>
         /// Gets the access mode that is currently enabled.
         /// </summary>
@@ -344,6 +346,11 @@ namespace Espera.Core.Management
             get { return this.currentPlayer == null ? TimeSpan.Zero : this.currentPlayer.TotalTime; }
         }
 
+        public IVideoPlayerCallback VideoPlayerCallback
+        {
+            get { return this.currentPlayer as IVideoPlayerCallback; }
+        }
+
         /// <summary>
         /// Gets or sets the current volume.
         /// </summary>
@@ -523,11 +530,6 @@ namespace Espera.Core.Management
                 CoreSettings.Default.Upgrade();
                 CoreSettings.Default.UpgradeRequired = false;
                 CoreSettings.Default.Save();
-            }
-
-            if (CoreSettings.Default.StreamYoutube && !ApplicationHelper.IsVlcInstalled())
-            {
-                CoreSettings.Default.StreamYoutube = false;
             }
 
             this.driveWatcher.Initialize();
@@ -940,6 +942,11 @@ namespace Espera.Core.Management
             }
 
             this.currentPlayer = song.CreateAudioPlayer();
+
+            if (this.currentPlayer is IVideoPlayerCallback)
+            {
+                this.VideoPlayerCallbackChanged.RaiseSafe(this, EventArgs.Empty);
+            }
 
             this.currentPlayer.SongFinished += (sender, e) => this.HandleSongFinish();
             this.currentPlayer.Volume = this.Volume;
