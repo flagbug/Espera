@@ -39,11 +39,6 @@ namespace Espera.View.ViewModels
             get { return new RelayCommand(param => Process.Start(this.Path)); }
         }
 
-        public string Path
-        {
-            get { return this.Model.OriginalPath; }
-        }
-
         public double? Rating
         {
             get

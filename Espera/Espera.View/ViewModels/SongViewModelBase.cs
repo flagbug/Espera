@@ -37,6 +37,11 @@ namespace Espera.View.ViewModels
 
         public Song Model { get; private set; }
 
+        public string Path
+        {
+            get { return this.Model.OriginalPath; }
+        }
+
         public string Title
         {
             get { return this.Model.Title; }
