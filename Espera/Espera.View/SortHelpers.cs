@@ -52,7 +52,7 @@ namespace Espera.View
         public static Func<IEnumerable<YoutubeSongViewModel>, IOrderedEnumerable<YoutubeSongViewModel>> GetOrderByViews(SortOrder sortOrder)
         {
             return songs => songs
-                .OrderBy(song => song.Views, sortOrder);
+                .OrderBy(song => song.ViewCount, sortOrder);
         }
 
         public static void InverseOrder(ref SortOrder sortOrder)

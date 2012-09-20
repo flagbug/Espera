@@ -67,6 +67,11 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public int ViewCount
+        {
+            get { return ((YoutubeSong)this.Model).Views; }
+        }
+
         public string Views
         {
             get
