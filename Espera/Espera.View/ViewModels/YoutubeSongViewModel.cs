@@ -102,19 +102,19 @@ namespace Espera.View.ViewModels
                             return;
                         }
 
-                        var imageStream = new MemoryStream(imageBytes);
-                        var image = new BitmapImage();
+                        using (var imageStream = new MemoryStream(imageBytes))
+                        {
+                            var image = new BitmapImage();
 
-                        image.BeginInit();
-                        image.StreamSource = imageStream;
-                        image.CacheOption = BitmapCacheOption.OnLoad;
-                        image.EndInit();
+                            image.BeginInit();
+                            image.StreamSource = imageStream;
+                            image.CacheOption = BitmapCacheOption.OnLoad;
+                            image.EndInit();
 
-                        image.Freeze();
+                            image.Freeze();
 
-                        imageStream.Close();
-
-                        e.Result = image;
+                            e.Result = image;
+                        }
                     }
 
                     catch (WebException ex)

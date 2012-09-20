@@ -30,18 +30,22 @@ namespace Espera.View
 
         private void AddSongsButtonClick(object sender, RoutedEventArgs e)
         {
-            var dialog = new FolderBrowserDialogEx
+            using
+            (
+                var dialog = new FolderBrowserDialogEx
+                {
+                    Description = "Choose a folder containing the music that you want to add to the library"
+                }
+            )
             {
-                Description = "Choose a folder containing the music that you want to add to the library"
-            };
+                dialog.ShowDialog();
 
-            dialog.ShowDialog();
+                string selectedPath = dialog.SelectedPath;
 
-            string selectedPath = dialog.SelectedPath;
-
-            if (!String.IsNullOrEmpty(selectedPath))
-            {
-                this.shellViewModel.LocalViewModel.AddSongs(selectedPath);
+                if (!String.IsNullOrEmpty(selectedPath))
+                {
+                    this.shellViewModel.LocalViewModel.AddSongs(selectedPath);
+                }
             }
         }
 

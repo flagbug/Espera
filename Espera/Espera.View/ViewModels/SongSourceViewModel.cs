@@ -19,7 +19,7 @@ namespace Espera.View.ViewModels
         protected SongSourceViewModel(Library library)
         {
             this.library = library;
-            this.SelectableSongs = Enumerable.Empty<T>();
+            this.selectableSongs = Enumerable.Empty<T>();
         }
 
         public event EventHandler TimeoutWarning;
