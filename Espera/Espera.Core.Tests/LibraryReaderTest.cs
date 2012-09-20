@@ -50,29 +50,27 @@ namespace Espera.Core.Tests
                 LocalSong[] songs = LibraryReader.ReadSongs(saveFileStream).ToArray();
 
                 Song actualSong1 = songs[0];
-                Song excpectedSong1 = Helpers.LocalSong1;
+                Song expectedSong1 = Helpers.LocalSong1;
 
-                Assert.AreEqual(excpectedSong1.Album, actualSong1.Album);
-                Assert.AreEqual(excpectedSong1.Artist, actualSong1.Artist);
-                Assert.AreEqual(excpectedSong1.AudioType, actualSong1.AudioType);
-                Assert.AreEqual(excpectedSong1.Duration, actualSong1.Duration);
-                Assert.AreEqual(excpectedSong1.Genre, actualSong1.Genre);
-                Assert.AreEqual(excpectedSong1.OriginalPath, actualSong1.OriginalPath);
-                Assert.AreEqual(excpectedSong1.Title, actualSong1.Title);
-                Assert.AreEqual(excpectedSong1.TrackNumber, actualSong1.TrackNumber);
+                AssertSongsAreEqual(expectedSong1, actualSong1);
 
                 Song actualSong2 = songs[1];
                 Song expectedSong2 = Helpers.LocalSong2;
 
-                Assert.AreEqual(expectedSong2.Album, actualSong2.Album);
-                Assert.AreEqual(expectedSong2.Artist, actualSong2.Artist);
-                Assert.AreEqual(expectedSong2.AudioType, actualSong2.AudioType);
-                Assert.AreEqual(expectedSong2.Duration, actualSong2.Duration);
-                Assert.AreEqual(expectedSong2.Genre, actualSong2.Genre);
-                Assert.AreEqual(expectedSong2.OriginalPath, actualSong2.OriginalPath);
-                Assert.AreEqual(expectedSong2.Title, actualSong2.Title);
-                Assert.AreEqual(expectedSong2.TrackNumber, actualSong2.TrackNumber);
+                AssertSongsAreEqual(expectedSong2, actualSong2);
             }
+        }
+
+        private static void AssertSongsAreEqual(Song song1, Song song2)
+        {
+            Assert.AreEqual(song1.Album, song2.Album);
+            Assert.AreEqual(song1.Artist, song2.Artist);
+            Assert.AreEqual(song1.AudioType, song2.AudioType);
+            Assert.AreEqual(song1.Duration, song2.Duration);
+            Assert.AreEqual(song1.Genre, song2.Genre);
+            Assert.AreEqual(song1.OriginalPath, song2.OriginalPath);
+            Assert.AreEqual(song1.Title, song2.Title);
+            Assert.AreEqual(song1.TrackNumber, song2.TrackNumber);
         }
     }
 }
