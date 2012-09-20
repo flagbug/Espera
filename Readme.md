@@ -19,11 +19,7 @@ stop the music, but still be able to add songs to the playlist.
 
 Espera can search songs at YouTube, add them to the playlist and download/stream the audio track.
 
-When adding songs from YouTube to the playlist, the video gets silently downloaded in the background.
-Afterwards the audio track gets extracted and the song can be played.
-
-Streaming requires the VLC media player to be installed, as it streams the YouTube audio track in the background 
-without opening the VLC media player itself. (Sadly I found no other way to stream from YouTube without a dependency to VLC)
+When adding songs from YouTube to the playlist the video gets silently downloaded in the background, or optionally get streamed immediately.
 
 ### Mp3-players & removable devices
 
@@ -39,7 +35,6 @@ very clean look.
 ## Requirements
 
  - .NET Framework 4.0
- - VLC media player (32-bit) greater or equal version 2.0 (only if you want to activate YouTube streaming)
 
 ## Development
 
@@ -56,7 +51,6 @@ Espera is released under the [MIT-License](http://opensource.org/licenses/mit-li
 - [MahApps.Metro](http://github.com/flagbug/MahApps.Metro)
 - [NAudio](http://naudio.codeplex.com)
 - [Taglib#](http://github.com/mono/taglib-sharp)
-- [VLC.NET](http://vlcdotnet.codeplex.com/)
 - [Moq](http://code.google.com/p/moq/)
 
 ## Screenshot
