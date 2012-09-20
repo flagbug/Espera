@@ -88,6 +88,11 @@ namespace Espera.Core
                 this.OnCachingFailed(EventArgs.Empty);
             }
 
+            catch (InvalidOperationException)
+            {
+                this.OnCachingFailed(EventArgs.Empty);
+            }
+
             finally
             {
                 this.IsCaching = false;
