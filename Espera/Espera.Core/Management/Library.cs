@@ -803,6 +803,9 @@ namespace Espera.Core.Management
                 this.currentPlaylist.CurrentSongIndex = null;
             }
 
+            this.currentPlayer.Dispose();
+            this.currentPlayer = null;
+
             this.SongFinished.RaiseSafe(this, EventArgs.Empty);
 
             if (this.currentPlaylist.CanPlayNextSong)
