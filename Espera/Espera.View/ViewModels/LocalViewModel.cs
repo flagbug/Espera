@@ -187,42 +187,27 @@ namespace Espera.View.ViewModels
 
         public void OrderByAlbum()
         {
-            this.SongOrderFunc = SortHelpers.GetOrderByAlbum<LocalSongViewModel>(this.albumOrder);
-            SortHelpers.InverseOrder(ref this.albumOrder);
-
-            this.ApplyOrder();
+            this.ApplyOrder(SortHelpers.GetOrderByAlbum<LocalSongViewModel>, ref this.albumOrder);
         }
 
         public void OrderByArtist()
         {
-            this.SongOrderFunc = SortHelpers.GetOrderByArtist<LocalSongViewModel>(this.artistOrder);
-            SortHelpers.InverseOrder(ref this.artistOrder);
-
-            this.ApplyOrder();
+            this.ApplyOrder(SortHelpers.GetOrderByArtist<LocalSongViewModel>, ref this.artistOrder);
         }
 
         public void OrderByDuration()
         {
-            this.SongOrderFunc = SortHelpers.GetOrderByDuration<LocalSongViewModel>(this.durationOrder);
-            SortHelpers.InverseOrder(ref this.durationOrder);
-
-            this.ApplyOrder();
+            this.ApplyOrder(SortHelpers.GetOrderByDuration<LocalSongViewModel>, ref this.durationOrder);
         }
 
         public void OrderByGenre()
         {
-            this.SongOrderFunc = SortHelpers.GetOrderByGenre<LocalSongViewModel>(this.genreOrder);
-            SortHelpers.InverseOrder(ref this.genreOrder);
-
-            this.ApplyOrder();
+            this.ApplyOrder(SortHelpers.GetOrderByGenre<LocalSongViewModel>, ref this.genreOrder);
         }
 
         public void OrderByTitle()
         {
-            this.SongOrderFunc = SortHelpers.GetOrderByTitle<LocalSongViewModel>(this.titleOrder);
-            SortHelpers.InverseOrder(ref this.titleOrder);
-
-            this.ApplyOrder();
+            this.ApplyOrder(SortHelpers.GetOrderByTitle<LocalSongViewModel>, ref this.titleOrder);
         }
 
         protected override void UpdateSelectableSongs()

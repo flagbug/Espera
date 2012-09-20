@@ -88,34 +88,22 @@ namespace Espera.View.ViewModels
 
         public void OrderByDuration()
         {
-            this.SongOrderFunc = SortHelpers.GetOrderByDuration<YoutubeSongViewModel>(this.durationOrder);
-            SortHelpers.InverseOrder(ref this.durationOrder);
-
-            this.ApplyOrder();
+            this.ApplyOrder(SortHelpers.GetOrderByDuration<YoutubeSongViewModel>, ref this.durationOrder);
         }
 
         public void OrderByRating()
         {
-            this.SongOrderFunc = SortHelpers.GetOrderByRating(this.ratingOrder);
-            SortHelpers.InverseOrder(ref this.ratingOrder);
-
-            this.ApplyOrder();
+            this.ApplyOrder(SortHelpers.GetOrderByRating, ref this.ratingOrder);
         }
 
         public void OrderByTitle()
         {
-            this.SongOrderFunc = SortHelpers.GetOrderByTitle<YoutubeSongViewModel>(this.titleOrder);
-            SortHelpers.InverseOrder(ref this.titleOrder);
-
-            this.ApplyOrder();
+            this.ApplyOrder(SortHelpers.GetOrderByTitle<YoutubeSongViewModel>, ref this.titleOrder);
         }
 
         public void OrderByViews()
         {
-            this.SongOrderFunc = SortHelpers.GetOrderByViews(this.viewsOrder);
-            SortHelpers.InverseOrder(ref this.viewsOrder);
-
-            this.ApplyOrder();
+            this.ApplyOrder(SortHelpers.GetOrderByViews, ref this.viewsOrder);
         }
 
         public void StartSearch()

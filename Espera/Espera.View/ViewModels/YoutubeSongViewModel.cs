@@ -15,7 +15,7 @@ namespace Espera.View.ViewModels
     {
         private BitmapImage thumbnail;
 
-        public YoutubeSongViewModel(Song wrapped)
+        public YoutubeSongViewModel(YoutubeSong wrapped)
             : base(wrapped)
         { }
 
@@ -23,9 +23,9 @@ namespace Espera.View.ViewModels
         {
             get
             {
-                var song = this.Model as YoutubeSong;
+                var song = (YoutubeSong)this.Model;
 
-                return song == null ? null : song.Description;
+                return song.Description;
             }
         }
 
@@ -48,9 +48,9 @@ namespace Espera.View.ViewModels
         {
             get
             {
-                var song = this.Model as YoutubeSong;
+                var song = (YoutubeSong)this.Model;
 
-                return song != null && song.Rating > 0 ? (double?)song.Rating : null;
+                return song.Rating;
             }
         }
 
@@ -58,11 +58,6 @@ namespace Espera.View.ViewModels
         {
             get
             {
-                var song = this.Model as YoutubeSong;
-
-                if (song == null)
-                    return null;
-
                 if (this.thumbnail == null)
                 {
                     this.GetThumbnail();
@@ -76,9 +71,9 @@ namespace Espera.View.ViewModels
         {
             get
             {
-                var song = this.Model as YoutubeSong;
+                var song = (YoutubeSong)this.Model;
 
-                return song == null ? null : String.Format("{0:N0}", song.Views);
+                return String.Format("{0:N0}", song.Views);
             }
         }
 

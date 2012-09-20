@@ -40,7 +40,10 @@ namespace Espera.Core
         /// <summary>
         /// Gets or sets the average rating.
         /// </summary>
-        public double Rating { get; set; }
+        /// <value>
+        /// The average rating. <c>null</c>, if the rating is unknown.
+        /// </value>
+        public double? Rating { get; set; }
 
         /// <summary>
         /// Gets or sets the thumbnail source.

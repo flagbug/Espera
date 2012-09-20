@@ -29,7 +29,7 @@ namespace Espera.View.ViewModels
             get
             {
                 return new RelayCommand
-                    (
+                (
                     param =>
                     {
                         if (!this.Library.CanAddSongToPlaylist)
@@ -51,7 +51,7 @@ namespace Espera.View.ViewModels
                         }
                     },
                     param => this.SelectedSongs != null && this.SelectedSongs.Any()
-                    );
+                );
             }
         }
 
@@ -106,8 +106,11 @@ namespace Espera.View.ViewModels
 
         protected Func<IEnumerable<T>, IOrderedEnumerable<T>> SongOrderFunc { get; set; }
 
-        protected void ApplyOrder()
+        protected void ApplyOrder(Func<SortOrder, Func<IEnumerable<T>, IOrderedEnumerable<T>>> orderFunc, ref SortOrder sortOrder)
         {
+            this.SongOrderFunc = orderFunc(sortOrder);
+            SortHelpers.InverseOrder(ref sortOrder);
+
             this.SelectableSongs = this.SongOrderFunc(this.SelectableSongs);
         }
 

@@ -53,7 +53,7 @@ namespace Espera.Core
                                {
                                    Title = video.Title,
                                    Description = video.Description,
-                                   Rating = video.RatingAverage,
+                                   Rating = video.RatingAverage >= 1 ? video.RatingAverage : (double?)null,
                                    ThumbnailSource = new Uri(video.Thumbnails[0].Url),
                                    Views = video.ViewCount
                                };
