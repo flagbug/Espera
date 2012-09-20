@@ -16,7 +16,6 @@ namespace Espera.Core
         private int cachingProgress;
         private bool isCached;
         private bool isCorrupted;
-        private string streamingPath;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Song"/> class.
