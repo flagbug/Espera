@@ -126,8 +126,11 @@ namespace Espera.Core
         {
             IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(youtubeLink);
 
+            // For now, we select the lowest resolution to avoid buffering, later we let the user decide which quality he prefers
             VideoInfo video = videoInfos
-                .First(info => !info.Is3D && info.VideoType == VideoType.Mp4 && info.Resolution == 360);
+                .Where(info => info.VideoType == VideoType.Mp4 && !info.Is3D)
+                .OrderBy(info => info.Resolution)
+                .First();
 
             return video;
         }
