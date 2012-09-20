@@ -86,6 +86,9 @@ namespace Espera.Core.Audio
 
         public void Finished()
         {
+            this.isPlaying = false;
+            this.isStopped = true;
+
             this.OnSongFinished(EventArgs.Empty);
         }
 
