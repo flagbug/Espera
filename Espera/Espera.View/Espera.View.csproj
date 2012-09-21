@@ -132,6 +132,7 @@
     <Compile Include="SortHelpers.cs" />
     <Compile Include="SortOrder.cs" />
     <Compile Include="ViewModels\AdministratorViewModel.cs" />
+    <Compile Include="ViewModels\ArtistViewModel.cs" />
     <Compile Include="ViewModels\ISongSourceViewModel.cs" />
     <Compile Include="ViewModels\LocalSongViewModel.cs" />
     <Compile Include="ViewModels\LocalViewModel.cs" />

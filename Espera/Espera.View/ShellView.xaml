@@ -129,6 +129,10 @@
                 <Setter Property="FontSize" Value="48" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
             </Style>
+            <Style x:Key="ArtistInfoStyle" TargetType="{x:Type TextBlock}">
+                <Setter Property="FontSize" Value="9" />
+                <Setter Property="FontFamily" Value="{DynamicResource ContentFontFamily}" />
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
     <Grid x:Name="mainGrid" Focusable="True" Margin="10">
@@ -267,7 +271,46 @@
                 <ListBox Grid.Row="1"
                          DataContext="{Binding Path=LocalViewModel}"
                          ItemsSource="{Binding Path=Artists}"
-                         SelectedItem="{Binding Path=SelectedArtist}" />
+                         SelectedItem="{Binding Path=SelectedArtist}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Vertical"
+                                        Margin="0, 5, 0, 5">
+                                <TextBlock Text="{Binding Path=Name}" />
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel.Style>
+                                        <Style TargetType="{x:Type StackPanel}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=IsAllArtists}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <TextBlock Style="{StaticResource ArtistInfoStyle}"
+                                               Text="{Binding Path=SongCount}" />
+                                    <TextBlock Style="{StaticResource ArtistInfoStyle}"
+                                               Text=" Songs" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel.Style>
+                                        <Style TargetType="{x:Type StackPanel}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=IsAllArtists}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <TextBlock Style="{StaticResource ArtistInfoStyle}"
+                                               Text="{Binding Path=ArtistCount}" />
+                                    <TextBlock Style="{StaticResource ArtistInfoStyle}"
+                                               Text=" Artists" />
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </Grid>
             <Grid Grid.Column="0" Visibility="{Binding Path=IsYoutube, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>

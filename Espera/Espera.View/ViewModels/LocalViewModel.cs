@@ -14,14 +14,12 @@ namespace Espera.View.ViewModels
     internal sealed class LocalViewModel : SongSourceViewModel<LocalSongViewModel>
     {
         private SortOrder albumOrder;
-        private bool allArtistsSelected;
         private SortOrder artistOrder;
-        private string currentAllArtists; // The current string for all artist
         private SortOrder durationOrder;
         private SortOrder genreOrder;
         private volatile bool isAdding;
         private string searchText;
-        private string selectedArtist;
+        private ArtistViewModel selectedArtist;
         private SortOrder titleOrder;
 
         public LocalViewModel(Library library)
@@ -55,7 +53,7 @@ namespace Espera.View.ViewModels
             set { Settings.Default.LocalArtistColumnWidth = value; }
         }
 
-        public IEnumerable<string> Artists
+        public IEnumerable<ArtistViewModel> Artists
         {
             get
             {
@@ -63,15 +61,12 @@ namespace Espera.View.ViewModels
                 IEnumerable<Song> source = this.isAdding ? this.Library.Songs.ToList() : this.Library.Songs;
 
                 var artists = source.FilterSongs(this.SearchText)
-                    .Select(song => song.Artist)
-                    .Where(artist => !String.IsNullOrWhiteSpace(artist))
-                    .Distinct()
-                    .OrderBy(artist => RemoveArtistPrefixes(artist, new[] { "A", "The" }))
+                    .GroupBy(song => song.Artist)
+                    .Select(group => new ArtistViewModel(group.Key, group.Count()))
+                    .OrderBy(artist => RemoveArtistPrefixes(artist.Name, new[] { "A", "The" }))
                     .ToList();
 
-                int count = artists.Count;
-
-                this.currentAllArtists = String.Format("All {0} Artists", count);
+                var currentAllArtists = new ArtistViewModel("All Artists", null, artists.Count);
 
                 return artists
                     .Prepend(currentAllArtists);
@@ -134,7 +129,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public string SelectedArtist
+        public ArtistViewModel SelectedArtist
         {
             get { return this.selectedArtist; }
             set
@@ -142,8 +137,6 @@ namespace Espera.View.ViewModels
                 if (value != null && this.SelectedArtist != value)
                 {
                     this.selectedArtist = value;
-
-                    this.allArtistsSelected = this.selectedArtist == this.currentAllArtists;
 
                     this.NotifyOfPropertyChange(() => this.SelectedArtist);
 
@@ -226,7 +219,7 @@ namespace Espera.View.ViewModels
             var source = (this.isAdding ? this.Library.Songs.ToList() : this.Library.Songs).AsParallel();
 
             IEnumerable<Song> songs = source
-                .Where(song => this.allArtistsSelected || song.Artist == this.SelectedArtist);
+                .Where(song => this.SelectedArtist.IsAllArtists || song.Artist == this.SelectedArtist.Name);
 
             this.SelectableSongs = songs.FilterSongs(this.SearchText)
                 .Select(song => new LocalSongViewModel(song))
