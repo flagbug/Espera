@@ -13,7 +13,6 @@ namespace Espera.View.ViewModels
 {
     internal sealed class LocalViewModel : SongSourceViewModel<LocalSongViewModel>
     {
-        private const string AllArtists = "All Artists"; // String value to select all songs
         private SortOrder albumOrder;
         private bool allArtistsSelected;
         private SortOrder artistOrder;
@@ -72,7 +71,7 @@ namespace Espera.View.ViewModels
 
                 int count = artists.Count;
 
-                this.currentAllArtists = String.Format("{0} ({1})", AllArtists, count);
+                this.currentAllArtists = String.Format("All {0} Artists", count);
 
                 return artists
                     .Prepend(currentAllArtists);
