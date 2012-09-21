@@ -62,11 +62,11 @@ namespace Espera.View.ViewModels
 
                 var artists = source.FilterSongs(this.SearchText)
                     .GroupBy(song => song.Artist)
-                    .Select(group => new ArtistViewModel(group.Key, group.Count()))
+                    .Select(group => new ArtistViewModel(group.Key, group.Select(song => song.Album).Distinct().Count(), group.Count()))
                     .OrderBy(artist => RemoveArtistPrefixes(artist.Name, new[] { "A", "The" }))
                     .ToList();
 
-                var currentAllArtists = new ArtistViewModel("All Artists", null, artists.Count);
+                var currentAllArtists = new ArtistViewModel("All Artists", artists.Count);
 
                 return artists
                     .Prepend(currentAllArtists);

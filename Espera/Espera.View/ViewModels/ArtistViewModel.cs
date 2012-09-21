@@ -2,17 +2,21 @@
 {
     internal sealed class ArtistViewModel
     {
-        public ArtistViewModel(string name, int? songCount, int? artistCount = null)
+        public ArtistViewModel(string name, int albumCount, int songCount)
         {
             this.Name = name;
+            this.AlbumCount = albumCount;
             this.SongCount = songCount;
-
-            if (artistCount != null)
-            {
-                this.IsAllArtists = true;
-                this.ArtistCount = artistCount;
-            }
         }
+
+        public ArtistViewModel(string name, int artistCount)
+        {
+            this.Name = name;
+            this.ArtistCount = artistCount;
+            this.IsAllArtists = true;
+        }
+
+        public int? AlbumCount { get; private set; }
 
         public int? ArtistCount { get; private set; }
 

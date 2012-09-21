@@ -288,6 +288,10 @@
                                         </Style>
                                     </StackPanel.Style>
                                     <TextBlock Style="{StaticResource ArtistInfoStyle}"
+                                               Text="{Binding Path=AlbumCount}" />
+                                    <TextBlock Style="{StaticResource ArtistInfoStyle}"
+                                               Text=" Albums, " />
+                                    <TextBlock Style="{StaticResource ArtistInfoStyle}"
                                                Text="{Binding Path=SongCount}" />
                                     <TextBlock Style="{StaticResource ArtistInfoStyle}"
                                                Text=" Songs" />
