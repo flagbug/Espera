@@ -1,6 +1,7 @@
 ﻿using Espera.Core;
 using Espera.Core.Management;
 using Espera.View.Properties;
+using MoreLinq;
 using Rareform.Patterns.MVVM;
 using Rareform.Validation;
 using System;
@@ -12,8 +13,11 @@ namespace Espera.View.ViewModels
 {
     internal sealed class LocalViewModel : SongSourceViewModel<LocalSongViewModel>
     {
+        private const string AllArtists = "All Artists"; // String value to select all songs
         private SortOrder albumOrder;
+        private bool allArtistsSelected;
         private SortOrder artistOrder;
+        private string currentAllArtists; // The current string for all artist
         private SortOrder durationOrder;
         private SortOrder genreOrder;
         private volatile bool isAdding;
@@ -37,11 +41,7 @@ namespace Espera.View.ViewModels
             // We need a default sorting order
             this.OrderByArtist();
 
-            // Selected the first artist, if there is any (there is always an artist, if there is a song (Unknown Artist))
-            if (this.Library.Songs.Any())
-            {
-                this.SelectedArtist = this.Artists.First();
-            }
+            this.SelectedArtist = this.Artists.First();
         }
 
         public int AlbumColumnWidth
@@ -61,13 +61,21 @@ namespace Espera.View.ViewModels
             get
             {
                 // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
-                IEnumerable<Song> songs = this.isAdding ? this.Library.Songs.ToList() : this.Library.Songs;
+                IEnumerable<Song> source = this.isAdding ? this.Library.Songs.ToList() : this.Library.Songs;
 
-                return songs.FilterSongs(this.SearchText)
-                    .Where(song => !String.IsNullOrWhiteSpace(song.Artist))
-                    .GroupBy(song => song.Artist)
-                    .Select(group => group.Key)
-                    .OrderBy(artist => RemoveArtistPrefixes(artist, new[] { "A", "The" }));
+                var artists = source.FilterSongs(this.SearchText)
+                    .Select(song => song.Artist)
+                    .Where(artist => !String.IsNullOrWhiteSpace(artist))
+                    .Distinct()
+                    .OrderBy(artist => RemoveArtistPrefixes(artist, new[] { "A", "The" }))
+                    .ToList();
+
+                int count = artists.Count;
+
+                this.currentAllArtists = String.Format("{0} ({1})", AllArtists, count);
+
+                return artists
+                    .Prepend(currentAllArtists);
             }
         }
 
@@ -132,9 +140,12 @@ namespace Espera.View.ViewModels
             get { return this.selectedArtist; }
             set
             {
-                if (this.SelectedArtist != value)
+                if (value != null && this.SelectedArtist != value)
                 {
                     this.selectedArtist = value;
+
+                    this.allArtistsSelected = this.selectedArtist == this.currentAllArtists;
+
                     this.NotifyOfPropertyChange(() => this.SelectedArtist);
 
                     this.UpdateSelectableSongs();
@@ -213,9 +224,10 @@ namespace Espera.View.ViewModels
         protected override void UpdateSelectableSongs()
         {
             // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
-            var songs = (this.isAdding ? this.Library.Songs.ToList() : this.Library.Songs)
-                .AsParallel()
-                .Where(song => song.Artist == this.SelectedArtist);
+            var source = (this.isAdding ? this.Library.Songs.ToList() : this.Library.Songs).AsParallel();
+
+            IEnumerable<Song> songs = source
+                .Where(song => this.allArtistsSelected || song.Artist == this.SelectedArtist);
 
             this.SelectableSongs = songs.FilterSongs(this.SearchText)
                 .Select(song => new LocalSongViewModel(song))
