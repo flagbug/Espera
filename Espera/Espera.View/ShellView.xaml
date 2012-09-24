@@ -627,8 +627,10 @@
                                      KeyUp="PlaylistsKeyUp">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid>
-                                            <TextBox Height="25"
+                                        <StackPanel Orientation="Vertical"
+                                                    Margin="0, 5, 0, 5">
+                                            <Grid>
+                                                <TextBox Height="25"
                                                      MinHeight="25"
                                                      Margin="0, 0, 5, 0"
                                                      VerticalAlignment="Center"
@@ -640,48 +642,50 @@
                                                      Text="{Binding Path=Name,
                                                                     ValidatesOnDataErrors=True,
                                                                     UpdateSourceTrigger=PropertyChanged}">
-                                                <TextBox.Style>
-                                                    <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="{x:Type TextBox}">
-                                                        <Style.Triggers>
-                                                            <Trigger Property="IsEnabled" Value="False">
-                                                                <Setter Property="Visibility" Value="Hidden" />
-                                                            </Trigger>
-                                                            <DataTrigger Binding="{Binding Path=EditName}" Value="False">
-                                                                <Setter Property="Background" Value="Transparent" />
-                                                                <Setter Property="BorderThickness" Value="0" />
-                                                                <Setter Property="IsReadOnly" Value="True" />
-                                                                <Setter Property="IsHitTestVisible" Value="False" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Path=EditName}" Value="True">
-                                                                <Setter Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={x:Static RelativeSource.Self}}" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBox.Style>
-                                            </TextBox>
-                                            <TextBlock VerticalAlignment="Center"
-                                                       Text="{Binding Path=Name}"
-                                                       Margin="5, 0, 5, 0"
-                                                       FontFamily="{DynamicResource ContentFontFamily}"
-                                                       FontSize="{DynamicResource ContentFontSize}">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="{x:Type TextBlock}">
-                                                        <Style.Triggers>
-                                                            <Trigger Property="IsEnabled" Value="True">
-                                                                <Setter Property="Visibility" Value="Hidden" />
-                                                            </Trigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </Grid>
+                                                    <TextBox.Style>
+                                                        <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="{x:Type TextBox}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Path=EditName}" Value="False">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Path=EditName}" Value="True">
+                                                                    <Setter Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={x:Static RelativeSource.Self}}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBox.Style>
+                                                </TextBox>
+                                                <TextBlock Text="{Binding Path=Name}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="{x:Type TextBlock}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Path=EditName}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Grid>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource ArtistInfoStyle}"
+                                                           Text="{Binding Path=SongCount}" />
+                                                <TextBlock>
+                                                    <TextBlock.Style>
+                                                        <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
+                                                            <Setter Property="Text" Value=" Songs" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Path=SongCount}" Value="1">
+                                                                    <Setter Property="Text" Value=" Song" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </StackPanel>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
-                                <ListBox.ItemContainerStyle>
-                                    <Style BasedOn="{StaticResource {x:Type ListBoxItem}}" TargetType="{x:Type ListBoxItem}">
-                                        <Setter Property="Height" Value="35" />
-                                    </Style>
-                                </ListBox.ItemContainerStyle>
                             </ListBox>
                         </Grid>
                         <ListView Grid.Column="1"

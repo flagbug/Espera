@@ -15,6 +15,8 @@ namespace Espera.View.ViewModels
         private bool editName;
         private string saveName;
 
+        private int? songCount;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PlaylistViewModel"/> class.
         /// </summary>
@@ -69,6 +71,29 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public int SongCount
+        {
+            get
+            {
+                // We use this to get a value, even if the Songs property hasn't been called
+                if (songCount == null)
+                {
+                    return this.Songs.Count();
+                }
+
+                return songCount.Value;
+            }
+
+            set
+            {
+                if (this.songCount != value)
+                {
+                    this.songCount = value;
+                    this.NotifyOfPropertyChange(() => this.SongCount);
+                }
+            }
+        }
+
         public IEnumerable<PlaylistEntryViewModel> Songs
         {
             get
@@ -76,6 +101,8 @@ namespace Espera.View.ViewModels
                 var songs = this.playlist.Songs
                     .Select((song, index) => new PlaylistEntryViewModel(song, index))
                     .ToList(); // We want a list, so that ReSharper doesn't complain about multiple enumerations
+
+                this.SongCount = songs.Count;
 
                 if (this.playlist.CurrentSongIndex.HasValue)
                 {
