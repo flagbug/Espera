@@ -130,8 +130,9 @@
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
             </Style>
             <Style x:Key="ArtistInfoStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="9" />
+                <Setter Property="FontSize" Value="{DynamicResource ContentFontSize}" />
                 <Setter Property="FontFamily" Value="{DynamicResource ContentFontFamily}" />
+                <Setter Property="Opacity" Value="0.6" />
             </Style>
         </ResourceDictionary>
     </Window.Resources>
