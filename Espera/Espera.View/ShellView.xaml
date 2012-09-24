@@ -289,12 +289,32 @@
                                     </StackPanel.Style>
                                     <TextBlock Style="{StaticResource ArtistInfoStyle}"
                                                Text="{Binding Path=AlbumCount}" />
-                                    <TextBlock Style="{StaticResource ArtistInfoStyle}"
-                                               Text=" Albums, " />
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
+                                                <Setter Property="Text" Value=" Albums, " />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=AlbumCount}" Value="1">
+                                                        <Setter Property="Text" Value=" Album, " />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                     <TextBlock Style="{StaticResource ArtistInfoStyle}"
                                                Text="{Binding Path=SongCount}" />
-                                    <TextBlock Style="{StaticResource ArtistInfoStyle}"
-                                               Text=" Songs" />
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
+                                                <Setter Property="Text" Value=" Songs" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=SongCount}" Value="1">
+                                                        <Setter Property="Text" Value=" Song" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <StackPanel.Style>
@@ -308,8 +328,18 @@
                                     </StackPanel.Style>
                                     <TextBlock Style="{StaticResource ArtistInfoStyle}"
                                                Text="{Binding Path=ArtistCount}" />
-                                    <TextBlock Style="{StaticResource ArtistInfoStyle}"
-                                               Text=" Artists" />
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
+                                                <Setter Property="Text" Value=" Artists" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=ArtistCount}" Value="1">
+                                                        <Setter Property="Text" Value=" Artist" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                 </StackPanel>
                             </StackPanel>
                         </DataTemplate>
