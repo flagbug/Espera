@@ -1,3 +1,16 @@
+----------------------------------- v1.4.0 -----------------------------------
+
+FEATURES:
+- The first element in the artist list is now always "All Artists", that can 
+  be selected to display all artists.
+- Each artist now displays the number of albums and songs underneath.
+- Each playlist now displays the number of songs underneath its name.
+
+BUGFIXES:
+- Fixed a bug, that caused the YouTube views to be sorted wrong.
+- Fixed a bug, that caused the path of local songs to not be displayed.
+- Fixed a bug, that caused YouTube streaming and downloading to fail randomly.
+
 ----------------------------------- v1.3.0 -----------------------------------
 
 FEATURES:
