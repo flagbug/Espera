@@ -91,7 +91,7 @@ namespace Espera.Core
                 this.OnCachingFailed(EventArgs.Empty);
             }
 
-            catch (InvalidOperationException)
+            catch (AudioExtractionException)
             {
                 this.OnCachingFailed(EventArgs.Empty);
             }

@@ -4,9 +4,17 @@
         <name>YoutubeExtractor</name>
     </assembly>
     <members>
+        <member name="M:YoutubeExtractor.IAudioExtractor.WriteChunk(System.Byte[],System.UInt32)">
+            <exception cref="T:YoutubeExtractor.AudioExtractionException">An error occured while writing the chunk.</exception>
+        </member>
         <member name="T:YoutubeExtractor.AudioDownloader">
             <summary>
             Provides a method to download a video and extract its audio track.
+            </summary>
+        </member>
+        <member name="T:YoutubeExtractor.Downloader">
+            <summary>
+            Provides the base class for the <see cref="T:YoutubeExtractor.AudioDownloader"/> and <see cref="T:YoutubeExtractor.VideoDownloader"/> class.
             </summary>
         </member>
         <member name="M:YoutubeExtractor.Downloader.#ctor(YoutubeExtractor.VideoInfo,System.String)">
@@ -15,6 +23,7 @@
             </summary>
             <param name="video">The video to download/convert.</param>
             <param name="savePath">The path to save the video/audio.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="video"/> or <paramref name="savePath"/> is <c>null</c>.</exception>
         </member>
         <member name="M:YoutubeExtractor.Downloader.Execute">
             <summary>
@@ -52,10 +61,23 @@
             </summary>
             <param name="video">The video to convert.</param>
             <param name="savePath">The path to save the audio.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="video"/> or <paramref name="savePath"/> is <c>null</c>.</exception>
         </member>
         <member name="M:YoutubeExtractor.AudioDownloader.Execute">
             <summary>
-            Starts the download and then extracts the audio track of the video.
+            Downloads the video from YouTube and then extracts the audio track out if it.
+            </summary>
+            <exception cref="T:System.IO.IOException">
+            The temporary video file could not be created.
+            - or -
+            The audio file could not be created.
+            </exception>
+            <exception cref="T:YoutubeExtractor.AudioExtractionException">An error occured during audio extraction.</exception>
+            <exception cref="T:System.Net.WebException">An error occured while downloading the video.</exception>
+        </member>
+        <member name="T:YoutubeExtractor.AudioExtractionException">
+            <summary>
+            The exception that is thrown when an error occurs durin audio extraction.
             </summary>
         </member>
         <member name="T:YoutubeExtractor.DownloadUrlResolver">
@@ -82,6 +104,9 @@
             <param name="inputPath">The path of the input.</param>
             <param name="outputPath">The path of the output without extension.</param>
         </member>
+        <member name="M:YoutubeExtractor.FlvFile.ExtractStreams">
+            <exception cref="T:YoutubeExtractor.AudioExtractionException">The input file is not an FLV file.</exception>
+        </member>
         <member name="P:YoutubeExtractor.ProgressEventArgs.ProgressPercentage">
             <summary>
             Gets the progress percentage in a range from 0.0 to 100.0.
@@ -98,11 +123,14 @@
             </summary>
             <param name="video">The video to download.</param>
             <param name="savePath">The path to save the video.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="video"/> or <paramref name="savePath"/> is <c>null</c>.</exception>
         </member>
         <member name="M:YoutubeExtractor.VideoDownloader.Execute">
             <summary>
             Starts the video download.
             </summary>
+            <exception cref="T:System.IO.IOException">The video file could not be saved.</exception>
+            <exception cref="T:System.Net.WebException">An error occured while downloading the video.</exception>
         </member>
         <member name="P:YoutubeExtractor.VideoInfo.AudioBitrate">
             <summary>
