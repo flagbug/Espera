@@ -237,15 +237,15 @@ namespace Espera.View
         {
             IVideoPlayerCallback callback = this.shellViewModel.VideoPlayerCallback;
 
-            callback.GetTime = () => (TimeSpan)Dispatcher.Invoke(new Func<TimeSpan>(() => this.videoPlayer.Position));
-            callback.SetTime = time => Dispatcher.Invoke(new Action(() => this.videoPlayer.Position = time));
+            callback.GetTime = () => (TimeSpan)this.Dispatcher.Invoke(new Func<TimeSpan>(() => this.videoPlayer.Position));
+            callback.SetTime = time => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Position = time));
 
-            callback.VolumeChangeRequest = volume => Dispatcher.Invoke(new Action(() => this.videoPlayer.Volume = volume));
+            callback.VolumeChangeRequest = volume => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Volume = volume));
 
             callback.LoadRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Source = callback.VideoUrl));
-            callback.PauseRequest = () => Dispatcher.Invoke(new Action(() => this.videoPlayer.Pause()));
-            callback.PlayRequest = () => Dispatcher.Invoke(new Action(() => this.videoPlayer.Play()));
-            callback.StopRequest = () => Dispatcher.Invoke(new Action(() => this.videoPlayer.Stop()));
+            callback.PauseRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Pause()));
+            callback.PlayRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Play()));
+            callback.StopRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Stop()));
         }
 
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
