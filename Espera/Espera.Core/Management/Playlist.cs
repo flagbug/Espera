@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Rareform.Reflection;
+using Rareform.Validation;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Rareform.Reflection;
-using Rareform.Validation;
 
 namespace Espera.Core.Management
 {
@@ -14,9 +14,6 @@ namespace Espera.Core.Management
     {
         private Dictionary<int, Song> playlist;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Playlist"/> class.
-        /// </summary>
         public Playlist(string name)
         {
             this.Name = name;
@@ -49,18 +46,26 @@ namespace Espera.Core.Management
         /// Gets the index of the currently played song in the playlist.
         /// </summary>
         /// <value>
-        /// The index of the currently played song in the playlist.
+        /// The index of the currently played song in the playlist. Null, if no song is currently played.
         /// </value>
         public int? CurrentSongIndex { get; set; }
 
         public string Name { get; set; }
 
-        /// <summary>
-        /// Gets the <see cref="Espera.Core.Song"/> at the specified index.
-        /// </summary>
         public Song this[int index]
         {
             get { return this.playlist[index]; }
+        }
+
+        /// <summary>
+        /// Returns an enumerator that iterates through a collection.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
+        /// </returns>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         /// <summary>
@@ -85,17 +90,16 @@ namespace Espera.Core.Management
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether there exists a song at the specified index.
+        /// </summary>
+        /// <param name="songIndex">The index to look for.</param>
+        /// <returns>True, if there exists a song at the specified index; otherwise, false.</returns>
         public bool ContainsIndex(int songIndex)
         {
             return this.playlist.ContainsKey(songIndex);
         }
 
-        /// <summary>
-        /// Returns an enumerator that iterates through the collection.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
-        /// </returns>
         public IEnumerator<Song> GetEnumerator()
         {
             return this.playlist
@@ -105,10 +109,8 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Gets the index in the playlist for each of the specified songs.
+        /// Gets the indexes of the specified songs.
         /// </summary>
-        /// <param name="songs">The songs.</param>
-        /// <returns></returns>
         public IEnumerable<int> GetIndexes(IEnumerable<Song> songs)
         {
             return this.playlist
@@ -165,7 +167,7 @@ namespace Espera.Core.Management
                 this.playlist.Remove(index);
             }
 
-            this.Rebuild();
+            this.RebuildIndexes();
         }
 
         public void Shuffle()
@@ -197,21 +199,7 @@ namespace Espera.Core.Management
             }
         }
 
-        /// <summary>
-        /// Returns an enumerator that iterates through a collection.
-        /// </summary>
-        /// <returns>
-        /// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
-        /// </returns>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        /// <summary>
-        /// Rebuilds the playlist with new indexes.
-        /// </summary>
-        private void Rebuild()
+        private void RebuildIndexes()
         {
             var newPlaylist = new Dictionary<int, Song>();
             int index = 0;
