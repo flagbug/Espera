@@ -102,7 +102,9 @@ namespace Espera.View
         private void MainWindowMouseDown(object sender, MouseButtonEventArgs e)
         {
             // We want to lose the focus of a textbox when the user clicks anywhere in the application
+            this.mainGrid.Focusable = true;
             this.mainGrid.Focus();
+            this.mainGrid.Focusable = false;
         }
 
         private void MetroWindowClosing(object sender, CancelEventArgs e)

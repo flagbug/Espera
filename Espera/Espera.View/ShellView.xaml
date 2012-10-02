@@ -138,7 +138,6 @@
         </ResourceDictionary>
     </Window.Resources>
     <Grid x:Name="mainGrid"
-          Focusable="True"
           Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
