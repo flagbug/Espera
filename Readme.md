@@ -2,7 +2,7 @@
 
 ## Overview
 
-Espera is an open-source media player that plays MP3s and YouTube videos.
+Espera is an open-source media player that plays MP3s, WAV files and YouTube videos.
 
 It is designed as party-player, as it offers features such as locking the player and allowing only to add a certain
 amount of songs to the playlist at a certain time, or adding music from YouTube to the playlist and streaming the 
