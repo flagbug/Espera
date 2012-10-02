@@ -2,7 +2,7 @@
 
 ## Overview
 
-Espera is a music player written in C# with WPF as frontend technology.
+Espera is an open-source media player that plays MP3s and YouTube videos.
 
 It is designed as party-player, as it offers features such as locking the player and allowing only to add a certain
 amount of songs to the playlist at a certain time, or adding music from YouTube to the playlist and streaming the 
@@ -27,7 +27,7 @@ Espera has built-in support for adding music from MP3-players and other removabl
 The music that is added to the playlist will be automatically cached on the computer, so that the devices can be removed
 without affecting the playback.
 
-### Metro-Style
+### Metro (Modern UI)-Style
 
 Espera uses [MahApps.Metro](http://github.com/MahApps/MahApps.Metro) for theming. This gives Espera a beautiful and 
 very clean look.
