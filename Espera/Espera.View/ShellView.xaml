@@ -93,6 +93,7 @@
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
+                <Setter Property="IsTabStop" Value="False" />
             </Style>
             <Style x:Key="ColorPickerButtonStyle" TargetType="{x:Type Button}">
                 <Setter Property="Template">
@@ -136,7 +137,9 @@
             </Style>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid x:Name="mainGrid" Focusable="True" Margin="10">
+    <Grid x:Name="mainGrid"
+          Focusable="True"
+          Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -554,7 +557,8 @@
                               Height="3"
                               HorizontalAlignment="Stretch"
                               Background="Transparent"
-                              Foreground="Transparent" />
+                              Foreground="Transparent"
+                              IsTabStop="False" />
                 <Grid Grid.Row="2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
