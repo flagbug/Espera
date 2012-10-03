@@ -229,6 +229,10 @@ namespace Espera.View.ViewModels
             this.SelectedSongs = this.SelectableSongs.Take(1);
         }
 
+        /// <example>
+        /// With prefixes "A" and "The":
+        /// "A Bar" -> "Bar", "The Foos" -> "Foos"
+        /// </example>
         private static string RemoveArtistPrefixes(string artistName, IEnumerable<string> prefixes)
         {
             foreach (string s in prefixes)
