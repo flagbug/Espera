@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using Espera.Core.Audio;
+﻿using Espera.Core.Audio;
 using Espera.Core.Management;
 using Moq;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Espera.Core.Tests
 {
@@ -45,12 +45,12 @@ namespace Espera.Core.Tests
 
         public static Library CreateLibrary()
         {
-            return new Library(new Mock<IRemovableDriveWatcher>().Object);
+            return new Library(new Mock<IRemovableDriveWatcher>().Object, new Mock<ILibraryReader>().Object, new Mock<ILibraryWriter>().Object);
         }
 
         public static Library CreateLibraryWithPlaylist(string playlistName = "Playlist")
         {
-            var library = new Library(new Mock<IRemovableDriveWatcher>().Object);
+            var library = CreateLibrary();
             library.AddAndSwitchToPlaylist(playlistName);
 
             return library;

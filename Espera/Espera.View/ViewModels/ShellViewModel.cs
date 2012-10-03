@@ -7,6 +7,7 @@ using Rareform.Patterns.MVVM;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Timers;
 using System.Windows.Input;
@@ -27,7 +28,15 @@ namespace Espera.View.ViewModels
 
         public ShellViewModel()
         {
-            this.library = new Library(new RemovableDriveWatcher());
+            string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Espera\");
+            string filePath = Path.Combine(directoryPath, "Library.xml");
+
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            this.library = new Library(new RemovableDriveWatcher(), new LibraryFileReader(filePath), new LibraryFileWriter(filePath));
             this.library.Initialize();
 
             this.library.SongStarted += (sender, args) => this.HandleSongStarted();

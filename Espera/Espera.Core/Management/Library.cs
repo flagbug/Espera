@@ -18,6 +18,8 @@ namespace Espera.Core.Management
         private readonly object disposeLock;
 
         private readonly IRemovableDriveWatcher driveWatcher;
+        private readonly ILibraryReader libraryReader;
+        private readonly ILibraryWriter libraryWriter;
         private readonly List<Playlist> playlists;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
@@ -31,7 +33,7 @@ namespace Espera.Core.Management
         private bool overrideCurrentCaching;
         private string password;
 
-        public Library(IRemovableDriveWatcher driveWatcher)
+        public Library(IRemovableDriveWatcher driveWatcher, ILibraryReader libraryReader, ILibraryWriter libraryWriter)
         {
             this.songLock = new object();
             this.songs = new HashSet<Song>();
@@ -39,6 +41,8 @@ namespace Espera.Core.Management
             this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
             this.cacheResetHandle = new AutoResetEvent(false);
             this.driveWatcher = driveWatcher;
+            this.libraryReader = libraryReader;
+            this.libraryWriter = libraryWriter;
             this.disposeLock = new object();
         }
 
@@ -670,18 +674,7 @@ namespace Espera.Core.Management
 
         public void Save()
         {
-            string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Espera\");
-            string filePath = Path.Combine(directoryPath, "Library.xml");
-
-            if (!Directory.Exists(directoryPath))
-            {
-                Directory.CreateDirectory(directoryPath);
-            }
-
-            using (Stream targetStream = File.Create(filePath))
-            {
-                LibraryWriter.Write(this.songs.Cast<LocalSong>(), this.playlists.Select(playlist => new PlaylistInfo(playlist)), targetStream);
-            }
+            this.libraryWriter.Write(this.songs.Cast<LocalSong>(), this.playlists.Select(playlist => new PlaylistInfo(playlist)));
         }
 
         public void ShufflePlaylist()
@@ -915,26 +908,16 @@ namespace Espera.Core.Management
 
         private void Load()
         {
-            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Espera\Library.xml");
+            IEnumerable<Song> savedSongs = this.libraryReader.ReadSongs();
 
-            if (File.Exists(filePath))
+            foreach (Song song in savedSongs)
             {
-                using (Stream sourceStream = File.OpenRead(filePath))
-                {
-                    IEnumerable<Song> savedSongs = LibraryReader.ReadSongs(sourceStream);
-
-                    foreach (Song song in savedSongs)
-                    {
-                        this.songs.Add(song);
-                    }
-
-                    sourceStream.Position = 0;
-
-                    IEnumerable<Playlist> savedPlaylists = LibraryReader.ReadPlaylists(sourceStream);
-
-                    this.playlists.AddRange(savedPlaylists);
-                }
+                this.songs.Add(song);
             }
+
+            IEnumerable<Playlist> savedPlaylists = this.libraryReader.ReadPlaylists();
+
+            this.playlists.AddRange(savedPlaylists);
         }
 
         private void RenewCurrentPlayer(Song song)
