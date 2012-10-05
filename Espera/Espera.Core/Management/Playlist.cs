@@ -48,7 +48,7 @@ namespace Espera.Core.Management
         /// <value>
         /// The index of the currently played song in the playlist. Null, if no song is currently played.
         /// </value>
-        public int? CurrentSongIndex { get; set; }
+        public int? CurrentSongIndex { get; internal set; }
 
         public string Name { get; set; }
 
@@ -60,28 +60,6 @@ namespace Espera.Core.Management
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
-
-        /// <summary>
-        /// Adds the specified songs to end of the playlist.
-        /// </summary>
-        /// <param name="songList">The songs to add to the end of the playlist.</param>
-        public void AddSongs(IEnumerable<Song> songList)
-        {
-            if (songList == null)
-                Throw.ArgumentNullException(() => songList);
-
-            foreach (Song song in songList)
-            {
-                if (song.HasToCache && !song.IsCaching)
-                {
-                    GlobalSongCacheQueue.Instance.Enqueue(song);
-                }
-
-                int index = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
-
-                this.playlist.Add(index, song);
-            }
         }
 
         /// <summary>
@@ -114,11 +92,33 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
+        /// Adds the specified songs to end of the playlist.
+        /// </summary>
+        /// <param name="songList">The songs to add to the end of the playlist.</param>
+        internal void AddSongs(IEnumerable<Song> songList)
+        {
+            if (songList == null)
+                Throw.ArgumentNullException(() => songList);
+
+            foreach (Song song in songList)
+            {
+                if (song.HasToCache && !song.IsCaching)
+                {
+                    GlobalSongCacheQueue.Instance.Enqueue(song);
+                }
+
+                int index = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
+
+                this.playlist.Add(index, song);
+            }
+        }
+
+        /// <summary>
         /// Inserts a song from a specified index to a other index in the playlist and moves all songs in between these indexes one index back.
         /// </summary>
         /// <param name="fromIndex">The index of the song to move.</param>
         /// <param name="toIndex">To index to insert the song.</param>
-        public void InsertMove(int fromIndex, int toIndex)
+        internal void InsertMove(int fromIndex, int toIndex)
         {
             if (fromIndex < 0)
                 Throw.ArgumentOutOfRangeException(() => fromIndex, 0);
@@ -146,7 +146,7 @@ namespace Espera.Core.Management
         /// Removes the songs with the specified indexes from the <see cref="Playlist"/>.
         /// </summary>
         /// <param name="indexes">The indexes of the songs to remove.</param>
-        public void RemoveSongs(IEnumerable<int> indexes)
+        internal void RemoveSongs(IEnumerable<int> indexes)
         {
             if (indexes == null)
                 Throw.ArgumentNullException(() => indexes);
@@ -164,7 +164,7 @@ namespace Espera.Core.Management
             this.RebuildIndexes();
         }
 
-        public void Shuffle()
+        internal void Shuffle()
         {
             int count = this.playlist.Count;
 

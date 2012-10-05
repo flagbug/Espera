@@ -598,7 +598,7 @@ namespace Espera.View.ViewModels
             this.CurrentPlaylist.EditName = true;
         }
 
-        private PlaylistViewModel CreatePlaylistViewModel(PlaylistInfo playlist)
+        private PlaylistViewModel CreatePlaylistViewModel(Playlist playlist)
         {
             return new PlaylistViewModel(playlist, name => this.playlists.Count(p => p.Name == name) == 1);
         }

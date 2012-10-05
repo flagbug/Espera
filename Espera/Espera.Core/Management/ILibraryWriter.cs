@@ -4,6 +4,6 @@ namespace Espera.Core.Management
 {
     public interface ILibraryWriter
     {
-        void Write(IEnumerable<LocalSong> songs, IEnumerable<PlaylistInfo> playlists);
+        void Write(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists);
     }
 }

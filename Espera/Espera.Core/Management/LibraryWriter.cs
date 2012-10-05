@@ -7,7 +7,7 @@ namespace Espera.Core.Management
 {
     internal class LibraryWriter
     {
-        public static void Write(IEnumerable<LocalSong> songs, IEnumerable<PlaylistInfo> playlists, Stream targetStream)
+        public static void Write(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists, Stream targetStream)
         {
             var document = new XDocument(
                 new XElement("Root",
@@ -25,7 +25,7 @@ namespace Espera.Core.Management
                     new XElement("Playlists", playlists.Select(playlist =>
                         new XElement("Playlist",
                             new XAttribute("Name", playlist.Name),
-                            new XElement("Entries", playlist.Songs.Select(song =>
+                            new XElement("Entries", playlist.Select(song =>
                                 new XElement("Entry",
                                     new XAttribute("Path", song.OriginalPath),
                                     song is YoutubeSong ? new XAttribute("Title", song.Title) : null,

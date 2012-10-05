@@ -27,7 +27,6 @@ namespace Espera.Core.Management
         private AccessMode accessMode;
         private AudioPlayer currentPlayer;
         private Playlist currentPlayingPlaylist;
-        private Playlist currentPlaylist;
         private bool isWaitingOnCache;
         private DateTime lastSongAddTime;
         private bool overrideCurrentCaching;
@@ -127,7 +126,7 @@ namespace Espera.Core.Management
         /// </value>
         public bool CanPlayNextSong
         {
-            get { return this.currentPlaylist.CanPlayNextSong; }
+            get { return this.CurrentPlaylist.CanPlayNextSong; }
         }
 
         /// <summary>
@@ -138,7 +137,7 @@ namespace Espera.Core.Management
         /// </value>
         public bool CanPlayPreviousSong
         {
-            get { return this.currentPlaylist.CanPlayPreviousSong; }
+            get { return this.CurrentPlaylist.CanPlayPreviousSong; }
         }
 
         public bool CanSwitchPlaylist
@@ -146,10 +145,7 @@ namespace Espera.Core.Management
             get { return this.AccessMode == AccessMode.Administrator || !this.LockPlaylistSwitching; }
         }
 
-        public PlaylistInfo CurrentPlaylist
-        {
-            get { return new PlaylistInfo(this.currentPlaylist); }
-        }
+        public Playlist CurrentPlaylist { get; private set; }
 
         /// <summary>
         /// Gets the index of the currently played song in the playlist.
@@ -159,7 +155,7 @@ namespace Espera.Core.Management
         /// </value>
         public int? CurrentSongIndex
         {
-            get { return this.currentPlaylist.CurrentSongIndex; }
+            get { return this.CurrentPlaylist.CurrentSongIndex; }
         }
 
         /// <summary>
@@ -291,9 +287,9 @@ namespace Espera.Core.Management
             }
         }
 
-        public IEnumerable<PlaylistInfo> Playlists
+        public IEnumerable<Playlist> Playlists
         {
-            get { return this.playlists.Select(playlist => new PlaylistInfo(playlist)); }
+            get { return this.playlists; }
         }
 
         public TimeSpan PlaylistTimeout
@@ -429,7 +425,7 @@ namespace Espera.Core.Management
 
             this.ThrowIfNotAdmin();
 
-            this.currentPlaylist.AddSongs(songList.ToList()); // Copy the sequence to a list, so that the enumeration doesn't gets modified
+            this.CurrentPlaylist.AddSongs(songList.ToList()); // Copy the sequence to a list, so that the enumeration doesn't gets modified
 
             this.PlaylistChanged.RaiseSafe(this, EventArgs.Empty);
         }
@@ -444,7 +440,7 @@ namespace Espera.Core.Management
             if (song == null)
                 Throw.ArgumentNullException(() => song);
 
-            this.currentPlaylist.AddSongs(new[] { song });
+            this.CurrentPlaylist.AddSongs(new[] { song });
 
             this.lastSongAddTime = DateTime.Now;
 
@@ -570,10 +566,10 @@ namespace Espera.Core.Management
         {
             this.ThrowIfNotAdmin();
 
-            if (!this.currentPlaylist.CanPlayPreviousSong || !this.currentPlaylist.CurrentSongIndex.HasValue)
+            if (!this.CurrentPlaylist.CanPlayPreviousSong || !this.CurrentPlaylist.CurrentSongIndex.HasValue)
                 throw new InvalidOperationException("The previous song couldn't be played.");
 
-            this.PlaySong(this.currentPlaylist.CurrentSongIndex.Value - 1);
+            this.PlaySong(this.CurrentPlaylist.CurrentSongIndex.Value - 1);
         }
 
         /// <summary>
@@ -628,9 +624,9 @@ namespace Espera.Core.Management
             if (this.LockPlaylistRemoval && this.AccessMode == AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
 
-            bool stopCurrentSong = indexes.Any(index => index == this.currentPlaylist.CurrentSongIndex);
+            bool stopCurrentSong = indexes.Any(index => index == this.CurrentPlaylist.CurrentSongIndex);
 
-            this.currentPlaylist.RemoveSongs(indexes);
+            this.CurrentPlaylist.RemoveSongs(indexes);
 
             this.PlaylistChanged.RaiseSafe(this, EventArgs.Empty);
 
@@ -650,7 +646,7 @@ namespace Espera.Core.Management
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
 
-            this.RemoveFromPlaylist(this.currentPlaylist.GetIndexes(songList));
+            this.RemoveFromPlaylist(this.CurrentPlaylist.GetIndexes(songList));
         }
 
         /// <summary>
@@ -674,12 +670,12 @@ namespace Espera.Core.Management
 
         public void Save()
         {
-            this.libraryWriter.Write(this.songs.Cast<LocalSong>(), this.playlists.Select(playlist => new PlaylistInfo(playlist)));
+            this.libraryWriter.Write(this.songs.Cast<LocalSong>(), this.playlists);
         }
 
         public void ShufflePlaylist()
         {
-            this.currentPlaylist.Shuffle();
+            this.CurrentPlaylist.Shuffle();
         }
 
         public void SwitchToPlaylist(string name)
@@ -687,7 +683,7 @@ namespace Espera.Core.Management
             if (!this.CanSwitchPlaylist)
                 throw new InvalidOperationException("Not allowed to switch playlist.");
 
-            this.currentPlaylist = this.playlists.Single(playlist => playlist.Name == name);
+            this.CurrentPlaylist = this.playlists.Single(playlist => playlist.Name == name);
         }
 
         /// <summary>
@@ -778,9 +774,9 @@ namespace Espera.Core.Management
 
         private void HandleSongCorruption()
         {
-            if (!this.currentPlaylist.CanPlayNextSong)
+            if (!this.CurrentPlaylist.CanPlayNextSong)
             {
-                this.currentPlaylist.CurrentSongIndex = null;
+                this.CurrentPlaylist.CurrentSongIndex = null;
             }
 
             else
@@ -791,9 +787,9 @@ namespace Espera.Core.Management
 
         private void HandleSongFinish()
         {
-            if (!this.currentPlaylist.CanPlayNextSong)
+            if (!this.CurrentPlaylist.CanPlayNextSong)
             {
-                this.currentPlaylist.CurrentSongIndex = null;
+                this.CurrentPlaylist.CurrentSongIndex = null;
             }
 
             this.currentPlayer.Dispose();
@@ -801,7 +797,7 @@ namespace Espera.Core.Management
 
             this.SongFinished.RaiseSafe(this, EventArgs.Empty);
 
-            if (this.currentPlaylist.CanPlayNextSong)
+            if (this.CurrentPlaylist.CanPlayNextSong)
             {
                 this.InternPlayNextSong();
             }
@@ -809,23 +805,23 @@ namespace Espera.Core.Management
 
         private void InternPlayNextSong()
         {
-            if (!this.currentPlaylist.CanPlayNextSong || !this.currentPlaylist.CurrentSongIndex.HasValue)
+            if (!this.CurrentPlaylist.CanPlayNextSong || !this.CurrentPlaylist.CurrentSongIndex.HasValue)
                 throw new InvalidOperationException("The next song couldn't be played.");
 
-            int nextIndex = this.currentPlaylist.CurrentSongIndex.Value + 1;
-            Song nextSong = this.currentPlaylist[nextIndex];
+            int nextIndex = this.CurrentPlaylist.CurrentSongIndex.Value + 1;
+            Song nextSong = this.CurrentPlaylist[nextIndex];
 
             // We want the to swap the songs, if the song that should be played next is currently caching
-            if (nextSong.HasToCache && !nextSong.IsCached && this.currentPlaylist.ContainsIndex(nextIndex + 1))
+            if (nextSong.HasToCache && !nextSong.IsCached && this.CurrentPlaylist.ContainsIndex(nextIndex + 1))
             {
-                var nextReady = this.currentPlaylist
+                var nextReady = this.CurrentPlaylist
                     .Select((song, i) => new { Song = song, Index = i })
                     .Skip(nextIndex)
                     .FirstOrDefault(item => !item.Song.HasToCache || item.Song.IsCached);
 
                 if (nextReady != null)
                 {
-                    this.currentPlaylist.InsertMove(nextReady.Index, nextIndex);
+                    this.CurrentPlaylist.InsertMove(nextReady.Index, nextIndex);
                 }
             }
 
@@ -850,11 +846,11 @@ namespace Espera.Core.Management
                 this.currentPlayingPlaylist.CurrentSongIndex = null;
             }
 
-            this.currentPlayingPlaylist = this.currentPlaylist;
+            this.currentPlayingPlaylist = this.CurrentPlaylist;
 
-            this.currentPlaylist.CurrentSongIndex = playlistIndex;
+            this.CurrentPlaylist.CurrentSongIndex = playlistIndex;
 
-            Song song = this.currentPlaylist[playlistIndex];
+            Song song = this.CurrentPlaylist[playlistIndex];
 
             this.RenewCurrentPlayer(song);
 

@@ -10,7 +10,7 @@ namespace Espera.View.ViewModels
 {
     internal sealed class PlaylistViewModel : PropertyChangedBase, IDataErrorInfo
     {
-        private readonly PlaylistInfo playlist;
+        private readonly Playlist playlist;
         private readonly Func<string, bool> renameRequest;
         private bool editName;
         private string saveName;
@@ -22,7 +22,7 @@ namespace Espera.View.ViewModels
         /// </summary>
         /// <param name="playlist">The playlist info.</param>
         /// <param name="renameRequest">A function that requests the rename of the playlist. Return true, if the rename is granted, otherwise false.</param>
-        public PlaylistViewModel(PlaylistInfo playlist, Func<string, bool> renameRequest)
+        public PlaylistViewModel(Playlist playlist, Func<string, bool> renameRequest)
         {
             this.playlist = playlist;
             this.renameRequest = renameRequest;
@@ -98,7 +98,7 @@ namespace Espera.View.ViewModels
         {
             get
             {
-                var songs = this.playlist.Songs
+                var songs = this.playlist
                     .Select((song, index) => new PlaylistEntryViewModel(song, index))
                     .ToList(); // We want a list, so that ReSharper doesn't complain about multiple enumerations
 

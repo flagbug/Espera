@@ -83,7 +83,6 @@
     <Compile Include="Management\LibraryReader.cs" />
     <Compile Include="Management\LibraryWriter.cs" />
     <Compile Include="Management\Playlist.cs" />
-    <Compile Include="Management\PlaylistInfo.cs" />
     <Compile Include="LocalSong.cs" />
     <Compile Include="Audio\PlaybackException.cs" />
     <Compile Include="Management\RemovableDriveWatcher.cs" />
