@@ -381,7 +381,7 @@ namespace Espera.Core.Management
         public void AddAndSwitchToPlaylist(string name)
         {
             this.AddPlaylist(name);
-            this.SwitchToPlaylist(name);
+            this.SwitchToPlaylist(this.GetPlaylistByName(name));
         }
 
         /// <summary>
@@ -521,6 +521,14 @@ namespace Espera.Core.Management
             }
 
             CoreSettings.Default.Save();
+        }
+
+        public Playlist GetPlaylistByName(string playlistName)
+        {
+            if (playlistName == null)
+                Throw.ArgumentNullException(() => playlistName);
+
+            return this.playlists.FirstOrDefault(playlist => playlist.Name == playlistName);
         }
 
         public void Initialize()
@@ -678,12 +686,15 @@ namespace Espera.Core.Management
             this.CurrentPlaylist.Shuffle();
         }
 
-        public void SwitchToPlaylist(string name)
+        public void SwitchToPlaylist(Playlist playlist)
         {
+            if (playlist == null)
+                Throw.ArgumentNullException(() => playlist);
+
             if (!this.CanSwitchPlaylist)
                 throw new InvalidOperationException("Not allowed to switch playlist.");
 
-            this.CurrentPlaylist = this.playlists.Single(playlist => playlist.Name == name);
+            this.CurrentPlaylist = playlist;
         }
 
         /// <summary>

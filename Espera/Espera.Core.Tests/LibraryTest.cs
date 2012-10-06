@@ -418,6 +418,24 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void GetPlaylistByName_PlaylistNameIsNotAPlaylist_ReturnsNull()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                Assert.IsNull(library.GetPlaylistByName("Playlist"));
+            }
+        }
+
+        [Test]
+        public void GetPlaylistByName_PlaylistNameIsNull_ThrowsArgumentNullException()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                Assert.Throws<ArgumentNullException>(() => library.GetPlaylistByName(null));
+            }
+        }
+
+        [Test]
         public void InitializeUpgradesCoreSettingsIfRequired()
         {
             CoreSettings.Default.UpgradeRequired = true;
@@ -790,7 +808,7 @@ namespace Espera.Core.Tests
                 library.PlaySong(0);
 
                 library.AddPlaylist("Playlist 2");
-                library.SwitchToPlaylist("Playlist 2");
+                library.SwitchToPlaylist(library.Playlists.Last());
                 library.AddSongToPlaylist(song.Object);
 
                 library.PlaySong(0);
@@ -816,12 +834,12 @@ namespace Espera.Core.Tests
                 library.PlaySong(0);
 
                 library.AddPlaylist("Playlist 2");
-                library.SwitchToPlaylist("Playlist 2");
+                library.SwitchToPlaylist(library.GetPlaylistByName("Playlist 2"));
                 library.AddSongToPlaylist(song.Object);
 
                 library.PlaySong(0);
 
-                library.SwitchToPlaylist("Playlist");
+                library.SwitchToPlaylist(library.GetPlaylistByName("Playlist"));
 
                 Assert.AreEqual(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
                 Assert.AreEqual(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
@@ -840,7 +858,16 @@ namespace Espera.Core.Tests
                 library.CreateAdmin("Password");
                 library.ChangeToParty();
 
-                Assert.Throws<InvalidOperationException>(() => library.SwitchToPlaylist("Playlist 2"));
+                Assert.Throws<InvalidOperationException>(() => library.SwitchToPlaylist(library.GetPlaylistByName("Playlist 2")));
+            }
+        }
+
+        [Test]
+        public void SwitchToPlaylist_PlaylistIsNull_ThrowsArgumentNullException()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                Assert.Throws<ArgumentNullException>(() => library.SwitchToPlaylist(null));
             }
         }
 

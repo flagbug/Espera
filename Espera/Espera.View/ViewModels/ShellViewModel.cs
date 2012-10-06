@@ -52,7 +52,7 @@ namespace Espera.View.ViewModels
 
             else
             {
-                this.library.SwitchToPlaylist(this.library.Playlists.First().Name);
+                this.library.SwitchToPlaylist(this.library.Playlists.First());
             }
 
             this.AdministratorViewModel = new AdministratorViewModel(this.library);
@@ -117,7 +117,7 @@ namespace Espera.View.ViewModels
             {
                 if (value != null) // There always has to be a playlist selected
                 {
-                    this.library.SwitchToPlaylist(value.Name);
+                    this.library.SwitchToPlaylist(this.library.GetPlaylistByName(value.Name));
                     this.NotifyOfPropertyChange(() => this.CurrentPlaylist);
                 }
             }
