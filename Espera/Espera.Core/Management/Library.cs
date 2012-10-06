@@ -407,7 +407,7 @@ namespace Espera.Core.Management
             if (name == null)
                 Throw.ArgumentNullException(() => name);
 
-            if (this.playlists.Any(playlist => playlist.Name == name))
+            if (this.GetPlaylistByName(name) != null)
                 throw new InvalidOperationException("A playlist with this name already exists.");
 
             this.playlists.Add(new Playlist(name));
