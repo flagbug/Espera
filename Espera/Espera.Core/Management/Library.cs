@@ -1,4 +1,5 @@
 ﻿using Espera.Core.Audio;
+using Espera.Core.Settings;
 using Rareform.Extensions;
 using Rareform.Validation;
 using System;
@@ -21,6 +22,7 @@ namespace Espera.Core.Management
         private readonly ILibraryReader libraryReader;
         private readonly ILibraryWriter libraryWriter;
         private readonly List<Playlist> playlists;
+        private readonly ILibrarySettings settings;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
         private bool abortSongAdding;
@@ -32,7 +34,7 @@ namespace Espera.Core.Management
         private bool overrideCurrentCaching;
         private string password;
 
-        public Library(IRemovableDriveWatcher driveWatcher, ILibraryReader libraryReader, ILibraryWriter libraryWriter)
+        public Library(IRemovableDriveWatcher driveWatcher, ILibraryReader libraryReader, ILibraryWriter libraryWriter, ILibrarySettings settings)
         {
             this.songLock = new object();
             this.songs = new HashSet<Song>();
@@ -43,6 +45,7 @@ namespace Espera.Core.Management
             this.libraryReader = libraryReader;
             this.libraryWriter = libraryWriter;
             this.disposeLock = new object();
+            this.settings = settings;
         }
 
         /// <summary>
@@ -174,12 +177,12 @@ namespace Espera.Core.Management
 
         public bool EnablePlaylistTimeout
         {
-            get { return CoreSettings.Default.EnablePlaylistTimeout; }
+            get { return this.settings.EnablePlaylistTimeout; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                CoreSettings.Default.EnablePlaylistTimeout = value;
+                this.settings.EnablePlaylistTimeout = value;
             }
         }
 
@@ -223,67 +226,67 @@ namespace Espera.Core.Management
 
         public bool LockLibraryRemoval
         {
-            get { return CoreSettings.Default.LockLibraryRemoval; }
+            get { return this.settings.LockLibraryRemoval; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                CoreSettings.Default.LockLibraryRemoval = value;
+                this.settings.LockLibraryRemoval = value;
             }
         }
 
         public bool LockPlaylistRemoval
         {
-            get { return CoreSettings.Default.LockPlaylistRemoval; }
+            get { return this.settings.LockPlaylistRemoval; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                CoreSettings.Default.LockPlaylistRemoval = value;
+                this.settings.LockPlaylistRemoval = value;
             }
         }
 
         public bool LockPlaylistSwitching
         {
-            get { return CoreSettings.Default.LockPlaylistSwitching; }
+            get { return this.settings.LockPlaylistSwitching; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                CoreSettings.Default.LockPlaylistSwitching = value;
+                this.settings.LockPlaylistSwitching = value;
             }
         }
 
         public bool LockPlayPause
         {
-            get { return CoreSettings.Default.LockPlayPause; }
+            get { return this.settings.LockPlayPause; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                CoreSettings.Default.LockPlayPause = value;
+                this.settings.LockPlayPause = value;
             }
         }
 
         public bool LockTime
         {
-            get { return CoreSettings.Default.LockTime; }
+            get { return this.settings.LockTime; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                CoreSettings.Default.LockTime = value;
+                this.settings.LockTime = value;
             }
         }
 
         public bool LockVolume
         {
-            get { return CoreSettings.Default.LockVolume; }
+            get { return this.settings.LockVolume; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                CoreSettings.Default.LockVolume = value;
+                this.settings.LockVolume = value;
             }
         }
 
@@ -294,12 +297,12 @@ namespace Espera.Core.Management
 
         public TimeSpan PlaylistTimeout
         {
-            get { return CoreSettings.Default.PlaylistTimeout; }
+            get { return this.settings.PlaylistTimeout; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                CoreSettings.Default.PlaylistTimeout = value;
+                this.settings.PlaylistTimeout = value;
             }
         }
 
@@ -329,12 +332,12 @@ namespace Espera.Core.Management
 
         public bool StreamYoutube
         {
-            get { return CoreSettings.Default.StreamYoutube; }
+            get { return this.settings.StreamYoutube; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                CoreSettings.Default.StreamYoutube = value;
+                this.settings.StreamYoutube = value;
             }
         }
 
@@ -359,12 +362,12 @@ namespace Espera.Core.Management
         /// </value>
         public float Volume
         {
-            get { return CoreSettings.Default.Volume; }
+            get { return this.settings.Volume; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                CoreSettings.Default.Volume = value;
+                this.settings.Volume = value;
 
                 if (this.currentPlayer != null)
                 {
@@ -520,7 +523,7 @@ namespace Espera.Core.Management
                 DisposeSongs(this.songs);
             }
 
-            CoreSettings.Default.Save();
+            this.settings.Save();
         }
 
         public Playlist GetPlaylistByName(string playlistName)
@@ -533,11 +536,11 @@ namespace Espera.Core.Management
 
         public void Initialize()
         {
-            if (CoreSettings.Default.UpgradeRequired)
+            if (this.settings.UpgradeRequired)
             {
-                CoreSettings.Default.Upgrade();
-                CoreSettings.Default.UpgradeRequired = false;
-                CoreSettings.Default.Save();
+                this.settings.Upgrade();
+                this.settings.UpgradeRequired = false;
+                this.settings.Save();
             }
 
             this.driveWatcher.Initialize();

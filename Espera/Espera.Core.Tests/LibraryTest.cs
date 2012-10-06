@@ -1,5 +1,6 @@
 ﻿using Espera.Core.Audio;
 using Espera.Core.Management;
+using Espera.Core.Settings;
 using Espera.Core.Tests.Mocks;
 using Moq;
 using NUnit.Framework;
@@ -438,20 +439,24 @@ namespace Espera.Core.Tests
         [Test]
         public void InitializeUpgradesCoreSettingsIfRequired()
         {
-            CoreSettings.Default.UpgradeRequired = true;
+            var settings = new Mock<ILibrarySettings>();
+            settings.SetupProperty(p => p.UpgradeRequired, true);
 
-            using (Library library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary(settings.Object))
             {
                 library.Initialize();
             }
 
-            Assert.IsFalse(CoreSettings.Default.UpgradeRequired);
+            Assert.IsFalse(settings.Object.UpgradeRequired);
         }
 
         [Test]
         public void PauseSong_IsNotAdministratorAndPausingIsLocked_ThrowsInvalidOperationException()
         {
-            using (Library library = Helpers.CreateLibrary())
+            var settings = new Mock<ILibrarySettings>();
+            settings.SetupProperty(p => p.LockPlayPause, true);
+
+            using (Library library = Helpers.CreateLibrary(settings.Object))
             {
                 library.CreateAdmin("Password");
                 library.ChangeToParty();
@@ -627,9 +632,12 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void PlaySong_UserIsNotAdministrator_ThrowsInvalidOperationException()
+        public void PlaySong_UserIsNotAdministratorAndLockPlayPauseIsTrue_ThrowsInvalidOperationException()
         {
-            using (Library library = Helpers.CreateLibrary())
+            var settings = new Mock<ILibrarySettings>();
+            settings.SetupProperty(p => p.LockPlayPause, true);
+
+            using (Library library = Helpers.CreateLibrary(settings.Object))
             {
                 library.CreateAdmin("TestPassword");
                 library.ChangeToParty();
@@ -662,11 +670,14 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void RemoveFromPlaylist_AccessModeIsParty_ThrowsInvalidOperationException()
+        public void RemoveFromPlaylist_AccessModeIsPartyAndLockPlaylistRemovalIsTrue_ThrowsInvalidOperationException()
         {
             var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
 
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
+            var settings = new Mock<ILibrarySettings>();
+            settings.SetupProperty(p => p.LockPlaylistRemoval, true);
+
+            using (Library library = Helpers.CreateLibraryWithPlaylist(settings: settings.Object))
             {
                 library.AddSongsToPlaylist(new[] { songMock.Object });
 

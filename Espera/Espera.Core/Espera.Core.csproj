@@ -87,6 +87,8 @@
     <Compile Include="Audio\PlaybackException.cs" />
     <Compile Include="Management\RemovableDriveWatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings\ILibrarySettings.cs" />
+    <Compile Include="Settings\LibrarySettingsWrapper.cs" />
     <Compile Include="Song.cs" />
     <Compile Include="SongEventArgs.cs" />
     <Compile Include="LocalSongFinder.cs" />

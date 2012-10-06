@@ -1,5 +1,6 @@
 ﻿using Espera.Core.Audio;
 using Espera.Core.Management;
+using Espera.Core.Settings;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -43,14 +44,18 @@ namespace Espera.Core.Tests
             Playlist2.AddSongs(new[] { (Song)LocalSong1, YoutubeSong1 });
         }
 
-        public static Library CreateLibrary()
+        public static Library CreateLibrary(ILibrarySettings settings = null)
         {
-            return new Library(new Mock<IRemovableDriveWatcher>().Object, new Mock<ILibraryReader>().Object, new Mock<ILibraryWriter>().Object);
+            return new Library(
+                new Mock<IRemovableDriveWatcher>().Object,
+                new Mock<ILibraryReader>().Object,
+                new Mock<ILibraryWriter>().Object,
+                settings ?? new Mock<ILibrarySettings>().SetupAllProperties().Object);
         }
 
-        public static Library CreateLibraryWithPlaylist(string playlistName = "Playlist")
+        public static Library CreateLibraryWithPlaylist(string playlistName = "Playlist", ILibrarySettings settings = null)
         {
-            var library = CreateLibrary();
+            var library = CreateLibrary(settings);
             library.AddAndSwitchToPlaylist(playlistName);
 
             return library;
