@@ -2,6 +2,10 @@
                       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                      xmlns:ViewModels="clr-namespace:Espera.View.ViewModels"
+                      mc:Ignorable="d"
                       Title="Espera"
                       Width="800"
                       Height="600"
@@ -9,7 +13,8 @@
                       Icon="/Espera;component/Images/ApplicationIcon.png"
                       KeyUp="MetroWindowKeyUp"
                       MouseDown="MainWindowMouseDown"
-                      WindowState="Maximized">
+                      WindowState="Maximized"
+                      d:DataContext="{d:DesignInstance ViewModels:ShellViewModel, IsDesignTimeCreatable=True}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
