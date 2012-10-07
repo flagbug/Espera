@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Espera.Core;
 using Espera.Core.Management;
+using Espera.Core.Settings;
 using Espera.View.Properties;
 using Rareform.Extensions;
 using Rareform.Patterns.MVVM;
@@ -36,7 +37,12 @@ namespace Espera.View.ViewModels
                 Directory.CreateDirectory(directoryPath);
             }
 
-            this.library = new Library(new RemovableDriveWatcher(), new LibraryFileReader(filePath), new LibraryFileWriter(filePath));
+            this.library = new Library(
+                new RemovableDriveWatcher(),
+                new LibraryFileReader(filePath),
+                new LibraryFileWriter(filePath),
+                new LibrarySettingsWrapper());
+
             this.library.Initialize();
 
             this.library.SongStarted += (sender, args) => this.HandleSongStarted();
@@ -69,6 +75,8 @@ namespace Espera.View.ViewModels
             this.playlistTimeoutUpdateTimer = new Timer(333);
             this.playlistTimeoutUpdateTimer.Elapsed += (sender, e) => this.UpdateRemainingPlaylistTimeout();
             this.playlistTimeoutUpdateTimer.Start();
+
+            this.IsLocal = true;
         }
 
         public event EventHandler VideoPlayerCallbackChanged

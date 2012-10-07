@@ -1,4 +1,4 @@
-﻿using Espera.Core;
+using Espera.Core;
 using Espera.View.Properties;
 using Espera.View.ViewModels;
 using Ionic.Utils;
@@ -11,12 +11,13 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using ListView = System.Windows.Controls.ListView;
 
-namespace Espera.View
+namespace Espera.View.Views
 {
     public partial class ShellView
     {
+        private ShellViewModel shellViewModel;
+
         public ShellView()
         {
             InitializeComponent();
@@ -25,7 +26,7 @@ namespace Espera.View
 
             this.ChangeColor(Settings.Default.AccentColor);
 
-            this.shellViewModel.VideoPlayerCallbackChanged += (sender, args) => this.SetupVideoPlayer();
+            this.DataContextChanged += (sender, args) => this.WireDataContext();
         }
 
         private void AddSongsButtonClick(object sender, RoutedEventArgs e)
@@ -332,6 +333,13 @@ namespace Espera.View
         private void VideoPlayerMediaEnded(object sender, RoutedEventArgs e)
         {
             this.shellViewModel.VideoPlayerCallback.Finished();
+        }
+
+        private void WireDataContext()
+        {
+            this.shellViewModel = (ShellViewModel)this.DataContext;
+
+            this.shellViewModel.VideoPlayerCallbackChanged += (sender, args) => this.SetupVideoPlayer();
         }
     }
 }
