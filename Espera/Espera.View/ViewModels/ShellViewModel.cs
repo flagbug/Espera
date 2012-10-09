@@ -1,14 +1,12 @@
 ﻿using Caliburn.Micro;
 using Espera.Core;
 using Espera.Core.Management;
-using Espera.Core.Settings;
 using Espera.View.Properties;
 using Rareform.Extensions;
 using Rareform.Patterns.MVVM;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Timers;
 using System.Windows.Input;
@@ -27,21 +25,9 @@ namespace Espera.View.ViewModels
         private ObservableCollection<PlaylistViewModel> playlists;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
 
-        public ShellViewModel()
+        public ShellViewModel(Library library)
         {
-            string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Espera\");
-            string filePath = Path.Combine(directoryPath, "Library.xml");
-
-            if (!Directory.Exists(directoryPath))
-            {
-                Directory.CreateDirectory(directoryPath);
-            }
-
-            this.library = new Library(
-                new RemovableDriveWatcher(),
-                new LibraryFileReader(filePath),
-                new LibraryFileWriter(filePath),
-                new LibrarySettingsWrapper());
+            this.library = library;
 
             this.library.Initialize();
 
