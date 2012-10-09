@@ -35,6 +35,8 @@ very clean look.
 ## Requirements
 
  - .NET Framework 4.0
+ - Windows 8, Windows 7, Windows Vista
+ - Windows XP only works with the portable version of Espera
 
 ## Development
 
