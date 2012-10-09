@@ -14,7 +14,7 @@
                       KeyUp="MetroWindowKeyUp"
                       MouseDown="MainWindowMouseDown"
                       WindowState="Maximized"
-                      d:DataContext="{d:DesignInstance ViewModels:ShellViewModel, IsDesignTimeCreatable=True}">
+                      d:DataContext="{d:DesignInstance ViewModels:ShellViewModel}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
