@@ -27,10 +27,10 @@ namespace Espera.View
         {
             this.kernel = new StandardKernel();
 
-            this.kernel.Bind<IRemovableDriveWatcher>().To<RemovableDriveWatcher>().InSingletonScope();
+            this.kernel.Bind<IRemovableDriveWatcher>().To<RemovableDriveWatcher>();
             this.kernel.Bind<ILibraryReader>().To<LibraryFileReader>().WithConstructorArgument("sourcePath", FilePath);
             this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", FilePath);
-            this.kernel.Bind<ILibrarySettings>().To<LibrarySettingsWrapper>().InSingletonScope();
+            this.kernel.Bind<ILibrarySettings>().To<LibrarySettingsWrapper>();
         }
 
         protected override IEnumerable<object> GetAllInstances(Type serviceType)
