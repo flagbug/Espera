@@ -43,6 +43,11 @@ namespace Espera.View
             return this.kernel.Get(serviceType, key);
         }
 
+        protected override void OnExit(object sender, EventArgs e)
+        {
+            this.kernel.Dispose();
+        }
+
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
             if (!Directory.Exists(DirectoryPath))
