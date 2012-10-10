@@ -13,7 +13,7 @@ using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class ShellViewModel : PropertyChangedBase, IDisposable
+    internal class ShellViewModel : PropertyChangedBase, IDisposable
     {
         private readonly Library library;
         private readonly Timer playlistTimeoutUpdateTimer;
