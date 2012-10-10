@@ -387,7 +387,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="{Binding Path=PlaylistHeight}" />
+                    <RowDefinition Height="{Binding Path=PlaylistHeight, Mode=TwoWay}" />
                 </Grid.RowDefinitions>
                 <TabControl Grid.Row="0">
                     <TabItem Header="local" IsSelected="{Binding Path=IsLocal}">
