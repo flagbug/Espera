@@ -397,9 +397,12 @@
                         <ListView ContextMenuOpening="SongListContextMenuOpening"
                                   DataContext="{Binding Path=LocalViewModel}"
                                   ItemsSource="{Binding Path=SelectableSongs}"
-                                  KeyUp="SongListKeyUp"
                                   ScrollViewer.CanContentScroll="True"
                                   SelectionChanged="SongListSelectionChanged">
+                            <ListView.InputBindings>
+                                <KeyBinding Command="{Binding Path=RemoveFromLibraryCommand}"
+                                            Key="Delete" />
+                            </ListView.InputBindings>
                             <ListView.Style>
                                 <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="{x:Type ListView}">
                                     <Setter Property="SelectionMode" Value="Extended" />
@@ -631,8 +634,11 @@
                                      Margin="0, 5, 0, 0"
                                      ItemsSource="{Binding Path=Playlists}"
                                      SelectedItem="{Binding Path=CurrentPlaylist}"
-                                     IsEnabled="{Binding Path=CanSwitchPlaylist}"
-                                     KeyUp="PlaylistsKeyUp">
+                                     IsEnabled="{Binding Path=CanSwitchPlaylist}">
+                                <ListBox.InputBindings>
+                                    <KeyBinding Command="{Binding Path=RemovePlaylistCommand}"
+                                                Key="Delete" />
+                                </ListBox.InputBindings>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Vertical"

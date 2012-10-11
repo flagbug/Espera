@@ -180,19 +180,6 @@ namespace Espera.View.Views
             this.shellViewModel.SelectedPlaylistEntries = ((ListView)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
         }
 
-        private void PlaylistsKeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Delete)
-            {
-                var command = this.shellViewModel.RemovePlaylistCommand;
-
-                if (command.CanExecute(null))
-                {
-                    command.Execute(null);
-                }
-            }
-        }
-
         private void PurpleColorButtonButtonClick(object sender, RoutedEventArgs e)
         {
             this.ChangeColor("Purple");
@@ -245,19 +232,6 @@ namespace Espera.View.Views
             if (((ListView)sender).Items.IsEmpty)
             {
                 e.Handled = true;
-            }
-        }
-
-        private void SongListKeyUp(object sender, KeyEventArgs e)
-        {
-            ICommand removeFromLibrary = this.shellViewModel.LocalViewModel.RemoveFromLibraryCommand;
-
-            if (e.Key == Key.Delete)
-            {
-                if (removeFromLibrary.CanExecute(null))
-                {
-                    removeFromLibrary.Execute(null);
-                }
             }
         }
 
