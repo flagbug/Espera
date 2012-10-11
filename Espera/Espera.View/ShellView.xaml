@@ -974,6 +974,11 @@
                                     <Run Foreground="#FF00B7C0" Text="Report a bug" />
                                 </Hyperlink>
                             </TextBlock>
+                            <TextBlock>
+                                <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=DonationPage}">
+                                    <Run Foreground="#FF00B7C0" Text="Donate :)" />
+                                </Hyperlink>
+                            </TextBlock>
                         </StackPanel>
                     </ScrollViewer>
                     <StackPanel Grid.Row="1"
