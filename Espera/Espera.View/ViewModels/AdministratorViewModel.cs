@@ -60,6 +60,11 @@ namespace Espera.View.ViewModels
 
         public string CreationPassword { get; set; }
 
+        public string DonationPage
+        {
+            get { return "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=K5AWR8EDG9QJY"; }
+        }
+
         public bool EnablePlaylistTimeout
         {
             get { return this.library.EnablePlaylistTimeout; }
