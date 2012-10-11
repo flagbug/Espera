@@ -113,25 +113,6 @@ namespace Espera.View.Views
             this.shellViewModel.Dispose();
         }
 
-        private void MetroWindowKeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Space)
-            {
-                if (this.shellViewModel.IsPlaying)
-                {
-                    if (this.shellViewModel.PauseCommand.CanExecute(null))
-                    {
-                        this.shellViewModel.PauseCommand.Execute(null);
-                    }
-                }
-
-                else if (this.shellViewModel.PlayCommand.CanExecute(null))
-                {
-                    this.shellViewModel.PlayCommand.Execute(false);
-                }
-            }
-        }
-
         private void PlaylistContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             if (((ListView)sender).Items.IsEmpty)

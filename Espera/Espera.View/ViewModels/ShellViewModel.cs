@@ -267,6 +267,32 @@ namespace Espera.View.ViewModels
         }
 
         /// <summary>
+        /// A command that decided whether the songs should be paused or continued.
+        /// </summary>
+        public ICommand PauseContinueCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        if (this.IsPlaying)
+                        {
+                            this.PauseCommand.Execute(null);
+                        }
+
+                        else
+                        {
+                            this.PlayCommand.Execute(false);
+                        }
+                    },
+                    param => this.IsPlaying ? this.PauseCommand.CanExecute(null) : this.PlayCommand.CanExecute(null)
+                );
+            }
+        }
+
+        /// <summary>
         /// Plays the song that is currently selected in the playlist or continues the song if it is paused.
         /// </summary>
         public ICommand PlayCommand
