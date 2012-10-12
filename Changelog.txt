@@ -1,3 +1,14 @@
+----------------------------------- v1.4.1 -----------------------------------
+
+FEATURES:
+- Added a donation link in the settings panel.
+
+BUGFIXES:
+- Fixed a bug, that caused the application to crash when no library existed 
+  yet.
+- Fixed a bug that caused the application to crash when songs were currently 
+  added and the application got closed.
+
 ----------------------------------- v1.4.0 -----------------------------------
 
 FEATURES:
