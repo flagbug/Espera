@@ -681,6 +681,13 @@ namespace Espera.Core.Management
 
         public void Save()
         {
+            IEnumerable<LocalSong> casted;
+
+            lock (this.songLock)
+            {
+                casted = this.songs.Cast<LocalSong>().ToList();
+            }
+
             this.libraryWriter.Write(this.songs.Cast<LocalSong>(), this.playlists);
         }
 
