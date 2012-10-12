@@ -625,7 +625,7 @@ namespace Espera.View.ViewModels
 
         private string GetNewPlaylistName()
         {
-            string newName = this.playlists
+            string newName = (this.playlists ?? Enumerable.Empty<PlaylistViewModel>())
                 .Select(playlist => playlist.Name)
                 .CreateUnique(i =>
                     {
