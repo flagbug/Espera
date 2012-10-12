@@ -680,7 +680,14 @@ namespace Espera.Core.Management
 
             using (Stream targetStream = File.Create(filePath))
             {
-                LibraryWriter.Write(this.songs.Cast<LocalSong>(), this.playlists.Select(playlist => new PlaylistInfo(playlist)), targetStream);
+                IEnumerable<LocalSong> casted;
+
+                lock (this.songLock)
+                {
+                    casted = this.songs.Cast<LocalSong>().ToList();
+                }
+
+                LibraryWriter.Write(casted, this.playlists.Select(playlist => new PlaylistInfo(playlist)), targetStream);
             }
         }
 
