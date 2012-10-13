@@ -688,7 +688,7 @@ namespace Espera.Core.Management
                 casted = this.songs.Cast<LocalSong>().ToList();
             }
 
-            this.libraryWriter.Write(this.songs.Cast<LocalSong>(), this.playlists);
+            this.libraryWriter.Write(casted, this.playlists);
         }
 
         public void ShufflePlaylist()
