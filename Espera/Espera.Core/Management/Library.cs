@@ -603,7 +603,7 @@ namespace Espera.Core.Management
 
             lock (this.songLock)
             {
-                this.playlists.ForEach(p => this.RemoveFromPlaylist(songList));
+                this.playlists.ForEach(playlist => this.RemoveFromPlaylist(playlist, songList));
 
                 foreach (Song song in songList)
                 {
@@ -624,17 +624,7 @@ namespace Espera.Core.Management
             if (this.LockPlaylistRemoval && this.AccessMode == AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
 
-            bool stopCurrentSong = indexes.Any(index => index == this.currentPlaylist.CurrentSongIndex);
-
-            this.currentPlaylist.RemoveSongs(indexes);
-
-            this.PlaylistChanged.RaiseSafe(this, EventArgs.Empty);
-
-            if (stopCurrentSong)
-            {
-                this.currentPlayer.Stop();
-                this.SongFinished.RaiseSafe(this, EventArgs.Empty);
-            }
+            this.RemoveFromPlaylist(this.currentPlaylist, indexes);
         }
 
         /// <summary>
@@ -646,7 +636,7 @@ namespace Espera.Core.Management
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
 
-            this.RemoveFromPlaylist(this.currentPlaylist.GetIndexes(songList));
+            this.RemoveFromPlaylist(this.currentPlaylist, songList);
         }
 
         /// <summary>
@@ -942,6 +932,26 @@ namespace Espera.Core.Management
                     this.playlists.AddRange(savedPlaylists);
                 }
             }
+        }
+
+        private void RemoveFromPlaylist(Playlist playlist, IEnumerable<int> indexes)
+        {
+            bool stopCurrentSong = playlist == this.currentPlaylist && indexes.Any(index => index == this.CurrentPlaylist.CurrentSongIndex);
+
+            playlist.RemoveSongs(indexes);
+
+            this.PlaylistChanged.RaiseSafe(this, EventArgs.Empty);
+
+            if (stopCurrentSong)
+            {
+                this.currentPlayer.Stop();
+                this.SongFinished.RaiseSafe(this, EventArgs.Empty);
+            }
+        }
+
+        private void RemoveFromPlaylist(Playlist playlist, IEnumerable<Song> songList)
+        {
+            this.RemoveFromPlaylist(playlist, playlist.GetIndexes(songList));
         }
 
         private void RenewCurrentPlayer(Song song)
