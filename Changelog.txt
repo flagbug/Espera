@@ -1,3 +1,11 @@
+----------------------------------- v1.4.2 -----------------------------------
+
+BUGFIXES:
+- Fixed a bug, that caused songs to be only removed from the current playlist 
+  instead of all playlists, when removing the songs from the library.
+  This bug also caused a corruption of the library and therefore a crash of 
+  the application.
+
 ----------------------------------- v1.4.1 -----------------------------------
 
 FEATURES:
