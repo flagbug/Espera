@@ -18,7 +18,7 @@ namespace Espera.Core.Management
 
         public void Write(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists)
         {
-            using (FileStream targetStream = File.OpenWrite(this.targetPath))
+            using (FileStream targetStream = File.Create(this.targetPath))
             {
                 LibraryWriter.Write(songs, playlists, targetStream);
             }
