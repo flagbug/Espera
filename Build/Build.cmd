@@ -2,7 +2,7 @@
 call "%VS110COMNTOOLS%vsvars32.bat"
 
 REM Portable project
-msbuild.exe /ToolsVersion:4.0 "..\Espera\Espera.sln" /p:configuration=Release
+msbuild.exe /ToolsVersion:4.0 /p:configuration=Release /v:minimal "..\Espera\Espera.sln"
 
 set ReleaseDir=..\Release\
 
@@ -20,7 +20,7 @@ copy %bin%Espera.exe.config %ReleaseDirPortable%
 copy ..\Changelog.txt %ReleaseDirPortable%
 
 REM ClickOnce project
-msbuild.exe /target:publish /p:configuration=Release ..\Espera\Espera.sln"
+msbuild.exe /target:publish /p:configuration=Release /v:minimal ..\Espera\Espera.sln"
 
 set ReleaseDirSetup=%ReleaseDir%Setup\
 mkdir %ReleaseDirSetup%
