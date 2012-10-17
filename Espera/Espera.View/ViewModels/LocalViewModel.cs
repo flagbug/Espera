@@ -17,7 +17,6 @@ namespace Espera.View.ViewModels
         private SortOrder artistOrder;
         private SortOrder durationOrder;
         private SortOrder genreOrder;
-        private volatile bool isAdding;
         private string searchText;
         private ArtistViewModel selectedArtist;
         private SortOrder titleOrder;
@@ -170,7 +169,6 @@ namespace Espera.View.ViewModels
 
             this.Library.SongAdded += handler;
 
-            this.isAdding = true;
             this.StatusViewModel.IsAdding = true;
 
             this.Library
@@ -180,7 +178,6 @@ namespace Espera.View.ViewModels
                     this.Library.SongAdded -= handler;
 
                     this.NotifyOfPropertyChange(() => this.Artists);
-                    this.isAdding = false;
                     this.StatusViewModel.Reset();
                 });
         }
