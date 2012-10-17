@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Espera.Core;
+using Rareform.Validation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Espera.Core;
-using Rareform.Validation;
 
 namespace Espera.View
 {
@@ -22,7 +22,7 @@ namespace Espera.View
             if (String.IsNullOrWhiteSpace(searchText))
                 return source;
 
-            IEnumerable<string> keyWords = searchText.ToUpperInvariant().Split(' ');
+            IEnumerable<string> keyWords = searchText.Split(' ');
 
             return source
                 .AsParallel()
@@ -31,12 +31,17 @@ namespace Espera.View
                     song => keyWords.All
                     (
                         keyword =>
-                            song.Artist.ToUpperInvariant().Contains(keyword) ||
-                            song.Album.ToUpperInvariant().Contains(keyword) ||
-                            song.Genre.ToUpperInvariant().Contains(keyword) ||
-                            song.Title.ToUpperInvariant().Contains(keyword)
+                            song.Artist.ContainsIngoreCase(keyword) ||
+                            song.Album.ContainsIngoreCase(keyword) ||
+                            song.Genre.ContainsIngoreCase(keyword) ||
+                            song.Title.ContainsIngoreCase(keyword)
                     )
                 );
+        }
+
+        private static bool ContainsIngoreCase(this string value, string other)
+        {
+            return value.IndexOf(other, StringComparison.InvariantCultureIgnoreCase) >= 0;
         }
     }
 }
