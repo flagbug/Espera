@@ -653,10 +653,10 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Removed the playlist with the specified name.
+        /// Removes the playlist with the specified name from the library.
         /// </summary>
         /// <param name="playlistName">The name of the playlist to remove.</param>
-        /// <exception cref="InvalidOperationException">No playlist exists, or np playlist with the specified name exists.</exception>
+        /// <exception cref="InvalidOperationException">No playlist exists, or no playlist with the specified name exists.</exception>
         public void RemovePlaylist(string playlistName)
         {
             if (playlistName == null)
@@ -665,10 +665,12 @@ namespace Espera.Core.Management
             if (!this.Playlists.Any())
                 throw new InvalidOperationException("There are no playlists.");
 
-            int removed = this.playlists.RemoveAll(playlist => playlist.Name == playlistName);
+            Playlist playlist = this.GetPlaylistByName(playlistName);
 
-            if (removed == 0)
+            if (playlist == null)
                 throw new InvalidOperationException("No playlist with the specified name exists.");
+
+            this.playlists.Remove(playlist);
         }
 
         public void Save()
