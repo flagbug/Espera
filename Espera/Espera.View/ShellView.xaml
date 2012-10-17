@@ -697,7 +697,9 @@
                                   Margin="5, 0, 0, 0">
                             <ListView.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Command="{Binding Path=PlayCommand}" Header="Play" />
+                                    <MenuItem Command="{Binding Path=PlayCommand}"
+                                              CommandParameter="True"
+                                              Header="Play" />
                                     <MenuItem Command="{Binding Path=RemoveSelectedPlaylistEntriesCommand}" Header="Remove" />
                                 </ContextMenu>
                             </ListView.ContextMenu>
