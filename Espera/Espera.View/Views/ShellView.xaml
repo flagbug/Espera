@@ -220,7 +220,8 @@
                 <ListBox Grid.Row="1"
                          DataContext="{Binding Path=LocalViewModel}"
                          ItemsSource="{Binding Path=Artists}"
-                         SelectedItem="{Binding Path=SelectedArtist}">
+                         SelectedItem="{Binding Path=SelectedArtist}"
+                         IsSynchronizedWithCurrentItem="True">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Vertical"
@@ -423,7 +424,8 @@
                         <Grid DataContext="{Binding Path=YoutubeViewModel}">
                             <ListView ContextMenuOpening="SongListContextMenuOpening"
                                       ItemsSource="{Binding Path=SelectableSongs}"
-                                      SelectionChanged="SongListSelectionChanged">
+                                      SelectionChanged="SongListSelectionChanged"
+                                      IsSynchronizedWithCurrentItem="True">
                                 <ListView.Style>
                                     <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="{x:Type ListView}">
                                         <Setter Property="SelectionMode" Value="Extended" />
