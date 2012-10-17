@@ -2,18 +2,14 @@
 
 ## Overview
 
-Espera is an open-source media player that plays MP3s, WAV files and YouTube videos.
-
-It is designed as party-player, as it offers features such as locking the player and allowing only to add a certain
-amount of songs to the playlist at a certain time, or adding music from YouTube to the playlist and streaming the 
-audio track of the video directly.
+Espera is an open-source media player that plays MP3s, WAV files and YouTube videos and has a special "party mode".
 
 ## Features
 
-### Party-Lock
+### Party-Mode
 
-Espera allows to lock itself, this comes handy on parties, where the guests shouldn't be able to change the volume or 
-stop the music, but still be able to add songs to the playlist.
+In the party-mode Espera allows to lock itself if the guests shouldn't be able to change the volume or stop the music, 
+but still be able to add songs to the playlist.
 
 ### YouTube
 
@@ -39,6 +35,8 @@ very clean look.
  - Windows XP only works with the portable version of Espera
 
 ## Development
+
+Espera is written in C#, with WPF as frontend.
 
 If you want to contribute to Espera, just send me a pull request at [GitHub](https://github.com/flagbug/Espera)!
 
