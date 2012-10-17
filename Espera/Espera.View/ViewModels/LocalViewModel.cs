@@ -57,10 +57,7 @@ namespace Espera.View.ViewModels
         {
             get
             {
-                // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
-                IEnumerable<Song> source = this.isAdding ? this.Library.Songs.ToList() : this.Library.Songs;
-
-                var artists = source.FilterSongs(this.SearchText)
+                var artists = this.Library.Songs.FilterSongs(this.SearchText)
                     .GroupBy(song => song.Artist)
                     .Select(group => new ArtistViewModel(group.Key, group.Select(song => song.Album).Distinct().Count(), group.Count()))
                     .OrderBy(artist => RemoveArtistPrefixes(artist.Name, new[] { "A", "The" }))
@@ -215,10 +212,7 @@ namespace Espera.View.ViewModels
 
         protected override void UpdateSelectableSongs()
         {
-            // If we are currently adding songs, copy the songs to a new list, so that we don't run into performance issues
-            var source = (this.isAdding ? this.Library.Songs.ToList() : this.Library.Songs).AsParallel();
-
-            IEnumerable<Song> songs = source
+            IEnumerable<Song> songs = this.Library.Songs.AsParallel()
                 .Where(song => this.SelectedArtist.IsAllArtists || song.Artist == this.SelectedArtist.Name);
 
             this.SelectableSongs = songs.FilterSongs(this.SearchText)
