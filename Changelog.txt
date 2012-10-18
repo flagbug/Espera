@@ -1,3 +1,12 @@
+----------------------------------- v1.4.3 -----------------------------------
+
+BUGFIXES:
+- Fixed a bug, that caused the "Play" command of a playlists context menu to 
+  be executable when it shouldn't. When executed regardless, it caused the 
+  application to crash.
+- Fixed some visual bugs, where buttons would be in an enabled state when 
+  they shouldn't be.
+
 ----------------------------------- v1.4.2 -----------------------------------
 
 BUGFIXES:
