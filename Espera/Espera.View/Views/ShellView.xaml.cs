@@ -113,6 +113,7 @@ namespace Espera.View.Views
             this.shellViewModel.Dispose();
         }
 
+                    this.shellViewModel.PlayCommand.Execute(null);
         private void PlaylistContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             if (((ListView)sender).Items.IsEmpty)
@@ -123,9 +124,9 @@ namespace Espera.View.Views
 
         private void PlaylistDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (this.shellViewModel.PlayCommand.CanExecute(null))
+            if (this.shellViewModel.PlayOverrideCommand.CanExecute(null))
             {
-                this.shellViewModel.PlayCommand.Execute(true);
+                this.shellViewModel.PlayOverrideCommand.Execute(null);
             }
         }
 
@@ -141,9 +142,9 @@ namespace Espera.View.Views
 
             else if (e.Key == Key.Enter)
             {
-                if (this.shellViewModel.PlayCommand.CanExecute(null))
+                if (this.shellViewModel.PlayOverrideCommand.CanExecute(null))
                 {
-                    this.shellViewModel.PlayCommand.Execute(true);
+                    this.shellViewModel.PlayOverrideCommand.Execute(null);
                 }
             }
         }
