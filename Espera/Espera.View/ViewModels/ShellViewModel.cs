@@ -629,6 +629,8 @@ namespace Espera.View.ViewModels
 
             this.NotifyOfPropertyChange(() => this.CurrentPlaylist);
 
+            this.NotifyOfPropertyChange(() => this.PreviousSongCommand);
+
             this.updateTimer.Stop();
         }
 
@@ -641,6 +643,8 @@ namespace Espera.View.ViewModels
 
             this.NotifyOfPropertyChange(() => this.SongsRemaining);
             this.NotifyOfPropertyChange(() => this.TimeRemaining);
+
+            this.NotifyOfPropertyChange(() => this.PlayCommand);
 
             this.updateTimer.Start();
         }
