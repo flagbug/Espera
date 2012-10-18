@@ -169,7 +169,6 @@
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Path=IsPlaying}" Value="False">
                                     <Setter Property="Command" Value="{Binding Path=PlayCommand}" />
-                                    <Setter Property="CommandParameter" Value="False" />
                                     <Setter Property="ToolTip" Value="Play" />
                                 </DataTrigger>
                             </Style.Triggers>
@@ -697,8 +696,7 @@
                                   Margin="5, 0, 0, 0">
                             <ListView.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Command="{Binding Path=PlayCommand}"
-                                              CommandParameter="True"
+                                    <MenuItem Command="{Binding Path=PlayOverrideCommand}"
                                               Header="Play" />
                                     <MenuItem Command="{Binding Path=RemoveSelectedPlaylistEntriesCommand}" Header="Remove" />
                                 </ContextMenu>

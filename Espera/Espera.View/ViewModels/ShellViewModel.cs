@@ -274,20 +274,7 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        /*
-                         * Some callers want to ignore if a song is paused and want to play the currently
-                         * selected song, instead of continuing the currently paused song.
-                         * This decision is passed as parameter.
-                         *
-                         * XAML commands pass the parameter as string, code-behind commands pass the parameter
-                         * as boolean, so we have to check what type it is.
-                         */
-
-                        var value = param as string;
-
-                        bool ignorePause = value == null ? (bool)param : Boolean.Parse(value);
-
-                        if ((this.library.IsPaused || this.library.LoadedSong != null) && !ignorePause)
+                        if (this.library.IsPaused || this.library.LoadedSong != null)
                         {
                             this.library.ContinueSong();
                             this.updateTimer.Start();
@@ -305,7 +292,7 @@ namespace Espera.View.ViewModels
                         (this.IsAdmin || !this.library.LockPlayPause) &&
 
                         // If exactly one song is selected, the command can be executed
-                        ((this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1) ||
+                        (this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1 ||
 
                         // If the current song is paused, the command can be executed
                         (this.library.LoadedSong != null || this.library.IsPaused))
@@ -371,6 +358,18 @@ namespace Espera.View.ViewModels
         {
             get { return Settings.Default.PlaylistTitleColumnWidth; }
             set { Settings.Default.PlaylistTitleColumnWidth = value; }
+        }
+
+        public ICommand PlayOverrideCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param => this.library.PlaySong(this.SelectedPlaylistEntries.First().Index),
+                    param => (this.IsAdmin || !this.library.LockPlayPause) && (this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1)
+               );
+            }
         }
 
         /// <summary>
