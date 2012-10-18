@@ -113,7 +113,6 @@ namespace Espera.View.Views
             this.shellViewModel.Dispose();
         }
 
-                    this.shellViewModel.PlayCommand.Execute(null);
         private void PlaylistContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             if (((ListView)sender).Items.IsEmpty)
