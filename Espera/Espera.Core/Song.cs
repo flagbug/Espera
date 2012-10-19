@@ -225,7 +225,7 @@ namespace Espera.Core
         /// Raises the <see cref="CachingFailed"/> event.
         /// </summary>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        internal protected void OnCachingFailed(EventArgs e)
+        protected void OnCachingFailed(EventArgs e)
         {
             this.CachingFailed.RaiseSafe(this, e);
         }
