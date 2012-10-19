@@ -5,7 +5,7 @@ using System.Xml.Linq;
 
 namespace Espera.Core.Management
 {
-    internal class LibraryWriter
+    internal static class LibraryWriter
     {
         public static void Write(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists, Stream targetStream)
         {

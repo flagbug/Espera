@@ -1,5 +1,5 @@
-﻿using System;
-using Rareform.Extensions;
+﻿using Rareform.Extensions;
+using System;
 
 namespace Espera.Core.Audio
 {
@@ -15,12 +15,6 @@ namespace Espera.Core.Audio
         /// </summary>
         /// <value>The current time.</value>
         public abstract TimeSpan CurrentTime { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="AudioPlayer"/> has loaded the song.
-        /// </summary>
-        /// <value><c>true</c> if  the <see cref="AudioPlayer"/> has loaded the song.; otherwise, <c>false</c>.</value>
-        public bool IsLoaded { get; protected set; }
 
         /// <summary>
         /// Gets the current playback state.
@@ -54,10 +48,7 @@ namespace Espera.Core.Audio
         /// Loads the specified song into the <see cref="Espera.Core.Audio.LocalAudioPlayer"/>. This is required before playing a new song.
         /// </summary>
         /// <exception cref="SongLoadException">The song could not be loaded.</exception>
-        public virtual void Load()
-        {
-            this.IsLoaded = true;
-        }
+        public abstract void Load();
 
         /// <summary>
         /// Pauses the playback of the <see cref="Song"/>.
@@ -87,7 +78,7 @@ namespace Espera.Core.Audio
         /// Raises the <see cref="SongFinished"/> event.
         /// </summary>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected virtual void OnSongFinished(EventArgs e)
+        protected void OnSongFinished(EventArgs e)
         {
             this.SongFinished.RaiseSafe(this, e);
         }

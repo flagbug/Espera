@@ -95,8 +95,6 @@ namespace Espera.Core.Audio
         public override void Load()
         {
             this.LoadRequest();
-
-            base.Load();
         }
 
         public override void Pause()

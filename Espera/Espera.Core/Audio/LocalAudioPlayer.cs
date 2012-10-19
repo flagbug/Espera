@@ -1,10 +1,10 @@
-﻿using System;
+﻿using NAudio;
+using NAudio.Wave;
+using Rareform.Validation;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using NAudio;
-using NAudio.Wave;
-using Rareform.Validation;
 
 namespace Espera.Core.Audio
 {
@@ -14,6 +14,7 @@ namespace Espera.Core.Audio
     internal sealed class LocalAudioPlayer : AudioPlayer
     {
         private WaveChannel32 inputStream;
+        private bool isLoaded;
         private float volume;
         private IWavePlayer wavePlayer;
 
@@ -57,7 +58,7 @@ namespace Espera.Core.Audio
 
         public override TimeSpan TotalTime
         {
-            get { return this.IsLoaded ? this.inputStream.TotalTime : TimeSpan.Zero; }
+            get { return this.isLoaded ? this.inputStream.TotalTime : TimeSpan.Zero; }
         }
 
         public override float Volume
@@ -99,7 +100,7 @@ namespace Espera.Core.Audio
                 throw new SongLoadException("Song could not be loaded.", ex);
             }
 
-            base.Load();
+            this.isLoaded = true;
         }
 
         public override void Pause()
@@ -165,7 +166,7 @@ namespace Espera.Core.Audio
                 this.inputStream.Dispose();
             }
 
-            this.IsLoaded = false;
+            this.isLoaded = false;
         }
 
         private static WaveChannel32 OpenMp3Stream(Stream stream)
@@ -207,6 +208,7 @@ namespace Espera.Core.Audio
                 case AudioType.Mp3:
                     this.inputStream = OpenMp3Stream(stream);
                     break;
+
                 default:
                     throw new InvalidOperationException("Unsupported audio type.");
             }

@@ -1,41 +1,14 @@
-﻿using System;
-using System.Collections;
+﻿using Espera.Core.Audio;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using Espera.Core.Audio;
 
 namespace Espera.Core.Management
 {
-    internal class LibraryReader
+    internal static class LibraryReader
     {
-        public static IEnumerable<LocalSong> ReadSongs(Stream stream)
-        {
-            return XDocument.Load(stream)
-                .Descendants("Root")
-                .Descendants("Songs")
-                .Elements("Song")
-                .Select
-                (
-                    song =>
-                        new LocalSong
-                        (
-                            song.Attribute("Path").Value,
-                            (AudioType)Enum.Parse(typeof(AudioType), song.Attribute("AudioType").Value),
-                            TimeSpan.FromTicks(Int64.Parse(song.Attribute("Duration").Value))
-                        )
-                        {
-                            Album = song.Attribute("Album").Value,
-                            Artist = song.Attribute("Artist").Value,
-                            Genre = song.Attribute("Genre").Value,
-                            Title = song.Attribute("Title").Value,
-                            TrackNumber = Int32.Parse(song.Attribute("TrackNumber").Value)
-                        }
-                )
-                .ToList();
-        }
-
         public static IEnumerable<Playlist> ReadPlaylists(Stream stream)
         {
             IEnumerable<Song> songs = ReadSongs(stream);
@@ -111,6 +84,32 @@ namespace Espera.Core.Management
                 }
             )
             .ToList();
+        }
+
+        public static IEnumerable<LocalSong> ReadSongs(Stream stream)
+        {
+            return XDocument.Load(stream)
+                .Descendants("Root")
+                .Descendants("Songs")
+                .Elements("Song")
+                .Select
+                (
+                    song =>
+                        new LocalSong
+                        (
+                            song.Attribute("Path").Value,
+                            (AudioType)Enum.Parse(typeof(AudioType), song.Attribute("AudioType").Value),
+                            TimeSpan.FromTicks(Int64.Parse(song.Attribute("Duration").Value))
+                        )
+                        {
+                            Album = song.Attribute("Album").Value,
+                            Artist = song.Attribute("Artist").Value,
+                            Genre = song.Attribute("Genre").Value,
+                            Title = song.Attribute("Title").Value,
+                            TrackNumber = Int32.Parse(song.Attribute("TrackNumber").Value)
+                        }
+                )
+                .ToList();
         }
     }
 }
