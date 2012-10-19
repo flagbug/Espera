@@ -11,6 +11,8 @@ namespace Espera.Core
 {
     public sealed class YoutubeSong : Song
     {
+        private readonly bool isStreaming;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="YoutubeSong"/> class.
         /// </summary>
@@ -22,7 +24,7 @@ namespace Espera.Core
         public YoutubeSong(string path, AudioType audioType, TimeSpan duration, bool isStreaming)
             : base(path, audioType, duration)
         {
-            this.IsStreaming = isStreaming;
+            this.isStreaming = isStreaming;
         }
 
         /// <summary>
@@ -32,10 +34,8 @@ namespace Espera.Core
 
         public override bool HasToCache
         {
-            get { return !this.IsStreaming; }
+            get { return !this.isStreaming; }
         }
-
-        public bool IsStreaming { get; private set; }
 
         /// <summary>
         /// Gets or sets the average rating.
@@ -104,13 +104,13 @@ namespace Espera.Core
 
         internal override AudioPlayer CreateAudioPlayer()
         {
-            if (this.IsStreaming)
+            if (this.isStreaming)
             {
                 VideoInfo video = GetVideoInfoForStreaming(this.OriginalPath);
 
                 this.StreamingPath = video.DownloadUrl;
             }
-            return this.IsStreaming ? (AudioPlayer)new YoutubeAudioPlayer(this) : new LocalAudioPlayer(this);
+            return this.isStreaming ? (AudioPlayer)new YoutubeAudioPlayer(this) : new LocalAudioPlayer(this);
         }
 
         private static VideoInfo GetVideoInfoForDownload(string youtubeLink)
