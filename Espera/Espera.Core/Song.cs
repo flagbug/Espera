@@ -74,7 +74,7 @@ namespace Espera.Core
                 if (this.cachingProgress != value)
                 {
                     this.cachingProgress = value;
-                    this.OnCachingProgressChanged(EventArgs.Empty);
+                    this.CachingProgressChanged.RaiseSafe(this, EventArgs.Empty);
                 }
             }
         }
@@ -108,7 +108,7 @@ namespace Espera.Core
                 {
                     this.CachingProgress = 100;
                     this.IsCaching = false;
-                    this.OnCachingCompleted(EventArgs.Empty);
+                    this.CachingCompleted.RaiseSafe(this, EventArgs.Empty);
                 }
             }
         }
@@ -222,30 +222,12 @@ namespace Espera.Core
         internal abstract AudioPlayer CreateAudioPlayer();
 
         /// <summary>
-        /// Raises the <see cref="CachingCompleted"/> event.
-        /// </summary>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        internal protected void OnCachingCompleted(EventArgs e)
-        {
-            this.CachingCompleted.RaiseSafe(this, e);
-        }
-
-        /// <summary>
         /// Raises the <see cref="CachingFailed"/> event.
         /// </summary>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         internal protected void OnCachingFailed(EventArgs e)
         {
             this.CachingFailed.RaiseSafe(this, e);
-        }
-
-        /// <summary>
-        /// Raises the <see cref="CachingProgressChanged"/> event.
-        /// </summary>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        internal protected void OnCachingProgressChanged(EventArgs e)
-        {
-            this.CachingProgressChanged.RaiseSafe(this, e);
         }
     }
 }
