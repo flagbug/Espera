@@ -151,17 +151,6 @@ namespace Espera.Core.Management
         public Playlist CurrentPlaylist { get; private set; }
 
         /// <summary>
-        /// Gets the index of the currently played song in the playlist.
-        /// </summary>
-        /// <value>
-        /// The index of the currently played song in the playlist.
-        /// </value>
-        public int? CurrentSongIndex
-        {
-            get { return this.CurrentPlaylist.CurrentSongIndex; }
-        }
-
-        /// <summary>
         /// Gets or sets the current song's elapsed time.
         /// </summary>
         public TimeSpan CurrentTime
