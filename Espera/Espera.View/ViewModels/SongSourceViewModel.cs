@@ -113,7 +113,5 @@ namespace Espera.View.ViewModels
 
             this.SelectableSongs = this.SongOrderFunc(this.SelectableSongs);
         }
-
-        protected abstract void UpdateSelectableSongs();
     }
 }

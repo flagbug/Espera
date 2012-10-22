@@ -113,7 +113,7 @@ namespace Espera.View.ViewModels
             Task.Factory.StartNew(this.UpdateSelectableSongs);
         }
 
-        protected override void UpdateSelectableSongs()
+        private void UpdateSelectableSongs()
         {
             if (this.IsSearching || this.currentSongs == null)
             {

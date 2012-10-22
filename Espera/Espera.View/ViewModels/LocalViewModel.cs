@@ -207,19 +207,6 @@ namespace Espera.View.ViewModels
             this.ApplyOrder(SortHelpers.GetOrderByTitle<LocalSongViewModel>, ref this.titleOrder);
         }
 
-        protected override void UpdateSelectableSongs()
-        {
-            IEnumerable<Song> songs = this.Library.Songs.AsParallel()
-                .Where(song => this.SelectedArtist.IsAllArtists || song.Artist == this.SelectedArtist.Name);
-
-            this.SelectableSongs = songs.FilterSongs(this.SearchText)
-                .Select(song => new LocalSongViewModel(song))
-                .OrderBy(this.SongOrderFunc)
-                .ToList();
-
-            this.SelectedSongs = this.SelectableSongs.Take(1);
-        }
-
         /// <example>
         /// With prefixes "A" and "The":
         /// "A Bar" -> "Bar", "The Foos" -> "Foos"
@@ -237,6 +224,19 @@ namespace Espera.View.ViewModels
             }
 
             return artistName;
+        }
+
+        private void UpdateSelectableSongs()
+        {
+            IEnumerable<Song> songs = this.Library.Songs.AsParallel()
+                .Where(song => this.SelectedArtist.IsAllArtists || song.Artist == this.SelectedArtist.Name);
+
+            this.SelectableSongs = songs.FilterSongs(this.SearchText)
+                .Select(song => new LocalSongViewModel(song))
+                .OrderBy(this.SongOrderFunc)
+                .ToList();
+
+            this.SelectedSongs = this.SelectableSongs.Take(1);
         }
     }
 }

@@ -48,7 +48,8 @@ namespace Espera.Core.Audio
         /// Loads the specified song into the <see cref="Espera.Core.Audio.LocalAudioPlayer"/>. This is required before playing a new song.
         /// </summary>
         /// <exception cref="SongLoadException">The song could not be loaded.</exception>
-        public abstract void Load();
+        public virtual void Load()
+        { }
 
         /// <summary>
         /// Pauses the playback of the <see cref="Song"/>.
