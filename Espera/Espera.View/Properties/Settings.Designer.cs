@@ -274,5 +274,29 @@ namespace Espera.View.Properties {
                 this["YoutubeViewsColumnWidth"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LockWindow {
+            get {
+                return ((bool)(this["LockWindow"]));
+            }
+            set {
+                this["LockWindow"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool GoFullScreenOnLock {
+            get {
+                return ((bool)(this["GoFullScreenOnLock"]));
+            }
+            set {
+                this["GoFullScreenOnLock"] = value;
+            }
+        }
     }
 }

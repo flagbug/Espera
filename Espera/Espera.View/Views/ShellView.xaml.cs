@@ -26,7 +26,23 @@ namespace Espera.View.Views
 
             this.ChangeColor(Settings.Default.AccentColor);
 
-            this.DataContextChanged += (sender, args) => this.WireDataContext();
+            this.DataContextChanged += (sender, args) =>
+            {
+                this.WireDataContext();
+
+                this.shellViewModel.UpdateScreenState += (sender2, args2) =>
+                {
+                    if (Settings.Default.GoFullScreenOnLock)
+                    {
+                        this.IgnoreTaskbarOnMaximize = !this.shellViewModel.IsAdmin && Settings.Default.GoFullScreenOnLock;
+
+                        this.WindowState = WindowState.Normal;
+                        this.WindowState = WindowState.Maximized;
+
+                        this.Topmost = true;
+                    }
+                };
+            };
         }
 
         private void AddSongsButtonClick(object sender, RoutedEventArgs e)
@@ -110,7 +126,15 @@ namespace Espera.View.Views
 
         private void MetroWindowClosing(object sender, CancelEventArgs e)
         {
-            this.shellViewModel.Dispose();
+            if (this.shellViewModel.CanModifyWindow)
+            {
+                this.shellViewModel.Dispose();
+            }
+
+            else
+            {
+                e.Cancel = true;
+            }
         }
 
         private void PlaylistContextMenuOpening(object sender, ContextMenuEventArgs e)

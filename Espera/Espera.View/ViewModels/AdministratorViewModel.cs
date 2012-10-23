@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using Espera.Core.Management;
+using Espera.View.Properties;
 using Rareform.Patterns.MVVM;
 using Rareform.Validation;
 using System;
@@ -79,6 +80,12 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public bool GoFullScreenOnLock
+        {
+            get { return Settings.Default.GoFullScreenOnLock; }
+            set { Settings.Default.GoFullScreenOnLock = value; }
+        }
+
         public string Homepage
         {
             get { return "http://github.com/flagbug/Espera"; }
@@ -151,6 +158,19 @@ namespace Espera.View.ViewModels
         {
             get { return this.library.LockVolume; }
             set { this.library.LockVolume = value; }
+        }
+
+        public bool LockWindow
+        {
+            get { return Settings.Default.LockWindow; }
+            set
+            {
+                if (this.LockWindow != value)
+                {
+                    Settings.Default.LockWindow = value;
+                    this.NotifyOfPropertyChange(() => this.LockWindow);
+                }
+            }
         }
 
         public ICommand LoginCommand

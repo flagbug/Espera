@@ -65,6 +65,8 @@ namespace Espera.View.ViewModels
             this.IsLocal = true;
         }
 
+        public event EventHandler UpdateScreenState;
+
         public event EventHandler VideoPlayerCallbackChanged
         {
             add { this.library.VideoPlayerCallbackChanged += value; }
@@ -92,6 +94,14 @@ namespace Espera.View.ViewModels
         public bool CanChangeVolume
         {
             get { return this.library.CanChangeVolume; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the window can be minimized, maximized or closed
+        /// </summary>
+        public bool CanModifyWindow
+        {
+            get { return this.IsAdmin || !Settings.Default.LockWindow; }
         }
 
         public bool CanSwitchPlaylist
@@ -723,6 +733,9 @@ namespace Espera.View.ViewModels
             this.NotifyOfPropertyChange(() => this.CanChangeTime);
             this.NotifyOfPropertyChange(() => this.CanSwitchPlaylist);
             this.NotifyOfPropertyChange(() => this.ShowPlaylistTimeOut);
+            this.NotifyOfPropertyChange(() => this.CanModifyWindow);
+
+            this.UpdateScreenState.RaiseSafe(this, EventArgs.Empty);
         }
     }
 }
