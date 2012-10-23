@@ -32,7 +32,7 @@ namespace Espera.View.Views
 
                 this.shellViewModel.UpdateScreenState += (sender2, args2) =>
                 {
-                    if (Settings.Default.GoFullScreenOnLock)
+                    if (Settings.Default.LockWindow && Settings.Default.GoFullScreenOnLock)
                     {
                         this.IgnoreTaskbarOnMaximize = !this.shellViewModel.IsAdmin && Settings.Default.GoFullScreenOnLock;
 
