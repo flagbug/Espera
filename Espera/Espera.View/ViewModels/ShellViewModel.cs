@@ -65,6 +65,9 @@ namespace Espera.View.ViewModels
             this.IsLocal = true;
         }
 
+        /// <summary>
+        /// Occurs when the view should update the screen state to maximized state or restore it to normal state
+        /// </summary>
         public event EventHandler UpdateScreenState;
 
         public event EventHandler VideoPlayerCallbackChanged
