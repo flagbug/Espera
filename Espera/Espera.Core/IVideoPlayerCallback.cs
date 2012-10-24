@@ -7,8 +7,6 @@ namespace Espera.Core
     /// </summary>
     public interface IVideoPlayerCallback
     {
-        TimeSpan CurrentTime { get; }
-
         Func<TimeSpan> GetTime { set; }
 
         Action LoadRequest { set; }
@@ -22,8 +20,6 @@ namespace Espera.Core
         Action StopRequest { set; }
 
         Uri VideoUrl { get; }
-
-        float Volume { get; }
 
         Action<float> VolumeChangeRequest { set; }
 
