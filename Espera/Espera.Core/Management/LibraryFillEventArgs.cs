@@ -1,5 +1,5 @@
-﻿using System;
-using Rareform.Extensions;
+﻿using Rareform.Validation;
+using System;
 
 namespace Espera.Core.Management
 {
@@ -8,10 +8,13 @@ namespace Espera.Core.Management
         public LibraryFillEventArgs(Song song, int processedTagCount, int totalTagCount)
         {
             if (song == null)
-                throw new ArgumentNullException("song");
+                Throw.ArgumentNullException(() => song);
 
-            processedTagCount.ThrowIfLessThan(0, () => processedTagCount);
-            totalTagCount.ThrowIfLessThan(0, () => totalTagCount);
+            if (processedTagCount < 0)
+                Throw.ArgumentOutOfRangeException(() => processedTagCount, 0);
+
+            if (totalTagCount < 0)
+                Throw.ArgumentOutOfRangeException(() => totalTagCount, 0);
 
             this.Song = song;
             this.TotalTagCount = totalTagCount;
