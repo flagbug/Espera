@@ -9,6 +9,8 @@ namespace Espera.Core
     {
         Func<TimeSpan> GetTime { set; }
 
+        Func<float> GetVolume { set; }
+
         Action LoadRequest { set; }
 
         Action PauseRequest { set; }
@@ -17,11 +19,11 @@ namespace Espera.Core
 
         Action<TimeSpan> SetTime { set; }
 
+        Action<float> SetVolume { set; }
+
         Action StopRequest { set; }
 
         Uri VideoUrl { get; }
-
-        Action<float> VolumeChangeRequest { set; }
 
         void Finished();
     }

@@ -11,7 +11,6 @@ namespace Espera.Core.Audio
         private bool isPaused;
         private bool isPlaying;
         private bool isStopped;
-        private float volume;
 
         public YoutubeAudioPlayer(YoutubeSong song)
         {
@@ -28,6 +27,8 @@ namespace Espera.Core.Audio
         }
 
         public Func<TimeSpan> GetTime { set; private get; }
+
+        public Func<float> GetVolume { set; private get; }
 
         public Action LoadRequest { set; private get; }
 
@@ -54,6 +55,8 @@ namespace Espera.Core.Audio
 
         public Action<TimeSpan> SetTime { set; private get; }
 
+        public Action<float> SetVolume { set; private get; }
+
         public Action StopRequest { set; private get; }
 
         public override TimeSpan TotalTime
@@ -68,16 +71,9 @@ namespace Espera.Core.Audio
 
         public override float Volume
         {
-            get { return this.volume; }
-            set
-            {
-                this.volume = value;
-
-                this.VolumeChangeRequest(this.volume);
-            }
+            get { return this.GetVolume(); }
+            set { this.SetVolume(value); }
         }
-
-        public Action<float> VolumeChangeRequest { set; private get; }
 
         public override void Dispose()
         {

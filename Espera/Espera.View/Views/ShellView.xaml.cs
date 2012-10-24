@@ -222,7 +222,8 @@ namespace Espera.View.Views
             callback.GetTime = () => (TimeSpan)this.Dispatcher.Invoke(new Func<TimeSpan>(() => this.videoPlayer.Position));
             callback.SetTime = time => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Position = time));
 
-            callback.VolumeChangeRequest = volume => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Volume = volume));
+            callback.GetVolume = () => (float)this.Dispatcher.Invoke(new Func<float>(() => (float)this.videoPlayer.Volume));
+            callback.SetVolume = volume => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Volume = volume));
 
             callback.LoadRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Source = callback.VideoUrl));
             callback.PauseRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Pause()));
