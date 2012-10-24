@@ -29,19 +29,8 @@ namespace Espera.View.Views
             this.DataContextChanged += (sender, args) =>
             {
                 this.WireDataContext();
-
-                this.shellViewModel.UpdateScreenState += (sender2, args2) =>
-                {
-                    if (Settings.Default.LockWindow && Settings.Default.GoFullScreenOnLock)
-                    {
-                        this.IgnoreTaskbarOnMaximize = !this.shellViewModel.IsAdmin && Settings.Default.GoFullScreenOnLock;
-
-                        this.WindowState = WindowState.Normal;
-                        this.WindowState = WindowState.Maximized;
-
-                        this.Topmost = true;
-                    }
-                };
+                this.WireVideoPlayer();
+                this.WireScreenStateUpdater();
             };
         }
 
@@ -317,7 +306,26 @@ namespace Espera.View.Views
         private void WireDataContext()
         {
             this.shellViewModel = (ShellViewModel)this.DataContext;
+        }
 
+        private void WireScreenStateUpdater()
+        {
+            this.shellViewModel.UpdateScreenState += (sender2, args2) =>
+            {
+                if (Settings.Default.LockWindow && Settings.Default.GoFullScreenOnLock)
+                {
+                    this.IgnoreTaskbarOnMaximize = !this.shellViewModel.IsAdmin && Settings.Default.GoFullScreenOnLock;
+
+                    this.WindowState = WindowState.Normal;
+                    this.WindowState = WindowState.Maximized;
+
+                    this.Topmost = true;
+                }
+            };
+        }
+
+        private void WireVideoPlayer()
+        {
             this.shellViewModel.VideoPlayerCallbackChanged += (sender, args) => this.SetupVideoPlayer();
         }
     }
