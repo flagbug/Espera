@@ -83,7 +83,7 @@
     </Window.InputBindings>
     <Controls:MetroWindow.Flyouts>
         <Controls:Flyout Header="settings" IsOpen="{Binding Path=AdministratorViewModel.Show}" Position="Right">
-            <Views:SettingsView />
+            <Views:SettingsView DataContext="{Binding Path=SettingsViewModel}" />
         </Controls:Flyout>
     </Controls:MetroWindow.Flyouts>
     <Grid x:Name="mainGrid"

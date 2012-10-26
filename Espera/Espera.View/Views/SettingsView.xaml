@@ -3,23 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ViewModels="clr-namespace:Espera.View.ViewModels"
              mc:Ignorable="d"
              d:DesignHeight="600"
-             d:DesignWidth="800">
+             d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance ViewModels:SettingsViewModel}">
     <UserControl.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colours.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
-            </ResourceDictionary.MergedDictionaries>
             <Style x:Key="ColorPickerButtonStyle" TargetType="{x:Type Button}">
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border Width="25"
-                                    Height="25"
+                            <Border Width="40"
+                                    Height="40"
                                     Margin="5, 0, 5, 0"
                                     Background="{TemplateBinding Background}">
                                 <ContentPresenter />
@@ -36,27 +32,41 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
+            <Style x:Key="SettingsHeaderStyle" TargetType="{x:Type TextBlock}">
+                <Setter Property="FontSize" Value="48" />
+                <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
+                <!--For some reason the foreground has to be set manually, otherwise it would be black.-->
+                <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
         <TabControl>
             <TabItem Header="appearance">
-                <StackPanel Margin="-5, 0, 0, 0"
-                            VerticalAlignment="Top"
-                            HorizontalAlignment="Left"
-                            Orientation="Horizontal">
-                    <Button Background="#CCCB0000"
-                                        Click="RedColorButtonButtonClick"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
-                    <Button Background="#CC48CB00"
-                                        Click="GreenColorButtonButtonClick"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
-                    <Button Background="#FF1C739D"
-                                        Click="BlueColorButtonButtonClick"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
-                    <Button Background="#CCB400FF"
-                                        Click="PurpleColorButtonButtonClick"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
+                <StackPanel>
+                    <TextBlock Style="{StaticResource SettingsHeaderStyle}"
+                               Text="accent color" />
+                    <StackPanel Margin="-5, 0, 0, 0"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Left"
+                                Orientation="Horizontal">
+                        <Button Background="#CCCB0000"
+                                Command="{Binding Path=ChangeAccentColorCommand}"
+                                CommandParameter="Red"
+                                Style="{StaticResource ColorPickerButtonStyle}" />
+                        <Button Background="#CC48CB00"
+                                Command="{Binding Path=ChangeAccentColorCommand}"
+                                CommandParameter="Green"
+                                Style="{StaticResource ColorPickerButtonStyle}" />
+                        <Button Background="#FF1C739D"
+                                Command="{Binding Path=ChangeAccentColorCommand}"
+                                CommandParameter="Blue"
+                                Style="{StaticResource ColorPickerButtonStyle}" />
+                        <Button Background="#CCB400FF"
+                                Command="{Binding Path=ChangeAccentColorCommand}"
+                                CommandParameter="Purple"
+                                Style="{StaticResource ColorPickerButtonStyle}" />
+                    </StackPanel>
                 </StackPanel>
             </TabItem>
             <TabItem Header="party mode">
