@@ -15,7 +15,7 @@
                       WindowState="Maximized"
                       ShowMinButton="{Binding Path=CanModifyWindow}"
                       ShowMaxRestoreButton="{Binding Path=CanModifyWindow}"
-                      ShowCloseButton="{Binding Path=CanModifyWindow}" IgnoreTaskbarOnMaximize="True"
+                      ShowCloseButton="{Binding Path=CanModifyWindow}"
                       d:DataContext="{d:DesignInstance ViewModels:DesignTimeShellViewModel, IsDesignTimeCreatable=True}">
     <Controls:MetroWindow.Style>
         <Style TargetType="{x:Type Controls:MetroWindow}">
