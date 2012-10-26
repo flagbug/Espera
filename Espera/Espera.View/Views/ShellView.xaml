@@ -865,7 +865,6 @@
                     <ScrollViewer>
                         <StackPanel Margin="5, 0, 5, 0">
                             <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="settings" />
-                            <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="accent" />
                             <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="party mode" />
                             <CheckBox IsChecked="{Binding Path=LockPlayPause}">
                                 <AccessText Text="Lock play/pause" TextWrapping="Wrap" />
@@ -911,24 +910,6 @@
                             <CheckBox IsChecked="{Binding Path=StreamYoutube}">
                                 <AccessText Text="Stream from Youtube instead of downloading.&#x0a;Changing this option requires a restart." TextWrapping="Wrap" />
                             </CheckBox>
-                            <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="about" />
-                            <TextBlock Text="{Binding Path=Version, StringFormat=Espera v\{0\}}" />
-                            <TextBlock Text="Author: Dennis Daume" />
-                            <TextBlock>
-                                <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=Homepage}">
-                                    <Run Foreground="#FF00B7C0" Text="Project Website" />
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=IssuesPage}">
-                                    <Run Foreground="#FF00B7C0" Text="Report a bug" />
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=DonationPage}">
-                                    <Run Foreground="#FF00B7C0" Text="Donate :)" />
-                                </Hyperlink>
-                            </TextBlock>
                         </StackPanel>
                     </ScrollViewer>
                     <StackPanel Grid.Row="1"

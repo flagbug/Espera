@@ -4,8 +4,6 @@ using Espera.View.Properties;
 using Rareform.Patterns.MVVM;
 using Rareform.Validation;
 using System;
-using System.Diagnostics;
-using System.Reflection;
 using System.Windows.Input;
 
 namespace Espera.View.ViewModels
@@ -61,11 +59,6 @@ namespace Espera.View.ViewModels
 
         public string CreationPassword { get; set; }
 
-        public string DonationPage
-        {
-            get { return "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=K5AWR8EDG9QJY"; }
-        }
-
         public bool EnablePlaylistTimeout
         {
             get { return this.library.EnablePlaylistTimeout; }
@@ -86,11 +79,6 @@ namespace Espera.View.ViewModels
             set { Settings.Default.GoFullScreenOnLock = value; }
         }
 
-        public string Homepage
-        {
-            get { return "http://github.com/flagbug/Espera"; }
-        }
-
         public bool IsAdmin
         {
             get { return this.library.AccessMode == AccessMode.Administrator; }
@@ -104,11 +92,6 @@ namespace Espera.View.ViewModels
         public bool IsParty
         {
             get { return this.library.AccessMode == AccessMode.Party; }
-        }
-
-        public string IssuesPage
-        {
-            get { return "http://github.com/flagbug/Espera/issues"; }
         }
 
         public bool IsWrongPassword
@@ -202,17 +185,6 @@ namespace Espera.View.ViewModels
 
         public string LoginPassword { get; set; }
 
-        public ICommand OpenLinkCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param => Process.Start((string)param)
-                );
-            }
-        }
-
         public int PlaylistTimeout
         {
             get { return (int)this.library.PlaylistTimeout.TotalSeconds; }
@@ -236,16 +208,6 @@ namespace Espera.View.ViewModels
         {
             get { return this.library.StreamYoutube; }
             set { this.library.StreamYoutube = value; }
-        }
-
-        public string Version
-        {
-            get
-            {
-                Version version = Assembly.GetExecutingAssembly().GetName().Version;
-
-                return String.Format("{0}.{1}.{2}", version.Major, version.Minor, version.Revision);
-            }
         }
     }
 }
