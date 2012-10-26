@@ -146,11 +146,15 @@
     <Compile Include="ViewModels\LocalViewModel.cs" />
     <Compile Include="ViewModels\PlaylistEntryViewModel.cs" />
     <Compile Include="ViewModels\PlaylistViewModel.cs" />
+    <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\SongSourceViewModel.cs" />
     <Compile Include="ViewModels\SongViewModelBase.cs" />
     <Compile Include="ViewModels\StatusViewModel.cs" />
     <Compile Include="ViewModels\YoutubeSongViewModel.cs" />
     <Compile Include="ViewModels\YoutubeViewModel.cs" />
+    <Compile Include="Views\SettingsView.xaml.cs">
+      <DependentUpon>SettingsView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
     </Compile>
@@ -159,6 +163,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Page Include="Views\SettingsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ShellView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

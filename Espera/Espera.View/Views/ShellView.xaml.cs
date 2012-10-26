@@ -3,6 +3,7 @@ using Espera.View.Properties;
 using Espera.View.ViewModels;
 using Ionic.Utils;
 using MahApps.Metro;
+using Rareform.Reflection;
 using System;
 using System.ComponentModel;
 using System.Globalization;
@@ -32,6 +33,14 @@ namespace Espera.View.Views
                 this.WireVideoPlayer();
                 this.WireScreenStateUpdater();
             };
+
+            Settings.Default.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == Reflector.GetMemberName(() => Settings.Default.AccentColor))
+                {
+                    this.ChangeColor(Settings.Default.AccentColor);
+                }
+            };
         }
 
         private void AddSongsButtonClick(object sender, RoutedEventArgs e)
@@ -55,12 +64,6 @@ namespace Espera.View.Views
             }
         }
 
-        private void BlueColorButtonButtonClick(object sender, RoutedEventArgs e)
-        {
-            this.ChangeColor("Blue");
-            Settings.Default.AccentColor = "Blue";
-        }
-
         private void ChangeColor(string color)
         {
             ThemeManager.ChangeTheme(this, ThemeManager.DefaultAccents.First(accent => accent.Name == color), Theme.Dark);
@@ -81,12 +84,6 @@ namespace Espera.View.Views
         private void CreationPasswordChanged(object sender, RoutedEventArgs e)
         {
             this.shellViewModel.AdministratorViewModel.CreationPassword = ((PasswordBox)sender).Password;
-        }
-
-        private void GreenColorButtonButtonClick(object sender, RoutedEventArgs e)
-        {
-            this.ChangeColor("Green");
-            Settings.Default.AccentColor = "Green";
         }
 
         private void LoginButtonClick(object sender, RoutedEventArgs e)
@@ -191,18 +188,6 @@ namespace Espera.View.Views
         private void PlaylistSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             this.shellViewModel.SelectedPlaylistEntries = ((ListView)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
-        }
-
-        private void PurpleColorButtonButtonClick(object sender, RoutedEventArgs e)
-        {
-            this.ChangeColor("Purple");
-            Settings.Default.AccentColor = "Purple";
-        }
-
-        private void RedColorButtonButtonClick(object sender, RoutedEventArgs e)
-        {
-            this.ChangeColor("Red");
-            Settings.Default.AccentColor = "Red";
         }
 
         private void SearchTextBoxKeyUp(object sender, KeyEventArgs e)

@@ -5,7 +5,7 @@
                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                       xmlns:ViewModels="clr-namespace:Espera.View.ViewModels"
-                      mc:Ignorable="d"
+                      xmlns:Views="clr-namespace:Espera.View.Views" mc:Ignorable="d"
                       Title="Espera"
                       Width="800"
                       Height="600"
@@ -49,20 +49,6 @@
                 </Setter>
                 <Setter Property="IsTabStop" Value="False" />
             </Style>
-            <Style x:Key="ColorPickerButtonStyle" TargetType="{x:Type Button}">
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Border Width="25"
-                                    Height="25"
-                                    Margin="5, 0, 5, 0"
-                                    Background="{TemplateBinding Background}">
-                                <ContentPresenter />
-                            </Border>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
             <Style x:Key="AdminHeaderStyle" TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="26.667" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
@@ -95,6 +81,11 @@
         <KeyBinding Command="{Binding PauseContinueCommand}"
                     Key="Space" />
     </Window.InputBindings>
+    <Controls:MetroWindow.Flyouts>
+        <Controls:Flyout Header="settings" IsOpen="{Binding Path=AdministratorViewModel.Show}" Position="Right">
+            <Views:SettingsView />
+        </Controls:Flyout>
+    </Controls:MetroWindow.Flyouts>
     <Grid x:Name="mainGrid"
           Margin="10">
         <Grid.RowDefinitions>
@@ -875,22 +866,6 @@
                         <StackPanel Margin="5, 0, 5, 0">
                             <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="settings" />
                             <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="accent" />
-                            <StackPanel Margin="-5, 0, 0, 0"
-                                        HorizontalAlignment="Left"
-                                        Orientation="Horizontal">
-                                <Button Background="#CCCB0000"
-                                        Click="RedColorButtonButtonClick"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
-                                <Button Background="#CC48CB00"
-                                        Click="GreenColorButtonButtonClick"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
-                                <Button Background="#FF1C739D"
-                                        Click="BlueColorButtonButtonClick"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
-                                <Button Background="#CCB400FF"
-                                        Click="PurpleColorButtonButtonClick"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
-                            </StackPanel>
                             <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="party mode" />
                             <CheckBox IsChecked="{Binding Path=LockPlayPause}">
                                 <AccessText Text="Lock play/pause" TextWrapping="Wrap" />

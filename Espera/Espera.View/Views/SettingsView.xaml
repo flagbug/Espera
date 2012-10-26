@@ -1,0 +1,70 @@
+﻿<UserControl x:Class="Espera.View.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="600"
+             d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colours.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="ColorPickerButtonStyle" TargetType="{x:Type Button}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Width="25"
+                                    Height="25"
+                                    Margin="5, 0, 5, 0"
+                                    Background="{TemplateBinding Background}">
+                                <ContentPresenter />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Opacity" Value="0.8" />
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter Property="Opacity" Value="0.6" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <TabControl>
+            <TabItem Header="appearance">
+                <StackPanel Margin="-5, 0, 0, 0"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Left"
+                            Orientation="Horizontal">
+                    <Button Background="#CCCB0000"
+                                        Click="RedColorButtonButtonClick"
+                                        Style="{StaticResource ColorPickerButtonStyle}" />
+                    <Button Background="#CC48CB00"
+                                        Click="GreenColorButtonButtonClick"
+                                        Style="{StaticResource ColorPickerButtonStyle}" />
+                    <Button Background="#FF1C739D"
+                                        Click="BlueColorButtonButtonClick"
+                                        Style="{StaticResource ColorPickerButtonStyle}" />
+                    <Button Background="#CCB400FF"
+                                        Click="PurpleColorButtonButtonClick"
+                                        Style="{StaticResource ColorPickerButtonStyle}" />
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="party mode">
+            </TabItem>
+            <TabItem Header="youtube">
+            </TabItem>
+            <TabItem Header="about">
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>
