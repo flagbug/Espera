@@ -1,3 +1,17 @@
+----------------------------------- v1.5.0 -----------------------------------
+
+FEATURES:
+- There is now an option to lock the window when entering the party mode.
+
+IMPROVEMENTS:
+- Some UI style and visual improvements.
+
+BUGFIXES:
+- Fixed a bug, that caused some settings to be resetted at application 
+  startup.
+- Fixed a bug, that could cause a corruption of the library under certain 
+  conditions.
+
 ----------------------------------- v1.4.3 -----------------------------------
 
 BUGFIXES:
