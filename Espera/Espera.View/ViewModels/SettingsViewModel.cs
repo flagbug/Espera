@@ -1,4 +1,5 @@
-﻿using Espera.View.Properties;
+﻿using Caliburn.Micro;
+using Espera.View.Properties;
 using Rareform.Patterns.MVVM;
 using System;
 using System.Diagnostics;
@@ -7,8 +8,10 @@ using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal class SettingsViewModel
+    internal class SettingsViewModel : PropertyChangedBase
     {
+        private bool show;
+
         public ICommand ChangeAccentColorCommand
         {
             get
@@ -43,6 +46,19 @@ namespace Espera.View.ViewModels
                 (
                     param => Process.Start((string)param)
                 );
+            }
+        }
+
+        public bool Show
+        {
+            get { return this.show; }
+            set
+            {
+                if (this.Show != value)
+                {
+                    this.show = value;
+                    this.NotifyOfPropertyChange(() => this.Show);
+                }
             }
         }
 

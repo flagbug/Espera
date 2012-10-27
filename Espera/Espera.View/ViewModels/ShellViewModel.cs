@@ -518,6 +518,14 @@ namespace Espera.View.ViewModels
             get { return this.AdministratorViewModel.EnablePlaylistTimeout && !this.IsAdmin; }
         }
 
+        public ICommand ShowSettingsCommand
+        {
+            get
+            {
+                return new RelayCommand(param => this.SettingsViewModel.Show = true);
+            }
+        }
+
         public ICommand ShufflePlaylistCommand
         {
             get

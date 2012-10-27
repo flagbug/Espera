@@ -81,8 +81,13 @@
         <KeyBinding Command="{Binding PauseContinueCommand}"
                     Key="Space" />
     </Window.InputBindings>
+    <Controls:MetroWindow.WindowCommands>
+        <Controls:WindowCommands>
+            <Button Content="settings" Command="{Binding Path=ShowSettingsCommand}" />
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.WindowCommands>
     <Controls:MetroWindow.Flyouts>
-        <Controls:Flyout Header="settings" IsOpen="{Binding Path=AdministratorViewModel.Show}" Position="Right">
+        <Controls:Flyout Header="settings" IsOpen="{Binding Path=SettingsViewModel.Show}" Position="Right">
             <Views:SettingsView DataContext="{Binding Path=SettingsViewModel}" />
         </Controls:Flyout>
     </Controls:MetroWindow.Flyouts>
@@ -197,13 +202,6 @@
                      KeyUp="SearchTextBoxKeyUp"
                      Text="{Binding Path=CurrentSongSource.SearchText,
                                     UpdateSourceTrigger=PropertyChanged}" />
-            <ToggleButton Grid.Column="5"
-                          Margin="10, 0, 0, 0"
-                          IsChecked="{Binding Path=AdministratorViewModel.Show}"
-                          Padding="0"
-                          ToolTip="Settings">
-                <Image Source="/Espera;component/Images/Settings.png" />
-            </ToggleButton>
         </Grid>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>

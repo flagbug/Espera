@@ -191,19 +191,6 @@ namespace Espera.View.ViewModels
             set { this.library.PlaylistTimeout = TimeSpan.FromSeconds(value); }
         }
 
-        public bool Show
-        {
-            get { return this.show; }
-            set
-            {
-                if (this.Show != value)
-                {
-                    this.show = value;
-                    this.NotifyOfPropertyChange(() => this.Show);
-                }
-            }
-        }
-
         public bool StreamYoutube
         {
             get { return this.library.StreamYoutube; }
