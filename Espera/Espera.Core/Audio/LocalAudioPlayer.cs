@@ -84,9 +84,7 @@ namespace Espera.Core.Audio
         {
             this.Stop();
 
-            // There is currently a problem with the WaveOut player, that causes it to hang if the UI does expensive operations.
-            // The problem is, that the other wave players, such as DirectOut or WasapiOut also have problems.
-            this.wavePlayer = new WaveOut(WaveCallbackInfo.FunctionCallback());
+            this.wavePlayer = new WaveOutEvent();
 
             try
             {
