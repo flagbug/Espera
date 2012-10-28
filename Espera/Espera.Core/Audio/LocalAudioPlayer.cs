@@ -78,12 +78,20 @@ namespace Espera.Core.Audio
         public override void Dispose()
         {
             this.Stop();
+
+            if (wavePlayer != null)
+            {
+                this.wavePlayer.Dispose();
+            }
+
+            if (inputStream != null)
+            {
+                this.inputStream.Dispose();
+            }
         }
 
         public override void Load()
         {
-            this.Stop();
-
             this.wavePlayer = new WaveOutEvent();
 
             try
@@ -153,16 +161,7 @@ namespace Espera.Core.Audio
 
         public override void Stop()
         {
-            if (wavePlayer != null)
-            {
-                this.wavePlayer.Stop();
-                this.wavePlayer.Dispose();
-            }
-
-            if (inputStream != null)
-            {
-                this.inputStream.Dispose();
-            }
+            this.wavePlayer.Stop();
 
             this.isLoaded = false;
         }
