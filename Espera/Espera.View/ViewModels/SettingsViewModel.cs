@@ -1,6 +1,8 @@
 ﻿using Caliburn.Micro;
+using Espera.Core.Management;
 using Espera.View.Properties;
 using Rareform.Patterns.MVVM;
+using Rareform.Validation;
 using System;
 using System.Diagnostics;
 using System.Reflection;
@@ -10,7 +12,16 @@ namespace Espera.View.ViewModels
 {
     internal class SettingsViewModel : PropertyChangedBase
     {
+        private Library library;
         private bool show;
+
+        public SettingsViewModel(Library library)
+        {
+            if (library == null)
+                Throw.ArgumentNullException(() => library);
+
+            this.library = library;
+        }
 
         public ICommand ChangeAccentColorCommand
         {
@@ -28,6 +39,26 @@ namespace Espera.View.ViewModels
             get { return "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=K5AWR8EDG9QJY"; }
         }
 
+        public bool EnablePlaylistTimeout
+        {
+            get { return this.library.EnablePlaylistTimeout; }
+            set
+            {
+                if (this.library.EnablePlaylistTimeout != value)
+                {
+                    this.library.EnablePlaylistTimeout = value;
+
+                    this.NotifyOfPropertyChange(() => this.EnablePlaylistTimeout);
+                }
+            }
+        }
+
+        public bool GoFullScreenOnLock
+        {
+            get { return Settings.Default.GoFullScreenOnLock; }
+            set { Settings.Default.GoFullScreenOnLock = value; }
+        }
+
         public string Homepage
         {
             get { return "http://github.com/flagbug/Espera"; }
@@ -36,6 +67,55 @@ namespace Espera.View.ViewModels
         public string IssuesPage
         {
             get { return "http://github.com/flagbug/Espera/issues"; }
+        }
+
+        public bool LockLibraryRemoval
+        {
+            get { return this.library.LockLibraryRemoval; }
+            set { this.library.LockLibraryRemoval = value; }
+        }
+
+        public bool LockPlaylistRemoval
+        {
+            get { return this.library.LockPlaylistRemoval; }
+            set { this.library.LockPlaylistRemoval = value; }
+        }
+
+        public bool LockPlaylistSwitching
+        {
+            get { return this.library.LockPlaylistSwitching; }
+            set { this.library.LockPlaylistSwitching = value; }
+        }
+
+        public bool LockPlayPause
+        {
+            get { return this.library.LockPlayPause; }
+            set { this.library.LockPlayPause = value; }
+        }
+
+        public bool LockTime
+        {
+            get { return this.library.LockTime; }
+            set { this.library.LockTime = value; }
+        }
+
+        public bool LockVolume
+        {
+            get { return this.library.LockVolume; }
+            set { this.library.LockVolume = value; }
+        }
+
+        public bool LockWindow
+        {
+            get { return Settings.Default.LockWindow; }
+            set
+            {
+                if (this.LockWindow != value)
+                {
+                    Settings.Default.LockWindow = value;
+                    this.NotifyOfPropertyChange(() => this.LockWindow);
+                }
+            }
         }
 
         public ICommand OpenLinkCommand
@@ -47,6 +127,12 @@ namespace Espera.View.ViewModels
                     param => Process.Start((string)param)
                 );
             }
+        }
+
+        public int PlaylistTimeout
+        {
+            get { return (int)this.library.PlaylistTimeout.TotalSeconds; }
+            set { this.library.PlaylistTimeout = TimeSpan.FromSeconds(value); }
         }
 
         public bool Show

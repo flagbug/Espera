@@ -1,9 +1,7 @@
 ﻿using Caliburn.Micro;
 using Espera.Core.Management;
-using Espera.View.Properties;
 using Rareform.Patterns.MVVM;
 using Rareform.Validation;
-using System;
 using System.Windows.Input;
 
 namespace Espera.View.ViewModels
@@ -59,26 +57,6 @@ namespace Espera.View.ViewModels
 
         public string CreationPassword { get; set; }
 
-        public bool EnablePlaylistTimeout
-        {
-            get { return this.library.EnablePlaylistTimeout; }
-            set
-            {
-                if (this.library.EnablePlaylistTimeout != value)
-                {
-                    this.library.EnablePlaylistTimeout = value;
-
-                    this.NotifyOfPropertyChange(() => this.EnablePlaylistTimeout);
-                }
-            }
-        }
-
-        public bool GoFullScreenOnLock
-        {
-            get { return Settings.Default.GoFullScreenOnLock; }
-            set { Settings.Default.GoFullScreenOnLock = value; }
-        }
-
         public bool IsAdmin
         {
             get { return this.library.AccessMode == AccessMode.Administrator; }
@@ -103,55 +81,6 @@ namespace Espera.View.ViewModels
                 {
                     this.isWrongPassword = value;
                     this.NotifyOfPropertyChange(() => this.IsWrongPassword);
-                }
-            }
-        }
-
-        public bool LockLibraryRemoval
-        {
-            get { return this.library.LockLibraryRemoval; }
-            set { this.library.LockLibraryRemoval = value; }
-        }
-
-        public bool LockPlaylistRemoval
-        {
-            get { return this.library.LockPlaylistRemoval; }
-            set { this.library.LockPlaylistRemoval = value; }
-        }
-
-        public bool LockPlaylistSwitching
-        {
-            get { return this.library.LockPlaylistSwitching; }
-            set { this.library.LockPlaylistSwitching = value; }
-        }
-
-        public bool LockPlayPause
-        {
-            get { return this.library.LockPlayPause; }
-            set { this.library.LockPlayPause = value; }
-        }
-
-        public bool LockTime
-        {
-            get { return this.library.LockTime; }
-            set { this.library.LockTime = value; }
-        }
-
-        public bool LockVolume
-        {
-            get { return this.library.LockVolume; }
-            set { this.library.LockVolume = value; }
-        }
-
-        public bool LockWindow
-        {
-            get { return Settings.Default.LockWindow; }
-            set
-            {
-                if (this.LockWindow != value)
-                {
-                    Settings.Default.LockWindow = value;
-                    this.NotifyOfPropertyChange(() => this.LockWindow);
                 }
             }
         }
@@ -184,12 +113,6 @@ namespace Espera.View.ViewModels
         }
 
         public string LoginPassword { get; set; }
-
-        public int PlaylistTimeout
-        {
-            get { return (int)this.library.PlaylistTimeout.TotalSeconds; }
-            set { this.library.PlaylistTimeout = TimeSpan.FromSeconds(value); }
-        }
 
         public bool StreamYoutube
         {

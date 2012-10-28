@@ -47,7 +47,7 @@ namespace Espera.View.ViewModels
                 this.library.SwitchToPlaylist(this.library.Playlists.First());
             }
 
-            this.SettingsViewModel = new SettingsViewModel();
+            this.SettingsViewModel = new SettingsViewModel(this.library);
             this.AdministratorViewModel = new AdministratorViewModel(this.library);
 
             this.LocalViewModel = new LocalViewModel(this.library);
@@ -515,7 +515,7 @@ namespace Espera.View.ViewModels
 
         public bool ShowPlaylistTimeOut
         {
-            get { return this.AdministratorViewModel.EnablePlaylistTimeout && !this.IsAdmin; }
+            get { return this.SettingsViewModel.EnablePlaylistTimeout && !this.IsAdmin; }
         }
 
         public ICommand ShowSettingsCommand
