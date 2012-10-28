@@ -115,10 +115,7 @@ namespace Espera.Core.Audio
             {
                 this.wavePlayer.Pause();
 
-                while (this.PlaybackState != AudioPlayerState.Paused)
-                {
-                    Thread.Sleep(100);
-                }
+                this.EnsureState(AudioPlayerState.Paused);
             }
         }
 
@@ -152,16 +149,15 @@ namespace Espera.Core.Audio
                     }
                 });
 
-                while (this.PlaybackState != AudioPlayerState.Playing)
-                {
-                    Thread.Sleep(100);
-                }
+                this.EnsureState(AudioPlayerState.Playing);
             }
         }
 
         public override void Stop()
         {
             this.wavePlayer.Stop();
+
+            this.EnsureState(AudioPlayerState.Stopped);
 
             this.isLoaded = false;
         }
@@ -211,6 +207,14 @@ namespace Espera.Core.Audio
             }
 
             this.inputStream.Volume = this.Volume;
+        }
+
+        private void EnsureState(AudioPlayerState state)
+        {
+            while (this.PlaybackState != state)
+            {
+                Thread.Sleep(200);
+            }
         }
 
         private void UpdateSongState()
