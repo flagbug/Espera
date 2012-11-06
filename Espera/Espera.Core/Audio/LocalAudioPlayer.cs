@@ -78,15 +78,21 @@ namespace Espera.Core.Audio
         public override void Dispose()
         {
             this.Stop();
+
+            if (wavePlayer != null)
+            {
+                this.wavePlayer.Dispose();
+            }
+
+            if (inputStream != null)
+            {
+                this.inputStream.Dispose();
+            }
         }
 
         public override void Load()
         {
-            this.Stop();
-
-            // There is currently a problem with the WaveOut player, that causes it to hang if the UI does expensive operations.
-            // The problem is, that the other wave players, such as DirectOut or WasapiOut also have problems.
-            this.wavePlayer = new WaveOut(WaveCallbackInfo.FunctionCallback());
+            this.wavePlayer = new WaveOutEvent();
 
             try
             {
@@ -109,10 +115,7 @@ namespace Espera.Core.Audio
             {
                 this.wavePlayer.Pause();
 
-                while (this.PlaybackState != AudioPlayerState.Paused)
-                {
-                    Thread.Sleep(100);
-                }
+                this.EnsureState(AudioPlayerState.Paused);
             }
         }
 
@@ -146,25 +149,15 @@ namespace Espera.Core.Audio
                     }
                 });
 
-                while (this.PlaybackState != AudioPlayerState.Playing)
-                {
-                    Thread.Sleep(100);
-                }
+                this.EnsureState(AudioPlayerState.Playing);
             }
         }
 
         public override void Stop()
         {
-            if (wavePlayer != null)
-            {
-                this.wavePlayer.Stop();
-                this.wavePlayer.Dispose();
-            }
+            this.wavePlayer.Stop();
 
-            if (inputStream != null)
-            {
-                this.inputStream.Dispose();
-            }
+            this.EnsureState(AudioPlayerState.Stopped);
 
             this.isLoaded = false;
         }
@@ -214,6 +207,14 @@ namespace Espera.Core.Audio
             }
 
             this.inputStream.Volume = this.Volume;
+        }
+
+        private void EnsureState(AudioPlayerState state)
+        {
+            while (this.PlaybackState != state)
+            {
+                Thread.Sleep(200);
+            }
         }
 
         private void UpdateSongState()

@@ -312,12 +312,14 @@ namespace Espera.Core.Management
         {
             get
             {
-                IEnumerable<Song> tempSongs = this.songs.ToList();
+                IEnumerable<Song> tempSongs;
 
                 lock (songLock)
                 {
-                    return tempSongs;
+                    tempSongs = this.songs.ToList();
                 }
+
+                return tempSongs;
             }
         }
 
