@@ -855,7 +855,9 @@
                         <StackPanel Margin="5, 0, 5, 0">
                             <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="settings" />
                             <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="party mode" />
-
+                            <CheckBox Margin="30, 5, 0, 0"
+                                      IsChecked="{Binding Path=GoFullScreenOnLock}"
+                                      IsEnabled="{Binding Path=LockWindow}" />
                             <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="youtube" />
                             <CheckBox IsChecked="{Binding Path=StreamYoutube}">
                                 <AccessText Text="Stream from Youtube instead of downloading.&#10;Changing this option requires a restart." TextWrapping="Wrap" />
