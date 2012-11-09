@@ -96,13 +96,7 @@
       <HintPath>..\packages\Rareform.1.3.0\lib\Rareform.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MahApps.Metro.0.10.0.0\lib\net40\System.Windows.Interactivity.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml">
@@ -181,6 +175,10 @@
     <ProjectReference Include="..\Espera.Core\Espera.Core.csproj">
       <Project>{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}</Project>
       <Name>Espera.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Espera.Services\Espera.Services.csproj">
+      <Project>{cd457ebc-86cc-434b-bb0d-0db4f93e4a56}</Project>
+      <Name>Espera.Services</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
