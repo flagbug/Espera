@@ -53,7 +53,8 @@ namespace Espera.View.ViewModels
                         {
                             this.SendingSucceeded = false;
                         }
-                    }
+                    },
+                    param => this.SendingSucceeded == null || !this.SendingSucceeded.Value
                 );
             }
         }

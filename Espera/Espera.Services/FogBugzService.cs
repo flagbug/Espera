@@ -21,7 +21,6 @@ namespace Espera.Services
             string project = "Espera";
             string area = "CrashReports";
             string body = message + "\n\n" + stackTrace;
-            bool forceNewBug = true;
 
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.ContentType = "application/x-www-form-urlencoded";
@@ -32,7 +31,7 @@ namespace Espera.Services
             parameters += "&ScoutUserName=" + HttpUtility.UrlEncode(userName);
             parameters += "&ScoutProject=" + HttpUtility.UrlEncode(project);
             parameters += "&ScoutArea=" + HttpUtility.UrlEncode(area);
-            parameters += "&ForceNewBug=" + (forceNewBug ? "1" : "0");
+            parameters += "&ForceNewBug=" + "1";
 
             byte[] bytes = Encoding.ASCII.GetBytes(parameters);
             request.ContentLength = bytes.Length;
@@ -42,7 +41,8 @@ namespace Espera.Services
                 os.Write(bytes, 0, bytes.Length);
             }
 
-            using (var response = (HttpWebResponse)request.GetResponse()) ;
+            using (var response = (HttpWebResponse)request.GetResponse())
+            { }
         }
     }
 }
