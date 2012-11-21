@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace Espera.View
 {
@@ -15,12 +16,18 @@ namespace Espera.View
     {
         private static readonly string DirectoryPath;
         private static readonly string FilePath;
+        private readonly WindowManager windowManager;
         private IKernel kernel;
 
         static AppBootstrapper()
         {
             DirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Espera\");
             FilePath = Path.Combine(DirectoryPath, "Library.xml");
+        }
+
+        public AppBootstrapper()
+        {
+            this.windowManager = new WindowManager();
         }
 
         protected override void Configure()
@@ -63,6 +70,15 @@ namespace Espera.View
             }
 
             base.OnStartup(sender, e);
+        }
+
+        protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            this.windowManager.ShowDialog(new CrashViewModel(e.Exception));
+
+            e.Handled = true;
+
+            Application.Current.Shutdown();
         }
     }
 }
