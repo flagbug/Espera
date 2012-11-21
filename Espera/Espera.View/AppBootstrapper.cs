@@ -74,6 +74,8 @@ namespace Espera.View
 
         protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
+            this.Application.MainWindow.Hide();
+
             this.windowManager.ShowDialog(new CrashViewModel(e.Exception));
 
             e.Handled = true;
