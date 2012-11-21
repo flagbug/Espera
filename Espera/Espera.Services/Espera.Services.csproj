@@ -33,9 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NGitHub">
-      <HintPath>..\packages\NGitHub.0.6.4\lib\net40\NGitHub.dll</HintPath>
-    </Reference>
     <Reference Include="Rareform">
       <HintPath>..\packages\Rareform.1.3.0\lib\Rareform.dll</HintPath>
     </Reference>

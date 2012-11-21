@@ -41,7 +41,7 @@ namespace Espera.Services
                 os.Write(bytes, 0, bytes.Length);
             }
 
-            using (var response = (HttpWebResponse)request.GetResponse())
+            using (request.GetResponse())
             { }
         }
     }
