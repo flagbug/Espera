@@ -1,13 +1,15 @@
-﻿using Espera.Services;
+﻿using Caliburn.Micro;
+using Espera.Services;
 using Rareform.Patterns.MVVM;
 using System;
 using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal class CrashViewModel
+    internal class CrashViewModel : PropertyChangedBase
     {
         private readonly Exception exception;
+        private bool? sendingSucceeded;
 
         public CrashViewModel(Exception exception)
         {
@@ -19,13 +21,39 @@ namespace Espera.View.ViewModels
             get { return this.exception.Message + "\n\n" + exception.StackTrace; }
         }
 
-        public ICommand SubmitBugReport
+        public bool? SendingSucceeded
+        {
+            get { return this.sendingSucceeded; }
+            set
+            {
+                if (this.SendingSucceeded != value)
+                {
+                    this.sendingSucceeded = value;
+                    this.NotifyOfPropertyChange(() => this.SendingSucceeded);
+                }
+            }
+        }
+
+        public ICommand SubmitCrashReport
         {
             get
             {
                 return new RelayCommand
                 (
-                    param => FogBugzService.SubmitCrashReport(this.exception.Message, this.exception.StackTrace)
+                    param =>
+                    {
+                        try
+                        {
+                            FogBugzService.SubmitCrashReport(this.exception.Message, this.exception.StackTrace);
+
+                            this.SendingSucceeded = true;
+                        }
+
+                        catch (Exception)
+                        {
+                            this.SendingSucceeded = false;
+                        }
+                    }
                 );
             }
         }
