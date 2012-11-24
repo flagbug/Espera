@@ -13,6 +13,8 @@ namespace Espera.View.ViewModels
 {
     internal sealed class LocalViewModel : SongSourceViewModel<LocalSongViewModel>
     {
+        private readonly ArtistViewModel allArtistsViewModel;
+        private readonly Dictionary<string, ArtistViewModel> artists;
         private SortOrder albumOrder;
         private SortOrder artistOrder;
         private SortOrder durationOrder;
@@ -33,6 +35,9 @@ namespace Espera.View.ViewModels
             this.StatusViewModel = new StatusViewModel(library);
 
             this.searchText = String.Empty;
+
+            this.artists = new Dictionary<string, ArtistViewModel>();
+            this.allArtistsViewModel = new ArtistViewModel("All Artists");
 
             // We need a default sorting order
             this.OrderByArtist();
@@ -56,16 +61,9 @@ namespace Espera.View.ViewModels
         {
             get
             {
-                var artists = this.Library.Songs.FilterSongs(this.SearchText)
-                    .GroupBy(song => song.Artist)
-                    .Select(group => new ArtistViewModel(group.Key, group.Select(song => song.Album).Distinct().Count(), group.Count()))
+                return this.artists.Values
                     .OrderBy(artist => RemoveArtistPrefixes(artist.Name, new[] { "A", "The" }))
-                    .ToList();
-
-                var currentAllArtists = new ArtistViewModel("All Artists", artists.Count);
-
-                return artists
-                    .Prepend(currentAllArtists);
+                    .Prepend(this.allArtistsViewModel);
             }
         }
 
@@ -117,8 +115,6 @@ namespace Espera.View.ViewModels
                     this.searchText = value;
 
                     this.NotifyOfPropertyChange(() => this.SearchText);
-
-                    this.NotifyOfPropertyChange(() => this.Artists);
 
                     this.UpdateSelectableSongs();
                 }
@@ -228,10 +224,46 @@ namespace Espera.View.ViewModels
 
         private void UpdateSelectableSongs()
         {
-            IEnumerable<Song> songs = this.Library.Songs.AsParallel()
-                .Where(song => this.SelectedArtist.IsAllArtists || song.Artist == this.SelectedArtist.Name);
+            IEnumerable<Song> filtered = this.Library.Songs.FilterSongs(this.SearchText).ToList();
 
-            this.SelectableSongs = songs.FilterSongs(this.SearchText)
+            var artistInfos = filtered
+                .GroupBy(song => song.Artist)
+                .Select(group =>
+                    new ArtistViewModel(group.Key, group.Select(song => song.Album).Distinct().Count(), group.Count()))
+                .ToDictionary(model => model.Name);
+
+            List<string> removableArtists = this.artists
+                .Where(pair => !artistInfos.ContainsKey(pair.Key))
+                .Select(pair => pair.Key)
+                .ToList();
+
+            foreach (string artist in removableArtists)
+            {
+                this.artists.Remove(artist);
+            }
+
+            foreach (ArtistViewModel artist in artistInfos.Values)
+            {
+                if (this.artists.ContainsKey(artist.Name))
+                {
+                    ArtistViewModel updated = this.artists[artist.Name];
+
+                    updated.AlbumCount = artist.AlbumCount;
+                    updated.SongCount = artist.SongCount;
+                }
+
+                else
+                {
+                    this.artists.Add(artist.Name, artist);
+                }
+            }
+
+            this.NotifyOfPropertyChange(() => this.Artists);
+
+            this.allArtistsViewModel.ArtistCount = artistInfos.Count;
+
+            this.SelectableSongs = filtered
+                .Where(song => this.SelectedArtist.IsAllArtists || song.Artist == this.SelectedArtist.Name)
                 .Select(song => new LocalSongViewModel(song))
                 .OrderBy(this.SongOrderFunc)
                 .ToList();
