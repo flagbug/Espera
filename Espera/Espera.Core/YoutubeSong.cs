@@ -65,7 +65,7 @@ namespace Espera.Core
 
                 VideoInfo video = GetVideoInfoForDownload(this.OriginalPath);
 
-                this.DownloadVideo(video, tempPath);
+                this.DownloadAudioTrack(video, tempPath);
 
                 this.StreamingPath = tempPath;
                 this.IsCached = true;
@@ -138,12 +138,18 @@ namespace Espera.Core
             return video;
         }
 
-        private void DownloadVideo(VideoInfo video, string tempPath)
+        private void DownloadAudioTrack(VideoInfo video, string tempPath)
         {
             var downloader = new AudioDownloader(video, tempPath);
 
-            downloader.ProgressChanged += (sender, args) =>
-                this.OnCachingProgressChanged((int)args.ProgressPercentage);
+            // We need a factor at which the downlaod progress is preferred to the audio extraction progress
+            const double factor = 0.95;
+
+            downloader.DownloadProgressChanged += (sender, args) =>
+                this.OnCachingProgressChanged((int)(args.ProgressPercentage * factor));
+
+            downloader.AudioExtractionProgressChanged += (sender, args) =>
+                this.OnCachingProgressChanged((int)(factor * 100) + (int)(args.ProgressPercentage * (1 - factor)));
 
             downloader.Execute();
         }
