@@ -1,11 +1,14 @@
 ﻿using Espera.Core;
 using Rareform.Validation;
+using ReactiveUI;
 using System;
+using System.Reactive.Linq;
 
 namespace Espera.View.ViewModels
 {
     public sealed class PlaylistEntryViewModel : SongViewModelBase
     {
+        private readonly ObservableAsPropertyHelper<int> cachingProgress;
         private bool hasCachingFailed;
         private bool isInactive;
         private bool isPlaying;
@@ -20,32 +23,27 @@ namespace Espera.View.ViewModels
 
             if (this.Model.HasToCache && !this.Model.IsCached)
             {
-                this.Model.CachingProgressChanged += (sender, e) => this.NotifyOfPropertyChange(() => this.CacheProgress);
+                this.cachingProgress = this.Model.CachingProgress
+                    .DistinctUntilChanged()
+                    .ToProperty(this, x => x.CacheProgress);
 
                 this.Model.CachingFailed += (sender, args) => this.HasCachingFailed = true;
 
-                this.Model.CachingCompleted += (sender, e) => this.NotifyOfPropertyChange(() => this.ShowCaching);
+                this.Model.CachingCompleted += (sender, e) => this.RaisePropertyChanged(x => x.ShowCaching);
             }
 
-            this.Model.Corrupted += (sender, args) => this.NotifyOfPropertyChange(() => this.IsCorrupted);
+            this.Model.Corrupted += (sender, args) => this.RaisePropertyChanged(x => x.IsCorrupted);
         }
 
         public int CacheProgress
         {
-            get { return this.Model.CachingProgress; }
+            get { return this.cachingProgress.Value; }
         }
 
         public bool HasCachingFailed
         {
             get { return this.hasCachingFailed; }
-            set
-            {
-                if (this.HasCachingFailed != value)
-                {
-                    this.hasCachingFailed = value;
-                    this.NotifyOfPropertyChange(() => this.HasCachingFailed);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(x => x.HasCachingFailed, value); }
         }
 
         public int Index { get; private set; }
@@ -58,27 +56,13 @@ namespace Espera.View.ViewModels
         public bool IsInactive
         {
             get { return this.isInactive; }
-            set
-            {
-                if (this.IsInactive != value)
-                {
-                    this.isInactive = value;
-                    this.NotifyOfPropertyChange(() => this.IsInactive);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(x => x.IsInactive, value); }
         }
 
         public bool IsPlaying
         {
             get { return this.isPlaying; }
-            set
-            {
-                if (this.IsPlaying != value)
-                {
-                    this.isPlaying = value;
-                    this.NotifyOfPropertyChange(() => this.IsPlaying);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(x => x.IsPlaying, value); }
         }
 
         public bool ShowCaching

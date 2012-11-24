@@ -143,9 +143,7 @@ namespace Espera.Core
             var downloader = new AudioDownloader(video, tempPath);
 
             downloader.ProgressChanged += (sender, args) =>
-            {
-                this.CachingProgress = (int)args.ProgressPercentage;
-            };
+                this.OnCachingProgressChanged((int)args.ProgressPercentage);
 
             downloader.Execute();
         }

@@ -4,6 +4,7 @@ using Espera.Core.Settings;
 using Espera.View.Properties;
 using Espera.View.ViewModels;
 using Ninject;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,6 +29,16 @@ namespace Espera.View
         public AppBootstrapper()
         {
             this.windowManager = new WindowManager();
+
+            // ReactiveUI binding convention
+            Func<string, string> firstToLowerBehaviour = x =>
+            {
+                char[] arr = x.ToCharArray();
+                arr[0] = char.ToLower(arr[0]);
+                return new String(arr);
+            };
+
+            RxApp.GetFieldNameForPropertyNameFunc = firstToLowerBehaviour;
         }
 
         protected override void Configure()

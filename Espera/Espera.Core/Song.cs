@@ -4,6 +4,8 @@ using Rareform.Validation;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace Espera.Core
 {
@@ -13,7 +15,7 @@ namespace Espera.Core
     [DebuggerDisplay("{Artist}-{Album}-{Title}")]
     public abstract class Song : IEquatable<Song>
     {
-        private int cachingProgress;
+        private readonly Subject<int> cachingProgress;
         private bool isCached;
         private bool isCorrupted;
 
@@ -37,13 +39,13 @@ namespace Espera.Core
             this.Artist = String.Empty;
             this.Genre = String.Empty;
             this.Title = String.Empty;
+
+            this.cachingProgress = new Subject<int>();
         }
 
         public event EventHandler CachingCompleted;
 
         public event EventHandler CachingFailed;
-
-        public event EventHandler CachingProgressChanged;
 
         public event EventHandler Corrupted;
 
@@ -54,29 +56,11 @@ namespace Espera.Core
         public AudioType AudioType { get; private set; }
 
         /// <summary>
-        /// Gets or sets the caching progress in a range from 0 to 100.
+        /// Gets the caching progress in a range from 0 to 100.
         /// </summary>
-        /// <value>
-        /// The caching progress in a range from 0 to 100.
-        /// </value>
-        /// <exception cref="ArgumentOutOfRangeException">The value was not from 0 to 100.</exception>
-        public int CachingProgress
+        public IObservable<int> CachingProgress
         {
-            get { return this.cachingProgress; }
-            protected set
-            {
-                if (value < 0)
-                    Throw.ArgumentOutOfRangeException(() => value, 0);
-
-                if (value > 100)
-                    Throw.ArgumentOutOfRangeException(() => value, 100);
-
-                if (this.cachingProgress != value)
-                {
-                    this.cachingProgress = value;
-                    this.CachingProgressChanged.RaiseSafe(this, EventArgs.Empty);
-                }
-            }
+            get { return this.cachingProgress.AsObservable(); }
         }
 
         public TimeSpan Duration { get; private set; }
@@ -106,7 +90,7 @@ namespace Espera.Core
 
                 if (this.isCached)
                 {
-                    this.CachingProgress = 100;
+                    this.OnCachingProgressChanged(100);
                     this.IsCaching = false;
                     this.CachingCompleted.RaiseSafe(this, EventArgs.Empty);
                 }
@@ -172,7 +156,7 @@ namespace Espera.Core
 
             this.StreamingPath = null;
             this.IsCached = false;
-            this.CachingProgress = 0;
+            this.OnCachingProgressChanged(0);
         }
 
         /// <summary>
@@ -228,6 +212,21 @@ namespace Espera.Core
         protected void OnCachingFailed(EventArgs e)
         {
             this.CachingFailed.RaiseSafe(this, e);
+        }
+
+        /// <summary>
+        /// Sets the caching progress in a range from 0 to 100.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">The value was not from 0 to 100.</exception>
+        protected void OnCachingProgressChanged(int value)
+        {
+            if (value < 0)
+                Throw.ArgumentOutOfRangeException(() => value, 0);
+
+            if (value > 100)
+                Throw.ArgumentOutOfRangeException(() => value, 100);
+
+            this.cachingProgress.OnNext(value);
         }
     }
 }

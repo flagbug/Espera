@@ -1,5 +1,6 @@
 ﻿using Espera.Core;
 using Rareform.Patterns.MVVM;
+using ReactiveUI;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -126,8 +127,8 @@ namespace Espera.View.ViewModels
                 if (bitmapImage != null)
                 {
                     this.thumbnail = bitmapImage;
-                    this.NotifyOfPropertyChange(() => this.Thumbnail);
-                    this.NotifyOfPropertyChange(() => this.HasThumbnail);
+                    this.RaisePropertyChanged(x => x.Thumbnail);
+                    this.RaisePropertyChanged(x => x.HasThumbnail);
                 }
 
                 worker.Dispose();

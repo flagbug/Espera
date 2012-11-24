@@ -80,9 +80,7 @@ namespace Espera.Core
                     var operation = new StreamCopyOperation(sourceStream, targetStream);
 
                     operation.CopyProgressChanged += (sender, e) =>
-                    {
-                        this.CachingProgress = (int)e.ProgressPercentage;
-                    };
+                        this.OnCachingProgressChanged((int)e.ProgressPercentage);
 
                     operation.Execute();
                 }
