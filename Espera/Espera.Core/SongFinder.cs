@@ -1,55 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using Rareform.Extensions;
+﻿using Rareform.Validation;
+using System;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace Espera.Core
 {
     public abstract class SongFinder<T> where T : Song
     {
-        private readonly List<T> songsFound;
+        private readonly Subject<T> songFound;
 
         protected SongFinder()
         {
-            this.songsFound = new List<T>();
+            this.songFound = new Subject<T>();
         }
 
-        /// <summary>
-        /// Occurs when the song crawler has finished.
-        /// </summary>
-        public event EventHandler Finished;
-
-        /// <summary>
-        /// Occurs when a song has been found.
-        /// </summary>
-        public event EventHandler<SongEventArgs> SongFound;
-
-        /// <summary>
-        /// Gets the songs that have been found.
-        /// </summary>
-        /// <value>The songs that have been found.</value>
-        public IEnumerable<T> SongsFound
+        public IObservable<T> SongFound
         {
-            get { return this.songsFound; }
+            get { return this.songFound.AsObservable(); }
         }
 
-        protected ICollection<T> InternSongsFound
+        public abstract void Execute();
+
+        protected void OnCompleted()
         {
-            get { return this.songsFound; }
+            this.songFound.OnCompleted();
         }
 
-        /// <summary>
-        /// Starts the <see cref="SongFinder{T}"/>.
-        /// </summary>
-        public abstract void Start();
-
-        protected virtual void OnFinished(EventArgs e)
+        protected void OnSongFound(T song)
         {
-            this.Finished.RaiseSafe(this, e);
-        }
+            if (song == null)
+                Throw.ArgumentNullException(() => song);
 
-        protected virtual void OnSongFound(SongEventArgs e)
-        {
-            this.SongFound.RaiseSafe(this, e);
+            this.songFound.OnNext(song);
         }
     }
 }

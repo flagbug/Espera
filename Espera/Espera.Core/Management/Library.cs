@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -727,31 +728,36 @@ namespace Espera.Core.Management
 
             var finder = new LocalSongFinder(path);
 
-            finder.SongFound += (sender, e) =>
-            {
-                if (this.abortSongAdding)
-                {
-                    finder.Abort();
-                    return;
-                }
+            int totalSongs = 0;
 
-                bool added;
+            finder.SongsFound.Subscribe(i => totalSongs = i);
 
-                lock (this.songLock)
+            finder.SongFound
+                .ForEach((song, i) =>
                 {
-                    lock (this.disposeLock)
+                    if (this.abortSongAdding)
                     {
-                        added = this.songs.Add(e.Song);
+                        finder.Abort();
+                        return;
                     }
-                }
 
-                if (added)
-                {
-                    this.SongAdded.RaiseSafe(this, new LibraryFillEventArgs(e.Song, finder.TagsProcessed, finder.CurrentTotalSongs));
-                }
-            };
+                    bool added;
 
-            finder.Start();
+                    lock (this.songLock)
+                    {
+                        lock (this.disposeLock)
+                        {
+                            added = this.songs.Add(song);
+                        }
+                    }
+
+                    if (added)
+                    {
+                        this.SongAdded.RaiseSafe(this, new LibraryFillEventArgs(song, i, totalSongs));
+                    }
+                });
+
+            finder.Execute();
         }
 
         private bool AwaitCaching(Song song)

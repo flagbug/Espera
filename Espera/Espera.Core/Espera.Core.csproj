@@ -105,7 +105,6 @@
     <Compile Include="Settings\ILibrarySettings.cs" />
     <Compile Include="Settings\LibrarySettingsWrapper.cs" />
     <Compile Include="Song.cs" />
-    <Compile Include="SongEventArgs.cs" />
     <Compile Include="LocalSongFinder.cs" />
     <Compile Include="SongFinder.cs" />
     <Compile Include="IVideoPlayerCallback.cs" />

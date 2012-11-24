@@ -4,6 +4,7 @@ using Espera.View.Properties;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace Espera.View.ViewModels
@@ -118,11 +119,11 @@ namespace Espera.View.ViewModels
             if (this.IsSearching || this.currentSongs == null)
             {
                 var finder = new YoutubeSongFinder(this.SearchText);
-                finder.Start();
+                finder.Execute();
 
                 this.IsSearching = false;
 
-                this.currentSongs = finder.SongsFound;
+                this.currentSongs = finder.SongFound.ToEnumerable();
             }
 
             this.SelectableSongs = currentSongs
