@@ -134,7 +134,7 @@ namespace Espera.Core
                 handler => scanner.FileFound -= handler)
                 .Select(x => x.EventArgs.File)
                 .Where(file => AllowedExtensions.Contains(file.Extension))
-                .ForEach(file =>
+                .Subscribe(file =>
                 {
                     if (this.abort)
                     {
@@ -150,6 +150,7 @@ namespace Espera.Core
                 });
 
             scanner.Start();
+
             this.isSearching = false;
         }
 

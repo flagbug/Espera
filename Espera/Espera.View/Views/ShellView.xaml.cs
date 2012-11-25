@@ -11,6 +11,9 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using ListView = System.Windows.Controls.ListView;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace Espera.View.Views
 {
@@ -46,7 +49,7 @@ namespace Espera.View.Views
             {
                 dialog.ShowDialog();
 
-                string selectedPath = dialog.SelectedPath;
+                string selectedPath = @"D:\Music\iTunes\iTunes Media\Music"; //dialog.SelectedPath;
 
                 if (!String.IsNullOrEmpty(selectedPath))
                 {

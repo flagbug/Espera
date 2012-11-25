@@ -4,9 +4,11 @@ using Espera.View.Properties;
 using MoreLinq;
 using Rareform.Patterns.MVVM;
 using Rareform.Validation;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Windows.Input;
 
 namespace Espera.View.ViewModels
@@ -28,7 +30,7 @@ namespace Espera.View.ViewModels
         {
             library.Updated += (sender, args) =>
             {
-                this.NotifyOfPropertyChange(() => this.Artists);
+                this.RaisePropertyChanged(x => x.Artists);
                 this.UpdateSelectableSongs();
             };
 
@@ -43,6 +45,9 @@ namespace Espera.View.ViewModels
             this.OrderByArtist();
 
             this.SelectedArtist = this.Artists.First();
+
+            this.WhenAny(x => x.SearchText, x => x.SelectedArtist, (p1, p2) => Unit.Default)
+                .Subscribe(x => this.UpdateSelectableSongs());
         }
 
         public int AlbumColumnWidth
@@ -96,7 +101,7 @@ namespace Espera.View.ViewModels
                         this.Library.RemoveFromLibrary(this.SelectedSongs.Select(song => song.Model));
 
                         this.UpdateSelectableSongs();
-                        this.NotifyOfPropertyChange(() => this.Artists);
+                        this.RaisePropertyChanged(x => x.Artists);
                     },
                     param => this.SelectedSongs != null
                         && this.SelectedSongs.Any()
@@ -108,33 +113,13 @@ namespace Espera.View.ViewModels
         public override string SearchText
         {
             get { return this.searchText; }
-            set
-            {
-                if (this.SearchText != value)
-                {
-                    this.searchText = value;
-
-                    this.NotifyOfPropertyChange(() => this.SearchText);
-
-                    this.UpdateSelectableSongs();
-                }
-            }
+            set { this.RaiseAndSetIfChanged(x => x.SearchText, value); }
         }
 
         public ArtistViewModel SelectedArtist
         {
             get { return this.selectedArtist; }
-            set
-            {
-                if (value != null && this.SelectedArtist != value)
-                {
-                    this.selectedArtist = value;
-
-                    this.NotifyOfPropertyChange(() => this.SelectedArtist);
-
-                    this.UpdateSelectableSongs();
-                }
-            }
+            set { this.RaiseAndSetIfChanged(x => x.SelectedArtist, value); }
         }
 
         public StatusViewModel StatusViewModel { get; private set; }
@@ -159,7 +144,7 @@ namespace Espera.View.ViewModels
                 if (e.Song.Artist != lastArtist)
                 {
                     lastArtist = e.Song.Artist;
-                    this.NotifyOfPropertyChange(() => this.Artists);
+                    this.RaisePropertyChanged(x => x.Artists);
                 }
             };
 
@@ -173,7 +158,7 @@ namespace Espera.View.ViewModels
                 {
                     this.Library.SongAdded -= handler;
 
-                    this.NotifyOfPropertyChange(() => this.Artists);
+                    this.RaisePropertyChanged(x => x.Artists);
                     this.StatusViewModel.Reset();
                 });
         }
@@ -258,7 +243,7 @@ namespace Espera.View.ViewModels
                 }
             }
 
-            this.NotifyOfPropertyChange(() => this.Artists);
+            this.RaisePropertyChanged(x => x.Artists);
 
             this.allArtistsViewModel.ArtistCount = artistInfos.Count;
 

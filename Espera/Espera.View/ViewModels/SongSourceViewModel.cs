@@ -1,7 +1,7 @@
-﻿using Caliburn.Micro;
-using Espera.Core.Management;
+﻿using Espera.Core.Management;
 using Rareform.Extensions;
 using Rareform.Patterns.MVVM;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal abstract class SongSourceViewModel<T> : PropertyChangedBase, ISongSourceViewModel
+    internal abstract class SongSourceViewModel<T> : ReactiveObject, ISongSourceViewModel
         where T : SongViewModelBase
     {
         private readonly Library library;
@@ -75,14 +75,7 @@ namespace Espera.View.ViewModels
         public IEnumerable<T> SelectableSongs
         {
             get { return this.selectableSongs; }
-            protected set
-            {
-                if (this.selectableSongs != value)
-                {
-                    this.selectableSongs = value;
-                    this.NotifyOfPropertyChange(() => this.SelectableSongs);
-                }
-            }
+            protected set { this.RaiseAndSetIfChanged(x => x.SelectableSongs, value); }
         }
 
         public IEnumerable<SongViewModelBase> SelectedSongs
@@ -90,12 +83,8 @@ namespace Espera.View.ViewModels
             get { return this.selectedSongs; }
             set
             {
-                if (this.selectedSongs != value)
-                {
-                    this.selectedSongs = value;
-                    this.NotifyOfPropertyChange(() => this.SelectedSongs);
-                    this.NotifyOfPropertyChange(() => this.IsSongSelected);
-                }
+                this.RaiseAndSetIfChanged(x => x.SelectedSongs, value);
+                this.RaisePropertyChanged(x => x.IsSongSelected);
             }
         }
 
@@ -104,7 +93,7 @@ namespace Espera.View.ViewModels
             get { return this.library; }
         }
 
-        protected Func<IEnumerable<T>, IOrderedEnumerable<T>> SongOrderFunc { get; set; }
+        protected Func<IEnumerable<T>, IOrderedEnumerable<T>> SongOrderFunc { get; private set; }
 
         protected void ApplyOrder(Func<SortOrder, Func<IEnumerable<T>, IOrderedEnumerable<T>>> orderFunc, ref SortOrder sortOrder)
         {

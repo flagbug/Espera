@@ -1,6 +1,7 @@
 ﻿using Espera.Core;
 using Espera.Core.Management;
 using Espera.View.Properties;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,14 +41,7 @@ namespace Espera.View.ViewModels
         public bool IsSearching
         {
             get { return this.isSearching; }
-            private set
-            {
-                if (this.IsSearching != value)
-                {
-                    this.isSearching = value;
-                    this.NotifyOfPropertyChange(() => this.IsSearching);
-                }
-            }
+            private set { this.RaiseAndSetIfChanged(x => x.IsSearching, value); }
         }
 
         public int LinkColumnWidth
@@ -65,14 +59,7 @@ namespace Espera.View.ViewModels
         public override string SearchText
         {
             get { return this.searchText; }
-            set
-            {
-                if (this.SearchText != value)
-                {
-                    this.searchText = value;
-                    this.NotifyOfPropertyChange(() => this.SearchText);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(x => x.SearchText, value); }
         }
 
         public int TitleColumnWidth
