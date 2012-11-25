@@ -244,10 +244,10 @@ namespace Espera.View.ViewModels
 
             foreach (ArtistViewModel artist in artistInfos.Values)
             {
-                if (this.artists.ContainsKey(artist.Name))
-                {
-                    ArtistViewModel updated = this.artists[artist.Name];
+                ArtistViewModel updated;
 
+                if (this.artists.TryGetValue(artist.Name, out updated))
+                {
                     updated.AlbumCount = artist.AlbumCount;
                     updated.SongCount = artist.SongCount;
                 }
