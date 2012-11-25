@@ -101,7 +101,6 @@ namespace Espera.View.ViewModels
                         this.Library.RemoveFromLibrary(this.SelectedSongs.Select(song => song.Model));
 
                         this.UpdateSelectableSongs();
-                        this.RaisePropertyChanged(x => x.Artists);
                     },
                     param => this.SelectedSongs != null
                         && this.SelectedSongs.Any()
