@@ -49,6 +49,7 @@ namespace Espera.View
             this.kernel.Bind<ILibraryReader>().To<LibraryFileReader>().WithConstructorArgument("sourcePath", FilePath);
             this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", FilePath);
             this.kernel.Bind<ILibrarySettings>().To<LibrarySettingsWrapper>();
+            this.kernel.Bind<IWindowManager>().To<WindowManager>();
         }
 
         protected override IEnumerable<object> GetAllInstances(Type serviceType)

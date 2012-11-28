@@ -25,7 +25,7 @@ namespace Espera.View.ViewModels
         private ObservableCollection<PlaylistViewModel> playlists;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
 
-        public ShellViewModel(Library library)
+        public ShellViewModel(Library library, IWindowManager windowManager)
         {
             this.library = library;
 
@@ -47,7 +47,7 @@ namespace Espera.View.ViewModels
                 this.library.SwitchToPlaylist(this.library.Playlists.First());
             }
 
-            this.AdministratorViewModel = new AdministratorViewModel(this.library);
+            this.AdministratorViewModel = new AdministratorViewModel(this.library, windowManager);
 
             this.LocalViewModel = new LocalViewModel(this.library);
             this.LocalViewModel.TimeoutWarning += (sender, e) => this.TriggerTimeoutWarning();
