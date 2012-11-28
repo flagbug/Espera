@@ -4,7 +4,8 @@
                       xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                       Title="Bug report"
                       Width="600"
-                      Height="400">
+                      Height="400"
+                      ResizeMode="NoResize">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -26,10 +27,11 @@
     <StackPanel Margin="10" Orientation="Vertical">
         <TextBlock Style="{StaticResource DescriptionHeaderStyle}" Text="Report a bug" />
         <TextBlock Style="{StaticResource DescriptionHeaderStyle2}" Text="You can send a bug report to help improving Espera" />
-        <TextBox Height="200"
+        <TextBox Height="225"
                  Margin="0, 15, 0, 0"
                  Controls:TextboxHelper.Watermark="Please enter a detailed description of the bug you encountered."
-                 Text="{Binding Path=Message, UpdateSourceTrigger=PropertyChanged}" />
+                 Text="{Binding Path=Message,
+                                UpdateSourceTrigger=PropertyChanged}" />
         <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
             <Button Command="{Binding Path=SubmitBugReport}" Content="Send" />
             <Button Margin="10, 0, 0, 0" Click="CancelButtonClick">
