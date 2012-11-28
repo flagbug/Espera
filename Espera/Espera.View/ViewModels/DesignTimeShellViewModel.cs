@@ -22,7 +22,7 @@ namespace Espera.View.ViewModels
         }
 
         public DesignTimeShellViewModel()
-            : base(Library)
+            : base(Library, new WindowManager())
         { }
     }
 }

@@ -13,15 +13,18 @@ namespace Espera.View.ViewModels
     public sealed class AdministratorViewModel : PropertyChangedBase
     {
         private readonly Library library;
+        private readonly IWindowManager windowManager;
         private bool isWrongPassword;
         private bool show;
 
-        public AdministratorViewModel(Library library)
+        public AdministratorViewModel(Library library, IWindowManager windowManager)
         {
             if (library == null)
                 Throw.ArgumentNullException(() => library);
 
             this.library = library;
+
+            this.windowManager = windowManager;
         }
 
         public ICommand ChangeToPartyCommand
@@ -104,11 +107,6 @@ namespace Espera.View.ViewModels
         public bool IsParty
         {
             get { return this.library.AccessMode == AccessMode.Party; }
-        }
-
-        public string IssuesPage
-        {
-            get { return "http://github.com/flagbug/Espera/issues"; }
         }
 
         public bool IsWrongPassword
@@ -217,6 +215,14 @@ namespace Espera.View.ViewModels
         {
             get { return (int)this.library.PlaylistTimeout.TotalSeconds; }
             set { this.library.PlaylistTimeout = TimeSpan.FromSeconds(value); }
+        }
+
+        public ICommand ReportBugCommand
+        {
+            get
+            {
+                return new RelayCommand(param => this.windowManager.ShowWindow(new BugReportViewModel()));
+            }
         }
 
         public bool Show
