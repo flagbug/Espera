@@ -155,6 +155,9 @@ namespace Espera.Core.Audio
 
         public override void Stop()
         {
+            if (this.wavePlayer == null)
+                return;
+
             this.wavePlayer.Stop();
 
             this.EnsureState(AudioPlayerState.Stopped);

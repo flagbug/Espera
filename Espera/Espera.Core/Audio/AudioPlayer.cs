@@ -57,6 +57,8 @@ namespace Espera.Core.Audio
         /// <remarks>
         /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Paused"/>
         /// before leaving the method.
+        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded, is stopped or is paused.
+        /// In this case it shouldn't perform any operation.
         /// </remarks>
         public abstract void Pause();
 
@@ -73,6 +75,12 @@ namespace Espera.Core.Audio
         /// <summary>
         /// Stops the playback of the <see cref="Song"/>.
         /// </summary>
+        /// <remarks>
+        /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Stopped"/>
+        /// before leaving the method.
+        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded, is stopped or is paused.
+        /// In this case it shouldn't perform any operation.
+        /// </remarks>
         public abstract void Stop();
 
         /// <summary>
