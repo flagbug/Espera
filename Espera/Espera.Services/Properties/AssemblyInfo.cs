@@ -1,20 +1,17 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Espera.Core")]
+[assembly: AssemblyTitle("Espera.Services")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Espera.Core")]
-[assembly: AssemblyCopyright("Copyright © 2012 Dennis Daume")]
+[assembly: AssemblyProduct("Espera.Services")]
+[assembly: AssemblyCopyright("Copyright ©  2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: InternalsVisibleTo("Espera.Core.Tests")]
-[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")] // Moq
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from
@@ -22,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("76317ba5-a287-4835-9de4-801aedb88ac1")]
+[assembly: Guid("4e4e42a1-518c-4c4e-82ba-085bd78b57a4")]
 
 // Version information for an assembly consists of the following four values:
 //

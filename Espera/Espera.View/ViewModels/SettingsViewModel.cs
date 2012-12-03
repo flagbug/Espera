@@ -12,15 +12,18 @@ namespace Espera.View.ViewModels
 {
     internal class SettingsViewModel : PropertyChangedBase
     {
-        private Library library;
+        private readonly Library library;
+        private readonly IWindowManager windowManager;
         private bool show;
 
-        public SettingsViewModel(Library library)
+        public SettingsViewModel(Library library, IWindowManager windowManager)
         {
             if (library == null)
                 Throw.ArgumentNullException(() => library);
 
             this.library = library;
+
+            this.windowManager = windowManager;
         }
 
         public ICommand ChangeAccentColorCommand
@@ -133,6 +136,14 @@ namespace Espera.View.ViewModels
         {
             get { return (int)this.library.PlaylistTimeout.TotalSeconds; }
             set { this.library.PlaylistTimeout = TimeSpan.FromSeconds(value); }
+        }
+
+        public ICommand ReportBugCommand
+        {
+            get
+            {
+                return new RelayCommand(param => this.windowManager.ShowWindow(new BugReportViewModel()));
+            }
         }
 
         public bool Show

@@ -25,7 +25,7 @@ namespace Espera.View.ViewModels
         private ObservableCollection<PlaylistViewModel> playlists;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
 
-        public ShellViewModel(Library library)
+        public ShellViewModel(Library library, IWindowManager windowManager)
         {
             this.library = library;
 
@@ -47,7 +47,7 @@ namespace Espera.View.ViewModels
                 this.library.SwitchToPlaylist(this.library.Playlists.First());
             }
 
-            this.SettingsViewModel = new SettingsViewModel(this.library);
+            this.SettingsViewModel = new SettingsViewModel(this.library, windowManager);
             this.AdministratorViewModel = new AdministratorViewModel(this.library);
 
             this.LocalViewModel = new LocalViewModel(this.library);
@@ -616,9 +616,6 @@ namespace Espera.View.ViewModels
 
         public YoutubeViewModel YoutubeViewModel { get; private set; }
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
         public void Dispose()
         {
             Settings.Default.Save();

@@ -10,7 +10,6 @@ namespace Espera.View.ViewModels
     {
         private readonly Library library;
         private bool isWrongPassword;
-        private bool show;
 
         public AdministratorViewModel(Library library)
         {

@@ -221,7 +221,6 @@
                            Text="artists" />
                 <ListBox Grid.Row="1"
                          DataContext="{Binding Path=LocalViewModel}"
-                         IsSynchronizedWithCurrentItem="True"
                          ItemsSource="{Binding Path=Artists}"
                          SelectedItem="{Binding Path=SelectedArtist}">
                     <ListBox.ItemTemplate>

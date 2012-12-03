@@ -1,0 +1,73 @@
+﻿<Controls:MetroWindow x:Class="Espera.View.Views.CrashView"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      Title="Espera crashed"
+                      Width="600"
+                      Height="400"
+                      ResizeMode="NoResize">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colours.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="DescriptionHeaderStyle" TargetType="{x:Type TextBlock}">
+                <Setter Property="FontSize" Value="36" />
+                <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
+            </Style>
+            <Style x:Key="DescriptionHeaderStyle2" TargetType="{x:Type TextBlock}">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+    <StackPanel Margin="10" Orientation="Vertical">
+        <TextBlock Style="{StaticResource DescriptionHeaderStyle}" Text="Sorry, Espera has crashed :(" />
+        <TextBlock Style="{StaticResource DescriptionHeaderStyle2}" Text="You can send a crash report to help improving Espera" />
+        <Expander Margin="0, 10, 0, 0" Header="Show details">
+            <TextBox Height="200"
+                     Margin="0, 5, 0, 0"
+                     IsReadOnly="True"
+                     Text="{Binding Path=ReportContent,
+                                    Mode=OneTime}" />
+        </Expander>
+        <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
+            <Button Command="{Binding Path=SubmitCrashReport}" Content="Send" />
+            <Button Margin="10, 0, 0, 0" Click="CancelButtonClick">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=SendingSucceeded}" Value="{x:Null}">
+                                <Setter Property="Content" Value="Cancel" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=SendingSucceeded}" Value="True">
+                                <Setter Property="Content" Value="Close" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <TextBlock Margin="10, 0, 0, 0" VerticalAlignment="Center">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=SendingSucceeded}" Value="False">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Setter Property="Text" Value="Sending failed" />
+                                <Setter Property="Foreground" Value="Red" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=SendingSucceeded}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Setter Property="Text" Value="Sending succeeded" />
+                                <Setter Property="Foreground" Value="Green" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </StackPanel>
+    </StackPanel>
+</Controls:MetroWindow>

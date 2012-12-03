@@ -1,3 +1,26 @@
+----------------------------------- v1.6.2 -----------------------------------
+
+BUGIXES:
+- Fixed a bug, that caused the application to crash when performing operations 
+  that stop a local song.
+
+----------------------------------- v1.6.1 -----------------------------------
+
+BUGFIXES:
+- Fixed a problem with the updater.
+
+----------------------------------- v1.6.0 -----------------------------------
+
+FEATURES:
+- A crash of the application now opens a window to report the crash.
+- The bug reporting doesn't require a signup at GitHub anymore, but opens a 
+  window to report a bug with one click.
+
+IMPROVEMENTS:
+- Improved the overall playback performance of local songs.
+- Improved the local search performance.
+- Smoothened the caching progress of YouTube videos.
+
 ----------------------------------- v1.5.0 -----------------------------------
 
 FEATURES:
