@@ -64,6 +64,14 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void CanPlayNextSong_PlaylistIsEmpty_ReturnsFalse()
+        {
+            var playlist = new Playlist("Playlist");
+
+            Assert.IsFalse(playlist.CanPlayNextSong);
+        }
+
+        [Test]
         public void CanPlayPreviousSong_CurrentSongIndexIsNull_ReturnsFalse()
         {
             Song[] songs = Helpers.SetupSongMocks(4);
@@ -92,6 +100,14 @@ namespace Espera.Core.Tests
             Playlist playlist = Helpers.SetupPlaylist(songs);
 
             playlist.CurrentSongIndex = 0;
+
+            Assert.IsFalse(playlist.CanPlayPreviousSong);
+        }
+
+        [Test]
+        public void CanPlayPreviousSong_PlaylistIsEmpty_ReturnsFalse()
+        {
+            var playlist = new Playlist("Playlist");
 
             Assert.IsFalse(playlist.CanPlayPreviousSong);
         }
