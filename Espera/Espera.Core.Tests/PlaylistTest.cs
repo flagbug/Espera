@@ -113,6 +113,15 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void CurrentSongIndexSetter_PlaylistIsEmptyAndSetToNull_Passes()
+        {
+            new Playlist("Playlist")
+            {
+                CurrentSongIndex = null
+            };
+        }
+
+        [Test]
         public void CurrentSongIndexSetter_PlaylistIsEmptyAndSetToZero_ThrowsArgumentOutOfRangeException()
         {
             var playlist = new Playlist("Playlist");
