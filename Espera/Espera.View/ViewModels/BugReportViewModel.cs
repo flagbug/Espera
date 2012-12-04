@@ -2,14 +2,21 @@
 using Espera.Services;
 using Rareform.Patterns.MVVM;
 using System;
+using System.Reflection;
 using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
     internal class BugReportViewModel : PropertyChangedBase
     {
+        private readonly string version;
         private string message;
         private bool? sendingSucceeded;
+
+        public BugReportViewModel()
+        {
+            this.version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        }
 
         public string Message
         {
@@ -47,7 +54,7 @@ namespace Espera.View.ViewModels
                     {
                         try
                         {
-                            FogBugzService.SubmitCrashReport(this.Message, String.Empty);
+                            FogBugzService.SubmitCrashReport("Version " + this.version + "\n\n" + this.Message, String.Empty);
 
                             this.SendingSucceeded = true;
                         }

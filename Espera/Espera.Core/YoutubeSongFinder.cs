@@ -25,11 +25,11 @@ namespace Espera.Core
         public override void Execute()
         {
             var query = new YouTubeQuery(YouTubeQuery.DefaultVideoUri)
-                            {
-                                OrderBy = "relevance",
-                                Query = searchString,
-                                SafeSearch = YouTubeQuery.SafeSearchValues.None
-                            };
+            {
+                OrderBy = "relevance",
+                Query = searchString,
+                SafeSearch = YouTubeQuery.SafeSearchValues.None
+            };
 
             var settings = new YouTubeRequestSettings("Espera", ApiKey);
             var request = new YouTubeRequest(settings);

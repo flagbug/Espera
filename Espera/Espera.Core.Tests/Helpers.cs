@@ -61,13 +61,8 @@ namespace Espera.Core.Tests
             return library;
         }
 
-        public static Mock<Song> CreateSongMock(string name = "Song", bool callBase = false, AudioType audioType = AudioType.Mp3, TimeSpan? duration = null)
+        public static Mock<Song> CreateSongMock(string name = "Song", bool callBase = false, AudioType audioType = AudioType.Mp3, TimeSpan duration = new TimeSpan())
         {
-            if (duration == null)
-            {
-                duration = TimeSpan.Zero;
-            }
-
             return new Mock<Song>(name, audioType, duration) { CallBase = callBase };
         }
 
@@ -110,7 +105,7 @@ namespace Espera.Core.Tests
                 "</Root>";
         }
 
-        public static Song SetupSongMock(string name = "Song", bool callBase = false, AudioType audioType = AudioType.Mp3, TimeSpan? duration = null)
+        public static Song SetupSongMock(string name = "Song", bool callBase = false, AudioType audioType = AudioType.Mp3, TimeSpan duration = new TimeSpan())
         {
             return CreateSongMock(name, callBase, audioType, duration).Object;
         }

@@ -12,6 +12,7 @@ namespace Espera.Core.Management
     /// </summary>
     public sealed class Playlist : IEnumerable<Song>
     {
+        private int? currentSongIndex;
         private Dictionary<int, Song> playlist;
 
         internal Playlist(string name)
@@ -46,20 +47,37 @@ namespace Espera.Core.Management
         /// Gets the index of the currently played song in the playlist.
         /// </summary>
         /// <value>
-        /// The index of the currently played song in the playlist. Null, if no song is currently played.
+        /// The index of the currently played song in the playlist. <c>null</c>, if no song is currently played.
         /// </value>
-        public int? CurrentSongIndex { get; internal set; }
+        /// <exception cref="ArgumentOutOfRangeException">The value is not in the range of the playlist's indexes.</exception>
+        public int? CurrentSongIndex
+        {
+            get { return this.currentSongIndex; }
+            internal set
+            {
+                if (value != null && !this.playlist.ContainsKey(value.Value))
+                    Throw.ArgumentOutOfRangeException(() => value);
+
+                this.currentSongIndex = value;
+            }
+        }
 
         public string Name { get; set; }
 
         public Song this[int index]
         {
-            get { return this.playlist[index]; }
-        }
+            get
+            {
+                if (index < 0)
+                    Throw.ArgumentOutOfRangeException(() => index, 0);
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+                int maxIndex = this.playlist.Keys.Max();
+
+                if (index > maxIndex)
+                    Throw.ArgumentOutOfRangeException(() => index, maxIndex);
+
+                return this.playlist[index];
+            }
         }
 
         /// <summary>
@@ -89,6 +107,11 @@ namespace Espera.Core.Management
                 .Where(entry => songs.Contains(entry.Value))
                 .Select(entry => entry.Key)
                 .ToList();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         /// <summary>

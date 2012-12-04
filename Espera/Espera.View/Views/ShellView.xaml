@@ -877,6 +877,9 @@
                                 <Button Background="#CCB400FF"
                                         Click="PurpleColorButtonButtonClick"
                                         Style="{StaticResource ColorPickerButtonStyle}" />
+                                <Button Background="#FFDE872A"
+                                        Click="OrangeColorButtonButtonClick"
+                                        Style="{StaticResource ColorPickerButtonStyle}" />
                             </StackPanel>
                             <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="party mode" />
                             <CheckBox IsChecked="{Binding Path=LockPlayPause}">
