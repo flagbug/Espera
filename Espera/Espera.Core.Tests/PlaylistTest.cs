@@ -182,10 +182,9 @@ namespace Espera.Core.Tests
 
             playlist.InsertMove(3, 1);
 
-            Assert.AreEqual(songs[0], playlist[0]);
-            Assert.AreEqual(songs[3], playlist[1]);
-            Assert.AreEqual(songs[1], playlist[2]);
-            Assert.AreEqual(songs[2], playlist[3]);
+            var expected = new[] { songs[0], songs[3], songs[1], songs[2], songs[4] };
+
+            Assert.IsTrue(playlist.SequenceEqual(expected));
         }
 
         [Test]
