@@ -46,7 +46,7 @@ namespace Espera.Core.Management
         /// Gets the index of the currently played song in the playlist.
         /// </summary>
         /// <value>
-        /// The index of the currently played song in the playlist. Null, if no song is currently played.
+        /// The index of the currently played song in the playlist. <c>null</c>, if no song is currently played.
         /// </value>
         public int? CurrentSongIndex { get; internal set; }
 
@@ -54,12 +54,18 @@ namespace Espera.Core.Management
 
         public Song this[int index]
         {
-            get { return this.playlist[index]; }
-        }
+            get
+            {
+                if (index < 0)
+                    Throw.ArgumentOutOfRangeException(() => index, 0);
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+                int maxIndex = this.playlist.Keys.Max();
+
+                if (index > maxIndex)
+                    Throw.ArgumentOutOfRangeException(() => index, maxIndex);
+
+                return this.playlist[index];
+            }
         }
 
         /// <summary>
@@ -89,6 +95,11 @@ namespace Espera.Core.Management
                 .Where(entry => songs.Contains(entry.Value))
                 .Select(entry => entry.Key)
                 .ToList();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         /// <summary>
