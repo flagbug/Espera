@@ -113,6 +113,23 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void CurrentSongIndexSetter_PlaylistIsEmptyAndSetToZero_ThrowsArgumentOutOfRangeException()
+        {
+            var playlist = new Playlist("Playlist");
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex = 0);
+        }
+
+        [Test]
+        public void CurrentSongIndexSetter_ValueIsNotInPlaylistRange_ThrowsArgumentOutOfRangeException()
+        {
+            Song[] songs = Helpers.SetupSongMocks(3);
+            Playlist playlist = Helpers.SetupPlaylist(songs);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex = 3);
+        }
+
+        [Test]
         public void GetIndexes_MultipleSongs_ReturnsCorrectIndexes()
         {
             Song[] songs = Helpers.SetupSongMocks(3, true);

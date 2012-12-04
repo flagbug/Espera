@@ -12,6 +12,7 @@ namespace Espera.Core.Management
     /// </summary>
     public sealed class Playlist : IEnumerable<Song>
     {
+        private int? currentSongIndex;
         private Dictionary<int, Song> playlist;
 
         internal Playlist(string name)
@@ -48,7 +49,18 @@ namespace Espera.Core.Management
         /// <value>
         /// The index of the currently played song in the playlist. <c>null</c>, if no song is currently played.
         /// </value>
-        public int? CurrentSongIndex { get; internal set; }
+        /// <exception cref="ArgumentOutOfRangeException">The value is not in the range of the playlist's indexes.</exception>
+        public int? CurrentSongIndex
+        {
+            get { return this.currentSongIndex; }
+            set
+            {
+                if (value != null && !this.playlist.ContainsKey(value.Value))
+                    Throw.ArgumentOutOfRangeException(() => value);
+
+                this.currentSongIndex = value;
+            }
+        }
 
         public string Name { get; set; }
 
