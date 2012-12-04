@@ -32,11 +32,11 @@ namespace Espera.Core
         public override void Start()
         {
             var query = new YouTubeQuery(YouTubeQuery.DefaultVideoUri)
-                            {
-                                OrderBy = "relevance",
-                                Query = searchString,
-                                SafeSearch = YouTubeQuery.SafeSearchValues.None
-                            };
+            {
+                OrderBy = "relevance",
+                Query = searchString,
+                SafeSearch = YouTubeQuery.SafeSearchValues.None
+            };
 
             var settings = new YouTubeRequestSettings("Espera", ApiKey);
             var request = new YouTubeRequest(settings);
@@ -50,13 +50,13 @@ namespace Espera.Core
                     .Replace("https://", "http://"); /* VLC doesn't like https */
 
                 var song = new YoutubeSong(url, AudioType.Mp3, duration, CoreSettings.Default.StreamYoutube)
-                               {
-                                   Title = video.Title,
-                                   Description = video.Description,
-                                   Rating = video.RatingAverage >= 1 ? video.RatingAverage : (double?)null,
-                                   ThumbnailSource = new Uri(video.Thumbnails[0].Url),
-                                   Views = video.ViewCount
-                               };
+                {
+                    Title = video.Title,
+                    Description = video.Description,
+                    Rating = video.RatingAverage >= 1 ? video.RatingAverage : (double?)null,
+                    ThumbnailSource = new Uri(video.Thumbnails[0].Url),
+                    Views = video.ViewCount
+                };
 
                 this.InternSongsFound.Add(song);
 
