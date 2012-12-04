@@ -1,5 +1,8 @@
 ----------------------------------- v1.6.3 -----------------------------------
 
+FEATURES:
+- New color: orange.
+
 IMPROVEMENTS:
 - A bug- and crash report now also sends the application version.
 
