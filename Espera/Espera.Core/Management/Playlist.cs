@@ -53,7 +53,7 @@ namespace Espera.Core.Management
         public int? CurrentSongIndex
         {
             get { return this.currentSongIndex; }
-            set
+            internal set
             {
                 if (value != null && !this.playlist.ContainsKey(value.Value))
                     Throw.ArgumentOutOfRangeException(() => value);
