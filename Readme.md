@@ -38,7 +38,7 @@ very clean look.
 
 Espera is written in C#, with WPF as frontend.
 
-If you want to contribute to Espera, just send me a pull request at [GitHub](https://github.com/flagbug/Espera)!
+If you want to contribute to Espera, just send me a pull request!
 
 ### License
 
