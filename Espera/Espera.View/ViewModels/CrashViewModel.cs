@@ -2,6 +2,7 @@
 using Espera.Services;
 using Rareform.Patterns.MVVM;
 using System;
+using System.Reflection;
 using System.Windows.Input;
 
 namespace Espera.View.ViewModels
@@ -9,16 +10,18 @@ namespace Espera.View.ViewModels
     internal class CrashViewModel : PropertyChangedBase
     {
         private readonly Exception exception;
+        private readonly string version;
         private bool? sendingSucceeded;
 
         public CrashViewModel(Exception exception)
         {
             this.exception = exception;
+            this.version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
 
         public string ReportContent
         {
-            get { return this.exception.Message + "\n\n" + exception.StackTrace; }
+            get { return "Version " + this.version + "\n\n" + this.exception.Message + "\n\n" + exception.StackTrace; }
         }
 
         public bool? SendingSucceeded
