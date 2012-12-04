@@ -46,12 +46,16 @@ Espera is released under the [MIT-License](http://opensource.org/licenses/mit-li
 
 ### Used libraries
 
-- [Rareform](http://github.com/flagbug/Rareform)
-- [YoutubeExtractor](http://github.com/flagbug/YoutubeExtractor)
-- [MahApps.Metro](http://github.com/flagbug/MahApps.Metro)
-- [NAudio](http://naudio.codeplex.com)
-- [Taglib#](http://github.com/mono/taglib-sharp)
+- [Rareform](http://github.com/flagbug/Rareform/)
+- [YoutubeExtractor](http://github.com/flagbug/YoutubeExtractor/)
+- [MahApps.Metro](http://github.com/flagbug/MahApps.Metro/)
+- [NAudio](http://naudio.codeplex.com/)
+- [Taglib#](http://github.com/mono/taglib-sharp/)
 - [Moq](http://code.google.com/p/moq/)
+- [Caliburn.Mirco](http://caliburnmicro.codeplex.com/)
+- [NUnit](http://www.nunit.org/)
+- [Ninject](http://www.ninject.org/)
+- [MoreLinq](http://code.google.com/p/morelinq/)
 
 ## Screenshot
 
