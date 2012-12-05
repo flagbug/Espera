@@ -95,6 +95,7 @@ namespace Espera.View.Views
         private void LoginButtonClick(object sender, RoutedEventArgs e)
         {
             ICommand command = this.shellViewModel.AdministratorViewModel.LoginCommand;
+
             if (command.CanExecute(null))
             {
                 command.Execute(null);

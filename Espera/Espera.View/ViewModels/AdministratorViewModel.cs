@@ -1,20 +1,26 @@
 ﻿using Caliburn.Micro;
 using Espera.Core.Management;
 using Espera.View.Properties;
-using Rareform.Patterns.MVVM;
 using Rareform.Validation;
+using ReactiveUI;
+using ReactiveUI.Xaml;
 using System;
 using System.Diagnostics;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Reflection;
-using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    public sealed class AdministratorViewModel : PropertyChangedBase
+    public sealed class AdministratorViewModel : ReactiveObject
     {
+        private readonly ObservableAsPropertyHelper<bool> canCreateAdmin;
         private readonly Library library;
         private readonly IWindowManager windowManager;
+        private ObservableAsPropertyHelper<bool> canLogin;
+        private string creationPassword;
         private bool isWrongPassword;
+        private string loginPassword;
         private bool show;
 
         public AdministratorViewModel(Library library, IWindowManager windowManager)
@@ -25,44 +31,77 @@ namespace Espera.View.ViewModels
             this.library = library;
 
             this.windowManager = windowManager;
-        }
 
-        public ICommand ChangeToPartyCommand
-        {
-            get
+            this.ChangeToPartyCommand = new ReactiveCommand(this.WhenAny(x => x.IsAdminCreated, x => x.Value));
+            this.ChangeToPartyCommand.Subscribe(p => this.library.ChangeToParty());
+
+            this.canCreateAdmin = this.WhenAny
+            (
+                x => x.CreationPassword,
+                x => !string.IsNullOrWhiteSpace(x.Value) && !this.IsAdminCreated
+            )
+            .ToProperty(this, x => x.CanCreateAdmin);
+
+            this.CreateAdminCommand = new ReactiveCommand(this.canCreateAdmin,
+                ImmediateScheduler.Instance); // Immediate execution, because we set the password to an empty string afterwards
+            this.CreateAdminCommand.Subscribe(p =>
             {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        this.library.ChangeToParty();
-                        this.NotifyOfPropertyChange(() => this.IsParty);
-                        this.NotifyOfPropertyChange(() => this.IsAdmin);
-                    },
-                    param => this.IsAdminCreated
-                );
-            }
-        }
+                this.library.CreateAdmin(this.CreationPassword);
 
-        public ICommand CreateAdminCommand
-        {
-            get
+                this.RaisePropertyChanged(x => x.IsAdminCreated);
+            });
+
+            this.canLogin = this.WhenAny(x => x.LoginPassword, x => !string.IsNullOrWhiteSpace(x.Value))
+                .ToProperty(this, x => x.CanLogin);
+
+            this.LoginCommand = new ReactiveCommand(this.canLogin,
+                ImmediateScheduler.Instance); // Immediate execution, because we set the password to an empty string afterwards
+            this.LoginCommand.Subscribe(p =>
             {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        this.library.CreateAdmin(this.CreationPassword);
+                try
+                {
+                    this.library.ChangeToAdmin(this.LoginPassword);
+                    this.IsWrongPassword = false;
+                }
 
-                        this.NotifyOfPropertyChange(() => this.IsAdminCreated);
-                        this.NotifyOfPropertyChange(() => this.IsAdmin);
-                    },
-                    param => !string.IsNullOrWhiteSpace(this.CreationPassword) && !this.IsAdminCreated
-                );
-            }
+                catch (WrongPasswordException)
+                {
+                    this.IsWrongPassword = true;
+                }
+            });
+
+            this.OpenLinkCommand = new ReactiveCommand();
+            this.OpenLinkCommand.Subscribe(p => Process.Start((string)p));
+
+            this.ReportBugCommand = new ReactiveCommand();
+            this.ReportBugCommand.Subscribe(p => this.windowManager.ShowWindow(new BugReportViewModel()));
+
+            Observable.Merge(this.ChangeToPartyCommand, this.CreateAdminCommand, this.LoginCommand)
+                .Subscribe(p => this.RaisePropertyChanged(x => x.IsAdmin));
+
+            Observable.Merge(this.ChangeToPartyCommand, this.LoginCommand)
+                .Subscribe(p => this.RaisePropertyChanged(x => x.IsParty));
         }
 
-        public string CreationPassword { get; set; }
+        public bool CanCreateAdmin
+        {
+            get { return this.canCreateAdmin.Value; }
+        }
+
+        public bool CanLogin
+        {
+            get { return this.canLogin.Value; }
+        }
+
+        public IReactiveCommand ChangeToPartyCommand { get; private set; }
+
+        public IReactiveCommand CreateAdminCommand { get; private set; }
+
+        public string CreationPassword
+        {
+            get { return this.creationPassword; }
+            set { this.RaiseAndSetIfChanged(x => x.CreationPassword, value); }
+        }
 
         public string DonationPage
         {
@@ -78,7 +117,7 @@ namespace Espera.View.ViewModels
                 {
                     this.library.EnablePlaylistTimeout = value;
 
-                    this.NotifyOfPropertyChange(() => this.EnablePlaylistTimeout);
+                    this.RaisePropertyChanged(x => x.EnablePlaylistTimeout);
                 }
             }
         }
@@ -112,14 +151,7 @@ namespace Espera.View.ViewModels
         public bool IsWrongPassword
         {
             get { return this.isWrongPassword; }
-            set
-            {
-                if (this.IsWrongPassword != value)
-                {
-                    this.isWrongPassword = value;
-                    this.NotifyOfPropertyChange(() => this.IsWrongPassword);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(x => x.IsWrongPassword, value); }
         }
 
         public bool LockLibraryRemoval
@@ -166,50 +198,20 @@ namespace Espera.View.ViewModels
                 if (this.LockWindow != value)
                 {
                     Settings.Default.LockWindow = value;
-                    this.NotifyOfPropertyChange(() => this.LockWindow);
+                    this.RaisePropertyChanged(x => x.LockWindow);
                 }
             }
         }
 
-        public ICommand LoginCommand
+        public IReactiveCommand LoginCommand { get; private set; }
+
+        public string LoginPassword
         {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        try
-                        {
-                            this.library.ChangeToAdmin(this.LoginPassword);
-                            this.IsWrongPassword = false;
-                        }
-
-                        catch (WrongPasswordException)
-                        {
-                            this.IsWrongPassword = true;
-                        }
-
-                        this.NotifyOfPropertyChange(() => this.IsAdmin);
-                        this.NotifyOfPropertyChange(() => this.IsParty);
-                    },
-                    param => !string.IsNullOrWhiteSpace(this.LoginPassword)
-                );
-            }
+            get { return this.loginPassword; }
+            set { this.RaiseAndSetIfChanged(x => x.LoginPassword, value); }
         }
 
-        public string LoginPassword { get; set; }
-
-        public ICommand OpenLinkCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param => Process.Start((string)param)
-                );
-            }
-        }
+        public IReactiveCommand OpenLinkCommand { get; private set; }
 
         public int PlaylistTimeout
         {
@@ -217,25 +219,12 @@ namespace Espera.View.ViewModels
             set { this.library.PlaylistTimeout = TimeSpan.FromSeconds(value); }
         }
 
-        public ICommand ReportBugCommand
-        {
-            get
-            {
-                return new RelayCommand(param => this.windowManager.ShowWindow(new BugReportViewModel()));
-            }
-        }
+        public IReactiveCommand ReportBugCommand { get; private set; }
 
         public bool Show
         {
             get { return this.show; }
-            set
-            {
-                if (this.Show != value)
-                {
-                    this.show = value;
-                    this.NotifyOfPropertyChange(() => this.Show);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(x => x.Show, value); }
         }
 
         public bool StreamYoutube
