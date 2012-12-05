@@ -37,7 +37,7 @@ namespace Espera.View.ViewModels
 
         public int CacheProgress
         {
-            get { return this.cachingProgress.Value; }
+            get { return this.cachingProgress == null ? 0 : this.cachingProgress.Value; }
         }
 
         public bool HasCachingFailed

@@ -14,7 +14,7 @@ namespace Espera.View.ViewModels
         private readonly Func<string, bool> renameRequest;
         private bool editName;
         private string saveName;
-        private int? songCount;
+        private int songCount;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlaylistViewModel"/> class.
@@ -25,6 +25,7 @@ namespace Espera.View.ViewModels
         {
             this.playlist = playlist;
             this.renameRequest = renameRequest;
+            this.songCount = -1;
         }
 
         public bool EditName
@@ -68,15 +69,15 @@ namespace Espera.View.ViewModels
             get
             {
                 // We use this to get a value, even if the Songs property hasn't been called
-                if (songCount == null)
+                if (songCount == -1)
                 {
                     return this.Songs.Count();
                 }
 
-                return songCount.Value;
+                return songCount;
             }
 
-            set { this.RaiseAndSetIfChanged(x => x.SongCount, value); }
+            private set { this.RaiseAndSetIfChanged(x => x.SongCount, value); }
         }
 
         public IEnumerable<PlaylistEntryViewModel> Songs
