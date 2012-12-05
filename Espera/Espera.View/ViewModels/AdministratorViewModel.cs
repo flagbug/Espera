@@ -99,7 +99,7 @@ namespace Espera.View.ViewModels
 
         public string CreationPassword
         {
-            get { return this.creationPassword; }
+            private get { return this.creationPassword; }
             set { this.RaiseAndSetIfChanged(x => x.CreationPassword, value); }
         }
 
@@ -207,7 +207,7 @@ namespace Espera.View.ViewModels
 
         public string LoginPassword
         {
-            get { return this.loginPassword; }
+            private get { return this.loginPassword; }
             set { this.RaiseAndSetIfChanged(x => x.LoginPassword, value); }
         }
 
