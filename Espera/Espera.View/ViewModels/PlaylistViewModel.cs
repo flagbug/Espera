@@ -1,6 +1,6 @@
-﻿using Caliburn.Micro;
-using Espera.Core.Management;
+﻿using Espera.Core.Management;
 using Rareform.Reflection;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,13 +8,12 @@ using System.Linq;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class PlaylistViewModel : PropertyChangedBase, IDataErrorInfo
+    internal sealed class PlaylistViewModel : ReactiveObject, IDataErrorInfo
     {
         private readonly Playlist playlist;
         private readonly Func<string, bool> renameRequest;
         private bool editName;
         private string saveName;
-
         private int? songCount;
 
         /// <summary>
@@ -48,7 +47,7 @@ namespace Espera.View.ViewModels
                         this.saveName = null;
                     }
 
-                    this.NotifyOfPropertyChange(() => this.EditName);
+                    this.RaisePropertyChanged(x => x.EditName);
                 }
             }
         }
@@ -61,14 +60,7 @@ namespace Espera.View.ViewModels
         public string Name
         {
             get { return this.playlist.Name; }
-            set
-            {
-                if (this.Name != value)
-                {
-                    this.playlist.Name = value;
-                    this.NotifyOfPropertyChange(() => this.Name);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(x => x.Name, value); }
         }
 
         public int SongCount
@@ -84,14 +76,7 @@ namespace Espera.View.ViewModels
                 return songCount.Value;
             }
 
-            set
-            {
-                if (this.songCount != value)
-                {
-                    this.songCount = value;
-                    this.NotifyOfPropertyChange(() => this.SongCount);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(x => x.SongCount, value); }
         }
 
         public IEnumerable<PlaylistEntryViewModel> Songs

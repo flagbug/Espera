@@ -1,8 +1,8 @@
-﻿using Caliburn.Micro;
+﻿using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class ArtistViewModel : PropertyChangedBase
+    internal sealed class ArtistViewModel : ReactiveObject
     {
         private int? albumCount;
         private int? artistCount;
@@ -24,27 +24,13 @@ namespace Espera.View.ViewModels
         public int? AlbumCount
         {
             get { return this.albumCount; }
-            set
-            {
-                if (this.AlbumCount != value)
-                {
-                    this.albumCount = value;
-                    this.NotifyOfPropertyChange(() => this.AlbumCount);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(x => x.AlbumCount, value); }
         }
 
         public int? ArtistCount
         {
             get { return this.artistCount; }
-            set
-            {
-                if (this.ArtistCount != value)
-                {
-                    this.artistCount = value;
-                    this.NotifyOfPropertyChange(() => this.ArtistCount);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(x => x.ArtistCount, value); }
         }
 
         public bool IsAllArtists { get; private set; }
@@ -54,14 +40,7 @@ namespace Espera.View.ViewModels
         public int? SongCount
         {
             get { return this.songCount; }
-            set
-            {
-                if (this.SongCount != value)
-                {
-                    this.songCount = value;
-                    this.NotifyOfPropertyChange(() => this.SongCount);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(x => x.SongCount, value); }
         }
     }
 }
