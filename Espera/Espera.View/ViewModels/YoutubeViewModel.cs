@@ -5,14 +5,13 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace Espera.View.ViewModels
 {
     internal sealed class YoutubeViewModel : SongSourceViewModel<YoutubeSongViewModel>
     {
-        private IEnumerable<YoutubeSong> currentSongs;
+        private List<YoutubeSong> currentSongs;
         private SortOrder durationOrder;
         private bool isSearching;
         private SortOrder ratingOrder;
@@ -103,17 +102,20 @@ namespace Espera.View.ViewModels
 
         private void UpdateSelectableSongs()
         {
+            this.currentSongs = new List<YoutubeSong>();
+
             if (this.IsSearching || this.currentSongs == null)
             {
                 var finder = new YoutubeSongFinder(this.SearchText);
+
+                finder.SongFound.Subscribe(currentSongs.Add);
+
                 finder.Execute();
 
                 this.IsSearching = false;
-
-                this.currentSongs = finder.SongFound.ToEnumerable();
             }
 
-            this.SelectableSongs = currentSongs
+            this.SelectableSongs = this.currentSongs
                 .Select(song => new YoutubeSongViewModel(song))
                 .OrderBy(this.SongOrderFunc)
                 .ToList();
