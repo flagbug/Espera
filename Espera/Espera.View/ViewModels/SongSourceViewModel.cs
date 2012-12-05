@@ -1,10 +1,11 @@
 ﻿using Espera.Core.Management;
 using Rareform.Extensions;
-using Rareform.Patterns.MVVM;
 using ReactiveUI;
+using ReactiveUI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Windows.Input;
 
 namespace Espera.View.ViewModels
@@ -20,40 +21,38 @@ namespace Espera.View.ViewModels
         {
             this.library = library;
             this.selectableSongs = Enumerable.Empty<T>();
+
+            this.WhenAny(x => x.SelectedSongs, x => Unit.Default)
+                .Subscribe(p => this.RaisePropertyChanged(x => x.IsSongSelected));
+
+            IObservable<bool> canAddToPlaylist = this.WhenAny(x => x.SelectedSongs, x => x.Value != null && x.Value.Any());
+            var addToPlaylistCommand = new ReactiveCommand(canAddToPlaylist);
+            this.AddToPlaylistCommand = addToPlaylistCommand;
+            addToPlaylistCommand.Subscribe(p =>
+            {
+                if (!this.Library.CanAddSongToPlaylist)
+                {
+                    // Trigger the animation
+                    this.TimeoutWarning.RaiseSafe(this, EventArgs.Empty);
+
+                    return;
+                }
+
+                if (this.IsAdmin)
+                {
+                    this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model));
+                }
+
+                else
+                {
+                    this.library.AddSongToPlaylist(this.SelectedSongs.Select(song => song.Model).Single());
+                }
+            });
         }
 
         public event EventHandler TimeoutWarning;
 
-        public ICommand AddToPlaylistCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        if (!this.Library.CanAddSongToPlaylist)
-                        {
-                            // Trigger the animation
-                            this.TimeoutWarning.RaiseSafe(this, EventArgs.Empty);
-
-                            return;
-                        }
-
-                        if (this.IsAdmin)
-                        {
-                            this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model));
-                        }
-
-                        else
-                        {
-                            this.library.AddSongToPlaylist(this.SelectedSongs.Select(song => song.Model).Single());
-                        }
-                    },
-                    param => this.SelectedSongs != null && this.SelectedSongs.Any()
-                );
-            }
-        }
+        public ICommand AddToPlaylistCommand { get; private set; }
 
         public bool IsAdmin
         {
@@ -81,11 +80,7 @@ namespace Espera.View.ViewModels
         public IEnumerable<SongViewModelBase> SelectedSongs
         {
             get { return this.selectedSongs; }
-            set
-            {
-                this.RaiseAndSetIfChanged(x => x.SelectedSongs, value);
-                this.RaisePropertyChanged(x => x.IsSongSelected);
-            }
+            set { this.RaiseAndSetIfChanged(x => x.SelectedSongs, value); }
         }
 
         protected Library Library
