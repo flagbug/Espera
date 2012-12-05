@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
-using System.Windows.Threading;
 
 namespace Espera.View
 {
@@ -73,6 +72,7 @@ namespace Espera.View
             base.OnStartup(sender, e);
         }
 
+#if !DEBUG
         protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             this.Application.MainWindow.Hide();
@@ -83,5 +83,6 @@ namespace Espera.View
 
             Application.Current.Shutdown();
         }
+#endif
     }
 }
