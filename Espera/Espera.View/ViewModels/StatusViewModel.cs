@@ -1,10 +1,12 @@
-﻿using Caliburn.Micro;
-using Espera.Core.Management;
+﻿using Espera.Core.Management;
 using Rareform.Validation;
+using ReactiveUI;
+using System;
+using System.Reactive;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class StatusViewModel : PropertyChangedBase
+    internal sealed class StatusViewModel : ReactiveObject
     {
         private readonly Library library;
         private bool isAdding;
@@ -21,20 +23,15 @@ namespace Espera.View.ViewModels
             this.library = library;
             this.library.Updating += (sender, e) => this.IsUpdating = true;
             this.library.Updated += (sender, args) => this.IsUpdating = false;
+
+            this.WhenAny(x => x.IsAdding, x => Unit.Default)
+                .Subscribe(p => this.RaisePropertyChanged(x => x.IsProgressUnkown));
         }
 
         public bool IsAdding
         {
             get { return this.isAdding; }
-            set
-            {
-                if (this.IsAdding != value)
-                {
-                    this.isAdding = value;
-                    this.NotifyOfPropertyChange(() => this.IsAdding);
-                    this.NotifyOfPropertyChange(() => this.IsProgressUnkown);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(x => x.IsAdding, value); }
         }
 
         public bool IsProgressUnkown
@@ -45,53 +42,25 @@ namespace Espera.View.ViewModels
         public bool IsUpdating
         {
             get { return this.isUpdating; }
-            set
-            {
-                if (this.isUpdating != value)
-                {
-                    this.isUpdating = value;
-                    this.NotifyOfPropertyChange(() => this.IsUpdating);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(x => x.IsUpdating, value); }
         }
 
         public string Path
         {
             get { return this.path; }
-            private set
-            {
-                if (this.Path != value)
-                {
-                    this.path = value;
-                    this.NotifyOfPropertyChange(() => this.Path);
-                }
-            }
+            private set { this.RaiseAndSetIfChanged(x => x.Path, value); }
         }
 
         public int ProcessedTags
         {
             get { return this.processedTags; }
-            private set
-            {
-                if (this.ProcessedTags != value)
-                {
-                    this.processedTags = value;
-                    this.NotifyOfPropertyChange(() => this.ProcessedTags);
-                }
-            }
+            private set { this.RaiseAndSetIfChanged(x => x.ProcessedTags, value); }
         }
 
         public int TotalTags
         {
             get { return this.totalTags; }
-            private set
-            {
-                if (this.totalTags != value)
-                {
-                    this.totalTags = value;
-                    this.NotifyOfPropertyChange(() => this.TotalTags);
-                }
-            }
+            private set { this.RaiseAndSetIfChanged(x => x.TotalTags, value); }
         }
 
         public void Reset()
@@ -117,7 +86,7 @@ namespace Espera.View.ViewModels
             this.ProcessedTags = processedTags;
             this.TotalTags = totalTags;
 
-            this.NotifyOfPropertyChange(() => this.IsProgressUnkown);
+            this.RaisePropertyChanged(x => x.IsProgressUnkown);
         }
     }
 }
