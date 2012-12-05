@@ -6,14 +6,10 @@ using Espera.View.ViewModels;
 using Ninject;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
-
-#if !DEBUG
-
 using System.Windows.Threading;
-
-#endif
 
 namespace Espera.View
 {
@@ -78,10 +74,11 @@ namespace Espera.View
             base.OnStartup(sender, e);
         }
 
-#if !DEBUG
-
         protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
+            if (Debugger.IsAttached)
+                return;
+
             this.Application.MainWindow.Hide();
 
             this.windowManager.ShowDialog(new CrashViewModel(e.Exception));
@@ -90,7 +87,5 @@ namespace Espera.View
 
             Application.Current.Shutdown();
         }
-
-#endif
     }
 }
