@@ -47,7 +47,7 @@ namespace Espera.Core
                 var duration = TimeSpan.FromSeconds(Int32.Parse(video.YouTubeEntry.Duration.Seconds));
                 string url = video.WatchPage.OriginalString
                     .Replace("&feature=youtube_gdata_player", String.Empty) /* Unnecessary long url */
-                    .Replace("https://", "http://"); /* VLC doesn't like https */
+                    .Replace("https://", "http://"); /* Dont use https for streaming */
 
                 var song = new YoutubeSong(url, AudioType.Mp3, duration, CoreSettings.Default.StreamYoutube)
                 {
