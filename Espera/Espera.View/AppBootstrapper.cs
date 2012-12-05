@@ -7,8 +7,10 @@ using Ninject;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace Espera.View
 {
@@ -83,9 +85,11 @@ namespace Espera.View
             base.OnStartup(sender, e);
         }
 
-#if !DEBUG
         protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
+            if (Debugger.IsAttached)
+                return;
+
             this.Application.MainWindow.Hide();
 
             this.windowManager.ShowDialog(new CrashViewModel(e.Exception));
@@ -94,6 +98,5 @@ namespace Espera.View
 
             Application.Current.Shutdown();
         }
-#endif
     }
 }

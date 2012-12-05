@@ -1,3 +1,8 @@
+----------------------------------- v1.6.4 -----------------------------------
+
+BUGFIXES:
+- Fixed a bug that caused songs not to be shown in the library when added.
+
 ----------------------------------- v1.6.3 -----------------------------------
 
 FEATURES:

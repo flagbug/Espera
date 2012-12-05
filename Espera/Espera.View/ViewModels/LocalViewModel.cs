@@ -144,6 +144,7 @@ namespace Espera.View.ViewModels
 
                 if (e.Song.Artist != lastArtist)
                 {
+                    this.UpdateSelectableSongs();
                     lastArtist = e.Song.Artist;
                     this.RaisePropertyChanged(x => x.Artists);
                 }
