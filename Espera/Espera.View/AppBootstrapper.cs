@@ -9,6 +9,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 
+#if !DEBUG
+
+using System.Windows.Threading;
+
+#endif
+
 namespace Espera.View
 {
     internal class AppBootstrapper : Bootstrapper<ShellViewModel>
@@ -73,6 +79,7 @@ namespace Espera.View
         }
 
 #if !DEBUG
+
         protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             this.Application.MainWindow.Hide();
@@ -83,6 +90,7 @@ namespace Espera.View
 
             Application.Current.Shutdown();
         }
+
 #endif
     }
 }
