@@ -2,14 +2,14 @@
 using Espera.Core.Management;
 using Espera.View.Properties;
 using MoreLinq;
-using Rareform.Patterns.MVVM;
 using Rareform.Validation;
 using ReactiveUI;
+using ReactiveUI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
-using System.Windows.Input;
+using System.Reactive.Linq;
 
 namespace Espera.View.ViewModels
 {
@@ -46,8 +46,27 @@ namespace Espera.View.ViewModels
 
             this.SelectedArtist = this.Artists.First();
 
-            this.WhenAny(x => x.SearchText, x => x.SelectedArtist, (p1, p2) => Unit.Default)
+            this.WhenAny(x => x.SearchText, x => x.SelectedArtist, (x1, x2) => Unit.Default)
                 .Subscribe(x => this.UpdateSelectableSongs());
+
+            var accessModeChanged = Observable.FromEventPattern(
+                handler => this.Library.AccessModeChanged += handler,
+                handler => this.Library.AccessModeChanged -= handler);
+
+            IObservable<bool> canRemoveFromLibrary = this
+                .WhenAny(x => x.SelectedSongs, x => x.Value)
+                .CombineLatest(accessModeChanged,
+                    (selectedSongs, handler) =>
+                        selectedSongs != null && selectedSongs.Any() &&
+                        (this.IsAdmin || !this.Library.LockLibraryRemoval));
+
+            this.RemoveFromLibraryCommand = new ReactiveCommand(canRemoveFromLibrary);
+            this.RemoveFromLibraryCommand.Subscribe(p =>
+            {
+                this.Library.RemoveFromLibrary(this.SelectedSongs.Select(song => song.Model));
+
+                this.UpdateSelectableSongs();
+            });
         }
 
         public int AlbumColumnWidth
@@ -90,24 +109,7 @@ namespace Espera.View.ViewModels
             set { Settings.Default.LocalPathColumnWidth = value; }
         }
 
-        public ICommand RemoveFromLibraryCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        this.Library.RemoveFromLibrary(this.SelectedSongs.Select(song => song.Model));
-
-                        this.UpdateSelectableSongs();
-                    },
-                    param => this.SelectedSongs != null
-                        && this.SelectedSongs.Any()
-                        && (this.IsAdmin || !this.Library.LockLibraryRemoval)
-                );
-            }
-        }
+        public IReactiveCommand RemoveFromLibraryCommand { get; private set; }
 
         public override string SearchText
         {
