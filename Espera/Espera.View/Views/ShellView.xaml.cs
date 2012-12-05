@@ -49,7 +49,7 @@ namespace Espera.View.Views
             {
                 dialog.ShowDialog();
 
-                string selectedPath = @"D:\Music\iTunes\iTunes Media\Music"; //dialog.SelectedPath;
+                string selectedPath = dialog.SelectedPath;
 
                 if (!String.IsNullOrEmpty(selectedPath))
                 {
