@@ -144,7 +144,6 @@ namespace Espera.View.ViewModels
 
                 if (e.Song.Artist != lastArtist)
                 {
-                    this.UpdateSelectableSongs();
                     lastArtist = e.Song.Artist;
                     this.RaisePropertyChanged(x => x.Artists);
                 }
@@ -154,13 +153,18 @@ namespace Espera.View.ViewModels
 
             this.StatusViewModel.IsAdding = true;
 
+            IDisposable d = Observable.Interval(TimeSpan.FromSeconds(1.5))
+                .Subscribe(p => this.UpdateSelectableSongs());
+
             this.Library
                 .AddLocalSongsAsync(folderPath)
                 .ContinueWith(task =>
                 {
                     this.Library.SongAdded -= handler;
 
-                    this.RaisePropertyChanged(x => x.Artists);
+                    d.Dispose();
+
+                    this.UpdateSelectableSongs();
                     this.StatusViewModel.Reset();
                 });
         }
