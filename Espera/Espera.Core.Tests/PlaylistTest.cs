@@ -31,23 +31,23 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void CanPlayNextSong_CurrentSongIndexIsLastSong_ReturnsFalse()
+        {
+            Song[] songs = Helpers.SetupSongMocks(4);
+            Playlist playlist = Helpers.SetupPlaylist(songs);
+
+            playlist.CurrentSongIndex = 3;
+
+            Assert.IsFalse(playlist.CanPlayNextSong);
+        }
+
+        [Test]
         public void CanPlayNextSong_CurrentSongIndexIsNull_ReturnsFalse()
         {
             Song[] songs = Helpers.SetupSongMocks(4);
             Playlist playlist = Helpers.SetupPlaylist(songs);
 
             playlist.CurrentSongIndex = null;
-
-            Assert.IsFalse(playlist.CanPlayNextSong);
-        }
-
-        [Test]
-        public void CanPlayNextSong_CurrentSongIndexIsPlaylistCount_ReturnsFalse()
-        {
-            Song[] songs = Helpers.SetupSongMocks(4);
-            Playlist playlist = Helpers.SetupPlaylist(songs);
-
-            playlist.CurrentSongIndex = playlist.Count();
 
             Assert.IsFalse(playlist.CanPlayNextSong);
         }
@@ -72,6 +72,17 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void CanPlayPreviousSong_CurrentSongIndexIsLastSong_ReturnsTrue()
+        {
+            Song[] songs = Helpers.SetupSongMocks(4);
+            Playlist playlist = Helpers.SetupPlaylist(songs);
+
+            playlist.CurrentSongIndex = 3;
+
+            Assert.IsTrue(playlist.CanPlayPreviousSong);
+        }
+
+        [Test]
         public void CanPlayPreviousSong_CurrentSongIndexIsNull_ReturnsFalse()
         {
             Song[] songs = Helpers.SetupSongMocks(4);
@@ -80,17 +91,6 @@ namespace Espera.Core.Tests
             playlist.CurrentSongIndex = null;
 
             Assert.IsFalse(playlist.CanPlayPreviousSong);
-        }
-
-        [Test]
-        public void CanPlayPreviousSong_CurrentSongIndexIsPlaylistCount_ReturnsTrue()
-        {
-            Song[] songs = Helpers.SetupSongMocks(4);
-            Playlist playlist = Helpers.SetupPlaylist(songs);
-
-            playlist.CurrentSongIndex = playlist.Count();
-
-            Assert.IsTrue(playlist.CanPlayPreviousSong);
         }
 
         [Test]
