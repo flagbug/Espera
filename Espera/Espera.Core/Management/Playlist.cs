@@ -220,6 +220,7 @@ namespace Espera.Core.Management
         {
             var newPlaylist = new Dictionary<int, Song>();
             int index = 0;
+            int? migrateIndex = null;
 
             foreach (var entry in playlist.OrderBy(entry => entry.Key))
             {
@@ -227,13 +228,18 @@ namespace Espera.Core.Management
 
                 if (this.CurrentSongIndex == entry.Key)
                 {
-                    this.CurrentSongIndex = index;
+                    migrateIndex = index;
                 }
 
                 index++;
             }
 
             this.playlist = newPlaylist;
+
+            if (migrateIndex.HasValue)
+            {
+                this.CurrentSongIndex = migrateIndex;
+            }
         }
     }
 }
