@@ -1,3 +1,9 @@
+----------------------------------- v1.6.5 -----------------------------------
+
+BUGFIXES:
+- Fixed a bug, that caused the application to crash when removing songs from 
+  the playlist.
+
 ----------------------------------- v1.6.4 -----------------------------------
 
 BUGFIXES:
