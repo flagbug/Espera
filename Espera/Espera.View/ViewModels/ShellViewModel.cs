@@ -4,22 +4,27 @@ using Espera.Core.Management;
 using Espera.View.Properties;
 using Rareform.Extensions;
 using Rareform.Patterns.MVVM;
+using ReactiveUI;
+using ReactiveUI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Timers;
 using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal class ShellViewModel : PropertyChangedBase, IDisposable
+    internal class ShellViewModel : ReactiveObject, IDisposable
     {
+        private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
         private readonly Library library;
         private readonly Timer playlistTimeoutUpdateTimer;
         private readonly Timer updateTimer;
-        private ISongSourceViewModel currentSongSource;
+        private ObservableAsPropertyHelper<bool> canModifyWindow;
         private bool displayTimeoutWarning;
+        private ObservableAsPropertyHelper<bool> isAdmin;
         private bool isLocal;
         private bool isYoutube;
         private ObservableCollection<PlaylistViewModel> playlists;
@@ -63,6 +68,25 @@ namespace Espera.View.ViewModels
             this.playlistTimeoutUpdateTimer.Start();
 
             this.IsLocal = true;
+
+            this.currentSongSource = this.WhenAny(x => x.IsLocal, x => x.IsYoutube,
+                (x1, x2) => x1.Value ? (ISongSourceViewModel)this.LocalViewModel : this.YoutubeViewModel)
+                .ToProperty(this, x => x.CurrentSongSource);
+
+            this.isAdmin = Observable.FromEventPattern(
+                handler => this.library.AccessModeChanged += handler,
+                handler => this.library.AccessModeChanged -= handler)
+            .Select(x => this.library.AccessMode == AccessMode.Administrator)
+            .ToProperty(this, x => x.IsAdmin);
+
+            this.MuteCommand = new ReactiveCommand(this.isAdmin);
+            this.MuteCommand.Subscribe(x => this.Volume = 0);
+
+            this.UnMuteCommand = new ReactiveCommand(this.isAdmin);
+            this.UnMuteCommand.Subscribe(x => this.Volume = 1);
+
+            this.canModifyWindow = this.isAdmin.Select(x => x || !Settings.Default.LockWindow)
+                .ToProperty(this, x => x.CanModifyWindow);
         }
 
         /// <summary>
@@ -104,7 +128,7 @@ namespace Espera.View.ViewModels
         /// </summary>
         public bool CanModifyWindow
         {
-            get { return this.IsAdmin || !Settings.Default.LockWindow; }
+            get { return this.canModifyWindow.Value; }
         }
 
         public bool CanSwitchPlaylist
@@ -125,7 +149,7 @@ namespace Espera.View.ViewModels
                 if (value != null) // There always has to be a playlist selected
                 {
                     this.library.SwitchToPlaylist(this.library.GetPlaylistByName(value.Name));
-                    this.NotifyOfPropertyChange(() => this.CurrentPlaylist);
+                    this.RaisePropertyChanged(x => x.CurrentPlaylist);
                 }
             }
         }
@@ -138,15 +162,7 @@ namespace Espera.View.ViewModels
 
         public ISongSourceViewModel CurrentSongSource
         {
-            get { return this.currentSongSource; }
-            private set
-            {
-                if (this.CurrentSongSource != value)
-                {
-                    this.currentSongSource = value;
-                    this.NotifyOfPropertyChange(() => this.CurrentSongSource);
-                }
-            }
+            get { return this.currentSongSource.Value; }
         }
 
         public TimeSpan CurrentTime
@@ -157,14 +173,7 @@ namespace Espera.View.ViewModels
         public bool DisplayTimeoutWarning
         {
             get { return this.displayTimeoutWarning; }
-            set
-            {
-                if (this.displayTimeoutWarning != value)
-                {
-                    this.displayTimeoutWarning = value;
-                    this.NotifyOfPropertyChange(() => this.DisplayTimeoutWarning);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public ICommand EditPlaylistNameCommand
@@ -183,25 +192,13 @@ namespace Espera.View.ViewModels
 
         public bool IsAdmin
         {
-            get { return this.library.AccessMode == AccessMode.Administrator; }
+            get { return this.isAdmin.Value; }
         }
 
         public bool IsLocal
         {
             get { return this.isLocal; }
-            set
-            {
-                if (this.IsLocal != value)
-                {
-                    this.isLocal = value;
-                    this.NotifyOfPropertyChange(() => this.IsLocal);
-
-                    if (this.IsLocal)
-                    {
-                        this.CurrentSongSource = this.LocalViewModel;
-                    }
-                }
-            }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public bool IsPlaying
@@ -212,19 +209,7 @@ namespace Espera.View.ViewModels
         public bool IsYoutube
         {
             get { return this.isYoutube; }
-            set
-            {
-                if (this.IsYoutube != value)
-                {
-                    this.isYoutube = value;
-                    this.NotifyOfPropertyChange(() => this.IsYoutube);
-
-                    if (this.IsYoutube)
-                    {
-                        this.CurrentSongSource = this.YoutubeViewModel;
-                    }
-                }
-            }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public LocalViewModel LocalViewModel { get; private set; }
@@ -232,17 +217,7 @@ namespace Espera.View.ViewModels
         /// <summary>
         /// Sets the volume to the lowest possible value.
         /// </summary>
-        public ICommand MuteCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param => this.Volume = 0,
-                    param => this.IsAdmin
-                );
-            }
-        }
+        public IReactiveCommand MuteCommand { get; private set; }
 
         /// <summary>
         /// Plays the next song in the playlist.
@@ -272,7 +247,7 @@ namespace Espera.View.ViewModels
                     {
                         this.library.PauseSong();
                         this.updateTimer.Stop();
-                        this.NotifyOfPropertyChange(() => this.IsPlaying);
+                        this.RaisePropertyChanged(x => x.IsPlaying);
                     },
                     param => (this.IsAdmin || !this.library.LockPlayPause) && this.IsPlaying
                 );
@@ -320,7 +295,7 @@ namespace Espera.View.ViewModels
                         {
                             this.library.ContinueSong();
                             this.updateTimer.Start();
-                            this.NotifyOfPropertyChange(() => this.IsPlaying);
+                            this.RaisePropertyChanged(x => x.IsPlaying);
                         }
 
                         else
@@ -330,7 +305,7 @@ namespace Espera.View.ViewModels
                     },
                     param =>
 
-                        // The admin can always play, but if we are in party mode, we have to check wheter it is allowed to play
+                        // The admin can always play, but if we are in party mode, we have to check whether it is allowed to play
                         (this.IsAdmin || !this.library.LockPlayPause) &&
 
                         // If exactly one song is selected, the command can be executed
@@ -468,7 +443,7 @@ namespace Espera.View.ViewModels
                             this.CurrentPlaylist = this.Playlists[0];
                         }
 
-                        this.NotifyOfPropertyChange(() => this.Playlists);
+                        this.RaisePropertyChanged(x => x.Playlists);
                     },
                     param => this.CurrentEditedPlaylist != null || this.CurrentPlaylist != null
                 );
@@ -485,9 +460,9 @@ namespace Espera.View.ViewModels
                     {
                         this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index));
 
-                        this.NotifyOfPropertyChange(() => this.CurrentPlaylist);
-                        this.NotifyOfPropertyChange(() => this.SongsRemaining);
-                        this.NotifyOfPropertyChange(() => this.TimeRemaining);
+                        this.RaisePropertyChanged(x => x.CurrentPlaylist);
+                        this.RaisePropertyChanged(x => x.SongsRemaining);
+                        this.RaisePropertyChanged(x => x.TimeRemaining);
                     },
                     param => this.SelectedPlaylistEntries != null
                         && this.SelectedPlaylistEntries.Any()
@@ -504,8 +479,8 @@ namespace Espera.View.ViewModels
                 if (this.SelectedPlaylistEntries != value)
                 {
                     this.selectedPlaylistEntries = value;
-                    this.NotifyOfPropertyChange(() => this.SelectedPlaylistEntries);
-                    this.NotifyOfPropertyChange(() => this.PlayCommand);
+                    this.RaisePropertyChanged(x => x.SelectedPlaylistEntries);
+                    this.RaisePropertyChanged(x => x.PlayCommand);
                 }
             }
         }
@@ -576,17 +551,10 @@ namespace Espera.View.ViewModels
             get { return this.library.TotalTime; }
         }
 
-        public ICommand UnMuteCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param => this.Volume = 1,
-                    param => this.IsAdmin
-                );
-            }
-        }
+        /// <summary>
+        /// Sets the volume to the highest possible value.
+        /// </summary>
+        public IReactiveCommand UnMuteCommand { get; private set; }
 
         public IVideoPlayerCallback VideoPlayerCallback
         {
@@ -599,7 +567,7 @@ namespace Espera.View.ViewModels
             set
             {
                 this.library.Volume = (float)value;
-                this.NotifyOfPropertyChange(() => this.Volume);
+                this.RaisePropertyChanged(x => x.Volume);
             }
         }
 
@@ -637,24 +605,24 @@ namespace Espera.View.ViewModels
             string newName = (this.playlists ?? Enumerable.Empty<PlaylistViewModel>())
                 .Select(playlist => playlist.Name)
                 .CreateUnique(i =>
+                {
+                    string name = "New Playlist";
+
+                    if (i > 1)
                     {
-                        string name = "New Playlist";
+                        name += " " + i;
+                    }
 
-                        if (i > 1)
-                        {
-                            name += " " + i;
-                        }
-
-                        return name;
-                    });
+                    return name;
+                });
 
             return newName;
         }
 
         private void HandleSongCorrupted()
         {
-            this.NotifyOfPropertyChange(() => this.IsPlaying);
-            this.NotifyOfPropertyChange(() => this.CurrentPlaylist);
+            this.RaisePropertyChanged(x => x.IsPlaying);
+            this.RaisePropertyChanged(x => x.CurrentPlaylist);
         }
 
         private void HandleSongFinished()
@@ -663,12 +631,12 @@ namespace Espera.View.ViewModels
             // when the library starts the next song
             if (!this.library.CanPlayNextSong)
             {
-                this.NotifyOfPropertyChange(() => this.IsPlaying);
+                this.RaisePropertyChanged(x => x.IsPlaying);
             }
 
-            this.NotifyOfPropertyChange(() => this.CurrentPlaylist);
+            this.RaisePropertyChanged(x => x.CurrentPlaylist);
 
-            this.NotifyOfPropertyChange(() => this.PreviousSongCommand);
+            this.RaisePropertyChanged(x => x.PreviousSongCommand);
 
             this.updateTimer.Stop();
         }
@@ -677,13 +645,13 @@ namespace Espera.View.ViewModels
         {
             this.UpdateTotalTime();
 
-            this.NotifyOfPropertyChange(() => this.IsPlaying);
-            this.NotifyOfPropertyChange(() => this.CurrentPlaylist);
+            this.RaisePropertyChanged(x => x.IsPlaying);
+            this.RaisePropertyChanged(x => x.CurrentPlaylist);
 
-            this.NotifyOfPropertyChange(() => this.SongsRemaining);
-            this.NotifyOfPropertyChange(() => this.TimeRemaining);
+            this.RaisePropertyChanged(x => x.SongsRemaining);
+            this.RaisePropertyChanged(x => x.TimeRemaining);
 
-            this.NotifyOfPropertyChange(() => this.PlayCommand);
+            this.RaisePropertyChanged(x => x.PlayCommand);
 
             this.updateTimer.Start();
         }
@@ -696,19 +664,19 @@ namespace Espera.View.ViewModels
 
         private void UpdateCurrentTime()
         {
-            this.NotifyOfPropertyChange(() => this.CurrentSeconds);
-            this.NotifyOfPropertyChange(() => this.CurrentTime);
+            this.RaisePropertyChanged(x => x.CurrentSeconds);
+            this.RaisePropertyChanged(x => x.CurrentTime);
         }
 
         private void UpdatePlaylist()
         {
-            this.NotifyOfPropertyChange(() => this.CurrentPlaylist);
-            this.NotifyOfPropertyChange(() => this.SongsRemaining);
-            this.NotifyOfPropertyChange(() => this.TimeRemaining);
+            this.RaisePropertyChanged(x => x.CurrentPlaylist);
+            this.RaisePropertyChanged(x => x.SongsRemaining);
+            this.RaisePropertyChanged(x => x.TimeRemaining);
 
             if (this.library.EnablePlaylistTimeout)
             {
-                this.NotifyOfPropertyChange(() => this.RemainingPlaylistTimeout);
+                this.RaisePropertyChanged(x => x.RemainingPlaylistTimeout);
             }
         }
 
@@ -716,24 +684,22 @@ namespace Espera.View.ViewModels
         {
             if (this.RemainingPlaylistTimeout > TimeSpan.Zero)
             {
-                this.NotifyOfPropertyChange(() => this.RemainingPlaylistTimeout);
+                this.RaisePropertyChanged(x => x.RemainingPlaylistTimeout);
             }
         }
 
         private void UpdateTotalTime()
         {
-            this.NotifyOfPropertyChange(() => this.TotalSeconds);
-            this.NotifyOfPropertyChange(() => this.TotalTime);
+            this.RaisePropertyChanged(x => x.TotalSeconds);
+            this.RaisePropertyChanged(x => x.TotalTime);
         }
 
         private void UpdateUserAccess()
         {
-            this.NotifyOfPropertyChange(() => this.IsAdmin);
-            this.NotifyOfPropertyChange(() => this.CanChangeVolume);
-            this.NotifyOfPropertyChange(() => this.CanChangeTime);
-            this.NotifyOfPropertyChange(() => this.CanSwitchPlaylist);
-            this.NotifyOfPropertyChange(() => this.ShowPlaylistTimeOut);
-            this.NotifyOfPropertyChange(() => this.CanModifyWindow);
+            this.RaisePropertyChanged(x => x.CanChangeVolume);
+            this.RaisePropertyChanged(x => x.CanChangeTime);
+            this.RaisePropertyChanged(x => x.CanSwitchPlaylist);
+            this.RaisePropertyChanged(x => x.ShowPlaylistTimeOut);
 
             this.UpdateScreenState.RaiseSafe(this, EventArgs.Empty);
         }
