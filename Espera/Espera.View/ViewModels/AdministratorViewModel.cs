@@ -100,7 +100,7 @@ namespace Espera.View.ViewModels
         public string CreationPassword
         {
             private get { return this.creationPassword; }
-            set { this.RaiseAndSetIfChanged(x => x.CreationPassword, value); }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public string DonationPage
@@ -151,7 +151,7 @@ namespace Espera.View.ViewModels
         public bool IsWrongPassword
         {
             get { return this.isWrongPassword; }
-            set { this.RaiseAndSetIfChanged(x => x.IsWrongPassword, value); }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public bool LockLibraryRemoval
@@ -208,7 +208,7 @@ namespace Espera.View.ViewModels
         public string LoginPassword
         {
             private get { return this.loginPassword; }
-            set { this.RaiseAndSetIfChanged(x => x.LoginPassword, value); }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public IReactiveCommand OpenLinkCommand { get; private set; }
@@ -224,7 +224,7 @@ namespace Espera.View.ViewModels
         public bool Show
         {
             get { return this.show; }
-            set { this.RaiseAndSetIfChanged(x => x.Show, value); }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public bool StreamYoutube

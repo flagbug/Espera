@@ -1,13 +1,13 @@
-﻿using Caliburn.Micro;
-using Espera.Services;
+﻿using Espera.Services;
 using Rareform.Patterns.MVVM;
+using ReactiveUI;
 using System;
 using System.Reflection;
 using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal class BugReportViewModel : PropertyChangedBase
+    internal class BugReportViewModel : ReactiveObject
     {
         private readonly string version;
         private string message;
@@ -21,27 +21,13 @@ namespace Espera.View.ViewModels
         public string Message
         {
             get { return this.message; }
-            set
-            {
-                if (this.message != value)
-                {
-                    this.message = value;
-                    this.NotifyOfPropertyChange(() => this.Message);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public bool? SendingSucceeded
         {
             get { return this.sendingSucceeded; }
-            set
-            {
-                if (this.SendingSucceeded != value)
-                {
-                    this.sendingSucceeded = value;
-                    this.NotifyOfPropertyChange(() => this.SendingSucceeded);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public ICommand SubmitBugReport

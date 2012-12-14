@@ -1,13 +1,13 @@
-﻿using Caliburn.Micro;
-using Espera.Services;
+﻿using Espera.Services;
 using Rareform.Patterns.MVVM;
+using ReactiveUI;
 using System;
 using System.Reflection;
 using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal class CrashViewModel : PropertyChangedBase
+    internal class CrashViewModel : ReactiveObject
     {
         private readonly Exception exception;
         private readonly string version;
@@ -27,14 +27,7 @@ namespace Espera.View.ViewModels
         public bool? SendingSucceeded
         {
             get { return this.sendingSucceeded; }
-            set
-            {
-                if (this.SendingSucceeded != value)
-                {
-                    this.sendingSucceeded = value;
-                    this.NotifyOfPropertyChange(() => this.SendingSucceeded);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public ICommand SubmitCrashReport

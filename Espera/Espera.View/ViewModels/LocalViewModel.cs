@@ -21,7 +21,6 @@ namespace Espera.View.ViewModels
         private SortOrder artistOrder;
         private SortOrder durationOrder;
         private SortOrder genreOrder;
-        private string searchText;
         private ArtistViewModel selectedArtist;
         private SortOrder titleOrder;
 
@@ -35,8 +34,6 @@ namespace Espera.View.ViewModels
             };
 
             this.StatusViewModel = new StatusViewModel(library);
-
-            this.searchText = String.Empty;
 
             this.artists = new Dictionary<string, ArtistViewModel>();
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
@@ -111,16 +108,10 @@ namespace Espera.View.ViewModels
 
         public IReactiveCommand RemoveFromLibraryCommand { get; private set; }
 
-        public override string SearchText
-        {
-            get { return this.searchText; }
-            set { this.RaiseAndSetIfChanged(x => x.SearchText, value); }
-        }
-
         public ArtistViewModel SelectedArtist
         {
             get { return this.selectedArtist; }
-            set { this.RaiseAndSetIfChanged(x => x.SelectedArtist, value); }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public StatusViewModel StatusViewModel { get; private set; }

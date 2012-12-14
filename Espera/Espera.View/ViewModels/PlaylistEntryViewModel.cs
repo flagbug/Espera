@@ -43,7 +43,7 @@ namespace Espera.View.ViewModels
         public bool HasCachingFailed
         {
             get { return this.hasCachingFailed; }
-            set { this.RaiseAndSetIfChanged(x => x.HasCachingFailed, value); }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public int Index { get; private set; }
@@ -56,13 +56,13 @@ namespace Espera.View.ViewModels
         public bool IsInactive
         {
             get { return this.isInactive; }
-            set { this.RaiseAndSetIfChanged(x => x.IsInactive, value); }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public bool IsPlaying
         {
             get { return this.isPlaying; }
-            set { this.RaiseAndSetIfChanged(x => x.IsPlaying, value); }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public bool ShowCaching

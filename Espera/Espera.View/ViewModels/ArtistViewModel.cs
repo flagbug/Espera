@@ -24,13 +24,13 @@ namespace Espera.View.ViewModels
         public int? AlbumCount
         {
             get { return this.albumCount; }
-            set { this.RaiseAndSetIfChanged(x => x.AlbumCount, value); }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public int? ArtistCount
         {
             get { return this.artistCount; }
-            set { this.RaiseAndSetIfChanged(x => x.ArtistCount, value); }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public bool IsAllArtists { get; private set; }
@@ -40,7 +40,7 @@ namespace Espera.View.ViewModels
         public int? SongCount
         {
             get { return this.songCount; }
-            set { this.RaiseAndSetIfChanged(x => x.SongCount, value); }
+            set { this.RaiseAndSetIfChanged(value); }
         }
     }
 }

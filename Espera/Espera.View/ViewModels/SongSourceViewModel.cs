@@ -14,12 +14,15 @@ namespace Espera.View.ViewModels
         where T : SongViewModelBase
     {
         private readonly Library library;
+        private string searchText;
         private IEnumerable<T> selectableSongs;
         private IEnumerable<SongViewModelBase> selectedSongs;
 
         protected SongSourceViewModel(Library library)
         {
             this.library = library;
+
+            this.searchText = String.Empty;
             this.selectableSongs = Enumerable.Empty<T>();
 
             this.WhenAny(x => x.SelectedSongs, x => Unit.Default)
@@ -64,18 +67,22 @@ namespace Espera.View.ViewModels
             get { return this.SelectedSongs != null && this.SelectedSongs.Any(); }
         }
 
-        public abstract string SearchText { get; set; }
+        public string SearchText
+        {
+            get { return this.searchText; }
+            set { this.RaiseAndSetIfChanged(value); }
+        }
 
         public IEnumerable<T> SelectableSongs
         {
             get { return this.selectableSongs; }
-            protected set { this.RaiseAndSetIfChanged(x => x.SelectableSongs, value); }
+            protected set { this.RaiseAndSetIfChanged(value); }
         }
 
         public IEnumerable<SongViewModelBase> SelectedSongs
         {
             get { return this.selectedSongs; }
-            set { this.RaiseAndSetIfChanged(x => x.SelectedSongs, value); }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         protected Library Library

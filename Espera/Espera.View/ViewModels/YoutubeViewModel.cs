@@ -15,15 +15,12 @@ namespace Espera.View.ViewModels
         private SortOrder durationOrder;
         private bool isSearching;
         private SortOrder ratingOrder;
-        private string searchText;
         private SortOrder titleOrder;
         private SortOrder viewsOrder;
 
         public YoutubeViewModel(Library library)
             : base(library)
         {
-            this.searchText = String.Empty;
-
             // We need a default sorting order
             this.OrderByTitle();
 
@@ -40,7 +37,7 @@ namespace Espera.View.ViewModels
         public bool IsSearching
         {
             get { return this.isSearching; }
-            private set { this.RaiseAndSetIfChanged(x => x.IsSearching, value); }
+            private set { this.RaiseAndSetIfChanged(value); }
         }
 
         public int LinkColumnWidth
@@ -53,12 +50,6 @@ namespace Espera.View.ViewModels
         {
             get { return Settings.Default.YoutubeRatingColumnWidth; }
             set { Settings.Default.YoutubeRatingColumnWidth = value; }
-        }
-
-        public override string SearchText
-        {
-            get { return this.searchText; }
-            set { this.RaiseAndSetIfChanged(x => x.SearchText, value); }
         }
 
         public int TitleColumnWidth

@@ -31,7 +31,7 @@ namespace Espera.View.ViewModels
         public bool IsAdding
         {
             get { return this.isAdding; }
-            set { this.RaiseAndSetIfChanged(x => x.IsAdding, value); }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public bool IsProgressUnkown
@@ -42,25 +42,25 @@ namespace Espera.View.ViewModels
         public bool IsUpdating
         {
             get { return this.isUpdating; }
-            set { this.RaiseAndSetIfChanged(x => x.IsUpdating, value); }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public string Path
         {
             get { return this.path; }
-            private set { this.RaiseAndSetIfChanged(x => x.Path, value); }
+            private set { this.RaiseAndSetIfChanged(value); }
         }
 
         public int ProcessedTags
         {
             get { return this.processedTags; }
-            private set { this.RaiseAndSetIfChanged(x => x.ProcessedTags, value); }
+            private set { this.RaiseAndSetIfChanged(value); }
         }
 
         public int TotalTags
         {
             get { return this.totalTags; }
-            private set { this.RaiseAndSetIfChanged(x => x.TotalTags, value); }
+            private set { this.RaiseAndSetIfChanged(value); }
         }
 
         public void Reset()
