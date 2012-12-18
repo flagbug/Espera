@@ -1,7 +1,15 @@
+----------------------------------- v1.6.6 -----------------------------------
+
+BUGFIXES:
+- Fixed a bug that caused the application to crash when removing a removable 
+  device that contained songs from the library.
+- Fixed a bug that caused a corruption of the library when removing a 
+  removable device that contained songs on a playlist.
+
 ----------------------------------- v1.6.5 -----------------------------------
 
 BUGFIXES:
-- Fixed a bug, that caused the application to crash when removing songs from 
+- Fixed a bug that caused the application to crash when removing songs from 
   the playlist.
 
 ----------------------------------- v1.6.4 -----------------------------------
@@ -20,7 +28,7 @@ IMPROVEMENTS:
 ----------------------------------- v1.6.2 -----------------------------------
 
 BUGIXES:
-- Fixed a bug, that caused the application to crash when performing operations 
+- Fixed a bug that caused the application to crash when performing operations 
   that stop a local song.
 
 ----------------------------------- v1.6.1 -----------------------------------
@@ -49,24 +57,24 @@ IMPROVEMENTS:
 - Some UI style and visual improvements.
 
 BUGFIXES:
-- Fixed a bug, that caused some settings to be resetted at application 
+- Fixed a bug that caused some settings to be resetted at application 
   startup.
-- Fixed a bug, that could cause a corruption of the library under certain 
+- Fixed a bug that could cause a corruption of the library under certain 
   conditions.
 
 ----------------------------------- v1.4.3 -----------------------------------
 
 BUGFIXES:
-- Fixed a bug, that caused the "Play" command of a playlists context menu to 
+- Fixed a bug that caused the "Play" command of a playlists context menu to 
   be executable when it shouldn't. When executed regardless, it caused the 
   application to crash.
-- Fixed some visual bugs, where buttons would be in an enabled state when 
+- Fixed some visual bugs where buttons would be in an enabled state when 
   they shouldn't be.
 
 ----------------------------------- v1.4.2 -----------------------------------
 
 BUGFIXES:
-- Fixed a bug, that caused songs to be only removed from the current playlist 
+- Fixed a bug that caused songs to be only removed from the current playlist 
   instead of all playlists, when removing the songs from the library.
   This bug also caused a corruption of the library and therefore a crash of 
   the application.
@@ -77,7 +85,7 @@ FEATURES:
 - Added a donation link in the settings panel.
 
 BUGFIXES:
-- Fixed a bug, that caused the application to crash when no library existed 
+- Fixed a bug that caused the application to crash when no library existed 
   yet.
 - Fixed a bug that caused the application to crash when songs were currently 
   added and the application got closed.
@@ -91,9 +99,9 @@ FEATURES:
 - Each playlist now displays the number of songs underneath its name.
 
 BUGFIXES:
-- Fixed a bug, that caused the YouTube views to be sorted wrong.
-- Fixed a bug, that caused the path of local songs to not be displayed.
-- Fixed a bug, that caused YouTube streaming and downloading to fail randomly.
+- Fixed a bug that caused the YouTube views to be sorted wrong.
+- Fixed a bug that caused the path of local songs to not be displayed.
+- Fixed a bug that caused YouTube streaming and downloading to fail randomly.
 
 ----------------------------------- v1.3.0 -----------------------------------
 
@@ -119,17 +127,17 @@ BUGFIXES:
 ----------------------------------- v1.2.4 -----------------------------------
 
 BUGFIXES:
-- Fixed a bug, that caused the YouTube streaming to not work anymore.
+- Fixed a bug that caused the YouTube streaming to not work anymore.
 
 ----------------------------------- v1.2.3 -----------------------------------
 
 BUGFIXES:
-- Fixed a bug, that caused the sorting of songs to not work anymore.
+- Fixed a bug that caused the sorting of songs to not work anymore.
 
 ----------------------------------- v1.2.2 -----------------------------------
 
 BUGFIXES:
-- Fixed a bug, that caused the application appearance related settings to be 
+- Fixed a bug that caused the application appearance related settings to be 
   overridden every time the application starts.
 
 ----------------------------------- v1.2.1 -----------------------------------
@@ -138,7 +146,7 @@ FEATURES:
 - The volume is now saved when closing the application.
 
 BUGFIXES:
-- Fixed a bug, that caused the application to crash, when the user paused a 
+- Fixed a bug that caused the application to crash, when the user paused a 
   song, switched to another playlist and then continued the song.
 - Fixed application crash when rapidly clicking the play/pause button.
 
@@ -151,9 +159,9 @@ FEATURES:
 - Songs that can't be played are now marked as corrupt.
 
 BUGFIXES:
-- Fixed a bug, that caused the application to crash or start/pause a song when 
+- Fixed a bug that caused the application to crash or start/pause a song when 
   editing the name of a playlist.
-- Fixed a bug, that caused the application to crash when playing a song from 
+- Fixed a bug that caused the application to crash when playing a song from 
   YouTube.
 
 ----------------------------------- v1.1.0 -----------------------------------

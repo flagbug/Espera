@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using System.Threading;
 using System.Reactive.Linq;
 
 namespace Espera.View.ViewModels
@@ -17,6 +18,7 @@ namespace Espera.View.ViewModels
     {
         private readonly ArtistViewModel allArtistsViewModel;
         private readonly Dictionary<string, ArtistViewModel> artists;
+        private readonly SemaphoreSlim updateSemaphore;
         private SortOrder albumOrder;
         private SortOrder artistOrder;
         private SortOrder durationOrder;
@@ -27,6 +29,8 @@ namespace Espera.View.ViewModels
         public LocalViewModel(Library library)
             : base(library)
         {
+            this.updateSemaphore = new SemaphoreSlim(1, 1);
+
             library.Updated += (sender, args) =>
             {
                 this.RaisePropertyChanged(x => x.Artists);
@@ -206,6 +210,10 @@ namespace Espera.View.ViewModels
 
         private void UpdateSelectableSongs()
         {
+            // Restrict this method to one thread at a time, so that updates from the library,
+            // which are on a different thread, don't interfere
+            this.updateSemaphore.Wait();
+
             IEnumerable<Song> filtered = this.Library.Songs.FilterSongs(this.SearchText).ToList();
 
             var artistInfos = filtered
@@ -251,6 +259,8 @@ namespace Espera.View.ViewModels
                 .ToList();
 
             this.SelectedSongs = this.SelectableSongs.Take(1);
+
+            this.updateSemaphore.Release();
         }
     }
 }

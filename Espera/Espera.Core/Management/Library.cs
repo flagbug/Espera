@@ -663,11 +663,23 @@ namespace Espera.Core.Management
 
         public void Save()
         {
-            IEnumerable<LocalSong> casted;
+            HashSet<LocalSong> casted;
 
             lock (this.songLock)
             {
-                casted = this.songs.Cast<LocalSong>().ToList();
+                casted = new HashSet<LocalSong>(this.songs.Cast<LocalSong>());
+            }
+
+            // Clean up the songs that aren't in the library anymore
+            // This happens when the user adds a song from a removable device to the playlistx
+            // then removes the device, so the song is removed from the library, but not from the playlist
+            foreach (Playlist playlist in this.playlists)
+            {
+                List<Song> removable = playlist.OfType<LocalSong>().Where(song => !casted.Contains(song)).Cast<Song>().ToList();
+
+                IEnumerable<int> indexes = playlist.GetIndexes(removable);
+
+                playlist.RemoveSongs(indexes);
             }
 
             this.libraryWriter.Write(casted, this.playlists);
