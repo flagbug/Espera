@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Windows.Input;
 
 namespace Espera.View.ViewModels
@@ -14,6 +15,7 @@ namespace Espera.View.ViewModels
         where T : SongViewModelBase
     {
         private readonly Library library;
+        private ObservableAsPropertyHelper<bool> isAdmin;
         private string searchText;
         private IEnumerable<T> selectableSongs;
         private IEnumerable<SongViewModelBase> selectedSongs;
@@ -51,6 +53,10 @@ namespace Espera.View.ViewModels
                     this.library.AddSongToPlaylist(this.SelectedSongs.Select(song => song.Model).Single());
                 }
             });
+
+            this.isAdmin = this.Library.AccessMode
+                .Select(x => x == AccessMode.Administrator)
+                .ToProperty(this, x => x.IsAdmin);
         }
 
         public event EventHandler TimeoutWarning;
@@ -59,7 +65,7 @@ namespace Espera.View.ViewModels
 
         public bool IsAdmin
         {
-            get { return this.library.AccessMode == AccessMode.Administrator; }
+            get { return this.isAdmin.Value; }
         }
 
         public bool IsSongSelected

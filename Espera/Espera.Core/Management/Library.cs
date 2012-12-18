@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,6 +15,7 @@ namespace Espera.Core.Management
 {
     public sealed class Library : IDisposable
     {
+        private readonly BehaviorSubject<AccessMode> accessModeSubject;
         private readonly AutoResetEvent cacheResetHandle;
 
         // We need a lock when disposing songs to prevent a modification of the enumeration
@@ -39,7 +42,8 @@ namespace Espera.Core.Management
             this.songLock = new object();
             this.songs = new HashSet<Song>();
             this.playlists = new List<Playlist>();
-            this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
+            this.accessModeSubject = new BehaviorSubject<AccessMode>(Management.AccessMode.Administrator); // We want implicit to be the administrator, till we change to user mode manually
+            this.accessMode = Management.AccessMode.Administrator;
             this.cacheResetHandle = new AutoResetEvent(false);
             this.driveWatcher = driveWatcher;
             this.libraryReader = libraryReader;
@@ -47,11 +51,6 @@ namespace Espera.Core.Management
             this.disposeLock = new object();
             this.settings = settings;
         }
-
-        /// <summary>
-        /// Occurs when <see cref="AccessMode"/> property has changed.
-        /// </summary>
-        public event EventHandler AccessModeChanged;
 
         /// <summary>
         /// Occurs when the playlist has changed.
@@ -93,32 +92,24 @@ namespace Espera.Core.Management
         /// <summary>
         /// Gets the access mode that is currently enabled.
         /// </summary>
-        public AccessMode AccessMode
+        public IObservable<AccessMode> AccessMode
         {
-            get { return this.accessMode; }
-            private set
-            {
-                if (this.AccessMode != value)
-                {
-                    this.accessMode = value;
-                    this.AccessModeChanged.RaiseSafe(this, EventArgs.Empty);
-                }
-            }
+            get { return this.accessModeSubject.AsObservable(); }
         }
 
         public bool CanAddSongToPlaylist
         {
-            get { return this.AccessMode == AccessMode.Administrator || this.RemainingPlaylistTimeout <= TimeSpan.Zero; }
+            get { return this.accessMode == Management.AccessMode.Administrator || this.RemainingPlaylistTimeout <= TimeSpan.Zero; }
         }
 
         public bool CanChangeTime
         {
-            get { return this.AccessMode == AccessMode.Administrator || !this.LockTime; }
+            get { return this.accessMode == Management.AccessMode.Administrator || !this.LockTime; }
         }
 
         public bool CanChangeVolume
         {
-            get { return this.AccessMode == AccessMode.Administrator || !this.LockVolume; }
+            get { return this.accessMode == Management.AccessMode.Administrator || !this.LockVolume; }
         }
 
         /// <summary>
@@ -145,7 +136,7 @@ namespace Espera.Core.Management
 
         public bool CanSwitchPlaylist
         {
-            get { return this.AccessMode == AccessMode.Administrator || !this.LockPlaylistSwitching; }
+            get { return this.accessMode == Management.AccessMode.Administrator || !this.LockPlaylistSwitching; }
         }
 
         public Playlist CurrentPlaylist { get; private set; }
@@ -455,7 +446,8 @@ namespace Espera.Core.Management
             if (this.password != adminPassword)
                 throw new WrongPasswordException("The password is incorrect.");
 
-            this.AccessMode = AccessMode.Administrator;
+            this.accessMode = Management.AccessMode.Administrator;
+            this.accessModeSubject.OnNext(Management.AccessMode.Administrator);
         }
 
         /// <summary>
@@ -463,7 +455,8 @@ namespace Espera.Core.Management
         /// </summary>
         public void ChangeToParty()
         {
-            this.AccessMode = AccessMode.Party;
+            this.accessMode = Management.AccessMode.Party;
+            this.accessModeSubject.OnNext(Management.AccessMode.Party);
         }
 
         /// <summary>
@@ -544,7 +537,7 @@ namespace Espera.Core.Management
         /// </summary>
         public void PauseSong()
         {
-            if (this.LockPlayPause && this.AccessMode == AccessMode.Party)
+            if (this.LockPlayPause && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to play when in party mode.");
 
             this.currentPlayer.Pause();
@@ -582,7 +575,7 @@ namespace Espera.Core.Management
             if (playlistIndex < 0)
                 Throw.ArgumentOutOfRangeException(() => playlistIndex, 0);
 
-            if (this.LockPlayPause && this.AccessMode == AccessMode.Party)
+            if (this.LockPlayPause && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to play when in party mode.");
 
             this.InternPlaySong(playlistIndex);
@@ -597,7 +590,7 @@ namespace Espera.Core.Management
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
 
-            if (this.LockLibraryRemoval && this.AccessMode == AccessMode.Party)
+            if (this.LockLibraryRemoval && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
 
             DisposeSongs(songList);
@@ -622,7 +615,7 @@ namespace Espera.Core.Management
             if (indexes == null)
                 Throw.ArgumentNullException(() => indexes);
 
-            if (this.LockPlaylistRemoval && this.AccessMode == AccessMode.Party)
+            if (this.LockPlaylistRemoval && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
 
             this.RemoveFromPlaylist(this.CurrentPlaylist, indexes);
@@ -978,7 +971,7 @@ namespace Espera.Core.Management
 
         private void ThrowIfNotAdmin()
         {
-            if (this.AccessMode != AccessMode.Administrator)
+            if (this.accessMode != Management.AccessMode.Administrator)
                 throw new InvalidOperationException("Not in administrator mode.");
         }
 

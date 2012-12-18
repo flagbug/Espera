@@ -19,6 +19,8 @@ namespace Espera.View.ViewModels
         private readonly IWindowManager windowManager;
         private ObservableAsPropertyHelper<bool> canLogin;
         private string creationPassword;
+        private ObservableAsPropertyHelper<bool> isAdmin;
+        private ObservableAsPropertyHelper<bool> isParty;
         private bool isWrongPassword;
         private string loginPassword;
         private bool show;
@@ -81,6 +83,14 @@ namespace Espera.View.ViewModels
 
             Observable.Merge(this.ChangeToPartyCommand, this.LoginCommand)
                 .Subscribe(p => this.RaisePropertyChanged(x => x.IsParty));
+
+            this.isAdmin = this.library.AccessMode
+                .Select(x => x == AccessMode.Administrator)
+                .ToProperty(this, x => x.IsAdmin);
+
+            this.isParty = this.library.AccessMode
+                .Select(x => x == AccessMode.Party)
+                .ToProperty(this, x => x.IsParty);
         }
 
         public bool CanCreateAdmin
@@ -135,7 +145,7 @@ namespace Espera.View.ViewModels
 
         public bool IsAdmin
         {
-            get { return this.library.AccessMode == AccessMode.Administrator; }
+            get { return this.isAdmin.Value; }
         }
 
         public bool IsAdminCreated
@@ -145,7 +155,7 @@ namespace Espera.View.ViewModels
 
         public bool IsParty
         {
-            get { return this.library.AccessMode == AccessMode.Party; }
+            get { return this.isParty.Value; }
         }
 
         public bool IsWrongPassword

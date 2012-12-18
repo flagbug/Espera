@@ -7,6 +7,8 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Threading;
 
 namespace Espera.Core.Tests
@@ -307,7 +309,8 @@ namespace Espera.Core.Tests
                 library.CreateAdmin("TestPassword");
                 library.ChangeToAdmin("TestPassword");
 
-                Assert.AreEqual(AccessMode.Administrator, library.AccessMode);
+                library.AccessMode.ObserveOn(ImmediateScheduler.Instance)
+                    .Subscribe(x => Assert.AreEqual(AccessMode.Administrator, x));
             }
         }
 

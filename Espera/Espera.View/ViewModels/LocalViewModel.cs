@@ -50,14 +50,10 @@ namespace Espera.View.ViewModels
             this.WhenAny(x => x.SearchText, x => x.SelectedArtist, (x1, x2) => Unit.Default)
                 .Subscribe(x => this.UpdateSelectableSongs());
 
-            var accessModeChanged = Observable.FromEventPattern(
-                handler => this.Library.AccessModeChanged += handler,
-                handler => this.Library.AccessModeChanged -= handler);
-
             IObservable<bool> canRemoveFromLibrary = this
                 .WhenAny(x => x.SelectedSongs, x => x.Value)
-                .CombineLatest(accessModeChanged,
-                    (selectedSongs, handler) =>
+                .CombineLatest(this.Library.AccessMode,
+                    (selectedSongs, accessMode) =>
                         selectedSongs != null && selectedSongs.Any() &&
                         (this.IsAdmin || !this.Library.LockLibraryRemoval));
 

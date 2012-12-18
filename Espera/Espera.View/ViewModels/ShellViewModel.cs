@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Timers;
 using System.Windows.Input;
@@ -39,7 +40,7 @@ namespace Espera.View.ViewModels
             this.library.SongStarted += (sender, args) => this.HandleSongStarted();
             this.library.SongFinished += (sender, args) => this.HandleSongFinished();
             this.library.SongCorrupted += (sender, args) => this.HandleSongCorrupted();
-            this.library.AccessModeChanged += (sender, e) => this.UpdateUserAccess();
+            this.library.AccessMode.Subscribe(x => this.UpdateUserAccess());
             this.library.PlaylistChanged += (sender, e) => this.UpdatePlaylist();
 
             if (!this.library.Playlists.Any())
@@ -67,17 +68,15 @@ namespace Espera.View.ViewModels
             this.playlistTimeoutUpdateTimer.Elapsed += (sender, e) => this.UpdateRemainingPlaylistTimeout();
             this.playlistTimeoutUpdateTimer.Start();
 
-            this.IsLocal = true;
-
             this.currentSongSource = this.WhenAny(x => x.IsLocal, x => x.IsYoutube,
                 (x1, x2) => x1.Value ? (ISongSourceViewModel)this.LocalViewModel : this.YoutubeViewModel)
-                .ToProperty(this, x => x.CurrentSongSource);
+                .ToProperty(this, x => x.CurrentSongSource, null, ImmediateScheduler.Instance);
 
-            this.isAdmin = Observable.FromEventPattern(
-                handler => this.library.AccessModeChanged += handler,
-                handler => this.library.AccessModeChanged -= handler)
-            .Select(x => this.library.AccessMode == AccessMode.Administrator)
-            .ToProperty(this, x => x.IsAdmin);
+            IObservable<bool> isAdminObservable = this.library.AccessMode
+                .Select(x => x == AccessMode.Administrator);
+
+            this.isAdmin = isAdminObservable
+                .ToProperty(this, x => x.IsAdmin);
 
             this.MuteCommand = new ReactiveCommand(this.isAdmin);
             this.MuteCommand.Subscribe(x => this.Volume = 0);
@@ -85,8 +84,10 @@ namespace Espera.View.ViewModels
             this.UnMuteCommand = new ReactiveCommand(this.isAdmin);
             this.UnMuteCommand.Subscribe(x => this.Volume = 1);
 
-            this.canModifyWindow = this.isAdmin.Select(x => x || !Settings.Default.LockWindow)
+            this.canModifyWindow = isAdminObservable.Select(isAdmin => isAdmin || !Settings.Default.LockWindow)
                 .ToProperty(this, x => x.CanModifyWindow);
+
+            this.IsLocal = true;
         }
 
         /// <summary>
