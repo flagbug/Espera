@@ -47,7 +47,7 @@ namespace Espera.View.ViewModels
                     {
                         try
                         {
-                            FogBugzService.SubmitCrashReport(this.exception.Message, this.exception.StackTrace);
+                            FogBugzService.SubmitReport(this.ReportContent);
 
                             this.SendingSucceeded = true;
                         }

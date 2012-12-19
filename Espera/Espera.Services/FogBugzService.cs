@@ -8,19 +8,16 @@ namespace Espera.Services
 {
     public static class FogBugzService
     {
-        public static void SubmitCrashReport(string message, string stackTrace)
+        public static void SubmitReport(string message)
         {
             if (message == null)
                 Throw.ArgumentNullException(() => message);
-
-            if (stackTrace == null)
-                Throw.ArgumentNullException(() => stackTrace);
 
             string url = "https://espera.fogbugz.com/scoutSubmit.asp";
             string userName = "Dennis Daume";
             string project = "Espera";
             string area = "CrashReports";
-            string body = message + "\n\n" + stackTrace;
+            string body = message;
 
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.ContentType = "application/x-www-form-urlencoded";
