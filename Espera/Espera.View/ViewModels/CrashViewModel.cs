@@ -1,9 +1,9 @@
 ﻿using Espera.Services;
-using Rareform.Patterns.MVVM;
 using ReactiveUI;
+using ReactiveUI.Xaml;
 using System;
+using System.Reactive.Linq;
 using System.Reflection;
-using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
@@ -17,6 +17,25 @@ namespace Espera.View.ViewModels
         {
             this.exception = exception;
             this.version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+            this.SubmitCrashReport = new ReactiveCommand(
+                this.WhenAny(x => x.SendingSucceeded, x => x.Value)
+                .Select(x => x == null || !x.Value));
+
+            this.SubmitCrashReport.Subscribe(x =>
+            {
+                try
+                {
+                    FogBugzService.SubmitCrashReport(this.exception.Message, this.exception.StackTrace);
+
+                    this.sendingSucceeded = true;
+                }
+
+                catch (Exception)
+                {
+                    this.SendingSucceeded = false;
+                }
+            });
         }
 
         public string ReportContent
@@ -27,32 +46,9 @@ namespace Espera.View.ViewModels
         public bool? SendingSucceeded
         {
             get { return this.sendingSucceeded; }
-            set { this.RaiseAndSetIfChanged(value); }
+            private set { this.RaiseAndSetIfChanged(value); }
         }
 
-        public ICommand SubmitCrashReport
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        try
-                        {
-                            FogBugzService.SubmitCrashReport(this.exception.Message, this.exception.StackTrace);
-
-                            this.SendingSucceeded = true;
-                        }
-
-                        catch (Exception)
-                        {
-                            this.SendingSucceeded = false;
-                        }
-                    },
-                    param => this.SendingSucceeded == null || !this.SendingSucceeded.Value
-                );
-            }
-        }
+        public IReactiveCommand SubmitCrashReport { get; private set; }
     }
 }
