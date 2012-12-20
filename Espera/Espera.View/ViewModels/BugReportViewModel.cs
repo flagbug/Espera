@@ -24,7 +24,7 @@ namespace Espera.View.ViewModels
             {
                 try
                 {
-                    FogBugzService.SubmitCrashReport("Version " + this.version + "\n\n" + this.Message, String.Empty);
+                    FogBugzService.SubmitReport("Version " + this.version + "\n\n" + this.Message);
 
                     this.SendingSucceeded = true;
                 }
