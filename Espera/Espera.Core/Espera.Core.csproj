@@ -97,6 +97,7 @@
     <Compile Include="LocalSongFinder.cs" />
     <Compile Include="SongFinder.cs" />
     <Compile Include="IVideoPlayerCallback.cs" />
+    <Compile Include="TagSanitizer.cs" />
     <Compile Include="YoutubeSong.cs" />
     <Compile Include="YoutubeSongFinder.cs" />
   </ItemGroup>
