@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Espera.Core.Audio;
+using Rareform.IO;
+using Rareform.Validation;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Espera.Core.Audio;
-using Rareform.IO;
-using Rareform.Validation;
 using TagLib;
 
 namespace Espera.Core
@@ -116,13 +116,13 @@ namespace Espera.Core
         private static LocalSong CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath)
         {
             return new LocalSong(filePath, audioType, duration)
-                       {
-                           Album = tag.Album ?? String.Empty,
-                           Artist = tag.FirstPerformer ?? "Unknown Artist",
-                           Genre = tag.FirstGenre ?? String.Empty,
-                           Title = tag.Title ?? Path.GetFileNameWithoutExtension(filePath),
-                           TrackNumber = (int)tag.Track
-                       };
+            {
+                Album = tag.Album ?? String.Empty,
+                Artist = tag.FirstPerformer ?? "Unknown Artist",
+                Genre = tag.FirstGenre ?? String.Empty,
+                Title = tag.Title ?? Path.GetFileNameWithoutExtension(filePath),
+                TrackNumber = (int)tag.Track
+            };
         }
 
         private void AddSong(TagLib.File file, AudioType audioType)
