@@ -1,3 +1,9 @@
+----------------------------------- v1.6.8 -----------------------------------
+
+BUGFIXES:
+- Fixed a bug that caused the application to crash when closing, for libraries 
+  that contained songs with special characters in their tags.
+
 ----------------------------------- v1.6.7 -----------------------------------
 
 BUGFIXES:
