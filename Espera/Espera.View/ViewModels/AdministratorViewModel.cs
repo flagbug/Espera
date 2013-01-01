@@ -91,7 +91,7 @@ namespace Espera.View.ViewModels
 
         public string Homepage
         {
-            get { return "http://github.com/flagbug/Espera"; }
+            get { return "http://espera.flagbug.com"; }
         }
 
         public bool IsAdmin
