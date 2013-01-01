@@ -17,14 +17,17 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <PlatformTarget>x86</PlatformTarget>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\Release\</OutputPath>
     <PlatformTarget>x86</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Google.GData.Client, Version=2.1.0.0, Culture=neutral, PublicKeyToken=04a59ca9b0273830, processorArchitecture=MSIL">
