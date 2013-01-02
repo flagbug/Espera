@@ -35,11 +35,11 @@ FEATURES:
 - New color: orange.
 
 IMPROVEMENTS:
-- A bug- and crash report now also sends the application version.
+- A bug and crash report now also sends the application version.
 
 ----------------------------------- v1.6.2 -----------------------------------
 
-BUGIXES:
+BUGFIXES:
 - Fixed a bug that caused the application to crash when performing operations 
   that stop a local song.
 
