@@ -8,7 +8,7 @@ BUGFIXES:
 
 BUGFIXES:
 - Fixed YouTube playback.
-- Fixes a bug that caused a crash report to not send the version number.
+- Fixed a bug that caused a crash report to not send the version number.
 
 ----------------------------------- v1.6.6 -----------------------------------
 
