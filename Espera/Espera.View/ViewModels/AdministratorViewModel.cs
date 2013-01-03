@@ -217,6 +217,11 @@ namespace Espera.View.ViewModels
             set { this.library.PlaylistTimeout = TimeSpan.FromSeconds(value); }
         }
 
+        public string ReleaseNotes
+        {
+            get { return "http://espera.flagbug.com/release-notes"; }
+        }
+
         public ICommand ReportBugCommand
         {
             get

@@ -937,6 +937,11 @@
                                 </Hyperlink>
                             </TextBlock>
                             <TextBlock>
+                                <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=ReleaseNotes}">
+                                    <Run Foreground="#FF00B7C0" Text="Release Notes" />
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBlock>
                                 <Hyperlink Command="{Binding Path=ReportBugCommand}">
                                     <Run Foreground="#FF00B7C0" Text="Report a bug" />
                                 </Hyperlink>
