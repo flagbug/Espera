@@ -1,3 +1,11 @@
+----------------------------------- v1.6.9 -----------------------------------
+
+FEATURES:
+- Added a link to the release notes in the about section.
+
+CHANGES:
+- Updated the website link in the about section.
+
 ----------------------------------- v1.6.8 -----------------------------------
 
 BUGFIXES:
