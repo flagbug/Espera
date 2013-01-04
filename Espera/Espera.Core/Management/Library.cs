@@ -550,6 +550,12 @@ namespace Espera.Core.Management
             this.currentPlayer.Pause();
         }
 
+        public void PlayInstantly(IEnumerable<Song> songList)
+        {
+            if (songList == null)
+                Throw.ArgumentNullException(() => songList);
+        }
+
         /// <summary>
         /// Plays the next song in the playlist.
         /// </summary>

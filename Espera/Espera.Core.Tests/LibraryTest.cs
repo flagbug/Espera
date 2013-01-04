@@ -567,6 +567,61 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void PlayInstantly_MultipleSongs_PlaysSongsInRow()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                var player = new Mock<AudioPlayer>();
+
+                Mock<Song>[] songs = Helpers.CreateSongMocks(2, false);
+                songs[0].Setup(p => p.CreateAudioPlayer()).Returns(player.Object);
+                songs[1].Setup(p => p.CreateAudioPlayer()).Returns(player.Object);
+
+                var handle = new ManualResetEventSlim();
+
+                library.SongStarted += (sender, args) => handle.Set();
+
+                library.PlayInstantly(new[] { songs[0].Object });
+
+                handle.Wait();
+                handle.Wait();
+
+                player.Verify(p => p.Play(), Times.Exactly(2));
+            }
+        }
+
+        [Test]
+        public void PlayInstantly_OneSong_PlaysSong()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                var player = new Mock<AudioPlayer>();
+
+                Mock<Song> song = Helpers.CreateSongMock();
+                song.Setup(p => p.CreateAudioPlayer()).Returns(player.Object);
+
+                var handle = new ManualResetEventSlim();
+
+                library.SongStarted += (sender, args) => handle.Set();
+
+                library.PlayInstantly(new[] { song.Object });
+
+                handle.Wait();
+
+                player.Verify(p => p.Play(), Times.Once());
+            }
+        }
+
+        [Test]
+        public void PlayInstantly_SongListIsNull_ThrowsArgumentNullException()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                Assert.Throws<ArgumentNullException>(() => library.PlayInstantly(null));
+            }
+        }
+
+        [Test]
         public void PlayNextSong_UserIsNotAdministrator_ThrowsInvalidOperationException()
         {
             using (Library library = Helpers.CreateLibrary())
