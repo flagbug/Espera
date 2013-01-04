@@ -140,7 +140,7 @@ namespace Espera.View.ViewModels
 
         public string Homepage
         {
-            get { return "http://github.com/flagbug/Espera"; }
+            get { return "http://espera.flagbug.com"; }
         }
 
         public bool IsAdmin
@@ -227,6 +227,11 @@ namespace Espera.View.ViewModels
         {
             get { return (int)this.library.PlaylistTimeout.TotalSeconds; }
             set { this.library.PlaylistTimeout = TimeSpan.FromSeconds(value); }
+        }
+
+        public string ReleaseNotes
+        {
+            get { return "http://espera.flagbug.com/release-notes"; }
         }
 
         public IReactiveCommand ReportBugCommand { get; private set; }

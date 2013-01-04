@@ -67,12 +67,17 @@ namespace Espera.Core
         {
             return new LocalSong(filePath, audioType, duration)
             {
-                Album = tag.Album ?? String.Empty,
-                Artist = tag.FirstPerformer ?? "Unknown Artist",
-                Genre = tag.FirstGenre ?? String.Empty,
-                Title = tag.Title ?? Path.GetFileNameWithoutExtension(filePath),
+                Album = PrepareTag(tag.Album, String.Empty),
+                Artist = PrepareTag(tag.FirstPerformer, "Unknown Artist"), //HACK: In the future retrieve the string for an unkown artist from the view if we want to localize it
+                Genre = PrepareTag(tag.FirstGenre, String.Empty),
+                Title = PrepareTag(tag.Title, Path.GetFileNameWithoutExtension(filePath)),
                 TrackNumber = (int)tag.Track
             };
+        }
+
+        private static string PrepareTag(string tag, string replacementIfNull)
+        {
+            return tag == null ? replacementIfNull : TagSanitizer.Sanitize(tag);
         }
 
         private void AddSong(TagLib.File file, AudioType audioType)
