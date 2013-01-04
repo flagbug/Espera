@@ -81,7 +81,6 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Audio\SongLoadException.cs" />
-    <Compile Include="BackingFieldSubject.cs" />
     <Compile Include="CoreSettings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
