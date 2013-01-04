@@ -42,6 +42,9 @@
     <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>Properties\GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="FogBugzService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
