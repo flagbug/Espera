@@ -1,5 +1,7 @@
 # Espera
-
+<a href="http://flattr.com/thing/1092917/Espera" target="_blank">
+<img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" />
+</a>
 ## Overview
 
 Espera is an open-source media player that plays MP3s, WAV files and YouTube videos and has a special "party mode".
