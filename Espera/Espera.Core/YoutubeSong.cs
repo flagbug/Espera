@@ -73,27 +73,27 @@ namespace Espera.Core
 
             catch (IOException)
             {
-                this.OnCachingFailed(EventArgs.Empty);
+                this.OnCachingFailed();
             }
 
             catch (WebException)
             {
-                this.OnCachingFailed(EventArgs.Empty);
+                this.OnCachingFailed();
             }
 
             catch (VideoNotAvailableException)
             {
-                this.OnCachingFailed(EventArgs.Empty);
+                this.OnCachingFailed();
             }
 
             catch (YoutubeParseException)
             {
-                this.OnCachingFailed(EventArgs.Empty);
+                this.OnCachingFailed();
             }
 
             catch (AudioExtractionException)
             {
-                this.OnCachingFailed(EventArgs.Empty);
+                this.OnCachingFailed();
             }
 
             finally

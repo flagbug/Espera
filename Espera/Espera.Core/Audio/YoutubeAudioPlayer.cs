@@ -85,7 +85,7 @@ namespace Espera.Core.Audio
             this.isPlaying = false;
             this.isStopped = true;
 
-            this.OnSongFinished(EventArgs.Empty);
+            this.OnSongFinished();
         }
 
         public override void Load()

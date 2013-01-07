@@ -1,9 +1,9 @@
 ﻿using Espera.Core.Audio;
-using Rareform.Extensions;
 using Rareform.Validation;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
@@ -15,7 +15,10 @@ namespace Espera.Core
     [DebuggerDisplay("{Artist}-{Album}-{Title}")]
     public abstract class Song : IEquatable<Song>
     {
+        private readonly Subject<Unit> cachingCompleted;
+        private readonly Subject<Unit> cachingFailed;
         private readonly Subject<int> cachingProgress;
+        private readonly Subject<Unit> corrupted;
         private bool isCached;
         private bool isCorrupted;
 
@@ -41,13 +44,10 @@ namespace Espera.Core
             this.Title = String.Empty;
 
             this.cachingProgress = new Subject<int>();
+            this.cachingCompleted = new Subject<Unit>();
+            this.cachingFailed = new Subject<Unit>();
+            this.corrupted = new Subject<Unit>();
         }
-
-        public event EventHandler CachingCompleted;
-
-        public event EventHandler CachingFailed;
-
-        public event EventHandler Corrupted;
 
         public string Album { get; set; }
 
@@ -55,12 +55,27 @@ namespace Espera.Core
 
         public AudioType AudioType { get; private set; }
 
+        public IObservable<Unit> CachingCompleted
+        {
+            get { return this.cachingCompleted.AsObservable(); }
+        }
+
+        public IObservable<Unit> CachingFailed
+        {
+            get { return this.cachingFailed.AsObservable(); }
+        }
+
         /// <summary>
         /// Gets the caching progress in a range from 0 to 100.
         /// </summary>
         public IObservable<int> CachingProgress
         {
             get { return this.cachingProgress.AsObservable(); }
+        }
+
+        public IObservable<Unit> Corrupted
+        {
+            get { return this.corrupted.AsObservable(); }
         }
 
         public TimeSpan Duration { get; private set; }
@@ -92,7 +107,7 @@ namespace Espera.Core
                 {
                     this.OnCachingProgressChanged(100);
                     this.IsCaching = false;
-                    this.CachingCompleted.RaiseSafe(this, EventArgs.Empty);
+                    this.cachingCompleted.OnNext(Unit.Default);
                 }
             }
         }
@@ -118,7 +133,7 @@ namespace Espera.Core
 
                 if (this.isCorrupted)
                 {
-                    this.Corrupted.RaiseSafe(this, EventArgs.Empty);
+                    this.corrupted.OnNext(Unit.Default);
                 }
             }
         }
@@ -205,13 +220,9 @@ namespace Espera.Core
         /// <returns>The audio player for playback.</returns>
         internal abstract AudioPlayer CreateAudioPlayer();
 
-        /// <summary>
-        /// Raises the <see cref="CachingFailed"/> event.
-        /// </summary>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected void OnCachingFailed(EventArgs e)
+        protected void OnCachingFailed()
         {
-            this.CachingFailed.RaiseSafe(this, e);
+            this.cachingFailed.OnNext(Unit.Default);
         }
 
         /// <summary>

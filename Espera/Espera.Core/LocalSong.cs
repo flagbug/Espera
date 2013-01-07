@@ -55,7 +55,7 @@ namespace Espera.Core
 
             catch (IOException)
             {
-                this.OnCachingFailed(EventArgs.Empty);
+                this.OnCachingFailed();
             }
 
             finally

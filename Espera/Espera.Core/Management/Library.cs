@@ -965,7 +965,7 @@ namespace Espera.Core.Management
                 this.VideoPlayerCallbackChanged.RaiseSafe(this, EventArgs.Empty);
             }
 
-            this.currentPlayer.SongFinished += (sender, e) => this.HandleSongFinish();
+            this.currentPlayer.SongFinished.Subscribe(x => this.HandleSongFinish());
             this.currentPlayer.Volume = this.Volume;
         }
 
