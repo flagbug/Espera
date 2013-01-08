@@ -30,9 +30,9 @@ namespace Espera.View.ViewModels
             this.hasCachingFailed = this.Model.CachingFailed.Select(x => true)
                 .ToProperty(this, x => x.HasCachingFailed);
 
-            this.showCaching = Observable
-                .CombineLatest(this.Model.CachingCompleted.StartWith(Unit.Default), this.Model.CachingProgress.DistinctUntilChanged(), (unit, i) => i)
-                .Select(x => this.Model.HasToCache && x != 100 || this.HasCachingFailed)
+            this.showCaching = this.Model.CachingCompleted.StartWith(Unit.Default)
+                .CombineLatest(this.Model.CachingProgress.DistinctUntilChanged(), (unit, progress) => progress)
+                .Select(progress => this.Model.HasToCache && progress != 100 || this.HasCachingFailed)
                 .ToProperty(this, x => x.ShowCaching);
 
             this.Model.Corrupted.Subscribe(x => this.RaisePropertyChanged(p => p.IsCorrupted));
