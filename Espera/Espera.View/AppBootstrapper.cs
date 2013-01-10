@@ -6,6 +6,7 @@ using Espera.View.ViewModels;
 using Ninject;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
@@ -75,6 +76,9 @@ namespace Espera.View
 
         protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
+            if (Debugger.IsAttached)
+                return;
+
             this.Application.MainWindow.Hide();
 
             this.windowManager.ShowDialog(new CrashViewModel(e.Exception));

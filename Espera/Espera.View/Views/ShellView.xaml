@@ -91,7 +91,7 @@
         <Controls:Flyout Header="settings"
                          IsOpen="{Binding Path=SettingsViewModel.Show}"
                          Position="Right">
-            <Views:SettingsView DataContext="{Binding Path=SettingsViewModel}" />
+            <Views:SettingsView Width="500" DataContext="{Binding Path=SettingsViewModel}" />
         </Controls:Flyout>
     </Controls:MetroWindow.Flyouts>
     <Grid x:Name="mainGrid" Margin="10">
@@ -846,23 +846,6 @@
                     </StackPanel>
                 </Grid>
                 <Grid Visibility="{Binding Path=IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <ScrollViewer>
-                        <StackPanel Margin="5, 0, 5, 0">
-                            <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="settings" />
-                            <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="party mode" />
-                            <CheckBox Margin="30, 5, 0, 0"
-                                      IsChecked="{Binding Path=GoFullScreenOnLock}"
-                                      IsEnabled="{Binding Path=LockWindow}" />
-                            <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="youtube" />
-                            <CheckBox IsChecked="{Binding Path=StreamYoutube}">
-                                <AccessText Text="Stream from Youtube instead of downloading.&#10;Changing this option requires a restart." TextWrapping="Wrap" />
-                            </CheckBox>
-                        </StackPanel>
-                    </ScrollViewer>
                     <StackPanel Grid.Row="1"
                                 Margin="10, 0, 10, 10"
                                 Orientation="Vertical">

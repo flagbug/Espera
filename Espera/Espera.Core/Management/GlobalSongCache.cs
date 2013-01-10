@@ -1,23 +1,17 @@
-﻿using System.Collections.Concurrent;
+﻿using Rareform.Validation;
 using System.Threading;
 using System.Threading.Tasks;
-using Rareform.Validation;
 
 namespace Espera.Core.Management
 {
     internal sealed class GlobalSongCacheQueue
     {
         private static GlobalSongCacheQueue instance;
-        private readonly ConcurrentQueue<Song> cachingQueue;
+        private readonly SemaphoreSlim countblock;
 
         private GlobalSongCacheQueue()
         {
-            this.cachingQueue = new ConcurrentQueue<Song>();
-
-            for (int i = 0; i < 10; i++)
-            {
-                Task.Factory.StartNew(Cache, TaskCreationOptions.LongRunning);
-            }
+            this.countblock = new SemaphoreSlim(10, 10);
         }
 
         public static GlobalSongCacheQueue Instance
@@ -30,25 +24,14 @@ namespace Espera.Core.Management
             if (song == null)
                 Throw.ArgumentNullException(() => song);
 
-            this.cachingQueue.Enqueue(song);
-        }
-
-        private void Cache()
-        {
-            while (true)
+            Task.Factory.StartNew(() =>
             {
-                Song song;
+                this.countblock.Wait();
 
-                if (this.cachingQueue.TryDequeue(out song))
-                {
-                    song.LoadToCache();
-                }
+                song.LoadToCache();
 
-                else
-                {
-                    Thread.Sleep(500);
-                }
-            }
+                this.countblock.Release();
+            });
         }
     }
 }

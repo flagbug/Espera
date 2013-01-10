@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="Espera.View.Views.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:ViewModels="clr-namespace:Espera.View.ViewModels"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -15,9 +16,9 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border Width="40"
-                                    Height="40"
-                                    Margin="5, 0, 5, 0"
+                            <Border Width="150"
+                                    Height="150"
+                                    Margin="0, 0, 20, 20"
                                     Background="{TemplateBinding Background}">
                                 <ContentPresenter />
                             </Border>
@@ -34,35 +35,48 @@
                 </Style.Triggers>
             </Style>
             <Style x:Key="SettingsHeaderStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="48" />
+                <Setter Property="FontSize" Value="64" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
                 <!--  For some reason the foreground has to be set manually, otherwise it would be black.  -->
                 <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
             </Style>
+            <Style BasedOn="{StaticResource {x:Type Controls:ToggleSwitch}}" TargetType="{x:Type Controls:ToggleSwitch}">
+                <Setter Property="Margin" Value="0, 10, 0, 0" />
+                <Setter Property="OnLabel" Value="Yes" />
+                <Setter Property="OffLabel" Value="No" />
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <TabControl Padding="10, 0, 10, 10">
+        <TabControl Padding="10, 0, 0, 0">
             <TabItem Header="appearance">
                 <StackPanel>
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="accent color" />
-                    <StackPanel Margin="-5, 0, 0, 0"
+                    <StackPanel Margin="0, 10, 0, 0"
                                 HorizontalAlignment="Left"
-                                VerticalAlignment="Top"
-                                Orientation="Horizontal">
-                        <Button Background="#CCCB0000"
-                                Command="{Binding Path=ChangeAccentColorCommand}"
-                                CommandParameter="Red"
-                                Style="{StaticResource ColorPickerButtonStyle}" />
-                        <Button Background="#CC48CB00"
-                                Command="{Binding Path=ChangeAccentColorCommand}"
-                                CommandParameter="Green"
-                                Style="{StaticResource ColorPickerButtonStyle}" />
-                        <Button Background="#FF1C739D"
-                                Command="{Binding Path=ChangeAccentColorCommand}"
-                                CommandParameter="Blue"
-                                Style="{StaticResource ColorPickerButtonStyle}" />
-                        <Button Background="#CCB400FF"
+                                VerticalAlignment="Top">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Background="#CCCB0000"
+                                    Command="{Binding Path=ChangeAccentColorCommand}"
+                                    CommandParameter="Red"
+                                    Style="{StaticResource ColorPickerButtonStyle}" />
+                            <Button Background="#CC48CB00"
+                                    Command="{Binding Path=ChangeAccentColorCommand}"
+                                    CommandParameter="Green"
+                                    Style="{StaticResource ColorPickerButtonStyle}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Background="#FF1C739D"
+                                    Command="{Binding Path=ChangeAccentColorCommand}"
+                                    CommandParameter="Blue"
+                                    Style="{StaticResource ColorPickerButtonStyle}" />
+                            <Button Background="#FFDE872A"
+                                    Command="{Binding Path=ChangeAccentColorCommand}"
+                                    CommandParameter="Orange"
+                                    Style="{StaticResource ColorPickerButtonStyle}" />
+                        </StackPanel>
+                        <Button HorizontalAlignment="Left"
+                                Background="#CCB400FF"
                                 Command="{Binding Path=ChangeAccentColorCommand}"
                                 CommandParameter="Purple"
                                 Style="{StaticResource ColorPickerButtonStyle}" />
@@ -71,27 +85,13 @@
             </TabItem>
             <TabItem Header="party mode">
                 <StackPanel>
-                    <CheckBox IsChecked="{Binding Path=LockPlayPause}">
-                        <AccessText Text="Lock play/pause" TextWrapping="Wrap" />
-                    </CheckBox>
-                    <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=LockVolume}">
-                        <AccessText Text="Lock volume" TextWrapping="Wrap" />
-                    </CheckBox>
-                    <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=LockTime}">
-                        <AccessText Text="Lock time" TextWrapping="Wrap" />
-                    </CheckBox>
-                    <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=LockPlaylistSwitching}">
-                        <AccessText Text="Lock playlist switching" TextWrapping="Wrap" />
-                    </CheckBox>
-                    <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=LockPlaylistRemoval}">
-                        <AccessText Text="Lock song removal from playlist" TextWrapping="Wrap" />
-                    </CheckBox>
-                    <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=LockLibraryRemoval}">
-                        <AccessText Text="Lock song removal from library" TextWrapping="Wrap" />
-                    </CheckBox>
-                    <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=EnablePlaylistTimeout}">
-                        <AccessText Text="Enable timeout when adding songs to the playlist" TextWrapping="Wrap" />
-                    </CheckBox>
+                    <Controls:ToggleSwitch Header="Lock play/pause" IsChecked="{Binding Path=LockPlayPause}" />
+                    <Controls:ToggleSwitch Header="Lock volume" IsChecked="{Binding Path=LockVolume}" />
+                    <Controls:ToggleSwitch Header="Lock time" IsChecked="{Binding Path=LockTime}" />
+                    <Controls:ToggleSwitch Header="Lock playlist switching" IsChecked="{Binding Path=LockPlaylistSwitching}" />
+                    <Controls:ToggleSwitch Header="Lock song removal from playlist" IsChecked="{Binding Path=LockPlaylistRemoval}" />
+                    <Controls:ToggleSwitch Header="Lock song removal from library" IsChecked="{Binding Path=LockLibraryRemoval}" />
+                    <Controls:ToggleSwitch Header="Enable timeout when adding songs to the playlist" IsChecked="{Binding Path=EnablePlaylistTimeout}" />
                     <StackPanel Margin="30, 5, 0, 0"
                                 IsEnabled="{Binding Path=EnablePlaylistTimeout}"
                                 Orientation="Horizontal">
@@ -105,25 +105,29 @@
                                    VerticalAlignment="Center"
                                    Text="Seconds" />
                     </StackPanel>
-                    <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=LockWindow}">
-                        <AccessText Text="Lock window (minimize, maximize, close)" TextWrapping="Wrap" />
-                    </CheckBox>
-                    <CheckBox Margin="30, 5, 0, 0"
-                              IsChecked="{Binding Path=GoFullScreenOnLock}"
-                              IsEnabled="{Binding Path=LockWindow}">
-                        <AccessText Text="Make window fullscreen" TextWrapping="Wrap" />
-                    </CheckBox>
+                    <Controls:ToggleSwitch Header="Lock window (minimize, maximize, close)" IsChecked="{Binding Path=LockWindow}" />
+                    <Controls:ToggleSwitch Margin="30, 0, 0, 0"
+                                           Header="Make window fullscreen"
+                                           IsChecked="{Binding Path=GoFullScreenOnLock}"
+                                           IsEnabled="{Binding Path=LockWindow}" />
                 </StackPanel>
             </TabItem>
-            <TabItem Header="youtube" />
+            <TabItem Header="youtube">
+                <Controls:ToggleSwitch Header="Stream from Youtube instead of downloading.&#10;Changing this option requires a restart." IsChecked="{Binding Path=StreamYoutube}" />
+            </TabItem>
             <TabItem Header="about">
                 <StackPanel>
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="espera" />
-                    <TextBlock Text="{Binding Path=Version, StringFormat=Version \{0\}}" />
+                    <TextBlock Margin="0, 10, 0, 0" Text="{Binding Path=Version, StringFormat=Version \{0\}}" />
                     <TextBlock Text="Author: Dennis Daume" />
                     <TextBlock>
                         <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=Homepage}">
                             <Run Foreground="#FF00B7C0" Text="Project Website" />
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
+                        <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=ReleaseNotes}">
+                            <Run Foreground="#FF00B7C0" Text="Release Notes" />
                         </Hyperlink>
                     </TextBlock>
                     <TextBlock>

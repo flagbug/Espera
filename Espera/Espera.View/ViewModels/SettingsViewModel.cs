@@ -64,12 +64,7 @@ namespace Espera.View.ViewModels
 
         public string Homepage
         {
-            get { return "http://github.com/flagbug/Espera"; }
-        }
-
-        public string IssuesPage
-        {
-            get { return "http://github.com/flagbug/Espera/issues"; }
+            get { return "http://espera.flagbug.com"; }
         }
 
         public bool LockLibraryRemoval
@@ -138,6 +133,11 @@ namespace Espera.View.ViewModels
             set { this.library.PlaylistTimeout = TimeSpan.FromSeconds(value); }
         }
 
+        public string ReleaseNotes
+        {
+            get { return "http://espera.flagbug.com/release-notes"; }
+        }
+
         public ICommand ReportBugCommand
         {
             get
@@ -157,6 +157,12 @@ namespace Espera.View.ViewModels
                     this.NotifyOfPropertyChange(() => this.Show);
                 }
             }
+        }
+
+        public bool StreamYoutube
+        {
+            get { return this.library.StreamYoutube; }
+            set { this.library.StreamYoutube = value; }
         }
 
         public string Version

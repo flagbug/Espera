@@ -112,11 +112,5 @@ namespace Espera.View.ViewModels
         }
 
         public string LoginPassword { get; set; }
-
-        public bool StreamYoutube
-        {
-            get { return this.library.StreamYoutube; }
-            set { this.library.StreamYoutube = value; }
-        }
     }
 }
