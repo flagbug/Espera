@@ -48,7 +48,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <TabControl Padding="10, 0, 0, 0">
+        <TabControl Padding="15, 0, 15, 0">
             <TabItem Header="appearance">
                 <StackPanel>
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="accent color" />
