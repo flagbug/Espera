@@ -69,37 +69,20 @@ namespace Espera.View.Views
             ThemeManager.ChangeTheme(this, ThemeManager.DefaultAccents.First(accent => accent.Name == color), Theme.Dark);
         }
 
-        private void CreateAdminButtonClick(object sender, RoutedEventArgs e)
-        {
-            ICommand command = this.shellViewModel.AdministratorViewModel.CreateAdminCommand;
-
-            if (command.CanExecute(null))
-            {
-                command.Execute(null);
-            }
-
-            this.adminPasswordBox.Password = String.Empty;
-        }
-
-        private void CreationPasswordChanged(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.AdministratorViewModel.CreationPassword = ((PasswordBox)sender).Password;
-        }
-
         private void LoginButtonClick(object sender, RoutedEventArgs e)
         {
-            ICommand command = this.shellViewModel.AdministratorViewModel.LoginCommand;
+            ICommand command = this.shellViewModel.SettingsViewModel.LoginCommand;
             if (command.CanExecute(null))
             {
                 command.Execute(null);
             }
 
-            this.loginPasswordBox.Password = String.Empty;
+            this.LoginPasswordBox.Password = String.Empty;
         }
 
         private void LoginPasswordChanged(object sender, RoutedEventArgs e)
         {
-            this.shellViewModel.AdministratorViewModel.LoginPassword = ((PasswordBox)sender).Password;
+            this.shellViewModel.SettingsViewModel.LoginPassword = ((PasswordBox)sender).Password;
         }
 
         private void MainWindowMouseDown(object sender, MouseButtonEventArgs e)

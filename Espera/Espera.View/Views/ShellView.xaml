@@ -89,9 +89,34 @@
     </Controls:MetroWindow.WindowCommands>
     <Controls:MetroWindow.Flyouts>
         <Controls:Flyout Header="settings"
-                         IsOpen="{Binding Path=SettingsViewModel.Show}"
+                         IsOpen="{Binding Path=SettingsViewModel.ShowSettings}"
                          Position="Right">
             <Views:SettingsView Width="500" DataContext="{Binding Path=SettingsViewModel}" />
+        </Controls:Flyout>
+        <Controls:Flyout Header="Login"
+                         IsOpen="{Binding Path=SettingsViewModel.ShowLogin}"
+                         Position="Right">
+            <StackPanel Width="200"
+                        Margin="10, 0, 10, 0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center"
+                        DataContext="{Binding Path=SettingsViewModel}">
+                <PasswordBox Name="LoginPasswordBox"
+                             VerticalContentAlignment="Center"
+                             Controls:TextboxHelper.Watermark="Administrator password"
+                             PasswordChanged="LoginPasswordChanged"
+                             x:FieldModifier="private" />
+                <Button Margin="0, 10, 0, 0"
+                        Click="LoginButtonClick"
+                        Command="{Binding Path=LoginCommand}"
+                        Content="Login" />
+                <TextBlock Margin="0, 10, 0, 0"
+                           HorizontalAlignment="Center"
+                           Foreground="Red"
+                           Text="Wrong password!"
+                           Visibility="{Binding Path=IsWrongPassword,
+                                                Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </StackPanel>
         </Controls:Flyout>
     </Controls:MetroWindow.Flyouts>
     <Grid x:Name="mainGrid" Margin="10">
@@ -209,7 +234,6 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0" Visibility="{Binding Path=IsLocal, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
@@ -805,62 +829,6 @@
                         </StackPanel.Style>
                         <TextBlock Text="Remaining playlist timeout: " />
                         <TextBlock Text="{Binding Path=RemainingPlaylistTimeout, StringFormat=hh\\:mm\\:ss}" />
-                    </StackPanel>
-                </Grid>
-            </Grid>
-            <Grid Grid.Column="2"
-                  Width="200"
-                  DataContext="{Binding Path=AdministratorViewModel}"
-                  Visibility="{Binding Path=Show,
-                                       Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Grid.Style>
-                    <Style TargetType="{x:Type Grid}">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=IsAdminCreated, Mode=OneTime}" Value="False">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Path=IsParty}" Value="True">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Grid.Style>
-                <Grid Visibility="{Binding Path=IsParty, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel Margin="10, 0, 10, 0"
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Center">
-                        <PasswordBox Name="loginPasswordBox"
-                                     VerticalContentAlignment="Center"
-                                     Controls:TextboxHelper.Watermark="Administrator password"
-                                     PasswordChanged="LoginPasswordChanged" />
-                        <Button Margin="0, 10, 0, 0"
-                                Click="LoginButtonClick"
-                                Command="{Binding Path=LoginCommand}"
-                                Content="Login" />
-                        <TextBlock Margin="0, 10, 0, 0"
-                                   HorizontalAlignment="Center"
-                                   Foreground="Red"
-                                   Text="Wrong password!"
-                                   Visibility="{Binding Path=IsWrongPassword,
-                                                        Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    </StackPanel>
-                </Grid>
-                <Grid Visibility="{Binding Path=IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel Grid.Row="1"
-                                Margin="10, 0, 10, 10"
-                                Orientation="Vertical">
-                        <PasswordBox Name="adminPasswordBox"
-                                     Margin="0, 5, 0, 0"
-                                     VerticalContentAlignment="Center"
-                                     Controls:TextboxHelper.Watermark="Enter a password"
-                                     PasswordChanged="CreationPasswordChanged" />
-                        <Button Margin="0, 5, 0, 0"
-                                Click="CreateAdminButtonClick"
-                                Command="{Binding Path=CreateAdminCommand}"
-                                Content="Create Administrator" />
-                        <Button Margin="0, 15, 0, 0"
-                                Command="{Binding Path=ChangeToPartyCommand}"
-                                Content="Enter party mode" />
                     </StackPanel>
                 </Grid>
             </Grid>

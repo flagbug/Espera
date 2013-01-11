@@ -14,7 +14,9 @@ namespace Espera.View.ViewModels
     {
         private readonly Library library;
         private readonly IWindowManager windowManager;
-        private bool show;
+        private bool isWrongPassword;
+        private bool showLogin;
+        private bool showSettings;
 
         public SettingsViewModel(Library library, IWindowManager windowManager)
         {
@@ -36,6 +38,41 @@ namespace Espera.View.ViewModels
                 );
             }
         }
+
+        public ICommand ChangeToPartyCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.library.ChangeToParty();
+                        this.ShowSettings = false;
+                    },
+                    param => this.IsAdminCreated
+                );
+            }
+        }
+
+        public ICommand CreateAdminCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        this.library.CreateAdmin(this.CreationPassword);
+
+                        this.NotifyOfPropertyChange(() => this.IsAdminCreated);
+                    },
+                    param => !string.IsNullOrWhiteSpace(this.CreationPassword) && !this.IsAdminCreated
+                );
+            }
+        }
+
+        public string CreationPassword { get; set; }
 
         public string DonationPage
         {
@@ -65,6 +102,24 @@ namespace Espera.View.ViewModels
         public string Homepage
         {
             get { return "http://espera.flagbug.com"; }
+        }
+
+        public bool IsAdminCreated
+        {
+            get { return this.library.IsAdministratorCreated; }
+        }
+
+        public bool IsWrongPassword
+        {
+            get { return this.isWrongPassword; }
+            set
+            {
+                if (this.IsWrongPassword != value)
+                {
+                    this.isWrongPassword = value;
+                    this.NotifyOfPropertyChange(() => this.IsWrongPassword);
+                }
+            }
         }
 
         public bool LockLibraryRemoval
@@ -116,6 +171,34 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public ICommand LoginCommand
+        {
+            get
+            {
+                return new RelayCommand
+                (
+                    param =>
+                    {
+                        try
+                        {
+                            this.library.ChangeToAdmin(this.LoginPassword);
+                            this.IsWrongPassword = false;
+                            this.ShowLogin = false;
+                            this.ShowSettings = true;
+                        }
+
+                        catch (WrongPasswordException)
+                        {
+                            this.IsWrongPassword = true;
+                        }
+                    },
+                    param => !string.IsNullOrWhiteSpace(this.LoginPassword)
+                );
+            }
+        }
+
+        public string LoginPassword { get; set; }
+
         public ICommand OpenLinkCommand
         {
             get
@@ -146,15 +229,28 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public bool Show
+        public bool ShowLogin
         {
-            get { return this.show; }
+            get { return this.showLogin; }
             set
             {
-                if (this.Show != value)
+                if (this.ShowLogin != value)
                 {
-                    this.show = value;
-                    this.NotifyOfPropertyChange(() => this.Show);
+                    this.showLogin = value;
+                    this.NotifyOfPropertyChange(() => this.ShowLogin);
+                }
+            }
+        }
+
+        public bool ShowSettings
+        {
+            get { return this.showSettings; }
+            set
+            {
+                if (this.ShowSettings != value)
+                {
+                    this.showSettings = value;
+                    this.NotifyOfPropertyChange(() => this.ShowSettings);
                 }
             }
         }
@@ -172,6 +268,19 @@ namespace Espera.View.ViewModels
                 Version version = Assembly.GetExecutingAssembly().GetName().Version;
 
                 return String.Format("{0}.{1}.{2}", version.Major, version.Minor, version.Revision);
+            }
+        }
+
+        public void HandleSettings()
+        {
+            if (this.IsAdminCreated && this.library.AccessMode == AccessMode.Party)
+            {
+                this.ShowLogin = true;
+            }
+
+            else
+            {
+                this.ShowSettings = true;
             }
         }
     }

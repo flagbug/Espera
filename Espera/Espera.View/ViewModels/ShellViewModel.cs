@@ -48,7 +48,6 @@ namespace Espera.View.ViewModels
             }
 
             this.SettingsViewModel = new SettingsViewModel(this.library, windowManager);
-            this.AdministratorViewModel = new AdministratorViewModel(this.library);
 
             this.LocalViewModel = new LocalViewModel(this.library);
             this.LocalViewModel.TimeoutWarning += (sender, e) => this.TriggerTimeoutWarning();
@@ -87,8 +86,6 @@ namespace Espera.View.ViewModels
                 );
             }
         }
-
-        public AdministratorViewModel AdministratorViewModel { get; private set; }
 
         public bool CanChangeTime
         {
@@ -522,7 +519,7 @@ namespace Espera.View.ViewModels
         {
             get
             {
-                return new RelayCommand(param => this.SettingsViewModel.Show = true);
+                return new RelayCommand(param => this.SettingsViewModel.HandleSettings());
             }
         }
 

@@ -7,7 +7,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DataContext="{d:DesignInstance ViewModels:DesignTimeSettingsViewModel,
                                               IsDesignTimeCreatable=True}"
-             d:DesignHeight="600"
+             d:DesignHeight="800"
              d:DesignWidth="800"
              mc:Ignorable="d">
     <UserControl.Resources>
@@ -84,34 +84,58 @@
                 </StackPanel>
             </TabItem>
             <TabItem Header="party mode">
-                <StackPanel>
-                    <Controls:ToggleSwitch Header="Lock play/pause" IsChecked="{Binding Path=LockPlayPause}" />
-                    <Controls:ToggleSwitch Header="Lock volume" IsChecked="{Binding Path=LockVolume}" />
-                    <Controls:ToggleSwitch Header="Lock time" IsChecked="{Binding Path=LockTime}" />
-                    <Controls:ToggleSwitch Header="Lock playlist switching" IsChecked="{Binding Path=LockPlaylistSwitching}" />
-                    <Controls:ToggleSwitch Header="Lock song removal from playlist" IsChecked="{Binding Path=LockPlaylistRemoval}" />
-                    <Controls:ToggleSwitch Header="Lock song removal from library" IsChecked="{Binding Path=LockLibraryRemoval}" />
-                    <Controls:ToggleSwitch Header="Enable timeout when adding songs to the playlist" IsChecked="{Binding Path=EnablePlaylistTimeout}" />
-                    <StackPanel Margin="30, 5, 0, 0"
-                                IsEnabled="{Binding Path=EnablePlaylistTimeout}"
-                                Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Text="Timeout:" />
-                        <TextBox Width="30"
-                                 Margin="5, 0, 0, 0"
-                                 VerticalAlignment="Center"
-                                 VerticalContentAlignment="Center"
-                                 Text="{Binding Path=PlaylistTimeout}"
-                                 IsTabStop="False" />
-                        <TextBlock Margin="5, 0, 0, 0"
-                                   VerticalAlignment="Center"
-                                   Text="Seconds" />
+                <ScrollViewer>
+                    <StackPanel>
+                        <Controls:ToggleSwitch Header="Lock play/pause" IsChecked="{Binding Path=LockPlayPause}" />
+                        <Controls:ToggleSwitch Header="Lock volume" IsChecked="{Binding Path=LockVolume}" />
+                        <Controls:ToggleSwitch Header="Lock time" IsChecked="{Binding Path=LockTime}" />
+                        <Controls:ToggleSwitch Header="Lock playlist switching" IsChecked="{Binding Path=LockPlaylistSwitching}" />
+                        <Controls:ToggleSwitch Header="Lock song removal from playlist" IsChecked="{Binding Path=LockPlaylistRemoval}" />
+                        <Controls:ToggleSwitch Header="Lock song removal from library" IsChecked="{Binding Path=LockLibraryRemoval}" />
+                        <Controls:ToggleSwitch Header="Enable timeout when adding songs to the playlist" IsChecked="{Binding Path=EnablePlaylistTimeout}" />
+                        <StackPanel Margin="30, 5, 0, 0"
+                                    IsEnabled="{Binding Path=EnablePlaylistTimeout}"
+                                    Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="Timeout:" />
+                            <TextBox Width="30"
+                                     Margin="5, 0, 0, 0"
+                                     VerticalAlignment="Center"
+                                     VerticalContentAlignment="Center"
+                                     IsTabStop="False"
+                                     Text="{Binding Path=PlaylistTimeout}" />
+                            <TextBlock Margin="5, 0, 0, 0"
+                                       VerticalAlignment="Center"
+                                       Text="Seconds" />
+                        </StackPanel>
+                        <Controls:ToggleSwitch Header="Lock window (minimize, maximize, close)" IsChecked="{Binding Path=LockWindow}" />
+                        <Controls:ToggleSwitch Margin="30, 0, 0, 0"
+                                               Header="Make window fullscreen"
+                                               IsChecked="{Binding Path=GoFullScreenOnLock}"
+                                               IsEnabled="{Binding Path=LockWindow}" />
+                        <StackPanel Margin="0, 30, 0, 0">
+                            <TextBlock FontSize="16" Text="Before you can enter the party mode,&#10;you have to select a password." />
+                            <PasswordBox Name="AdminPasswordBox"
+                                         Width="200"
+                                         Margin="0, 10, 0, 0"
+                                         HorizontalAlignment="Left"
+                                         VerticalContentAlignment="Center"
+                                         Controls:TextboxHelper.Watermark="Enter a password"
+                                         PasswordChanged="CreationPasswordChanged"
+                                         x:FieldModifier="private" />
+                            <Button Width="200"
+                                    Margin="0, 5, 0, 0"
+                                    HorizontalAlignment="Left"
+                                    Click="CreateAdminButtonClick"
+                                    Command="{Binding Path=CreateAdminCommand}"
+                                    Content="Create Administrator" />
+                            <Button Width="200"
+                                    Margin="0, 15, 0, 0"
+                                    HorizontalAlignment="Left"
+                                    Command="{Binding Path=ChangeToPartyCommand}"
+                                    Content="Enter party mode" />
+                        </StackPanel>
                     </StackPanel>
-                    <Controls:ToggleSwitch Header="Lock window (minimize, maximize, close)" IsChecked="{Binding Path=LockWindow}" />
-                    <Controls:ToggleSwitch Margin="30, 0, 0, 0"
-                                           Header="Make window fullscreen"
-                                           IsChecked="{Binding Path=GoFullScreenOnLock}"
-                                           IsEnabled="{Binding Path=LockWindow}" />
-                </StackPanel>
+                </ScrollViewer>
             </TabItem>
             <TabItem Header="youtube">
                 <Controls:ToggleSwitch Header="Stream from Youtube instead of downloading.&#10;Changing this option requires a restart." IsChecked="{Binding Path=StreamYoutube}" />
