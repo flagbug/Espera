@@ -19,13 +19,13 @@ namespace Espera.View.ViewModels
 {
     internal class ShellViewModel : ReactiveObject, IDisposable
     {
+        private readonly ObservableAsPropertyHelper<bool> canModifyWindow;
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
+        private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly Library library;
         private readonly Timer playlistTimeoutUpdateTimer;
         private readonly Timer updateTimer;
-        private ObservableAsPropertyHelper<bool> canModifyWindow;
         private bool displayTimeoutWarning;
-        private ObservableAsPropertyHelper<bool> isAdmin;
         private bool isLocal;
         private bool isYoutube;
         private ObservableCollection<PlaylistViewModel> playlists;
