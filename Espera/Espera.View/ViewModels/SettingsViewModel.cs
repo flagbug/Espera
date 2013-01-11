@@ -34,16 +34,18 @@ namespace Espera.View.ViewModels
             this.windowManager = windowManager;
 
             this.canCreateAdmin = this
-                .WhenAny(x => x.CreationPassword, x => !string.IsNullOrWhiteSpace(x.Value) && !this.IsAdminCreated)
+                .WhenAny(x => x.CreationPassword, x => !string.IsNullOrWhiteSpace(x.Value) && !this.library.IsAdministratorCreated)
                 .ToProperty(this, x => x.CanCreateAdmin);
 
             this.CreateAdminCommand = new ReactiveCommand(this.canCreateAdmin,
                 ImmediateScheduler.Instance); // Immediate execution, because we set the password to an empty string afterwards
-            this.CreateAdminCommand.Subscribe(p =>
-            {
-                this.library.CreateAdmin(this.CreationPassword);
+            this.CreateAdminCommand.Subscribe(p => this.library.CreateAdmin(this.CreationPassword));
 
-                this.RaisePropertyChanged(x => x.IsAdminCreated);
+            this.ChangeToPartyCommand = new ReactiveCommand(this.CreateAdminCommand.Select(x => true).StartWith(false));
+            this.ChangeToPartyCommand.Subscribe(p =>
+            {
+                this.library.ChangeToParty();
+                this.ShowSettings = false;
             });
 
             this.canLogin = this.WhenAny(x => x.LoginPassword, x => !string.IsNullOrWhiteSpace(x.Value))
@@ -59,7 +61,7 @@ namespace Espera.View.ViewModels
                     this.IsWrongPassword = false;
 
                     this.ShowLogin = false;
-                    this.ShowSettings = false;
+                    this.ShowSettings = true;
                 }
 
                 catch (WrongPasswordException)
@@ -128,11 +130,6 @@ namespace Espera.View.ViewModels
         public string Homepage
         {
             get { return "http://espera.flagbug.com"; }
-        }
-
-        public bool IsAdminCreated
-        {
-            get { return this.library.IsAdministratorCreated; }
         }
 
         public bool IsWrongPassword
@@ -216,7 +213,7 @@ namespace Espera.View.ViewModels
         public bool ShowLogin
         {
             get { return this.showLogin; }
-            set { this.RaiseAndSetIfChanged(value); }
+            private set { this.RaiseAndSetIfChanged(value); }
         }
 
         public bool ShowSettings
@@ -243,7 +240,7 @@ namespace Espera.View.ViewModels
 
         public void HandleSettings()
         {
-            if (this.IsAdminCreated && this.library.AccessMode.First() == AccessMode.Party)
+            if (this.library.IsAdministratorCreated && this.library.AccessMode.First() == AccessMode.Party)
             {
                 this.ShowLogin = true;
             }
