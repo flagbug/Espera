@@ -100,7 +100,8 @@
                                  Margin="5, 0, 0, 0"
                                  VerticalAlignment="Center"
                                  VerticalContentAlignment="Center"
-                                 Text="{Binding Path=PlaylistTimeout}" />
+                                 Text="{Binding Path=PlaylistTimeout}"
+                                 IsTabStop="False" />
                         <TextBlock Margin="5, 0, 0, 0"
                                    VerticalAlignment="Center"
                                    Text="Seconds" />
