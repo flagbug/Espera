@@ -335,6 +335,15 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void ChangeToParty_AdministratorIsNotCreated_ThrowsInvalidOperationException()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                Assert.Throws<InvalidOperationException>(library.ChangeToParty);
+            }
+        }
+
+        [Test]
         public void ContinueSong_IsNotAdmin_ThrowsInvalidOperationException()
         {
             using (Library library = Helpers.CreateLibrary())
