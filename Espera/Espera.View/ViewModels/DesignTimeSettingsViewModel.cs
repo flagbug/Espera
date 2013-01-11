@@ -2,9 +2,9 @@
 
 namespace Espera.View.ViewModels
 {
-    internal class DesignTimeShellViewModel : ShellViewModel
+    internal class DesignTimeSettingsViewModel : SettingsViewModel
     {
-        public DesignTimeShellViewModel()
+        public DesignTimeSettingsViewModel()
             : base(DesignTime.LoadLibrary(), new WindowManager())
         { }
     }

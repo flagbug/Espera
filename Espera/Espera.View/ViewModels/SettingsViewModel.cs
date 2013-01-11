@@ -12,20 +12,19 @@ using System.Reflection;
 
 namespace Espera.View.ViewModels
 {
-    public sealed class AdministratorViewModel : ReactiveObject
+    internal class SettingsViewModel : ReactiveObject
     {
         private readonly ObservableAsPropertyHelper<bool> canCreateAdmin;
+        private readonly ObservableAsPropertyHelper<bool> canLogin;
         private readonly Library library;
         private readonly IWindowManager windowManager;
-        private ObservableAsPropertyHelper<bool> canLogin;
         private string creationPassword;
-        private ObservableAsPropertyHelper<bool> isAdmin;
-        private ObservableAsPropertyHelper<bool> isParty;
         private bool isWrongPassword;
         private string loginPassword;
-        private bool show;
+        private bool showLogin;
+        private bool showSettings;
 
-        public AdministratorViewModel(Library library, IWindowManager windowManager)
+        public SettingsViewModel(Library library, IWindowManager windowManager)
         {
             if (library == null)
                 Throw.ArgumentNullException(() => library);
@@ -34,15 +33,9 @@ namespace Espera.View.ViewModels
 
             this.windowManager = windowManager;
 
-            this.ChangeToPartyCommand = new ReactiveCommand(this.WhenAny(x => x.IsAdminCreated, x => x.Value));
-            this.ChangeToPartyCommand.Subscribe(p => this.library.ChangeToParty());
-
-            this.canCreateAdmin = this.WhenAny
-            (
-                x => x.CreationPassword,
-                x => !string.IsNullOrWhiteSpace(x.Value) && !this.IsAdminCreated
-            )
-            .ToProperty(this, x => x.CanCreateAdmin);
+            this.canCreateAdmin = this
+                .WhenAny(x => x.CreationPassword, x => !string.IsNullOrWhiteSpace(x.Value) && !this.IsAdminCreated)
+                .ToProperty(this, x => x.CanCreateAdmin);
 
             this.CreateAdminCommand = new ReactiveCommand(this.canCreateAdmin,
                 ImmediateScheduler.Instance); // Immediate execution, because we set the password to an empty string afterwards
@@ -64,6 +57,9 @@ namespace Espera.View.ViewModels
                 {
                     this.library.ChangeToAdmin(this.LoginPassword);
                     this.IsWrongPassword = false;
+
+                    this.ShowLogin = false;
+                    this.ShowSettings = false;
                 }
 
                 catch (WrongPasswordException)
@@ -78,19 +74,8 @@ namespace Espera.View.ViewModels
             this.ReportBugCommand = new ReactiveCommand();
             this.ReportBugCommand.Subscribe(p => this.windowManager.ShowWindow(new BugReportViewModel()));
 
-            Observable.Merge(this.ChangeToPartyCommand, this.CreateAdminCommand, this.LoginCommand)
-                .Subscribe(p => this.RaisePropertyChanged(x => x.IsAdmin));
-
-            Observable.Merge(this.ChangeToPartyCommand, this.LoginCommand)
-                .Subscribe(p => this.RaisePropertyChanged(x => x.IsParty));
-
-            this.isAdmin = this.library.AccessMode
-                .Select(x => x == AccessMode.Administrator)
-                .ToProperty(this, x => x.IsAdmin);
-
-            this.isParty = this.library.AccessMode
-                .Select(x => x == AccessMode.Party)
-                .ToProperty(this, x => x.IsParty);
+            this.ChangeAccentColorCommand = new ReactiveCommand();
+            this.ChangeAccentColorCommand.Subscribe(p => Settings.Default.AccentColor = (string)p);
         }
 
         public bool CanCreateAdmin
@@ -102,6 +87,8 @@ namespace Espera.View.ViewModels
         {
             get { return this.canLogin.Value; }
         }
+
+        public IReactiveCommand ChangeAccentColorCommand { get; private set; }
 
         public IReactiveCommand ChangeToPartyCommand { get; private set; }
 
@@ -143,19 +130,9 @@ namespace Espera.View.ViewModels
             get { return "http://espera.flagbug.com"; }
         }
 
-        public bool IsAdmin
-        {
-            get { return this.isAdmin.Value; }
-        }
-
         public bool IsAdminCreated
         {
             get { return this.library.IsAdministratorCreated; }
-        }
-
-        public bool IsParty
-        {
-            get { return this.isParty.Value; }
         }
 
         public bool IsWrongPassword
@@ -236,10 +213,16 @@ namespace Espera.View.ViewModels
 
         public IReactiveCommand ReportBugCommand { get; private set; }
 
-        public bool Show
+        public bool ShowLogin
         {
-            get { return this.show; }
+            get { return this.showLogin; }
             set { this.RaiseAndSetIfChanged(value); }
+        }
+
+        public bool ShowSettings
+        {
+            get { return this.showSettings; }
+            private set { this.RaiseAndSetIfChanged(value); }
         }
 
         public bool StreamYoutube
@@ -255,6 +238,19 @@ namespace Espera.View.ViewModels
                 Version version = Assembly.GetExecutingAssembly().GetName().Version;
 
                 return String.Format("{0}.{1}.{2}", version.Major, version.Minor, version.Revision);
+            }
+        }
+
+        public void HandleSettings()
+        {
+            if (this.IsAdminCreated && this.library.AccessMode.First() == AccessMode.Party)
+            {
+                this.ShowLogin = true;
+            }
+
+            else
+            {
+                this.ShowSettings = true;
             }
         }
     }

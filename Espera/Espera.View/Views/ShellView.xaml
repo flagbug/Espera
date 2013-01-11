@@ -3,6 +3,7 @@
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                       xmlns:ViewModels="clr-namespace:Espera.View.ViewModels"
+                      xmlns:Views="clr-namespace:Espera.View.Views"
                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                       Title="Espera"
@@ -50,20 +51,6 @@
                 </Setter>
                 <Setter Property="IsTabStop" Value="False" />
             </Style>
-            <Style x:Key="ColorPickerButtonStyle" TargetType="{x:Type Button}">
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Border Width="25"
-                                    Height="25"
-                                    Margin="5, 0, 5, 0"
-                                    Background="{TemplateBinding Background}">
-                                <ContentPresenter />
-                            </Border>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
             <Style x:Key="AdminHeaderStyle" TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="26.667" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
@@ -95,6 +82,43 @@
     <Window.InputBindings>
         <KeyBinding Key="Space" Command="{Binding PauseContinueCommand}" />
     </Window.InputBindings>
+    <Controls:MetroWindow.WindowCommands>
+        <Controls:WindowCommands>
+            <Button Command="{Binding Path=ShowSettingsCommand}" Content="settings" />
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.WindowCommands>
+    <Controls:MetroWindow.Flyouts>
+        <Controls:Flyout Header="settings"
+                         IsOpen="{Binding Path=SettingsViewModel.ShowSettings}"
+                         Position="Right">
+            <Views:SettingsView Width="500" DataContext="{Binding Path=SettingsViewModel}" />
+        </Controls:Flyout>
+        <Controls:Flyout Header="Login"
+                         IsOpen="{Binding Path=SettingsViewModel.ShowLogin}"
+                         Position="Right">
+            <StackPanel Width="200"
+                        Margin="10, 0, 10, 0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center"
+                        DataContext="{Binding Path=SettingsViewModel}">
+                <PasswordBox Name="LoginPasswordBox"
+                             VerticalContentAlignment="Center"
+                             Controls:TextboxHelper.Watermark="Administrator password"
+                             PasswordChanged="LoginPasswordChanged"
+                             x:FieldModifier="private" />
+                <Button Margin="0, 10, 0, 0"
+                        Click="LoginButtonClick"
+                        Command="{Binding Path=LoginCommand}"
+                        Content="Login" />
+                <TextBlock Margin="0, 10, 0, 0"
+                           HorizontalAlignment="Center"
+                           Foreground="Red"
+                           Text="Wrong password!"
+                           Visibility="{Binding Path=IsWrongPassword,
+                                                Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </StackPanel>
+        </Controls:Flyout>
+    </Controls:MetroWindow.Flyouts>
     <Grid x:Name="mainGrid" Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -205,19 +229,11 @@
                      KeyUp="SearchTextBoxKeyUp"
                      Text="{Binding Path=CurrentSongSource.SearchText,
                                     UpdateSourceTrigger=PropertyChanged}" />
-            <ToggleButton Grid.Column="5"
-                          Margin="10, 0, 0, 0"
-                          IsChecked="{Binding Path=AdministratorViewModel.Show}"
-                          Padding="0"
-                          ToolTip="Settings">
-                <Image Source="/Espera;component/Images/Settings.png" />
-            </ToggleButton>
         </Grid>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0" Visibility="{Binding Path=IsLocal, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
@@ -813,161 +829,6 @@
                         </StackPanel.Style>
                         <TextBlock Text="Remaining playlist timeout: " />
                         <TextBlock Text="{Binding Path=RemainingPlaylistTimeout, StringFormat=hh\\:mm\\:ss}" />
-                    </StackPanel>
-                </Grid>
-            </Grid>
-            <Grid Grid.Column="2"
-                  Width="200"
-                  DataContext="{Binding Path=AdministratorViewModel}"
-                  Visibility="{Binding Path=Show,
-                                       Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Grid.Style>
-                    <Style TargetType="{x:Type Grid}">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=IsAdminCreated, Mode=OneTime}" Value="False">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Path=IsParty}" Value="True">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Grid.Style>
-                <Grid Visibility="{Binding Path=IsParty, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel Margin="10, 0, 10, 0"
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Center">
-                        <PasswordBox Name="loginPasswordBox"
-                                     VerticalContentAlignment="Center"
-                                     Controls:TextboxHelper.Watermark="Administrator password"
-                                     PasswordChanged="LoginPasswordChanged" />
-                        <Button Margin="0, 10, 0, 0"
-                                Click="LoginButtonClick"
-                                IsEnabled="{Binding Path=CanLogin}"
-                                Content="Login" />
-                        <TextBlock Margin="0, 10, 0, 0"
-                                   HorizontalAlignment="Center"
-                                   Foreground="Red"
-                                   Text="Wrong password!"
-                                   Visibility="{Binding Path=IsWrongPassword,
-                                                        Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    </StackPanel>
-                </Grid>
-                <Grid Visibility="{Binding Path=IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <ScrollViewer>
-                        <StackPanel Margin="5, 0, 5, 0">
-                            <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="settings" />
-                            <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="accent" />
-                            <StackPanel Margin="-5, 0, 0, 0"
-                                        HorizontalAlignment="Left"
-                                        Orientation="Horizontal">
-                                <Button Background="#CCCB0000"
-                                        Click="RedColorButtonButtonClick"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
-                                <Button Background="#CC48CB00"
-                                        Click="GreenColorButtonButtonClick"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
-                                <Button Background="#FF1C739D"
-                                        Click="BlueColorButtonButtonClick"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
-                                <Button Background="#CCB400FF"
-                                        Click="PurpleColorButtonButtonClick"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
-                                <Button Background="#FFDE872A"
-                                        Click="OrangeColorButtonButtonClick"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
-                            </StackPanel>
-                            <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="party mode" />
-                            <CheckBox IsChecked="{Binding Path=LockPlayPause}">
-                                <AccessText Text="Lock play/pause" TextWrapping="Wrap" />
-                            </CheckBox>
-                            <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=LockVolume}">
-                                <AccessText Text="Lock volume" TextWrapping="Wrap" />
-                            </CheckBox>
-                            <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=LockTime}">
-                                <AccessText Text="Lock time" TextWrapping="Wrap" />
-                            </CheckBox>
-                            <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=LockPlaylistSwitching}">
-                                <AccessText Text="Lock playlist switching" TextWrapping="Wrap" />
-                            </CheckBox>
-                            <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=LockPlaylistRemoval}">
-                                <AccessText Text="Lock song removal from playlist" TextWrapping="Wrap" />
-                            </CheckBox>
-                            <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=LockLibraryRemoval}">
-                                <AccessText Text="Lock song removal from library" TextWrapping="Wrap" />
-                            </CheckBox>
-                            <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=EnablePlaylistTimeout}">
-                                <AccessText Text="Enable timeout when adding songs to the playlist" TextWrapping="Wrap" />
-                            </CheckBox>
-                            <StackPanel Margin="30, 5, 0, 0"
-                                        IsEnabled="{Binding Path=EnablePlaylistTimeout}"
-                                        Orientation="Horizontal">
-                                <TextBlock VerticalAlignment="Center" Text="Timeout:" />
-                                <TextBox Width="30"
-                                         Margin="5, 0, 0, 0"
-                                         VerticalAlignment="Center"
-                                         VerticalContentAlignment="Center"
-                                         Text="{Binding Path=PlaylistTimeout}" />
-                                <TextBlock Margin="5, 0, 0, 0"
-                                           VerticalAlignment="Center"
-                                           Text="Seconds" />
-                            </StackPanel>
-                            <CheckBox Margin="0, 10, 0, 0" IsChecked="{Binding Path=LockWindow}">
-                                <AccessText Text="Lock window (minimize, maximize, close)" TextWrapping="Wrap" />
-                            </CheckBox>
-                            <CheckBox Margin="30, 5, 0, 0"
-                                      IsChecked="{Binding Path=GoFullScreenOnLock}"
-                                      IsEnabled="{Binding Path=LockWindow}">
-                                <AccessText Text="Make window fullscreen" TextWrapping="Wrap" />
-                            </CheckBox>
-                            <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="youtube" />
-                            <CheckBox IsChecked="{Binding Path=StreamYoutube}">
-                                <AccessText Text="Stream from Youtube instead of downloading.&#10;Changing this option requires a restart." TextWrapping="Wrap" />
-                            </CheckBox>
-                            <TextBlock Style="{StaticResource AdminHeaderStyle}" Text="about" />
-                            <TextBlock Text="{Binding Path=Version, StringFormat=Espera v\{0\}}" />
-                            <TextBlock Text="Author: Dennis Daume" />
-                            <TextBlock>
-                                <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=Homepage}">
-                                    <Run Foreground="#FF00B7C0" Text="Project Website" />
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=ReleaseNotes}">
-                                    <Run Foreground="#FF00B7C0" Text="Release Notes" />
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink Command="{Binding Path=ReportBugCommand}">
-                                    <Run Foreground="#FF00B7C0" Text="Report a bug" />
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=DonationPage}">
-                                    <Run Foreground="#FF00B7C0" Text="Donate :)" />
-                                </Hyperlink>
-                            </TextBlock>
-                        </StackPanel>
-                    </ScrollViewer>
-                    <StackPanel Grid.Row="1"
-                                Margin="10, 0, 10, 10"
-                                Orientation="Vertical">
-                        <PasswordBox Name="adminPasswordBox"
-                                     Margin="0, 5, 0, 0"
-                                     VerticalContentAlignment="Center"
-                                     Controls:TextboxHelper.Watermark="Enter a password"
-                                     PasswordChanged="CreationPasswordChanged" />
-                        <Button Margin="0, 5, 0, 0"
-                                Click="CreateAdminButtonClick"
-                                IsEnabled="{Binding Path=CanCreateAdmin}"
-                                Content="Create Administrator" />
-                        <Button Margin="0, 15, 0, 0"
-                                Command="{Binding Path=ChangeToPartyCommand}"
-                                Content="Enter party mode" />
                     </StackPanel>
                 </Grid>
             </Grid>
