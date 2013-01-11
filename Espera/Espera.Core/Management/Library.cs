@@ -463,6 +463,9 @@ namespace Espera.Core.Management
         /// </summary>
         public void ChangeToParty()
         {
+            if (!this.IsAdministratorCreated)
+                throw new InvalidOperationException("Administrator is not created.");
+
             this.AccessMode = AccessMode.Party;
         }
 
