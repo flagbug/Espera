@@ -56,9 +56,9 @@
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Top">
                         <StackPanel Orientation="Horizontal">
-                            <Button Background="#CCCB0000"
+                            <Button Background="#FF1C739D"
                                     Command="{Binding Path=ChangeAccentColorCommand}"
-                                    CommandParameter="Red"
+                                    CommandParameter="Blue"
                                     Style="{StaticResource ColorPickerButtonStyle}" />
                             <Button Background="#CC48CB00"
                                     Command="{Binding Path=ChangeAccentColorCommand}"
@@ -66,19 +66,19 @@
                                     Style="{StaticResource ColorPickerButtonStyle}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <Button Background="#FF1C739D"
+                            <Button Background="#CCB400FF"
                                     Command="{Binding Path=ChangeAccentColorCommand}"
-                                    CommandParameter="Blue"
+                                    CommandParameter="Purple"
                                     Style="{StaticResource ColorPickerButtonStyle}" />
-                            <Button Background="#FFDE872A"
+                            <Button Background="#CCCB0000"
                                     Command="{Binding Path=ChangeAccentColorCommand}"
-                                    CommandParameter="Orange"
+                                    CommandParameter="Red"
                                     Style="{StaticResource ColorPickerButtonStyle}" />
                         </StackPanel>
                         <Button HorizontalAlignment="Left"
-                                Background="#CCB400FF"
+                                Background="#FFDE872A"
                                 Command="{Binding Path=ChangeAccentColorCommand}"
-                                CommandParameter="Purple"
+                                CommandParameter="Orange"
                                 Style="{StaticResource ColorPickerButtonStyle}" />
                     </StackPanel>
                 </StackPanel>
