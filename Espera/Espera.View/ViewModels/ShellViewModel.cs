@@ -41,6 +41,7 @@ namespace Espera.View.ViewModels
             this.library.SongFinished += (sender, args) => this.HandleSongFinished();
             this.library.SongCorrupted += (sender, args) => this.HandleSongCorrupted();
             this.library.AccessMode.Subscribe(x => this.UpdateUserAccess());
+            this.UpdateScreenState = this.library.AccessMode;
             this.library.PlaylistChanged += (sender, e) => this.UpdatePlaylist();
 
             if (!this.library.Playlists.Any())
@@ -84,16 +85,12 @@ namespace Espera.View.ViewModels
             this.UnMuteCommand = new ReactiveCommand(this.isAdmin);
             this.UnMuteCommand.Subscribe(x => this.Volume = 1);
 
-            this.canModifyWindow = isAdminObservable.Select(isAdmin => isAdmin || !Settings.Default.LockWindow)
+            this.canModifyWindow = isAdminObservable
+                .Select(isAdmin => isAdmin || !Settings.Default.LockWindow)
                 .ToProperty(this, x => x.CanModifyWindow);
 
             this.IsLocal = true;
         }
-
-        /// <summary>
-        /// Occurs when the view should update the screen state to maximized state or restore it to normal state
-        /// </summary>
-        public event EventHandler UpdateScreenState;
 
         public event EventHandler VideoPlayerCallbackChanged
         {
@@ -565,6 +562,11 @@ namespace Espera.View.ViewModels
         /// </summary>
         public IReactiveCommand UnMuteCommand { get; private set; }
 
+        /// <summary>
+        /// Occurs when the view should update the screen state to maximized state or restore it to normal state
+        /// </summary>
+        public IObservable<AccessMode> UpdateScreenState { get; private set; }
+
         public IVideoPlayerCallback VideoPlayerCallback
         {
             get { return this.library.VideoPlayerCallback; }
@@ -709,8 +711,6 @@ namespace Espera.View.ViewModels
             this.RaisePropertyChanged(x => x.CanChangeTime);
             this.RaisePropertyChanged(x => x.CanSwitchPlaylist);
             this.RaisePropertyChanged(x => x.ShowPlaylistTimeOut);
-
-            this.UpdateScreenState.RaiseSafe(this, EventArgs.Empty);
         }
     }
 }

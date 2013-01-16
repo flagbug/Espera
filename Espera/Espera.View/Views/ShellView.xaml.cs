@@ -1,4 +1,5 @@
 using Espera.Core;
+using Espera.Core.Management;
 using Espera.View.Properties;
 using Espera.View.ViewModels;
 using Ionic.Utils;
@@ -292,18 +293,18 @@ namespace Espera.View.Views
 
         private void WireScreenStateUpdater()
         {
-            this.shellViewModel.UpdateScreenState += (sender2, args2) =>
+            this.shellViewModel.UpdateScreenState.Subscribe(x =>
             {
                 if (Settings.Default.LockWindow && Settings.Default.GoFullScreenOnLock)
                 {
-                    this.IgnoreTaskbarOnMaximize = !this.shellViewModel.IsAdmin && Settings.Default.GoFullScreenOnLock;
+                    this.IgnoreTaskbarOnMaximize = x == AccessMode.Party && Settings.Default.GoFullScreenOnLock;
 
                     this.WindowState = WindowState.Normal;
                     this.WindowState = WindowState.Maximized;
 
                     this.Topmost = true;
                 }
-            };
+            });
         }
 
         private void WireVideoPlayer()
