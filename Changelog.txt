@@ -1,3 +1,9 @@
+----------------------------------- v1.6.10 -----------------------------------
+
+BUGFIXES:
+- Fixed a bug that caused a timeout when caching YouTube videos.
+- Fixed a bug that caused the application to crash during audio playback.
+
 ----------------------------------- v1.6.9 -----------------------------------
 
 FEATURES:
