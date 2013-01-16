@@ -21,7 +21,7 @@ namespace Espera.View.ViewModels
 
         public string ReportContent
         {
-            get { return "Version " + this.version + "\n\n" + this.exception.Message + "\n\n" + exception.StackTrace; }
+            get { return "Version " + this.version + "\n\n" + this.exception; }
         }
 
         public bool? SendingSucceeded
