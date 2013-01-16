@@ -82,11 +82,13 @@ namespace Espera.Core.Audio
             if (wavePlayer != null)
             {
                 this.wavePlayer.Dispose();
+                this.wavePlayer = null;
             }
 
             if (inputStream != null)
             {
                 this.inputStream.Dispose();
+                this.inputStream = null;
             }
         }
 
@@ -111,58 +113,58 @@ namespace Espera.Core.Audio
 
         public override void Pause()
         {
-            if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != NAudio.Wave.PlaybackState.Paused)
-            {
-                this.wavePlayer.Pause();
+            if (this.wavePlayer == null || this.inputStream == null || this.wavePlayer.PlaybackState == NAudio.Wave.PlaybackState.Paused)
+                return;
 
-                this.EnsureState(AudioPlayerState.Paused);
-            }
+            this.wavePlayer.Pause();
+
+            this.EnsureState(AudioPlayerState.Paused);
         }
 
         public override void Play()
         {
-            if (this.wavePlayer != null && this.inputStream != null && this.wavePlayer.PlaybackState != NAudio.Wave.PlaybackState.Playing)
+            if (this.wavePlayer == null || this.inputStream == null || this.wavePlayer.PlaybackState == NAudio.Wave.PlaybackState.Playing)
+                return;
+
+            // Create a new thread, so that we can spawn the song state check on the same thread as the play method
+            // With this, we can avoid cross-threading issues with the NAudio library
+            Task.Factory.StartNew(() =>
             {
-                // Create a new thread, so that we can spawn the song state check on the same thread as the play method
-                // With this, we can avoid cross-threading issues with the NAudio library
-                Task.Factory.StartNew(() =>
+                bool wasPaused = this.PlaybackState == AudioPlayerState.Paused;
+
+                try
                 {
-                    bool wasPaused = this.PlaybackState == AudioPlayerState.Paused;
+                    this.wavePlayer.Play();
+                }
 
-                    try
+                catch (MmException ex)
+                {
+                    throw new PlaybackException("The playback couldn't be started.", ex);
+                }
+
+                if (!wasPaused)
+                {
+                    while (this.PlaybackState != AudioPlayerState.Stopped)
                     {
-                        this.wavePlayer.Play();
+                        this.UpdateSongState();
+                        Thread.Sleep(250);
                     }
+                }
+            });
 
-                    catch (MmException ex)
-                    {
-                        throw new PlaybackException("The playback couldn't be started.", ex);
-                    }
-
-                    if (!wasPaused)
-                    {
-                        while (this.PlaybackState != AudioPlayerState.Stopped)
-                        {
-                            this.UpdateSongState();
-                            Thread.Sleep(250);
-                        }
-                    }
-                });
-
-                this.EnsureState(AudioPlayerState.Playing);
-            }
+            this.EnsureState(AudioPlayerState.Playing);
         }
 
         public override void Stop()
         {
-            if (this.wavePlayer == null)
-                return;
+            if (this.wavePlayer != null && this.wavePlayer.PlaybackState != NAudio.Wave.PlaybackState.Stopped)
+            {
+                this.wavePlayer.Stop();
 
-            this.wavePlayer.Stop();
+                this.EnsureState(AudioPlayerState.Stopped);
 
-            this.EnsureState(AudioPlayerState.Stopped);
-
-            this.isLoaded = false;
+                this.isLoaded = false;
+            }
         }
 
         private static WaveChannel32 OpenMp3Stream(Stream stream)

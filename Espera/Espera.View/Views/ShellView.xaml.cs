@@ -3,6 +3,7 @@ using Espera.View.Properties;
 using Espera.View.ViewModels;
 using Ionic.Utils;
 using MahApps.Metro;
+using Ookii.Dialogs.Wpf;
 using Rareform.Reflection;
 using System;
 using System.ComponentModel;
@@ -48,22 +49,30 @@ namespace Espera.View.Views
 
         private void AddSongsButtonClick(object sender, RoutedEventArgs e)
         {
-            using
-            (
-                var dialog = new FolderBrowserDialogEx
-                {
-                    Description = "Choose a folder containing the music that you want to add to the library"
-                }
-            )
+            string selectedPath;
+
+            if (VistaFolderBrowserDialog.IsVistaFolderDialogSupported)
             {
-                dialog.ShowDialog();
+                var dialog = new VistaFolderBrowserDialog();
 
-                string selectedPath = dialog.SelectedPath;
+                dialog.ShowDialog(this);
 
-                if (!String.IsNullOrEmpty(selectedPath))
+                selectedPath = dialog.SelectedPath;
+            }
+
+            else
+            {
+                using (var dialog = new FolderBrowserDialogEx())
                 {
-                    this.shellViewModel.LocalViewModel.AddSongs(selectedPath);
+                    dialog.ShowDialog();
+
+                    selectedPath = dialog.SelectedPath;
                 }
+            }
+
+            if (!String.IsNullOrEmpty(selectedPath))
+            {
+                this.shellViewModel.LocalViewModel.AddSongs(selectedPath);
             }
         }
 
