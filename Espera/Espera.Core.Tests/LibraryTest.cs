@@ -543,7 +543,7 @@ namespace Espera.Core.Tests
 
                 var handle = new ManualResetEvent(false);
 
-                song.Object.Corrupted += (sender, args) => handle.Set();
+                song.Object.Corrupted.Subscribe(x => handle.Set());
 
                 library.PlaySong(0);
 
@@ -568,7 +568,7 @@ namespace Espera.Core.Tests
 
                 var handle = new ManualResetEvent(false);
 
-                song.Object.Corrupted += (sender, args) => handle.Set();
+                song.Object.Corrupted.Subscribe(x => handle.Set());
 
                 library.PlaySong(0);
 
