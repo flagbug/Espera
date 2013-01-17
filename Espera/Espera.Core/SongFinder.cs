@@ -26,6 +26,14 @@ namespace Espera.Core
             this.songFound.OnCompleted();
         }
 
+        protected void OnError(Exception exception)
+        {
+            if (exception == null)
+                Throw.ArgumentNullException(() => exception);
+
+            this.songFound.OnError(exception);
+        }
+
         protected void OnSongFound(T song)
         {
             if (song == null)

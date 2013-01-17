@@ -99,7 +99,7 @@ namespace Espera.View.ViewModels
             {
                 var finder = new YoutubeSongFinder(this.SearchText);
 
-                finder.SongFound.Subscribe(currentSongs.Add);
+                finder.SongFound.Subscribe(currentSongs.Add, ex => { }); //TODO: Handle error
 
                 finder.Execute();
 

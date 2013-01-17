@@ -35,23 +35,32 @@ namespace Espera.Core
             var request = new YouTubeRequest(settings);
             Feed<Video> feed = request.Get<Video>(query);
 
-            foreach (Video video in feed.Entries)
+            try
             {
-                var duration = TimeSpan.FromSeconds(Int32.Parse(video.YouTubeEntry.Duration.Seconds));
-                string url = video.WatchPage.OriginalString
-                    .Replace("&feature=youtube_gdata_player", String.Empty) /* Unnecessary long url */
-                    .Replace("https://", "http://"); /* Secure connections are not always easy to handle when streaming */
-
-                var song = new YoutubeSong(url, AudioType.Mp3, duration, CoreSettings.Default.StreamYoutube)
+                foreach (Video video in feed.Entries)
                 {
-                    Title = video.Title,
-                    Description = video.Description,
-                    Rating = video.RatingAverage >= 1 ? video.RatingAverage : (double?)null,
-                    ThumbnailSource = new Uri(video.Thumbnails[0].Url),
-                    Views = video.ViewCount
-                };
+                    var duration = TimeSpan.FromSeconds(Int32.Parse(video.YouTubeEntry.Duration.Seconds));
+                    string url = video.WatchPage.OriginalString
+                        .Replace("&feature=youtube_gdata_player", String.Empty) /* Unnecessary long url */
+                        .Replace("https://", "http://"); /* Secure connections are not always easy to handle when streaming */
 
-                this.OnSongFound(song);
+                    var song = new YoutubeSong(url, AudioType.Mp3, duration, CoreSettings.Default.StreamYoutube)
+                    {
+                        Title = video.Title,
+                        Description = video.Description,
+                        Rating = video.RatingAverage >= 1 ? video.RatingAverage : (double?)null,
+                        ThumbnailSource = new Uri(video.Thumbnails[0].Url),
+                        Views = video.ViewCount
+                    };
+
+                    this.OnSongFound(song);
+                }
+            }
+
+            catch (GDataRequestException ex)
+            {
+                this.OnError(ex);
+                return;
             }
 
             this.OnCompleted();
