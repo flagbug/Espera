@@ -92,6 +92,33 @@ namespace Espera.View.ViewModels
             this.AddPlaylistCommand = new ReactiveCommand(this.WhenAny(x => x.CanSwitchPlaylist, x => x.Value));
             this.AddPlaylistCommand.Subscribe(x => this.AddPlaylist());
 
+            this.ShowSettingsCommand = new ReactiveCommand();
+            this.ShowSettingsCommand.Subscribe(x => this.SettingsViewModel.HandleSettings());
+
+            this.ShufflePlaylistCommand = new ReactiveCommand();
+            this.ShufflePlaylistCommand.Subscribe(x =>
+            {
+                this.library.ShufflePlaylist();
+
+                this.UpdatePlaylist();
+            });
+
+            this.PauseContinueCommand = new ReactiveCommand(this
+                .WhenAny(x => x.IsPlaying, x => x.Value)
+                .Select(x => x ? this.PauseCommand.CanExecute(null) : this.PlayCommand.CanExecute(null)));
+            this.PauseContinueCommand.Subscribe(x =>
+                                                    {
+                                                        if (this.IsPlaying)
+                                                        {
+                                                            this.PauseCommand.Execute(null);
+                                                        }
+
+                                                        else
+                                                        {
+                                                            this.PlayCommand.Execute(false);
+                                                        }
+                                                    });
+
             this.IsLocal = true;
         }
 
@@ -247,28 +274,7 @@ namespace Espera.View.ViewModels
         /// <summary>
         /// A command that decided whether the songs should be paused or continued.
         /// </summary>
-        public ICommand PauseContinueCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        if (this.IsPlaying)
-                        {
-                            this.PauseCommand.Execute(null);
-                        }
-
-                        else
-                        {
-                            this.PlayCommand.Execute(false);
-                        }
-                    },
-                    param => this.IsPlaying ? this.PauseCommand.CanExecute(null) : this.PlayCommand.CanExecute(null)
-                );
-            }
-        }
+        public IReactiveCommand PauseContinueCommand { get; private set; }
 
         /// <summary>
         /// Plays the song that is currently selected in the playlist or continues the song if it is paused.
@@ -482,29 +488,9 @@ namespace Espera.View.ViewModels
             get { return this.SettingsViewModel.EnablePlaylistTimeout && !this.IsAdmin; }
         }
 
-        public ICommand ShowSettingsCommand
-        {
-            get
-            {
-                return new RelayCommand(param => this.SettingsViewModel.HandleSettings());
-            }
-        }
+        public IReactiveCommand ShowSettingsCommand { get; private set; }
 
-        public ICommand ShufflePlaylistCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        this.library.ShufflePlaylist();
-
-                        this.UpdatePlaylist();
-                    }
-                );
-            }
-        }
+        public IReactiveCommand ShufflePlaylistCommand { get; private set; }
 
         /// <summary>
         /// Gets the number of songs that come after the currently played song.
