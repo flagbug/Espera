@@ -690,6 +690,8 @@ namespace Espera.Core.Tests
             {
                 library.AddSongsToPlaylist(new[] { songMock.Object });
 
+                library.CreateAdmin("SomePassword");
+
                 library.ChangeToParty();
 
                 Assert.Throws<InvalidOperationException>(() => library.RemoveFromPlaylist(new[] { 0 }));
