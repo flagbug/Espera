@@ -89,6 +89,9 @@ namespace Espera.View.ViewModels
                 .Select(isAdmin => isAdmin || !Settings.Default.LockWindow)
                 .ToProperty(this, x => x.CanModifyWindow);
 
+            this.AddPlaylistCommand = new ReactiveCommand(this.WhenAny(x => x.CanSwitchPlaylist, x => x.Value));
+            this.AddPlaylistCommand.Subscribe(x => this.AddPlaylist());
+
             this.IsLocal = true;
         }
 
@@ -98,16 +101,7 @@ namespace Espera.View.ViewModels
             remove { this.library.VideoPlayerCallbackChanged -= value; }
         }
 
-        public ICommand AddPlaylistCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param => this.AddPlaylist()
-                );
-            }
-        }
+        public IReactiveCommand AddPlaylistCommand { get; private set; }
 
         public bool CanChangeTime
         {
@@ -139,7 +133,7 @@ namespace Espera.View.ViewModels
 
         public PlaylistViewModel CurrentPlaylist
         {
-            get { return this.playlists == null ? null : this.playlists.Single(vm => vm.Name == this.library.CurrentPlaylist.Name); }
+            get { return this.playlists == null ? null : this.playlists.SingleOrDefault(vm => vm.Name == this.library.CurrentPlaylist.Name); }
             set
             {
                 if (value != null) // There always has to be a playlist selected

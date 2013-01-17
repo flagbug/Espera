@@ -561,7 +561,6 @@
                                 <Button Grid.Column="0"
                                         Width="30"
                                         Command="{Binding Path=AddPlaylistCommand}"
-                                        IsEnabled="{Binding Path=CanSwitchPlaylist}"
                                         Padding="0"
                                         ToolTip="Add playlist">
                                     <Image Source="/Espera;component/Images/NewPlaylist.png" />
