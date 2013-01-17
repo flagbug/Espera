@@ -8,7 +8,6 @@ using ReactiveUI;
 using ReactiveUI.Xaml;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -23,12 +22,12 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly Library library;
+        private readonly ReactiveCollection<PlaylistViewModel> playlists;
         private readonly Timer playlistTimeoutUpdateTimer;
         private readonly Timer updateTimer;
         private bool displayTimeoutWarning;
         private bool isLocal;
         private bool isYoutube;
-        private ObservableCollection<PlaylistViewModel> playlists;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
 
         public ShellViewModel(Library library, IWindowManager windowManager)
@@ -91,6 +90,8 @@ namespace Espera.View.ViewModels
 
             this.AddPlaylistCommand = new ReactiveCommand(this.WhenAny(x => x.CanSwitchPlaylist, x => x.Value));
             this.AddPlaylistCommand.Subscribe(x => this.AddPlaylist());
+
+            this.playlists = this.library.Playlists.CreateDerivedCollection(this.CreatePlaylistViewModel);
 
             this.ShowSettingsCommand = new ReactiveCommand();
             this.ShowSettingsCommand.Subscribe(x => this.SettingsViewModel.HandleSettings());
@@ -350,15 +351,9 @@ namespace Espera.View.ViewModels
             set { Settings.Default.PlaylistHeight = value; }
         }
 
-        public ObservableCollection<PlaylistViewModel> Playlists
+        public IReactiveCollection<PlaylistViewModel> Playlists
         {
-            get
-            {
-                var vms = this.library.Playlists.Select(this.CreatePlaylistViewModel);
-
-                return this.playlists ??
-                    (this.playlists = new ObservableCollection<PlaylistViewModel>(vms));
-            }
+            get { return this.playlists; }
         }
 
         public int PlaylistSourceColumnWidth
@@ -413,30 +408,28 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        int index = this.Playlists.IndexOf(this.CurrentPlaylist);
+                        int index = this.playlists.IndexOf(this.CurrentPlaylist);
 
                         this.library.RemovePlaylist(this.CurrentPlaylist.Name);
-
-                        this.Playlists.Remove(this.CurrentPlaylist);
 
                         if (!this.library.Playlists.Any())
                         {
                             this.AddPlaylist();
                         }
 
-                        if (this.Playlists.Count > index)
+                        if (this.playlists.Count > index)
                         {
-                            this.CurrentPlaylist = this.Playlists[index];
+                            this.CurrentPlaylist = this.playlists[index];
                         }
 
-                        else if (this.Playlists.Count >= 1)
+                        else if (this.playlists.Count >= 1)
                         {
-                            this.CurrentPlaylist = this.Playlists[index - 1];
+                            this.CurrentPlaylist = this.playlists[index - 1];
                         }
 
                         else
                         {
-                            this.CurrentPlaylist = this.Playlists[0];
+                            this.CurrentPlaylist = this.playlists[0];
                         }
 
                         this.RaisePropertyChanged(x => x.Playlists);
@@ -579,10 +572,7 @@ namespace Espera.View.ViewModels
         {
             this.library.AddAndSwitchToPlaylist(this.GetNewPlaylistName());
 
-            PlaylistViewModel newPlaylist = this.CreatePlaylistViewModel(this.library.Playlists.Last());
-            this.Playlists.Add(newPlaylist);
-
-            this.CurrentPlaylist = newPlaylist;
+            this.CurrentPlaylist = this.playlists.Last();
             this.CurrentPlaylist.EditName = true;
         }
 

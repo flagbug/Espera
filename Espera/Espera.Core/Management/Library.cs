@@ -4,6 +4,8 @@ using Rareform.Extensions;
 using Rareform.Validation;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -24,7 +26,7 @@ namespace Espera.Core.Management
         private readonly IRemovableDriveWatcher driveWatcher;
         private readonly ILibraryReader libraryReader;
         private readonly ILibraryWriter libraryWriter;
-        private readonly List<Playlist> playlists;
+        private readonly ObservableCollection<Playlist> playlists;
         private readonly ILibrarySettings settings;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
@@ -41,7 +43,7 @@ namespace Espera.Core.Management
         {
             this.songLock = new object();
             this.songs = new HashSet<Song>();
-            this.playlists = new List<Playlist>();
+            this.playlists = new ObservableCollection<Playlist>();
             this.accessModeSubject = new BehaviorSubject<AccessMode>(Management.AccessMode.Administrator); // We want implicit to be the administrator, till we change to user mode manually
             this.accessMode = Management.AccessMode.Administrator;
             this.cacheResetHandle = new AutoResetEvent(false);
@@ -270,6 +272,9 @@ namespace Espera.Core.Management
             }
         }
 
+        /// <summary>
+        /// Returns an enumeration of playlists that implements <see cref="INotifyCollectionChanged"/>.
+        /// </summary>
         public IEnumerable<Playlist> Playlists
         {
             get { return this.playlists; }
@@ -457,7 +462,7 @@ namespace Espera.Core.Management
         {
             if (!this.IsAdministratorCreated)
                 throw new InvalidOperationException("Administrator is not created.");
-                
+
             this.accessMode = Management.AccessMode.Party;
             this.accessModeSubject.OnNext(Management.AccessMode.Party);
         }
@@ -931,7 +936,10 @@ namespace Espera.Core.Management
 
             IEnumerable<Playlist> savedPlaylists = this.libraryReader.ReadPlaylists();
 
-            this.playlists.AddRange(savedPlaylists);
+            foreach (Playlist playlist in savedPlaylists)
+            {
+                this.playlists.Add(playlist);
+            }
         }
 
         private void RemoveFromPlaylist(Playlist playlist, IEnumerable<int> indexes)
