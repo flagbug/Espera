@@ -107,17 +107,17 @@ namespace Espera.View.ViewModels
                 .WhenAny(x => x.IsPlaying, x => x.Value)
                 .Select(x => x ? this.PauseCommand.CanExecute(null) : this.PlayCommand.CanExecute(null)));
             this.PauseContinueCommand.Subscribe(x =>
-                                                    {
-                                                        if (this.IsPlaying)
-                                                        {
-                                                            this.PauseCommand.Execute(null);
-                                                        }
+            {
+                if (this.IsPlaying)
+                {
+                    this.PauseCommand.Execute(null);
+                }
 
-                                                        else
-                                                        {
-                                                            this.PlayCommand.Execute(false);
-                                                        }
-                                                    });
+                else
+                {
+                    this.PlayCommand.Execute(false);
+                }
+            });
 
             this.IsLocal = true;
         }
