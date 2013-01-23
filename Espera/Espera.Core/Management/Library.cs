@@ -27,6 +27,7 @@ namespace Espera.Core.Management
         private readonly ILibraryReader libraryReader;
         private readonly ILibraryWriter libraryWriter;
         private readonly ObservableCollection<Playlist> playlists;
+        private readonly ReadOnlyObservableCollection<Playlist> playlistsPublicWrapper;
         private readonly ILibrarySettings settings;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
@@ -44,6 +45,7 @@ namespace Espera.Core.Management
             this.songLock = new object();
             this.songs = new HashSet<Song>();
             this.playlists = new ObservableCollection<Playlist>();
+            this.playlistsPublicWrapper = new ReadOnlyObservableCollection<Playlist>(this.playlists);
             this.accessModeSubject = new BehaviorSubject<AccessMode>(Management.AccessMode.Administrator); // We want implicit to be the administrator, till we change to user mode manually
             this.accessMode = Management.AccessMode.Administrator;
             this.cacheResetHandle = new AutoResetEvent(false);
@@ -275,9 +277,9 @@ namespace Espera.Core.Management
         /// <summary>
         /// Returns an enumeration of playlists that implements <see cref="INotifyCollectionChanged"/>.
         /// </summary>
-        public IEnumerable<Playlist> Playlists
+        public ReadOnlyObservableCollection<Playlist> Playlists
         {
-            get { return this.playlists; }
+            get { return this.playlistsPublicWrapper; }
         }
 
         public TimeSpan PlaylistTimeout
