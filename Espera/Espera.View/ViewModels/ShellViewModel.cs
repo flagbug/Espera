@@ -110,6 +110,9 @@ namespace Espera.View.ViewModels
             this.PauseContinueCommand.Where(x => this.IsPlaying).Subscribe(x => this.PauseCommand.Execute(null));
             this.PauseContinueCommand.Where(x => !this.IsPlaying).Subscribe(x => this.PlayCommand.Execute(false));
 
+            this.EditPlaylistNameCommand = new ReactiveCommand();
+            this.EditPlaylistNameCommand.Subscribe(x => this.CurrentPlaylist.EditName = true);
+
             this.IsLocal = true;
         }
 
@@ -184,19 +187,7 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(value); }
         }
 
-        public ICommand EditPlaylistNameCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        this.CurrentPlaylist.EditName = true;
-                    }
-                );
-            }
-        }
+        public IReactiveCommand EditPlaylistNameCommand { get; private set; }
 
         public bool IsAdmin
         {
