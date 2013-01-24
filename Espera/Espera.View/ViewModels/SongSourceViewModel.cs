@@ -1,5 +1,4 @@
 ﻿using Espera.Core.Management;
-using Rareform.Extensions;
 using ReactiveUI;
 using ReactiveUI.Xaml;
 using System;
@@ -7,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace Espera.View.ViewModels
 {
@@ -14,6 +14,7 @@ namespace Espera.View.ViewModels
         where T : SongViewModelBase
     {
         private readonly Library library;
+        private readonly Subject<Unit> timeoutWarning;
         private ObservableAsPropertyHelper<bool> isAdmin;
         private string searchText;
         private IEnumerable<T> selectableSongs;
@@ -25,6 +26,7 @@ namespace Espera.View.ViewModels
 
             this.searchText = String.Empty;
             this.selectableSongs = Enumerable.Empty<T>();
+            this.timeoutWarning = new Subject<Unit>();
 
             this.WhenAny(x => x.SelectedSongs, x => Unit.Default)
                 .Subscribe(p => this.RaisePropertyChanged(x => x.IsSongSelected));
@@ -36,7 +38,7 @@ namespace Espera.View.ViewModels
                 if (!this.Library.CanAddSongToPlaylist)
                 {
                     // Trigger the animation
-                    this.TimeoutWarning.RaiseSafe(this, EventArgs.Empty);
+                    this.timeoutWarning.OnNext(Unit.Default);
 
                     return;
                 }
@@ -56,8 +58,6 @@ namespace Espera.View.ViewModels
                 .Select(x => x == AccessMode.Administrator)
                 .ToProperty(this, x => x.IsAdmin);
         }
-
-        public event EventHandler TimeoutWarning;
 
         public IReactiveCommand AddToPlaylistCommand { get; private set; }
 
@@ -87,6 +87,11 @@ namespace Espera.View.ViewModels
         {
             get { return this.selectedSongs; }
             set { this.RaiseAndSetIfChanged(value); }
+        }
+
+        public IObservable<Unit> TimeoutWarning
+        {
+            get { return this.timeoutWarning.AsObservable(); }
         }
 
         protected Library Library

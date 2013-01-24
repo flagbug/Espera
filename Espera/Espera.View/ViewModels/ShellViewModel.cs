@@ -56,10 +56,9 @@ namespace Espera.View.ViewModels
             this.SettingsViewModel = new SettingsViewModel(this.library, windowManager);
 
             this.LocalViewModel = new LocalViewModel(this.library);
-            this.LocalViewModel.TimeoutWarning += (sender, e) => this.TriggerTimeoutWarning();
-
             this.YoutubeViewModel = new YoutubeViewModel(this.library);
-            this.YoutubeViewModel.TimeoutWarning += (sender, e) => this.TriggerTimeoutWarning();
+            Observable.CombineLatest(this.LocalViewModel.TimeoutWarning, this.YoutubeViewModel.TimeoutWarning)
+                .Subscribe(x => this.TriggerTimeoutWarning());
 
             this.updateTimer = new Timer(333);
             this.updateTimer.Elapsed += (sender, e) => this.UpdateCurrentTime();
