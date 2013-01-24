@@ -1,4 +1,5 @@
 ﻿using Espera.Core.Management;
+using Rareform.Extensions;
 using Rareform.Reflection;
 using ReactiveUI;
 using System;
@@ -137,11 +138,6 @@ namespace Espera.View.ViewModels
 
                 return error;
             }
-        }
-
-        private bool HasErrors()
-        {
-            return this.GetType().GetProperties().Any(p => this[p.Name] != null);
         }
     }
 }
