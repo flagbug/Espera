@@ -95,9 +95,9 @@
     <Reference Include="Ookii.Dialogs.Wpf">
       <HintPath>..\packages\Ookii.Dialogs.1.0\lib\net35\Ookii.Dialogs.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="Rareform, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Rareform, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Rareform.1.3.0\lib\Rareform.dll</HintPath>
+      <HintPath>..\packages\Rareform.1.4.0\lib\Rareform.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
