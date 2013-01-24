@@ -117,7 +117,7 @@ namespace Espera.View.ViewModels
 
         public PlaylistViewModel CurrentPlaylist
         {
-            get { return this.playlists == null ? null : this.playlists.Single(vm => vm.Name == this.library.CurrentPlaylist.Name); }
+            get { return this.playlists == null ? null : this.playlists.SingleOrDefault(vm => vm.Name == this.library.CurrentPlaylist.Name); }
             set
             {
                 if (value != null) // There always has to be a playlist selected
