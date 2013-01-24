@@ -111,25 +111,19 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Rareform.1.4.0\lib\Rareform.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=4.3.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="ReactiveUI">
       <HintPath>..\packages\reactiveui-core.4.3.1\lib\Net40\ReactiveUI.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Blend, Version=4.3.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="ReactiveUI.Blend">
       <HintPath>..\packages\reactiveui-xaml.4.3.1\lib\Net40\ReactiveUI.Blend.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.NLog, Version=4.2.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="ReactiveUI.NLog">
       <HintPath>..\packages\reactiveui-nlog.4.3.1\lib\net40\ReactiveUI.NLog.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Routing, Version=4.3.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="ReactiveUI.Routing">
       <HintPath>..\packages\reactiveui-xaml.4.3.1\lib\Net40\ReactiveUI.Routing.dll</HintPath>
-      <HintPath>..\packages\Caliburn.Micro.1.4.1\lib\net40\System.Windows.Interactivity.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Xaml, Version=4.3.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="ReactiveUI.Xaml">
       <HintPath>..\packages\reactiveui-xaml.4.3.1\lib\Net40\ReactiveUI.Xaml.dll</HintPath>
     </Reference>
     <Reference Include="System" />
