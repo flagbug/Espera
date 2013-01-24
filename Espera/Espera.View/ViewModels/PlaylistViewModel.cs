@@ -62,7 +62,14 @@ namespace Espera.View.ViewModels
         public string Name
         {
             get { return this.playlist.Name; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set
+            {
+                if (this.Name != value)
+                {
+                    this.playlist.Name = value;
+                    this.RaisePropertyChanged(x => x.Name);
+                }
+            }
         }
 
         public int SongCount
