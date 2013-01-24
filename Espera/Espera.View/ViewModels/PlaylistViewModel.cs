@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using Espera.Core.Management;
+using Rareform.Extensions;
 using Rareform.Reflection;
 using System;
 using System.Collections.Generic;
@@ -151,11 +152,6 @@ namespace Espera.View.ViewModels
 
                 return error;
             }
-        }
-
-        private bool HasErrors()
-        {
-            return this.GetType().GetProperties().Any(p => this[p.Name] != null);
         }
     }
 }
