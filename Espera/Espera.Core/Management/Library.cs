@@ -24,6 +24,7 @@ namespace Espera.Core.Management
         private readonly object disposeLock;
 
         private readonly IRemovableDriveWatcher driveWatcher;
+        private readonly Subject<bool> isUpdating;
         private readonly ILibraryReader libraryReader;
         private readonly ILibraryWriter libraryWriter;
         private readonly ObservableCollection<Playlist> playlists;
@@ -54,6 +55,7 @@ namespace Espera.Core.Management
             this.libraryWriter = libraryWriter;
             this.disposeLock = new object();
             this.settings = settings;
+            this.isUpdating = new Subject<bool>();
         }
 
         /// <summary>
@@ -80,16 +82,6 @@ namespace Espera.Core.Management
         /// Occurs when a song has started the playback.
         /// </summary>
         public event EventHandler SongStarted;
-
-        /// <summary>
-        /// Occurs when the library is finished with updating.
-        /// </summary>
-        public event EventHandler Updated;
-
-        /// <summary>
-        /// Occurs when the library is updating.
-        /// </summary>
-        public event EventHandler Updating;
 
         public event EventHandler VideoPlayerCallbackChanged;
 
@@ -198,6 +190,14 @@ namespace Espera.Core.Management
         public bool IsPlaying
         {
             get { return this.currentPlayer != null && this.currentPlayer.PlaybackState == AudioPlayerState.Playing; }
+        }
+
+        /// <summary>
+        /// Occurs when the library is updating. <c>True</c>, when the updated starts, <c>false</c> when the update finished.
+        /// </summary>
+        public IObservable<bool> IsUpdating
+        {
+            get { return this.isUpdating.AsObservable(); }
         }
 
         /// <summary>
@@ -990,7 +990,7 @@ namespace Espera.Core.Management
 
         private void Update()
         {
-            this.Updating.RaiseSafe(this, EventArgs.Empty);
+            this.isUpdating.OnNext(true);
 
             IEnumerable<Song> removable;
 
@@ -1011,7 +1011,7 @@ namespace Espera.Core.Management
                 }
             }
 
-            this.Updated.RaiseSafe(this, EventArgs.Empty);
+            this.isUpdating.OnNext(false);
         }
     }
 }

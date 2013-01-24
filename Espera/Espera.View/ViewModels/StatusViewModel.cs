@@ -8,9 +8,9 @@ namespace Espera.View.ViewModels
 {
     internal sealed class StatusViewModel : ReactiveObject
     {
+        private readonly ObservableAsPropertyHelper<bool> isUpdating;
         private readonly Library library;
         private bool isAdding;
-        private bool isUpdating;
         private string path;
         private int processedTags;
         private int totalTags;
@@ -21,8 +21,7 @@ namespace Espera.View.ViewModels
                 Throw.ArgumentNullException(() => library);
 
             this.library = library;
-            this.library.Updating += (sender, e) => this.IsUpdating = true;
-            this.library.Updated += (sender, args) => this.IsUpdating = false;
+            this.isUpdating = this.library.IsUpdating.ToProperty(this, x => x.IsUpdating);
 
             this.WhenAny(x => x.IsAdding, x => Unit.Default)
                 .Subscribe(p => this.RaisePropertyChanged(x => x.IsProgressUnkown));
@@ -41,8 +40,7 @@ namespace Espera.View.ViewModels
 
         public bool IsUpdating
         {
-            get { return this.isUpdating; }
-            set { this.RaiseAndSetIfChanged(value); }
+            get { return this.isUpdating.Value; }
         }
 
         public string Path
