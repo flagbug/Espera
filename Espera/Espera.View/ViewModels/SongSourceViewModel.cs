@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
@@ -31,9 +30,8 @@ namespace Espera.View.ViewModels
                 .Subscribe(p => this.RaisePropertyChanged(x => x.IsSongSelected));
 
             IObservable<bool> canAddToPlaylist = this.WhenAny(x => x.SelectedSongs, x => x.Value != null && x.Value.Any());
-            var addToPlaylistCommand = new ReactiveCommand(canAddToPlaylist);
-            this.AddToPlaylistCommand = addToPlaylistCommand;
-            addToPlaylistCommand.Subscribe(p =>
+            this.AddToPlaylistCommand = new ReactiveCommand(canAddToPlaylist);
+            this.AddToPlaylistCommand.Subscribe(p =>
             {
                 if (!this.Library.CanAddSongToPlaylist)
                 {
@@ -61,7 +59,7 @@ namespace Espera.View.ViewModels
 
         public event EventHandler TimeoutWarning;
 
-        public ICommand AddToPlaylistCommand { get; private set; }
+        public IReactiveCommand AddToPlaylistCommand { get; private set; }
 
         public bool IsAdmin
         {
