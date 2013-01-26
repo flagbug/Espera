@@ -904,6 +904,28 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void Save_LibraryWithTemporaryPlaylist_DoesntSaveTemporaryPlaylist()
+        {
+            var libraryWriter = new Mock<ILibraryWriter>();
+            libraryWriter.Setup(x => x.Write(It.IsAny<IEnumerable<LocalSong>>(), It.IsAny<IEnumerable<Playlist>>()))
+                .Callback<IEnumerable<LocalSong>, IEnumerable<Playlist>>((songs, playlists) => Assert.AreEqual(1, playlists.Count()));
+
+            using (Library library = Helpers.CreateLibrary(libraryWriter.Object))
+            {
+                library.AddAndSwitchToPlaylist("Playlist");
+
+                Mock<Song> song = Helpers.CreateSongMock();
+                song.Setup(x => x.CreateAudioPlayer()).Returns(new JumpAudioPlayer());
+
+                library.PlayInstantly(new[] { song.Object });
+
+                library.Save();
+            }
+
+            libraryWriter.Verify(x => x.Write(It.IsAny<IEnumerable<LocalSong>>(), It.IsAny<IEnumerable<Playlist>>()), Times.Once());
+        }
+
+        [Test]
         public void SwitchToPlaylist_ChangeToOtherPlaylistAndPlayFirstSong_CurrentSongIndexIsCorrectlySet()
         {
             var blockingPlayer = new Mock<AudioPlayer>();

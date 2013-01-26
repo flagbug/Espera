@@ -10,6 +10,14 @@ namespace Espera.Core.Tests
     public sealed class PlaylistTest
     {
         [Test]
+        public void NameSetter_IsTemporaryIsTrue_ThrowsInvalidOperationException()
+        {
+            var playlist = new Playlist("Playlist", true);
+            
+            Assert.Throws<InvalidOperationException>(() => playlist.Name = "Test");
+        }
+        
+        [Test]
         public void AddSongs_ArgumentIsNull_ThrowsArgumentNullException()
         {
             var playlist = new Playlist("Playlist");

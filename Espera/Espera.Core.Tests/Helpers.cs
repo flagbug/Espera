@@ -44,12 +44,17 @@ namespace Espera.Core.Tests
             Playlist2.AddSongs(new[] { (Song)LocalSong1, YoutubeSong1 });
         }
 
-        public static Library CreateLibrary(ILibrarySettings settings = null)
+        public static Library CreateLibrary(ILibraryWriter writer)
+        {
+            return CreateLibrary(null, writer);
+        }
+
+        public static Library CreateLibrary(ILibrarySettings settings = null, ILibraryWriter writer = null)
         {
             return new Library(
                 new Mock<IRemovableDriveWatcher>().Object,
                 new Mock<ILibraryReader>().Object,
-                new Mock<ILibraryWriter>().Object,
+                writer ?? new Mock<ILibraryWriter>().Object,
                 settings ?? new Mock<ILibrarySettings>().SetupAllProperties().Object);
         }
 
