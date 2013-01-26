@@ -630,14 +630,21 @@ namespace Espera.Core.Tests
 
                 var player = new Mock<AudioPlayer>();
 
-                var song = new Mock<Song>();
+                Mock<Song> song = Helpers.CreateSongMock();
                 song.Setup(x => x.CreateAudioPlayer()).Returns(player.Object);
+
+                Mock<Song> instantSong = Helpers.CreateSongMock();
+                instantSong.Setup(x => x.CreateAudioPlayer()).Returns(new JumpAudioPlayer());
 
                 library.AddSongToPlaylist(song.Object);
 
                 var handle = new ManualResetEventSlim();
 
                 library.SongFinished += (sender, args) => handle.Set();
+
+                library.PlaySong(0);
+
+                library.PlayInstantly(new[] { instantSong.Object });
 
                 handle.Wait();
 
