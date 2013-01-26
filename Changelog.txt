@@ -1,3 +1,9 @@
+----------------------------------- v1.7.1 -----------------------------------
+
+BUGFIXES:
+- Fixed a bug that caused the application to jump over songs or mark them as 
+  corrupt incorrectly.
+
 ----------------------------------- v1.7.0 -----------------------------------
 
 FEATURES:
