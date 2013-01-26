@@ -15,9 +15,10 @@ namespace Espera.Core.Management
         private int? currentSongIndex;
         private Dictionary<int, Song> playlist;
 
-        internal Playlist(string name)
+        internal Playlist(string name, bool isTemporary = false)
         {
             this.Name = name;
+            this.IsTemporary = isTemporary;
             this.playlist = new Dictionary<int, Song>();
         }
 
@@ -61,6 +62,12 @@ namespace Espera.Core.Management
                 this.currentSongIndex = value;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether this playlist is temporary and used for instant-playing.
+        /// This means that this playlist isn't saved to the harddrive when closing the application.
+        /// </summary>
+        public bool IsTemporary { get; private set; }
 
         public string Name { get; set; }
 

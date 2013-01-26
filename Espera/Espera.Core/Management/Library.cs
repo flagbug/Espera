@@ -559,8 +559,15 @@ namespace Espera.Core.Management
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
 
-            this.instantPlaylist = new Playlist("Instant Playlist");
+            if (this.instantPlaylist != null)
+            {
+                this.playlists.Remove(instantPlaylist);
+            }
 
+            string instantPlaylistName = Guid.NewGuid().ToString();
+            this.instantPlaylist = new Playlist(instantPlaylistName, true);
+
+            this.playlists.Add(this.instantPlaylist);
             this.SwitchToPlaylist(this.instantPlaylist);
 
             this.AddSongsToPlaylist(songList);
