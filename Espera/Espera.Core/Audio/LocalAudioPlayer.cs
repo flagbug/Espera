@@ -144,7 +144,7 @@ namespace Espera.Core.Audio
 
                 if (!wasPaused)
                 {
-                    while (this.PlaybackState != AudioPlayerState.Stopped)
+                    while (this.PlaybackState != AudioPlayerState.Stopped && this.PlaybackState != AudioPlayerState.None)
                     {
                         this.UpdateSongState();
                         Thread.Sleep(250);
