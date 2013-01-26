@@ -29,6 +29,7 @@ namespace Espera.Core.Management
         private AccessMode accessMode;
         private AudioPlayer currentPlayer;
         private Playlist currentPlayingPlaylist;
+        private Playlist instantPlaylist;
         private bool isWaitingOnCache;
         private DateTime lastSongAddTime;
         private bool overrideCurrentCaching;
@@ -554,6 +555,14 @@ namespace Espera.Core.Management
         {
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
+
+            this.instantPlaylist = new Playlist("Instant Playlist");
+
+            this.SwitchToPlaylist(this.instantPlaylist);
+
+            this.AddSongsToPlaylist(songList);
+
+            this.PlaySong(0);
         }
 
         /// <summary>

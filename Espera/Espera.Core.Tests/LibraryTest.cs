@@ -622,6 +622,30 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void PlayInstantly_StopsCurrentSong()
+        {
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
+            {
+                library.SwitchToPlaylist(library.Playlists.First());
+
+                var player = new Mock<AudioPlayer>();
+
+                var song = new Mock<Song>();
+                song.Setup(x => x.CreateAudioPlayer()).Returns(player.Object);
+
+                library.AddSongToPlaylist(song.Object);
+
+                var handle = new ManualResetEventSlim();
+
+                library.SongFinished += (sender, args) => handle.Set();
+
+                handle.Wait();
+
+                player.Verify(x => x.Stop(), Times.Once());
+            }
+        }
+
+        [Test]
         public void PlayNextSong_UserIsNotAdministrator_ThrowsInvalidOperationException()
         {
             using (Library library = Helpers.CreateLibrary())
