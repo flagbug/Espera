@@ -1,4 +1,5 @@
 using Espera.Core;
+using Espera.Core.Management;
 using Espera.View.Properties;
 using Espera.View.ViewModels;
 using Ionic.Utils;
@@ -13,6 +14,9 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using ListView = System.Windows.Controls.ListView;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace Espera.View.Views
 {
@@ -81,6 +85,7 @@ namespace Espera.View.Views
         private void LoginButtonClick(object sender, RoutedEventArgs e)
         {
             ICommand command = this.shellViewModel.SettingsViewModel.LoginCommand;
+
             if (command.CanExecute(null))
             {
                 command.Execute(null);
@@ -113,12 +118,6 @@ namespace Espera.View.Views
             {
                 e.Cancel = true;
             }
-        }
-
-        private void OrangeColorButtonButtonClick(object sender, RoutedEventArgs e)
-        {
-            this.ChangeColor("Orange");
-            Settings.Default.AccentColor = "Orange";
         }
 
         private void PlaylistContextMenuOpening(object sender, ContextMenuEventArgs e)
@@ -294,18 +293,18 @@ namespace Espera.View.Views
 
         private void WireScreenStateUpdater()
         {
-            this.shellViewModel.UpdateScreenState += (sender2, args2) =>
+            this.shellViewModel.UpdateScreenState.Subscribe(x =>
             {
                 if (Settings.Default.LockWindow && Settings.Default.GoFullScreenOnLock)
                 {
-                    this.IgnoreTaskbarOnMaximize = !this.shellViewModel.IsAdmin && Settings.Default.GoFullScreenOnLock;
+                    this.IgnoreTaskbarOnMaximize = x == AccessMode.Party && Settings.Default.GoFullScreenOnLock;
 
                     this.WindowState = WindowState.Normal;
                     this.WindowState = WindowState.Maximized;
 
                     this.Topmost = true;
                 }
-            };
+            });
         }
 
         private void WireVideoPlayer()

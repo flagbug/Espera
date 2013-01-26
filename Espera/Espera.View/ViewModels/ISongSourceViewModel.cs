@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Windows.Input;
+﻿using ReactiveUI.Xaml;
+using System.Collections.Generic;
 
 namespace Espera.View.ViewModels
 {
     internal interface ISongSourceViewModel
     {
-        ICommand AddToPlaylistCommand { get; }
+        IReactiveCommand AddToPlaylistCommand { get; }
 
         string SearchText { get; set; }
 

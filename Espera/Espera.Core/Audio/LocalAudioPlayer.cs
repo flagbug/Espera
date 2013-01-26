@@ -227,7 +227,7 @@ namespace Espera.Core.Audio
             if (this.CurrentTime >= this.TotalTime)
             {
                 this.Stop();
-                this.OnSongFinished(EventArgs.Empty);
+                this.OnSongFinished();
             }
         }
     }

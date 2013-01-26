@@ -1,13 +1,12 @@
-﻿using Caliburn.Micro;
-using Espera.Services;
-using Rareform.Patterns.MVVM;
+﻿using Espera.Services;
+using ReactiveUI;
+using ReactiveUI.Xaml;
 using System;
 using System.Reflection;
-using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal class BugReportViewModel : PropertyChangedBase
+    internal class BugReportViewModel : ReactiveObject
     {
         private readonly string version;
         private string message;
@@ -16,57 +15,39 @@ namespace Espera.View.ViewModels
         public BugReportViewModel()
         {
             this.version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+            IObservable<bool> canSubmitBugReport = this.WhenAny(x => x.Message, x => x.SendingSucceeded,
+                (message, succeeded) => !string.IsNullOrWhiteSpace(message.Value) && (succeeded.Value == null || !succeeded.Value.Value));
+
+            this.SubmitBugReport = new ReactiveCommand(canSubmitBugReport);
+            this.SubmitBugReport.Subscribe(x =>
+            {
+                try
+                {
+                    FogBugzService.SubmitReport("Version " + this.version + "\n\n" + this.Message);
+
+                    this.SendingSucceeded = true;
+                }
+
+                catch (Exception)
+                {
+                    this.SendingSucceeded = false;
+                }
+            });
         }
 
         public string Message
         {
             get { return this.message; }
-            set
-            {
-                if (this.message != value)
-                {
-                    this.message = value;
-                    this.NotifyOfPropertyChange(() => this.Message);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public bool? SendingSucceeded
         {
             get { return this.sendingSucceeded; }
-            set
-            {
-                if (this.SendingSucceeded != value)
-                {
-                    this.sendingSucceeded = value;
-                    this.NotifyOfPropertyChange(() => this.SendingSucceeded);
-                }
-            }
+            private set { this.RaiseAndSetIfChanged(value); }
         }
 
-        public ICommand SubmitBugReport
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        try
-                        {
-                            FogBugzService.SubmitReport("Version " + this.version + "\n\n" + this.Message);
-
-                            this.SendingSucceeded = true;
-                        }
-
-                        catch (Exception)
-                        {
-                            this.SendingSucceeded = false;
-                        }
-                    },
-                    param => !string.IsNullOrWhiteSpace(this.Message) &&
-                        (this.SendingSucceeded == null || !this.SendingSucceeded.Value));
-            }
-        }
+        public IReactiveCommand SubmitBugReport { get; private set; }
     }
 }

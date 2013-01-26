@@ -1,5 +1,5 @@
-﻿using System;
-using Espera.Core.Audio;
+﻿using Espera.Core.Audio;
+using System;
 
 namespace Espera.Core.Tests.Mocks
 {
@@ -38,7 +38,7 @@ namespace Espera.Core.Tests.Mocks
 
         public override void Play()
         {
-            this.OnSongFinished(EventArgs.Empty);
+            this.OnSongFinished();
         }
 
         public override void Stop()

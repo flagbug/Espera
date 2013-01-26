@@ -73,27 +73,27 @@ namespace Espera.Core
 
             catch (IOException)
             {
-                this.OnCachingFailed(EventArgs.Empty);
+                this.OnCachingFailed();
             }
 
             catch (WebException)
             {
-                this.OnCachingFailed(EventArgs.Empty);
+                this.OnCachingFailed();
             }
 
             catch (VideoNotAvailableException)
             {
-                this.OnCachingFailed(EventArgs.Empty);
+                this.OnCachingFailed();
             }
 
             catch (YoutubeParseException)
             {
-                this.OnCachingFailed(EventArgs.Empty);
+                this.OnCachingFailed();
             }
 
             catch (AudioExtractionException)
             {
-                this.OnCachingFailed(EventArgs.Empty);
+                this.OnCachingFailed();
             }
 
             finally
@@ -146,14 +146,10 @@ namespace Espera.Core
             const double factor = 0.95;
 
             downloader.DownloadProgressChanged += (sender, args) =>
-            {
-                this.CachingProgress = (int)(args.ProgressPercentage * factor);
-            };
+                this.OnCachingProgressChanged((int)(args.ProgressPercentage * factor));
 
             downloader.AudioExtractionProgressChanged += (sender, args) =>
-            {
-                this.CachingProgress = (int)(factor * 100) + (int)(args.ProgressPercentage * (1 - factor));
-            };
+                this.OnCachingProgressChanged((int)(factor * 100) + (int)(args.ProgressPercentage * (1 - factor)));
 
             downloader.Execute();
         }

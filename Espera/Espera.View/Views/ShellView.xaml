@@ -108,8 +108,8 @@
                              x:FieldModifier="private" />
                 <Button Margin="0, 10, 0, 0"
                         Click="LoginButtonClick"
-                        Command="{Binding Path=LoginCommand}"
-                        Content="Login" />
+                        Content="Login"
+                        IsEnabled="{Binding Path=CanLogin}" />
                 <TextBlock Margin="0, 10, 0, 0"
                            HorizontalAlignment="Center"
                            Foreground="Red"
@@ -561,7 +561,6 @@
                                 <Button Grid.Column="0"
                                         Width="30"
                                         Command="{Binding Path=AddPlaylistCommand}"
-                                        IsEnabled="{Binding Path=CanSwitchPlaylist}"
                                         Padding="0"
                                         ToolTip="Add playlist">
                                     <Image Source="/Espera;component/Images/NewPlaylist.png" />

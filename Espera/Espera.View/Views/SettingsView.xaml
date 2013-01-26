@@ -126,8 +126,8 @@
                                     Margin="0, 5, 0, 0"
                                     HorizontalAlignment="Left"
                                     Click="CreateAdminButtonClick"
-                                    Command="{Binding Path=CreateAdminCommand}"
-                                    Content="Create Administrator" />
+                                    Content="Create Administrator"
+                                    IsEnabled="{Binding Path=CanCreateAdmin}" />
                             <Button Width="200"
                                     Margin="0, 15, 0, 0"
                                     HorizontalAlignment="Left"

@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Espera.Core.Audio;
+using System;
 using System.Threading;
-using Espera.Core.Audio;
 
 namespace Espera.Core.Tests.Mocks
 {
@@ -48,7 +48,7 @@ namespace Espera.Core.Tests.Mocks
         {
             handle.WaitOne();
 
-            this.OnSongFinished(EventArgs.Empty);
+            this.OnSongFinished();
         }
 
         public override void Stop()

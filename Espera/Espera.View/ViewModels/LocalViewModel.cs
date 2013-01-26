@@ -2,13 +2,15 @@
 using Espera.Core.Management;
 using Espera.View.Properties;
 using MoreLinq;
-using Rareform.Patterns.MVVM;
 using Rareform.Validation;
+using ReactiveUI;
+using ReactiveUI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading;
-using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
@@ -21,7 +23,6 @@ namespace Espera.View.ViewModels
         private SortOrder artistOrder;
         private SortOrder durationOrder;
         private SortOrder genreOrder;
-        private string searchText;
         private ArtistViewModel selectedArtist;
         private SortOrder titleOrder;
 
@@ -30,15 +31,13 @@ namespace Espera.View.ViewModels
         {
             this.updateSemaphore = new SemaphoreSlim(1, 1);
 
-            library.Updated += (sender, args) =>
+            library.IsUpdating.Where(x => x).Subscribe(p =>
             {
-                this.NotifyOfPropertyChange(() => this.Artists);
+                this.RaisePropertyChanged(x => x.Artists);
                 this.UpdateSelectableSongs();
-            };
+            });
 
             this.StatusViewModel = new StatusViewModel(library);
-
-            this.searchText = String.Empty;
 
             this.artists = new Dictionary<string, ArtistViewModel>();
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
@@ -47,6 +46,24 @@ namespace Espera.View.ViewModels
             this.OrderByArtist();
 
             this.SelectedArtist = this.Artists.First();
+
+            this.WhenAny(x => x.SearchText, x => x.SelectedArtist, (x1, x2) => Unit.Default)
+                .Subscribe(x => this.UpdateSelectableSongs());
+
+            IObservable<bool> canRemoveFromLibrary = this
+                .WhenAny(x => x.SelectedSongs, x => x.Value)
+                .CombineLatest(this.Library.AccessMode,
+                    (selectedSongs, accessMode) =>
+                        selectedSongs != null && selectedSongs.Any() &&
+                        (this.IsAdmin || !this.Library.LockLibraryRemoval));
+
+            this.RemoveFromLibraryCommand = new ReactiveCommand(canRemoveFromLibrary);
+            this.RemoveFromLibraryCommand.Subscribe(p =>
+            {
+                this.Library.RemoveFromLibrary(this.SelectedSongs.Select(song => song.Model));
+
+                this.UpdateSelectableSongs();
+            });
         }
 
         public int AlbumColumnWidth
@@ -89,56 +106,12 @@ namespace Espera.View.ViewModels
             set { Settings.Default.LocalPathColumnWidth = value; }
         }
 
-        public ICommand RemoveFromLibraryCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        this.Library.RemoveFromLibrary(this.SelectedSongs.Select(song => song.Model));
-
-                        this.UpdateSelectableSongs();
-                        this.NotifyOfPropertyChange(() => this.Artists);
-                    },
-                    param => this.SelectedSongs != null
-                        && this.SelectedSongs.Any()
-                        && (this.IsAdmin || !this.Library.LockLibraryRemoval)
-                );
-            }
-        }
-
-        public override string SearchText
-        {
-            get { return this.searchText; }
-            set
-            {
-                if (this.SearchText != value)
-                {
-                    this.searchText = value;
-
-                    this.NotifyOfPropertyChange(() => this.SearchText);
-
-                    this.UpdateSelectableSongs();
-                }
-            }
-        }
+        public IReactiveCommand RemoveFromLibraryCommand { get; private set; }
 
         public ArtistViewModel SelectedArtist
         {
             get { return this.selectedArtist; }
-            set
-            {
-                if (value != null && this.SelectedArtist != value)
-                {
-                    this.selectedArtist = value;
-
-                    this.NotifyOfPropertyChange(() => this.SelectedArtist);
-
-                    this.UpdateSelectableSongs();
-                }
-            }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public StatusViewModel StatusViewModel { get; private set; }
@@ -162,9 +135,8 @@ namespace Espera.View.ViewModels
 
                 if (e.Song.Artist != lastArtist)
                 {
-                    this.UpdateSelectableSongs();
                     lastArtist = e.Song.Artist;
-                    this.NotifyOfPropertyChange(() => this.Artists);
+                    this.RaisePropertyChanged(x => x.Artists);
                 }
             };
 
@@ -172,13 +144,18 @@ namespace Espera.View.ViewModels
 
             this.StatusViewModel.IsAdding = true;
 
+            IDisposable d = Observable.Interval(TimeSpan.FromSeconds(1.5))
+                .Subscribe(p => this.UpdateSelectableSongs());
+
             this.Library
                 .AddLocalSongsAsync(folderPath)
                 .ContinueWith(task =>
                 {
                     this.Library.SongAdded -= handler;
 
-                    this.NotifyOfPropertyChange(() => this.Artists);
+                    d.Dispose();
+
+                    this.UpdateSelectableSongs();
                     this.StatusViewModel.Reset();
                 });
         }
@@ -267,7 +244,7 @@ namespace Espera.View.ViewModels
                 }
             }
 
-            this.NotifyOfPropertyChange(() => this.Artists);
+            this.RaisePropertyChanged(x => x.Artists);
 
             this.allArtistsViewModel.ArtistCount = artistInfos.Count;
 

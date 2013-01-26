@@ -2,9 +2,12 @@
 using Rareform.IO;
 using Rareform.Validation;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
 using TagLib;
 
@@ -16,80 +19,30 @@ namespace Espera.Core
     internal sealed class LocalSongFinder : SongFinder<LocalSong>
     {
         private static readonly string[] AllowedExtensions = new[] { ".mp3", ".wav" };
-        private readonly List<string> corruptFiles;
-        private readonly Queue<string> pathQueue;
-        private readonly DirectoryScanner scanner;
-        private readonly object songListLock;
-        private readonly object tagLock;
+        private readonly string directoryPath;
+        private readonly ConcurrentQueue<string> pathQueue;
+        private readonly Subject<int> songsFound;
         private volatile bool abort;
         private volatile bool isSearching;
         private volatile bool isTagging;
+        private int songCount;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LocalSongFinder"/> class.
-        /// </summary>
-        /// <param name="path">The path of the directory where the recursive search should start.</param>
-        public LocalSongFinder(string path)
+        public LocalSongFinder(string directoryPath)
         {
-            if (path == null)
-                Throw.ArgumentNullException(() => path);
+            if (directoryPath == null)
+                Throw.ArgumentNullException(() => directoryPath);
 
-            this.tagLock = new object();
-            this.songListLock = new object();
-
-            this.pathQueue = new Queue<string>();
-            this.corruptFiles = new List<string>();
-            this.scanner = new DirectoryScanner(path);
-            this.scanner.FileFound += ScannerFileFound;
+            this.pathQueue = new ConcurrentQueue<string>();
+            this.directoryPath = directoryPath;
+            this.songsFound = new Subject<int>();
         }
 
         /// <summary>
-        /// Gets the files that are corrupt and could not be read.
+        /// Gets the number of songs that have been found.
         /// </summary>
-        public IEnumerable<string> CorruptFiles
+        public IObservable<int> SongsFound
         {
-            get { return this.corruptFiles; }
-        }
-
-        /// <summary>
-        /// Gets the total number of songs that are counted yet.
-        /// </summary>
-        public int CurrentTotalSongs
-        {
-            get
-            {
-                int pathCount;
-
-                lock (this.tagLock)
-                {
-                    pathCount = this.pathQueue.Count;
-                }
-
-                lock (this.songListLock)
-                {
-                    pathCount += this.InternSongsFound.Count;
-                }
-
-                return pathCount;
-            }
-        }
-
-        /// <summary>
-        /// Gets the number of tags that are processed yet.
-        /// </summary>
-        public int TagsProcessed
-        {
-            get
-            {
-                int songCount;
-
-                lock (this.songListLock)
-                {
-                    songCount = this.InternSongsFound.Count;
-                }
-
-                return songCount;
-            }
+            get { return this.songsFound.AsObservable(); }
         }
 
         public void Abort()
@@ -97,10 +50,7 @@ namespace Espera.Core
             this.abort = true;
         }
 
-        /// <summary>
-        /// Starts the <see cref="LocalSongFinder"/>.
-        /// </summary>
-        public override void Start()
+        public override void Execute()
         {
             var fileScanTask = Task.Factory.StartNew(this.StartFileScan);
 
@@ -110,7 +60,7 @@ namespace Espera.Core
 
             Task.WaitAll(fileScanTask, tagScanTask);
 
-            this.OnFinished(EventArgs.Empty);
+            this.OnCompleted();
         }
 
         private static LocalSong CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath)
@@ -134,12 +84,7 @@ namespace Espera.Core
         {
             var song = CreateSong(file.Tag, file.Properties.Duration, audioType, file.Name);
 
-            lock (this.songListLock)
-            {
-                this.InternSongsFound.Add(song);
-            }
-
-            this.OnSongFound(new SongEventArgs(song));
+            this.OnSongFound(song);
         }
 
         private void ProcessFile(string filePath)
@@ -176,29 +121,41 @@ namespace Espera.Core
 
             catch (CorruptFileException)
             {
-                this.corruptFiles.Add(filePath);
+                Interlocked.Decrement(ref this.songCount);
             }
 
             catch (IOException)
             {
-                this.corruptFiles.Add(filePath);
-            }
-        }
-
-        private void ScannerFileFound(object sender, FileEventArgs e)
-        {
-            if (this.abort || !AllowedExtensions.Contains(e.File.Extension))
-                return;
-
-            lock (this.tagLock)
-            {
-                this.pathQueue.Enqueue(e.File.FullName);
+                Interlocked.Decrement(ref this.songCount);
             }
         }
 
         private void StartFileScan()
         {
-            this.scanner.Start();
+            var scanner = new DirectoryScanner(this.directoryPath);
+
+            Observable.FromEventPattern<FileEventArgs>(
+                handler => scanner.FileFound += handler,
+                handler => scanner.FileFound -= handler)
+                .Select(x => x.EventArgs.File)
+                .Where(file => AllowedExtensions.Contains(file.Extension))
+                .Subscribe(file =>
+                {
+                    if (this.abort)
+                    {
+                        scanner.Stop();
+                    }
+
+                    else
+                    {
+                        this.pathQueue.Enqueue(file.FullName);
+
+                        this.songsFound.OnNext(Interlocked.Increment(ref this.songCount));
+                    }
+                });
+
+            scanner.Start();
+
             this.isSearching = false;
         }
 
@@ -206,26 +163,20 @@ namespace Espera.Core
         {
             this.isTagging = true;
 
-            while ((this.isSearching || this.isTagging) && !this.abort)
+            while (this.isTagging && !this.abort)
             {
-                string filePath = null;
+                string filePath;
 
-                lock (this.tagLock)
-                {
-                    if (this.pathQueue.Any())
-                    {
-                        filePath = this.pathQueue.Dequeue();
-                    }
+                bool hasPath = this.pathQueue.TryDequeue(out filePath);
 
-                    else if (!this.isSearching)
-                    {
-                        this.isTagging = false;
-                    }
-                }
-
-                if (filePath != null)
+                if (hasPath)
                 {
                     this.ProcessFile(filePath);
+                }
+
+                if (!this.isSearching && this.pathQueue.IsEmpty)
+                {
+                    this.isTagging = false;
                 }
             }
         }

@@ -1,14 +1,18 @@
-﻿using Rareform.Extensions;
-using System;
+﻿using System;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace Espera.Core.Audio
 {
     internal abstract class AudioPlayer : IDisposable
     {
-        /// <summary>
-        /// Occurs when the <see cref="Song"/> has finished it's playback.
-        /// </summary>
-        public event EventHandler SongFinished;
+        private readonly Subject<Unit> songFinished;
+
+        protected AudioPlayer()
+        {
+            this.songFinished = new Subject<Unit>();
+        }
 
         /// <summary>
         /// Gets or sets the current time.
@@ -29,6 +33,14 @@ namespace Espera.Core.Audio
         /// </summary>
         /// <value>The song that the <see cref="AudioPlayer"/> is assigned to.</value>
         public Song Song { get; protected set; }
+
+        /// <summary>
+        /// Occurs when the <see cref="Song"/> has finished it's playback.
+        /// </summary>
+        public IObservable<Unit> SongFinished
+        {
+            get { return this.songFinished.AsObservable(); }
+        }
 
         /// <summary>
         /// Gets the total time.
@@ -83,13 +95,9 @@ namespace Espera.Core.Audio
         /// </remarks>
         public abstract void Stop();
 
-        /// <summary>
-        /// Raises the <see cref="SongFinished"/> event.
-        /// </summary>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected void OnSongFinished(EventArgs e)
+        protected void OnSongFinished()
         {
-            this.SongFinished.RaiseSafe(this, e);
+            this.songFinished.OnNext(Unit.Default);
         }
     }
 }

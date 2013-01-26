@@ -1,20 +1,26 @@
 ﻿using Caliburn.Micro;
 using Espera.Core.Management;
 using Espera.View.Properties;
-using Rareform.Patterns.MVVM;
 using Rareform.Validation;
+using ReactiveUI;
+using ReactiveUI.Xaml;
 using System;
 using System.Diagnostics;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Reflection;
-using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal class SettingsViewModel : PropertyChangedBase
+    internal class SettingsViewModel : ReactiveObject
     {
+        private readonly ObservableAsPropertyHelper<bool> canCreateAdmin;
+        private readonly ObservableAsPropertyHelper<bool> canLogin;
         private readonly Library library;
         private readonly IWindowManager windowManager;
+        private string creationPassword;
         private bool isWrongPassword;
+        private string loginPassword;
         private bool showLogin;
         private bool showSettings;
 
@@ -26,53 +32,75 @@ namespace Espera.View.ViewModels
             this.library = library;
 
             this.windowManager = windowManager;
-        }
 
-        public ICommand ChangeAccentColorCommand
-        {
-            get
+            this.canCreateAdmin = this
+                .WhenAny(x => x.CreationPassword, x => !string.IsNullOrWhiteSpace(x.Value) && !this.library.IsAdministratorCreated)
+                .ToProperty(this, x => x.CanCreateAdmin);
+
+            this.CreateAdminCommand = new ReactiveCommand(this.canCreateAdmin,
+                ImmediateScheduler.Instance); // Immediate execution, because we set the password to an empty string afterwards
+            this.CreateAdminCommand.Subscribe(p => this.library.CreateAdmin(this.CreationPassword));
+
+            this.ChangeToPartyCommand = new ReactiveCommand(this.CreateAdminCommand.Select(x => true).StartWith(false));
+            this.ChangeToPartyCommand.Subscribe(p =>
             {
-                return new RelayCommand
-                (
-                    param => Settings.Default.AccentColor = (string)param
-                );
-            }
-        }
+                this.library.ChangeToParty();
+                this.ShowSettings = false;
+            });
 
-        public ICommand ChangeToPartyCommand
-        {
-            get
+            this.canLogin = this.WhenAny(x => x.LoginPassword, x => !string.IsNullOrWhiteSpace(x.Value))
+                .ToProperty(this, x => x.CanLogin);
+
+            this.LoginCommand = new ReactiveCommand(this.canLogin,
+                ImmediateScheduler.Instance); // Immediate execution, because we set the password to an empty string afterwards
+            this.LoginCommand.Subscribe(p =>
             {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        this.library.ChangeToParty();
-                        this.ShowSettings = false;
-                    },
-                    param => this.IsAdminCreated
-                );
-            }
+                try
+                {
+                    this.library.ChangeToAdmin(this.LoginPassword);
+                    this.IsWrongPassword = false;
+
+                    this.ShowLogin = false;
+                    this.ShowSettings = true;
+                }
+
+                catch (WrongPasswordException)
+                {
+                    this.IsWrongPassword = true;
+                }
+            });
+
+            this.OpenLinkCommand = new ReactiveCommand();
+            this.OpenLinkCommand.Subscribe(p => Process.Start((string)p));
+
+            this.ReportBugCommand = new ReactiveCommand();
+            this.ReportBugCommand.Subscribe(p => this.windowManager.ShowWindow(new BugReportViewModel()));
+
+            this.ChangeAccentColorCommand = new ReactiveCommand();
+            this.ChangeAccentColorCommand.Subscribe(p => Settings.Default.AccentColor = (string)p);
         }
 
-        public ICommand CreateAdminCommand
+        public bool CanCreateAdmin
         {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        this.library.CreateAdmin(this.CreationPassword);
-
-                        this.NotifyOfPropertyChange(() => this.IsAdminCreated);
-                    },
-                    param => !string.IsNullOrWhiteSpace(this.CreationPassword) && !this.IsAdminCreated
-                );
-            }
+            get { return this.canCreateAdmin.Value; }
         }
 
-        public string CreationPassword { get; set; }
+        public bool CanLogin
+        {
+            get { return this.canLogin.Value; }
+        }
+
+        public IReactiveCommand ChangeAccentColorCommand { get; private set; }
+
+        public IReactiveCommand ChangeToPartyCommand { get; private set; }
+
+        public IReactiveCommand CreateAdminCommand { get; private set; }
+
+        public string CreationPassword
+        {
+            private get { return this.creationPassword; }
+            set { this.RaiseAndSetIfChanged(value); }
+        }
 
         public string DonationPage
         {
@@ -88,7 +116,7 @@ namespace Espera.View.ViewModels
                 {
                     this.library.EnablePlaylistTimeout = value;
 
-                    this.NotifyOfPropertyChange(() => this.EnablePlaylistTimeout);
+                    this.RaisePropertyChanged(x => x.EnablePlaylistTimeout);
                 }
             }
         }
@@ -104,22 +132,10 @@ namespace Espera.View.ViewModels
             get { return "http://espera.flagbug.com"; }
         }
 
-        public bool IsAdminCreated
-        {
-            get { return this.library.IsAdministratorCreated; }
-        }
-
         public bool IsWrongPassword
         {
             get { return this.isWrongPassword; }
-            set
-            {
-                if (this.IsWrongPassword != value)
-                {
-                    this.isWrongPassword = value;
-                    this.NotifyOfPropertyChange(() => this.IsWrongPassword);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public bool LockLibraryRemoval
@@ -166,49 +182,20 @@ namespace Espera.View.ViewModels
                 if (this.LockWindow != value)
                 {
                     Settings.Default.LockWindow = value;
-                    this.NotifyOfPropertyChange(() => this.LockWindow);
+                    this.RaisePropertyChanged(x => x.LockWindow);
                 }
             }
         }
 
-        public ICommand LoginCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        try
-                        {
-                            this.library.ChangeToAdmin(this.LoginPassword);
-                            this.IsWrongPassword = false;
-                            this.ShowLogin = false;
-                            this.ShowSettings = true;
-                        }
+        public IReactiveCommand LoginCommand { get; private set; }
 
-                        catch (WrongPasswordException)
-                        {
-                            this.IsWrongPassword = true;
-                        }
-                    },
-                    param => !string.IsNullOrWhiteSpace(this.LoginPassword)
-                );
-            }
+        public string LoginPassword
+        {
+            private get { return this.loginPassword; }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
-        public string LoginPassword { get; set; }
-
-        public ICommand OpenLinkCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param => Process.Start((string)param)
-                );
-            }
-        }
+        public IReactiveCommand OpenLinkCommand { get; private set; }
 
         public int PlaylistTimeout
         {
@@ -221,38 +208,18 @@ namespace Espera.View.ViewModels
             get { return "http://espera.flagbug.com/release-notes"; }
         }
 
-        public ICommand ReportBugCommand
-        {
-            get
-            {
-                return new RelayCommand(param => this.windowManager.ShowWindow(new BugReportViewModel()));
-            }
-        }
+        public IReactiveCommand ReportBugCommand { get; private set; }
 
         public bool ShowLogin
         {
             get { return this.showLogin; }
-            set
-            {
-                if (this.ShowLogin != value)
-                {
-                    this.showLogin = value;
-                    this.NotifyOfPropertyChange(() => this.ShowLogin);
-                }
-            }
+            private set { this.RaiseAndSetIfChanged(value); }
         }
 
         public bool ShowSettings
         {
             get { return this.showSettings; }
-            set
-            {
-                if (this.ShowSettings != value)
-                {
-                    this.showSettings = value;
-                    this.NotifyOfPropertyChange(() => this.ShowSettings);
-                }
-            }
+            private set { this.RaiseAndSetIfChanged(value); }
         }
 
         public bool StreamYoutube
@@ -273,7 +240,7 @@ namespace Espera.View.ViewModels
 
         public void HandleSettings()
         {
-            if (this.IsAdminCreated && this.library.AccessMode == AccessMode.Party)
+            if (this.library.IsAdministratorCreated && this.library.AccessMode.First() == AccessMode.Party)
             {
                 this.ShowLogin = true;
             }

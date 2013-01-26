@@ -1,7 +1,7 @@
-﻿using Caliburn.Micro;
-using Espera.Core.Management;
+﻿using Espera.Core.Management;
 using Rareform.Extensions;
 using Rareform.Reflection;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,14 +9,13 @@ using System.Linq;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class PlaylistViewModel : PropertyChangedBase, IDataErrorInfo
+    internal sealed class PlaylistViewModel : ReactiveObject, IDataErrorInfo
     {
         private readonly Playlist playlist;
         private readonly Func<string, bool> renameRequest;
         private bool editName;
         private string saveName;
-
-        private int? songCount;
+        private int songCount;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlaylistViewModel"/> class.
@@ -27,6 +26,7 @@ namespace Espera.View.ViewModels
         {
             this.playlist = playlist;
             this.renameRequest = renameRequest;
+            this.songCount = -1;
         }
 
         public bool EditName
@@ -49,7 +49,7 @@ namespace Espera.View.ViewModels
                         this.saveName = null;
                     }
 
-                    this.NotifyOfPropertyChange(() => this.EditName);
+                    this.RaisePropertyChanged(x => x.EditName);
                 }
             }
         }
@@ -67,7 +67,7 @@ namespace Espera.View.ViewModels
                 if (this.Name != value)
                 {
                     this.playlist.Name = value;
-                    this.NotifyOfPropertyChange(() => this.Name);
+                    this.RaisePropertyChanged(x => x.Name);
                 }
             }
         }
@@ -77,22 +77,15 @@ namespace Espera.View.ViewModels
             get
             {
                 // We use this to get a value, even if the Songs property hasn't been called
-                if (songCount == null)
+                if (songCount == -1)
                 {
                     return this.Songs.Count();
                 }
 
-                return songCount.Value;
+                return songCount;
             }
 
-            set
-            {
-                if (this.songCount != value)
-                {
-                    this.songCount = value;
-                    this.NotifyOfPropertyChange(() => this.SongCount);
-                }
-            }
+            private set { this.RaiseAndSetIfChanged(x => x.SongCount, value); }
         }
 
         public IEnumerable<PlaylistEntryViewModel> Songs

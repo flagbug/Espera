@@ -1,13 +1,13 @@
-﻿using Caliburn.Micro;
-using Espera.Services;
-using Rareform.Patterns.MVVM;
+﻿using Espera.Services;
+using ReactiveUI;
+using ReactiveUI.Xaml;
 using System;
+using System.Reactive.Linq;
 using System.Reflection;
-using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal class CrashViewModel : PropertyChangedBase
+    internal class CrashViewModel : ReactiveObject
     {
         private readonly Exception exception;
         private readonly string version;
@@ -17,6 +17,25 @@ namespace Espera.View.ViewModels
         {
             this.exception = exception;
             this.version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+            this.SubmitCrashReport = new ReactiveCommand(
+                this.WhenAny(x => x.SendingSucceeded, x => x.Value)
+                .Select(x => x == null || !x.Value));
+
+            this.SubmitCrashReport.Subscribe(x =>
+            {
+                try
+                {
+                    FogBugzService.SubmitReport(this.ReportContent);
+
+                    this.sendingSucceeded = true;
+                }
+
+                catch (Exception)
+                {
+                    this.SendingSucceeded = false;
+                }
+            });
         }
 
         public string ReportContent
@@ -27,39 +46,9 @@ namespace Espera.View.ViewModels
         public bool? SendingSucceeded
         {
             get { return this.sendingSucceeded; }
-            set
-            {
-                if (this.SendingSucceeded != value)
-                {
-                    this.sendingSucceeded = value;
-                    this.NotifyOfPropertyChange(() => this.SendingSucceeded);
-                }
-            }
+            private set { this.RaiseAndSetIfChanged(value); }
         }
 
-        public ICommand SubmitCrashReport
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        try
-                        {
-                            FogBugzService.SubmitReport(this.ReportContent);
-
-                            this.SendingSucceeded = true;
-                        }
-
-                        catch (Exception)
-                        {
-                            this.SendingSucceeded = false;
-                        }
-                    },
-                    param => this.SendingSucceeded == null || !this.SendingSucceeded.Value
-                );
-            }
-        }
+        public IReactiveCommand SubmitCrashReport { get; private set; }
     }
 }
