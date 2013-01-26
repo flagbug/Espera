@@ -64,6 +64,14 @@ namespace Espera.View.ViewModels
 
                 this.UpdateSelectableSongs();
             });
+
+            this.PlayNowCommand = new ReactiveCommand();
+            this.PlayNowCommand.Subscribe(p =>
+            {
+                int songIndex = this.SelectableSongs.TakeWhile(x => x.Model != this.SelectedSongs.First().Model).Count();
+
+                this.Library.PlayInstantly(this.SelectableSongs.Skip(songIndex).Select(x => x.Model));
+            });
         }
 
         public int AlbumColumnWidth
@@ -105,6 +113,8 @@ namespace Espera.View.ViewModels
             get { return Settings.Default.LocalPathColumnWidth; }
             set { Settings.Default.LocalPathColumnWidth = value; }
         }
+
+        public IReactiveCommand PlayNowCommand { get; private set; }
 
         public IReactiveCommand RemoveFromLibraryCommand { get; private set; }
 
