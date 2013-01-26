@@ -1,3 +1,9 @@
+----------------------------------- v1.7.0 -----------------------------------
+
+FEATURES:
+- Completely new settings menu.
+- New music folder selection dialog for Windows Vista and higher.
+
 ----------------------------------- v1.6.10 -----------------------------------
 
 BUGFIXES:
