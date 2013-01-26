@@ -707,7 +707,7 @@ namespace Espera.Core.Management
                 playlist.RemoveSongs(indexes);
             }
 
-            this.libraryWriter.Write(casted, this.playlists);
+            this.libraryWriter.Write(casted, this.playlists.Where(playlist => !playlist.IsTemporary));
         }
 
         public void ShufflePlaylist()
