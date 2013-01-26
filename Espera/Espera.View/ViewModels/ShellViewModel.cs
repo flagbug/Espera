@@ -47,7 +47,7 @@ namespace Espera.View.ViewModels
                 this.library.SwitchToPlaylist(this.library.Playlists.First());
             }
 
-            this.AdministratorViewModel = new AdministratorViewModel(this.library, windowManager);
+            this.SettingsViewModel = new SettingsViewModel(this.library, windowManager);
 
             this.LocalViewModel = new LocalViewModel(this.library);
             this.LocalViewModel.TimeoutWarning += (sender, e) => this.TriggerTimeoutWarning();
@@ -87,8 +87,6 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public AdministratorViewModel AdministratorViewModel { get; private set; }
-
         public bool CanChangeTime
         {
             get { return this.library.CanChangeTime; }
@@ -119,7 +117,7 @@ namespace Espera.View.ViewModels
 
         public PlaylistViewModel CurrentPlaylist
         {
-            get { return this.playlists == null ? null : this.playlists.Single(vm => vm.Name == this.library.CurrentPlaylist.Name); }
+            get { return this.playlists == null ? null : this.playlists.SingleOrDefault(vm => vm.Name == this.library.CurrentPlaylist.Name); }
             set
             {
                 if (value != null) // There always has to be a playlist selected
@@ -510,9 +508,19 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public SettingsViewModel SettingsViewModel { get; private set; }
+
         public bool ShowPlaylistTimeOut
         {
-            get { return this.AdministratorViewModel.EnablePlaylistTimeout && !this.IsAdmin; }
+            get { return this.SettingsViewModel.EnablePlaylistTimeout && !this.IsAdmin; }
+        }
+
+        public ICommand ShowSettingsCommand
+        {
+            get
+            {
+                return new RelayCommand(param => this.SettingsViewModel.HandleSettings());
+            }
         }
 
         public ICommand ShufflePlaylistCommand
