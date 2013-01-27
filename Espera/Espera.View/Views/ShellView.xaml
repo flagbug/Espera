@@ -577,7 +577,6 @@
                                 <Button Grid.Column="2"
                                         Width="30"
                                         Command="{Binding Path=EditPlaylistNameCommand}"
-                                        IsEnabled="{Binding Path=CanSwitchPlaylist}"
                                         Padding="0"
                                         ToolTip="Edit playlist name">
                                     <Image Source="/Espera;component/Images/EditPlaylistName.png" />

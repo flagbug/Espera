@@ -109,7 +109,9 @@ namespace Espera.View.ViewModels
             this.PauseContinueCommand.Where(x => this.IsPlaying).Subscribe(x => this.PauseCommand.Execute(null));
             this.PauseContinueCommand.Where(x => !this.IsPlaying).Subscribe(x => this.PlayCommand.Execute(false));
 
-            this.EditPlaylistNameCommand = new ReactiveCommand();
+            IObservable<bool> canEditPlaylist = this
+                .WhenAny(x => x.CanSwitchPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1.Value && !x2.Value.Model.IsTemporary);
+            this.EditPlaylistNameCommand = new ReactiveCommand(canEditPlaylist);
             this.EditPlaylistNameCommand.Subscribe(x => this.CurrentPlaylist.EditName = true);
 
             this.IsLocal = true;
