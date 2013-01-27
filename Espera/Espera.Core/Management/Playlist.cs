@@ -13,6 +13,7 @@ namespace Espera.Core.Management
     public sealed class Playlist : IEnumerable<Song>
     {
         private int? currentSongIndex;
+        private string name;
         private Dictionary<int, Song> playlist;
 
         internal Playlist(string name, bool isTemporary = false)
@@ -69,7 +70,17 @@ namespace Espera.Core.Management
         /// </summary>
         public bool IsTemporary { get; private set; }
 
-        public string Name { get; set; }
+        public string Name
+        {
+            get { return this.name; }
+            set
+            {
+                if (this.IsTemporary)
+                    throw new InvalidOperationException("Cannot change the name of a temporary playlist.");
+
+                this.name = value;
+            }
+        }
 
         public Song this[int index]
         {
