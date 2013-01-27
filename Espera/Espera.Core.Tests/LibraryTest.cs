@@ -862,26 +862,6 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void RemovePlaylist_NoPlaylistExists_ThrowsInvalidOperationException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<InvalidOperationException>(() => library.RemovePlaylist("Playlist"));
-            }
-        }
-
-        [Test]
-        public void RemovePlaylist_PlaylistDoesNotExist_ThrowsInvalidOperationException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.AddPlaylist("Playlist");
-
-                Assert.Throws<InvalidOperationException>(() => library.RemovePlaylist("Playlist 2"));
-            }
-        }
-
-        [Test]
         public void RemovePlaylist_PlaylistNameIsNull_ThrowsArgumentNullException()
         {
             using (Library library = Helpers.CreateLibrary())
@@ -897,7 +877,7 @@ namespace Espera.Core.Tests
             {
                 library.AddPlaylist("Playlist");
 
-                library.RemovePlaylist("Playlist");
+                library.RemovePlaylist(library.GetPlaylistByName("Playlist"));
 
                 Assert.IsEmpty(library.Playlists);
             }

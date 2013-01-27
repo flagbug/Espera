@@ -158,7 +158,7 @@ namespace Espera.View.ViewModels
             {
                 if (value != null) // There always has to be a playlist selected
                 {
-                    this.library.SwitchToPlaylist(this.library.GetPlaylistByName(value.Name));
+                    this.library.SwitchToPlaylist(value.Model);
                     this.RaisePropertyChanged(x => x.CurrentPlaylist);
                 }
             }
@@ -390,7 +390,7 @@ namespace Espera.View.ViewModels
                     {
                         int index = this.playlists.IndexOf(this.CurrentPlaylist);
 
-                        this.library.RemovePlaylist(this.CurrentPlaylist.Name);
+                        this.library.RemovePlaylist(this.CurrentPlaylist.Model);
 
                         if (!this.library.Playlists.Any())
                         {
