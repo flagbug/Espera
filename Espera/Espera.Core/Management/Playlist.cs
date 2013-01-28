@@ -3,6 +3,9 @@ using Rareform.Validation;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Espera.Core.Management
@@ -10,15 +13,27 @@ namespace Espera.Core.Management
     /// <summary>
     /// Represents a playlist where songs are stored with an associated index.
     /// </summary>
-    public sealed class Playlist : IEnumerable<PlaylistEntry>
+    public sealed class Playlist : IEnumerable<PlaylistEntry>, INotifyCollectionChanged, INotifyPropertyChanged
     {
+        private readonly ObservableCollection<PlaylistEntry> playlist;
         private int? currentSongIndex;
-        private List<PlaylistEntry> playlist;
 
         internal Playlist(string name)
         {
             this.Name = name;
-            this.playlist = new List<PlaylistEntry>();
+            this.playlist = new ObservableCollection<PlaylistEntry>();
+        }
+
+        public event NotifyCollectionChangedEventHandler CollectionChanged
+        {
+            add { this.playlist.CollectionChanged += value; }
+            remove { this.playlist.CollectionChanged -= value; }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged
+        {
+            add { ((INotifyPropertyChanged)this.playlist).PropertyChanged += value; }
+            remove { ((INotifyPropertyChanged)this.playlist).PropertyChanged -= value; }
         }
 
         /// <summary>
@@ -171,15 +186,21 @@ namespace Espera.Core.Management
             if (indexes == null)
                 Throw.ArgumentNullException(() => indexes);
 
-            // Use a hashset for better lookup performance
-            var indexList = new HashSet<int>(indexes);
+            var indexList = new List<int>(indexes);
 
             if (this.CurrentSongIndex.HasValue && indexList.Contains(this.CurrentSongIndex.Value))
             {
                 this.CurrentSongIndex = null;
             }
 
-            this.playlist.RemoveAll(entry => indexList.Contains(entry.Index));
+            int removed = 0;
+            indexList.Sort(); // Sort the list, so that we can substract the indexes when removing
+
+            foreach (int index in indexList)
+            {
+                this.playlist.RemoveAt(index - removed);
+                removed++;
+            }
 
             this.RebuildIndexes();
         }
