@@ -10,6 +10,19 @@ namespace Espera.Core.Tests
     public sealed class PlaylistTest
     {
         [Test]
+        public void AddSongs_AddTwoSong_IndexesAreCorrect()
+        {
+            Song[] songs = Helpers.SetupSongMocks(2);
+
+            var playlist = new Playlist("Playlist");
+
+            playlist.AddSongs(songs);
+
+            Assert.AreEqual(0, playlist[0].Index);
+            Assert.AreEqual(1, playlist[1].Index);
+        }
+
+        [Test]
         public void AddSongs_ArgumentIsNull_ThrowsArgumentNullException()
         {
             var playlist = new Playlist("Playlist");
