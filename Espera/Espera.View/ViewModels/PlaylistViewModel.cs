@@ -9,13 +9,13 @@ using System.Linq;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class PlaylistViewModel : PropertyChangedBase, IDataErrorInfo
+    internal sealed class PlaylistViewModel : PropertyChangedBase, IDataErrorInfo, IDisposable
     {
         private readonly Playlist playlist;
         private readonly Func<string, bool> renameRequest;
+        private List<PlaylistEntryViewModel> currentEntries;
         private bool editName;
         private string saveName;
-
         private int? songCount;
 
         /// <summary>
@@ -99,6 +99,7 @@ namespace Espera.View.ViewModels
         {
             get
             {
+                this.DisposeCurrentEntries();
                 var songs = this.playlist
                     .Select(entry => new PlaylistEntryViewModel(entry))
                     .ToList(); // We want a list, so that ReSharper doesn't complain about multiple enumerations
@@ -127,6 +128,8 @@ namespace Espera.View.ViewModels
                     }
                 }
 
+                this.currentEntries = songs;
+
                 return songs;
             }
         }
@@ -151,6 +154,22 @@ namespace Espera.View.ViewModels
                 }
 
                 return error;
+            }
+        }
+
+        public void Dispose()
+        {
+            this.DisposeCurrentEntries();
+        }
+
+        private void DisposeCurrentEntries()
+        {
+            if (this.currentEntries != null)
+            {
+                foreach (PlaylistEntryViewModel entry in currentEntries)
+                {
+                    entry.Dispose();
+                }
             }
         }
     }

@@ -444,6 +444,7 @@ namespace Espera.View.ViewModels
 
                         this.library.RemovePlaylist(this.CurrentPlaylist.Name);
 
+                        this.CurrentPlaylist.Dispose();
                         this.Playlists.Remove(this.CurrentPlaylist);
 
                         if (!this.library.Playlists.Any())

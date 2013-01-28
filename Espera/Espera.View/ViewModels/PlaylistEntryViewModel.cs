@@ -4,7 +4,7 @@ using System;
 
 namespace Espera.View.ViewModels
 {
-    public sealed class PlaylistEntryViewModel : SongViewModelBase
+    public sealed class PlaylistEntryViewModel : SongViewModelBase, IDisposable
     {
         private readonly PlaylistEntry entry;
         private bool hasCachingFailed;
@@ -18,14 +18,14 @@ namespace Espera.View.ViewModels
 
             if (this.Model.HasToCache && !this.Model.IsCached)
             {
-                this.Model.CachingProgressChanged += (sender, e) => this.NotifyOfPropertyChange(() => this.CacheProgress);
+                this.Model.CachingProgressChanged += this.CachingProgressChanged;
 
-                this.Model.CachingFailed += (sender, args) => this.HasCachingFailed = true;
+                this.Model.CachingFailed += this.OnCachingFailed;
 
-                this.Model.CachingCompleted += (sender, e) => this.NotifyOfPropertyChange(() => this.ShowCaching);
+                this.Model.CachingCompleted += this.OnCachingCompleted;
             }
 
-            this.Model.Corrupted += (sender, args) => this.NotifyOfPropertyChange(() => this.IsCorrupted);
+            this.Model.Corrupted -= OnCorrupted;
         }
 
         public int CacheProgress
@@ -103,6 +103,40 @@ namespace Espera.View.ViewModels
 
                 throw new InvalidOperationException();
             }
+        }
+
+        public void Dispose()
+        {
+            if (this.Model.HasToCache && !this.Model.IsCached)
+            {
+                this.Model.CachingProgressChanged -= this.CachingProgressChanged;
+
+                this.Model.CachingFailed -= this.OnCachingFailed;
+
+                this.Model.CachingCompleted -= this.OnCachingCompleted;
+            }
+
+            this.Model.Corrupted -= this.OnCorrupted;
+        }
+
+        private void CachingProgressChanged(object sender, EventArgs e)
+        {
+            this.NotifyOfPropertyChange(() => this.CacheProgress);
+        }
+
+        private void OnCachingCompleted(object sender, EventArgs eventArgs)
+        {
+            this.NotifyOfPropertyChange(() => this.ShowCaching);
+        }
+
+        private void OnCachingFailed(object sender, EventArgs eventArgs)
+        {
+            this.HasCachingFailed = true;
+        }
+
+        private void OnCorrupted(object sender, EventArgs eventArgs)
+        {
+            this.NotifyOfPropertyChange(() => this.IsCorrupted);
         }
     }
 }
