@@ -171,14 +171,15 @@ namespace Espera.Core.Management
             if (indexes == null)
                 Throw.ArgumentNullException(() => indexes);
 
-            List<int> indexList = indexes.ToList();
+            // Use a hashset for better lookup performance
+            var indexList = new HashSet<int>(indexes);
 
-            if (indexList.Any(index => index == this.CurrentSongIndex))
+            if (this.CurrentSongIndex.HasValue && indexList.Contains(this.CurrentSongIndex.Value))
             {
                 this.CurrentSongIndex = null;
             }
 
-            this.playlist.RemoveAll(entry => indexList.Any(index => entry.Index == index));
+            this.playlist.RemoveAll(entry => indexList.Contains(entry.Index));
 
             this.RebuildIndexes();
         }

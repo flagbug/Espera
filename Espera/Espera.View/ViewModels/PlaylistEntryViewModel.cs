@@ -2,17 +2,20 @@
 using Espera.Core.Management;
 using ReactiveUI;
 using System;
+using System.Diagnostics;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
 namespace Espera.View.ViewModels
 {
-    public sealed class PlaylistEntryViewModel : SongViewModelBase
+    public sealed class PlaylistEntryViewModel : SongViewModelBase, IDisposable
     {
-        private readonly PlaylistEntry entry;
         private readonly ObservableAsPropertyHelper<int> cachingProgress;
+        private readonly PlaylistEntry entry;
         private readonly ObservableAsPropertyHelper<bool> hasCachingFailed;
         private readonly ObservableAsPropertyHelper<bool> showCaching;
+        private CompositeDisposable disposable;
         private bool isInactive;
         private bool isPlaying;
 
@@ -20,6 +23,8 @@ namespace Espera.View.ViewModels
             : base(entry.Song)
         {
             this.entry = entry;
+
+            this.disposable = new CompositeDisposable();
 
             this.cachingProgress = this.Model.CachingProgress
                 .DistinctUntilChanged()
@@ -33,7 +38,12 @@ namespace Espera.View.ViewModels
                 .Select(progress => this.Model.HasToCache && progress != 100 || this.HasCachingFailed)
                 .ToProperty(this, x => x.ShowCaching);
 
-            this.Model.Corrupted.Subscribe(x => this.RaisePropertyChanged(p => p.IsCorrupted));
+            this.disposable.Add(this.Model.Corrupted.Subscribe(x => this.RaisePropertyChanged(p => p.IsCorrupted)));
+        }
+
+        ~PlaylistEntryViewModel()
+        {
+            Debug.WriteLine(string.Format("Destroying PlaylistEntryViewModel {0}", this.Path));
         }
 
         public int CacheProgress
@@ -89,6 +99,14 @@ namespace Espera.View.ViewModels
 
                 throw new InvalidOperationException();
             }
+        }
+
+        public void Dispose()
+        {
+            this.cachingProgress.Dispose();
+            this.hasCachingFailed.Dispose();
+            this.showCaching.Dispose();
+            this.disposable.Dispose();
         }
     }
 }

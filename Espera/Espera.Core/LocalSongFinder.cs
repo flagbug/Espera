@@ -29,8 +29,6 @@ namespace Espera.Core
         private int songCount;
 
         public LocalSongFinder(string directoryPath)
-
-            this.driveType = new DriveInfo(Path.GetPathRoot(path)).DriveType;
         {
             if (directoryPath == null)
                 Throw.ArgumentNullException(() => directoryPath);
@@ -38,6 +36,8 @@ namespace Espera.Core
             this.pathQueue = new ConcurrentQueue<string>();
             this.directoryPath = directoryPath;
             this.songsFound = new Subject<int>();
+
+            this.driveType = new DriveInfo(Path.GetPathRoot(directoryPath)).DriveType;
         }
 
         /// <summary>
