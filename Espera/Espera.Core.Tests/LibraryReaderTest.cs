@@ -13,10 +13,10 @@ namespace Espera.Core.Tests
         {
             using (Stream saveFileStream = Helpers.GenerateSaveFile().ToStream())
             {
-                Playlist[] playlists = LibraryReader.ReadPlaylists(saveFileStream).ToArray();
+                Playlist[] playlists = LibraryReader.ReadPlaylists(saveFileStream, x => DriveType.Fixed).ToArray();
 
                 Playlist playlist1 = playlists[0];
-                Song[] songs1 = playlist1.ToArray();
+                Song[] songs1 = playlist1.Select(entry => entry.Song).ToArray();
                 Song localSong1 = Helpers.LocalSong1;
                 Song localSong2 = Helpers.LocalSong2;
 
@@ -28,7 +28,7 @@ namespace Espera.Core.Tests
                 Assert.IsInstanceOf(localSong2.GetType(), songs1[1]);
 
                 Playlist playlist2 = playlists[1];
-                Song[] songs2 = playlist2.ToArray();
+                Song[] songs2 = playlist2.Select(entry => entry.Song).ToArray();
                 Song youtubeSong1 = Helpers.YoutubeSong1;
 
                 Assert.AreEqual("Playlist2", playlist2.Name);
@@ -47,7 +47,7 @@ namespace Espera.Core.Tests
         {
             using (Stream saveFileStream = Helpers.GenerateSaveFile().ToStream())
             {
-                LocalSong[] songs = LibraryReader.ReadSongs(saveFileStream).ToArray();
+                LocalSong[] songs = LibraryReader.ReadSongs(saveFileStream, x => DriveType.Fixed).ToArray();
 
                 Song actualSong1 = songs[0];
                 Song expectedSong1 = Helpers.LocalSong1;

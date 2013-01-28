@@ -9,9 +9,9 @@ namespace Espera.Core.Management
 {
     internal static class LibraryReader
     {
-        public static IEnumerable<Playlist> ReadPlaylists(Stream stream)
+        public static IEnumerable<Playlist> ReadPlaylists(Stream stream, Func<string, DriveType> driveTypeCallback)
         {
-            IEnumerable<Song> songs = ReadSongs(stream);
+            IEnumerable<Song> songs = ReadSongs(stream, driveTypeCallback);
 
             stream.Position = 0;
 
@@ -86,7 +86,7 @@ namespace Espera.Core.Management
             .ToList();
         }
 
-        public static IEnumerable<LocalSong> ReadSongs(Stream stream)
+        public static IEnumerable<LocalSong> ReadSongs(Stream stream, Func<string, DriveType> driveTypeCallback)
         {
             return XDocument.Load(stream)
                 .Descendants("Root")
@@ -99,7 +99,8 @@ namespace Espera.Core.Management
                         (
                             song.Attribute("Path").Value,
                             (AudioType)Enum.Parse(typeof(AudioType), song.Attribute("AudioType").Value),
-                            TimeSpan.FromTicks(Int64.Parse(song.Attribute("Duration").Value))
+                            TimeSpan.FromTicks(Int64.Parse(song.Attribute("Duration").Value)),
+                            driveTypeCallback(song.Attribute("Path").Value)
                         )
                         {
                             Album = song.Attribute("Album").Value,

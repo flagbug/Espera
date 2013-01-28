@@ -1,5 +1,5 @@
 ﻿using Espera.Core;
-using Rareform.Validation;
+using Espera.Core.Management;
 using ReactiveUI;
 using System;
 using System.Reactive;
@@ -9,19 +9,17 @@ namespace Espera.View.ViewModels
 {
     public sealed class PlaylistEntryViewModel : SongViewModelBase
     {
+        private readonly PlaylistEntry entry;
         private readonly ObservableAsPropertyHelper<int> cachingProgress;
         private readonly ObservableAsPropertyHelper<bool> hasCachingFailed;
         private readonly ObservableAsPropertyHelper<bool> showCaching;
         private bool isInactive;
         private bool isPlaying;
 
-        public PlaylistEntryViewModel(Song model, int index)
-            : base(model)
+        public PlaylistEntryViewModel(PlaylistEntry entry)
+            : base(entry.Song)
         {
-            if (index < 0)
-                Throw.ArgumentOutOfRangeException(() => index, 0);
-
-            this.Index = index;
+            this.entry = entry;
 
             this.cachingProgress = this.Model.CachingProgress
                 .DistinctUntilChanged()
@@ -48,7 +46,10 @@ namespace Espera.View.ViewModels
             get { return this.hasCachingFailed.Value; }
         }
 
-        public int Index { get; private set; }
+        public int Index
+        {
+            get { return this.entry.Index; }
+        }
 
         public bool IsCorrupted
         {

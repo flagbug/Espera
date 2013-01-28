@@ -159,7 +159,7 @@ namespace Espera.Core.Tests
                     jumpSong.Object, nextSong.Object, cachingSong.Object, cachingSong2.Object
                 };
 
-                Assert.IsTrue(expectedSongs.SequenceEqual(library.CurrentPlaylist));
+                Assert.IsTrue(expectedSongs.SequenceEqual(library.CurrentPlaylist.Select(entry => entry.Song)));
             }
         }
 
@@ -721,7 +721,7 @@ namespace Espera.Core.Tests
 
                 library.RemoveFromPlaylist(new[] { 0, 2 });
 
-                Song[] remaining = library.CurrentPlaylist.ToArray();
+                Song[] remaining = library.CurrentPlaylist.Select(entry => entry.Song).ToArray();
 
                 Assert.AreEqual(songs[1], remaining[0]);
                 Assert.AreEqual(songs[3], remaining[1]);
@@ -739,7 +739,7 @@ namespace Espera.Core.Tests
 
                 library.RemoveFromPlaylist(new[] { songs[0], songs[2] });
 
-                Song[] remaining = library.CurrentPlaylist.ToArray();
+                Song[] remaining = library.CurrentPlaylist.Select(entry => entry.Song).ToArray();
 
                 Assert.AreEqual(songs[1], remaining[0]);
                 Assert.AreEqual(songs[3], remaining[1]);
