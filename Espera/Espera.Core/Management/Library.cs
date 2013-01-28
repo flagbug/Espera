@@ -847,15 +847,14 @@ namespace Espera.Core.Management
                 throw new InvalidOperationException("The next song couldn't be played.");
 
             int nextIndex = this.CurrentPlaylist.CurrentSongIndex.Value + 1;
-            Song nextSong = this.CurrentPlaylist[nextIndex];
+            Song nextSong = this.CurrentPlaylist[nextIndex].Song;
 
             // We want the to swap the songs, if the song that should be played next is currently caching
             if (nextSong.HasToCache && !nextSong.IsCached && this.CurrentPlaylist.ContainsIndex(nextIndex + 1))
             {
                 var nextReady = this.CurrentPlaylist
-                    .Select((song, i) => new { Song = song, Index = i })
                     .Skip(nextIndex)
-                    .FirstOrDefault(item => !item.Song.HasToCache || item.Song.IsCached);
+                    .FirstOrDefault(entry => !entry.Song.HasToCache || entry.Song.IsCached);
 
                 if (nextReady != null)
                 {
@@ -888,7 +887,7 @@ namespace Espera.Core.Management
 
             this.CurrentPlaylist.CurrentSongIndex = playlistIndex;
 
-            Song song = this.CurrentPlaylist[playlistIndex];
+            Song song = this.CurrentPlaylist[playlistIndex].Song;
 
             this.RenewCurrentPlayer(song);
 

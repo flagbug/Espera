@@ -2,13 +2,12 @@
 using Rareform.IO;
 using System;
 using System.IO;
-using System.Linq;
 
 namespace Espera.Core
 {
     public sealed class LocalSong : Song
     {
-        private bool? hasToCache;
+        private readonly DriveType sourceDriveType;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalSong"/> class.
@@ -16,25 +15,16 @@ namespace Espera.Core
         /// <param name="path">The path of the file.</param>
         /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
-        public LocalSong(string path, AudioType audioType, TimeSpan duration)
+        /// <param name="sourceDriveType">The drive type where the song comes from.</param>
+        public LocalSong(string path, AudioType audioType, TimeSpan duration, DriveType sourceDriveType)
             : base(path, audioType, duration)
-        { }
+        {
+            this.sourceDriveType = sourceDriveType;
+        }
 
         public override bool HasToCache
         {
-            get
-            {
-                if (this.hasToCache == null)
-                {
-                    string songDrive = Path.GetPathRoot(this.OriginalPath);
-
-                    this.hasToCache = DriveInfo.GetDrives()
-                        .Where(drive => drive.DriveType == DriveType.Fixed)
-                        .All(drive => drive.RootDirectory.Name != songDrive);
-                }
-
-                return this.hasToCache.Value;
-            }
+            get { return this.sourceDriveType != DriveType.Fixed && this.sourceDriveType != DriveType.Network; }
         }
 
         public override string StreamingPath

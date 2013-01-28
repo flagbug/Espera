@@ -23,6 +23,7 @@ namespace Espera.Core
         private readonly ConcurrentQueue<string> pathQueue;
         private readonly Subject<int> songsFound;
         private volatile bool abort;
+        private DriveType driveType;
         private volatile bool isSearching;
         private volatile bool isTagging;
         private int songCount;
@@ -35,6 +36,8 @@ namespace Espera.Core
             this.pathQueue = new ConcurrentQueue<string>();
             this.directoryPath = directoryPath;
             this.songsFound = new Subject<int>();
+
+            this.driveType = new DriveInfo(Path.GetPathRoot(directoryPath)).DriveType;
         }
 
         /// <summary>
@@ -63,9 +66,9 @@ namespace Espera.Core
             this.OnCompleted();
         }
 
-        private static LocalSong CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath)
+        private static LocalSong CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath, DriveType driveType)
         {
-            return new LocalSong(filePath, audioType, duration)
+            return new LocalSong(filePath, audioType, duration, driveType)
             {
                 Album = PrepareTag(tag.Album, String.Empty),
                 Artist = PrepareTag(tag.FirstPerformer, "Unknown Artist"), //HACK: In the future retrieve the string for an unkown artist from the view if we want to localize it
@@ -82,7 +85,7 @@ namespace Espera.Core
 
         private void AddSong(TagLib.File file, AudioType audioType)
         {
-            var song = CreateSong(file.Tag, file.Properties.Duration, audioType, file.Name);
+            var song = CreateSong(file.Tag, file.Properties.Duration, audioType, file.Name, this.driveType);
 
             this.OnSongFound(song);
         }
