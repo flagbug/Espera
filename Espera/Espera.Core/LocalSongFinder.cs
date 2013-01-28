@@ -22,6 +22,7 @@ namespace Espera.Core
         private readonly object songListLock;
         private readonly object tagLock;
         private volatile bool abort;
+        private DriveType driveType;
         private volatile bool isSearching;
         private volatile bool isTagging;
 
@@ -41,6 +42,8 @@ namespace Espera.Core
             this.corruptFiles = new List<string>();
             this.scanner = new DirectoryScanner(path);
             this.scanner.FileFound += ScannerFileFound;
+
+            this.driveType = new DriveInfo(Path.GetPathRoot(path)).DriveType;
         }
 
         /// <summary>
@@ -113,9 +116,9 @@ namespace Espera.Core
             this.OnFinished(EventArgs.Empty);
         }
 
-        private static LocalSong CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath)
+        private static LocalSong CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath, DriveType driveType)
         {
-            return new LocalSong(filePath, audioType, duration)
+            return new LocalSong(filePath, audioType, duration, driveType)
             {
                 Album = PrepareTag(tag.Album, String.Empty),
                 Artist = PrepareTag(tag.FirstPerformer, "Unknown Artist"), //HACK: In the future retrieve the string for an unkown artist from the view if we want to localize it
@@ -132,7 +135,7 @@ namespace Espera.Core
 
         private void AddSong(TagLib.File file, AudioType audioType)
         {
-            var song = CreateSong(file.Tag, file.Properties.Duration, audioType, file.Name);
+            var song = CreateSong(file.Tag, file.Properties.Duration, audioType, file.Name, this.driveType);
 
             lock (this.songListLock)
             {

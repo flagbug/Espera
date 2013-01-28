@@ -10,7 +10,7 @@ namespace Espera.Core.Tests
 {
     internal static class Helpers
     {
-        public static readonly LocalSong LocalSong1 = new LocalSong("Path1", AudioType.Mp3, TimeSpan.FromTicks(1))
+        public static readonly LocalSong LocalSong1 = new LocalSong("Path1", AudioType.Mp3, TimeSpan.FromTicks(1), DriveType.Fixed)
         {
             Album = "Album1",
             Artist = "Artist1",
@@ -19,7 +19,7 @@ namespace Espera.Core.Tests
             TrackNumber = 1
         };
 
-        public static readonly LocalSong LocalSong2 = new LocalSong("Path2", AudioType.Wav, TimeSpan.FromTicks(2))
+        public static readonly LocalSong LocalSong2 = new LocalSong("Path2", AudioType.Wav, TimeSpan.FromTicks(2), DriveType.Fixed)
         {
             Album = "Album2",
             Artist = "Artist2",
