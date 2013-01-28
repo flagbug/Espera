@@ -13,12 +13,12 @@ namespace Espera.Core.Management
     public sealed class Playlist : IEnumerable<Song>
     {
         private int? currentSongIndex;
-        private Dictionary<int, Song> playlist;
+        private SortedDictionary<int, Song> playlist;
 
         internal Playlist(string name)
         {
             this.Name = name;
-            this.playlist = new Dictionary<int, Song>();
+            this.playlist = new SortedDictionary<int, Song>();
         }
 
         /// <summary>
@@ -93,8 +93,7 @@ namespace Espera.Core.Management
         public IEnumerator<Song> GetEnumerator()
         {
             return this.playlist
-                .OrderBy(pair => pair.Key)
-                .Select(pair => pair.Value)
+                .Values
                 .GetEnumerator();
         }
 
@@ -218,11 +217,11 @@ namespace Espera.Core.Management
 
         private void RebuildIndexes()
         {
-            var newPlaylist = new Dictionary<int, Song>();
+            var newPlaylist = new SortedDictionary<int, Song>();
             int index = 0;
             int? migrateIndex = null;
 
-            foreach (var entry in playlist.OrderBy(entry => entry.Key))
+            foreach (var entry in playlist)
             {
                 newPlaylist.Add(index, entry.Value);
 
