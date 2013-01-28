@@ -10,15 +10,15 @@ namespace Espera.Core.Management
     /// <summary>
     /// Represents a playlist where songs are stored with an associated index.
     /// </summary>
-    public sealed class Playlist : IEnumerable<Song>
+    public sealed class Playlist : IEnumerable<PlaylistEntry>
     {
         private int? currentSongIndex;
-        private SortedDictionary<int, Song> playlist;
+        private List<PlaylistEntry> playlist;
 
         internal Playlist(string name)
         {
             this.Name = name;
-            this.playlist = new SortedDictionary<int, Song>();
+            this.playlist = new List<PlaylistEntry>();
         }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace Espera.Core.Management
         /// </value>
         public bool CanPlayNextSong
         {
-            get { return this.CurrentSongIndex.HasValue && this.playlist.ContainsKey(this.CurrentSongIndex.Value + 1); }
+            get { return this.CurrentSongIndex.HasValue && this.ContainsIndex(this.CurrentSongIndex.Value + 1); }
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace Espera.Core.Management
         /// </value>
         public bool CanPlayPreviousSong
         {
-            get { return this.CurrentSongIndex.HasValue && this.playlist.ContainsKey(this.CurrentSongIndex.Value - 1); }
+            get { return this.CurrentSongIndex.HasValue && this.ContainsIndex(this.CurrentSongIndex.Value - 1); }
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Espera.Core.Management
             get { return this.currentSongIndex; }
             internal set
             {
-                if (value != null && !this.playlist.ContainsKey(value.Value))
+                if (value != null && !this.ContainsIndex(value.Value))
                     Throw.ArgumentOutOfRangeException(() => value);
 
                 this.currentSongIndex = value;
@@ -64,14 +64,14 @@ namespace Espera.Core.Management
 
         public string Name { get; set; }
 
-        public Song this[int index]
+        public PlaylistEntry this[int index]
         {
             get
             {
                 if (index < 0)
                     Throw.ArgumentOutOfRangeException(() => index, 0);
 
-                int maxIndex = this.playlist.Keys.Max();
+                int maxIndex = this.playlist.Count;
 
                 if (index > maxIndex)
                     Throw.ArgumentOutOfRangeException(() => index, maxIndex);
@@ -87,24 +87,22 @@ namespace Espera.Core.Management
         /// <returns>True, if there exists a song at the specified index; otherwise, false.</returns>
         public bool ContainsIndex(int songIndex)
         {
-            return this.playlist.ContainsKey(songIndex);
+            return this.playlist.Any(entry => entry.Index == songIndex);
         }
 
-        public IEnumerator<Song> GetEnumerator()
+        public IEnumerator<PlaylistEntry> GetEnumerator()
         {
-            return this.playlist
-                .Values
-                .GetEnumerator();
+            return this.playlist.GetEnumerator();
         }
 
         /// <summary>
-        /// Gets the indexes of the specified songs.
+        /// Gets all indexes of the specified songs.
         /// </summary>
         public IEnumerable<int> GetIndexes(IEnumerable<Song> songs)
         {
             return this.playlist
-                .Where(entry => songs.Contains(entry.Value))
-                .Select(entry => entry.Key)
+                .Where(entry => songs.Contains(entry.Song))
+                .Select(entry => entry.Index)
                 .ToList();
         }
 
@@ -127,11 +125,9 @@ namespace Espera.Core.Management
                 if (song.HasToCache && !song.IsCaching)
                 {
                     GlobalSongCacheQueue.Instance.Enqueue(song);
-                }
+                };
 
-                int index = this.playlist.Keys.Count == 0 ? 0 : this.playlist.Keys.Max() + 1;
-
-                this.playlist.Add(index, song);
+                this.playlist.Add(new PlaylistEntry(this.playlist.Count, song));
             }
         }
 
@@ -154,13 +150,15 @@ namespace Espera.Core.Management
                     Reflector.GetMemberName(() => toIndex), Reflector.GetMemberName(() => fromIndex)),
                     () => toIndex);
 
-            Song from = this[fromIndex];
+            PlaylistEntry from = this[fromIndex];
 
             for (int i = fromIndex; i > toIndex; i--)
             {
+                this.playlist[i].Index = i - 1;
                 this.playlist[i] = this[i - 1];
             }
 
+            from.Index = toIndex;
             this.playlist[toIndex] = from;
         }
 
@@ -173,15 +171,14 @@ namespace Espera.Core.Management
             if (indexes == null)
                 Throw.ArgumentNullException(() => indexes);
 
-            foreach (int index in indexes)
-            {
-                if (index == this.CurrentSongIndex)
-                {
-                    this.CurrentSongIndex = null;
-                }
+            List<int> indexList = indexes.ToList();
 
-                this.playlist.Remove(index);
+            if (indexList.Any(index => index == this.CurrentSongIndex))
+            {
+                this.CurrentSongIndex = null;
             }
+
+            this.playlist.RemoveAll(entry => indexList.Any(index => entry.Index == index));
 
             this.RebuildIndexes();
         }
@@ -207,28 +204,31 @@ namespace Espera.Core.Management
                     this.CurrentSongIndex = index;
                 }
 
-                Song temp = this.playlist[index];
+                PlaylistEntry temp = this.playlist[index];
 
+                this.playlist[newIndex].Index = index;
                 this.playlist[index] = this.playlist[newIndex];
 
+                temp.Index = newIndex;
                 this.playlist[newIndex] = temp;
             }
         }
 
         private void RebuildIndexes()
         {
-            var newPlaylist = new SortedDictionary<int, Song>();
+            var newPlaylist = new List<PlaylistEntry>();
             int index = 0;
             int? migrateIndex = null;
 
             foreach (var entry in playlist)
             {
-                newPlaylist.Add(index, entry.Value);
-
-                if (this.CurrentSongIndex == entry.Key)
+                if (this.CurrentSongIndex == entry.Index)
                 {
                     migrateIndex = index;
                 }
+
+                newPlaylist.Add(entry);
+                entry.Index = index;
 
                 index++;
             }

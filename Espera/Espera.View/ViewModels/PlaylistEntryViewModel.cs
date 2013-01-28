@@ -1,22 +1,20 @@
 ﻿using Espera.Core;
-using Rareform.Validation;
+using Espera.Core.Management;
 using System;
 
 namespace Espera.View.ViewModels
 {
     public sealed class PlaylistEntryViewModel : SongViewModelBase
     {
+        private readonly PlaylistEntry entry;
         private bool hasCachingFailed;
         private bool isInactive;
         private bool isPlaying;
 
-        public PlaylistEntryViewModel(Song model, int index)
-            : base(model)
+        public PlaylistEntryViewModel(PlaylistEntry entry)
+            : base(entry.Song)
         {
-            if (index < 0)
-                Throw.ArgumentOutOfRangeException(() => index, 0);
-
-            this.Index = index;
+            this.entry = entry;
 
             if (this.Model.HasToCache && !this.Model.IsCached)
             {
@@ -48,7 +46,10 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public int Index { get; private set; }
+        public int Index
+        {
+            get { return this.entry.Index; }
+        }
 
         public bool IsCorrupted
         {

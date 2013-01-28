@@ -24,10 +24,10 @@ namespace Espera.Core.Tests
             Playlist playlist = Helpers.SetupPlaylist(songs);
 
             Assert.AreEqual(4, playlist.Count());
-            Assert.AreEqual(songs[0], playlist[0]);
-            Assert.AreEqual(songs[1], playlist[1]);
-            Assert.AreEqual(songs[2], playlist[2]);
-            Assert.AreEqual(songs[3], playlist[3]);
+            Assert.AreEqual(songs[0], playlist[0].Song);
+            Assert.AreEqual(songs[1], playlist[1].Song);
+            Assert.AreEqual(songs[2], playlist[2].Song);
+            Assert.AreEqual(songs[3], playlist[3].Song);
         }
 
         [Test]
@@ -191,7 +191,7 @@ namespace Espera.Core.Tests
         {
             var playlist = new Playlist("Playlist");
 
-            Song temp;
+            PlaylistEntry temp;
 
             Assert.Throws<ArgumentOutOfRangeException>(() => temp = playlist[-1]);
         }
@@ -202,7 +202,7 @@ namespace Espera.Core.Tests
             Song song = Helpers.SetupSongMock();
             var playlist = Helpers.SetupPlaylist(song);
 
-            Song temp;
+            PlaylistEntry temp;
 
             Assert.Throws<ArgumentOutOfRangeException>(() => temp = playlist[1]);
         }
@@ -226,7 +226,7 @@ namespace Espera.Core.Tests
 
             var expected = new[] { songs[0], songs[3], songs[1], songs[2], songs[4] };
 
-            Assert.IsTrue(playlist.SequenceEqual(expected));
+            Assert.IsTrue(playlist.Select(entry => entry.Song).SequenceEqual(expected));
         }
 
         [Test]
@@ -270,10 +270,10 @@ namespace Espera.Core.Tests
             playlist.RemoveSongs(new[] { 1, 3, 4 });
 
             Assert.AreEqual(4, playlist.Count());
-            Assert.AreEqual(songs[0], playlist[0]);
-            Assert.AreEqual(songs[2], playlist[1]);
-            Assert.AreEqual(songs[5], playlist[2]);
-            Assert.AreEqual(songs[6], playlist[3]);
+            Assert.AreEqual(songs[0], playlist[0].Song);
+            Assert.AreEqual(songs[2], playlist[1].Song);
+            Assert.AreEqual(songs[5], playlist[2].Song);
+            Assert.AreEqual(songs[6], playlist[3].Song);
         }
 
         [Test]
@@ -285,9 +285,9 @@ namespace Espera.Core.Tests
             playlist.RemoveSongs(new[] { 1 });
 
             Assert.AreEqual(3, playlist.Count());
-            Assert.AreEqual(songs[0], playlist[0]);
-            Assert.AreEqual(songs[2], playlist[1]);
-            Assert.AreEqual(songs[3], playlist[2]);
+            Assert.AreEqual(songs[0], playlist[0].Song);
+            Assert.AreEqual(songs[2], playlist[1].Song);
+            Assert.AreEqual(songs[3], playlist[2].Song);
         }
 
         [Test]

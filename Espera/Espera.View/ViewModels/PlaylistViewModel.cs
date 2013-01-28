@@ -100,7 +100,7 @@ namespace Espera.View.ViewModels
             get
             {
                 var songs = this.playlist
-                    .Select((song, index) => new PlaylistEntryViewModel(song, index))
+                    .Select(entry => new PlaylistEntryViewModel(entry))
                     .ToList(); // We want a list, so that ReSharper doesn't complain about multiple enumerations
 
                 this.SongCount = songs.Count;
