@@ -216,24 +216,24 @@ namespace Espera.Core.Management
 
         private void RebuildIndexes()
         {
-            var newPlaylist = new List<PlaylistEntry>();
             int index = 0;
             int? migrateIndex = null;
+            var current = this.playlist.ToList();
 
-            foreach (var entry in playlist)
+            this.playlist.Clear();
+
+            foreach (var entry in current)
             {
                 if (this.CurrentSongIndex == entry.Index)
                 {
                     migrateIndex = index;
                 }
 
-                newPlaylist.Add(entry);
+                this.playlist.Add(entry);
                 entry.Index = index;
 
                 index++;
             }
-
-            this.playlist = newPlaylist;
 
             if (migrateIndex.HasValue)
             {
