@@ -96,6 +96,7 @@ namespace Espera.View.ViewModels
             this.AddPlaylistCommand.Subscribe(x => this.AddPlaylist());
 
             this.playlists = this.library.Playlists.CreateDerivedCollection(this.CreatePlaylistViewModel);
+            this.playlists.ItemsRemoved.Subscribe(x => x.Dispose());
 
             this.ShowSettingsCommand = new ReactiveCommand();
             this.ShowSettingsCommand.Subscribe(x => this.SettingsViewModel.HandleSettings());
@@ -397,7 +398,6 @@ namespace Espera.View.ViewModels
                     {
                         int index = this.playlists.IndexOf(this.CurrentPlaylist);
 
-                        this.CurrentPlaylist.Dispose();
                         this.library.RemovePlaylist(this.CurrentPlaylist.Model);
 
                         if (!this.library.Playlists.Any())
@@ -419,8 +419,6 @@ namespace Espera.View.ViewModels
                         {
                             this.CurrentPlaylist = this.playlists[0];
                         }
-
-                        this.RaisePropertyChanged(x => x.Playlists);
                     },
                     param => this.CurrentEditedPlaylist != null || this.CurrentPlaylist != null
                 );
