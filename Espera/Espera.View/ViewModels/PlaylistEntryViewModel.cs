@@ -16,7 +16,6 @@ namespace Espera.View.ViewModels
         private readonly PlaylistEntry entry;
         private readonly ObservableAsPropertyHelper<bool> hasCachingFailed;
         private readonly ObservableAsPropertyHelper<bool> showCaching;
-        private bool isInactive;
         private bool isPlaying;
 
         public PlaylistEntryViewModel(PlaylistEntry entry)
@@ -59,12 +58,6 @@ namespace Espera.View.ViewModels
         public bool IsCorrupted
         {
             get { return this.Model.IsCorrupted; }
-        }
-
-        public bool IsInactive
-        {
-            get { return this.isInactive; }
-            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public bool IsPlaying

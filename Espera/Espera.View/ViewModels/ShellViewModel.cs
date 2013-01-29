@@ -426,14 +426,7 @@ namespace Espera.View.ViewModels
             {
                 return new RelayCommand
                 (
-                    param =>
-                    {
-                        this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index));
-
-                        this.RaisePropertyChanged(x => x.CurrentPlaylist);
-                        this.RaisePropertyChanged(x => x.SongsRemaining);
-                        this.RaisePropertyChanged(x => x.TimeRemaining);
-                    },
+                    param => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index)),
                     param => this.SelectedPlaylistEntries != null
                         && this.SelectedPlaylistEntries.Any()
                         && (this.IsAdmin || !this.library.LockPlaylistRemoval)
@@ -465,41 +458,6 @@ namespace Espera.View.ViewModels
         public IReactiveCommand ShowSettingsCommand { get; private set; }
 
         public IReactiveCommand ShufflePlaylistCommand { get; private set; }
-
-        /// <summary>
-        /// Gets the number of songs that come after the currently played song.
-        /// </summary>
-        public int SongsRemaining
-        {
-            get
-            {
-                return this.CurrentPlaylist.Songs
-                    .SkipWhile(song => song.IsInactive)
-                    .Count();
-            }
-        }
-
-        /// <summary>
-        /// Gets the total remaining time of all songs that come after the currently played song.
-        /// </summary>
-        public TimeSpan? TimeRemaining
-        {
-            get
-            {
-                var songs = this.CurrentPlaylist.Songs
-                    .SkipWhile(song => song.IsInactive)
-                    .ToList();
-
-                if (songs.Any())
-                {
-                    return songs
-                        .Select(song => song.Duration)
-                        .Aggregate((t1, t2) => t1 + t2);
-                }
-
-                return null;
-            }
-        }
 
         public int TotalSeconds
         {
@@ -607,9 +565,6 @@ namespace Espera.View.ViewModels
 
             this.RaisePropertyChanged(x => x.IsPlaying);
 
-            this.RaisePropertyChanged(x => x.SongsRemaining);
-            this.RaisePropertyChanged(x => x.TimeRemaining);
-
             this.RaisePropertyChanged(x => x.PlayCommand);
 
             this.updateTimer.Start();
@@ -629,9 +584,6 @@ namespace Espera.View.ViewModels
 
         private void UpdatePlaylist()
         {
-            this.RaisePropertyChanged(x => x.SongsRemaining);
-            this.RaisePropertyChanged(x => x.TimeRemaining);
-
             if (this.library.EnablePlaylistTimeout)
             {
                 this.RaisePropertyChanged(x => x.RemainingPlaylistTimeout);

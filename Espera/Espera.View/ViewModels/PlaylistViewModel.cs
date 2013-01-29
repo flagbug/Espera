@@ -1,11 +1,15 @@
-﻿using Espera.Core.Helpers;
-using Espera.Core.Management;
+﻿using Espera.Core.Management;
 using Rareform.Extensions;
 using Rareform.Reflection;
 using ReactiveUI;
 using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 
 namespace Espera.View.ViewModels
 {
@@ -16,6 +20,8 @@ namespace Espera.View.ViewModels
         private readonly Playlist playlist;
         private readonly Func<string, bool> renameRequest;
         private readonly ObservableAsPropertyHelper<int> songCount;
+        private readonly ObservableAsPropertyHelper<int> songsRemaining;
+        private readonly ObservableAsPropertyHelper<TimeSpan?> timeRemaining;
         private bool editName;
         private string saveName;
 
@@ -36,7 +42,18 @@ namespace Espera.View.ViewModels
 
             this.songCount = this.entries.CollectionCountChanged.ToProperty(this, x => x.SongCount, this.entries.Count);
 
-            this.playlist.CurrentSongIndexChanged.Subscribe(this.UpdateCurrentSong).DisposeWith(this.disposable);
+            IObservable<int?> currentSongUpdated = this.playlist.CurrentSongIndexChanged.Do(this.UpdateCurrentSong);
+            IObservable<IEnumerable<PlaylistEntryViewModel>> remainingSongs = this.entries.Changed.StartWith(new NotifyCollectionChangedEventArgs[] { null })
+                .CombineLatest(currentSongUpdated, (changed, index) => Unit.Default)
+                .Select(x => this.entries.Reverse().TakeWhile(entry => !entry.IsPlaying).ToList());
+
+            this.songsRemaining = remainingSongs
+                .Select(x => x.Count())
+                .ToProperty(this, x => x.SongsRemaining);
+
+            this.timeRemaining = remainingSongs
+                .Select(x => x.Any() ? x.Select(entry => entry.Duration).Aggregate((t1, t2) => t1 + t2) : (TimeSpan?)null)
+                .ToProperty(this, x => x.TimeRemaining);
         }
 
         public bool EditName
@@ -92,6 +109,22 @@ namespace Espera.View.ViewModels
             get { return this.entries; }
         }
 
+        /// <summary>
+        /// Gets the number of songs that come after the currently played song.
+        /// </summary>
+        public int SongsRemaining
+        {
+            get { return this.songsRemaining.Value; }
+        }
+
+        /// <summary>
+        /// Gets the total remaining time of all songs that come after the currently played song.
+        /// </summary>
+        public TimeSpan? TimeRemaining
+        {
+            get { return this.timeRemaining.Value; }
+        }
+
         public string this[string columnName]
         {
             get
@@ -127,15 +160,12 @@ namespace Espera.View.ViewModels
 
         private void UpdateCurrentSong(int? currentSongIndex)
         {
-            if (currentSongIndex == null)
+            foreach (PlaylistEntryViewModel entry in entries)
             {
-                foreach (PlaylistEntryViewModel entry in entries)
-                {
-                    entry.IsPlaying = false;
-                }
+                entry.IsPlaying = false;
             }
 
-            else
+            if (currentSongIndex.HasValue)
             {
                 PlaylistEntryViewModel entry = this.entries[currentSongIndex.Value];
 
