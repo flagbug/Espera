@@ -1,4 +1,5 @@
-﻿using Espera.Core.Management;
+﻿using Espera.Core.Helpers;
+using Espera.Core.Management;
 using Rareform.Extensions;
 using Rareform.Reflection;
 using ReactiveUI;
@@ -40,7 +41,9 @@ namespace Espera.View.ViewModels
             this.entries = playlist.CreateDerivedCollection(entry => new PlaylistEntryViewModel(entry));
             this.entries.ItemsRemoved.Subscribe(x => x.Dispose());
 
-            this.songCount = this.entries.CollectionCountChanged.ToProperty(this, x => x.SongCount, this.entries.Count);
+            this.songCount = this.entries.CollectionCountChanged
+                .ToProperty(this, x => x.SongCount, this.entries.Count)
+                .DisposeWith(this.disposable);
 
             IObservable<int?> currentSongUpdated = this.playlist.CurrentSongIndexChanged.Do(this.UpdateCurrentSong);
             IObservable<IEnumerable<PlaylistEntryViewModel>> remainingSongs = this.entries.Changed.StartWith(new NotifyCollectionChangedEventArgs[] { null })
@@ -49,11 +52,13 @@ namespace Espera.View.ViewModels
 
             this.songsRemaining = remainingSongs
                 .Select(x => x.Count())
-                .ToProperty(this, x => x.SongsRemaining);
+                .ToProperty(this, x => x.SongsRemaining)
+                .DisposeWith(this.disposable);
 
             this.timeRemaining = remainingSongs
                 .Select(x => x.Any() ? x.Select(entry => entry.Duration).Aggregate((t1, t2) => t1 + t2) : (TimeSpan?)null)
-                .ToProperty(this, x => x.TimeRemaining);
+                .ToProperty(this, x => x.TimeRemaining)
+                .DisposeWith(this.disposable);
         }
 
         public bool EditName

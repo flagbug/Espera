@@ -27,17 +27,22 @@ namespace Espera.View.ViewModels
 
             this.cachingProgress = this.Model.CachingProgress
                 .DistinctUntilChanged()
-                .ToProperty(this, x => x.CacheProgress);
+                .ToProperty(this, x => x.CacheProgress)
+                .DisposeWith(this.disposable);
 
             this.hasCachingFailed = this.Model.CachingFailed.Select(x => true)
-                .ToProperty(this, x => x.HasCachingFailed);
+                .ToProperty(this, x => x.HasCachingFailed)
+                .DisposeWith(this.disposable);
 
             this.showCaching = this.Model.CachingCompleted.StartWith(Unit.Default)
                 .CombineLatest(this.Model.CachingProgress.DistinctUntilChanged(), (unit, progress) => progress)
                 .Select(progress => this.Model.HasToCache && progress != 100 || this.HasCachingFailed)
-                .ToProperty(this, x => x.ShowCaching);
+                .ToProperty(this, x => x.ShowCaching)
+                .DisposeWith(this.disposable);
 
-            this.Model.Corrupted.Subscribe(x => this.RaisePropertyChanged(p => p.IsCorrupted)).DisposeWith(disposable);
+            this.Model.Corrupted
+                .Subscribe(x => this.RaisePropertyChanged(p => p.IsCorrupted))
+                .DisposeWith(disposable);
         }
 
         public int CacheProgress
@@ -91,9 +96,6 @@ namespace Espera.View.ViewModels
 
         public void Dispose()
         {
-            this.cachingProgress.Dispose();
-            this.hasCachingFailed.Dispose();
-            this.showCaching.Dispose();
             this.disposable.Dispose();
         }
     }

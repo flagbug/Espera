@@ -5,9 +5,10 @@ namespace Espera.Core.Helpers
 {
     public static class DisposableExtensions
     {
-        public static void DisposeWith(this IDisposable disposable, CompositeDisposable with)
+        public static T DisposeWith<T>(this T disposable, CompositeDisposable with) where T : IDisposable
         {
             with.Add(disposable);
+            return disposable;
         }
     }
 }
