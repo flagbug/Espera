@@ -25,20 +25,25 @@ namespace Espera.View.ViewModels
 
             this.disposable = new CompositeDisposable();
 
-            this.cachingProgress = this.Model.CachingProgress
-                .DistinctUntilChanged()
-                .ToProperty(this, x => x.CacheProgress)
-                .DisposeWith(this.disposable);
+            // This check greatly decreases the memory footprint of the application,
+            // since the observables are only created for songs that actually have to be cached
+            if (this.Model.HasToCache)
+            {
+                this.cachingProgress = this.Model.CachingProgress
+                    .DistinctUntilChanged()
+                    .ToProperty(this, x => x.CacheProgress)
+                    .DisposeWith(this.disposable);
 
-            this.hasCachingFailed = this.Model.CachingFailed.Select(x => true)
-                .ToProperty(this, x => x.HasCachingFailed)
-                .DisposeWith(this.disposable);
+                this.hasCachingFailed = this.Model.CachingFailed.Select(x => true)
+                    .ToProperty(this, x => x.HasCachingFailed)
+                    .DisposeWith(this.disposable);
 
-            this.showCaching = this.Model.CachingCompleted.StartWith(Unit.Default)
-                .CombineLatest(this.Model.CachingProgress.DistinctUntilChanged(), (unit, progress) => progress)
-                .Select(progress => this.Model.HasToCache && progress != 100 || this.HasCachingFailed)
-                .ToProperty(this, x => x.ShowCaching)
-                .DisposeWith(this.disposable);
+                this.showCaching = this.Model.CachingCompleted.StartWith(Unit.Default)
+                    .CombineLatest(this.Model.CachingProgress.DistinctUntilChanged(), (unit, progress) => progress)
+                    .Select(progress => this.Model.HasToCache && progress != 100 || this.HasCachingFailed)
+                    .ToProperty(this, x => x.ShowCaching)
+                    .DisposeWith(this.disposable);
+            }
 
             this.Model.Corrupted
                 .Subscribe(x => this.RaisePropertyChanged(p => p.IsCorrupted))
@@ -47,12 +52,12 @@ namespace Espera.View.ViewModels
 
         public int CacheProgress
         {
-            get { return this.cachingProgress.Value; }
+            get { return this.cachingProgress != null ? this.cachingProgress.Value : -1; }
         }
 
         public bool HasCachingFailed
         {
-            get { return this.hasCachingFailed.Value; }
+            get { return this.hasCachingFailed != null && this.hasCachingFailed.Value; }
         }
 
         public int Index
@@ -73,7 +78,7 @@ namespace Espera.View.ViewModels
 
         public bool ShowCaching
         {
-            get { return this.showCaching.Value; }
+            get { return this.showCaching != null && this.showCaching.Value; }
         }
 
         public string Source
