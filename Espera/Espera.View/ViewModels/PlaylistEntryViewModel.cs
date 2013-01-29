@@ -2,7 +2,6 @@
 using Espera.Core.Management;
 using ReactiveUI;
 using System;
-using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -39,11 +38,6 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.ShowCaching);
 
             this.disposable.Add(this.Model.Corrupted.Subscribe(x => this.RaisePropertyChanged(p => p.IsCorrupted)));
-        }
-
-        ~PlaylistEntryViewModel()
-        {
-            Debug.WriteLine(string.Format("Destroying PlaylistEntryViewModel {0}", this.Path));
         }
 
         public int CacheProgress
