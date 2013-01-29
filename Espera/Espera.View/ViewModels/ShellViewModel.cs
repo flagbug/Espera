@@ -24,6 +24,7 @@ namespace Espera.View.ViewModels
         private readonly Library library;
         private readonly ReactiveCollection<PlaylistViewModel> playlists;
         private readonly Timer playlistTimeoutUpdateTimer;
+        private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
         private readonly Timer updateTimer;
         private bool displayTimeoutWarning;
         private bool isLocal;
@@ -75,7 +76,11 @@ namespace Espera.View.ViewModels
                 .Select(x => x == AccessMode.Administrator);
 
             this.isAdmin = isAdminObservable
-                .ToProperty(this, x => x.IsAdmin);
+                .ToProperty(this, x => x.IsAdmin, true);
+
+            this.showPlaylistTimeout = isAdminObservable
+                .CombineLatest(this.WhenAny(x => x.SettingsViewModel.EnablePlaylistTimeout, x => x.Value), (isAdmin, enableTimeout) => !isAdmin && enableTimeout)
+                .ToProperty(this, x => x.ShowPlaylistTimeout);
 
             this.MuteCommand = new ReactiveCommand(this.isAdmin);
             this.MuteCommand.Subscribe(x => this.Volume = 0);
@@ -450,9 +455,9 @@ namespace Espera.View.ViewModels
 
         public SettingsViewModel SettingsViewModel { get; private set; }
 
-        public bool ShowPlaylistTimeOut
+        public bool ShowPlaylistTimeout
         {
-            get { return this.SettingsViewModel.EnablePlaylistTimeout && !this.IsAdmin; }
+            get { return this.showPlaylistTimeout.Value; }
         }
 
         public IReactiveCommand ShowSettingsCommand { get; private set; }
@@ -609,7 +614,7 @@ namespace Espera.View.ViewModels
             this.RaisePropertyChanged(x => x.CanChangeVolume);
             this.RaisePropertyChanged(x => x.CanChangeTime);
             this.RaisePropertyChanged(x => x.CanSwitchPlaylist);
-            this.RaisePropertyChanged(x => x.ShowPlaylistTimeOut);
+            this.RaisePropertyChanged(x => x.ShowPlaylistTimeout);
         }
     }
 }
