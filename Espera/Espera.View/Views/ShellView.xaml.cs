@@ -302,7 +302,7 @@ namespace Espera.View.Views
                     this.WindowState = WindowState.Normal;
                     this.WindowState = WindowState.Maximized;
 
-                    this.Topmost = true;
+                    this.Topmost = this.IgnoreTaskbarOnMaximize;
                 }
             });
         }
