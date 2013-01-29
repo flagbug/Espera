@@ -1,22 +1,23 @@
-﻿using Espera.Core.Management;
+﻿using Espera.Core.Helpers;
+using Espera.Core.Management;
 using Rareform.Extensions;
 using Rareform.Reflection;
 using ReactiveUI;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
+using System.Reactive.Disposables;
 
 namespace Espera.View.ViewModels
 {
     internal sealed class PlaylistViewModel : ReactiveObject, IDataErrorInfo, IDisposable
     {
+        private readonly CompositeDisposable disposable;
+        private readonly ReactiveCollection<PlaylistEntryViewModel> entries;
         private readonly Playlist playlist;
         private readonly Func<string, bool> renameRequest;
-        private List<PlaylistEntryViewModel> currentEntries;
+        private readonly ObservableAsPropertyHelper<int> songCount;
         private bool editName;
         private string saveName;
-        private int songCount;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlaylistViewModel"/> class.
@@ -27,7 +28,15 @@ namespace Espera.View.ViewModels
         {
             this.playlist = playlist;
             this.renameRequest = renameRequest;
-            this.songCount = -1;
+
+            this.disposable = new CompositeDisposable();
+
+            this.entries = playlist.CreateDerivedCollection(entry => new PlaylistEntryViewModel(entry));
+            this.entries.ItemsRemoved.Subscribe(x => x.Dispose());
+
+            this.songCount = this.entries.CollectionCountChanged.ToProperty(this, x => x.SongCount, this.entries.Count);
+
+            this.playlist.CurrentSongIndexChanged.Subscribe(this.UpdateCurrentSong).DisposeWith(this.disposable);
         }
 
         public bool EditName
@@ -75,57 +84,12 @@ namespace Espera.View.ViewModels
 
         public int SongCount
         {
-            get
-            {
-                // We use this to get a value, even if the Songs property hasn't been called
-                if (songCount == -1)
-                {
-                    return this.Songs.Count();
-                }
-
-                return songCount;
-            }
-
-            private set { this.RaiseAndSetIfChanged(x => x.SongCount, value); }
+            get { return this.songCount.Value; }
         }
 
-        public IEnumerable<PlaylistEntryViewModel> Songs
+        public ReactiveCollection<PlaylistEntryViewModel> Songs
         {
-            get
-            {
-                this.DisposeCurrentEntries();
-                var songs = this.playlist
-                    .Select(entry => new PlaylistEntryViewModel(entry))
-                    .ToList(); // We want a list, so that ReSharper doesn't complain about multiple enumerations
-
-                this.SongCount = songs.Count;
-
-                if (this.playlist.CurrentSongIndex.HasValue)
-                {
-                    PlaylistEntryViewModel entry = songs[this.playlist.CurrentSongIndex.Value];
-
-                    if (!entry.IsCorrupted)
-                    {
-                        entry.IsPlaying = true;
-                    }
-
-                    // If there are more than 5 songs from the beginning of the playlist to the current played song,
-                    // skip all, but 5 songs to the position of the currently played song
-                    if (this.playlist.CurrentSongIndex > 5)
-                    {
-                        songs = songs.Skip(this.playlist.CurrentSongIndex.Value - 5).ToList();
-                    }
-
-                    foreach (var model in songs.TakeWhile(song => !song.IsPlaying))
-                    {
-                        model.IsInactive = true;
-                    }
-                }
-
-                this.currentEntries = songs;
-
-                return songs;
-            }
+            get { return this.entries; }
         }
 
         public string this[string columnName]
@@ -153,16 +117,31 @@ namespace Espera.View.ViewModels
 
         public void Dispose()
         {
-            this.DisposeCurrentEntries();
+            this.disposable.Dispose();
+
+            foreach (PlaylistEntryViewModel entry in entries)
+            {
+                entry.Dispose();
+            }
         }
 
-        private void DisposeCurrentEntries()
+        private void UpdateCurrentSong(int? currentSongIndex)
         {
-            if (this.currentEntries != null)
+            if (currentSongIndex == null)
             {
-                foreach (PlaylistEntryViewModel entry in currentEntries)
+                foreach (PlaylistEntryViewModel entry in entries)
                 {
-                    entry.Dispose();
+                    entry.IsPlaying = false;
+                }
+            }
+
+            else
+            {
+                PlaylistEntryViewModel entry = this.entries[currentSongIndex.Value];
+
+                if (!entry.IsCorrupted)
+                {
+                    entry.IsPlaying = true;
                 }
             }
         }

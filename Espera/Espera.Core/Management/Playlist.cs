@@ -7,6 +7,8 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace Espera.Core.Management
 {
@@ -15,13 +17,15 @@ namespace Espera.Core.Management
     /// </summary>
     public sealed class Playlist : IEnumerable<PlaylistEntry>, INotifyCollectionChanged, INotifyPropertyChanged
     {
+        private readonly BehaviorSubject<int?> currentSongIndex;
         private readonly ObservableCollection<PlaylistEntry> playlist;
-        private int? currentSongIndex;
 
         internal Playlist(string name)
         {
             this.Name = name;
             this.playlist = new ObservableCollection<PlaylistEntry>();
+
+            this.currentSongIndex = new BehaviorSubject<int?>(null);
         }
 
         public event NotifyCollectionChangedEventHandler CollectionChanged
@@ -67,14 +71,19 @@ namespace Espera.Core.Management
         /// <exception cref="ArgumentOutOfRangeException">The value is not in the range of the playlist's indexes.</exception>
         public int? CurrentSongIndex
         {
-            get { return this.currentSongIndex; }
+            get { return this.currentSongIndex.First(); }
             internal set
             {
                 if (value != null && !this.ContainsIndex(value.Value))
                     Throw.ArgumentOutOfRangeException(() => value);
 
-                this.currentSongIndex = value;
+                this.currentSongIndex.OnNext(value);
             }
+        }
+
+        public IObservable<int?> CurrentSongIndexChanged
+        {
+            get { return this.currentSongIndex.AsObservable(); }
         }
 
         public string Name { get; set; }

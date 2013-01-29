@@ -596,8 +596,6 @@ namespace Espera.View.ViewModels
                 this.RaisePropertyChanged(x => x.IsPlaying);
             }
 
-            this.RaisePropertyChanged(x => x.CurrentPlaylist);
-
             this.RaisePropertyChanged(x => x.PreviousSongCommand);
 
             this.updateTimer.Stop();
@@ -608,7 +606,6 @@ namespace Espera.View.ViewModels
             this.UpdateTotalTime();
 
             this.RaisePropertyChanged(x => x.IsPlaying);
-            this.RaisePropertyChanged(x => x.CurrentPlaylist);
 
             this.RaisePropertyChanged(x => x.SongsRemaining);
             this.RaisePropertyChanged(x => x.TimeRemaining);
@@ -632,7 +629,6 @@ namespace Espera.View.ViewModels
 
         private void UpdatePlaylist()
         {
-            this.RaisePropertyChanged(x => x.CurrentPlaylist);
             this.RaisePropertyChanged(x => x.SongsRemaining);
             this.RaisePropertyChanged(x => x.TimeRemaining);
 
