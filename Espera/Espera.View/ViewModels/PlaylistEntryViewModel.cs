@@ -1,4 +1,5 @@
 ﻿using Espera.Core;
+using Espera.Core.Helpers;
 using Espera.Core.Management;
 using ReactiveUI;
 using System;
@@ -11,10 +12,10 @@ namespace Espera.View.ViewModels
     public sealed class PlaylistEntryViewModel : SongViewModelBase, IDisposable
     {
         private readonly ObservableAsPropertyHelper<int> cachingProgress;
+        private readonly CompositeDisposable disposable;
         private readonly PlaylistEntry entry;
         private readonly ObservableAsPropertyHelper<bool> hasCachingFailed;
         private readonly ObservableAsPropertyHelper<bool> showCaching;
-        private CompositeDisposable disposable;
         private bool isInactive;
         private bool isPlaying;
 
@@ -37,7 +38,7 @@ namespace Espera.View.ViewModels
                 .Select(progress => this.Model.HasToCache && progress != 100 || this.HasCachingFailed)
                 .ToProperty(this, x => x.ShowCaching);
 
-            this.disposable.Add(this.Model.Corrupted.Subscribe(x => this.RaisePropertyChanged(p => p.IsCorrupted)));
+            this.Model.Corrupted.Subscribe(x => this.RaisePropertyChanged(p => p.IsCorrupted)).DisposeWith(disposable);
         }
 
         public int CacheProgress
