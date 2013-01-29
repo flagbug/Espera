@@ -417,8 +417,6 @@ namespace Espera.View.ViewModels
                         {
                             this.CurrentPlaylist = this.playlists[0];
                         }
-
-                        this.RaisePropertyChanged(x => x.Playlists);
                     },
                     param => this.CurrentEditedPlaylist != null || this.CurrentPlaylist != null
                 );
