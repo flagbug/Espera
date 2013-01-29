@@ -101,6 +101,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>CoreSettings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\DisposableExtensions.cs" />
     <Compile Include="Management\AccessMode.cs" />
     <Compile Include="Audio\AudioPlayer.cs" />
     <Compile Include="Audio\LocalAudioPlayer.cs" />

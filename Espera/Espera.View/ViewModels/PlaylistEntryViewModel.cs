@@ -1,19 +1,21 @@
 ﻿using Espera.Core;
+using Espera.Core.Helpers;
 using Espera.Core.Management;
 using ReactiveUI;
 using System;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
 namespace Espera.View.ViewModels
 {
-    public sealed class PlaylistEntryViewModel : SongViewModelBase
+    public sealed class PlaylistEntryViewModel : SongViewModelBase, IDisposable
     {
-        private readonly PlaylistEntry entry;
         private readonly ObservableAsPropertyHelper<int> cachingProgress;
+        private readonly CompositeDisposable disposable;
+        private readonly PlaylistEntry entry;
         private readonly ObservableAsPropertyHelper<bool> hasCachingFailed;
         private readonly ObservableAsPropertyHelper<bool> showCaching;
-        private bool isInactive;
         private bool isPlaying;
 
         public PlaylistEntryViewModel(PlaylistEntry entry)
@@ -21,29 +23,41 @@ namespace Espera.View.ViewModels
         {
             this.entry = entry;
 
-            this.cachingProgress = this.Model.CachingProgress
-                .DistinctUntilChanged()
-                .ToProperty(this, x => x.CacheProgress);
+            this.disposable = new CompositeDisposable();
 
-            this.hasCachingFailed = this.Model.CachingFailed.Select(x => true)
-                .ToProperty(this, x => x.HasCachingFailed);
+            // This check greatly decreases the memory footprint of the application,
+            // since the observables are only created for songs that actually have to be cached
+            if (this.Model.HasToCache)
+            {
+                this.cachingProgress = this.Model.CachingProgress
+                    .DistinctUntilChanged()
+                    .ToProperty(this, x => x.CacheProgress)
+                    .DisposeWith(this.disposable);
 
-            this.showCaching = this.Model.CachingCompleted.StartWith(Unit.Default)
-                .CombineLatest(this.Model.CachingProgress.DistinctUntilChanged(), (unit, progress) => progress)
-                .Select(progress => this.Model.HasToCache && progress != 100 || this.HasCachingFailed)
-                .ToProperty(this, x => x.ShowCaching);
+                this.hasCachingFailed = this.Model.CachingFailed.Select(x => true)
+                    .ToProperty(this, x => x.HasCachingFailed)
+                    .DisposeWith(this.disposable);
 
-            this.Model.Corrupted.Subscribe(x => this.RaisePropertyChanged(p => p.IsCorrupted));
+                this.showCaching = this.Model.CachingCompleted.StartWith(Unit.Default)
+                    .CombineLatest(this.Model.CachingProgress.DistinctUntilChanged(), (unit, progress) => progress)
+                    .Select(progress => this.Model.HasToCache && progress != 100 || this.HasCachingFailed)
+                    .ToProperty(this, x => x.ShowCaching)
+                    .DisposeWith(this.disposable);
+            }
+
+            this.Model.Corrupted
+                .Subscribe(x => this.RaisePropertyChanged(p => p.IsCorrupted))
+                .DisposeWith(disposable);
         }
 
         public int CacheProgress
         {
-            get { return this.cachingProgress.Value; }
+            get { return this.cachingProgress != null ? this.cachingProgress.Value : -1; }
         }
 
         public bool HasCachingFailed
         {
-            get { return this.hasCachingFailed.Value; }
+            get { return this.hasCachingFailed != null && this.hasCachingFailed.Value; }
         }
 
         public int Index
@@ -56,12 +70,6 @@ namespace Espera.View.ViewModels
             get { return this.Model.IsCorrupted; }
         }
 
-        public bool IsInactive
-        {
-            get { return this.isInactive; }
-            set { this.RaiseAndSetIfChanged(value); }
-        }
-
         public bool IsPlaying
         {
             get { return this.isPlaying; }
@@ -70,7 +78,7 @@ namespace Espera.View.ViewModels
 
         public bool ShowCaching
         {
-            get { return this.showCaching.Value; }
+            get { return this.showCaching != null && this.showCaching.Value; }
         }
 
         public string Source
@@ -89,6 +97,11 @@ namespace Espera.View.ViewModels
 
                 throw new InvalidOperationException();
             }
+        }
+
+        public void Dispose()
+        {
+            this.disposable.Dispose();
         }
     }
 }

@@ -3,24 +3,43 @@ using Rareform.Validation;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace Espera.Core.Management
 {
     /// <summary>
     /// Represents a playlist where songs are stored with an associated index.
     /// </summary>
-    public sealed class Playlist : IEnumerable<PlaylistEntry>
+    public sealed class Playlist : IEnumerable<PlaylistEntry>, INotifyCollectionChanged, INotifyPropertyChanged
     {
-        private int? currentSongIndex;
+        private readonly BehaviorSubject<int?> currentSongIndex;
         private string name;
-        private List<PlaylistEntry> playlist;
+        private readonly ObservableCollection<PlaylistEntry> playlist;
 
         internal Playlist(string name, bool isTemporary = false)
         {
             this.Name = name;
             this.IsTemporary = isTemporary;
-            this.playlist = new List<PlaylistEntry>();
+            this.playlist = new ObservableCollection<PlaylistEntry>();
+
+            this.currentSongIndex = new BehaviorSubject<int?>(null);
+        }
+
+        public event NotifyCollectionChangedEventHandler CollectionChanged
+        {
+            add { this.playlist.CollectionChanged += value; }
+            remove { this.playlist.CollectionChanged -= value; }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged
+        {
+            add { ((INotifyPropertyChanged)this.playlist).PropertyChanged += value; }
+            remove { ((INotifyPropertyChanged)this.playlist).PropertyChanged -= value; }
         }
 
         /// <summary>
@@ -54,13 +73,13 @@ namespace Espera.Core.Management
         /// <exception cref="ArgumentOutOfRangeException">The value is not in the range of the playlist's indexes.</exception>
         public int? CurrentSongIndex
         {
-            get { return this.currentSongIndex; }
+            get { return this.currentSongIndex.First(); }
             internal set
             {
                 if (value != null && !this.ContainsIndex(value.Value))
                     Throw.ArgumentOutOfRangeException(() => value);
 
-                this.currentSongIndex = value;
+                this.currentSongIndex.OnNext(value);
             }
         }
 
@@ -69,6 +88,11 @@ namespace Espera.Core.Management
         /// This means that this playlist isn't saved to the harddrive when closing the application.
         /// </summary>
         public bool IsTemporary { get; private set; }
+        public IObservable<int?> CurrentSongIndexChanged
+        {
+            get { return this.currentSongIndex.AsObservable(); }
+        }
+
 
         public string Name
         {
@@ -189,14 +213,21 @@ namespace Espera.Core.Management
             if (indexes == null)
                 Throw.ArgumentNullException(() => indexes);
 
-            List<int> indexList = indexes.ToList();
+            var indexList = new List<int>(indexes);
 
-            if (indexList.Any(index => index == this.CurrentSongIndex))
+            if (this.CurrentSongIndex.HasValue && indexList.Contains(this.CurrentSongIndex.Value))
             {
                 this.CurrentSongIndex = null;
             }
 
-            this.playlist.RemoveAll(entry => indexList.Any(index => entry.Index == index));
+            int removed = 0;
+            indexList.Sort(); // Sort the list, so that we can substract the indexes when removing
+
+            foreach (int index in indexList)
+            {
+                this.playlist.RemoveAt(index - removed);
+                removed++;
+            }
 
             this.RebuildIndexes();
         }

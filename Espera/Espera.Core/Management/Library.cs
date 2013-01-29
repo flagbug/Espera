@@ -878,7 +878,7 @@ namespace Espera.Core.Management
                 cacheResetHandle.WaitOne();
             }
 
-            if (this.currentPlayingPlaylist != null)
+            if (this.currentPlayingPlaylist != null && this.currentPlayingPlaylist != this.CurrentPlaylist)
             {
                 this.currentPlayingPlaylist.CurrentSongIndex = null;
             }

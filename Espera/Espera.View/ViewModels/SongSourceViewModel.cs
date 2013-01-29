@@ -13,9 +13,9 @@ namespace Espera.View.ViewModels
     internal abstract class SongSourceViewModel<T> : ReactiveObject, ISongSourceViewModel
         where T : SongViewModelBase
     {
+        private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly Library library;
         private readonly Subject<Unit> timeoutWarning;
-        private ObservableAsPropertyHelper<bool> isAdmin;
         private string searchText;
         private IEnumerable<T> selectableSongs;
         private IEnumerable<SongViewModelBase> selectedSongs;

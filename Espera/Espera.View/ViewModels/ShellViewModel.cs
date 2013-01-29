@@ -24,6 +24,7 @@ namespace Espera.View.ViewModels
         private readonly Library library;
         private readonly ReactiveCollection<PlaylistViewModel> playlists;
         private readonly Timer playlistTimeoutUpdateTimer;
+        private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
         private readonly Timer updateTimer;
         private bool displayTimeoutWarning;
         private bool isLocal;
@@ -75,7 +76,11 @@ namespace Espera.View.ViewModels
                 .Select(x => x == AccessMode.Administrator);
 
             this.isAdmin = isAdminObservable
-                .ToProperty(this, x => x.IsAdmin);
+                .ToProperty(this, x => x.IsAdmin, true);
+
+            this.showPlaylistTimeout = isAdminObservable
+                .CombineLatest(this.WhenAny(x => x.SettingsViewModel.EnablePlaylistTimeout, x => x.Value), (isAdmin, enableTimeout) => !isAdmin && enableTimeout)
+                .ToProperty(this, x => x.ShowPlaylistTimeout);
 
             this.MuteCommand = new ReactiveCommand(this.isAdmin);
             this.MuteCommand.Subscribe(x => this.Volume = 0);
@@ -392,6 +397,7 @@ namespace Espera.View.ViewModels
                     {
                         int index = this.playlists.IndexOf(this.CurrentPlaylist);
 
+                        this.CurrentPlaylist.Dispose();
                         this.library.RemovePlaylist(this.CurrentPlaylist.Model);
 
                         if (!this.library.Playlists.Any())
@@ -427,14 +433,7 @@ namespace Espera.View.ViewModels
             {
                 return new RelayCommand
                 (
-                    param =>
-                    {
-                        this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index));
-
-                        this.RaisePropertyChanged(x => x.CurrentPlaylist);
-                        this.RaisePropertyChanged(x => x.SongsRemaining);
-                        this.RaisePropertyChanged(x => x.TimeRemaining);
-                    },
+                    param => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index)),
                     param => this.SelectedPlaylistEntries != null
                         && this.SelectedPlaylistEntries.Any()
                         && (this.IsAdmin || !this.library.LockPlaylistRemoval)
@@ -458,49 +457,14 @@ namespace Espera.View.ViewModels
 
         public SettingsViewModel SettingsViewModel { get; private set; }
 
-        public bool ShowPlaylistTimeOut
+        public bool ShowPlaylistTimeout
         {
-            get { return this.SettingsViewModel.EnablePlaylistTimeout && !this.IsAdmin; }
+            get { return this.showPlaylistTimeout.Value; }
         }
 
         public IReactiveCommand ShowSettingsCommand { get; private set; }
 
         public IReactiveCommand ShufflePlaylistCommand { get; private set; }
-
-        /// <summary>
-        /// Gets the number of songs that come after the currently played song.
-        /// </summary>
-        public int SongsRemaining
-        {
-            get
-            {
-                return this.CurrentPlaylist.Songs
-                    .SkipWhile(song => song.IsInactive)
-                    .Count();
-            }
-        }
-
-        /// <summary>
-        /// Gets the total remaining time of all songs that come after the currently played song.
-        /// </summary>
-        public TimeSpan? TimeRemaining
-        {
-            get
-            {
-                var songs = this.CurrentPlaylist.Songs
-                    .SkipWhile(song => song.IsInactive)
-                    .ToList();
-
-                if (songs.Any())
-                {
-                    return songs
-                        .Select(song => song.Duration)
-                        .Aggregate((t1, t2) => t1 + t2);
-                }
-
-                return null;
-            }
-        }
 
         public int TotalSeconds
         {
@@ -597,8 +561,6 @@ namespace Espera.View.ViewModels
                 this.RaisePropertyChanged(x => x.IsPlaying);
             }
 
-            this.RaisePropertyChanged(x => x.CurrentPlaylist);
-
             this.RaisePropertyChanged(x => x.PreviousSongCommand);
 
             this.updateTimer.Stop();
@@ -609,10 +571,6 @@ namespace Espera.View.ViewModels
             this.UpdateTotalTime();
 
             this.RaisePropertyChanged(x => x.IsPlaying);
-            this.RaisePropertyChanged(x => x.CurrentPlaylist);
-
-            this.RaisePropertyChanged(x => x.SongsRemaining);
-            this.RaisePropertyChanged(x => x.TimeRemaining);
 
             this.RaisePropertyChanged(x => x.PlayCommand);
 
@@ -633,10 +591,6 @@ namespace Espera.View.ViewModels
 
         private void UpdatePlaylist()
         {
-            this.RaisePropertyChanged(x => x.CurrentPlaylist);
-            this.RaisePropertyChanged(x => x.SongsRemaining);
-            this.RaisePropertyChanged(x => x.TimeRemaining);
-
             if (this.library.EnablePlaylistTimeout)
             {
                 this.RaisePropertyChanged(x => x.RemainingPlaylistTimeout);
@@ -662,7 +616,7 @@ namespace Espera.View.ViewModels
             this.RaisePropertyChanged(x => x.CanChangeVolume);
             this.RaisePropertyChanged(x => x.CanChangeTime);
             this.RaisePropertyChanged(x => x.CanSwitchPlaylist);
-            this.RaisePropertyChanged(x => x.ShowPlaylistTimeOut);
+            this.RaisePropertyChanged(x => x.ShowPlaylistTimeout);
         }
     }
 }
