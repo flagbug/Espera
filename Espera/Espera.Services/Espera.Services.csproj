@@ -34,9 +34,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Rareform, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Rareform, Version=1.5.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Rareform.1.4.0\lib\Rareform.dll</HintPath>
+      <HintPath>..\packages\Rareform.1.5.1\lib\Rareform.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
