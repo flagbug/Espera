@@ -589,6 +589,8 @@ namespace Espera.View.ViewModels
 
         private void UpdatePlaylist()
         {
+            this.RaisePropertyChanged(x => x.CurrentPlaylist);
+
             if (this.library.EnablePlaylistTimeout)
             {
                 this.RaisePropertyChanged(x => x.RemainingPlaylistTimeout);
