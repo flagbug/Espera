@@ -1,9 +1,9 @@
-﻿using Rareform.Reflection;
+﻿using Rareform.Collections;
+using Rareform.Reflection;
 using Rareform.Validation;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
@@ -19,14 +19,14 @@ namespace Espera.Core.Management
     {
         private readonly BehaviorSubject<int?> currentSongIndex;
         private string name;
-        private readonly ObservableCollection<PlaylistEntry> playlist;
+        private readonly ObservableList<PlaylistEntry> playlist;
 
         internal Playlist(string name, bool isTemporary = false)
         {
             this.Name = name;
             this.IsTemporary = isTemporary;
-            this.playlist = new ObservableCollection<PlaylistEntry>();
-
+            
+            this.playlist = new ObservableList<PlaylistEntry>();
             this.currentSongIndex = new BehaviorSubject<int?>(null);
         }
 
@@ -162,15 +162,21 @@ namespace Espera.Core.Management
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
 
+            var itemsToAdd = new List<PlaylistEntry>();
+
+            int index = this.playlist.Count;
+
             foreach (Song song in songList)
             {
                 if (song.HasToCache && !song.IsCaching)
                 {
                     GlobalSongCacheQueue.Instance.Enqueue(song);
-                };
+                }
 
-                this.playlist.Add(new PlaylistEntry(this.playlist.Count, song));
+                itemsToAdd.Add(new PlaylistEntry(index++, song));
             }
+
+            this.playlist.AddRange(itemsToAdd);
         }
 
         /// <summary>
@@ -213,21 +219,15 @@ namespace Espera.Core.Management
             if (indexes == null)
                 Throw.ArgumentNullException(() => indexes);
 
-            var indexList = new List<int>(indexes);
+            // Use a HashSet for better lookup performance
+            var indexList = new HashSet<int>(indexes);
 
             if (this.CurrentSongIndex.HasValue && indexList.Contains(this.CurrentSongIndex.Value))
             {
                 this.CurrentSongIndex = null;
             }
 
-            int removed = 0;
-            indexList.Sort(); // Sort the list, so that we can substract the indexes when removing
-
-            foreach (int index in indexList)
-            {
-                this.playlist.RemoveAt(index - removed);
-                removed++;
-            }
+            this.playlist.RemoveAll(item => indexList.Contains(item.Index));
 
             this.RebuildIndexes();
         }
@@ -267,22 +267,23 @@ namespace Espera.Core.Management
         {
             int index = 0;
             int? migrateIndex = null;
-            var current = this.playlist.ToList();
+            var newPlaylist = new List<PlaylistEntry>(this.playlist.Capacity);
 
-            this.playlist.Clear();
-
-            foreach (var entry in current)
+            foreach (var entry in this.playlist)
             {
                 if (this.CurrentSongIndex == entry.Index)
                 {
                     migrateIndex = index;
                 }
 
-                this.playlist.Add(entry);
+                newPlaylist.Add(entry);
                 entry.Index = index;
 
                 index++;
             }
+
+            this.playlist.Clear();
+            this.playlist.AddRange(newPlaylist);
 
             if (migrateIndex.HasValue)
             {
