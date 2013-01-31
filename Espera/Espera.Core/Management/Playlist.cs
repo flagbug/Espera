@@ -18,14 +18,14 @@ namespace Espera.Core.Management
     public sealed class Playlist : IEnumerable<PlaylistEntry>, INotifyCollectionChanged, INotifyPropertyChanged
     {
         private readonly BehaviorSubject<int?> currentSongIndex;
-        private string name;
         private readonly ObservableList<PlaylistEntry> playlist;
+        private string name;
 
         internal Playlist(string name, bool isTemporary = false)
         {
             this.Name = name;
             this.IsTemporary = isTemporary;
-            
+
             this.playlist = new ObservableList<PlaylistEntry>();
             this.currentSongIndex = new BehaviorSubject<int?>(null);
         }
@@ -83,16 +83,16 @@ namespace Espera.Core.Management
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this playlist is temporary and used for instant-playing.
-        /// This means that this playlist isn't saved to the harddrive when closing the application.
-        /// </summary>
-        public bool IsTemporary { get; private set; }
         public IObservable<int?> CurrentSongIndexChanged
         {
             get { return this.currentSongIndex.AsObservable(); }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this playlist is temporary and used for instant-playing.
+        /// This means that this playlist isn't saved to the harddrive when closing the application.
+        /// </summary>
+        public bool IsTemporary { get; private set; }
 
         public string Name
         {
@@ -235,12 +235,20 @@ namespace Espera.Core.Management
         internal void Shuffle()
         {
             int count = this.playlist.Count;
-
+            var newPlaylist = new List<PlaylistEntry>(this.playlist.Capacity);
             var random = new Random();
 
             for (int index = 0; index < count; index++)
             {
                 int newIndex = random.Next(count);
+
+                PlaylistEntry temp = this.playlist[index];
+
+                this.playlist[newIndex].Index = index;
+                this.playlist[index] = this.playlist[newIndex];
+
+                temp.Index = newIndex;
+                this.playlist[newIndex] = temp;
 
                 // Migrate the CurrentSongIndex to the new position
                 if (index == this.CurrentSongIndex)
@@ -252,14 +260,6 @@ namespace Espera.Core.Management
                 {
                     this.CurrentSongIndex = index;
                 }
-
-                PlaylistEntry temp = this.playlist[index];
-
-                this.playlist[newIndex].Index = index;
-                this.playlist[index] = this.playlist[newIndex];
-
-                temp.Index = newIndex;
-                this.playlist[newIndex] = temp;
             }
         }
 
