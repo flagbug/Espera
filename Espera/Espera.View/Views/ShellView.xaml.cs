@@ -115,12 +115,6 @@ namespace Espera.View.Views
             }
         }
 
-        private void OrangeColorButtonButtonClick(object sender, RoutedEventArgs e)
-        {
-            this.ChangeColor("Orange");
-            Settings.Default.AccentColor = "Orange";
-        }
-
         private void PlaylistContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             if (((ListView)sender).Items.IsEmpty)
