@@ -584,6 +584,7 @@
                             </Grid>
                             <ListBox Grid.Row="2"
                                      Margin="0, 5, 0, 0"
+                                     FocusVisualStyle="{x:Null}"
                                      IsEnabled="{Binding Path=CanSwitchPlaylist}"
                                      ItemsSource="{Binding Path=Playlists}"
                                      SelectedItem="{Binding Path=CurrentPlaylist}">
@@ -654,6 +655,7 @@
                         <ListView Grid.Column="1"
                                   Margin="5, 0, 0, 0"
                                   ContextMenuOpening="PlaylistContextMenuOpening"
+                                  FocusVisualStyle="{x:Null}"
                                   ItemsSource="{Binding Path=CurrentPlaylist.Songs}"
                                   KeyUp="PlaylistKeyUp"
                                   ScrollViewer.CanContentScroll="True"
