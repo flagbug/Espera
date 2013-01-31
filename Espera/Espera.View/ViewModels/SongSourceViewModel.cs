@@ -60,11 +60,6 @@ namespace Espera.View.ViewModels
             get { return this.library.AccessMode == AccessMode.Administrator; }
         }
 
-        public bool IsSongSelected
-        {
-            get { return this.SelectedSongs != null && this.SelectedSongs.Any(); }
-        }
-
         public abstract string SearchText { get; set; }
 
         public IEnumerable<T> SelectableSongs
@@ -89,7 +84,6 @@ namespace Espera.View.ViewModels
                 {
                     this.selectedSongs = value;
                     this.NotifyOfPropertyChange(() => this.SelectedSongs);
-                    this.NotifyOfPropertyChange(() => this.IsSongSelected);
                 }
             }
         }
