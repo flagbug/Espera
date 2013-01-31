@@ -60,11 +60,6 @@ namespace Espera.View.ViewModels
             get { return this.library.AccessMode == AccessMode.Administrator; }
         }
 
-        public bool IsParty
-        {
-            get { return this.library.AccessMode == AccessMode.Party; }
-        }
-
         public bool IsSongSelected
         {
             get { return this.SelectedSongs != null && this.SelectedSongs.Any(); }
@@ -104,7 +99,7 @@ namespace Espera.View.ViewModels
             get { return this.library; }
         }
 
-        protected Func<IEnumerable<T>, IOrderedEnumerable<T>> SongOrderFunc { get; set; }
+        protected Func<IEnumerable<T>, IOrderedEnumerable<T>> SongOrderFunc { get; private set; }
 
         protected void ApplyOrder(Func<SortOrder, Func<IEnumerable<T>, IOrderedEnumerable<T>>> orderFunc, ref SortOrder sortOrder)
         {
