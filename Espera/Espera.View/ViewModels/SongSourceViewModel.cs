@@ -65,7 +65,6 @@ namespace Espera.View.ViewModels
         {
             get { return this.isAdmin.Value; }
         }
-
         public bool IsSongSelected
         {
             get { return this.SelectedSongs != null && this.SelectedSongs.Any(); }

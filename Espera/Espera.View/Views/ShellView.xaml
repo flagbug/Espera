@@ -51,15 +51,6 @@
                 </Setter>
                 <Setter Property="IsTabStop" Value="False" />
             </Style>
-            <Style x:Key="AdminHeaderStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="26.667" />
-                <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
-                <Setter Property="Margin" Value="0, 15, 0, 10" />
-            </Style>
-            <Style x:Key="SettingsHeaderStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="48" />
-                <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
-            </Style>
             <Style x:Key="ArtistsHeaderStyle" TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="48" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
@@ -592,6 +583,7 @@
                             </Grid>
                             <ListBox Grid.Row="2"
                                      Margin="0, 5, 0, 0"
+                                     FocusVisualStyle="{x:Null}"
                                      IsEnabled="{Binding Path=CanSwitchPlaylist}"
                                      ItemsSource="{Binding Path=Playlists}"
                                      SelectedItem="{Binding Path=CurrentPlaylist}">
@@ -662,6 +654,7 @@
                         <ListView Grid.Column="1"
                                   Margin="5, 0, 0, 0"
                                   ContextMenuOpening="PlaylistContextMenuOpening"
+                                  FocusVisualStyle="{x:Null}"
                                   ItemsSource="{Binding Path=CurrentPlaylist.Songs}"
                                   KeyUp="PlaylistKeyUp"
                                   ScrollViewer.CanContentScroll="True"
