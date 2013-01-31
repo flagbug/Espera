@@ -374,7 +374,11 @@ namespace Espera.View.ViewModels
         public string PlaylistHeight
         {
             get { return Settings.Default.PlaylistHeight; }
-            set { Settings.Default.PlaylistHeight = value; }
+            set
+            {
+                // Remove the "*" from value, as it causes the playlist to fill all the space
+                Settings.Default.PlaylistHeight = value.Remove(value.Length - 1);
+            }
         }
 
         public ObservableCollection<PlaylistViewModel> Playlists
