@@ -112,8 +112,18 @@ namespace Espera.View.ViewModels
             this.PauseContinueCommand = new ReactiveCommand(this
                 .WhenAny(x => x.IsPlaying, x => x.Value)
                 .Select(x => x ? this.PauseCommand.CanExecute(null) : this.PlayCommand.CanExecute(null)));
-            this.PauseContinueCommand.Where(x => this.IsPlaying).Subscribe(x => this.PauseCommand.Execute(null));
-            this.PauseContinueCommand.Where(x => !this.IsPlaying).Subscribe(x => this.PlayCommand.Execute(false));
+            this.PauseContinueCommand.Subscribe(x =>
+            {
+                if (this.IsPlaying)
+                {
+                    this.PauseCommand.Execute(null);
+                }
+
+                else
+                {
+                    this.PlayCommand.Execute(false);
+                }
+            });
 
             this.EditPlaylistNameCommand = new ReactiveCommand();
             this.EditPlaylistNameCommand.Subscribe(x => this.CurrentPlaylist.EditName = true);
