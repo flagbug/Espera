@@ -226,8 +226,10 @@ namespace Espera.Core.Management
 
                 PlaylistEntry temp = newplaylist[index];
                 newplaylist[newIndex].Index = index;
+
                 newplaylist[index] = newplaylist[newIndex];
                 newplaylist[newIndex] = temp;
+
                 // Migrate the CurrentSongIndex to the new position
                 if (index == this.CurrentSongIndex)
                 {
@@ -246,7 +248,6 @@ namespace Espera.Core.Management
             if (newCurrentIndex.HasValue)
             {
                 this.CurrentSongIndex = newCurrentIndex;
-                this.playlist[newIndex] = temp;
             }
         }
 
