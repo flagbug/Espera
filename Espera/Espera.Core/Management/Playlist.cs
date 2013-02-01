@@ -235,7 +235,6 @@ namespace Espera.Core.Management
         internal void Shuffle()
         {
             int count = this.playlist.Count;
-            var newPlaylist = new List<PlaylistEntry>(this.playlist.Capacity);
             var random = new Random();
 
             for (int index = 0; index < count; index++)
