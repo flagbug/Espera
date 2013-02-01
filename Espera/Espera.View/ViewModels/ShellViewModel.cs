@@ -125,7 +125,9 @@ namespace Espera.View.ViewModels
                 }
             });
 
-            this.EditPlaylistNameCommand = new ReactiveCommand();
+            IObservable<bool> canEditPlaylist = this
+                .WhenAny(x => x.CanSwitchPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1.Value && !x2.Value.Model.IsTemporary);
+            this.EditPlaylistNameCommand = new ReactiveCommand(canEditPlaylist);
             this.EditPlaylistNameCommand.Subscribe(x => this.CurrentPlaylist.EditName = true);
 
             this.IsLocal = true;
@@ -169,12 +171,12 @@ namespace Espera.View.ViewModels
 
         public PlaylistViewModel CurrentPlaylist
         {
-            get { return this.playlists == null ? null : this.playlists.SingleOrDefault(vm => vm.Name == this.library.CurrentPlaylist.Name); }
+            get { return this.playlists == null ? null : this.playlists.SingleOrDefault(vm => vm.Model == this.library.CurrentPlaylist); }
             set
             {
                 if (value != null) // There always has to be a playlist selected
                 {
-                    this.library.SwitchToPlaylist(this.library.GetPlaylistByName(value.Name));
+                    this.library.SwitchToPlaylist(value.Model);
                     this.RaisePropertyChanged(x => x.CurrentPlaylist);
                 }
             }
@@ -410,7 +412,7 @@ namespace Espera.View.ViewModels
                     {
                         int index = this.playlists.IndexOf(this.CurrentPlaylist);
 
-                        this.library.RemovePlaylist(this.CurrentPlaylist.Name);
+                        this.library.RemovePlaylist(this.CurrentPlaylist.Model);
 
                         if (!this.library.Playlists.Any())
                         {
@@ -601,6 +603,8 @@ namespace Espera.View.ViewModels
 
         private void UpdatePlaylist()
         {
+            this.RaisePropertyChanged(x => x.CurrentPlaylist);
+
             if (this.library.EnablePlaylistTimeout)
             {
                 this.RaisePropertyChanged(x => x.RemainingPlaylistTimeout);

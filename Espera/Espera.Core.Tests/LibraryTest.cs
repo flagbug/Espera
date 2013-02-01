@@ -579,6 +579,92 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void PlayInstantly_MultipleSongs_PlaysSongsInRow()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                var player = new Mock<AudioPlayer>();
+
+                Mock<Song>[] songs = Helpers.CreateSongMocks(2, false);
+                songs[0].Setup(p => p.CreateAudioPlayer()).Returns(player.Object);
+                songs[1].Setup(p => p.CreateAudioPlayer()).Returns(player.Object);
+
+                var handle = new ManualResetEventSlim();
+
+                library.SongStarted += (sender, args) => handle.Set();
+
+                library.PlayInstantly(new[] { songs[0].Object });
+
+                handle.Wait();
+                handle.Wait();
+
+                player.Verify(p => p.Play(), Times.Exactly(2));
+            }
+        }
+
+        [Test]
+        public void PlayInstantly_OneSong_PlaysSong()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                var player = new Mock<AudioPlayer>();
+
+                Mock<Song> song = Helpers.CreateSongMock();
+                song.Setup(p => p.CreateAudioPlayer()).Returns(player.Object);
+
+                var handle = new ManualResetEventSlim();
+
+                library.SongStarted += (sender, args) => handle.Set();
+
+                library.PlayInstantly(new[] { song.Object });
+
+                handle.Wait();
+
+                player.Verify(p => p.Play(), Times.Once());
+            }
+        }
+
+        [Test]
+        public void PlayInstantly_SongListIsNull_ThrowsArgumentNullException()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                Assert.Throws<ArgumentNullException>(() => library.PlayInstantly(null));
+            }
+        }
+
+        [Test]
+        public void PlayInstantly_StopsCurrentSong()
+        {
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
+            {
+                library.SwitchToPlaylist(library.Playlists.First());
+
+                var player = new Mock<AudioPlayer>();
+
+                Mock<Song> song = Helpers.CreateSongMock();
+                song.Setup(x => x.CreateAudioPlayer()).Returns(player.Object);
+
+                Mock<Song> instantSong = Helpers.CreateSongMock();
+                instantSong.Setup(x => x.CreateAudioPlayer()).Returns(new JumpAudioPlayer());
+
+                library.AddSongToPlaylist(song.Object);
+
+                var handle = new ManualResetEventSlim();
+
+                library.SongFinished += (sender, args) => handle.Set();
+
+                library.PlaySong(0);
+
+                library.PlayInstantly(new[] { instantSong.Object });
+
+                handle.Wait();
+
+                player.Verify(x => x.Stop(), Times.Once());
+            }
+        }
+
+        [Test]
         public void PlayNextSong_UserIsNotAdministrator_ThrowsInvalidOperationException()
         {
             using (Library library = Helpers.CreateLibrary())
@@ -776,26 +862,6 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void RemovePlaylist_NoPlaylistExists_ThrowsInvalidOperationException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<InvalidOperationException>(() => library.RemovePlaylist("Playlist"));
-            }
-        }
-
-        [Test]
-        public void RemovePlaylist_PlaylistDoesNotExist_ThrowsInvalidOperationException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.AddPlaylist("Playlist");
-
-                Assert.Throws<InvalidOperationException>(() => library.RemovePlaylist("Playlist 2"));
-            }
-        }
-
-        [Test]
         public void RemovePlaylist_PlaylistNameIsNull_ThrowsArgumentNullException()
         {
             using (Library library = Helpers.CreateLibrary())
@@ -811,10 +877,32 @@ namespace Espera.Core.Tests
             {
                 library.AddPlaylist("Playlist");
 
-                library.RemovePlaylist("Playlist");
+                library.RemovePlaylist(library.GetPlaylistByName("Playlist"));
 
                 Assert.IsEmpty(library.Playlists);
             }
+        }
+
+        [Test]
+        public void Save_LibraryWithTemporaryPlaylist_DoesntSaveTemporaryPlaylist()
+        {
+            var libraryWriter = new Mock<ILibraryWriter>();
+            libraryWriter.Setup(x => x.Write(It.IsAny<IEnumerable<LocalSong>>(), It.IsAny<IEnumerable<Playlist>>()))
+                .Callback<IEnumerable<LocalSong>, IEnumerable<Playlist>>((songs, playlists) => Assert.AreEqual(1, playlists.Count()));
+
+            using (Library library = Helpers.CreateLibrary(libraryWriter.Object))
+            {
+                library.AddAndSwitchToPlaylist("Playlist");
+
+                Mock<Song> song = Helpers.CreateSongMock();
+                song.Setup(x => x.CreateAudioPlayer()).Returns(new JumpAudioPlayer());
+
+                library.PlayInstantly(new[] { song.Object });
+
+                library.Save();
+            }
+
+            libraryWriter.Verify(x => x.Write(It.IsAny<IEnumerable<LocalSong>>(), It.IsAny<IEnumerable<Playlist>>()), Times.Once());
         }
 
         [Test]

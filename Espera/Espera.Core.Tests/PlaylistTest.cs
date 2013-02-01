@@ -10,6 +10,14 @@ namespace Espera.Core.Tests
     public sealed class PlaylistTest
     {
         [Test]
+        public void NameSetter_IsTemporaryIsTrue_ThrowsInvalidOperationException()
+        {
+            var playlist = new Playlist("Playlist", true);
+            
+            Assert.Throws<InvalidOperationException>(() => playlist.Name = "Test");
+        }
+
+        [Test]
         public void AddSongs_AddTwoSong_IndexesAreCorrect()
         {
             Song[] songs = Helpers.SetupSongMocks(2);
@@ -21,6 +29,7 @@ namespace Espera.Core.Tests
             Assert.AreEqual(0, playlist[0].Index);
             Assert.AreEqual(1, playlist[1].Index);
         }
+
 
         [Test]
         public void AddSongs_ArgumentIsNull_ThrowsArgumentNullException()

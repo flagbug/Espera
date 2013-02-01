@@ -91,9 +91,14 @@ namespace Espera.View.ViewModels
             get { return null; }
         }
 
+        public Playlist Model
+        {
+            get { return this.playlist; }
+        }
+
         public string Name
         {
-            get { return this.playlist.Name; }
+            get { return this.playlist.IsTemporary ? "Now Playing" : this.playlist.Name; }
             set
             {
                 if (this.Name != value)

@@ -19,12 +19,14 @@ namespace Espera.Core.Management
     {
         private readonly BehaviorSubject<int?> currentSongIndex;
         private readonly ObservableList<PlaylistEntry> playlist;
+        private string name;
 
-        internal Playlist(string name)
+        internal Playlist(string name, bool isTemporary = false)
         {
             this.Name = name;
-            this.playlist = new ObservableList<PlaylistEntry>();
+            this.IsTemporary = isTemporary;
 
+            this.playlist = new ObservableList<PlaylistEntry>();
             this.currentSongIndex = new BehaviorSubject<int?>(null);
         }
 
@@ -86,7 +88,23 @@ namespace Espera.Core.Management
             get { return this.currentSongIndex.AsObservable(); }
         }
 
-        public string Name { get; set; }
+        /// <summary>
+        /// Gets a value indicating whether this playlist is temporary and used for instant-playing.
+        /// This means that this playlist isn't saved to the harddrive when closing the application.
+        /// </summary>
+        public bool IsTemporary { get; private set; }
+
+        public string Name
+        {
+            get { return this.name; }
+            set
+            {
+                if (this.IsTemporary)
+                    throw new InvalidOperationException("Cannot change the name of a temporary playlist.");
+
+                this.name = value;
+            }
+        }
 
         public PlaylistEntry this[int index]
         {
@@ -217,6 +235,8 @@ namespace Espera.Core.Management
         internal void Shuffle()
         {
             this.playlist.Shuffle();
+
+
 
             this.RebuildIndexes();
         }

@@ -36,6 +36,7 @@ namespace Espera.Core.Management
         private AccessMode accessMode;
         private AudioPlayer currentPlayer;
         private Playlist currentPlayingPlaylist;
+        private Playlist instantPlaylist;
         private bool isWaitingOnCache;
         private DateTime lastSongAddTime;
         private bool overrideCurrentCaching;
@@ -553,6 +554,27 @@ namespace Espera.Core.Management
             this.currentPlayer.Pause();
         }
 
+        public void PlayInstantly(IEnumerable<Song> songList)
+        {
+            if (songList == null)
+                Throw.ArgumentNullException(() => songList);
+
+            if (this.instantPlaylist != null)
+            {
+                this.playlists.Remove(instantPlaylist);
+            }
+
+            string instantPlaylistName = Guid.NewGuid().ToString();
+            this.instantPlaylist = new Playlist(instantPlaylistName, true);
+
+            this.playlists.Add(this.instantPlaylist);
+            this.SwitchToPlaylist(this.instantPlaylist);
+
+            this.AddSongsToPlaylist(songList);
+
+            this.PlaySong(0);
+        }
+
         /// <summary>
         /// Plays the next song in the playlist.
         /// </summary>
@@ -646,20 +668,11 @@ namespace Espera.Core.Management
         /// <summary>
         /// Removes the playlist with the specified name from the library.
         /// </summary>
-        /// <param name="playlistName">The name of the playlist to remove.</param>
-        /// <exception cref="InvalidOperationException">No playlist exists, or no playlist with the specified name exists.</exception>
-        public void RemovePlaylist(string playlistName)
+        /// <param name="playlist">The playlist to remove.</param>
+        public void RemovePlaylist(Playlist playlist)
         {
-            if (playlistName == null)
-                Throw.ArgumentNullException(() => playlistName);
-
-            if (!this.Playlists.Any())
-                throw new InvalidOperationException("There are no playlists.");
-
-            Playlist playlist = this.GetPlaylistByName(playlistName);
-
             if (playlist == null)
-                throw new InvalidOperationException("No playlist with the specified name exists.");
+                Throw.ArgumentNullException(() => playlist);
 
             this.playlists.Remove(playlist);
         }
@@ -685,7 +698,7 @@ namespace Espera.Core.Management
                 playlist.RemoveSongs(indexes);
             }
 
-            this.libraryWriter.Write(casted, this.playlists);
+            this.libraryWriter.Write(casted, this.playlists.Where(playlist => !playlist.IsTemporary));
         }
 
         public void ShufflePlaylist()
