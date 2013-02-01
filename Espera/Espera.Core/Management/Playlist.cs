@@ -234,31 +234,40 @@ namespace Espera.Core.Management
 
         internal void Shuffle()
         {
-            int count = this.playlist.Count;
+            List<PlaylistEntry> newplaylist = this.playlist.ToList();
+            int? newCurrentIndex = null;
             var random = new Random();
 
-            for (int index = 0; index < count; index++)
+            for (int index = 0; index < newplaylist.Count; index++)
             {
-                int newIndex = random.Next(count);
+                int newIndex = random.Next(newplaylist.Count);
 
-                PlaylistEntry temp = this.playlist[index];
+                PlaylistEntry temp = newplaylist[index];
 
-                this.playlist[newIndex].Index = index;
-                this.playlist[index] = this.playlist[newIndex];
+                newplaylist[newIndex].Index = index;
+                newplaylist[index] = newplaylist[newIndex];
 
                 temp.Index = newIndex;
-                this.playlist[newIndex] = temp;
+                newplaylist[newIndex] = temp;
 
                 // Migrate the CurrentSongIndex to the new position
                 if (index == this.CurrentSongIndex)
                 {
-                    this.CurrentSongIndex = newIndex;
+                    newCurrentIndex = newIndex;
                 }
 
                 else if (newIndex == this.CurrentSongIndex)
                 {
-                    this.CurrentSongIndex = index;
+                    newCurrentIndex = index;
                 }
+            }
+
+            this.playlist.Clear();
+            this.playlist.AddRange(newplaylist);
+
+            if (newCurrentIndex.HasValue)
+            {
+                this.CurrentSongIndex = newCurrentIndex;
             }
         }
 
