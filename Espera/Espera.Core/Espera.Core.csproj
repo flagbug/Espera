@@ -59,6 +59,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Rareform.1.5.2\lib\Rareform.dll</HintPath>
     </Reference>
+    <Reference Include="ReactiveMarrow, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ReactiveMarrow.0.1.1-alpha\lib\ReactiveMarrow.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Reactive.Core">
