@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using Espera.Core;
+using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.View.Properties;
 using Rareform.Extensions;
@@ -21,10 +22,12 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> canModifyWindow;
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
+        private readonly ObservableAsPropertyHelper<bool> isPlaying;
         private readonly Library library;
         private readonly ReactiveCollection<PlaylistViewModel> playlists;
         private readonly Timer playlistTimeoutUpdateTimer;
         private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
+        private readonly ObservableAsPropertyHelper<TimeSpan> totalTime;
         private readonly Timer updateTimer;
         private bool displayTimeoutWarning;
         private bool isLocal;
@@ -99,6 +102,13 @@ namespace Espera.View.ViewModels
             this.canModifyWindow = isAdminObservable
                 .Select(isAdmin => isAdmin || !Settings.Default.LockWindow)
                 .ToProperty(this, x => x.CanModifyWindow);
+
+            this.isPlaying = this.library.PlaybackState
+                .Select(x => x == AudioPlayerState.Playing)
+                .ToProperty(this, x => x.IsPlaying);
+
+            this.totalTime = this.library.TotalTime
+                .ToProperty(this, x => x.TotalTime);
 
             this.AddPlaylistCommand = new ReactiveCommand(this.WhenAny(x => x.CanSwitchPlaylist, x => x.Value));
             this.AddPlaylistCommand.Subscribe(x => this.AddPlaylist());
@@ -227,7 +237,7 @@ namespace Espera.View.ViewModels
 
         public bool IsPlaying
         {
-            get { return this.library.IsPlaying; }
+            get { return this.isPlaying.Value; }
         }
 
         public bool IsYoutube
@@ -284,7 +294,7 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        if (this.library.IsPaused || this.library.LoadedSong != null)
+                        if (this.library.PlaybackState.First() == AudioPlayerState.Paused || this.library.LoadedSong.First() != null)
                         {
                             this.library.ContinueSong();
                             this.updateTimer.Start();
@@ -305,7 +315,7 @@ namespace Espera.View.ViewModels
                         (this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1 ||
 
                         // If the current song is paused, the command can be executed
-                        (this.library.LoadedSong != null || this.library.IsPaused))
+                        (this.library.LoadedSong.First() != null || this.library.PlaybackState.First() == AudioPlayerState.Paused))
                 );
             }
         }
@@ -473,7 +483,7 @@ namespace Espera.View.ViewModels
 
         public TimeSpan TotalTime
         {
-            get { return this.library.TotalTime; }
+            get { return this.totalTime.Value; }
         }
 
         /// <summary>

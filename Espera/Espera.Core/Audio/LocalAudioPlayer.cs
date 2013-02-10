@@ -3,6 +3,8 @@ using NAudio.Wave;
 using Rareform.Validation;
 using System;
 using System.IO;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,8 +15,8 @@ namespace Espera.Core.Audio
     /// </summary>
     internal sealed class LocalAudioPlayer : AudioPlayer
     {
+        private readonly BehaviorSubject<TimeSpan> totalTime;
         private WaveChannel32 inputStream;
-        private bool isLoaded;
         private float volume;
         private IWavePlayer wavePlayer;
 
@@ -25,6 +27,8 @@ namespace Espera.Core.Audio
 
             this.Song = song;
             this.Volume = 1.0f;
+
+            this.totalTime = new BehaviorSubject<TimeSpan>(TimeSpan.Zero);
         }
 
         public override TimeSpan CurrentTime
@@ -33,32 +37,9 @@ namespace Espera.Core.Audio
             set { this.inputStream.CurrentTime = value; }
         }
 
-        public override AudioPlayerState PlaybackState
+        public override IObservable<TimeSpan> TotalTime
         {
-            get
-            {
-                if (this.wavePlayer != null)
-                {
-                    // We map the NAudio playbackstate to our own playback state,
-                    // so that the NAudio API is not exposed outside of this class.
-                    switch (this.wavePlayer.PlaybackState)
-                    {
-                        case NAudio.Wave.PlaybackState.Stopped:
-                            return AudioPlayerState.Stopped;
-                        case NAudio.Wave.PlaybackState.Playing:
-                            return AudioPlayerState.Playing;
-                        case NAudio.Wave.PlaybackState.Paused:
-                            return AudioPlayerState.Paused;
-                    }
-                }
-
-                return AudioPlayerState.None;
-            }
-        }
-
-        public override TimeSpan TotalTime
-        {
-            get { return this.isLoaded ? this.inputStream.TotalTime : TimeSpan.Zero; }
+            get { return this.totalTime.AsObservable(); }
         }
 
         public override float Volume
@@ -108,7 +89,7 @@ namespace Espera.Core.Audio
                 throw new SongLoadException("Song could not be loaded.", ex);
             }
 
-            this.isLoaded = true;
+            this.totalTime.OnNext(this.inputStream.TotalTime);
         }
 
         public override void Pause()
@@ -118,7 +99,8 @@ namespace Espera.Core.Audio
 
             this.wavePlayer.Pause();
 
-            this.EnsureState(AudioPlayerState.Paused);
+            this.EnsureState(NAudio.Wave.PlaybackState.Paused);
+            this.SetPlaybackState(AudioPlayerState.Paused);
         }
 
         public override void Play()
@@ -130,7 +112,7 @@ namespace Espera.Core.Audio
             // With this, we can avoid cross-threading issues with the NAudio library
             Task.Factory.StartNew(() =>
             {
-                bool wasPaused = this.PlaybackState == AudioPlayerState.Paused;
+                bool wasPaused = this.PlaybackState.First() == AudioPlayerState.Paused;
 
                 try
                 {
@@ -144,7 +126,7 @@ namespace Espera.Core.Audio
 
                 if (!wasPaused)
                 {
-                    while (this.PlaybackState != AudioPlayerState.Stopped && this.PlaybackState != AudioPlayerState.None)
+                    while (this.PlaybackState.First() != AudioPlayerState.Stopped)
                     {
                         this.UpdateSongState();
                         Thread.Sleep(250);
@@ -152,7 +134,8 @@ namespace Espera.Core.Audio
                 }
             });
 
-            this.EnsureState(AudioPlayerState.Playing);
+            this.EnsureState(NAudio.Wave.PlaybackState.Playing);
+            this.SetPlaybackState(AudioPlayerState.Playing);
         }
 
         public override void Stop()
@@ -161,9 +144,8 @@ namespace Espera.Core.Audio
             {
                 this.wavePlayer.Stop();
 
-                this.EnsureState(AudioPlayerState.Stopped);
-
-                this.isLoaded = false;
+                this.EnsureState(NAudio.Wave.PlaybackState.Stopped);
+                this.SetPlaybackState(AudioPlayerState.Stopped);
             }
         }
 
@@ -214,9 +196,9 @@ namespace Espera.Core.Audio
             this.inputStream.Volume = this.Volume;
         }
 
-        private void EnsureState(AudioPlayerState state)
+        private void EnsureState(PlaybackState state)
         {
-            while (this.PlaybackState != state)
+            while (this.wavePlayer.PlaybackState != state)
             {
                 Thread.Sleep(200);
             }
@@ -224,7 +206,7 @@ namespace Espera.Core.Audio
 
         private void UpdateSongState()
         {
-            if (this.CurrentTime >= this.TotalTime)
+            if (this.CurrentTime >= this.TotalTime.First())
             {
                 this.Stop();
                 this.OnSongFinished();

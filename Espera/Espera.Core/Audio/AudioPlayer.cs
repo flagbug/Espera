@@ -7,11 +7,13 @@ namespace Espera.Core.Audio
 {
     internal abstract class AudioPlayer : IDisposable
     {
+        private readonly BehaviorSubject<AudioPlayerState> playbackState;
         private readonly Subject<Unit> songFinished;
 
         protected AudioPlayer()
         {
             this.songFinished = new Subject<Unit>();
+            this.playbackState = new BehaviorSubject<AudioPlayerState>(AudioPlayerState.None);
         }
 
         /// <summary>
@@ -26,7 +28,10 @@ namespace Espera.Core.Audio
         /// <value>
         /// The current playback state.
         /// </value>
-        public abstract AudioPlayerState PlaybackState { get; }
+        public IObservable<AudioPlayerState> PlaybackState
+        {
+            get { return this.playbackState.AsObservable(); }
+        }
 
         /// <summary>
         /// Gets the song that the <see cref="AudioPlayer"/> is assigned to.
@@ -46,7 +51,7 @@ namespace Espera.Core.Audio
         /// Gets the total time.
         /// </summary>
         /// <value>The total time.</value>
-        public abstract TimeSpan TotalTime { get; }
+        public abstract IObservable<TimeSpan> TotalTime { get; }
 
         /// <summary>
         /// Gets or sets the volume (a value from 0.0 to 1.0).
@@ -98,6 +103,11 @@ namespace Espera.Core.Audio
         protected void OnSongFinished()
         {
             this.songFinished.OnNext(Unit.Default);
+        }
+
+        protected void SetPlaybackState(AudioPlayerState state)
+        {
+            this.playbackState.OnNext(state);
         }
     }
 }

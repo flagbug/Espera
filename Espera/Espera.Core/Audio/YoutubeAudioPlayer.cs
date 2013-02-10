@@ -1,5 +1,7 @@
 ﻿using Rareform.Validation;
 using System;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace Espera.Core.Audio
 {
@@ -8,9 +10,7 @@ namespace Espera.Core.Audio
     /// </summary>
     internal sealed class YoutubeAudioPlayer : AudioPlayer, IVideoPlayerCallback
     {
-        private bool isPaused;
-        private bool isPlaying;
-        private bool isStopped;
+        private readonly BehaviorSubject<TimeSpan> totalTime;
 
         public YoutubeAudioPlayer(YoutubeSong song)
         {
@@ -18,6 +18,8 @@ namespace Espera.Core.Audio
                 Throw.ArgumentNullException(() => song);
 
             this.Song = song;
+
+            this.totalTime = new BehaviorSubject<TimeSpan>(TimeSpan.Zero);
         }
 
         public override TimeSpan CurrentTime
@@ -34,23 +36,6 @@ namespace Espera.Core.Audio
 
         public Action PauseRequest { set; private get; }
 
-        public override AudioPlayerState PlaybackState
-        {
-            get
-            {
-                if (this.isPlaying)
-                    return AudioPlayerState.Playing;
-
-                if (this.isPaused)
-                    return AudioPlayerState.Paused;
-
-                if (this.isStopped)
-                    return AudioPlayerState.Stopped;
-
-                return AudioPlayerState.None;
-            }
-        }
-
         public Action PlayRequest { set; private get; }
 
         public Action<TimeSpan> SetTime { set; private get; }
@@ -59,9 +44,9 @@ namespace Espera.Core.Audio
 
         public Action StopRequest { set; private get; }
 
-        public override TimeSpan TotalTime
+        public override IObservable<TimeSpan> TotalTime
         {
-            get { return this.Song.Duration; }
+            get { return this.totalTime.AsObservable(); }
         }
 
         public Uri VideoUrl
@@ -82,8 +67,7 @@ namespace Espera.Core.Audio
 
         public void Finished()
         {
-            this.isPlaying = false;
-            this.isStopped = true;
+            this.SetPlaybackState(AudioPlayerState.Stopped);
 
             this.OnSongFinished();
         }
@@ -91,29 +75,29 @@ namespace Espera.Core.Audio
         public override void Load()
         {
             this.LoadRequest();
+
+            this.totalTime.OnNext(this.Song.Duration);
         }
 
         public override void Pause()
         {
             this.PauseRequest();
 
-            this.isPlaying = false;
-            this.isPaused = true;
+            this.SetPlaybackState(AudioPlayerState.Paused);
         }
 
         public override void Play()
         {
             this.PlayRequest();
 
-            this.isPlaying = true;
-            this.isPaused = false;
+            this.SetPlaybackState(AudioPlayerState.Playing);
         }
 
         public override void Stop()
         {
             this.StopRequest();
 
-            this.isStopped = true;
+            this.SetPlaybackState(AudioPlayerState.Stopped);
         }
     }
 }

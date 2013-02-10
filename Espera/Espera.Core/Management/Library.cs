@@ -20,6 +20,7 @@ namespace Espera.Core.Management
         private readonly BehaviorSubject<AccessMode> accessModeSubject;
         private readonly AutoResetEvent cacheResetHandle;
 
+        private readonly BehaviorSubject<AudioPlayer> currentPlayer;
         private readonly Subject<Playlist> currentPlaylistChanged;
 
         // We need a lock when disposing songs to prevent a modification of the enumeration
@@ -36,7 +37,6 @@ namespace Espera.Core.Management
         private readonly HashSet<Song> songs;
         private bool abortSongAdding;
         private AccessMode accessMode;
-        private AudioPlayer currentPlayer;
         private Playlist currentPlayingPlaylist;
         private Playlist instantPlaylist;
         private bool isWaitingOnCache;
@@ -62,6 +62,17 @@ namespace Espera.Core.Management
             this.isUpdating = new Subject<bool>();
             this.CanPlayNextSong = this.CurrentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
             this.CanPlayPreviousSong = this.CurrentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
+            this.currentPlayer = new BehaviorSubject<AudioPlayer>(null);
+            this.LoadedSong = this.currentPlayer
+                .Select(x => x == null ? null : x.Song);
+            this.TotalTime = this.currentPlayer
+                .Select(x => x == null ? Observable.Never(TimeSpan.Zero) : x.TotalTime)
+                .Switch()
+                .StartWith(TimeSpan.Zero);
+            this.PlaybackState = this.currentPlayer
+                .Select(x => x == null ? Observable.Never(AudioPlayerState.None) : x.PlaybackState)
+                .Switch()
+                .StartWith(AudioPlayerState.None);
         }
 
         /// <summary>
@@ -147,12 +158,15 @@ namespace Espera.Core.Management
         /// </summary>
         public TimeSpan CurrentTime
         {
-            get { return this.currentPlayer == null ? TimeSpan.Zero : this.currentPlayer.CurrentTime; }
+            get { return this.currentPlayer.First() == null ? TimeSpan.Zero : this.currentPlayer.First().CurrentTime; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                this.currentPlayer.CurrentTime = value;
+                if (this.currentPlayer.First() != null)
+                {
+                    this.currentPlayer.First().CurrentTime = value;
+                }
             }
         }
 
@@ -176,28 +190,6 @@ namespace Espera.Core.Management
         public bool IsAdministratorCreated { get; private set; }
 
         /// <summary>
-        /// Gets a value indicating whether the playback is paused.
-        /// </summary>
-        /// <value>
-        /// true if the playback is paused; otherwise, false.
-        /// </value>
-        public bool IsPaused
-        {
-            get { return this.currentPlayer != null && this.currentPlayer.PlaybackState == AudioPlayerState.Paused; }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the playback is started.
-        /// </summary>
-        /// <value>
-        /// true if the playback is started; otherwise, false.
-        /// </value>
-        public bool IsPlaying
-        {
-            get { return this.currentPlayer != null && this.currentPlayer.PlaybackState == AudioPlayerState.Playing; }
-        }
-
-        /// <summary>
         /// Occurs when the library is updating. <c>True</c>, when the updated starts, <c>false</c> when the update finished.
         /// </summary>
         public IObservable<bool> IsUpdating
@@ -208,10 +200,7 @@ namespace Espera.Core.Management
         /// <summary>
         /// Gets the song that is currently loaded.
         /// </summary>
-        public Song LoadedSong
-        {
-            get { return this.currentPlayer == null ? null : this.currentPlayer.Song; }
-        }
+        public IObservable<Song> LoadedSong { get; private set; }
 
         public bool LockLibraryRemoval
         {
@@ -279,6 +268,8 @@ namespace Espera.Core.Management
             }
         }
 
+        public IObservable<AudioPlayerState> PlaybackState { get; private set; }
+
         /// <summary>
         /// Returns an enumeration of playlists that implements <see cref="INotifyCollectionChanged"/>.
         /// </summary>
@@ -340,14 +331,11 @@ namespace Espera.Core.Management
         /// <summary>
         /// Gets the duration of the current song.
         /// </summary>
-        public TimeSpan TotalTime
-        {
-            get { return this.currentPlayer == null ? TimeSpan.Zero : this.currentPlayer.TotalTime; }
-        }
+        public IObservable<TimeSpan> TotalTime { get; private set; }
 
         public IVideoPlayerCallback VideoPlayerCallback
         {
-            get { return this.currentPlayer as IVideoPlayerCallback; }
+            get { return this.currentPlayer.First() as IVideoPlayerCallback; }
         }
 
         /// <summary>
@@ -365,9 +353,9 @@ namespace Espera.Core.Management
 
                 this.settings.Volume = value;
 
-                if (this.currentPlayer != null)
+                if (this.currentPlayer.First() != null)
                 {
-                    this.currentPlayer.Volume = value;
+                    this.currentPlayer.First().Volume = value;
                 }
             }
         }
@@ -481,7 +469,7 @@ namespace Espera.Core.Management
         {
             this.ThrowIfNotAdmin();
 
-            this.currentPlayer.Play();
+            this.currentPlayer.First().Play();
         }
 
         /// <summary>
@@ -505,9 +493,9 @@ namespace Espera.Core.Management
 
         public void Dispose()
         {
-            if (this.currentPlayer != null)
+            if (this.currentPlayer.First() != null)
             {
-                this.currentPlayer.Dispose();
+                this.currentPlayer.First().Dispose();
             }
 
             this.driveWatcher.Dispose();
@@ -555,7 +543,7 @@ namespace Espera.Core.Management
             if (this.LockPlayPause && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to play when in party mode.");
 
-            this.currentPlayer.Pause();
+            this.currentPlayer.First().Pause();
         }
 
         public void PlayInstantly(IEnumerable<Song> songList)
@@ -835,8 +823,8 @@ namespace Espera.Core.Management
                 this.CurrentPlaylist.CurrentSongIndex = null;
             }
 
-            this.currentPlayer.Dispose();
-            this.currentPlayer = null;
+            this.currentPlayer.First().Dispose();
+            this.currentPlayer.OnNext(null);
 
             this.SongFinished.RaiseSafe(this, EventArgs.Empty);
 
@@ -912,7 +900,7 @@ namespace Espera.Core.Management
 
                 try
                 {
-                    this.currentPlayer.Load();
+                    this.currentPlayer.First().Load();
                 }
 
                 catch (SongLoadException)
@@ -927,7 +915,7 @@ namespace Espera.Core.Management
 
                 try
                 {
-                    this.currentPlayer.Play();
+                    this.currentPlayer.First().Play();
                 }
 
                 catch (PlaybackException)
@@ -971,7 +959,7 @@ namespace Espera.Core.Management
 
             if (stopCurrentSong)
             {
-                this.currentPlayer.Stop();
+                this.currentPlayer.First().Stop();
                 this.SongFinished.RaiseSafe(this, EventArgs.Empty);
             }
         }
@@ -983,20 +971,20 @@ namespace Espera.Core.Management
 
         private void RenewCurrentPlayer(Song song)
         {
-            if (this.currentPlayer != null)
+            if (this.currentPlayer.First() != null)
             {
-                this.currentPlayer.Dispose();
+                this.currentPlayer.First().Dispose();
             }
 
-            this.currentPlayer = song.CreateAudioPlayer();
+            this.currentPlayer.OnNext(song.CreateAudioPlayer());
 
-            if (this.currentPlayer is IVideoPlayerCallback)
+            if (this.currentPlayer.First() is IVideoPlayerCallback)
             {
                 this.VideoPlayerCallbackChanged.RaiseSafe(this, EventArgs.Empty);
             }
 
-            this.currentPlayer.SongFinished.Subscribe(x => this.HandleSongFinish());
-            this.currentPlayer.Volume = this.Volume;
+            this.currentPlayer.First().SongFinished.Subscribe(x => this.HandleSongFinish());
+            this.currentPlayer.First().Volume = this.Volume;
         }
 
         private void ThrowIfNotAdmin()
