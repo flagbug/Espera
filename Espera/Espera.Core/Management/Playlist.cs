@@ -1,6 +1,6 @@
-﻿using Rareform.Collections;
-using Rareform.Reflection;
+﻿using Rareform.Reflection;
 using Rareform.Validation;
+using ReactiveMarrow;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,8 +17,10 @@ namespace Espera.Core.Management
     /// </summary>
     public sealed class Playlist : IEnumerable<PlaylistEntry>, INotifyCollectionChanged, INotifyPropertyChanged
     {
+        private readonly BehaviorSubject<bool> canPlayNextSong;
+        private readonly BehaviorSubject<bool> canPlayPreviousSong;
         private readonly BehaviorSubject<int?> currentSongIndex;
-        private readonly ObservableList<PlaylistEntry> playlist;
+        private readonly ReactiveList<PlaylistEntry> playlist;
         private string name;
 
         internal Playlist(string name, bool isTemporary = false)
@@ -26,8 +28,19 @@ namespace Espera.Core.Management
             this.Name = name;
             this.IsTemporary = isTemporary;
 
-            this.playlist = new ObservableList<PlaylistEntry>();
+            this.playlist = new ReactiveList<PlaylistEntry>();
             this.currentSongIndex = new BehaviorSubject<int?>(null);
+
+            this.canPlayNextSong = new BehaviorSubject<bool>(false);
+            this.canPlayPreviousSong = new BehaviorSubject<bool>(false);
+
+            this.CurrentSongIndexChanged
+                .CombineLatest(this.playlist.Changed, (i, args) => i.HasValue && this.ContainsIndex(i.Value + 1))
+                .Subscribe(x => this.canPlayNextSong.OnNext(x));
+
+            this.CurrentSongIndexChanged
+                .CombineLatest(this.playlist.Changed, (i, args) => i.HasValue && this.ContainsIndex(i.Value - 1))
+                .Subscribe(x => this.canPlayPreviousSong.OnNext(x));
         }
 
         public event NotifyCollectionChangedEventHandler CollectionChanged
@@ -48,9 +61,9 @@ namespace Espera.Core.Management
         /// <value>
         /// true if the next song in the playlist can be played; otherwise, false.
         /// </value>
-        public bool CanPlayNextSong
+        public IObservable<bool> CanPlayNextSong
         {
-            get { return this.CurrentSongIndex.HasValue && this.ContainsIndex(this.CurrentSongIndex.Value + 1); }
+            get { return this.canPlayNextSong.AsObservable(); }
         }
 
         /// <summary>
@@ -59,9 +72,9 @@ namespace Espera.Core.Management
         /// <value>
         /// true if the previous song in the playlist can be played; otherwise, false.
         /// </value>
-        public bool CanPlayPreviousSong
+        public IObservable<bool> CanPlayPreviousSong
         {
-            get { return this.CurrentSongIndex.HasValue && this.ContainsIndex(this.CurrentSongIndex.Value - 1); }
+            get { return this.canPlayPreviousSong.AsObservable(); }
         }
 
         /// <summary>
@@ -235,8 +248,6 @@ namespace Espera.Core.Management
         internal void Shuffle()
         {
             this.playlist.Shuffle();
-
-
 
             this.RebuildIndexes();
         }

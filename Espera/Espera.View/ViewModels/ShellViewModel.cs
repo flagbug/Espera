@@ -44,6 +44,17 @@ namespace Espera.View.ViewModels
             this.UpdateScreenState = this.library.AccessMode;
             this.library.PlaylistChanged += (sender, e) => this.UpdatePlaylist();
 
+            IObservable<bool> isAdminObservable = this.library.AccessMode
+                .Select(x => x == AccessMode.Administrator);
+
+            this.NextSongCommand = new ReactiveCommand(isAdminObservable
+                .CombineLatest(this.library.CanPlayNextSong, (b, b1) => b && b1));
+            this.NextSongCommand.Subscribe(x => this.library.PlayNextSong());
+
+            this.PreviousSongCommand = new ReactiveCommand(isAdminObservable
+                .CombineLatest(this.library.CanPlayPreviousSong, (b, b1) => b && b1));
+            this.PreviousSongCommand.Subscribe(x => this.library.PlayPreviousSong());
+
             if (!this.library.Playlists.Any())
             {
                 this.library.AddAndSwitchToPlaylist(this.GetNewPlaylistName());
@@ -71,9 +82,6 @@ namespace Espera.View.ViewModels
             this.currentSongSource = this.WhenAny(x => x.IsLocal, x => x.IsYoutube,
                 (x1, x2) => x1.Value ? (ISongSourceViewModel)this.LocalViewModel : this.YoutubeViewModel)
                 .ToProperty(this, x => x.CurrentSongSource, null, ImmediateScheduler.Instance);
-
-            IObservable<bool> isAdminObservable = this.library.AccessMode
-                .Select(x => x == AccessMode.Administrator);
 
             this.isAdmin = isAdminObservable
                 .ToProperty(this, x => x.IsAdmin, true);
@@ -238,17 +246,7 @@ namespace Espera.View.ViewModels
         /// <summary>
         /// Plays the next song in the playlist.
         /// </summary>
-        public ICommand NextSongCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param => this.library.PlayNextSong(),
-                    param => this.IsAdmin && this.library.CanPlayNextSong
-                );
-            }
-        }
+        public IReactiveCommand NextSongCommand { get; private set; }
 
         /// <summary>
         /// Pauses the currently played song.
@@ -385,17 +383,7 @@ namespace Espera.View.ViewModels
         /// <summary>
         /// Plays the song that is before the currently played song in the playlist.
         /// </summary>
-        public ICommand PreviousSongCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param => this.library.PlayPreviousSong(),
-                    param => this.IsAdmin && this.library.CanPlayPreviousSong
-                );
-            }
-        }
+        public IReactiveCommand PreviousSongCommand { get; private set; }
 
         public TimeSpan RemainingPlaylistTimeout
         {
@@ -566,13 +554,6 @@ namespace Espera.View.ViewModels
 
         private void HandleSongFinished()
         {
-            // We need this check, to avoid that the pause/play button changes its state,
-            // when the library starts the next song
-            if (!this.library.CanPlayNextSong)
-            {
-                this.RaisePropertyChanged(x => x.IsPlaying);
-            }
-
             this.RaisePropertyChanged(x => x.PreviousSongCommand);
 
             this.updateTimer.Stop();
