@@ -63,16 +63,23 @@ namespace Espera.Core.Management
             this.CanPlayNextSong = this.CurrentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
             this.CanPlayPreviousSong = this.CurrentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
             this.currentPlayer = new BehaviorSubject<AudioPlayer>(null);
+
             this.LoadedSong = this.currentPlayer
                 .Select(x => x == null ? null : x.Song);
+
             this.TotalTime = this.currentPlayer
                 .Select(x => x == null ? Observable.Never(TimeSpan.Zero) : x.TotalTime)
                 .Switch()
                 .StartWith(TimeSpan.Zero);
+
             this.PlaybackState = this.currentPlayer
                 .Select(x => x == null ? Observable.Never(AudioPlayerState.None) : x.PlaybackState)
                 .Switch()
                 .StartWith(AudioPlayerState.None);
+
+            this.currentPlayer
+                .Where(x => x is IVideoPlayerCallback)
+                .Subscribe(x => this.VideoPlayerCallbackChanged.RaiseSafe(this, EventArgs.Empty));
         }
 
         /// <summary>
@@ -977,11 +984,6 @@ namespace Espera.Core.Management
             }
 
             this.currentPlayer.OnNext(song.CreateAudioPlayer());
-
-            if (this.currentPlayer.First() is IVideoPlayerCallback)
-            {
-                this.VideoPlayerCallbackChanged.RaiseSafe(this, EventArgs.Empty);
-            }
 
             this.currentPlayer.First().SongFinished.Subscribe(x => this.HandleSongFinish());
             this.currentPlayer.First().Volume = this.Volume;
