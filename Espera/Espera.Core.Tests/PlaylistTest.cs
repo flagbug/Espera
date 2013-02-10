@@ -3,20 +3,13 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 
 namespace Espera.Core.Tests
 {
     [TestFixture]
     public sealed class PlaylistTest
     {
-        [Test]
-        public void NameSetter_IsTemporaryIsTrue_ThrowsInvalidOperationException()
-        {
-            var playlist = new Playlist("Playlist", true);
-            
-            Assert.Throws<InvalidOperationException>(() => playlist.Name = "Test");
-        }
-
         [Test]
         public void AddSongs_AddTwoSong_IndexesAreCorrect()
         {
@@ -29,7 +22,6 @@ namespace Espera.Core.Tests
             Assert.AreEqual(0, playlist[0].Index);
             Assert.AreEqual(1, playlist[1].Index);
         }
-
 
         [Test]
         public void AddSongs_ArgumentIsNull_ThrowsArgumentNullException()
@@ -60,7 +52,7 @@ namespace Espera.Core.Tests
 
             playlist.CurrentSongIndex = 3;
 
-            Assert.IsFalse(playlist.CanPlayNextSong);
+            Assert.IsFalse(playlist.CanPlayNextSong.First());
         }
 
         [Test]
@@ -71,7 +63,7 @@ namespace Espera.Core.Tests
 
             playlist.CurrentSongIndex = null;
 
-            Assert.IsFalse(playlist.CanPlayNextSong);
+            Assert.IsFalse(playlist.CanPlayNextSong.First());
         }
 
         [Test]
@@ -82,7 +74,7 @@ namespace Espera.Core.Tests
 
             playlist.CurrentSongIndex = 0;
 
-            Assert.IsTrue(playlist.CanPlayNextSong);
+            Assert.IsTrue(playlist.CanPlayNextSong.First());
         }
 
         [Test]
@@ -90,7 +82,7 @@ namespace Espera.Core.Tests
         {
             var playlist = new Playlist("Playlist");
 
-            Assert.IsFalse(playlist.CanPlayNextSong);
+            Assert.IsFalse(playlist.CanPlayNextSong.First());
         }
 
         [Test]
@@ -101,7 +93,7 @@ namespace Espera.Core.Tests
 
             playlist.CurrentSongIndex = 3;
 
-            Assert.IsTrue(playlist.CanPlayPreviousSong);
+            Assert.IsTrue(playlist.CanPlayPreviousSong.First());
         }
 
         [Test]
@@ -112,7 +104,7 @@ namespace Espera.Core.Tests
 
             playlist.CurrentSongIndex = null;
 
-            Assert.IsFalse(playlist.CanPlayPreviousSong);
+            Assert.IsFalse(playlist.CanPlayPreviousSong.First());
         }
 
         [Test]
@@ -123,7 +115,7 @@ namespace Espera.Core.Tests
 
             playlist.CurrentSongIndex = 0;
 
-            Assert.IsFalse(playlist.CanPlayPreviousSong);
+            Assert.IsFalse(playlist.CanPlayPreviousSong.First());
         }
 
         [Test]
@@ -131,7 +123,7 @@ namespace Espera.Core.Tests
         {
             var playlist = new Playlist("Playlist");
 
-            Assert.IsFalse(playlist.CanPlayPreviousSong);
+            Assert.IsFalse(playlist.CanPlayPreviousSong.First());
         }
 
         [Test]
@@ -273,6 +265,14 @@ namespace Espera.Core.Tests
             var playlist = new Playlist("Playlist");
 
             Assert.Throws<ArgumentOutOfRangeException>(() => playlist.InsertMove(0, -1));
+        }
+
+        [Test]
+        public void NameSetter_IsTemporaryIsTrue_ThrowsInvalidOperationException()
+        {
+            var playlist = new Playlist("Playlist", true);
+
+            Assert.Throws<InvalidOperationException>(() => playlist.Name = "Test");
         }
 
         [Test]

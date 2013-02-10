@@ -28,7 +28,7 @@ namespace Espera.Core.Audio
         /// <value>
         /// The current playback state.
         /// </value>
-        public IObservable<AudioPlayerState> PlaybackState
+        public virtual IObservable<AudioPlayerState> PlaybackState
         {
             get { return this.playbackState.AsObservable(); }
         }

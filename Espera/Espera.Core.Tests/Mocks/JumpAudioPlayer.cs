@@ -15,12 +15,12 @@ namespace Espera.Core.Tests.Mocks
             set { throw new NotImplementedException(); }
         }
 
-        public override AudioPlayerState PlaybackState
+        public override IObservable<AudioPlayerState> PlaybackState
         {
             get { throw new NotImplementedException(); }
         }
 
-        public override TimeSpan TotalTime
+        public override IObservable<TimeSpan> TotalTime
         {
             get { throw new NotImplementedException(); }
         }
