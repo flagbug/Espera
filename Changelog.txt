@@ -1,3 +1,11 @@
+----------------------------------- v1.7.3 -----------------------------------
+
+BUGFIXES:
+- Fixed some visual bugs.
+- Fixed a bug that caused the application to crash when the application is 
+  closed.
+- Fixed a bug that caused the application to crash when a song is played.
+
 ----------------------------------- v1.7.2 -----------------------------------
 
 CHANGES:
