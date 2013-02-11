@@ -28,9 +28,6 @@ namespace Espera.View.ViewModels
             this.selectableSongs = Enumerable.Empty<T>();
             this.timeoutWarning = new Subject<Unit>();
 
-            this.WhenAny(x => x.SelectedSongs, x => Unit.Default)
-                .Subscribe(p => this.RaisePropertyChanged(x => x.IsSongSelected));
-
             IObservable<bool> canAddToPlaylist = this.WhenAny(x => x.SelectedSongs, x => x.Value != null && x.Value.Any());
             this.AddToPlaylistCommand = new ReactiveCommand(canAddToPlaylist);
             this.AddToPlaylistCommand.Subscribe(p =>
@@ -64,10 +61,6 @@ namespace Espera.View.ViewModels
         public bool IsAdmin
         {
             get { return this.isAdmin.Value; }
-        }
-        public bool IsSongSelected
-        {
-            get { return this.SelectedSongs != null && this.SelectedSongs.Any(); }
         }
 
         public string SearchText

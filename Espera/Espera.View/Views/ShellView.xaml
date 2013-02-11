@@ -316,10 +316,7 @@
                 <TextBlock Grid.Row="0"
                            Style="{StaticResource VideoInfoHeaderStyle}"
                            Text="video info" />
-                <Grid Grid.Row="1"
-                      DataContext="{Binding Path=YoutubeViewModel}"
-                      Visibility="{Binding Path=IsSongSelected,
-                                           Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid Grid.Row="1" DataContext="{Binding Path=YoutubeViewModel}">
                     <Grid Margin="5" DataContext="{Binding Path=SelectedSongs/}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
