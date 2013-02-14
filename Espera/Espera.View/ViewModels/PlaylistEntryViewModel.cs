@@ -25,7 +25,7 @@ namespace Espera.View.ViewModels
                 this.Model.CachingCompleted += this.OnCachingCompleted;
             }
 
-            this.Model.Corrupted -= OnCorrupted;
+            this.Model.Corrupted += OnCorrupted;
         }
 
         public int CacheProgress
