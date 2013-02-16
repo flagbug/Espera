@@ -99,6 +99,7 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="AudioPlayerCreatingException.cs" />
     <Compile Include="Audio\SongLoadException.cs" />
     <Compile Include="CoreSettings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -128,6 +129,7 @@
     <Compile Include="LocalSong.cs" />
     <Compile Include="Audio\PlaybackException.cs" />
     <Compile Include="Management\RemovableDriveWatcher.cs" />
+    <Compile Include="PreparationFailureCause.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\ILibrarySettings.cs" />
     <Compile Include="Settings\LibrarySettingsWrapper.cs" />

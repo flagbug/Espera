@@ -15,6 +15,7 @@ namespace Espera.View.ViewModels
         private readonly CompositeDisposable disposable;
         private readonly PlaylistEntry entry;
         private readonly ObservableAsPropertyHelper<bool> hasCachingFailed;
+        private readonly ObservableAsPropertyHelper<bool> hasStreamingFailed;
         private readonly ObservableAsPropertyHelper<bool> showCaching;
         private bool isPlaying;
 
@@ -29,21 +30,27 @@ namespace Espera.View.ViewModels
             // since the observables are only created for songs that actually have to be cached
             if (this.Model.HasToCache)
             {
-                this.cachingProgress = this.Model.CachingProgress
+                this.cachingProgress = this.Model.PreparationProgress
                     .DistinctUntilChanged()
                     .ToProperty(this, x => x.CacheProgress)
                     .DisposeWith(this.disposable);
 
-                this.hasCachingFailed = this.Model.CachingFailed.Select(x => true)
-                    .ToProperty(this, x => x.HasCachingFailed)
-                    .DisposeWith(this.disposable);
-
-                this.showCaching = this.Model.CachingCompleted.StartWith(Unit.Default)
-                    .CombineLatest(this.Model.CachingProgress.DistinctUntilChanged(), (unit, progress) => progress)
+                this.showCaching = this.Model.PreparationCompleted.StartWith(Unit.Default)
+                    .CombineLatest(this.Model.PreparationProgress.DistinctUntilChanged(), (unit, progress) => progress)
                     .Select(progress => this.Model.HasToCache && progress != 100 || this.HasCachingFailed)
                     .ToProperty(this, x => x.ShowCaching)
                     .DisposeWith(this.disposable);
             }
+
+            this.hasCachingFailed = this.Model.PreparationFailed
+                .Select(x => x == PreparationFailureCause.CachingFailed)
+                .ToProperty(this, x => x.HasCachingFailed)
+                .DisposeWith(this.disposable);
+
+            this.hasStreamingFailed = this.Model.PreparationFailed
+                .Select(x => x == PreparationFailureCause.StreamingFailed)
+                .ToProperty(this, x => x.HasStreamingFailed)
+                .DisposeWith(this.disposable);
 
             this.Model.Corrupted
                 .Subscribe(x => this.RaisePropertyChanged(p => p.IsCorrupted))
@@ -58,6 +65,11 @@ namespace Espera.View.ViewModels
         public bool HasCachingFailed
         {
             get { return this.hasCachingFailed != null && this.hasCachingFailed.Value; }
+        }
+
+        public bool HasStreamingFailed
+        {
+            get { return this.hasStreamingFailed.Value; }
         }
 
         public int Index

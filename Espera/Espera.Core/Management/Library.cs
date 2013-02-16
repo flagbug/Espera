@@ -889,7 +889,17 @@ namespace Espera.Core.Management
 
             Song song = this.CurrentPlaylist[playlistIndex].Song;
 
-            this.RenewCurrentPlayer(song);
+            try
+            {
+                this.RenewCurrentPlayer(song);
+            }
+
+            catch (AudioPlayerCreatingException)
+            {
+                this.HandleSongCorruption();
+
+                return;
+            }
 
             Task.Factory.StartNew(() =>
             {

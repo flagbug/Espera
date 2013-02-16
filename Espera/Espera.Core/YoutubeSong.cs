@@ -71,29 +71,18 @@ namespace Espera.Core
                 this.IsCached = true;
             }
 
-            catch (IOException)
+            catch (Exception ex)
             {
-                this.OnCachingFailed();
-            }
+                if (ex is IOException || ex is WebException || ex is VideoNotAvailableException ||
+                    ex is YoutubeParseException || ex is AudioExtractionException)
+                {
+                    this.OnCachingFailed(PreparationFailureCause.CachingFailed);
+                }
 
-            catch (WebException)
-            {
-                this.OnCachingFailed();
-            }
-
-            catch (VideoNotAvailableException)
-            {
-                this.OnCachingFailed();
-            }
-
-            catch (YoutubeParseException)
-            {
-                this.OnCachingFailed();
-            }
-
-            catch (AudioExtractionException)
-            {
-                this.OnCachingFailed();
+                else
+                {
+                    throw;
+                }
             }
 
             finally
@@ -106,7 +95,29 @@ namespace Espera.Core
         {
             if (this.isStreaming)
             {
-                VideoInfo video = GetVideoInfoForStreaming(this.OriginalPath);
+                VideoInfo video = null;
+
+                try
+                {
+                    video = GetVideoInfoForStreaming(this.OriginalPath);
+                }
+
+                catch (Exception ex)
+                {
+                    if (ex is WebException || ex is VideoNotAvailableException || ex is YoutubeParseException)
+                    {
+                        this.OnCachingFailed(PreparationFailureCause.StreamingFailed);
+
+                        throw new AudioPlayerCreatingException();
+                    }
+                }
+
+                if (video == null)
+                {
+                    this.OnCachingFailed(PreparationFailureCause.StreamingFailed);
+
+                    throw new AudioPlayerCreatingException();
+                }
 
                 this.StreamingPath = video.DownloadUrl;
             }
@@ -133,7 +144,7 @@ namespace Espera.Core
             VideoInfo video = videoInfos
                 .Where(info => info.VideoType == VideoType.Mp4 && !info.Is3D)
                 .OrderBy(info => info.Resolution)
-                .First();
+                .FirstOrDefault();
 
             return video;
         }

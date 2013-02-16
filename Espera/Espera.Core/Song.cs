@@ -15,10 +15,10 @@ namespace Espera.Core
     [DebuggerDisplay("{Artist}-{Album}-{Title}")]
     public abstract class Song : IEquatable<Song>
     {
-        private readonly Subject<Unit> cachingCompleted;
-        private readonly Subject<Unit> cachingFailed;
-        private readonly Subject<int> cachingProgress;
         private readonly Subject<Unit> corrupted;
+        private readonly Subject<Unit> preparationCompleted;
+        private readonly Subject<PreparationFailureCause> preparationFailed;
+        private readonly Subject<int> preparationProgress;
         private bool isCached;
         private bool isCorrupted;
 
@@ -43,9 +43,9 @@ namespace Espera.Core
             this.Genre = String.Empty;
             this.Title = String.Empty;
 
-            this.cachingProgress = new Subject<int>();
-            this.cachingCompleted = new Subject<Unit>();
-            this.cachingFailed = new Subject<Unit>();
+            this.preparationProgress = new Subject<int>();
+            this.preparationCompleted = new Subject<Unit>();
+            this.preparationFailed = new Subject<PreparationFailureCause>();
             this.corrupted = new Subject<Unit>();
         }
 
@@ -54,24 +54,6 @@ namespace Espera.Core
         public string Artist { get; set; }
 
         public AudioType AudioType { get; private set; }
-
-        public IObservable<Unit> CachingCompleted
-        {
-            get { return this.cachingCompleted.AsObservable(); }
-        }
-
-        public IObservable<Unit> CachingFailed
-        {
-            get { return this.cachingFailed.AsObservable(); }
-        }
-
-        /// <summary>
-        /// Gets the caching progress in a range from 0 to 100.
-        /// </summary>
-        public IObservable<int> CachingProgress
-        {
-            get { return this.cachingProgress.AsObservable(); }
-        }
 
         public IObservable<Unit> Corrupted
         {
@@ -107,7 +89,7 @@ namespace Espera.Core
                 {
                     this.OnCachingProgressChanged(100);
                     this.IsCaching = false;
-                    this.cachingCompleted.OnNext(Unit.Default);
+                    this.preparationCompleted.OnNext(Unit.Default);
                 }
             }
         }
@@ -142,6 +124,24 @@ namespace Espera.Core
         /// Gets the path of the song on the local filesystem, or in the internet.
         /// </summary>
         public string OriginalPath { get; private set; }
+
+        public IObservable<Unit> PreparationCompleted
+        {
+            get { return this.preparationCompleted.AsObservable(); }
+        }
+
+        public IObservable<PreparationFailureCause> PreparationFailed
+        {
+            get { return this.preparationFailed.AsObservable(); }
+        }
+
+        /// <summary>
+        /// Gets the preparation progress in a range from 0 to 100.
+        /// </summary>
+        public IObservable<int> PreparationProgress
+        {
+            get { return this.preparationProgress.AsObservable(); }
+        }
 
         /// <summary>
         /// Gets the path to stream the audio from.
@@ -220,9 +220,9 @@ namespace Espera.Core
         /// <returns>The audio player for playback.</returns>
         internal abstract AudioPlayer CreateAudioPlayer();
 
-        protected void OnCachingFailed()
+        protected void OnCachingFailed(PreparationFailureCause failureCause)
         {
-            this.cachingFailed.OnNext(Unit.Default);
+            this.preparationFailed.OnNext(failureCause);
         }
 
         /// <summary>
@@ -237,7 +237,7 @@ namespace Espera.Core
             if (value > 100)
                 Throw.ArgumentOutOfRangeException(() => value, 100);
 
-            this.cachingProgress.OnNext(value);
+            this.preparationProgress.OnNext(value);
         }
     }
 }

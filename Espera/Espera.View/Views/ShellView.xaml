@@ -734,16 +734,7 @@
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Grid>
-                                                    <Grid.Style>
-                                                        <Style TargetType="{x:Type Grid}">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Path=ShowCaching}" Value="False">
-                                                                    <Setter Property="Visibility" Value="Hidden" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Grid.Style>
-                                                    <TextBlock VerticalAlignment="Center">
+                                                    <TextBlock VerticalAlignment="Center" Visibility="{Binding Path=ShowCaching, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                         <TextBlock.Style>
                                                             <Style TargetType="{x:Type TextBlock}">
                                                                 <Style.Triggers>
@@ -757,6 +748,7 @@
                                                             </Style>
                                                         </TextBlock.Style>
                                                     </TextBlock>
+                                                    <TextBlock Text="Streaming failed!" Visibility="{Binding Path=HasStreamingFailed, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                                 </Grid>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
