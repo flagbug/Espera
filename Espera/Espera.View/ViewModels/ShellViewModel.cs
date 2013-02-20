@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Timers;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Espera.View.ViewModels
@@ -371,13 +372,13 @@ namespace Espera.View.ViewModels
         }
 
         // Save the playlist height as string, so that the initial value can be "*"
-        public string PlaylistHeight
+        public GridLength PlaylistHeight
         {
-            get { return Settings.Default.PlaylistHeight; }
+            get { return (GridLength)new GridLengthConverter().ConvertFrom(Settings.Default.PlaylistHeight); }
             set
             {
                 // Remove the "*" from value, as it causes the playlist to fill all the space
-                Settings.Default.PlaylistHeight = value.Remove(value.Length - 1);
+                Settings.Default.PlaylistHeight = (string)new GridLengthConverter().ConvertTo(value, typeof(string));
             }
         }
 
