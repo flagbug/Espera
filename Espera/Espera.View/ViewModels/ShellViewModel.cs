@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Timers;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Espera.View.ViewModels
@@ -350,14 +351,12 @@ namespace Espera.View.ViewModels
             set { Settings.Default.PlaylistGenreColumnWidth = value; }
         }
 
-        // Save the playlist height as string, so that the initial value can be "*"
-        public string PlaylistHeight
+        public GridLength PlaylistHeight
         {
-            get { return Settings.Default.PlaylistHeight; }
+            get { return (GridLength)new GridLengthConverter().ConvertFromString(Settings.Default.PlaylistHeight); }
             set
             {
-                // Remove the "*" from value, as it causes the playlist to fill all the space
-                Settings.Default.PlaylistHeight = value.Remove(value.Length - 1);
+                Settings.Default.PlaylistHeight = new GridLengthConverter().ConvertToString(value);
             }
         }
 
@@ -473,6 +472,15 @@ namespace Espera.View.ViewModels
         }
 
         public IReactiveCommand ShowSettingsCommand { get; private set; }
+            }
+        }
+
+        public GridLength SongSourceHeight
+        {
+            get { return (GridLength)new GridLengthConverter().ConvertFromString(Settings.Default.SongSourceHeight); }
+            set
+            {
+                Settings.Default.SongSourceHeight = new GridLengthConverter().ConvertToString(value);
 
         public IReactiveCommand ShufflePlaylistCommand { get; private set; }
 
