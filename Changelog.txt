@@ -1,3 +1,9 @@
+----------------------------------- v1.7.4 -----------------------------------
+
+BUGFIXES:
+- Fixed a bug that caused the playlist height to reset after an application 
+  restart.
+
 ----------------------------------- v1.7.3 -----------------------------------
 
 BUGFIXES:
@@ -12,7 +18,7 @@ CHANGES:
 - Songs from a local network are not cached anymore.
 
 BUGFIXES:
-- Fixed a bug that caused the memory consumption to increse over time.
+- Fixed a bug that caused the memory consumption to increase over time.
 - Fixed a bug that caused the application to force focus.
 - Fixed a bug that caused the playlist area to take up all the remaining 
   space after a restart.
