@@ -339,7 +339,7 @@
             </Grid>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="{Binding Path=SongSourceHeight, Mode=TwoWay}" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="{Binding Path=PlaylistHeight, Mode=TwoWay}" />
                 </Grid.RowDefinitions>

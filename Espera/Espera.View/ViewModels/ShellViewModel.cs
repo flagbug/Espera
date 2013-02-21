@@ -371,14 +371,12 @@ namespace Espera.View.ViewModels
             set { Settings.Default.PlaylistGenreColumnWidth = value; }
         }
 
-        // Save the playlist height as string, so that the initial value can be "*"
         public GridLength PlaylistHeight
         {
-            get { return (GridLength)new GridLengthConverter().ConvertFrom(Settings.Default.PlaylistHeight); }
+            get { return (GridLength)new GridLengthConverter().ConvertFromString(Settings.Default.PlaylistHeight); }
             set
             {
-                // Remove the "*" from value, as it causes the playlist to fill all the space
-                Settings.Default.PlaylistHeight = (string)new GridLengthConverter().ConvertTo(value, typeof(string));
+                Settings.Default.PlaylistHeight = new GridLengthConverter().ConvertToString(value);
             }
         }
 
@@ -542,6 +540,15 @@ namespace Espera.View.ViewModels
                         this.UpdatePlaylist();
                     }
                 );
+            }
+        }
+
+        public GridLength SongSourceHeight
+        {
+            get { return (GridLength)new GridLengthConverter().ConvertFromString(Settings.Default.SongSourceHeight); }
+            set
+            {
+                Settings.Default.SongSourceHeight = new GridLengthConverter().ConvertToString(value);
             }
         }
 
