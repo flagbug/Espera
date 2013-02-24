@@ -46,7 +46,6 @@ namespace Espera.View.ViewModels
             this.library.SongCorrupted += (sender, args) => this.HandleSongCorrupted();
             this.library.AccessMode.Subscribe(x => this.UpdateUserAccess());
             this.UpdateScreenState = this.library.AccessMode;
-            this.library.PlaylistChanged += (sender, e) => this.UpdatePlaylist();
 
             IObservable<bool> isAdminObservable = this.library.AccessMode
                 .Select(x => x == AccessMode.Administrator);
@@ -121,12 +120,7 @@ namespace Espera.View.ViewModels
             this.ShowSettingsCommand.Subscribe(x => this.SettingsViewModel.HandleSettings());
 
             this.ShufflePlaylistCommand = new ReactiveCommand();
-            this.ShufflePlaylistCommand.Subscribe(x =>
-            {
-                this.library.ShufflePlaylist();
-
-                this.UpdatePlaylist();
-            });
+            this.ShufflePlaylistCommand.Subscribe(x => this.library.ShufflePlaylist());
 
             this.PauseContinueCommand = new ReactiveCommand(this
                 .WhenAny(x => x.IsPlaying, x => x.Value)
@@ -598,16 +592,6 @@ namespace Espera.View.ViewModels
         {
             this.RaisePropertyChanged(x => x.CurrentSeconds);
             this.RaisePropertyChanged(x => x.CurrentTime);
-        }
-
-        private void UpdatePlaylist()
-        {
-            this.RaisePropertyChanged(x => x.CurrentPlaylist);
-
-            if (this.library.EnablePlaylistTimeout)
-            {
-                this.RaisePropertyChanged(x => x.RemainingPlaylistTimeout);
-            }
         }
 
         private void UpdateRemainingPlaylistTimeout()
