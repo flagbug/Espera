@@ -560,7 +560,6 @@ namespace Espera.View.ViewModels
 
         private void HandleSongCorrupted()
         {
-            this.RaisePropertyChanged(x => x.IsPlaying);
             this.RaisePropertyChanged(x => x.CurrentPlaylist);
         }
 
@@ -574,8 +573,6 @@ namespace Espera.View.ViewModels
         private void HandleSongStarted()
         {
             this.UpdateTotalTime();
-
-            this.RaisePropertyChanged(x => x.IsPlaying);
 
             this.RaisePropertyChanged(x => x.PlayCommand);
 
