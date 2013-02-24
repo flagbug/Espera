@@ -472,8 +472,8 @@ namespace Espera.View.ViewModels
         }
 
         public IReactiveCommand ShowSettingsCommand { get; private set; }
-            }
-        }
+
+        public IReactiveCommand ShufflePlaylistCommand { get; private set; }
 
         public GridLength SongSourceHeight
         {
@@ -481,8 +481,8 @@ namespace Espera.View.ViewModels
             set
             {
                 Settings.Default.SongSourceHeight = new GridLengthConverter().ConvertToString(value);
-
-        public IReactiveCommand ShufflePlaylistCommand { get; private set; }
+            }
+        }
 
         public int TotalSeconds
         {
