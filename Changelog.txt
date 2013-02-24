@@ -1,3 +1,8 @@
+----------------------------------- v1.7.5 -----------------------------------
+
+BUGFIXES:
+- Fixed a bug that caused a corrupted song not being reported to the user.
+
 ----------------------------------- v1.7.4 -----------------------------------
 
 BUGFIXES:

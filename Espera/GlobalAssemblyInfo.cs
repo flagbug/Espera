@@ -2,5 +2,5 @@
 
 [assembly: AssemblyProduct("Espera")]
 [assembly: AssemblyCopyright("Copyright © 2013 Dennis Daume")]
-[assembly: AssemblyVersion("1.7.0.4")]
-[assembly: AssemblyFileVersion("1.7.0.4")]
+[assembly: AssemblyVersion("1.7.0.5")]
+[assembly: AssemblyFileVersion("1.7.0.5")]
