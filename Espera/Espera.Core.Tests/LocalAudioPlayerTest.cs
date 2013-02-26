@@ -27,7 +27,7 @@ namespace Espera.Core.Tests
         {
             var audioPlayer = new LocalAudioPlayer(Helpers.SetupSongMock());
 
-            Assert.AreEqual(AudioPlayerState.None, audioPlayer.PlaybackState.First());
+            Assert.AreEqual(AudioPlayerState.None, audioPlayer.PlaybackState.FirstAsync().Wait());
         }
 
         [Test]
@@ -43,7 +43,7 @@ namespace Espera.Core.Tests
         {
             var audioPlayer = new LocalAudioPlayer(Helpers.SetupSongMock());
 
-            Assert.AreEqual(TimeSpan.Zero, audioPlayer.TotalTime.First());
+            Assert.AreEqual(TimeSpan.Zero, audioPlayer.TotalTime.FirstAsync().Wait());
         }
 
         [Test]

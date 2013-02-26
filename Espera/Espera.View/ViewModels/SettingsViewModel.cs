@@ -240,7 +240,7 @@ namespace Espera.View.ViewModels
 
         public void HandleSettings()
         {
-            if (this.library.IsAdministratorCreated && this.library.AccessMode.First() == AccessMode.Party)
+            if (this.library.IsAdministratorCreated && this.library.AccessMode.FirstAsync().Wait() == AccessMode.Party)
             {
                 this.ShowLogin = true;
             }

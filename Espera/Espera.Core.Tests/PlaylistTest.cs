@@ -52,7 +52,7 @@ namespace Espera.Core.Tests
 
             playlist.CurrentSongIndex = 3;
 
-            Assert.IsFalse(playlist.CanPlayNextSong.First());
+            Assert.IsFalse(playlist.CanPlayNextSong.FirstAsync().Wait());
         }
 
         [Test]
@@ -63,7 +63,7 @@ namespace Espera.Core.Tests
 
             playlist.CurrentSongIndex = null;
 
-            Assert.IsFalse(playlist.CanPlayNextSong.First());
+            Assert.IsFalse(playlist.CanPlayNextSong.FirstAsync().Wait());
         }
 
         [Test]
@@ -74,7 +74,7 @@ namespace Espera.Core.Tests
 
             playlist.CurrentSongIndex = 0;
 
-            Assert.IsTrue(playlist.CanPlayNextSong.First());
+            Assert.IsTrue(playlist.CanPlayNextSong.FirstAsync().Wait());
         }
 
         [Test]
@@ -82,7 +82,7 @@ namespace Espera.Core.Tests
         {
             var playlist = new Playlist("Playlist");
 
-            Assert.IsFalse(playlist.CanPlayNextSong.First());
+            Assert.IsFalse(playlist.CanPlayNextSong.FirstAsync().Wait());
         }
 
         [Test]
@@ -93,7 +93,7 @@ namespace Espera.Core.Tests
 
             playlist.CurrentSongIndex = 3;
 
-            Assert.IsTrue(playlist.CanPlayPreviousSong.First());
+            Assert.IsTrue(playlist.CanPlayPreviousSong.FirstAsync().Wait());
         }
 
         [Test]
@@ -104,7 +104,7 @@ namespace Espera.Core.Tests
 
             playlist.CurrentSongIndex = null;
 
-            Assert.IsFalse(playlist.CanPlayPreviousSong.First());
+            Assert.IsFalse(playlist.CanPlayPreviousSong.FirstAsync().Wait());
         }
 
         [Test]
@@ -115,7 +115,7 @@ namespace Espera.Core.Tests
 
             playlist.CurrentSongIndex = 0;
 
-            Assert.IsFalse(playlist.CanPlayPreviousSong.First());
+            Assert.IsFalse(playlist.CanPlayPreviousSong.FirstAsync().Wait());
         }
 
         [Test]
@@ -123,7 +123,7 @@ namespace Espera.Core.Tests
         {
             var playlist = new Playlist("Playlist");
 
-            Assert.IsFalse(playlist.CanPlayPreviousSong.First());
+            Assert.IsFalse(playlist.CanPlayPreviousSong.FirstAsync().Wait());
         }
 
         [Test]

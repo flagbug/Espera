@@ -79,7 +79,7 @@ namespace Espera.Core.Management
         /// <exception cref="ArgumentOutOfRangeException">The value is not in the range of the playlist's indexes.</exception>
         public int? CurrentSongIndex
         {
-            get { return this.currentSongIndex.First(); }
+            get { return this.currentSongIndex.FirstAsync().Wait(); }
             internal set
             {
                 if (value != null && !this.ContainsIndex(value.Value))

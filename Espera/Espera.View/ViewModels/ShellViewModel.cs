@@ -289,7 +289,7 @@ namespace Espera.View.ViewModels
                 (
                     param =>
                     {
-                        if (this.library.PlaybackState.First() == AudioPlayerState.Paused || this.library.LoadedSong.First() != null)
+                        if (this.library.PlaybackState.FirstAsync().Wait() == AudioPlayerState.Paused || this.library.LoadedSong.FirstAsync().Wait() != null)
                         {
                             this.library.ContinueSong();
                             this.updateTimer.Start();
@@ -310,7 +310,7 @@ namespace Espera.View.ViewModels
                         (this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1 ||
 
                         // If the current song is paused, the command can be executed
-                        (this.library.LoadedSong.First() != null || this.library.PlaybackState.First() == AudioPlayerState.Paused))
+                        (this.library.LoadedSong.FirstAsync().Wait() != null || this.library.PlaybackState.FirstAsync().Wait() == AudioPlayerState.Paused))
                 );
             }
         }

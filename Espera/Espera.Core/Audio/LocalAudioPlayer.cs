@@ -133,7 +133,7 @@ namespace Espera.Core.Audio
                 // With this, we can avoid cross-threading issues with the NAudio library
                 Task.Factory.StartNew(() =>
                 {
-                    bool wasPaused = this.PlaybackState.First() == AudioPlayerState.Paused;
+                    bool wasPaused = this.PlaybackState.FirstAsync().Wait() == AudioPlayerState.Paused;
 
                     try
                     {
@@ -147,7 +147,7 @@ namespace Espera.Core.Audio
 
                     if (!wasPaused)
                     {
-                        while (this.PlaybackState.First() != AudioPlayerState.Stopped)
+                        while (this.PlaybackState.FirstAsync().Wait() != AudioPlayerState.Stopped)
                         {
                             this.UpdateSongState();
                             Thread.Sleep(250);
@@ -231,7 +231,7 @@ namespace Espera.Core.Audio
 
         private void UpdateSongState()
         {
-            if (this.CurrentTime >= this.TotalTime.First())
+            if (this.CurrentTime >= this.TotalTime.FirstAsync().Wait())
             {
                 this.Stop();
                 this.OnSongFinished();

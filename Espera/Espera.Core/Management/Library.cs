@@ -157,14 +157,14 @@ namespace Espera.Core.Management
         /// </summary>
         public TimeSpan CurrentTime
         {
-            get { return this.currentPlayer.First() == null ? TimeSpan.Zero : this.currentPlayer.First().CurrentTime; }
+            get { return this.currentPlayer.FirstAsync().Wait() == null ? TimeSpan.Zero : this.currentPlayer.FirstAsync().Wait().CurrentTime; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                if (this.currentPlayer.First() != null)
+                if (this.currentPlayer.FirstAsync().Wait() != null)
                 {
-                    this.currentPlayer.First().CurrentTime = value;
+                    this.currentPlayer.FirstAsync().Wait().CurrentTime = value;
                 }
             }
         }
@@ -342,7 +342,7 @@ namespace Espera.Core.Management
 
         public IVideoPlayerCallback VideoPlayerCallback
         {
-            get { return this.currentPlayer.First() as IVideoPlayerCallback; }
+            get { return this.currentPlayer.FirstAsync().Wait() as IVideoPlayerCallback; }
         }
 
         /// <summary>
@@ -360,9 +360,9 @@ namespace Espera.Core.Management
 
                 this.settings.Volume = value;
 
-                if (this.currentPlayer.First() != null)
+                if (this.currentPlayer.FirstAsync().Wait() != null)
                 {
-                    this.currentPlayer.First().Volume = value;
+                    this.currentPlayer.FirstAsync().Wait().Volume = value;
                 }
             }
         }
@@ -471,7 +471,7 @@ namespace Espera.Core.Management
         {
             this.ThrowIfNotAdmin();
 
-            this.currentPlayer.First().Play();
+            this.currentPlayer.FirstAsync().Wait().Play();
         }
 
         /// <summary>
@@ -495,9 +495,9 @@ namespace Espera.Core.Management
 
         public void Dispose()
         {
-            if (this.currentPlayer.First() != null)
+            if (this.currentPlayer.FirstAsync().Wait() != null)
             {
-                this.currentPlayer.First().Dispose();
+                this.currentPlayer.FirstAsync().Wait().Dispose();
             }
 
             this.driveWatcher.Dispose();
@@ -545,7 +545,7 @@ namespace Espera.Core.Management
             if (this.LockPlayPause && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to play when in party mode.");
 
-            this.currentPlayer.First().Pause();
+            this.currentPlayer.FirstAsync().Wait().Pause();
         }
 
         public void PlayInstantly(IEnumerable<Song> songList)
@@ -586,7 +586,7 @@ namespace Espera.Core.Management
         {
             this.ThrowIfNotAdmin();
 
-            if (!this.CurrentPlaylist.CanPlayPreviousSong.First() || !this.CurrentPlaylist.CurrentSongIndex.HasValue)
+            if (!this.CurrentPlaylist.CanPlayPreviousSong.FirstAsync().Wait() || !this.CurrentPlaylist.CurrentSongIndex.HasValue)
                 throw new InvalidOperationException("The previous song couldn't be played.");
 
             this.PlaySong(this.CurrentPlaylist.CurrentSongIndex.Value - 1);
@@ -807,7 +807,7 @@ namespace Espera.Core.Management
 
         private void HandleSongCorruption()
         {
-            if (!this.CurrentPlaylist.CanPlayNextSong.First())
+            if (!this.CurrentPlaylist.CanPlayNextSong.FirstAsync().Wait())
             {
                 this.CurrentPlaylist.CurrentSongIndex = null;
             }
@@ -820,17 +820,17 @@ namespace Espera.Core.Management
 
         private void HandleSongFinish()
         {
-            if (!this.CurrentPlaylist.CanPlayNextSong.First())
+            if (!this.CurrentPlaylist.CanPlayNextSong.FirstAsync().Wait())
             {
                 this.CurrentPlaylist.CurrentSongIndex = null;
             }
 
-            this.currentPlayer.First().Dispose();
+            this.currentPlayer.FirstAsync().Wait().Dispose();
             this.currentPlayer.OnNext(null);
 
             this.SongFinished.RaiseSafe(this, EventArgs.Empty);
 
-            if (this.CurrentPlaylist.CanPlayNextSong.First())
+            if (this.CurrentPlaylist.CanPlayNextSong.FirstAsync().Wait())
             {
                 this.InternPlayNextSong();
             }
@@ -838,7 +838,7 @@ namespace Espera.Core.Management
 
         private void InternPlayNextSong()
         {
-            if (!this.CurrentPlaylist.CanPlayNextSong.First() || !this.CurrentPlaylist.CurrentSongIndex.HasValue)
+            if (!this.CurrentPlaylist.CanPlayNextSong.FirstAsync().Wait() || !this.CurrentPlaylist.CurrentSongIndex.HasValue)
                 throw new InvalidOperationException("The next song couldn't be played.");
 
             int nextIndex = this.CurrentPlaylist.CurrentSongIndex.Value + 1;
@@ -912,7 +912,7 @@ namespace Espera.Core.Management
 
                 try
                 {
-                    this.currentPlayer.First().Load();
+                    this.currentPlayer.FirstAsync().Wait().Load();
                 }
 
                 catch (SongLoadException)
@@ -927,7 +927,7 @@ namespace Espera.Core.Management
 
                 try
                 {
-                    this.currentPlayer.First().Play();
+                    this.currentPlayer.FirstAsync().Wait().Play();
                 }
 
                 catch (PlaybackException)
@@ -969,7 +969,7 @@ namespace Espera.Core.Management
 
             if (stopCurrentSong)
             {
-                this.currentPlayer.First().Stop();
+                this.currentPlayer.FirstAsync().Wait().Stop();
                 this.SongFinished.RaiseSafe(this, EventArgs.Empty);
             }
         }
@@ -981,15 +981,15 @@ namespace Espera.Core.Management
 
         private void RenewCurrentPlayer(Song song)
         {
-            if (this.currentPlayer.First() != null)
+            if (this.currentPlayer.FirstAsync().Wait() != null)
             {
-                this.currentPlayer.First().Dispose();
+                this.currentPlayer.FirstAsync().Wait().Dispose();
             }
 
             this.currentPlayer.OnNext(song.CreateAudioPlayer());
 
-            this.currentPlayer.First().SongFinished.Subscribe(x => this.HandleSongFinish());
-            this.currentPlayer.First().Volume = this.Volume;
+            this.currentPlayer.FirstAsync().Wait().SongFinished.Subscribe(x => this.HandleSongFinish());
+            this.currentPlayer.FirstAsync().Wait().Volume = this.Volume;
         }
 
         private void ThrowIfNotAdmin()
