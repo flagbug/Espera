@@ -387,7 +387,7 @@ namespace Espera.Core.Management
             if (path == null)
                 Throw.ArgumentNullException(() => path);
 
-            Task.Factory.StartNew(() => this.AddLocalSongs(path));
+            await Task.Factory.StartNew(() => this.AddLocalSongs(path));
         }
 
         /// <summary>
