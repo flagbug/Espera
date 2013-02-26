@@ -132,42 +132,36 @@ namespace Espera.View.ViewModels
             set { Settings.Default.LocalTitleColumnWidth = value; }
         }
 
-        public void AddSongs(string folderPath)
+        public async void AddSongs(string folderPath)
         {
             if (folderPath == null)
                 Throw.ArgumentNullException(() => folderPath);
 
             string lastArtist = null;
 
-            EventHandler<LibraryFillEventArgs> handler = (sender, e) =>
-            {
-                this.StatusViewModel.Update(e.Song.OriginalPath, e.ProcessedTagCount, e.TotalTagCount);
-
-                if (e.Song.Artist != lastArtist)
-                {
-                    lastArtist = e.Song.Artist;
-                    this.RaisePropertyChanged(x => x.Artists);
-                }
-            };
-
-            this.Library.SongAdded += handler;
-
             this.StatusViewModel.IsAdding = true;
 
-            IDisposable d = Observable.Interval(TimeSpan.FromSeconds(1.5))
+            IDisposable songAddedSubscription = this.Library.SongAdded.Subscribe(x =>
+            {
+                this.StatusViewModel.Update(x.Song.OriginalPath, x.ProcessedTagCount, x.TotalTagCount);
+
+                if (x.Song.Artist != lastArtist)
+                {
+                    lastArtist = x.Song.Artist;
+                    this.RaisePropertyChanged(p => p.Artists);
+                }
+            });
+
+            IDisposable intervalSubscription = Observable.Interval(TimeSpan.FromSeconds(1.5))
                 .Subscribe(p => this.UpdateSelectableSongs());
 
-            this.Library
-                .AddLocalSongsAsync(folderPath)
-                .ContinueWith(task =>
-                {
-                    this.Library.SongAdded -= handler;
+            await this.Library.AddLocalSongsAsync(folderPath);
 
-                    d.Dispose();
+            songAddedSubscription.Dispose();
+            intervalSubscription.Dispose();
 
-                    this.UpdateSelectableSongs();
-                    this.StatusViewModel.Reset();
-                });
+            this.UpdateSelectableSongs();
+            this.StatusViewModel.Reset();
         }
 
         public void OrderByAlbum()

@@ -33,6 +33,7 @@ namespace Espera.Core.Management
         private readonly ObservableCollection<Playlist> playlists;
         private readonly ReadOnlyObservableCollection<Playlist> publicPlaylistWrapper;
         private readonly ILibrarySettings settings;
+        private readonly Subject<LibraryFillEventArgs> songAdded;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
         private bool abortSongAdding;
@@ -63,6 +64,7 @@ namespace Espera.Core.Management
             this.CanPlayNextSong = this.CurrentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
             this.CanPlayPreviousSong = this.CurrentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
             this.currentPlayer = new BehaviorSubject<AudioPlayer>(null);
+            this.songAdded = new Subject<LibraryFillEventArgs>();
 
             this.LoadedSong = this.currentPlayer
                 .Select(x => x == null ? null : x.Song);
@@ -81,11 +83,6 @@ namespace Espera.Core.Management
                 .Where(x => x is IVideoPlayerCallback)
                 .Subscribe(x => this.VideoPlayerCallbackChanged.RaiseSafe(this, EventArgs.Empty));
         }
-
-        /// <summary>
-        /// Occurs when a song has been added to the library.
-        /// </summary>
-        public event EventHandler<LibraryFillEventArgs> SongAdded;
 
         /// <summary>
         /// Occurs when a corrupted song has been attempted to be played.
@@ -302,6 +299,14 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
+        /// Occurs when a song has been added to the library.
+        /// </summary>
+        public IObservable<LibraryFillEventArgs> SongAdded
+        {
+            get { return this.songAdded.AsObservable(); }
+        }
+
+        /// <summary>
         /// Gets all songs that are currently in the library.
         /// </summary>
         public IEnumerable<Song> Songs
@@ -377,13 +382,12 @@ namespace Espera.Core.Management
         /// Adds the song that are contained in the specified directory recursively in an asynchronous manner to the library.
         /// </summary>
         /// <param name="path">The path of the directory to search.</param>
-        /// <returns>The <see cref="Task"/> that did the work.</returns>
-        public Task AddLocalSongsAsync(string path)
+        public async Task AddLocalSongsAsync(string path)
         {
             if (path == null)
                 Throw.ArgumentNullException(() => path);
 
-            return Task.Factory.StartNew(() => this.AddLocalSongs(path));
+            Task.Factory.StartNew(() => this.AddLocalSongs(path));
         }
 
         /// <summary>
@@ -770,7 +774,7 @@ namespace Espera.Core.Management
                     if (added)
                     {
                         songsProcessed++;
-                        this.SongAdded.RaiseSafe(this, new LibraryFillEventArgs(song, songsProcessed, totalSongs));
+                        this.songAdded.OnNext(new LibraryFillEventArgs(song, songsProcessed, totalSongs));
                     }
                 });
 
