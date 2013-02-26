@@ -53,15 +53,13 @@ namespace Espera.Core
             this.abort = true;
         }
 
-        public override void Execute()
+        public async override Task ExecuteAsync()
         {
-            var fileScanTask = Task.Factory.StartNew(this.StartFileScan);
+            Task.Factory.StartNew(this.StartFileScan);
 
             this.isSearching = true;
 
-            var tagScanTask = Task.Factory.StartNew(this.StartTagScan);
-
-            Task.WaitAll(fileScanTask, tagScanTask);
+            await Task.Factory.StartNew(this.StartTagScan);
 
             this.OnCompleted();
         }

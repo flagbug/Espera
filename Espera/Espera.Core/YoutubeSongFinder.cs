@@ -4,6 +4,7 @@ using Google.GData.YouTube;
 using Google.YouTube;
 using Rareform.Validation;
 using System;
+using System.Threading.Tasks;
 
 namespace Espera.Core
 {
@@ -22,7 +23,7 @@ namespace Espera.Core
             this.searchString = searchString;
         }
 
-        public override void Execute()
+        public override async Task ExecuteAsync()
         {
             var query = new YouTubeQuery(YouTubeQuery.DefaultVideoUri)
             {
@@ -33,7 +34,7 @@ namespace Espera.Core
 
             var settings = new YouTubeRequestSettings("Espera", ApiKey);
             var request = new YouTubeRequest(settings);
-            Feed<Video> feed = request.Get<Video>(query);
+            Feed<Video> feed = await Task.Factory.StartNew(() => request.Get<Video>(query));
 
             try
             {

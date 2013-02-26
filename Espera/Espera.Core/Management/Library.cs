@@ -379,7 +379,7 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Adds the song that are contained in the specified directory recursively in an asynchronous manner to the library.
+        /// Adds the song that are contained in the specified directory recursively to the library.
         /// </summary>
         /// <param name="path">The path of the directory to search.</param>
         public async Task AddLocalSongsAsync(string path)
@@ -387,7 +387,43 @@ namespace Espera.Core.Management
             if (path == null)
                 Throw.ArgumentNullException(() => path);
 
-            await Task.Factory.StartNew(() => this.AddLocalSongs(path));
+            if (!Directory.Exists(path))
+                Throw.ArgumentException("The directory doesn't exist.", () => path);
+
+            var finder = new LocalSongFinder(path);
+
+            int totalSongs = 0;
+            int songsProcessed = 0;
+
+            finder.SongsFound.Subscribe(i => totalSongs = i);
+
+            finder.SongFound
+                .Subscribe(song =>
+                {
+                    if (this.abortSongAdding)
+                    {
+                        finder.Abort();
+                        return;
+                    }
+
+                    bool added;
+
+                    lock (this.songLock)
+                    {
+                        lock (this.disposeLock)
+                        {
+                            added = this.songs.Add(song);
+                        }
+                    }
+
+                    if (added)
+                    {
+                        songsProcessed++;
+                        this.songAdded.OnNext(new LibraryFillEventArgs(song, songsProcessed, totalSongs));
+                    }
+                });
+
+            await finder.ExecuteAsync();
         }
 
         /// <summary>
@@ -731,54 +767,6 @@ namespace Espera.Core.Management
                     // Swallow the exception, we don't care about temporary files that could not be deleted
                 }
             }
-        }
-
-        /// <summary>
-        /// Adds the song that are contained in the specified directory recursively to the library.
-        /// </summary>
-        /// <param name="path">The path of the directory to search.</param>
-        private void AddLocalSongs(string path)
-        {
-            if (path == null)
-                Throw.ArgumentNullException(() => path);
-
-            if (!Directory.Exists(path))
-                Throw.ArgumentException("The directory doesn't exist.", () => path);
-
-            var finder = new LocalSongFinder(path);
-
-            int totalSongs = 0;
-            int songsProcessed = 0;
-
-            finder.SongsFound.Subscribe(i => totalSongs = i);
-
-            finder.SongFound
-                .Subscribe(song =>
-                {
-                    if (this.abortSongAdding)
-                    {
-                        finder.Abort();
-                        return;
-                    }
-
-                    bool added;
-
-                    lock (this.songLock)
-                    {
-                        lock (this.disposeLock)
-                        {
-                            added = this.songs.Add(song);
-                        }
-                    }
-
-                    if (added)
-                    {
-                        songsProcessed++;
-                        this.songAdded.OnNext(new LibraryFillEventArgs(song, songsProcessed, totalSongs));
-                    }
-                });
-
-            finder.Execute();
         }
 
         private bool AwaitCaching(Song song)

@@ -84,14 +84,14 @@ namespace Espera.View.ViewModels
             this.ApplyOrder(SortHelpers.GetOrderByViews, ref this.viewsOrder);
         }
 
-        public void StartSearch()
+        public async Task StartSearch()
         {
             this.IsSearching = true;
 
-            Task.Factory.StartNew(this.UpdateSelectableSongs);
+            await this.UpdateSelectableSongs();
         }
 
-        private void UpdateSelectableSongs()
+        private async Task UpdateSelectableSongs()
         {
             this.currentSongs = new List<YoutubeSong>();
 
@@ -101,7 +101,7 @@ namespace Espera.View.ViewModels
 
                 finder.SongFound.Subscribe(currentSongs.Add, ex => { }); //TODO: Handle error
 
-                finder.Execute();
+                await finder.ExecuteAsync();
 
                 this.IsSearching = false;
             }
