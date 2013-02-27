@@ -42,8 +42,8 @@ namespace Espera.View.ViewModels
             this.library.Initialize();
 
             this.library.SongStarted += (sender, args) => this.HandleSongStarted();
-            this.library.SongFinished += (sender, args) => this.HandleSongFinished();
-            this.library.SongCorrupted += (sender, args) => this.HandleSongCorrupted();
+            this.library.SongFinished.Subscribe(x => this.HandleSongFinished());
+            this.library.SongCorrupted.Subscribe(x => this.HandleSongCorrupted());
             this.library.AccessMode.Subscribe(x => this.UpdateUserAccess());
             this.UpdateScreenState = this.library.AccessMode;
 
@@ -565,8 +565,6 @@ namespace Espera.View.ViewModels
 
         private void HandleSongFinished()
         {
-            this.RaisePropertyChanged(x => x.PreviousSongCommand);
-
             this.updateTimer.Stop();
         }
 

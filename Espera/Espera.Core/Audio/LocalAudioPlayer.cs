@@ -170,6 +170,7 @@ namespace Espera.Core.Audio
 
                     this.EnsureState(NAudio.Wave.PlaybackState.Stopped);
                     this.SetPlaybackState(AudioPlayerState.Stopped);
+                    this.OnStopped();
                 }
             }
         }

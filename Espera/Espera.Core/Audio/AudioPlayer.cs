@@ -9,11 +9,13 @@ namespace Espera.Core.Audio
     {
         private readonly BehaviorSubject<AudioPlayerState> playbackState;
         private readonly Subject<Unit> songFinished;
+        private readonly Subject<Unit> stopped;
 
         protected AudioPlayer()
         {
             this.songFinished = new Subject<Unit>();
             this.playbackState = new BehaviorSubject<AudioPlayerState>(AudioPlayerState.None);
+            this.stopped = new Subject<Unit>();
         }
 
         /// <summary>
@@ -45,6 +47,11 @@ namespace Espera.Core.Audio
         public IObservable<Unit> SongFinished
         {
             get { return this.songFinished.AsObservable(); }
+        }
+
+        public IObservable<Unit> Stopped
+        {
+            get { return this.stopped.AsObservable(); }
         }
 
         /// <summary>
@@ -103,6 +110,11 @@ namespace Espera.Core.Audio
         protected void OnSongFinished()
         {
             this.songFinished.OnNext(Unit.Default);
+        }
+
+        protected void OnStopped()
+        {
+            this.stopped.OnNext(Unit.Default);
         }
 
         protected void SetPlaybackState(AudioPlayerState state)

@@ -98,6 +98,8 @@ namespace Espera.Core.Audio
             this.StopRequest();
 
             this.SetPlaybackState(AudioPlayerState.Stopped);
+
+            this.OnStopped();
         }
     }
 }

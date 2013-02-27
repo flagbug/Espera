@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -19,7 +20,6 @@ namespace Espera.Core.Management
     {
         private readonly BehaviorSubject<AccessMode> accessModeSubject;
         private readonly AutoResetEvent cacheResetHandle;
-
         private readonly BehaviorSubject<AudioPlayer> currentPlayer;
         private readonly Subject<Playlist> currentPlaylistChanged;
 
@@ -34,6 +34,7 @@ namespace Espera.Core.Management
         private readonly ReadOnlyObservableCollection<Playlist> publicPlaylistWrapper;
         private readonly ILibrarySettings settings;
         private readonly Subject<LibraryFillEventArgs> songAdded;
+        private readonly Subject<Unit> songCorrupted;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
         private bool abortSongAdding;
@@ -65,6 +66,7 @@ namespace Espera.Core.Management
             this.CanPlayPreviousSong = this.CurrentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
             this.currentPlayer = new BehaviorSubject<AudioPlayer>(null);
             this.songAdded = new Subject<LibraryFillEventArgs>();
+            this.songCorrupted = new Subject<Unit>();
 
             this.LoadedSong = this.currentPlayer
                 .Select(x => x == null ? null : x.Song);
@@ -82,17 +84,10 @@ namespace Espera.Core.Management
             this.currentPlayer
                 .Where(x => x is IVideoPlayerCallback)
                 .Subscribe(x => this.VideoPlayerCallbackChanged.RaiseSafe(this, EventArgs.Empty));
+
+            this.SongFinished = this.currentPlayer
+                .CombineLatest(this.currentPlayer.Where(x => x != null).Select(x => x.Stopped).Switch(), (x1, x2) => Unit.Default);
         }
-
-        /// <summary>
-        /// Occurs when a corrupted song has been attempted to be played.
-        /// </summary>
-        public event EventHandler SongCorrupted;
-
-        /// <summary>
-        /// Occurs when a song has finished the playback.
-        /// </summary>
-        public event EventHandler SongFinished;
 
         /// <summary>
         /// Occurs when a song has started the playback.
@@ -305,6 +300,19 @@ namespace Espera.Core.Management
         {
             get { return this.songAdded.AsObservable(); }
         }
+
+        /// <summary>
+        /// Occurs when a corrupted song has been attempted to be played.
+        /// </summary>
+        public IObservable<Unit> SongCorrupted
+        {
+            get { return this.songCorrupted.AsObservable(); }
+        }
+
+        /// <summary>
+        /// Occurs when a song has finished the playback.
+        /// </summary>
+        public IObservable<Unit> SongFinished { get; private set; }
 
         /// <summary>
         /// Gets all songs that are currently in the library.
@@ -816,8 +824,6 @@ namespace Espera.Core.Management
             this.currentPlayer.FirstAsync().Wait().Dispose();
             this.currentPlayer.OnNext(null);
 
-            this.SongFinished.RaiseSafe(this, EventArgs.Empty);
-
             if (this.CurrentPlaylist.CanPlayNextSong.FirstAsync().Wait())
             {
                 this.InternPlayNextSong();
@@ -906,7 +912,7 @@ namespace Espera.Core.Management
                 catch (SongLoadException)
                 {
                     song.IsCorrupted = true;
-                    this.SongCorrupted.RaiseSafe(this, EventArgs.Empty);
+                    this.songCorrupted.OnNext(Unit.Default);
 
                     this.HandleSongCorruption();
 
@@ -921,7 +927,7 @@ namespace Espera.Core.Management
                 catch (PlaybackException)
                 {
                     song.IsCorrupted = true;
-                    this.SongCorrupted.RaiseSafe(this, EventArgs.Empty);
+                    this.songCorrupted.OnNext(Unit.Default);
 
                     this.HandleSongCorruption();
 
@@ -958,7 +964,6 @@ namespace Espera.Core.Management
             if (stopCurrentSong)
             {
                 this.currentPlayer.FirstAsync().Wait().Stop();
-                this.SongFinished.RaiseSafe(this, EventArgs.Empty);
             }
         }
 
