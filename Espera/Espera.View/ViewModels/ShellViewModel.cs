@@ -20,7 +20,6 @@ namespace Espera.View.ViewModels
 {
     internal class ShellViewModel : ReactiveObject, IDisposable
     {
-        private readonly ObservableAsPropertyHelper<bool> canChangeTime;
         private readonly ObservableAsPropertyHelper<bool> canModifyWindow;
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
@@ -143,8 +142,6 @@ namespace Espera.View.ViewModels
             this.EditPlaylistNameCommand = new ReactiveCommand(canEditPlaylist);
             this.EditPlaylistNameCommand.Subscribe(x => this.CurrentPlaylist.EditName = true);
 
-            this.canChangeTime = this.library.CanChangeTime.ToProperty(this, x => x.CanChangeTime);
-
             this.RemovePlaylistCommand = new ReactiveCommand(this.WhenAny(x => x.CurrentEditedPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 != null || x2 != null));
             this.RemovePlaylistCommand.Subscribe(x =>
             {
@@ -186,7 +183,7 @@ namespace Espera.View.ViewModels
 
         public bool CanChangeTime
         {
-            get { return this.canChangeTime.Value; }
+            get { return this.library.CanChangeTime; }
         }
 
         public bool CanChangeVolume
@@ -596,6 +593,7 @@ namespace Espera.View.ViewModels
         private void UpdateUserAccess()
         {
             this.RaisePropertyChanged(x => x.CanChangeVolume);
+            this.RaisePropertyChanged(x => x.CanChangeTime);
             this.RaisePropertyChanged(x => x.CanSwitchPlaylist);
             this.RaisePropertyChanged(x => x.ShowPlaylistTimeout);
         }
