@@ -1,5 +1,6 @@
 ﻿using Espera.Core.Audio;
 using Rareform.Validation;
+using ReactiveMarrow;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -15,12 +16,10 @@ namespace Espera.Core
     [DebuggerDisplay("{Artist}-{Album}-{Title}")]
     public abstract class Song : IEquatable<Song>
     {
-        private readonly Subject<Unit> corrupted;
         private readonly Subject<Unit> preparationCompleted;
         private readonly Subject<PreparationFailureCause> preparationFailed;
         private readonly Subject<int> preparationProgress;
         private bool isCached;
-        private bool isCorrupted;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Song"/> class.
@@ -46,7 +45,7 @@ namespace Espera.Core
             this.preparationProgress = new Subject<int>();
             this.preparationCompleted = new Subject<Unit>();
             this.preparationFailed = new Subject<PreparationFailureCause>();
-            this.corrupted = new Subject<Unit>();
+            this.IsCorrupted = new ObservableProperty<bool>();
         }
 
         public string Album { get; set; }
@@ -54,11 +53,6 @@ namespace Espera.Core
         public string Artist { get; set; }
 
         public AudioType AudioType { get; private set; }
-
-        public IObservable<Unit> Corrupted
-        {
-            get { return this.corrupted.AsObservable(); }
-        }
 
         public TimeSpan Duration { get; private set; }
 
@@ -106,19 +100,7 @@ namespace Espera.Core
         /// Gets a value indicating whether the song is corrupted and can't be played.
         /// </summary>
         /// <value><c>true</c> if the song is corrupted; otherwise, <c>false</c>.</value>
-        public bool IsCorrupted
-        {
-            get { return this.isCorrupted; }
-            internal set
-            {
-                this.isCorrupted = value;
-
-                if (this.isCorrupted)
-                {
-                    this.corrupted.OnNext(Unit.Default);
-                }
-            }
-        }
+        public ObservableProperty<bool> IsCorrupted { get; set; }
 
         /// <summary>
         /// Gets the path of the song on the local filesystem, or in the internet.

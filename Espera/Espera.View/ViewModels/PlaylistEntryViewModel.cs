@@ -16,6 +16,7 @@ namespace Espera.View.ViewModels
         private readonly PlaylistEntry entry;
         private readonly ObservableAsPropertyHelper<bool> hasCachingFailed;
         private readonly ObservableAsPropertyHelper<bool> hasStreamingFailed;
+        private readonly ObservableAsPropertyHelper<bool> isCorrupted;
         private readonly ObservableAsPropertyHelper<bool> showCaching;
         private bool isPlaying;
 
@@ -52,8 +53,8 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.HasStreamingFailed)
                 .DisposeWith(this.disposable);
 
-            this.Model.Corrupted
-                .Subscribe(x => this.RaisePropertyChanged(p => p.IsCorrupted))
+            this.isCorrupted = this.Model.IsCorrupted
+                .ToProperty(this, x => x.IsCorrupted)
                 .DisposeWith(disposable);
         }
 
@@ -79,7 +80,7 @@ namespace Espera.View.ViewModels
 
         public bool IsCorrupted
         {
-            get { return this.Model.IsCorrupted; }
+            get { return this.isCorrupted.Value; }
         }
 
         public bool IsPlaying

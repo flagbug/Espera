@@ -34,7 +34,6 @@ namespace Espera.Core.Management
         private readonly ReadOnlyObservableCollection<Playlist> publicPlaylistWrapper;
         private readonly ILibrarySettings settings;
         private readonly Subject<LibraryFillEventArgs> songAdded;
-        private readonly Subject<Unit> songCorrupted;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
         private bool abortSongAdding;
@@ -66,7 +65,6 @@ namespace Espera.Core.Management
             this.CanPlayPreviousSong = this.CurrentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
             this.currentPlayer = new BehaviorSubject<AudioPlayer>(null);
             this.songAdded = new Subject<LibraryFillEventArgs>();
-            this.songCorrupted = new Subject<Unit>();
 
             this.LoadedSong = this.currentPlayer
                 .Select(x => x == null ? null : x.Song);
@@ -299,14 +297,6 @@ namespace Espera.Core.Management
         public IObservable<LibraryFillEventArgs> SongAdded
         {
             get { return this.songAdded.AsObservable(); }
-        }
-
-        /// <summary>
-        /// Occurs when a corrupted song has been attempted to be played.
-        /// </summary>
-        public IObservable<Unit> SongCorrupted
-        {
-            get { return this.songCorrupted.AsObservable(); }
         }
 
         /// <summary>
@@ -911,8 +901,7 @@ namespace Espera.Core.Management
 
                 catch (SongLoadException)
                 {
-                    song.IsCorrupted = true;
-                    this.songCorrupted.OnNext(Unit.Default);
+                    song.IsCorrupted.Value = true;
 
                     this.HandleSongCorruption();
 
@@ -926,8 +915,7 @@ namespace Espera.Core.Management
 
                 catch (PlaybackException)
                 {
-                    song.IsCorrupted = true;
-                    this.songCorrupted.OnNext(Unit.Default);
+                    song.IsCorrupted.Value = true;
 
                     this.HandleSongCorruption();
 
