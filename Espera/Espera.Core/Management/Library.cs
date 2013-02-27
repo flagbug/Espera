@@ -2,6 +2,7 @@
 using Espera.Core.Settings;
 using Rareform.Extensions;
 using Rareform.Validation;
+using ReactiveMarrow;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -85,6 +86,14 @@ namespace Espera.Core.Management
 
             this.SongFinished = this.currentPlayer
                 .CombineLatest(this.currentPlayer.Where(x => x != null).Select(x => x.Stopped).Switch(), (x1, x2) => Unit.Default);
+
+            this.LockTime = new ObservableProperty<bool>(x =>
+            {
+                this.ThrowIfNotAdmin();
+                return x;
+            });
+
+            this.CanChangeTime = this.AccessMode.CombineLatest(this.LockTime, (access, lockTime) => access == Management.AccessMode.Administrator || !lockTime);
         }
 
         /// <summary>
@@ -107,10 +116,7 @@ namespace Espera.Core.Management
             get { return this.accessMode == Management.AccessMode.Administrator || this.RemainingPlaylistTimeout <= TimeSpan.Zero; }
         }
 
-        public bool CanChangeTime
-        {
-            get { return this.accessMode == Management.AccessMode.Administrator || !this.LockTime; }
-        }
+        public IObservable<bool> CanChangeTime { get; private set; }
 
         public bool CanChangeVolume
         {
@@ -238,16 +244,7 @@ namespace Espera.Core.Management
             }
         }
 
-        public bool LockTime
-        {
-            get { return this.settings.LockTime; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                this.settings.LockTime = value;
-            }
-        }
+        public ObservableProperty<bool> LockTime { get; private set; }
 
         public bool LockVolume
         {

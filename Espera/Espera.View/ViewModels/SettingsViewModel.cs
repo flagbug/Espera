@@ -164,8 +164,8 @@ namespace Espera.View.ViewModels
 
         public bool LockTime
         {
-            get { return this.library.LockTime; }
-            set { this.library.LockTime = value; }
+            get { return this.library.LockTime.Value; }
+            set { this.library.LockTime.Value = value; }
         }
 
         public bool LockVolume
