@@ -145,6 +145,34 @@ namespace Espera.View.ViewModels
 
             this.canChangeTime = this.library.CanChangeTime.ToProperty(this, x => x.CanChangeTime);
 
+            this.RemovePlaylistCommand = new ReactiveCommand(this.WhenAny(x => x.CurrentEditedPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 != null || x2 != null));
+            this.RemovePlaylistCommand.Subscribe(x =>
+            {
+                int index = this.playlists.IndexOf(this.CurrentPlaylist);
+
+                this.library.RemovePlaylist(this.CurrentPlaylist.Model);
+
+                if (!this.library.Playlists.Any())
+                {
+                    this.AddPlaylist();
+                }
+
+                if (this.playlists.Count > index)
+                {
+                    this.CurrentPlaylist = this.playlists[index];
+                }
+
+                else if (this.playlists.Count >= 1)
+                {
+                    this.CurrentPlaylist = this.playlists[index - 1];
+                }
+
+                else
+                {
+                    this.CurrentPlaylist = this.playlists[0];
+                }
+            });
+
             this.IsLocal = true;
         }
 
@@ -395,42 +423,7 @@ namespace Espera.View.ViewModels
             get { return this.library.RemainingPlaylistTimeout; }
         }
 
-        public ICommand RemovePlaylistCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        int index = this.playlists.IndexOf(this.CurrentPlaylist);
-
-                        this.library.RemovePlaylist(this.CurrentPlaylist.Model);
-
-                        if (!this.library.Playlists.Any())
-                        {
-                            this.AddPlaylist();
-                        }
-
-                        if (this.playlists.Count > index)
-                        {
-                            this.CurrentPlaylist = this.playlists[index];
-                        }
-
-                        else if (this.playlists.Count >= 1)
-                        {
-                            this.CurrentPlaylist = this.playlists[index - 1];
-                        }
-
-                        else
-                        {
-                            this.CurrentPlaylist = this.playlists[0];
-                        }
-                    },
-                    param => this.CurrentEditedPlaylist != null || this.CurrentPlaylist != null
-                );
-            }
-        }
+        public IReactiveCommand RemovePlaylistCommand { get; private set; }
 
         public ICommand RemoveSelectedPlaylistEntriesCommand
         {
