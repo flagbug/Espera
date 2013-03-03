@@ -36,6 +36,7 @@ namespace Espera.Core.Management
         private readonly Subject<LibraryFillEventArgs> songAdded;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
+        private readonly Subject<Unit> songStarted;
         private bool abortSongAdding;
         private AccessMode accessMode;
         private Playlist currentPlayingPlaylist;
@@ -65,6 +66,7 @@ namespace Espera.Core.Management
             this.CanPlayPreviousSong = this.CurrentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
             this.currentPlayer = new BehaviorSubject<AudioPlayer>(null);
             this.songAdded = new Subject<LibraryFillEventArgs>();
+            this.songStarted = new Subject<Unit>();
 
             this.LoadedSong = this.currentPlayer
                 .Select(x => x == null ? null : x.Song);
@@ -79,20 +81,12 @@ namespace Espera.Core.Management
                 .Switch()
                 .StartWith(AudioPlayerState.None);
 
-            this.currentPlayer
-                .Where(x => x is IVideoPlayerCallback)
-                .Subscribe(x => this.VideoPlayerCallbackChanged.RaiseSafe(this, EventArgs.Empty));
+            this.VideoPlayerCallback = this.currentPlayer
+                .OfType<IVideoPlayerCallback>();
 
             this.SongFinished = this.currentPlayer
                 .CombineLatest(this.currentPlayer.Where(x => x != null).Select(x => x.Stopped).Switch(), (x1, x2) => Unit.Default);
         }
-
-        /// <summary>
-        /// Occurs when a song has started the playback.
-        /// </summary>
-        public event EventHandler SongStarted;
-
-        public event EventHandler VideoPlayerCallbackChanged;
 
         /// <summary>
         /// Gets the access mode that is currently enabled.
@@ -322,6 +316,14 @@ namespace Espera.Core.Management
             }
         }
 
+        /// <summary>
+        /// Occurs when a song has started the playback.
+        /// </summary>
+        public IObservable<Unit> SongStarted
+        {
+            get { return this.songStarted.AsObservable(); }
+        }
+
         public bool StreamYoutube
         {
             get { return this.settings.StreamYoutube; }
@@ -338,10 +340,7 @@ namespace Espera.Core.Management
         /// </summary>
         public IObservable<TimeSpan> TotalTime { get; private set; }
 
-        public IVideoPlayerCallback VideoPlayerCallback
-        {
-            get { return this.currentPlayer.FirstAsync().Wait() as IVideoPlayerCallback; }
-        }
+        public IObservable<IVideoPlayerCallback> VideoPlayerCallback { get; private set; }
 
         /// <summary>
         /// Gets or sets the current volume.
@@ -922,7 +921,7 @@ namespace Espera.Core.Management
                     return;
                 }
 
-                this.SongStarted.RaiseSafe(this, EventArgs.Empty);
+                this.songStarted.OnNext(Unit.Default);
             });
         }
 

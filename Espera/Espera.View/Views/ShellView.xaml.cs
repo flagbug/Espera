@@ -22,6 +22,7 @@ namespace Espera.View.Views
 {
     public partial class ShellView
     {
+        private IVideoPlayerCallback currentVideoPlayerCallback;
         private ShellViewModel shellViewModel;
 
         public ShellView()
@@ -197,20 +198,19 @@ namespace Espera.View.Views
             e.Handled = true;
         }
 
-        private void SetupVideoPlayer()
+        private void SetupVideoPlayer(IVideoPlayerCallback callback)
         {
-            IVideoPlayerCallback callback = this.shellViewModel.VideoPlayerCallback;
-
-            callback.GetTime = () => (TimeSpan)this.Dispatcher.Invoke(new Func<TimeSpan>(() => this.videoPlayer.Position));
+            this.currentVideoPlayerCallback = callback;
+            callback.GetTime = () => this.Dispatcher.Invoke(() => this.videoPlayer.Position);
             callback.SetTime = time => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Position = time));
 
-            callback.GetVolume = () => (float)this.Dispatcher.Invoke(new Func<float>(() => (float)this.videoPlayer.Volume));
+            callback.GetVolume = () => this.Dispatcher.Invoke(() => (float)this.videoPlayer.Volume);
             callback.SetVolume = volume => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Volume = volume));
 
             callback.LoadRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Source = callback.VideoUrl));
-            callback.PauseRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Pause()));
-            callback.PlayRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Play()));
-            callback.StopRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Stop()));
+            callback.PauseRequest = () => this.Dispatcher.Invoke(() => this.videoPlayer.Pause());
+            callback.PlayRequest = () => this.Dispatcher.Invoke(() => this.videoPlayer.Play());
+            callback.StopRequest = () => this.Dispatcher.Invoke(() => this.videoPlayer.Stop());
         }
 
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
@@ -283,7 +283,7 @@ namespace Espera.View.Views
 
         private void VideoPlayerMediaEnded(object sender, RoutedEventArgs e)
         {
-            this.shellViewModel.VideoPlayerCallback.Finished();
+            this.currentVideoPlayerCallback.Finished();
         }
 
         private void WireDataContext()
@@ -309,7 +309,7 @@ namespace Espera.View.Views
 
         private void WireVideoPlayer()
         {
-            this.shellViewModel.VideoPlayerCallbackChanged += (sender, args) => this.SetupVideoPlayer();
+            this.shellViewModel.VideoPlayerCallback.Subscribe(this.SetupVideoPlayer);
         }
     }
 }

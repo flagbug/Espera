@@ -41,7 +41,7 @@ namespace Espera.View.ViewModels
 
             this.library.Initialize();
 
-            this.library.SongStarted += (sender, args) => this.HandleSongStarted();
+            this.library.SongStarted.Subscribe(x => this.HandleSongStarted());
             this.library.SongFinished.Subscribe(x => this.HandleSongFinished());
             this.library.AccessMode.Subscribe(x => this.UpdateUserAccess());
             this.UpdateScreenState = this.library.AccessMode;
@@ -171,12 +171,6 @@ namespace Espera.View.ViewModels
             });
 
             this.IsLocal = true;
-        }
-
-        public event EventHandler VideoPlayerCallbackChanged
-        {
-            add { this.library.VideoPlayerCallbackChanged += value; }
-            remove { this.library.VideoPlayerCallbackChanged -= value; }
         }
 
         public IReactiveCommand AddPlaylistCommand { get; private set; }
@@ -490,7 +484,7 @@ namespace Espera.View.ViewModels
         /// </summary>
         public IObservable<AccessMode> UpdateScreenState { get; private set; }
 
-        public IVideoPlayerCallback VideoPlayerCallback
+        public IObservable<IVideoPlayerCallback> VideoPlayerCallback
         {
             get { return this.library.VideoPlayerCallback; }
         }
