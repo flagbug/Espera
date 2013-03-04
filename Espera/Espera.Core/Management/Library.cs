@@ -62,8 +62,8 @@ namespace Espera.Core.Management
             this.disposeLock = new object();
             this.settings = settings;
             this.isUpdating = new Subject<bool>();
-            this.CanPlayNextSong = this.CurrentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
-            this.CanPlayPreviousSong = this.CurrentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
+            this.CanPlayNextSong = this.currentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
+            this.CanPlayPreviousSong = this.currentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
             this.currentPlayer = new BehaviorSubject<AudioPlayer>(null);
             this.songAdded = new Subject<LibraryFillEventArgs>();
             this.songStarted = new Subject<Unit>();
@@ -133,11 +133,6 @@ namespace Espera.Core.Management
         }
 
         public Playlist CurrentPlaylist { get; private set; }
-
-        public IObservable<Playlist> CurrentPlaylistChanged
-        {
-            get { return this.currentPlaylistChanged.AsObservable(); }
-        }
 
         /// <summary>
         /// Gets or sets the current song's elapsed time.
