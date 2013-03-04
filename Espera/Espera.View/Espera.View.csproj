@@ -106,7 +106,7 @@
     </Reference>
     <Reference Include="ReactiveMarrow, Version=0.1.5.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ReactiveMarrow.0.1.5-alpha\lib\ReactiveMarrow.dll</HintPath>
+      <HintPath>..\packages\ReactiveMarrow.0.2.0-alpha\lib\ReactiveMarrow.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveUI.Blend_Net45">
       <HintPath>..\packages\reactiveui-xaml.4.4.1\lib\net45\ReactiveUI.Blend_Net45.dll</HintPath>

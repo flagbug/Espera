@@ -45,7 +45,7 @@ namespace Espera.Core
             this.preparationProgress = new Subject<int>();
             this.preparationCompleted = new Subject<Unit>();
             this.preparationFailed = new Subject<PreparationFailureCause>();
-            this.IsCorrupted = new ObservableProperty<bool>();
+            this.IsCorrupted = new ReactiveProperty<bool>();
         }
 
         public string Album { get; set; }
@@ -100,7 +100,7 @@ namespace Espera.Core
         /// Gets a value indicating whether the song is corrupted and can't be played.
         /// </summary>
         /// <value><c>true</c> if the song is corrupted; otherwise, <c>false</c>.</value>
-        public ObservableProperty<bool> IsCorrupted { get; set; }
+        public ReactiveProperty<bool> IsCorrupted { get; private set; }
 
         /// <summary>
         /// Gets the path of the song on the local filesystem, or in the internet.
