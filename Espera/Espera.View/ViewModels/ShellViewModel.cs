@@ -176,6 +176,14 @@ namespace Espera.View.ViewModels
                 }
             });
 
+            this.PauseCommand = new ReactiveCommand(this.isAdmin.CombineLatest(this.library.LockPlayPause, this.isPlaying,
+                (isAdmin, lockPlayPause, isPlaying) => (isAdmin || !lockPlayPause) && isPlaying));
+            this.PauseCommand.Subscribe(x =>
+            {
+                this.library.PauseSong();
+                this.updateTimer.Stop();
+            });
+
             this.IsLocal = true;
         }
 
@@ -283,22 +291,7 @@ namespace Espera.View.ViewModels
         /// <summary>
         /// Pauses the currently played song.
         /// </summary>
-        public ICommand PauseCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        this.library.PauseSong();
-                        this.updateTimer.Stop();
-                        this.RaisePropertyChanged(x => x.IsPlaying);
-                    },
-                    param => (this.IsAdmin || !this.library.LockPlayPause.Value) && this.IsPlaying
-                );
-            }
-        }
+        public IReactiveCommand PauseCommand { get; private set; }
 
         /// <summary>
         /// A command that decided whether the songs should be paused or continued.
