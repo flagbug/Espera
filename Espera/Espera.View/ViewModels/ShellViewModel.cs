@@ -4,7 +4,6 @@ using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.View.Properties;
 using Rareform.Extensions;
-using Rareform.Patterns.MVVM;
 using ReactiveUI;
 using ReactiveUI.Xaml;
 using System;
@@ -14,7 +13,6 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Timers;
 using System.Windows;
-using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
@@ -152,6 +150,11 @@ namespace Espera.View.ViewModels
                     this.library.PlaySong(this.SelectedPlaylistEntries.First().Index);
                 }
             });
+
+            this.PlayOverrideCommand = new ReactiveCommand(this.WhenAny(x => x.SelectedPlaylistEntries, x => x.Value)
+                .CombineLatest(this.isAdmin, this.library.LockPlayPause, (selectedPlaylistEntries, isAdmin, lockPlayPause) =>
+                    (isAdmin || !lockPlayPause) && (selectedPlaylistEntries != null && selectedPlaylistEntries.Count() == 1)));
+            this.PlayOverrideCommand.Subscribe(x => this.library.PlaySong(this.SelectedPlaylistEntries.First().Index));
 
             this.PauseCommand = new ReactiveCommand(this.isAdmin.CombineLatest(this.library.LockPlayPause, this.isPlaying,
                 (isAdmin, lockPlayPause, isPlaying) => (isAdmin || !lockPlayPause) && isPlaying));
@@ -388,17 +391,10 @@ namespace Espera.View.ViewModels
             set { Settings.Default.PlaylistTitleColumnWidth = value; }
         }
 
-        public ICommand PlayOverrideCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param => this.library.PlaySong(this.SelectedPlaylistEntries.First().Index),
-                    param => (this.IsAdmin || !this.library.LockPlayPause.Value) && (this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1)
-               );
-            }
-        }
+        /// <summary>
+        /// Overrides the currently played song.
+        /// </summary>
+        public IReactiveCommand PlayOverrideCommand { get; private set; }
 
         /// <summary>
         /// Plays the song that is before the currently played song in the playlist.
