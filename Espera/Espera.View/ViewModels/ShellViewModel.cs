@@ -368,10 +368,7 @@ namespace Espera.View.ViewModels
         public GridLength PlaylistHeight
         {
             get { return (GridLength)new GridLengthConverter().ConvertFromString(Settings.Default.PlaylistHeight); }
-            set
-            {
-                Settings.Default.PlaylistHeight = new GridLengthConverter().ConvertToString(value);
-            }
+            set { Settings.Default.PlaylistHeight = new GridLengthConverter().ConvertToString(value); }
         }
 
         public IReactiveCollection<PlaylistViewModel> Playlists
@@ -457,10 +454,7 @@ namespace Espera.View.ViewModels
         public GridLength SongSourceHeight
         {
             get { return (GridLength)new GridLengthConverter().ConvertFromString(Settings.Default.SongSourceHeight); }
-            set
-            {
-                Settings.Default.SongSourceHeight = new GridLengthConverter().ConvertToString(value);
-            }
+            set { Settings.Default.SongSourceHeight = new GridLengthConverter().ConvertToString(value); }
         }
 
         public int TotalSeconds
