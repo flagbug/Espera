@@ -212,7 +212,8 @@ namespace Espera.View.ViewModels
 
             this.RemoveSelectedPlaylistEntriesCommand = new ReactiveCommand(this.WhenAny(x => x.SelectedPlaylistEntries, x => x.Value)
                 .CombineLatest(this.isAdmin, this.library.LockPlaylistRemoval,
-                    (selectedPlaylistEntries, isAdmin, lockPlaylistRemoval) => selectedPlaylistEntries != null && selectedPlaylistEntries.Any() && (isAdmin || lockPlaylistRemoval)));
+                    (selectedPlaylistEntries, isAdmin, lockPlaylistRemoval) =>
+                        selectedPlaylistEntries != null && selectedPlaylistEntries.Any() && (isAdmin || lockPlaylistRemoval)));
             this.RemoveSelectedPlaylistEntriesCommand.Subscribe(x => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index)));
 
             this.IsLocal = true;
