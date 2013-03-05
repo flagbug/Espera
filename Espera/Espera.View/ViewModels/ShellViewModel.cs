@@ -127,6 +127,40 @@ namespace Espera.View.ViewModels
             this.ShufflePlaylistCommand = new ReactiveCommand();
             this.ShufflePlaylistCommand.Subscribe(x => this.library.ShufflePlaylist());
 
+            this.PlayCommand = new ReactiveCommand(this.WhenAny(x => x.SelectedPlaylistEntries, x => x.Value)
+                .CombineLatest(this.isAdmin, this.library.LockPlayPause, this.library.LoadedSong, this.library.PlaybackState,
+                    (selectedPlaylistEntries, isAdmin, lockPlayPause, loadedSong, playBackState) =>
+
+                        // The admin can always play, but if we are in party mode, we have to check whether it is allowed to play
+                        (isAdmin || !lockPlayPause) &&
+
+                        // If exactly one song is selected, the command can be executed
+                        (selectedPlaylistEntries != null && selectedPlaylistEntries.Count() == 1 ||
+
+                        // If the current song is paused, the command can be executed
+                        (loadedSong != null || playBackState == AudioPlayerState.Paused))));
+            this.PlayCommand.Subscribe(x =>
+            {
+                if (this.library.PlaybackState.FirstAsync().Wait() == AudioPlayerState.Paused || this.library.LoadedSong.FirstAsync().Wait() != null)
+                {
+                    this.library.ContinueSong();
+                    this.updateTimer.Start();
+                }
+
+                else
+                {
+                    this.library.PlaySong(this.SelectedPlaylistEntries.First().Index);
+                }
+            });
+
+            this.PauseCommand = new ReactiveCommand(this.isAdmin.CombineLatest(this.library.LockPlayPause, this.isPlaying,
+                (isAdmin, lockPlayPause, isPlaying) => (isAdmin || !lockPlayPause) && isPlaying));
+            this.PauseCommand.Subscribe(x =>
+            {
+                this.library.PauseSong();
+                this.updateTimer.Stop();
+            });
+
             this.PauseContinueCommand = new ReactiveCommand(this
                 .WhenAny(x => x.IsPlaying, x => x.Value)
                 .Select(x => x ? this.PauseCommand.CanExecute(null) : this.PlayCommand.CanExecute(null)));
@@ -176,13 +210,10 @@ namespace Espera.View.ViewModels
                 }
             });
 
-            this.PauseCommand = new ReactiveCommand(this.isAdmin.CombineLatest(this.library.LockPlayPause, this.isPlaying,
-                (isAdmin, lockPlayPause, isPlaying) => (isAdmin || !lockPlayPause) && isPlaying));
-            this.PauseCommand.Subscribe(x =>
-            {
-                this.library.PauseSong();
-                this.updateTimer.Stop();
-            });
+            this.RemoveSelectedPlaylistEntriesCommand = new ReactiveCommand(this.WhenAny(x => x.SelectedPlaylistEntries, x => x.Value)
+                .CombineLatest(this.isAdmin, this.library.LockPlaylistRemoval,
+                    (selectedPlaylistEntries, isAdmin, lockPlaylistRemoval) => selectedPlaylistEntries != null && selectedPlaylistEntries.Any() && (isAdmin || lockPlaylistRemoval)));
+            this.RemoveSelectedPlaylistEntriesCommand.Subscribe(x => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index)));
 
             this.IsLocal = true;
         }
@@ -301,39 +332,7 @@ namespace Espera.View.ViewModels
         /// <summary>
         /// Plays the song that is currently selected in the playlist or continues the song if it is paused.
         /// </summary>
-        public ICommand PlayCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        if (this.library.PlaybackState.FirstAsync().Wait() == AudioPlayerState.Paused || this.library.LoadedSong.FirstAsync().Wait() != null)
-                        {
-                            this.library.ContinueSong();
-                            this.updateTimer.Start();
-                            this.RaisePropertyChanged(x => x.IsPlaying);
-                        }
-
-                        else
-                        {
-                            this.library.PlaySong(this.SelectedPlaylistEntries.First().Index);
-                        }
-                    },
-                    param =>
-
-                        // The admin can always play, but if we are in party mode, we have to check whether it is allowed to play
-                        (this.IsAdmin || !this.library.LockPlayPause.Value) &&
-
-                        // If exactly one song is selected, the command can be executed
-                        (this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1 ||
-
-                        // If the current song is paused, the command can be executed
-                        (this.library.LoadedSong.FirstAsync().Wait() != null || this.library.PlaybackState.FirstAsync().Wait() == AudioPlayerState.Paused))
-                );
-            }
-        }
+        public IReactiveCommand PlayCommand { get; private set; }
 
         public int PlaylistAlbumColumnWidth
         {
@@ -412,19 +411,7 @@ namespace Espera.View.ViewModels
 
         public IReactiveCommand RemovePlaylistCommand { get; private set; }
 
-        public ICommand RemoveSelectedPlaylistEntriesCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index)),
-                    param => this.SelectedPlaylistEntries != null
-                        && this.SelectedPlaylistEntries.Any()
-                        && (this.IsAdmin || !this.library.LockPlaylistRemoval.Value)
-                );
-            }
-        }
+        public IReactiveCommand RemoveSelectedPlaylistEntriesCommand { get; private set; }
 
         public IEnumerable<PlaylistEntryViewModel> SelectedPlaylistEntries
         {
@@ -545,8 +532,6 @@ namespace Espera.View.ViewModels
         private void HandleSongStarted()
         {
             this.UpdateTotalTime();
-
-            this.RaisePropertyChanged(x => x.PlayCommand);
 
             this.updateTimer.Start();
         }
