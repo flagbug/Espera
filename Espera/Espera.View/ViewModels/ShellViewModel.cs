@@ -20,7 +20,10 @@ namespace Espera.View.ViewModels
 {
     internal class ShellViewModel : ReactiveObject, IDisposable
     {
+        private readonly ObservableAsPropertyHelper<bool> canChangeTime;
+        private readonly ObservableAsPropertyHelper<bool> canChangeVolume;
         private readonly ObservableAsPropertyHelper<bool> canModifyWindow;
+        private readonly ObservableAsPropertyHelper<bool> canSwitchPlaylist;
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly ObservableAsPropertyHelper<bool> isPlaying;
@@ -43,8 +46,11 @@ namespace Espera.View.ViewModels
 
             this.library.SongStarted.Subscribe(x => this.HandleSongStarted());
             this.library.SongFinished.Subscribe(x => this.HandleSongFinished());
-            this.library.AccessMode.Subscribe(x => this.UpdateUserAccess());
             this.UpdateScreenState = this.library.AccessMode;
+
+            this.canChangeTime = this.library.CanChangeTime.ToProperty(this, x => x.CanChangeTime);
+            this.canChangeVolume = this.library.CanChangeVolume.ToProperty(this, x => x.CanChangeVolume);
+            this.canSwitchPlaylist = this.library.CanSwitchPlaylist.ToProperty(this, x => x.CanSwitchPlaylist);
 
             IObservable<bool> isAdminObservable = this.library.AccessMode
                 .Select(x => x == AccessMode.Administrator);
@@ -177,12 +183,12 @@ namespace Espera.View.ViewModels
 
         public bool CanChangeTime
         {
-            get { return this.library.CanChangeTime; }
+            get { return this.canChangeTime.Value; }
         }
 
         public bool CanChangeVolume
         {
-            get { return this.library.CanChangeVolume; }
+            get { return this.canChangeVolume.Value; }
         }
 
         /// <summary>
@@ -195,7 +201,7 @@ namespace Espera.View.ViewModels
 
         public bool CanSwitchPlaylist
         {
-            get { return this.library.CanSwitchPlaylist; }
+            get { return this.canSwitchPlaylist.Value; }
         }
 
         public PlaylistViewModel CurrentEditedPlaylist
@@ -289,7 +295,7 @@ namespace Espera.View.ViewModels
                         this.updateTimer.Stop();
                         this.RaisePropertyChanged(x => x.IsPlaying);
                     },
-                    param => (this.IsAdmin || !this.library.LockPlayPause) && this.IsPlaying
+                    param => (this.IsAdmin || !this.library.LockPlayPause.Value) && this.IsPlaying
                 );
             }
         }
@@ -325,7 +331,7 @@ namespace Espera.View.ViewModels
                     param =>
 
                         // The admin can always play, but if we are in party mode, we have to check whether it is allowed to play
-                        (this.IsAdmin || !this.library.LockPlayPause) &&
+                        (this.IsAdmin || !this.library.LockPlayPause.Value) &&
 
                         // If exactly one song is selected, the command can be executed
                         (this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1 ||
@@ -399,7 +405,7 @@ namespace Espera.View.ViewModels
                 return new RelayCommand
                 (
                     param => this.library.PlaySong(this.SelectedPlaylistEntries.First().Index),
-                    param => (this.IsAdmin || !this.library.LockPlayPause) && (this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1)
+                    param => (this.IsAdmin || !this.library.LockPlayPause.Value) && (this.SelectedPlaylistEntries != null && this.SelectedPlaylistEntries.Count() == 1)
                );
             }
         }
@@ -425,7 +431,7 @@ namespace Espera.View.ViewModels
                     param => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index)),
                     param => this.SelectedPlaylistEntries != null
                         && this.SelectedPlaylistEntries.Any()
-                        && (this.IsAdmin || !this.library.LockPlaylistRemoval)
+                        && (this.IsAdmin || !this.library.LockPlaylistRemoval.Value)
                 );
             }
         }
@@ -582,14 +588,6 @@ namespace Espera.View.ViewModels
         {
             this.RaisePropertyChanged(x => x.TotalSeconds);
             this.RaisePropertyChanged(x => x.TotalTime);
-        }
-
-        private void UpdateUserAccess()
-        {
-            this.RaisePropertyChanged(x => x.CanChangeVolume);
-            this.RaisePropertyChanged(x => x.CanChangeTime);
-            this.RaisePropertyChanged(x => x.CanSwitchPlaylist);
-            this.RaisePropertyChanged(x => x.ShowPlaylistTimeout);
         }
     }
 }

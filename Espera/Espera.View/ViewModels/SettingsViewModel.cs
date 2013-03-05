@@ -109,12 +109,12 @@ namespace Espera.View.ViewModels
 
         public bool EnablePlaylistTimeout
         {
-            get { return this.library.EnablePlaylistTimeout; }
+            get { return this.library.EnablePlaylistTimeout.Value; }
             set
             {
-                if (this.library.EnablePlaylistTimeout != value)
+                if (this.library.EnablePlaylistTimeout.Value != value)
                 {
-                    this.library.EnablePlaylistTimeout = value;
+                    this.library.EnablePlaylistTimeout.Value = value;
 
                     this.RaisePropertyChanged(x => x.EnablePlaylistTimeout);
                 }
@@ -140,38 +140,38 @@ namespace Espera.View.ViewModels
 
         public bool LockLibraryRemoval
         {
-            get { return this.library.LockLibraryRemoval; }
-            set { this.library.LockLibraryRemoval = value; }
+            get { return this.library.LockLibraryRemoval.Value; }
+            set { this.library.LockLibraryRemoval.Value = value; }
         }
 
         public bool LockPlaylistRemoval
         {
-            get { return this.library.LockPlaylistRemoval; }
-            set { this.library.LockPlaylistRemoval = value; }
+            get { return this.library.LockPlaylistRemoval.Value; }
+            set { this.library.LockPlaylistRemoval.Value = value; }
         }
 
         public bool LockPlaylistSwitching
         {
-            get { return this.library.LockPlaylistSwitching; }
-            set { this.library.LockPlaylistSwitching = value; }
+            get { return this.library.LockPlaylistSwitching.Value; }
+            set { this.library.LockPlaylistSwitching.Value = value; }
         }
 
         public bool LockPlayPause
         {
-            get { return this.library.LockPlayPause; }
-            set { this.library.LockPlayPause = value; }
+            get { return this.library.LockPlayPause.Value; }
+            set { this.library.LockPlayPause.Value = value; }
         }
 
         public bool LockTime
         {
-            get { return this.library.LockTime; }
-            set { this.library.LockTime = value; }
+            get { return this.library.LockTime.Value; }
+            set { this.library.LockTime.Value = value; }
         }
 
         public bool LockVolume
         {
-            get { return this.library.LockVolume; }
-            set { this.library.LockVolume = value; }
+            get { return this.library.LockVolume.Value; }
+            set { this.library.LockVolume.Value = value; }
         }
 
         public bool LockWindow

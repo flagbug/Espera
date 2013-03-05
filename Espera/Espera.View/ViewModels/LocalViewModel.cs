@@ -52,10 +52,9 @@ namespace Espera.View.ViewModels
 
             IObservable<bool> canRemoveFromLibrary = this
                 .WhenAny(x => x.SelectedSongs, x => x.Value)
-                .CombineLatest(this.Library.AccessMode,
-                    (selectedSongs, accessMode) =>
-                        selectedSongs != null && selectedSongs.Any() &&
-                        (this.IsAdmin || !this.Library.LockLibraryRemoval));
+                .CombineLatest(this.Library.AccessMode, this.Library.LockLibraryRemoval,
+                    (selectedSongs, accessMode, lockLibraryRemoval) =>
+                        selectedSongs != null && selectedSongs.Any() && (accessMode == AccessMode.Administrator || !lockLibraryRemoval));
 
             this.RemoveFromLibraryCommand = new ReactiveCommand(canRemoveFromLibrary);
             this.RemoveFromLibraryCommand.Subscribe(p =>
