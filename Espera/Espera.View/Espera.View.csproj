@@ -104,9 +104,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Rareform.1.5.2\lib\Rareform.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveMarrow, Version=0.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveMarrow, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ReactiveMarrow.0.2.1-alpha\lib\ReactiveMarrow.dll</HintPath>
+      <HintPath>..\packages\ReactiveMarrow.0.3.0-alpha\lib\ReactiveMarrow.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveUI.Blend_Net45">
       <HintPath>..\packages\reactiveui-xaml.4.4.1\lib\net45\ReactiveUI.Blend_Net45.dll</HintPath>
