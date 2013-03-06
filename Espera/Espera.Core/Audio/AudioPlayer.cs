@@ -62,7 +62,10 @@ namespace Espera.Core.Audio
         /// </remarks>
         public virtual void Finish()
         {
-            this.PlaybackStateProperty.Value = AudioPlayerState.Finished;
+            if (this.PlaybackStateProperty.Value != AudioPlayerState.Finished)
+            {
+                this.PlaybackStateProperty.Value = AudioPlayerState.Finished;
+            }
         }
 
         /// <summary>
