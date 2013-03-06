@@ -65,6 +65,13 @@ namespace Espera.Core.Audio
             this.Finish();
         }
 
+        public override void Finish()
+        {
+            this.StopRequest();
+
+            base.Finish();
+        }
+
         public override void Load()
         {
             base.Load();
