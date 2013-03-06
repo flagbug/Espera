@@ -50,7 +50,7 @@ namespace Espera.Core.Tests
             Song[] songs = Helpers.SetupSongMocks(4);
             Playlist playlist = Helpers.SetupPlaylist(songs);
 
-            playlist.CurrentSongIndex = 3;
+            playlist.CurrentSongIndex.Value = 3;
 
             Assert.IsFalse(playlist.CanPlayNextSong.FirstAsync().Wait());
         }
@@ -61,7 +61,7 @@ namespace Espera.Core.Tests
             Song[] songs = Helpers.SetupSongMocks(4);
             Playlist playlist = Helpers.SetupPlaylist(songs);
 
-            playlist.CurrentSongIndex = null;
+            playlist.CurrentSongIndex.Value = null;
 
             Assert.IsFalse(playlist.CanPlayNextSong.FirstAsync().Wait());
         }
@@ -72,7 +72,7 @@ namespace Espera.Core.Tests
             Song[] songs = Helpers.SetupSongMocks(4);
             Playlist playlist = Helpers.SetupPlaylist(songs);
 
-            playlist.CurrentSongIndex = 0;
+            playlist.CurrentSongIndex.Value = 0;
 
             Assert.IsTrue(playlist.CanPlayNextSong.FirstAsync().Wait());
         }
@@ -91,7 +91,7 @@ namespace Espera.Core.Tests
             Song[] songs = Helpers.SetupSongMocks(4);
             Playlist playlist = Helpers.SetupPlaylist(songs);
 
-            playlist.CurrentSongIndex = 3;
+            playlist.CurrentSongIndex.Value = 3;
 
             Assert.IsTrue(playlist.CanPlayPreviousSong.FirstAsync().Wait());
         }
@@ -102,7 +102,7 @@ namespace Espera.Core.Tests
             Song[] songs = Helpers.SetupSongMocks(4);
             Playlist playlist = Helpers.SetupPlaylist(songs);
 
-            playlist.CurrentSongIndex = null;
+            playlist.CurrentSongIndex.Value = null;
 
             Assert.IsFalse(playlist.CanPlayPreviousSong.FirstAsync().Wait());
         }
@@ -113,7 +113,7 @@ namespace Espera.Core.Tests
             Song[] songs = Helpers.SetupSongMocks(4);
             Playlist playlist = Helpers.SetupPlaylist(songs);
 
-            playlist.CurrentSongIndex = 0;
+            playlist.CurrentSongIndex.Value = 0;
 
             Assert.IsFalse(playlist.CanPlayPreviousSong.FirstAsync().Wait());
         }
@@ -129,10 +129,7 @@ namespace Espera.Core.Tests
         [Test]
         public void CurrentSongIndexSetter_PlaylistIsEmptyAndSetToNull_Passes()
         {
-            new Playlist("Playlist")
-            {
-                CurrentSongIndex = null
-            };
+            new Playlist("Playlist").CurrentSongIndex.Value = null;
         }
 
         [Test]
@@ -140,7 +137,7 @@ namespace Espera.Core.Tests
         {
             var playlist = new Playlist("Playlist");
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex = 0);
+            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex.Value = 0);
         }
 
         [Test]
@@ -149,7 +146,7 @@ namespace Espera.Core.Tests
             Song[] songs = Helpers.SetupSongMocks(3);
             Playlist playlist = Helpers.SetupPlaylist(songs);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex = 3);
+            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex.Value = 3);
         }
 
         [Test]
@@ -319,11 +316,11 @@ namespace Espera.Core.Tests
 
             Playlist playlist = Helpers.SetupPlaylist(songs);
 
-            playlist.CurrentSongIndex = 1;
+            playlist.CurrentSongIndex.Value = 1;
 
             playlist.RemoveSongs(new[] { 0 });
 
-            Assert.AreEqual(0, playlist.CurrentSongIndex);
+            Assert.AreEqual(0, playlist.CurrentSongIndex.Value);
         }
 
         [Test]
@@ -333,13 +330,13 @@ namespace Espera.Core.Tests
 
             Playlist playlist = Helpers.SetupPlaylist(songs);
 
-            playlist.CurrentSongIndex = 0;
+            playlist.CurrentSongIndex.Value = 0;
 
             playlist.Shuffle();
 
             int newIndex = playlist.GetIndexes(new[] { songs[0] }).First();
 
-            Assert.AreEqual(newIndex, playlist.CurrentSongIndex);
+            Assert.AreEqual(newIndex, playlist.CurrentSongIndex.Value);
         }
     }
 }

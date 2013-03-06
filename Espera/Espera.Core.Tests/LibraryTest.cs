@@ -584,6 +584,7 @@ namespace Espera.Core.Tests
             using (Library library = Helpers.CreateLibrary())
             {
                 var player = new Mock<AudioPlayer>();
+                player.Setup(x => x.Play()).Callback(player.Object.Finish);
 
                 Mock<Song>[] songs = Helpers.CreateSongMocks(2, false);
                 songs[0].Setup(p => p.CreateAudioPlayer()).Returns(player.Object);
@@ -640,10 +641,8 @@ namespace Espera.Core.Tests
             {
                 library.SwitchToPlaylist(library.Playlists.First());
 
-                var player = new Mock<AudioPlayer>();
-
                 Mock<Song> song = Helpers.CreateSongMock();
-                song.Setup(x => x.CreateAudioPlayer()).Returns(player.Object);
+                song.Setup(x => x.CreateAudioPlayer()).Returns(new JumpAudioPlayer());
 
                 Mock<Song> instantSong = Helpers.CreateSongMock();
                 instantSong.Setup(x => x.CreateAudioPlayer()).Returns(new JumpAudioPlayer());
@@ -661,8 +660,6 @@ namespace Espera.Core.Tests
                 library.PlayInstantly(new[] { instantSong.Object });
 
                 handle.Wait();
-
-                player.Verify(x => x.Finish(), Times.Once());
             }
         }
 

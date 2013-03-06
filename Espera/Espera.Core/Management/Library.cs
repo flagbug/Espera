@@ -95,39 +95,32 @@ namespace Espera.Core.Management
              * Start boring, repeating glue code
              */
             this.EnablePlaylistTimeout = new ReactiveProperty<bool>(
-                () => this.settings.EnablePlaylistTimeout,
-                x => this.settings.EnablePlaylistTimeout = x,
-                x => this.accessMode == Management.AccessMode.Administrator);
+                () => this.settings.EnablePlaylistTimeout, x => this.settings.EnablePlaylistTimeout = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
 
             this.LockLibraryRemoval = new ReactiveProperty<bool>(
-                () => this.settings.LockLibraryRemoval,
-                x => this.settings.LockLibraryRemoval = x,
-                x => this.accessMode == Management.AccessMode.Administrator);
+                () => this.settings.LockLibraryRemoval, x => this.settings.LockLibraryRemoval = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
 
             this.LockPlaylistRemoval = new ReactiveProperty<bool>(
-                () => this.settings.LockPlaylistRemoval,
-                x => this.settings.LockPlaylistRemoval = x,
-                x => this.accessMode == Management.AccessMode.Administrator);
+                () => this.settings.LockPlaylistRemoval, x => this.settings.LockPlaylistRemoval = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
 
             this.LockPlaylistSwitching = new ReactiveProperty<bool>(
-                () => this.settings.LockPlaylistSwitching,
-                x => this.settings.LockPlaylistSwitching = x,
-                x => this.accessMode == Management.AccessMode.Administrator);
+                () => this.settings.LockPlaylistSwitching, x => this.settings.LockPlaylistSwitching = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
 
             this.LockPlayPause = new ReactiveProperty<bool>(
-                () => this.settings.LockPlayPause,
-                x => this.settings.LockPlayPause = x,
-                x => this.accessMode == Management.AccessMode.Administrator);
+                () => this.settings.LockPlayPause, x => this.settings.LockPlayPause = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
 
             this.LockTime = new ReactiveProperty<bool>(
-                () => this.settings.LockTime,
-                x => this.settings.LockTime = x,
-                x => this.accessMode == Management.AccessMode.Administrator);
+                () => this.settings.LockTime, x => this.settings.LockTime = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
 
             this.LockVolume = new ReactiveProperty<bool>(
-                () => this.settings.LockVolume,
-                x => this.settings.LockVolume = x,
-                x => this.accessMode == Management.AccessMode.Administrator);
+                () => this.settings.LockVolume, x => this.settings.LockVolume = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
             /*
              * End boring, repeating glue code
              */

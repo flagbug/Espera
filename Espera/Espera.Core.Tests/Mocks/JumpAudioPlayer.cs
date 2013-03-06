@@ -29,7 +29,7 @@ namespace Espera.Core.Tests.Mocks
 
         public override void Pause()
         {
-            this.PlaybackStateProperty.Value = AudioPlayerState.Paused;
+            throw new NotImplementedException();
         }
 
         public override void Play()

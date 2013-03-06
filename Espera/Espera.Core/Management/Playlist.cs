@@ -26,7 +26,7 @@ namespace Espera.Core.Management
 
             this.playlist = new ReactiveList<PlaylistEntry>();
 
-            this.CurrentSongIndex = new ReactiveProperty<int?>(x => x == null || this.ContainsIndex(x.Value));
+            this.CurrentSongIndex = new ReactiveProperty<int?>(x => x == null || this.ContainsIndex(x.Value), typeof(ArgumentOutOfRangeException));
 
             var canPlayNextSong = this.CurrentSongIndex
                 .CombineLatest(this.playlist.Changed, (i, args) => i.HasValue && this.ContainsIndex(i.Value + 1))
@@ -70,7 +70,7 @@ namespace Espera.Core.Management
         public IObservable<bool> CanPlayPreviousSong { get; private set; }
 
         /// <summary>
-        /// Gets the index of the currently played song in the playlist.
+        /// Gets or sets the index of the currently played song in the playlist.
         /// </summary>
         /// <value>
         /// The index of the currently played song in the playlist. <c>null</c>, if no song is currently played.
@@ -103,7 +103,7 @@ namespace Espera.Core.Management
                 if (index < 0)
                     Throw.ArgumentOutOfRangeException(() => index, 0);
 
-                int maxIndex = this.playlist.Count;
+                int maxIndex = this.playlist.Count - 1;
 
                 if (index > maxIndex)
                     Throw.ArgumentOutOfRangeException(() => index, maxIndex);
