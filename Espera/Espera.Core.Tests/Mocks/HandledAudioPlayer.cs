@@ -5,8 +5,8 @@ using System.Threading;
 namespace Espera.Core.Tests.Mocks
 {
     /// <summary>
-    /// A <see cref="AudioPlayer"/> mock that raises the <see cref="AudioPlayer.SongFinished"/>
-    /// event when the <see cref="ManualResetEvent"/> is set, after <see cref="Play"/> is called.
+    /// A <see cref="AudioPlayer"/> mock that sets the <see cref="AudioPlayer.PlaybackState"/> to <see cref="AudioPlayerState.Finished"/>
+    /// when the <see cref="ManualResetEvent"/> is set, after <see cref="Play"/> is called.
     /// </summary>
     internal class HandledAudioPlayer : AudioPlayer
     {
@@ -23,11 +23,6 @@ namespace Espera.Core.Tests.Mocks
             set { throw new NotImplementedException(); }
         }
 
-        public override IObservable<AudioPlayerState> PlaybackState
-        {
-            get { throw new NotImplementedException(); }
-        }
-
         public override IObservable<TimeSpan> TotalTime
         {
             get { throw new NotImplementedException(); }
@@ -37,6 +32,7 @@ namespace Espera.Core.Tests.Mocks
 
         public override void Dispose()
         {
+            this.Finish();
         }
 
         public override void Pause()
@@ -46,14 +42,11 @@ namespace Espera.Core.Tests.Mocks
 
         public override void Play()
         {
+            this.PlaybackStateProperty.Value = AudioPlayerState.Playing;
+
             handle.WaitOne();
 
-            this.OnSongFinished();
-        }
-
-        public override void Stop()
-        {
-            throw new NotImplementedException();
+            this.Finish();
         }
     }
 }

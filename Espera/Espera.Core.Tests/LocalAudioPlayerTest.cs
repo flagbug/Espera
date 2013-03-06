@@ -23,19 +23,19 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        public void Finish_SongNotLoaded_PassesWithoutException()
+        {
+            var audioPlayer = new LocalAudioPlayer(Helpers.SetupSongMock());
+
+            audioPlayer.Finish();
+        }
+
+        [Test]
         public void PlaybackState_NoSongLoaded_ReturnsNone()
         {
             var audioPlayer = new LocalAudioPlayer(Helpers.SetupSongMock());
 
             Assert.AreEqual(AudioPlayerState.None, audioPlayer.PlaybackState.FirstAsync().Wait());
-        }
-
-        [Test]
-        public void Stop_SongNotLoaded_PassesWithoutException()
-        {
-            var audioPlayer = new LocalAudioPlayer(Helpers.SetupSongMock());
-
-            audioPlayer.Stop();
         }
 
         [Test]

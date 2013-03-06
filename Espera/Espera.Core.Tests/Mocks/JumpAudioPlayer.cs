@@ -4,8 +4,8 @@ using System;
 namespace Espera.Core.Tests.Mocks
 {
     /// <summary>
-    /// A <see cref="AudioPlayer"/> mock that raises the <see cref="AudioPlayer.SongFinished"/>
-    /// event immediately when the <see cref="AudioPlayer.Play"/> method is called.
+    /// A <see cref="AudioPlayer"/> mock that sets the <see cref="AudioPlayer.PlaybackState"/> to <see cref="AudioPlayerState.Finished"/>
+    /// immediately after the <see cref="AudioPlayer.Play"/> method is called.
     /// </summary>
     internal class JumpAudioPlayer : AudioPlayer
     {
@@ -13,11 +13,6 @@ namespace Espera.Core.Tests.Mocks
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
-        }
-
-        public override IObservable<AudioPlayerState> PlaybackState
-        {
-            get { throw new NotImplementedException(); }
         }
 
         public override IObservable<TimeSpan> TotalTime
@@ -29,21 +24,18 @@ namespace Espera.Core.Tests.Mocks
 
         public override void Dispose()
         {
+            this.Finish();
         }
 
         public override void Pause()
         {
-            throw new NotImplementedException();
+            this.PlaybackStateProperty.Value = AudioPlayerState.Paused;
         }
 
         public override void Play()
         {
-            this.OnSongFinished();
-        }
-
-        public override void Stop()
-        {
-            throw new NotImplementedException();
+            this.PlaybackStateProperty.Value = AudioPlayerState.Playing;
+            this.Finish();
         }
     }
 }

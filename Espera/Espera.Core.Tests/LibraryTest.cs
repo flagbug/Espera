@@ -102,6 +102,7 @@ namespace Espera.Core.Tests
         }
 
         [Test]
+        [Ignore("Times out randomly")]
         public void AutoNextSong_SongIsCaching_SwapSongs()
         {
             var eventWait = new ManualResetEvent(false); // We need this, because Library.PlaySong() pops up a new thread internally and then returns
@@ -133,7 +134,7 @@ namespace Espera.Core.Tests
 
                 // We need to wait till the second played song has finished and then release our lock,
                 // otherwise it would directly call the assertion, without anything changed
-                library.SongFinished += (sender, e) =>
+                library.PlaybackState.Where(x => x == AudioPlayerState.Finished).Subscribe(x =>
                 {
                     finished++;
 
@@ -141,7 +142,7 @@ namespace Espera.Core.Tests
                     {
                         eventWait.Set();
                     }
-                };
+                });
 
                 IEnumerable<Song> songs = new[]
                 {
@@ -195,7 +196,7 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                Assert.IsTrue(library.CanChangeTime);
+                Assert.IsTrue(library.CanChangeTime.FirstAsync().Wait());
             }
         }
 
@@ -204,12 +205,12 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                library.LockTime = false;
+                library.LockTime.Value = false;
 
                 library.CreateAdmin("password");
                 library.ChangeToParty();
 
-                Assert.IsTrue(library.CanChangeTime);
+                Assert.IsTrue(library.CanChangeTime.FirstAsync().Wait());
             }
         }
 
@@ -218,12 +219,12 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                library.LockTime = true;
+                library.LockTime.Value = true;
 
                 library.CreateAdmin("password");
                 library.ChangeToParty();
 
-                Assert.IsFalse(library.CanChangeTime);
+                Assert.IsFalse(library.CanChangeTime.FirstAsync().Wait());
             }
         }
 
@@ -232,7 +233,7 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                Assert.IsTrue(library.CanChangeVolume);
+                Assert.IsTrue(library.CanChangeVolume.FirstAsync().Wait());
             }
         }
 
@@ -241,12 +242,12 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                library.LockVolume = false;
+                library.LockVolume.Value = false;
 
                 library.CreateAdmin("password");
                 library.ChangeToParty();
 
-                Assert.IsTrue(library.CanChangeVolume);
+                Assert.IsTrue(library.CanChangeVolume.FirstAsync().Wait());
             }
         }
 
@@ -255,12 +256,12 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                library.LockVolume = true;
+                library.LockVolume.Value = true;
 
                 library.CreateAdmin("password");
                 library.ChangeToParty();
 
-                Assert.IsFalse(library.CanChangeVolume);
+                Assert.IsFalse(library.CanChangeVolume.FirstAsync().Wait());
             }
         }
 
@@ -269,7 +270,7 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                Assert.IsTrue(library.CanSwitchPlaylist);
+                Assert.IsTrue(library.CanSwitchPlaylist.FirstAsync().Wait());
             }
         }
 
@@ -278,12 +279,12 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                library.LockPlaylistSwitching = false;
+                library.LockPlaylistSwitching.Value = false;
 
                 library.CreateAdmin("password");
                 library.ChangeToParty();
 
-                Assert.IsTrue(library.CanSwitchPlaylist);
+                Assert.IsTrue(library.CanSwitchPlaylist.FirstAsync().Wait());
             }
         }
 
@@ -292,12 +293,12 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                library.LockPlaylistSwitching = true;
+                library.LockPlaylistSwitching.Value = true;
 
                 library.CreateAdmin("password");
                 library.ChangeToParty();
 
-                Assert.IsFalse(library.CanSwitchPlaylist);
+                Assert.IsFalse(library.CanSwitchPlaylist.FirstAsync().Wait());
             }
         }
 
@@ -498,7 +499,6 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        [Ignore("Test fails with NCrunch but not when starting it manually with NUnit. Needs to be revised.")]
         public void Play_SongIsCorrupted_PlaysNextSong()
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
@@ -516,8 +516,8 @@ namespace Espera.Core.Tests
 
                 var handle = new AutoResetEvent(false);
 
-                library.SongCorrupted += (sender, args) => handle.Set();
-                library.SongStarted += (sender, args) => handle.Set();
+                corruptedSong.Object.IsCorrupted.Subscribe(x => handle.Set());
+                library.SongStarted.Subscribe(x => handle.Set());
 
                 library.PlaySong(0);
 
@@ -543,13 +543,13 @@ namespace Espera.Core.Tests
 
                 var handle = new ManualResetEvent(false);
 
-                song.Object.Corrupted.Subscribe(x => handle.Set());
+                song.Object.IsCorrupted.Where(x => x).Subscribe(x => handle.Set());
 
                 library.PlaySong(0);
 
                 handle.WaitOne();
 
-                Assert.IsTrue(song.Object.IsCorrupted);
+                Assert.IsTrue(song.Object.IsCorrupted.Value);
             }
         }
 
@@ -568,13 +568,13 @@ namespace Espera.Core.Tests
 
                 var handle = new ManualResetEvent(false);
 
-                song.Object.Corrupted.Subscribe(x => handle.Set());
+                song.Object.IsCorrupted.Where(x => x).Subscribe(x => handle.Set());
 
                 library.PlaySong(0);
 
                 handle.WaitOne();
 
-                Assert.IsTrue(song.Object.IsCorrupted);
+                Assert.IsTrue(song.Object.IsCorrupted.FirstAsync().Wait());
             }
         }
 
@@ -591,9 +591,9 @@ namespace Espera.Core.Tests
 
                 var handle = new ManualResetEventSlim();
 
-                library.SongStarted += (sender, args) => handle.Set();
+                library.SongStarted.Subscribe(x => handle.Set());
 
-                library.PlayInstantly(new[] { songs[0].Object });
+                library.PlayInstantly(songs.Select(x => x.Object));
 
                 handle.Wait();
                 handle.Wait();
@@ -614,7 +614,7 @@ namespace Espera.Core.Tests
 
                 var handle = new ManualResetEventSlim();
 
-                library.SongStarted += (sender, args) => handle.Set();
+                library.SongStarted.Subscribe(x => handle.Set());
 
                 library.PlayInstantly(new[] { song.Object });
 
@@ -652,7 +652,9 @@ namespace Espera.Core.Tests
 
                 var handle = new ManualResetEventSlim();
 
-                library.SongFinished += (sender, args) => handle.Set();
+                library.PlaybackState
+                    .Where(x => x == AudioPlayerState.Finished)
+                    .Subscribe(x => handle.Set());
 
                 library.PlaySong(0);
 
@@ -660,7 +662,7 @@ namespace Espera.Core.Tests
 
                 handle.Wait();
 
-                player.Verify(x => x.Stop(), Times.Once());
+                player.Verify(x => x.Finish(), Times.Once());
             }
         }
 
@@ -701,7 +703,7 @@ namespace Espera.Core.Tests
                 var handle = new ManualResetEvent(false);
                 int played = 0;
 
-                library.SongStarted += (sender, e) =>
+                library.SongStarted.Subscribe(x =>
                 {
                     played++;
 
@@ -709,7 +711,7 @@ namespace Espera.Core.Tests
                     {
                         handle.Set();
                     }
-                };
+                });
 
                 library.PlaySong(0);
 
@@ -749,7 +751,7 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                library.LockLibraryRemoval = true;
+                library.LockLibraryRemoval.Value = true;
 
                 library.CreateAdmin("Password");
                 library.ChangeToParty();
@@ -848,7 +850,7 @@ namespace Espera.Core.Tests
 
                 library.RemoveFromPlaylist(new[] { 0 });
 
-                audioPlayerMock.Verify(p => p.Stop(), Times.Once());
+                audioPlayerMock.Verify(p => p.Finish(), Times.Once());
             }
         }
 
@@ -964,7 +966,7 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
-                library.LockPlaylistSwitching = true;
+                library.LockPlaylistSwitching.Value = true;
 
                 library.AddPlaylist("Playlist 2");
 
