@@ -179,6 +179,11 @@ namespace Espera.Core.Management
 
         public Playlist CurrentPlaylist { get; private set; }
 
+        public IObservable<Playlist> CurrentPlaylistChanged
+        {
+            get { return this.currentPlaylistChanged.AsObservable(); }
+        }
+
         /// <summary>
         /// Gets or sets the current song's elapsed time.
         /// </summary>
