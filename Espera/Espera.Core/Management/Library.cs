@@ -940,20 +940,22 @@ namespace Espera.Core.Management
 
         private AudioPlayer RenewCurrentPlayer(Song song)
         {
-            if (this.currentPlayer.FirstAsync().Wait() != null)
+            AudioPlayer player = this.currentPlayer.FirstAsync().Wait();
+
+            if (player != null)
             {
-                this.currentPlayer.FirstAsync().Wait().Dispose();
+                player.Dispose();
             }
 
-            AudioPlayer audioPlayer = song.CreateAudioPlayer();
+            AudioPlayer newAudioPlayer = song.CreateAudioPlayer();
 
-            this.currentPlayer.OnNext(audioPlayer);
+            this.currentPlayer.OnNext(newAudioPlayer);
 
             // Set the volume after the currentPlayer is propagated so that an potential
             // IVideoPlayerCallback user can attach to the new AudioPlayer prior to that
-            audioPlayer.Volume = this.Volume;
+            newAudioPlayer.Volume = this.Volume;
 
-            return audioPlayer;
+            return newAudioPlayer;
         }
 
         private void ThrowIfNotAdmin()
