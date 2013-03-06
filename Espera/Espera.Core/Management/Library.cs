@@ -844,9 +844,11 @@ namespace Espera.Core.Management
 
             Song song = this.CurrentPlaylist[playlistIndex].Song;
 
+            AudioPlayer audioPlayer = null;
+
             try
             {
-                this.RenewCurrentPlayer(song);
+                audioPlayer = this.RenewCurrentPlayer(song);
             }
 
             catch (AudioPlayerCreatingException)
@@ -872,7 +874,7 @@ namespace Espera.Core.Management
 
                 try
                 {
-                    this.currentPlayer.FirstAsync().Wait().Load();
+                    audioPlayer.Load();
                 }
 
                 catch (SongLoadException)
@@ -886,7 +888,7 @@ namespace Espera.Core.Management
 
                 try
                 {
-                    this.currentPlayer.FirstAsync().Wait().Play();
+                    audioPlayer.Play();
                 }
 
                 catch (PlaybackException)
@@ -936,16 +938,19 @@ namespace Espera.Core.Management
             this.RemoveFromPlaylist(playlist, playlist.GetIndexes(songList));
         }
 
-        private void RenewCurrentPlayer(Song song)
+        private AudioPlayer RenewCurrentPlayer(Song song)
         {
             if (this.currentPlayer.FirstAsync().Wait() != null)
             {
                 this.currentPlayer.FirstAsync().Wait().Dispose();
             }
 
-            this.currentPlayer.OnNext(song.CreateAudioPlayer());
+            AudioPlayer audioPlayer = song.CreateAudioPlayer();
+            audioPlayer.Volume = this.Volume;
 
-            this.currentPlayer.FirstAsync().Wait().Volume = this.Volume;
+            this.currentPlayer.OnNext(audioPlayer);
+
+            return audioPlayer;
         }
 
         private void ThrowIfNotAdmin()
