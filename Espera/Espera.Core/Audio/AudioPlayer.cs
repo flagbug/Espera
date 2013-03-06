@@ -1,21 +1,14 @@
-﻿using System;
-using System.Reactive;
+﻿using ReactiveMarrow;
+using System;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 
 namespace Espera.Core.Audio
 {
     internal abstract class AudioPlayer : IDisposable
     {
-        private readonly BehaviorSubject<AudioPlayerState> playbackState;
-        private readonly Subject<Unit> songFinished;
-        private readonly Subject<Unit> stopped;
-
         protected AudioPlayer()
         {
-            this.songFinished = new Subject<Unit>();
-            this.playbackState = new BehaviorSubject<AudioPlayerState>(AudioPlayerState.None);
-            this.stopped = new Subject<Unit>();
+            this.PlaybackStateProperty = new ReactiveProperty<AudioPlayerState>(AudioPlayerState.None);
         }
 
         /// <summary>
@@ -30,9 +23,9 @@ namespace Espera.Core.Audio
         /// <value>
         /// The current playback state.
         /// </value>
-        public virtual IObservable<AudioPlayerState> PlaybackState
+        public IObservable<AudioPlayerState> PlaybackState
         {
-            get { return this.playbackState.AsObservable(); }
+            get { return this.PlaybackStateProperty.AsObservable(); }
         }
 
         /// <summary>
@@ -40,19 +33,6 @@ namespace Espera.Core.Audio
         /// </summary>
         /// <value>The song that the <see cref="AudioPlayer"/> is assigned to.</value>
         public Song Song { get; protected set; }
-
-        /// <summary>
-        /// Occurs when the <see cref="Song"/> has finished it's playback.
-        /// </summary>
-        public IObservable<Unit> SongFinished
-        {
-            get { return this.songFinished.AsObservable(); }
-        }
-
-        public IObservable<Unit> Stopped
-        {
-            get { return this.stopped.AsObservable(); }
-        }
 
         /// <summary>
         /// Gets the total time.
@@ -66,14 +46,36 @@ namespace Espera.Core.Audio
         /// <value>The volume.</value>
         public abstract float Volume { get; set; }
 
+        protected ReactiveProperty<AudioPlayerState> PlaybackStateProperty { get; private set; }
+
         public abstract void Dispose();
 
         /// <summary>
-        /// Loads the specified song into the <see cref="Espera.Core.Audio.LocalAudioPlayer"/>. This is required before playing a new song.
+        /// Stops the playback of the <see cref="Song"/>.
+        /// </summary>
+        /// <remarks>
+        /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Finished"/>
+        /// before leaving the method.
+        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded, is stopped or is paused.
+        /// In this case it shouldn't perform any operation.
+        /// After this method is called, the <see cref="Play"/> and <see cref="Pause"/> methods have to throw an <see cref="InvalidOperationException"/> if they are called.
+        /// </remarks>
+        public virtual void Finish()
+        {
+            this.PlaybackStateProperty.Value = AudioPlayerState.Finished;
+        }
+
+        /// <summary>
+        /// Loads the specified song into the <see cref="Espera.Core.Audio.LocalAudioPlayer"/>.
+        /// Override this if the <see cref="AudioPlayer"/> needs to initialize before playing a song.
         /// </summary>
         /// <exception cref="SongLoadException">The song could not be loaded.</exception>
+        /// <exception cref="InvalidOperationException">The method is called more than once.</exception>
         public virtual void Load()
-        { }
+        {
+            if (this.PlaybackStateProperty.Value != AudioPlayerState.None)
+                throw new InvalidOperationException("Load was already called");
+        }
 
         /// <summary>
         /// Pauses the playback of the <see cref="Song"/>.
@@ -84,6 +86,7 @@ namespace Espera.Core.Audio
         /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded, is stopped or is paused.
         /// In this case it shouldn't perform any operation.
         /// </remarks>
+        /// <exception cref="InvalidOperationException">The method is called after <see cref="Finish"/> has been called.</exception>
         public abstract void Pause();
 
         /// <summary>
@@ -94,32 +97,7 @@ namespace Espera.Core.Audio
         /// before leaving the method.
         /// </remarks>
         /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
+        /// <exception cref="InvalidOperationException">The method is called after <see cref="Finish"/> has been called.</exception>
         public abstract void Play();
-
-        /// <summary>
-        /// Stops the playback of the <see cref="Song"/>.
-        /// </summary>
-        /// <remarks>
-        /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Stopped"/>
-        /// before leaving the method.
-        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded, is stopped or is paused.
-        /// In this case it shouldn't perform any operation.
-        /// </remarks>
-        public abstract void Stop();
-
-        protected void OnSongFinished()
-        {
-            this.songFinished.OnNext(Unit.Default);
-        }
-
-        protected void OnStopped()
-        {
-            this.stopped.OnNext(Unit.Default);
-        }
-
-        protected void SetPlaybackState(AudioPlayerState state)
-        {
-            this.playbackState.OnNext(state);
-        }
     }
 }

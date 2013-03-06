@@ -62,18 +62,13 @@ namespace Espera.Core.Audio
 
         public override void Dispose()
         {
-            this.Stop();
-        }
-
-        public void Finished()
-        {
-            this.SetPlaybackState(AudioPlayerState.Stopped);
-
-            this.OnSongFinished();
+            this.Finish();
         }
 
         public override void Load()
         {
+            base.Load();
+
             this.LoadRequest();
 
             this.totalTime.OnNext(this.Song.Duration);
@@ -81,25 +76,22 @@ namespace Espera.Core.Audio
 
         public override void Pause()
         {
+            if (this.PlaybackStateProperty.Value == AudioPlayerState.Finished)
+                throw new InvalidOperationException("Audio player has already finished playback");
+
             this.PauseRequest();
 
-            this.SetPlaybackState(AudioPlayerState.Paused);
+            this.PlaybackStateProperty.Value = AudioPlayerState.Paused;
         }
 
         public override void Play()
         {
+            if (this.PlaybackStateProperty.Value == AudioPlayerState.Finished)
+                throw new InvalidOperationException("Audio player has already finished playback");
+
             this.PlayRequest();
 
-            this.SetPlaybackState(AudioPlayerState.Playing);
-        }
-
-        public override void Stop()
-        {
-            this.StopRequest();
-
-            this.SetPlaybackState(AudioPlayerState.Stopped);
-
-            this.OnStopped();
+            this.PlaybackStateProperty.Value = AudioPlayerState.Playing;
         }
     }
 }

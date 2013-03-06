@@ -283,7 +283,7 @@ namespace Espera.View.Views
 
         private void VideoPlayerMediaEnded(object sender, RoutedEventArgs e)
         {
-            this.currentVideoPlayerCallback.Finished();
+            this.currentVideoPlayerCallback.Finish();
         }
 
         private void WireDataContext()

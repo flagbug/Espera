@@ -85,9 +85,15 @@ namespace Espera.Core.Management
             this.VideoPlayerCallback = this.currentPlayer
                 .OfType<IVideoPlayerCallback>();
 
-            this.SongFinished = this.currentPlayer
-                .CombineLatest(this.currentPlayer.Where(x => x != null).Select(x => x.Stopped).Switch(), (x1, x2) => Unit.Default);
+            this.currentPlayer
+                .Where(x => x != null)
+                .Select(x => x.PlaybackState.Where(p => p == AudioPlayerState.Finished).Select(q => x))
+                .Switch()
+                .Subscribe(this.HandleSongFinish);
 
+            /*
+             * Start boring, repeating glue code
+             */
             this.EnablePlaylistTimeout = new ReactiveProperty<bool>(
                 () => this.settings.EnablePlaylistTimeout,
                 x => this.settings.EnablePlaylistTimeout = x,
@@ -122,6 +128,9 @@ namespace Espera.Core.Management
                 () => this.settings.LockVolume,
                 x => this.settings.LockVolume = x,
                 x => this.accessMode == Management.AccessMode.Administrator);
+            /*
+             * End boring, repeating glue code
+             */
 
             this.CanChangeTime = this.AccessMode.CombineLatest(this.LockTime,
                 (accessMode, lockTime) => accessMode == Management.AccessMode.Administrator || !lockTime);
@@ -260,11 +269,6 @@ namespace Espera.Core.Management
         {
             get { return this.songAdded.AsObservable(); }
         }
-
-        /// <summary>
-        /// Occurs when a song has finished the playback.
-        /// </summary>
-        public IObservable<Unit> SongFinished { get; private set; }
 
         /// <summary>
         /// Gets all songs that are currently in the library.
@@ -771,14 +775,14 @@ namespace Espera.Core.Management
             }
         }
 
-        private void HandleSongFinish()
+        private void HandleSongFinish(AudioPlayer audioPlayer)
         {
             if (!this.CurrentPlaylist.CanPlayNextSong.FirstAsync().Wait())
             {
                 this.CurrentPlaylist.CurrentSongIndex = null;
             }
 
-            this.currentPlayer.FirstAsync().Wait().Dispose();
+            audioPlayer.Dispose();
             this.currentPlayer.OnNext(null);
 
             if (this.CurrentPlaylist.CanPlayNextSong.FirstAsync().Wait())
@@ -918,7 +922,7 @@ namespace Espera.Core.Management
 
             if (stopCurrentSong)
             {
-                this.currentPlayer.FirstAsync().Wait().Stop();
+                this.currentPlayer.FirstAsync().Wait().Finish();
             }
         }
 
@@ -936,7 +940,6 @@ namespace Espera.Core.Management
 
             this.currentPlayer.OnNext(song.CreateAudioPlayer());
 
-            this.currentPlayer.FirstAsync().Wait().SongFinished.Subscribe(x => this.HandleSongFinish());
             this.currentPlayer.FirstAsync().Wait().Volume = this.Volume;
         }
 

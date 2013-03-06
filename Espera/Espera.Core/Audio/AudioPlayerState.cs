@@ -6,23 +6,16 @@
     public enum AudioPlayerState
     {
         /// <summary>
-        /// The <see cref="AudioPlayer"/> is playing.
+        /// The initial state of the <see cref="AudioPlayer"/>
         /// </summary>
-        Playing,
+        None,
 
-        /// <summary>
-        /// The <see cref="AudioPlayer"/>  is paused.
-        /// </summary>
+        Playing,
         Paused,
 
         /// <summary>
-        /// The <see cref="AudioPlayer"/>  is stopped.
+        /// The <see cref="AudioPlayer"/> has finished the playback and cannot be started again.
         /// </summary>
-        Stopped,
-
-        /// <summary>
-        /// The <see cref="AudioPlayer"/>  has no state.
-        /// </summary>
-        None
+        Finished
     }
 }

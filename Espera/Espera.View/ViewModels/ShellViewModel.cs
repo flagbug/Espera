@@ -43,7 +43,7 @@ namespace Espera.View.ViewModels
             this.library.Initialize();
 
             this.library.SongStarted.Subscribe(x => this.HandleSongStarted());
-            this.library.SongFinished.Subscribe(x => this.HandleSongFinished());
+            this.library.PlaybackState.Where(x => x == AudioPlayerState.Finished).Subscribe(x => this.HandleSongFinished());
             this.UpdateScreenState = this.library.AccessMode;
 
             this.canChangeTime = this.library.CanChangeTime.ToProperty(this, x => x.CanChangeTime);
