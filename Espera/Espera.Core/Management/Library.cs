@@ -596,10 +596,10 @@ namespace Espera.Core.Management
         {
             this.ThrowIfNotAdmin();
 
-            if (!this.CurrentPlaylist.CanPlayPreviousSong.FirstAsync().Wait() || !this.CurrentPlaylist.CurrentSongIndex.HasValue)
+            if (!this.CurrentPlaylist.CanPlayPreviousSong.FirstAsync().Wait() || !this.CurrentPlaylist.CurrentSongIndex.Value.HasValue)
                 throw new InvalidOperationException("The previous song couldn't be played.");
 
-            this.PlaySong(this.CurrentPlaylist.CurrentSongIndex.Value - 1);
+            this.PlaySong(this.CurrentPlaylist.CurrentSongIndex.Value.Value - 1);
         }
 
         /// <summary>
@@ -771,7 +771,7 @@ namespace Espera.Core.Management
         {
             if (!this.CurrentPlaylist.CanPlayNextSong.FirstAsync().Wait())
             {
-                this.CurrentPlaylist.CurrentSongIndex = null;
+                this.CurrentPlaylist.CurrentSongIndex.Value = null;
             }
 
             else
@@ -784,7 +784,7 @@ namespace Espera.Core.Management
         {
             if (!this.CurrentPlaylist.CanPlayNextSong.FirstAsync().Wait())
             {
-                this.CurrentPlaylist.CurrentSongIndex = null;
+                this.CurrentPlaylist.CurrentSongIndex.Value = null;
             }
 
             audioPlayer.Dispose();
@@ -798,10 +798,10 @@ namespace Espera.Core.Management
 
         private void InternPlayNextSong()
         {
-            if (!this.CurrentPlaylist.CanPlayNextSong.FirstAsync().Wait() || !this.CurrentPlaylist.CurrentSongIndex.HasValue)
+            if (!this.CurrentPlaylist.CanPlayNextSong.FirstAsync().Wait() || !this.CurrentPlaylist.CurrentSongIndex.Value.HasValue)
                 throw new InvalidOperationException("The next song couldn't be played.");
 
-            int nextIndex = this.CurrentPlaylist.CurrentSongIndex.Value + 1;
+            int nextIndex = this.CurrentPlaylist.CurrentSongIndex.Value.Value + 1;
             Song nextSong = this.CurrentPlaylist[nextIndex].Song;
 
             // We want the to swap the songs, if the song that should be played next is currently caching
@@ -835,16 +835,16 @@ namespace Espera.Core.Management
 
             if (this.currentPlayingPlaylist != null && this.currentPlayingPlaylist != this.CurrentPlaylist)
             {
-                this.currentPlayingPlaylist.CurrentSongIndex = null;
+                this.currentPlayingPlaylist.CurrentSongIndex.Value = null;
             }
 
             this.currentPlayingPlaylist = this.CurrentPlaylist;
 
-            this.CurrentPlaylist.CurrentSongIndex = playlistIndex;
+            this.CurrentPlaylist.CurrentSongIndex.Value = playlistIndex;
 
             Song song = this.CurrentPlaylist[playlistIndex].Song;
 
-            AudioPlayer audioPlayer = null;
+            AudioPlayer audioPlayer;
 
             try
             {
@@ -923,7 +923,7 @@ namespace Espera.Core.Management
 
         private void RemoveFromPlaylist(Playlist playlist, IEnumerable<int> indexes)
         {
-            bool stopCurrentSong = playlist == this.CurrentPlaylist && indexes.Any(index => index == this.CurrentPlaylist.CurrentSongIndex);
+            bool stopCurrentSong = playlist == this.CurrentPlaylist && indexes.Any(index => index == this.CurrentPlaylist.CurrentSongIndex.Value);
 
             playlist.RemoveSongs(indexes);
 
@@ -946,9 +946,12 @@ namespace Espera.Core.Management
             }
 
             AudioPlayer audioPlayer = song.CreateAudioPlayer();
-            audioPlayer.Volume = this.Volume;
 
             this.currentPlayer.OnNext(audioPlayer);
+
+            // Set the volume after the currentPlayer is propagated so that an potential
+            // IVideoPlayerCallback user can attach to the new AudioPlayer prior to that
+            audioPlayer.Volume = this.Volume;
 
             return audioPlayer;
         }

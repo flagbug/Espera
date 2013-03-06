@@ -8,7 +8,6 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 
 namespace Espera.Core.Management
 {
@@ -17,7 +16,6 @@ namespace Espera.Core.Management
     /// </summary>
     public sealed class Playlist : IEnumerable<PlaylistEntry>, INotifyCollectionChanged, INotifyPropertyChanged
     {
-        private readonly BehaviorSubject<int?> currentSongIndex;
         private readonly ReactiveList<PlaylistEntry> playlist;
         private string name;
 
@@ -27,15 +25,16 @@ namespace Espera.Core.Management
             this.IsTemporary = isTemporary;
 
             this.playlist = new ReactiveList<PlaylistEntry>();
-            this.currentSongIndex = new BehaviorSubject<int?>(null);
 
-            var canPlayNextSong = this.CurrentSongIndexChanged
+            this.CurrentSongIndex = new ReactiveProperty<int?>(x => x == null || this.ContainsIndex(x.Value));
+
+            var canPlayNextSong = this.CurrentSongIndex
                 .CombineLatest(this.playlist.Changed, (i, args) => i.HasValue && this.ContainsIndex(i.Value + 1))
                 .Publish(false);
             canPlayNextSong.Connect();
             this.CanPlayNextSong = canPlayNextSong;
 
-            var canPlayPeviousSong = this.CurrentSongIndexChanged
+            var canPlayPeviousSong = this.CurrentSongIndex
                 .CombineLatest(this.playlist.Changed, (i, args) => i.HasValue && this.ContainsIndex(i.Value - 1))
                 .Publish(false);
             canPlayPeviousSong.Connect();
@@ -77,22 +76,7 @@ namespace Espera.Core.Management
         /// The index of the currently played song in the playlist. <c>null</c>, if no song is currently played.
         /// </value>
         /// <exception cref="ArgumentOutOfRangeException">The value is not in the range of the playlist's indexes.</exception>
-        public int? CurrentSongIndex
-        {
-            get { return this.currentSongIndex.FirstAsync().Wait(); }
-            internal set
-            {
-                if (value != null && !this.ContainsIndex(value.Value))
-                    Throw.ArgumentOutOfRangeException(() => value);
-
-                this.currentSongIndex.OnNext(value);
-            }
-        }
-
-        public IObservable<int?> CurrentSongIndexChanged
-        {
-            get { return this.currentSongIndex.AsObservable(); }
-        }
+        public ReactiveProperty<int?> CurrentSongIndex { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether this playlist is temporary and used for instant-playing.
@@ -228,7 +212,7 @@ namespace Espera.Core.Management
             // Use a HashSet for better lookup performance
             var indexList = new HashSet<int>(indexes);
 
-            if (this.CurrentSongIndex.HasValue && indexList.Contains(this.CurrentSongIndex.Value))
+            if (this.CurrentSongIndex.Value.HasValue && indexList.Contains(this.CurrentSongIndex.Value.Value))
             {
                 this.CurrentSongIndex = null;
             }
@@ -253,7 +237,7 @@ namespace Espera.Core.Management
 
             foreach (var entry in this.playlist)
             {
-                if (this.CurrentSongIndex == entry.Index)
+                if (this.CurrentSongIndex.Value == entry.Index)
                 {
                     migrateIndex = index;
                 }
@@ -269,7 +253,7 @@ namespace Espera.Core.Management
 
             if (migrateIndex.HasValue)
             {
-                this.CurrentSongIndex = migrateIndex;
+                this.CurrentSongIndex.Value = migrateIndex;
             }
         }
     }

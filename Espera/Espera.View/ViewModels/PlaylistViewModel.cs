@@ -45,7 +45,7 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.SongCount, this.entries.Count)
                 .DisposeWith(this.disposable);
 
-            IObservable<int?> currentSongUpdated = this.playlist.CurrentSongIndexChanged.Do(this.UpdateCurrentSong);
+            IObservable<int?> currentSongUpdated = this.playlist.CurrentSongIndex.Do(this.UpdateCurrentSong);
             IObservable<IEnumerable<PlaylistEntryViewModel>> remainingSongs = this.entries.Changed.StartWith(new NotifyCollectionChangedEventArgs[] { null })
                 .CombineLatest(currentSongUpdated, (changed, index) => Unit.Default)
                 .Select(x => this.entries.Reverse().TakeWhile(entry => !entry.IsPlaying).ToList());
