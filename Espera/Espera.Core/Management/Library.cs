@@ -922,7 +922,7 @@ namespace Espera.Core.Management
 
             if (stopCurrentSong)
             {
-                this.currentPlayer.FirstAsync().Wait().Finish();
+                this.currentPlayer.FirstAsync().Wait().Stop();
             }
         }
 

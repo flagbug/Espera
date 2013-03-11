@@ -8,7 +8,7 @@ namespace Espera.Core.Audio
     {
         protected AudioPlayer()
         {
-            this.PlaybackStateProperty = new ReactiveProperty<AudioPlayerState>(AudioPlayerState.None);
+            this.PlaybackStateProperty = new ReactiveProperty<AudioPlayerState>();
         }
 
         /// <summary>
@@ -48,10 +48,8 @@ namespace Espera.Core.Audio
 
         protected ReactiveProperty<AudioPlayerState> PlaybackStateProperty { get; private set; }
 
-        public abstract void Dispose();
-
         /// <summary>
-        /// Stops the playback of the <see cref="Song"/>.
+        /// Finishes the playback of the <see cref="Song"/>. This method is called when a song has ended.
         /// </summary>
         /// <remarks>
         /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Finished"/>
@@ -60,11 +58,31 @@ namespace Espera.Core.Audio
         /// In this case it shouldn't perform any operation.
         /// After this method is called, the <see cref="Play"/> and <see cref="Pause"/> methods have to throw an <see cref="InvalidOperationException"/> if they are called.
         /// </remarks>
-        public virtual void Finish()
+        protected virtual void Finish()
         {
             if (this.PlaybackStateProperty.Value != AudioPlayerState.Finished)
             {
                 this.PlaybackStateProperty.Value = AudioPlayerState.Finished;
+            }
+        }
+
+        public abstract void Dispose();
+
+        /// <summary>
+        /// Prematurely stops the playback of a song.
+        /// </summary>
+         /// <remarks>
+        /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Stopped"/>
+        /// before leaving the method.
+        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded or is paused.
+        /// In this case it shouldn't perform any operation.
+        /// After this method is called, the <see cref="Play"/> and <see cref="Pause"/> methods have to throw an <see cref="InvalidOperationException"/> if they are called.
+        /// </remarks>
+        public virtual void Stop()
+        {
+            if (this.PlaybackStateProperty.Value != AudioPlayerState.Stopped)
+            {
+                this.PlaybackStateProperty.Value = AudioPlayerState.Stopped;
             }
         }
 
@@ -73,7 +91,7 @@ namespace Espera.Core.Audio
         /// Override this if the <see cref="AudioPlayer"/> needs to initialize before playing a song.
         /// </summary>
         /// <exception cref="SongLoadException">The song could not be loaded.</exception>
-        /// <exception cref="InvalidOperationException">The method is called more than once.</exception>
+        /// <exception cref="InvalidOperationException">The method was called more than once.</exception>
         public virtual void Load()
         {
             if (this.PlaybackStateProperty.Value != AudioPlayerState.None)
@@ -86,10 +104,10 @@ namespace Espera.Core.Audio
         /// <remarks>
         /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Paused"/>
         /// before leaving the method.
-        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded, is stopped or is paused.
+        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded or is paused.
         /// In this case it shouldn't perform any operation.
         /// </remarks>
-        /// <exception cref="InvalidOperationException">The method is called after <see cref="Finish"/> has been called.</exception>
+        /// <exception cref="InvalidOperationException">The method is called after <see cref="Finish"/> or <see cref="Stop"/> has been called.</exception>
         public abstract void Pause();
 
         /// <summary>
@@ -99,8 +117,10 @@ namespace Espera.Core.Audio
         /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Playing"/>
         /// before leaving the method.
         /// </remarks>
+        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded or is playing.
+        /// In this case it shouldn't perform any operation.
         /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
-        /// <exception cref="InvalidOperationException">The method is called after <see cref="Finish"/> has been called.</exception>
+        /// <exception cref="InvalidOperationException">The method is called after <see cref="Finish"/> or <see cref="Stop"/> has been called.</exception>
         public abstract void Play();
     }
 }

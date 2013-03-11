@@ -25,6 +25,6 @@ namespace Espera.Core
 
         Uri VideoUrl { get; }
 
-        void Finish();
+        void Finished();
     }
 }
