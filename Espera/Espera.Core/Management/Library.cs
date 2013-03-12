@@ -73,12 +73,12 @@ namespace Espera.Core.Management
                 .Select(x => x == null ? null : x.Song);
 
             this.TotalTime = this.currentPlayer
-                .Select(x => x == null ? Observable.Never(TimeSpan.Zero) : x.TotalTime)
+                .Select(x => x == null ? Observable.Return(TimeSpan.Zero) : x.TotalTime)
                 .Switch()
                 .StartWith(TimeSpan.Zero);
 
             this.PlaybackState = this.currentPlayer
-                .Select(x => x == null ? Observable.Never(AudioPlayerState.None) : x.PlaybackState)
+                .Select(x => x == null ? Observable.Return(AudioPlayerState.None) : x.PlaybackState)
                 .Switch()
                 .StartWith(AudioPlayerState.None);
 
