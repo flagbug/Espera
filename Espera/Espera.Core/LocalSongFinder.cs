@@ -23,7 +23,7 @@ namespace Espera.Core
         private readonly ConcurrentQueue<string> pathQueue;
         private readonly Subject<int> songsFound;
         private volatile bool abort;
-        private DriveType driveType;
+        private readonly DriveType driveType;
         private volatile bool isSearching;
         private volatile bool isTagging;
         private int songCount;
@@ -55,11 +55,11 @@ namespace Espera.Core
 
         public async override Task ExecuteAsync()
         {
-            Task.Factory.StartNew(this.StartFileScan);
+            Task.Run(() => this.StartFileScan());
 
             this.isSearching = true;
 
-            await Task.Factory.StartNew(this.StartTagScan);
+            await Task.Run(() => this.StartTagScan());
 
             this.OnCompleted();
         }

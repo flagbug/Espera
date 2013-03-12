@@ -34,7 +34,7 @@ namespace Espera.Core
 
             var settings = new YouTubeRequestSettings("Espera", ApiKey);
             var request = new YouTubeRequest(settings);
-            Feed<Video> feed = await Task.Factory.StartNew(() => request.Get<Video>(query));
+            Feed<Video> feed = await Task.Run(() => request.Get<Video>(query));
 
             try
             {

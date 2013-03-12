@@ -170,7 +170,7 @@ namespace Espera.Core.Audio
 
                 // Create a new thread, so that we can spawn the song state check on the same thread as the play method
                 // With this, we can avoid cross-threading issues with the NAudio library
-                Task.Factory.StartNew(() =>
+                Task.Run(() =>
                 {
                     bool wasPaused = this.PlaybackStateProperty.Value == AudioPlayerState.Paused;
 
