@@ -48,43 +48,7 @@ namespace Espera.Core.Audio
 
         protected ReactiveProperty<AudioPlayerState> PlaybackStateProperty { get; private set; }
 
-        /// <summary>
-        /// Finishes the playback of the <see cref="Song"/>. This method is called when a song has ended.
-        /// </summary>
-        /// <remarks>
-        /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Finished"/>
-        /// before leaving the method.
-        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded, is stopped or is paused.
-        /// In this case it shouldn't perform any operation.
-        /// After this method is called, the <see cref="Play"/> and <see cref="Pause"/> methods have to throw an <see cref="InvalidOperationException"/> if they are called.
-        /// </remarks>
-        protected virtual void Finish()
-        {
-            if (this.PlaybackStateProperty.Value != AudioPlayerState.Finished)
-            {
-                this.PlaybackStateProperty.Value = AudioPlayerState.Finished;
-            }
-        }
-
         public abstract void Dispose();
-
-        /// <summary>
-        /// Prematurely stops the playback of a song.
-        /// </summary>
-         /// <remarks>
-        /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Stopped"/>
-        /// before leaving the method.
-        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded or is paused.
-        /// In this case it shouldn't perform any operation.
-        /// After this method is called, the <see cref="Play"/> and <see cref="Pause"/> methods have to throw an <see cref="InvalidOperationException"/> if they are called.
-        /// </remarks>
-        public virtual void Stop()
-        {
-            if (this.PlaybackStateProperty.Value != AudioPlayerState.Stopped)
-            {
-                this.PlaybackStateProperty.Value = AudioPlayerState.Stopped;
-            }
-        }
 
         /// <summary>
         /// Loads the specified song into the <see cref="Espera.Core.Audio.LocalAudioPlayer"/>.
@@ -122,5 +86,35 @@ namespace Espera.Core.Audio
         /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
         /// <exception cref="InvalidOperationException">The method is called after <see cref="Finish"/> or <see cref="Stop"/> has been called.</exception>
         public abstract void Play();
+
+        /// <summary>
+        /// Prematurely stops the playback of a song.
+        /// </summary>
+        /// <remarks>
+        /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Stopped"/>
+        /// before leaving the method.
+        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded or is paused.
+        /// In this case it shouldn't perform any operation.
+        /// After this method is called, the <see cref="Play"/> and <see cref="Pause"/> methods have to throw an <see cref="InvalidOperationException"/> if they are called.
+        /// </remarks>
+        public abstract void Stop();
+
+        /// <summary>
+        /// Finishes the playback of the <see cref="Song"/>. This method is called when a song has ended.
+        /// </summary>
+        /// <remarks>
+        /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Finished"/>
+        /// before leaving the method.
+        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded, is stopped or is paused.
+        /// In this case it shouldn't perform any operation.
+        /// After this method is called, the <see cref="Play"/> and <see cref="Pause"/> methods have to throw an <see cref="InvalidOperationException"/> if they are called.
+        /// </remarks>
+        protected virtual void Finish()
+        {
+            if (this.PlaybackStateProperty.Value != AudioPlayerState.Finished)
+            {
+                this.PlaybackStateProperty.Value = AudioPlayerState.Finished;
+            }
+        }
     }
 }

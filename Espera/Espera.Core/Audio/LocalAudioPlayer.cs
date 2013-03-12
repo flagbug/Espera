@@ -85,36 +85,6 @@ namespace Espera.Core.Audio
             }
         }
 
-        protected override void Finish()
-        {
-            lock (this.playerLock)
-            {
-                if (this.wavePlayer != null && this.PlaybackStateProperty.Value != AudioPlayerState.Finished)
-                {
-                    this.wavePlayer.Stop();
-
-                    this.EnsureState(NAudio.Wave.PlaybackState.Stopped);
-
-                    base.Finish();
-                }
-            }
-        }
-
-        public override void Stop()
-        {
-            lock (this.playerLock)
-            {
-                if (this.wavePlayer != null && this.PlaybackStateProperty.Value != AudioPlayerState.Stopped)
-                {
-                    this.wavePlayer.Stop();
-
-                    this.EnsureState(NAudio.Wave.PlaybackState.Stopped);
-
-                    base.Stop();
-                }
-            }
-        }
-
         public override void Load()
         {
             lock (this.playerLock)
@@ -143,7 +113,7 @@ namespace Espera.Core.Audio
         {
             lock (this.playerLock)
             {
-                if (this.PlaybackStateProperty.Value == AudioPlayerState.Finished || 
+                if (this.PlaybackStateProperty.Value == AudioPlayerState.Finished ||
                     this.PlaybackStateProperty.Value == AudioPlayerState.Stopped)
                     throw new InvalidOperationException("Audio player has already finished playback");
 
@@ -161,7 +131,7 @@ namespace Espera.Core.Audio
         {
             lock (this.playerLock)
             {
-                if (this.PlaybackStateProperty.Value == AudioPlayerState.Finished || 
+                if (this.PlaybackStateProperty.Value == AudioPlayerState.Finished ||
                     this.PlaybackStateProperty.Value == AudioPlayerState.Stopped)
                     throw new InvalidOperationException("Audio player has already finished playback");
 
@@ -173,7 +143,6 @@ namespace Espera.Core.Audio
                 Task.Run(() =>
                 {
                     bool wasPaused = this.PlaybackStateProperty.Value == AudioPlayerState.Paused;
-
 
                     try
                     {
@@ -197,6 +166,35 @@ namespace Espera.Core.Audio
 
                 this.EnsureState(NAudio.Wave.PlaybackState.Playing);
                 this.PlaybackStateProperty.Value = AudioPlayerState.Playing;
+            }
+        }
+
+        public override void Stop()
+        {
+            lock (this.playerLock)
+            {
+                if (this.wavePlayer != null && this.PlaybackStateProperty.Value != AudioPlayerState.Stopped)
+                {
+                    this.wavePlayer.Stop();
+
+                    this.EnsureState(NAudio.Wave.PlaybackState.Stopped);
+                    this.PlaybackStateProperty.Value = AudioPlayerState.Stopped;
+                }
+            }
+        }
+
+        protected override void Finish()
+        {
+            lock (this.playerLock)
+            {
+                if (this.wavePlayer != null && this.PlaybackStateProperty.Value != AudioPlayerState.Finished)
+                {
+                    this.wavePlayer.Stop();
+
+                    this.EnsureState(NAudio.Wave.PlaybackState.Stopped);
+
+                    base.Finish();
+                }
             }
         }
 
