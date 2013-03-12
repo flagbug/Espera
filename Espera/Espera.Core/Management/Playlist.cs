@@ -214,7 +214,7 @@ namespace Espera.Core.Management
 
             if (this.CurrentSongIndex.Value.HasValue && indexList.Contains(this.CurrentSongIndex.Value.Value))
             {
-                this.CurrentSongIndex = null;
+                this.CurrentSongIndex.Value = null;
             }
 
             this.playlist.RemoveAll(item => indexList.Contains(item.Index));
