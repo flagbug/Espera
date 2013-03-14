@@ -848,7 +848,7 @@ namespace Espera.Core.Tests
         {
             bool finishedFired = false;
 
-            var audioPlayerMock = new JumpAudioPlayer();
+            var audioPlayerMock = new SimpleAudioPlayer();
             audioPlayerMock.PlaybackState.Where(x => x == AudioPlayerState.Stopped).Subscribe(x => finishedFired = true);
 
             var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
