@@ -103,7 +103,6 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        [Ignore("Times out randomly")]
         public void AutoNextSong_SongIsCaching_SwapSongs()
         {
             var eventWait = new ManualResetEvent(false); // We need this, because Library.PlaySong() pops up a new thread internally and then returns
@@ -154,7 +153,10 @@ namespace Espera.Core.Tests
 
                 library.PlaySong(0);
 
-                eventWait.WaitOne();
+                if (!eventWait.WaitOne(5000))
+                {
+                    Assert.Fail();
+                }
 
                 var expectedSongs = new[]
                 {
@@ -642,7 +644,6 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        [Ignore("Times out")]
         public void PlayInstantly_StopsCurrentSong()
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
@@ -667,7 +668,10 @@ namespace Espera.Core.Tests
 
                 library.PlayInstantly(new[] { instantSong.Object });
 
-                handle.Wait();
+                if (!handle.Wait(5000))
+                {
+                    Assert.Fail();
+                }
             }
         }
 
