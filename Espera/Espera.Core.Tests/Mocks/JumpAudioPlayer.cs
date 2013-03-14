@@ -24,7 +24,6 @@ namespace Espera.Core.Tests.Mocks
 
         public override void Dispose()
         {
-            this.Finish();
         }
 
         public override void Pause()
@@ -36,6 +35,11 @@ namespace Espera.Core.Tests.Mocks
         {
             this.PlaybackStateProperty.Value = AudioPlayerState.Playing;
             this.Finish();
+        }
+
+        public override void Stop()
+        {
+            this.PlaybackStateProperty.Value = AudioPlayerState.Stopped;
         }
     }
 }

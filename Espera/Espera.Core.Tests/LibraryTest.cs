@@ -584,27 +584,29 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                var player1 = new Mock<AudioPlayer>();
-                player1.Setup(x => x.Play()).Callback(player1.Object.Finish);
+                bool play1Called = false;
+                bool play2Called = false;
 
-                var player2 = new Mock<AudioPlayer>();
-                player2.Setup(x => x.Play()).Callback(player2.Object.Finish);
+                var player1 = new JumpAudioPlayer();
+                player1.PlaybackState.Where(x => x == AudioPlayerState.Playing).Subscribe(x => play1Called = true);
+
+                var player2 = new JumpAudioPlayer();
+                player2.PlaybackState.Where(x => x == AudioPlayerState.Playing).Subscribe(x => play2Called = true);
 
                 Mock<Song>[] songs = Helpers.CreateSongMocks(2, false);
-                songs[0].Setup(p => p.CreateAudioPlayer()).Returns(player1.Object);
-                songs[1].Setup(p => p.CreateAudioPlayer()).Returns(player2.Object);
+                songs[0].Setup(p => p.CreateAudioPlayer()).Returns(player1);
+                songs[1].Setup(p => p.CreateAudioPlayer()).Returns(player2);
 
-                var handle = new AutoResetEvent(false);
+                var handle = new CountdownEvent(2);
 
-                library.SongStarted.Subscribe(x => handle.Set());
+                library.SongStarted.Subscribe(x => handle.Signal());
 
                 library.PlayInstantly(songs.Select(x => x.Object));
 
-                handle.WaitOne();
-                handle.WaitOne();
+                handle.Wait();
 
-                player1.Verify(p => p.Play(), Times.Once());
-                player2.Verify(p => p.Play(), Times.Once());
+                Assert.IsTrue(play1Called);
+                Assert.IsTrue(play2Called);
             }
         }
 
@@ -840,10 +842,13 @@ namespace Espera.Core.Tests
         [Test]
         public void RemoveFromPlaylist_SongIsPlaying_CurrentPlayerIsStopped()
         {
-            var audioPlayerMock = new Mock<AudioPlayer>();
+            bool finishedFired = false;
+
+            var audioPlayerMock = new JumpAudioPlayer();
+            audioPlayerMock.PlaybackState.Where(x => x == AudioPlayerState.Stopped).Subscribe(x => finishedFired = true);
 
             var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-            songMock.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayerMock.Object);
+            songMock.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayerMock);
 
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
@@ -852,9 +857,9 @@ namespace Espera.Core.Tests
                 library.PlaySong(0);
 
                 library.RemoveFromPlaylist(new[] { 0 });
-
-                audioPlayerMock.Verify(p => p.Finish(), Times.Once());
             }
+
+            Assert.IsTrue(finishedFired);
         }
 
         [Test]

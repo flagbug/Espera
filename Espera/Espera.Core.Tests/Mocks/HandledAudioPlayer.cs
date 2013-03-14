@@ -32,7 +32,6 @@ namespace Espera.Core.Tests.Mocks
 
         public override void Dispose()
         {
-            this.Finish();
         }
 
         public override void Pause()
@@ -47,6 +46,11 @@ namespace Espera.Core.Tests.Mocks
             handle.WaitOne();
 
             this.Finish();
+        }
+
+        public override void Stop()
+        {
+            throw new NotImplementedException();
         }
     }
 }
