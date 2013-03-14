@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="StreamYoutube" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="LockVolume" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
