@@ -414,15 +414,7 @@ namespace Espera.View.ViewModels
         public IEnumerable<PlaylistEntryViewModel> SelectedPlaylistEntries
         {
             get { return this.selectedPlaylistEntries; }
-            set
-            {
-                if (this.SelectedPlaylistEntries != value)
-                {
-                    this.selectedPlaylistEntries = value;
-                    this.RaisePropertyChanged(x => x.SelectedPlaylistEntries);
-                    this.RaisePropertyChanged(x => x.PlayCommand);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(value); }
         }
 
         public SettingsViewModel SettingsViewModel { get; private set; }
