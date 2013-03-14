@@ -121,6 +121,7 @@ namespace Espera.Core
 
                 this.StreamingPath = video.DownloadUrl;
             }
+
             return this.isStreaming ? (AudioPlayer)new YoutubeAudioPlayer(this) : new LocalAudioPlayer(this);
         }
 
