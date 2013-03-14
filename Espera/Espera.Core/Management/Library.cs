@@ -535,7 +535,7 @@ namespace Espera.Core.Management
             }
 
             this.driveWatcher.Initialize();
-            this.driveWatcher.DriveRemoved += (sender, args) => Task.Factory.StartNew(this.Update);
+            this.driveWatcher.DriveRemoved += (sender, args) => Task.Run(() => this.Update());
 
             this.Load();
         }
@@ -851,7 +851,7 @@ namespace Espera.Core.Management
                 return;
             }
 
-            Task.Factory.StartNew(() =>
+            Task.Run(() =>
             {
                 if (song.HasToCache && !song.IsCached)
                 {

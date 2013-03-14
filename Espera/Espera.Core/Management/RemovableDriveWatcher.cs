@@ -8,15 +8,8 @@ namespace Espera.Core.Management
 
         public event EventHandler DriveRemoved
         {
-            add
-            {
-                this.driveWatcher.DriveRemoved += value;
-            }
-
-            remove
-            {
-                this.driveWatcher.DriveRemoved -= value;
-            }
+            add { this.driveWatcher.DriveRemoved += value; }
+            remove { this.driveWatcher.DriveRemoved -= value; }
         }
 
         public void Dispose()
