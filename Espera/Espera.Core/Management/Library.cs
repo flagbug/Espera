@@ -294,6 +294,17 @@ namespace Espera.Core.Management
             get { return this.songStarted.AsObservable(); }
         }
 
+        public bool StreamHighestYoutubeQuality
+        {
+            get { return this.settings.StreamHighestYoutubeQuality; }
+            set
+            {
+                this.ThrowIfNotAdmin();
+
+                this.settings.StreamHighestYoutubeQuality = value;
+            }
+        }
+
         public bool StreamYoutube
         {
             get { return this.settings.StreamYoutube; }
@@ -331,6 +342,17 @@ namespace Espera.Core.Management
                 {
                     this.currentPlayer.FirstAsync().Wait().Volume = value;
                 }
+            }
+        }
+
+        public YoutubeStreamingQuality YoutubeStreamingQuality
+        {
+            get { return this.settings.YoutubeStreamingQuality; }
+            set
+            {
+                this.ThrowIfNotAdmin();
+
+                this.settings.YoutubeStreamingQuality = value;
             }
         }
 

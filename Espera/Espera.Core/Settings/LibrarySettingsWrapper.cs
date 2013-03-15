@@ -52,6 +52,12 @@ namespace Espera.Core.Settings
             set { CoreSettings.Default.PlaylistTimeout = value; }
         }
 
+        public bool StreamHighestYoutubeQuality
+        {
+            get { return CoreSettings.Default.StreamHighestYoutubeQuality; }
+            set { CoreSettings.Default.StreamHighestYoutubeQuality = value; }
+        }
+
         public bool StreamYoutube
         {
             get { return CoreSettings.Default.StreamYoutube; }
@@ -68,6 +74,12 @@ namespace Espera.Core.Settings
         {
             get { return CoreSettings.Default.Volume; }
             set { CoreSettings.Default.Volume = value; }
+        }
+
+        public YoutubeStreamingQuality YoutubeStreamingQuality
+        {
+            get { return (YoutubeStreamingQuality)CoreSettings.Default.YoutubeStreamingQuality; }
+            set { CoreSettings.Default.YoutubeStreamingQuality = (int)value; }
         }
 
         public void Save()

@@ -154,5 +154,29 @@ namespace Espera.Core {
                 this["Volume"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int YoutubeStreamingQuality {
+            get {
+                return ((int)(this["YoutubeStreamingQuality"]));
+            }
+            set {
+                this["YoutubeStreamingQuality"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool StreamHighestYoutubeQuality {
+            get {
+                return ((bool)(this["StreamHighestYoutubeQuality"]));
+            }
+            set {
+                this["StreamHighestYoutubeQuality"] = value;
+            }
+        }
     }
 }

@@ -1,11 +1,14 @@
 ﻿using Caliburn.Micro;
+using Espera.Core;
 using Espera.Core.Management;
 using Espera.View.Properties;
 using Rareform.Validation;
 using ReactiveUI;
 using ReactiveUI.Xaml;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reflection;
@@ -23,6 +26,8 @@ namespace Espera.View.ViewModels
         private string loginPassword;
         private bool showLogin;
         private bool showSettings;
+
+        private YoutubeStreamingQuality youtubeStreamingQuality;
 
         public SettingsViewModel(Library library, IWindowManager windowManager)
         {
@@ -78,6 +83,16 @@ namespace Espera.View.ViewModels
 
             this.ChangeAccentColorCommand = new ReactiveCommand();
             this.ChangeAccentColorCommand.Subscribe(p => Settings.Default.AccentColor = (string)p);
+        }
+
+        public static IEnumerable<YoutubeStreamingQuality> YoutubeStreamingQualities
+        {
+            get
+            {
+                return Enum.GetValues(typeof(YoutubeStreamingQuality))
+                    .Cast<YoutubeStreamingQuality>()
+                    .Reverse();
+            }
         }
 
         public bool CanCreateAdmin
@@ -222,6 +237,17 @@ namespace Espera.View.ViewModels
             private set { this.RaiseAndSetIfChanged(value); }
         }
 
+        public bool StreamHighestYoutubeQuality
+        {
+            get { return this.library.StreamHighestYoutubeQuality; }
+            set
+            {
+                this.library.StreamHighestYoutubeQuality = value;
+
+                this.RaisePropertyChanged(x => x.StreamHighestYoutubeQuality);
+            }
+        }
+
         public bool StreamYoutube
         {
             get { return this.library.StreamYoutube; }
@@ -235,6 +261,16 @@ namespace Espera.View.ViewModels
                 Version version = Assembly.GetExecutingAssembly().GetName().Version;
 
                 return String.Format("{0}.{1}.{2}", version.Major, version.Minor, version.Revision);
+            }
+        }
+
+        public YoutubeStreamingQuality YoutubeStreamingQuality
+        {
+            get { return this.library.YoutubeStreamingQuality; }
+            set
+            {
+                this.library.YoutubeStreamingQuality = value;
+                this.RaisePropertyChanged(x => x.YoutubeStreamingQuality);
             }
         }
 

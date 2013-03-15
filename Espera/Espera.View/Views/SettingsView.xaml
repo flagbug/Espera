@@ -5,6 +5,7 @@
              xmlns:ViewModels="clr-namespace:Espera.View.ViewModels"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:valueConverters="clr-namespace:Rareform.ValueConverters;assembly=Rareform"
              d:DataContext="{d:DesignInstance ViewModels:DesignTimeSettingsViewModel,
                                               IsDesignTimeCreatable=True}"
              d:DesignHeight="800"
@@ -45,6 +46,7 @@
                 <Setter Property="OnLabel" Value="Yes" />
                 <Setter Property="OffLabel" Value="No" />
             </Style>
+            <valueConverters:BoolNegationValueConverter x:Key="BoolNegationConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -138,7 +140,23 @@
                 </ScrollViewer>
             </TabItem>
             <TabItem Header="youtube">
-                <Controls:ToggleSwitch Header="Stream from Youtube instead of downloading.&#10;Changing this option requires a restart." IsChecked="{Binding Path=StreamYoutube}" />
+                <StackPanel>
+                    <Controls:ToggleSwitch Header="Stream from Youtube instead of downloading.&#10;Changing this option requires a restart." IsChecked="{Binding Path=StreamYoutube}" />
+                    <Controls:ToggleSwitch Margin="10, 0, 0, 0"
+                                           Header="Always stream highest quality"
+                                           IsChecked="{Binding Path=StreamHighestYoutubeQuality}" />
+                    <StackPanel Margin="20, 0, 0, 0"
+                                IsEnabled="{Binding Path=StreamHighestYoutubeQuality,
+                                                    Converter={StaticResource BoolNegationConverter}}"
+                                Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="Streaming quality" />
+                        <ComboBox Width="100"
+                                  Margin="10, 0, 0, 0"
+                                  ItemsSource="{Binding Path=YoutubeStreamingQualities}"
+                                  SelectedIndex="0"
+                                  SelectedItem="{Binding Path=YoutubeStreamingQuality}" />
+                    </StackPanel>
+                </StackPanel>
             </TabItem>
             <TabItem Header="about">
                 <StackPanel>

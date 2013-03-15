@@ -11,6 +11,14 @@ namespace Espera.Core
 {
     public sealed class YoutubeSong : Song
     {
+        private static readonly Dictionary<YoutubeStreamingQuality, IEnumerable<int>> StreamingQualityMap =
+            new Dictionary<YoutubeStreamingQuality, IEnumerable<int>>
+            {
+                { YoutubeStreamingQuality.High, new HashSet<int> { 1080, 720 } },
+                { YoutubeStreamingQuality.Medium, new HashSet<int> { 480 } },
+                { YoutubeStreamingQuality.Low, new HashSet<int> { 360, 240 } }
+            };
+
         private readonly bool isStreaming;
 
         /// <summary>
@@ -125,6 +133,30 @@ namespace Espera.Core
             return this.isStreaming ? (AudioPlayer)new YoutubeAudioPlayer(this) : new LocalAudioPlayer(this);
         }
 
+        private static VideoInfo GetVideoByStreamingQuality(IEnumerable<VideoInfo> videos, YoutubeStreamingQuality quality)
+        {
+            if (CoreSettings.Default.StreamHighestYoutubeQuality)
+            {
+                return videos.OrderByDescending(x => x.Resolution)
+                    .FirstOrDefault();
+            }
+
+            IEnumerable<int> preferredResolutions = StreamingQualityMap[quality];
+
+            IEnumerable<VideoInfo> preferredVideos = videos
+                .Where(info => preferredResolutions.Contains(info.Resolution))
+                .OrderByDescending(info => info.Resolution);
+
+            VideoInfo video = preferredVideos.FirstOrDefault();
+
+            if (video == null)
+            {
+                return GetVideoByStreamingQuality(videos, (YoutubeStreamingQuality)(((int)quality) - 1));
+            }
+
+            return video;
+        }
+
         private static VideoInfo GetVideoInfoForDownload(string youtubeLink)
         {
             IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(youtubeLink);
@@ -141,13 +173,10 @@ namespace Espera.Core
         {
             IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(youtubeLink);
 
-            // For now, we select the lowest resolution to avoid buffering, later we let the user decide which quality he prefers
-            VideoInfo video = videoInfos
-                .Where(info => info.VideoType == VideoType.Mp4 && !info.Is3D)
-                .OrderBy(info => info.Resolution)
-                .FirstOrDefault();
+            IEnumerable<VideoInfo> filtered = videoInfos
+                .Where(info => info.VideoType == VideoType.Mp4 && !info.Is3D);
 
-            return video;
+            return GetVideoByStreamingQuality(filtered, (YoutubeStreamingQuality)CoreSettings.Default.YoutubeStreamingQuality);
         }
 
         private void DownloadAudioTrack(VideoInfo video, string tempPath)

@@ -140,6 +140,7 @@
     <Compile Include="TagSanitizer.cs" />
     <Compile Include="YoutubeSong.cs" />
     <Compile Include="YoutubeSongFinder.cs" />
+    <Compile Include="YoutubeStreamingQuality.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
