@@ -81,7 +81,7 @@ namespace Espera.View.ViewModels
                         this.saveName = null;
                     }
 
-                    this.RaisePropertyChanged(x => x.EditName);
+                    this.RaisePropertyChanged();
                 }
             }
         }
@@ -104,7 +104,7 @@ namespace Espera.View.ViewModels
                 if (this.Name != value)
                 {
                     this.playlist.Name = value;
-                    this.RaisePropertyChanged(x => x.Name);
+                    this.RaisePropertyChanged();
                 }
             }
         }

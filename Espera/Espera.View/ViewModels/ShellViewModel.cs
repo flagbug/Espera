@@ -261,7 +261,7 @@ namespace Espera.View.ViewModels
                 if (value != null) // There always has to be a playlist selected
                 {
                     this.library.SwitchToPlaylist(value.Model);
-                    this.RaisePropertyChanged(x => x.CurrentPlaylist);
+                    this.RaisePropertyChanged();
                 }
             }
         }
@@ -465,7 +465,7 @@ namespace Espera.View.ViewModels
             set
             {
                 this.library.Volume = (float)value;
-                this.RaisePropertyChanged(x => x.Volume);
+                this.RaisePropertyChanged();
             }
         }
 

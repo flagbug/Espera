@@ -131,7 +131,7 @@ namespace Espera.View.ViewModels
                 {
                     this.library.EnablePlaylistTimeout.Value = value;
 
-                    this.RaisePropertyChanged(x => x.EnablePlaylistTimeout);
+                    this.RaisePropertyChanged();
                 }
             }
         }
@@ -197,7 +197,7 @@ namespace Espera.View.ViewModels
                 if (this.LockWindow != value)
                 {
                     Settings.Default.LockWindow = value;
-                    this.RaisePropertyChanged(x => x.LockWindow);
+                    this.RaisePropertyChanged();
                 }
             }
         }
@@ -244,7 +244,7 @@ namespace Espera.View.ViewModels
             {
                 this.library.StreamHighestYoutubeQuality = value;
 
-                this.RaisePropertyChanged(x => x.StreamHighestYoutubeQuality);
+                this.RaisePropertyChanged();
             }
         }
 
@@ -270,7 +270,7 @@ namespace Espera.View.ViewModels
             set
             {
                 this.library.YoutubeStreamingQuality = value;
-                this.RaisePropertyChanged(x => x.YoutubeStreamingQuality);
+                this.RaisePropertyChanged();
             }
         }
 
