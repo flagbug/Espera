@@ -109,6 +109,15 @@
                                                 Converter={StaticResource BooleanToVisibilityConverter}}" />
             </StackPanel>
         </Controls:Flyout>
+        <Controls:Flyout Header="Video"
+                         IsOpen="{Binding Path=ShowVideoPlayer}"
+                         Position="Right">
+            <MediaElement x:Name="videoPlayer"
+                          Width="{Binding RelativeSource={RelativeSource AncestorType=Controls:MetroWindow},
+                                          Path=Width}"
+                          LoadedBehavior="Manual"
+                          MediaEnded="VideoPlayerMediaEnded" />
+        </Controls:Flyout>
     </Controls:MetroWindow.Flyouts>
     <Grid x:Name="mainGrid" Margin="10">
         <Grid.LayoutTransform>
@@ -124,6 +133,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -223,6 +233,14 @@
                      KeyUp="SearchTextBoxKeyUp"
                      Text="{Binding Path=CurrentSongSource.SearchText,
                                     UpdateSourceTrigger=PropertyChanged}" />
+            <ToggleButton Grid.Column="5"
+                          Width="30"
+                          Margin="5, 0, 0, 0"
+                          IsChecked="{Binding Path=ShowVideoPlayer}"
+                          Padding="0"
+                          ToolTip="YouTube video player">
+                <Image Source="/Espera;component/Images/VideoPlayer.png" />
+            </ToggleButton>
         </Grid>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
@@ -858,11 +876,5 @@
                 </Grid>
             </StatusBarItem>
         </StatusBar>
-        <MediaElement x:Name="videoPlayer"
-                      Width="0"
-                      Height="0"
-                      LoadedBehavior="Manual"
-                      MediaEnded="VideoPlayerMediaEnded"
-                      Visibility="Hidden" />
     </Grid>
 </Controls:MetroWindow>
