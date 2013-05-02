@@ -111,6 +111,9 @@
         </Controls:Flyout>
     </Controls:MetroWindow.Flyouts>
     <Grid x:Name="mainGrid" Margin="10">
+        <Grid.LayoutTransform>
+            <ScaleTransform ScaleX="{Binding Path=SettingsViewModel.Scaling}" ScaleY="{Binding Path=SettingsViewModel.Scaling}" />
+        </Grid.LayoutTransform>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
