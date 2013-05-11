@@ -122,7 +122,6 @@
     <Compile Include="Management\PlaylistEntry.cs" />
     <Compile Include="Management\WrongPasswordException.cs" />
     <Compile Include="Management\Library.cs" />
-    <Compile Include="Management\LibraryFillEventArgs.cs" />
     <Compile Include="Management\LibraryReader.cs" />
     <Compile Include="Management\LibraryWriter.cs" />
     <Compile Include="Management\Playlist.cs" />

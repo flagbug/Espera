@@ -41,6 +41,11 @@ namespace Espera.Core.Management
             }
         }
 
+        public IEnumerable<string> ReadSources()
+        {
+            return Enumerable.Empty<string>();
+        }
+
         private DriveType GetDriveType(string path)
         {
             string root = Path.GetPathRoot(path);

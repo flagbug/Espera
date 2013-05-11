@@ -82,7 +82,7 @@
         <Controls:Flyout Header="settings"
                          IsOpen="{Binding Path=SettingsViewModel.ShowSettings}"
                          Position="Right">
-            <Views:SettingsView Width="500" DataContext="{Binding Path=SettingsViewModel}" />
+            <Views:SettingsView Width="575" DataContext="{Binding Path=SettingsViewModel}" />
         </Controls:Flyout>
         <Controls:Flyout Header="Login"
                          IsOpen="{Binding Path=SettingsViewModel.ShowLogin}"
@@ -126,11 +126,6 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <Button Click="AddSongsButtonClick"
-                        Padding="0"
-                        ToolTip="Add music">
-                    <Image Source="/Espera;component/Images/Add.png" />
-                </Button>
                 <Button Width="30"
                         Margin="15, 0, 0, 0"
                         Padding="0">

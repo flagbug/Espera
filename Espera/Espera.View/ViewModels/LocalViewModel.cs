@@ -2,7 +2,6 @@
 using Espera.Core.Management;
 using Espera.View.Properties;
 using MoreLinq;
-using Rareform.Validation;
 using ReactiveUI;
 using ReactiveUI.Xaml;
 using System;
@@ -36,8 +35,6 @@ namespace Espera.View.ViewModels
                 this.RaisePropertyChanged(x => x.Artists);
                 this.UpdateSelectableSongs();
             });
-
-            this.StatusViewModel = new StatusViewModel(library);
 
             this.artists = new Dictionary<string, ArtistViewModel>();
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
@@ -123,44 +120,10 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(value); }
         }
 
-        public StatusViewModel StatusViewModel { get; private set; }
-
         public int TitleColumnWidth
         {
             get { return Settings.Default.LocalTitleColumnWidth; }
             set { Settings.Default.LocalTitleColumnWidth = value; }
-        }
-
-        public async void AddSongs(string folderPath)
-        {
-            if (folderPath == null)
-                Throw.ArgumentNullException(() => folderPath);
-
-            string lastArtist = null;
-
-            this.StatusViewModel.IsAdding = true;
-
-            IDisposable songAddedSubscription = this.Library.SongAdded.Subscribe(x =>
-            {
-                this.StatusViewModel.Update(x.Song.OriginalPath, x.ProcessedTagCount, x.TotalTagCount);
-
-                if (x.Song.Artist != lastArtist)
-                {
-                    lastArtist = x.Song.Artist;
-                    this.RaisePropertyChanged(p => p.Artists);
-                }
-            });
-
-            IDisposable intervalSubscription = Observable.Interval(TimeSpan.FromSeconds(1.5))
-                .Subscribe(p => this.UpdateSelectableSongs());
-
-            await this.Library.AddLocalSongsAsync(folderPath);
-
-            songAddedSubscription.Dispose();
-            intervalSubscription.Dispose();
-
-            this.UpdateSelectableSongs();
-            this.StatusViewModel.Reset();
         }
 
         public void OrderByAlbum()

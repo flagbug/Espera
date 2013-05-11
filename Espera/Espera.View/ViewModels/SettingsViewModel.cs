@@ -27,8 +27,6 @@ namespace Espera.View.ViewModels
         private bool showLogin;
         private bool showSettings;
 
-        private YoutubeStreamingQuality youtubeStreamingQuality;
-
         public SettingsViewModel(Library library, IWindowManager windowManager)
         {
             if (library == null)
@@ -272,6 +270,11 @@ namespace Espera.View.ViewModels
                 this.library.YoutubeStreamingQuality = value;
                 this.RaisePropertyChanged();
             }
+        }
+
+        public void AddLibrarySource(string source)
+        {
+            this.library.AddSource(source);
         }
 
         public void HandleSettings()

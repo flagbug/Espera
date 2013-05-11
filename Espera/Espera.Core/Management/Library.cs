@@ -30,11 +30,12 @@ namespace Espera.Core.Management
         private readonly IRemovableDriveWatcher driveWatcher;
         private readonly Subject<bool> isUpdating;
         private readonly ILibraryReader libraryReader;
+        private readonly List<string> librarySources;
         private readonly ILibraryWriter libraryWriter;
         private readonly ObservableCollection<Playlist> playlists;
         private readonly ReadOnlyObservableCollection<Playlist> publicPlaylistWrapper;
         private readonly ILibrarySettings settings;
-        private readonly Subject<LibraryFillEventArgs> songAdded;
+        private readonly Subject<Unit> songAdded;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
         private readonly Subject<Unit> songStarted;
@@ -42,6 +43,7 @@ namespace Espera.Core.Management
         private AccessMode accessMode;
         private Playlist currentPlayingPlaylist;
         private Playlist instantPlaylist;
+        private bool isUpdatingSources;
         private bool isWaitingOnCache;
         private DateTime lastSongAddTime;
         private bool overrideCurrentCaching;
@@ -66,8 +68,9 @@ namespace Espera.Core.Management
             this.CanPlayNextSong = this.currentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
             this.CanPlayPreviousSong = this.currentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
             this.currentPlayer = new BehaviorSubject<AudioPlayer>(null);
-            this.songAdded = new Subject<LibraryFillEventArgs>();
+            this.songAdded = new Subject<Unit>();
             this.songStarted = new Subject<Unit>();
+            this.librarySources = new List<string>();
 
             this.LoadedSong = this.currentPlayer
                 .Select(x => x == null ? null : x.Song);
@@ -263,7 +266,7 @@ namespace Espera.Core.Management
         /// <summary>
         /// Occurs when a song has been added to the library.
         /// </summary>
-        public IObservable<LibraryFillEventArgs> SongAdded
+        public IObservable<Unit> SongAdded
         {
             get { return this.songAdded.AsObservable(); }
         }
@@ -368,54 +371,6 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Adds the song that are contained in the specified directory recursively to the library.
-        /// </summary>
-        /// <param name="path">The path of the directory to search.</param>
-        public async Task AddLocalSongsAsync(string path)
-        {
-            if (path == null)
-                Throw.ArgumentNullException(() => path);
-
-            if (!Directory.Exists(path))
-                Throw.ArgumentException("The directory doesn't exist.", () => path);
-
-            var finder = new LocalSongFinder(path);
-
-            int totalSongs = 0;
-            int songsProcessed = 0;
-
-            finder.SongsFound.Subscribe(i => totalSongs = i);
-
-            finder.SongFound
-                .Subscribe(song =>
-                {
-                    if (this.abortSongAdding)
-                    {
-                        finder.Abort();
-                        return;
-                    }
-
-                    bool added;
-
-                    lock (this.songLock)
-                    {
-                        lock (this.disposeLock)
-                        {
-                            added = this.songs.Add(song);
-                        }
-                    }
-
-                    if (added)
-                    {
-                        songsProcessed++;
-                        this.songAdded.OnNext(new LibraryFillEventArgs(song, songsProcessed, totalSongs));
-                    }
-                });
-
-            await finder.ExecuteAsync();
-        }
-
-        /// <summary>
         /// Adds a new playlist with the specified name to the library.
         /// </summary>
         /// <param name="name">The name of the playlist. It is required that no other playlist has this name.</param>
@@ -459,6 +414,14 @@ namespace Espera.Core.Management
             this.CurrentPlaylist.AddSongs(new[] { song });
 
             this.lastSongAddTime = DateTime.Now;
+        }
+
+        public void AddSource(string source)
+        {
+            if (!Directory.Exists(source))
+                throw new ArgumentException("Directory does't exist");
+
+            this.UpdateSources();
         }
 
         /// <summary>
@@ -696,6 +659,11 @@ namespace Espera.Core.Management
             this.playlists.Remove(playlist);
         }
 
+        public void RemoveSource(string source)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Save()
         {
             HashSet<LocalSong> casted;
@@ -706,7 +674,7 @@ namespace Espera.Core.Management
             }
 
             // Clean up the songs that aren't in the library anymore
-            // This happens when the user adds a song from a removable device to the playlistx
+            // This happens when the user adds a song from a removable device to the playlist
             // then removes the device, so the song is removed from the library, but not from the playlist
             foreach (Playlist playlist in this.playlists)
             {
@@ -934,6 +902,8 @@ namespace Espera.Core.Management
             {
                 this.playlists.Add(playlist);
             }
+
+            this.librarySources.AddRange(this.libraryReader.ReadSources());
         }
 
         private void RemoveFromPlaylist(Playlist playlist, IEnumerable<int> indexes)
@@ -1003,6 +973,51 @@ namespace Espera.Core.Management
             }
 
             this.isUpdating.OnNext(false);
+        }
+
+        private async Task UpdateSources()
+        {
+            if (this.isUpdatingSources)
+                return;
+
+            this.isUpdatingSources = true;
+
+            foreach (string librarySource in this.librarySources)
+            {
+                if (this.abortSongAdding)
+                    break;
+
+                var finder = new LocalSongFinder(librarySource);
+
+                finder.SongFound
+                    .Subscribe(async song =>
+                    {
+                        if (this.abortSongAdding)
+                        {
+                            await finder.AbortAsync();
+                            return;
+                        }
+
+                        bool added;
+
+                        lock (this.songLock)
+                        {
+                            lock (this.disposeLock)
+                            {
+                                added = this.songs.Add(song);
+                            }
+                        }
+
+                        if (added)
+                        {
+                            this.songAdded.OnNext(Unit.Default);
+                        }
+                    });
+
+                await finder.ExecuteAsync();
+            }
+
+            this.isUpdatingSources = false;
         }
     }
 }

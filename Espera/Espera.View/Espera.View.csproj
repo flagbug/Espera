@@ -164,9 +164,6 @@
     </Compile>
     <Compile Include="AppBootstrapper.cs" />
     <Compile Include="DesignTime.cs" />
-    <Compile Include="FolderBrowserDialogEx.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="SearchEngine.cs" />
     <Compile Include="SortHelpers.cs" />
     <Compile Include="SortOrder.cs" />
@@ -183,7 +180,6 @@
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\SongSourceViewModel.cs" />
     <Compile Include="ViewModels\SongViewModelBase.cs" />
-    <Compile Include="ViewModels\StatusViewModel.cs" />
     <Compile Include="ViewModels\YoutubeSongViewModel.cs" />
     <Compile Include="ViewModels\YoutubeViewModel.cs" />
     <Compile Include="Views\SettingsView.xaml.cs">
