@@ -35,6 +35,7 @@ namespace Espera.View.ViewModels
         private bool isLocal;
         private bool isYoutube;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
+        private bool showVideoPlayer;
 
         public ShellViewModel(Library library, IWindowManager windowManager)
         {
@@ -425,6 +426,12 @@ namespace Espera.View.ViewModels
         }
 
         public IReactiveCommand ShowSettingsCommand { get; private set; }
+
+        public bool ShowVideoPlayer
+        {
+            get { return this.showVideoPlayer; }
+            set { this.RaiseAndSetIfChanged(value); }
+        }
 
         public IReactiveCommand ShufflePlaylistCommand { get; private set; }
 

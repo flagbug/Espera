@@ -83,6 +83,15 @@
                                 CommandParameter="Orange"
                                 Style="{StaticResource ColorPickerButtonStyle}" />
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="EXPERIMENTAL: Scaling" />
+                        <Slider Width="100"
+                                Margin="10, 0, 0, 0"
+                                Maximum="2"
+                                Minimum="0.5"
+                                Value="{Binding Path=Scaling}" />
+                        <TextBlock Margin="10, 0, 0, 0" Text="{Binding Path=Scaling}" />
+                    </StackPanel>
                 </StackPanel>
             </TabItem>
             <TabItem Header="party mode">

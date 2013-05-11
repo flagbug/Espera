@@ -24,6 +24,7 @@ namespace Espera.View.ViewModels
         private string creationPassword;
         private bool isWrongPassword;
         private string loginPassword;
+        private double scaling;
         private bool showLogin;
         private bool showSettings;
 
@@ -33,8 +34,9 @@ namespace Espera.View.ViewModels
                 Throw.ArgumentNullException(() => library);
 
             this.library = library;
-
             this.windowManager = windowManager;
+
+            this.Scaling = 1;
 
             this.canCreateAdmin = this
                 .WhenAny(x => x.CreationPassword, x => !string.IsNullOrWhiteSpace(x.Value) && !this.library.IsAdministratorCreated)
@@ -222,6 +224,12 @@ namespace Espera.View.ViewModels
         }
 
         public IReactiveCommand ReportBugCommand { get; private set; }
+
+        public double Scaling
+        {
+            get { return this.scaling; }
+            set { this.RaiseAndSetIfChanged(value); }
+        }
 
         public bool ShowLogin
         {
