@@ -825,51 +825,5 @@
                 </Grid>
             </Grid>
         </Grid>
-        <StatusBar Grid.Row="2"
-                   Height="25"
-                   Margin="0, 5, 0, 0"
-                   Background="Transparent"
-                   DataContext="{Binding Path=LocalViewModel.StatusViewModel}"
-                   Visibility="{Binding Path=IsUpdating,
-                                        Converter={StaticResource BooleanToVisibilityConverter}}">
-            <StatusBarItem Content="Updating library..." />
-        </StatusBar>
-        <StatusBar Grid.Row="2"
-                   Height="25"
-                   Margin="0, 5, 0, 0"
-                   Background="Transparent"
-                   DataContext="{Binding Path=LocalViewModel.StatusViewModel}"
-                   Visibility="{Binding Path=IsAdding,
-                                        Converter={StaticResource BooleanToVisibilityConverter}}">
-            <StatusBarItem>
-                <ProgressBar Width="200"
-                             IsIndeterminate="{Binding Path=IsProgressUnkown}"
-                             Maximum="{Binding Path=TotalTags}"
-                             Value="{Binding Path=ProcessedTags,
-                                             Mode=OneWay}" />
-            </StatusBarItem>
-            <StatusBarItem>
-                <Grid>
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel.Style>
-                            <Style TargetType="{x:Type StackPanel}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=IsProgressUnkown}" Value="True">
-                                        <Setter Property="Visibility" Value="Hidden" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-                        <TextBlock Text="Added " />
-                        <TextBlock Text="{Binding Path=ProcessedTags}" />
-                        <TextBlock Text=" of " />
-                        <TextBlock Text="{Binding Path=TotalTags}" />
-                        <TextBlock Text=" found Songs: " />
-                        <TextBlock Text="{Binding Path=Path}" />
-                    </StackPanel>
-                    <TextBlock Text="Searching..." Visibility="{Binding Path=IsProgressUnkown, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-            </StatusBarItem>
-        </StatusBar>
     </Grid>
 </Controls:MetroWindow>
