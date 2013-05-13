@@ -574,7 +574,7 @@
                                         IsEnabled="{Binding Path=CanSwitchPlaylist}"
                                         Padding="0"
                                         ToolTip="Remove playlist">
-                                    <Image Source="/Espera;component/Images/RemovePlaylist.png" />
+                                    <Image Source="/Espera;component/Images/Remove.png" />
                                 </Button>
                                 <Button Grid.Column="2"
                                         Width="30"

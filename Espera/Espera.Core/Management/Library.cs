@@ -664,9 +664,11 @@ namespace Espera.Core.Management
             this.playlists.Remove(playlist);
         }
 
-        public void RemoveSource(string source)
+        public void RemoveSongSourcePath(string source)
         {
-            throw new NotImplementedException();
+            this.ThrowIfNotAdmin();
+
+            this.songSourcePaths.Remove(source);
         }
 
         public void Save()

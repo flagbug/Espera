@@ -17,7 +17,7 @@ namespace Espera.View.Views
             InitializeComponent();
         }
 
-        private void AddSongsButtonClick(object sender, RoutedEventArgs e)
+        private void AddSongSourceButtonClick(object sender, RoutedEventArgs e)
         {
             var dialog = new VistaFolderBrowserDialog();
 

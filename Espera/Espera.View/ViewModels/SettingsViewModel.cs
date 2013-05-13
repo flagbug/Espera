@@ -25,6 +25,7 @@ namespace Espera.View.ViewModels
         private bool isWrongPassword;
         private string loginPassword;
         private double scaling;
+        private string selectedSongSourcePath;
         private bool showLogin;
         private bool showSettings;
 
@@ -85,6 +86,10 @@ namespace Espera.View.ViewModels
             this.ChangeAccentColorCommand.Subscribe(p => Settings.Default.AccentColor = (string)p);
 
             this.SongSourcePaths = this.library.SongSourcePaths.CreateDerivedCollection(x => x);
+
+            this.RemoveSelectedSongSourcePath = new ReactiveCommand(this.WhenAny(x => x.SelectedSongSourcePath, x => x.Value)
+                .Select(x => !string.IsNullOrEmpty(x)));
+            this.RemoveSelectedSongSourcePath.Subscribe(x => this.library.RemoveSongSourcePath(this.SelectedSongSourcePath));
         }
 
         public static IEnumerable<YoutubeStreamingQuality> YoutubeStreamingQualities
@@ -225,11 +230,19 @@ namespace Espera.View.ViewModels
             get { return "http://espera.flagbug.com/release-notes"; }
         }
 
+        public ReactiveCommand RemoveSelectedSongSourcePath { get; private set; }
+
         public IReactiveCommand ReportBugCommand { get; private set; }
 
         public double Scaling
         {
             get { return this.scaling; }
+            set { this.RaiseAndSetIfChanged(value); }
+        }
+
+        public string SelectedSongSourcePath
+        {
+            get { return this.selectedSongSourcePath; }
             set { this.RaiseAndSetIfChanged(value); }
         }
 

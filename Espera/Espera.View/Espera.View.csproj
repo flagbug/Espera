@@ -309,7 +309,7 @@
     <Resource Include="Images\EditPlaylistName.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\RemovePlaylist.png" />
+    <Resource Include="Images\Remove.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\ShufflePlaylist.png" />
