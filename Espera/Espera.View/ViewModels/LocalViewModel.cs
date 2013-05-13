@@ -34,7 +34,7 @@ namespace Espera.View.ViewModels
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
 
             library.SongsUpdated
-                .Buffer(TimeSpan.FromMilliseconds(250))
+                .Buffer(TimeSpan.FromSeconds(1))
                 .Where(x => x.Any())
                 .Subscribe(p =>
                 {

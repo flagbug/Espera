@@ -139,6 +139,7 @@ namespace Espera.Core.Management
 
             this.songSourcePaths
                 .Changed()
+                .Throttle(TimeSpan.FromSeconds(1))
                 .Select(x => Unit.Default)
                 .Merge(this.SongSourceUpdateInterval
                     .Select(Observable.Interval)
