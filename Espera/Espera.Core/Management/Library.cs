@@ -942,11 +942,17 @@ namespace Espera.Core.Management
                 currentSongs = this.songs.ToList();
             }
 
+            List<Song> notInAnySongSource = currentSongs
+                .Where(song => !this.songSourcePaths.Any(path => song.OriginalPath.StartsWith(path)))
+                .ToList();
+
             await Task.Run(() =>
             {
-                List<Song> removable = currentSongs
+                List<Song> nonExistant = currentSongs
                     .Where(song => !File.Exists(song.OriginalPath))
                     .ToList();
+
+                var removable = new HashSet<Song>(notInAnySongSource.Concat(nonExistant));
 
                 DisposeSongs(removable);
 
