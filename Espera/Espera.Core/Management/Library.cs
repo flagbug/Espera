@@ -690,7 +690,7 @@ namespace Espera.Core.Management
                 playlist.RemoveSongs(indexes);
             }
 
-            this.libraryWriter.Write(casted, this.playlists.Where(playlist => !playlist.IsTemporary));
+            this.libraryWriter.Write(casted, this.playlists.Where(playlist => !playlist.IsTemporary), this.songSourcePaths);
         }
 
         public void ShufflePlaylist()
@@ -908,7 +908,7 @@ namespace Espera.Core.Management
                 this.playlists.Add(playlist);
             }
 
-            foreach (string path in this.libraryReader.ReadSources())
+            foreach (string path in this.libraryReader.ReadSongSourcePaths())
             {
                 this.songSourcePaths.Add(path);
             }

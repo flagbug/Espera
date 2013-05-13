@@ -41,9 +41,15 @@ namespace Espera.Core.Management
             }
         }
 
-        public IEnumerable<string> ReadSources()
+        public IEnumerable<string> ReadSongSourcePaths()
         {
-            return Enumerable.Empty<string>();
+            if (!File.Exists(this.sourcePath))
+                return Enumerable.Empty<string>();
+
+            using (FileStream sourceStream = File.OpenRead(this.sourcePath))
+            {
+                return LibraryReader.ReadSongSourcePaths(sourceStream);
+            }
         }
 
         private DriveType GetDriveType(string path)

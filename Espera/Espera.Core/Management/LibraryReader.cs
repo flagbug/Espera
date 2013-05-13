@@ -112,5 +112,16 @@ namespace Espera.Core.Management
                 )
                 .ToList();
         }
+
+        public static IEnumerable<string> ReadSongSourcePaths(Stream stream)
+        {
+            stream.Position = 0;
+
+            return XDocument.Load(stream)
+                .Descendants("Root")
+                .Descendants("SongSourcePaths")
+                .Elements("Path")
+                .Select(path => path.Value);
+        }
     }
 }

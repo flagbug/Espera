@@ -16,11 +16,11 @@ namespace Espera.Core.Management
             this.targetPath = targetPath;
         }
 
-        public void Write(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists)
+        public void Write(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists, IEnumerable<string> songSourcePaths)
         {
             using (FileStream targetStream = File.Create(this.targetPath))
             {
-                LibraryWriter.Write(songs, playlists, targetStream);
+                LibraryWriter.Write(songs, playlists, songSourcePaths, targetStream);
             }
         }
     }
