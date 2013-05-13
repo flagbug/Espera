@@ -37,6 +37,7 @@ namespace Espera.Core.Management
         private readonly Subject<Unit> songsUpdated;
         private bool abortUpdate;
         private AccessMode accessMode;
+        private LocalSongFinderAggregator currentAggregator;
         private Playlist currentPlayingPlaylist;
         private Playlist instantPlaylist;
         private bool isUpdatingSources;
@@ -995,6 +996,12 @@ namespace Espera.Core.Management
 
         private async Task UpdateSourcesAsync()
         {
+            if (this.currentAggregator != null)
+            {
+                await this.currentAggregator.AbortAsync();
+                this.currentAggregator = null;
+            }
+
             this.isUpdatingSources = true;
 
             await this.RemoveMissingSongsAsync();
@@ -1002,6 +1009,8 @@ namespace Espera.Core.Management
             this.songsUpdated.OnNext(Unit.Default);
 
             var aggregator = new LocalSongFinderAggregator(this.songSourcePaths);
+
+            this.currentAggregator = aggregator;
 
             aggregator.Songs.Subscribe(async song =>
             {
