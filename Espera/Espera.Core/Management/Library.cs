@@ -1038,6 +1038,7 @@ namespace Espera.Core.Management
 
             await aggregator.ExecuteAsync();
 
+            this.currentAggregator = null;
             this.abortUpdate = false;
             this.isUpdatingSources = false;
         }
