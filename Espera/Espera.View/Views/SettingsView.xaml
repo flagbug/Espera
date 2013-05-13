@@ -166,6 +166,15 @@
                             </Button>
                         </StackPanel>
                     </StackPanel>
+                    <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
+                        <TextBlock Text="Update interval" />
+                        <Slider Width="200"
+                                Margin="5, 0, 0, 0"
+                                Maximum="60"
+                                Minimum="1"
+                                Value="{Binding Path=SongSourceUpdateInterval}" />
+                        <TextBlock Margin="5, 0, 0, 0" Text="{Binding Path=SongSourceUpdateInterval, StringFormat=\{0\} Minutes}" />
+                    </StackPanel>
                 </StackPanel>
             </TabItem>
             <TabItem Header="youtube">

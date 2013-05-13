@@ -52,6 +52,12 @@ namespace Espera.Core.Settings
             set { CoreSettings.Default.PlaylistTimeout = value; }
         }
 
+        public TimeSpan SongSourceUpdateInterval
+        {
+            get { return CoreSettings.Default.SongSourceUpdateInterval; }
+            set { CoreSettings.Default.SongSourceUpdateInterval = value; }
+        }
+
         public bool StreamHighestYoutubeQuality
         {
             get { return CoreSettings.Default.StreamHighestYoutubeQuality; }

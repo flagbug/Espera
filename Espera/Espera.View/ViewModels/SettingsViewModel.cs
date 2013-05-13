@@ -247,6 +247,17 @@ namespace Espera.View.ViewModels
 
         public ReactiveDerivedCollection<string> SongSourcePaths { get; private set; }
 
+        public int SongSourceUpdateInterval
+        {
+            get { return (int)this.library.SongSourceUpdateInterval.Value.TotalMinutes; }
+            set
+            {
+                this.library.SongSourceUpdateInterval.Value = TimeSpan.FromMinutes(value);
+
+                this.RaisePropertyChanged();
+            }
+        }
+
         public bool StreamHighestYoutubeQuality
         {
             get { return this.library.StreamHighestYoutubeQuality; }

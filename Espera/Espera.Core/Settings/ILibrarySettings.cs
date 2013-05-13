@@ -20,6 +20,8 @@ namespace Espera.Core.Settings
 
         TimeSpan PlaylistTimeout { get; set; }
 
+        TimeSpan SongSourceUpdateInterval { get; set; }
+
         bool StreamHighestYoutubeQuality { get; set; }
 
         bool StreamYoutube { get; set; }

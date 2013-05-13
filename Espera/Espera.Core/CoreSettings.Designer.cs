@@ -178,5 +178,17 @@ namespace Espera.Core {
                 this["StreamHighestYoutubeQuality"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("00:30:00")]
+        public global::System.TimeSpan SongSourceUpdateInterval {
+            get {
+                return ((global::System.TimeSpan)(this["SongSourceUpdateInterval"]));
+            }
+            set {
+                this["SongSourceUpdateInterval"] = value;
+            }
+        }
     }
 }

@@ -120,6 +120,10 @@ namespace Espera.Core.Management
             this.LockVolume = new ReactiveProperty<bool>(
                 () => this.settings.LockVolume, x => this.settings.LockVolume = x,
                 x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
+
+            this.SongSourceUpdateInterval = new ReactiveProperty<TimeSpan>(
+                () => this.settings.SongSourceUpdateInterval, x => this.settings.SongSourceUpdateInterval = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
             /*
              * End boring, repeating glue code
              */
@@ -133,7 +137,14 @@ namespace Espera.Core.Management
             this.CanSwitchPlaylist = this.AccessMode.CombineLatest(this.LockPlaylistSwitching,
                 (accessMode, lockPlaylistSwitching) => accessMode == Management.AccessMode.Administrator || !lockPlaylistSwitching);
 
-            this.songSourcePaths.Changed().Subscribe(x => this.UpdateSources());
+            this.songSourcePaths
+                .Changed()
+                .Select(x => Unit.Default)
+                .Merge(this.SongSourceUpdateInterval
+                    .Select(Observable.Interval)
+                    .Switch()
+                    .Select(x => Unit.Default))
+                .Subscribe(x => this.UpdateSourcesAsync());
         }
 
         /// <summary>
@@ -272,6 +283,8 @@ namespace Espera.Core.Management
         }
 
         public ReadOnlyObservableCollection<string> SongSourcePaths { get; private set; }
+
+        public ReactiveProperty<TimeSpan> SongSourceUpdateInterval { get; private set; }
 
         /// <summary>
         /// Occurs when a song has started the playback.
@@ -971,7 +984,7 @@ namespace Espera.Core.Management
                 throw new InvalidOperationException("Not in administrator mode.");
         }
 
-        private async Task UpdateSources()
+        private async Task UpdateSourcesAsync()
         {
             this.isUpdatingSources = true;
 
