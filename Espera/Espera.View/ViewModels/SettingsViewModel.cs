@@ -83,6 +83,8 @@ namespace Espera.View.ViewModels
 
             this.ChangeAccentColorCommand = new ReactiveCommand();
             this.ChangeAccentColorCommand.Subscribe(p => Settings.Default.AccentColor = (string)p);
+
+            this.SongSourcePaths = this.library.SongSourcePaths.CreateDerivedCollection(x => x);
         }
 
         public static IEnumerable<YoutubeStreamingQuality> YoutubeStreamingQualities
@@ -243,6 +245,8 @@ namespace Espera.View.ViewModels
             private set { this.RaiseAndSetIfChanged(value); }
         }
 
+        public ReactiveDerivedCollection<string> SongSourcePaths { get; private set; }
+
         public bool StreamHighestYoutubeQuality
         {
             get { return this.library.StreamHighestYoutubeQuality; }
@@ -282,7 +286,7 @@ namespace Espera.View.ViewModels
 
         public void AddLibrarySource(string source)
         {
-            this.library.AddSource(source);
+            this.library.AddSongSourcePath(source);
         }
 
         public void HandleSettings()

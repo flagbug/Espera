@@ -30,14 +30,17 @@ namespace Espera.View.ViewModels
         {
             this.updateSemaphore = new SemaphoreSlim(1, 1);
 
-            library.IsUpdating.Where(x => x).Subscribe(p =>
-            {
-                this.RaisePropertyChanged(x => x.Artists);
-                this.UpdateSelectableSongs();
-            });
-
             this.artists = new Dictionary<string, ArtistViewModel>();
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
+
+            library.SongsUpdated
+                .Buffer(TimeSpan.FromMilliseconds(250))
+                .Where(x => x.Any())
+                .Subscribe(p =>
+                {
+                    this.RaisePropertyChanged(x => x.Artists);
+                    this.UpdateSelectableSongs();
+                });
 
             // We need a default sorting order
             this.OrderByArtist();
