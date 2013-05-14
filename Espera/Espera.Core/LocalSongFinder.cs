@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -19,9 +20,9 @@ namespace Espera.Core
     internal sealed class LocalSongFinder : SongFinder<LocalSong>
     {
         private static readonly string[] AllowedExtensions = new[] { ".mp3", ".wav" };
+        private readonly AsyncSubject<Unit> aborted;
         private readonly string directoryPath;
         private readonly DriveType driveType;
-        private readonly Subject<bool> isAborted;
         private readonly ConcurrentQueue<string> pathQueue;
         private readonly Subject<int> songsFound;
         private volatile bool abort;
@@ -37,7 +38,7 @@ namespace Espera.Core
             this.pathQueue = new ConcurrentQueue<string>();
             this.directoryPath = directoryPath;
             this.songsFound = new Subject<int>();
-            this.isAborted = new Subject<bool>();
+            this.aborted = new AsyncSubject<Unit>();
 
             this.driveType = new DriveInfo(Path.GetPathRoot(directoryPath)).DriveType;
         }
@@ -54,7 +55,7 @@ namespace Espera.Core
         {
             this.abort = true;
 
-            await isAborted;
+            await this.aborted.FirstAsync();
         }
 
         public async override Task ExecuteAsync()
@@ -67,7 +68,8 @@ namespace Espera.Core
 
             if (abort)
             {
-                this.isAborted.OnNext(true);
+                this.aborted.OnNext(Unit.Default);
+                this.aborted.OnCompleted();
             }
 
             this.OnCompleted();

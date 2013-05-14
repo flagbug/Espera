@@ -13,7 +13,7 @@ namespace Espera.Core
     /// </summary>
     public class LocalSongFinderAggregator
     {
-        private readonly Subject<Unit> aborted;
+        private readonly AsyncSubject<Unit> aborted;
         private readonly IEnumerable<string> paths;
         private readonly Subject<LocalSong> songs;
         private bool abort;
@@ -25,7 +25,7 @@ namespace Espera.Core
 
             this.paths = paths;
 
-            this.aborted = new Subject<Unit>();
+            this.aborted = new AsyncSubject<Unit>();
             this.songs = new Subject<LocalSong>();
         }
 
@@ -38,7 +38,7 @@ namespace Espera.Core
         {
             this.abort = true;
 
-            await this.aborted;
+            await this.aborted.FirstAsync();
         }
 
         public async Task ExecuteAsync()
@@ -52,19 +52,22 @@ namespace Espera.Core
                     if (this.abort)
                     {
                         await finder.AbortAsync();
+
                         return;
                     }
 
                     this.songs.OnNext(x);
                 });
 
+                await finder.ExecuteAsync();
+
                 if (this.abort)
                 {
                     this.aborted.OnNext(Unit.Default);
+                    this.aborted.OnCompleted();
+
                     break;
                 }
-
-                await finder.ExecuteAsync();
             }
 
             this.songs.OnCompleted();
