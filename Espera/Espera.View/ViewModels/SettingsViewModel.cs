@@ -4,7 +4,6 @@ using Espera.Core.Management;
 using Espera.View.Properties;
 using Rareform.Validation;
 using ReactiveUI;
-using ReactiveUI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -44,7 +43,7 @@ namespace Espera.View.ViewModels
                 .WhenAny(x => x.CreationPassword, x => !string.IsNullOrWhiteSpace(x.Value) && !this.library.IsAdministratorCreated)
                 .ToProperty(this, x => x.CanCreateAdmin);
 
-            this.CreateAdminCommand = new ReactiveCommand(this.canCreateAdmin,
+            this.CreateAdminCommand = new ReactiveCommand(this.canCreateAdmin, false,
                 ImmediateScheduler.Instance); // Immediate execution, because we set the password to an empty string afterwards
             this.CreateAdminCommand.Subscribe(p => this.library.CreateAdmin(this.CreationPassword));
 
@@ -58,7 +57,7 @@ namespace Espera.View.ViewModels
             this.canLogin = this.WhenAny(x => x.LoginPassword, x => !string.IsNullOrWhiteSpace(x.Value))
                 .ToProperty(this, x => x.CanLogin);
 
-            this.LoginCommand = new ReactiveCommand(this.canLogin,
+            this.LoginCommand = new ReactiveCommand(this.canLogin, false,
                 ImmediateScheduler.Instance); // Immediate execution, because we set the password to an empty string afterwards
             this.LoginCommand.Subscribe(p =>
             {
@@ -116,7 +115,7 @@ namespace Espera.View.ViewModels
         public string CreationPassword
         {
             private get { return this.creationPassword; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.creationPassword, value); }
         }
 
         public string DonationPage
@@ -152,7 +151,7 @@ namespace Espera.View.ViewModels
         public bool IsWrongPassword
         {
             get { return this.isWrongPassword; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.isWrongPassword, value); }
         }
 
         public bool LockLibraryRemoval
@@ -209,7 +208,7 @@ namespace Espera.View.ViewModels
         public string LoginPassword
         {
             private get { return this.loginPassword; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.loginPassword, value); }
         }
 
         public IReactiveCommand OpenLinkCommand { get; private set; }
@@ -230,19 +229,19 @@ namespace Espera.View.ViewModels
         public double Scaling
         {
             get { return this.scaling; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.scaling, value); }
         }
 
         public bool ShowLogin
         {
             get { return this.showLogin; }
-            private set { this.RaiseAndSetIfChanged(value); }
+            private set { this.RaiseAndSetIfChanged(ref this.showLogin, value); }
         }
 
         public bool ShowSettings
         {
             get { return this.showSettings; }
-            private set { this.RaiseAndSetIfChanged(value); }
+            private set { this.RaiseAndSetIfChanged(ref this.showSettings, value); }
         }
 
         public bool StreamHighestYoutubeQuality

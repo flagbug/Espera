@@ -30,16 +30,7 @@ namespace Espera.View
         public AppBootstrapper()
         {
             this.windowManager = new WindowManager();
-
-            // ReactiveUI binding convention
-            Func<string, string> firstToLowerBehaviour = x =>
-            {
-                char[] arr = x.ToCharArray();
-                arr[0] = char.ToLower(arr[0]);
-                return new String(arr);
-            };
-
-            RxApp.GetFieldNameForPropertyNameFunc = firstToLowerBehaviour;
+            RxApp.Initialize();
         }
 
         protected override void Configure()
@@ -51,6 +42,7 @@ namespace Espera.View
             this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", FilePath);
             this.kernel.Bind<ILibrarySettings>().To<LibrarySettingsWrapper>();
             this.kernel.Bind<IWindowManager>().To<WindowManager>();
+            this.kernel.Bind<ILogger>().To<DebugLogger>();
         }
 
         protected override IEnumerable<object> GetAllInstances(Type serviceType)
