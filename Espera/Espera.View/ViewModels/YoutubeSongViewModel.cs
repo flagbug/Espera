@@ -1,12 +1,10 @@
 ﻿using Espera.Core;
-using Rareform.Patterns.MVVM;
 using ReactiveUI;
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
-using System.Windows.Input;
+using System.Reactive.Linq;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -14,40 +12,35 @@ namespace Espera.View.ViewModels
 {
     internal sealed class YoutubeSongViewModel : SongViewModelBase
     {
-        private BitmapImage thumbnail;
+        private readonly ObservableAsPropertyHelper<bool> hasThumbnail;
+        private ImageSource thumbnail;
 
         public YoutubeSongViewModel(YoutubeSong wrapped)
             : base(wrapped)
-        { }
+        {
+            this.OpenPathCommand = new ReactiveCommand();
+            this.OpenPathCommand.Subscribe(x => Process.Start(this.Path));
+
+            this.hasThumbnail = this.WhenAny(x => x.Thumbnail, x => x.Value)
+                .Select(x => x != null)
+                .ToProperty(this, x => x.HasThumbnail);
+        }
 
         public string Description
         {
-            get
-            {
-                var song = (YoutubeSong)this.Model;
-
-                return song.Description;
-            }
+            get { return ((YoutubeSong)this.Model).Description; }
         }
 
         public bool HasThumbnail
         {
-            get { return this.thumbnail != null; }
+            get { return this.hasThumbnail.Value; }
         }
 
-        public ICommand OpenPathCommand
-        {
-            get { return new RelayCommand(param => Process.Start(this.Path)); }
-        }
+        public IReactiveCommand OpenPathCommand { get; private set; }
 
         public double? Rating
         {
-            get
-            {
-                var song = (YoutubeSong)this.Model;
-
-                return song.Rating;
-            }
+            get { return ((YoutubeSong)this.Model).Rating; }
         }
 
         public ImageSource Thumbnail
@@ -56,11 +49,13 @@ namespace Espera.View.ViewModels
             {
                 if (this.thumbnail == null)
                 {
-                    this.GetThumbnail();
+                    this.GetThumbnailAsync();
                 }
 
                 return this.thumbnail;
             }
+
+            private set { this.RaiseAndSetIfChanged(ref this.thumbnail, value); }
         }
 
         public int ViewCount
@@ -70,71 +65,40 @@ namespace Espera.View.ViewModels
 
         public string Views
         {
-            get
-            {
-                var song = (YoutubeSong)this.Model;
-
-                return String.Format("{0:N0}", song.Views);
-            }
+            get { return String.Format("{0:N0}", ((YoutubeSong)this.Model).Views); }
         }
 
-        private void GetThumbnail()
+        private async void GetThumbnailAsync()
         {
-            var worker = new BackgroundWorker();
-
-            worker.DoWork += (s, e) =>
+            using (var webClient = new WebClient())
             {
-                var uri = (Uri)e.Argument;
-
-                using (var webClient = new WebClient())
+                try
                 {
-                    try
+                    byte[] imageBytes = await webClient.DownloadDataTaskAsync(((YoutubeSong)this.Model).ThumbnailSource);
+
+                    if (imageBytes == null)
                     {
-                        byte[] imageBytes = webClient.DownloadData(uri);
-
-                        if (imageBytes == null)
-                        {
-                            e.Result = null;
-                            return;
-                        }
-
-                        using (var imageStream = new MemoryStream(imageBytes))
-                        {
-                            var image = new BitmapImage();
-
-                            image.BeginInit();
-                            image.StreamSource = imageStream;
-                            image.CacheOption = BitmapCacheOption.OnLoad;
-                            image.EndInit();
-
-                            image.Freeze();
-
-                            e.Result = image;
-                        }
+                        return;
                     }
 
-                    catch (WebException ex)
+                    using (var imageStream = new MemoryStream(imageBytes))
                     {
-                        e.Result = ex;
+                        var image = new BitmapImage();
+
+                        image.BeginInit();
+                        image.StreamSource = imageStream;
+                        image.CacheOption = BitmapCacheOption.OnLoad;
+                        image.EndInit();
+
+                        image.Freeze();
+
+                        this.Thumbnail = image;
                     }
                 }
-            };
 
-            worker.RunWorkerCompleted += (s, e) =>
-            {
-                var bitmapImage = e.Result as BitmapImage;
-
-                if (bitmapImage != null)
-                {
-                    this.thumbnail = bitmapImage;
-                    this.RaisePropertyChanged(x => x.Thumbnail);
-                    this.RaisePropertyChanged(x => x.HasThumbnail);
-                }
-
-                worker.Dispose();
-            };
-
-            worker.RunWorkerAsync(((YoutubeSong)this.Model).ThumbnailSource);
+                catch (WebException)
+                { } // We can't load the thumbnail, ignore it
+            }
         }
     }
 }

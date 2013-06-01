@@ -1,3 +1,11 @@
+----------------------------------- v1.7.6 -----------------------------------
+
+CHANGES:
+- YouTube streaming is now enabled by default.
+
+BUGFIXES:
+- Fixed the settings not beeing fully accessible in a small window.
+
 ----------------------------------- v1.7.5 -----------------------------------
 
 BUGFIXES:

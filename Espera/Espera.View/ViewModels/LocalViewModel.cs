@@ -3,7 +3,6 @@ using Espera.Core.Management;
 using Espera.View.Properties;
 using MoreLinq;
 using ReactiveUI;
-using ReactiveUI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -120,7 +119,7 @@ namespace Espera.View.ViewModels
         public ArtistViewModel SelectedArtist
         {
             get { return this.selectedArtist; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.selectedArtist, value); }
         }
 
         public int TitleColumnWidth
@@ -213,7 +212,7 @@ namespace Espera.View.ViewModels
                 }
             }
 
-            this.RaisePropertyChanged(x => x.Artists);
+            this.RaisePropertyChanged("Artists");
 
             this.allArtistsViewModel.ArtistCount = artistInfos.Count;
 
