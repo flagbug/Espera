@@ -1,5 +1,4 @@
 ﻿using Espera.Core;
-using Rareform.Patterns.MVVM;
 using ReactiveUI;
 using System;
 using System.Diagnostics;
@@ -7,7 +6,6 @@ using System.IO;
 using System.Net;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -21,6 +19,9 @@ namespace Espera.View.ViewModels
         public YoutubeSongViewModel(YoutubeSong wrapped)
             : base(wrapped)
         {
+            this.OpenPathCommand = new ReactiveCommand();
+            this.OpenPathCommand.Subscribe(x => Process.Start(this.Path));
+
             this.hasThumbnail = this.WhenAny(x => x.Thumbnail, x => x.Value)
                 .Select(x => x != null)
                 .ToProperty(this, x => x.HasThumbnail);
@@ -36,10 +37,7 @@ namespace Espera.View.ViewModels
             get { return this.hasThumbnail.Value; }
         }
 
-        public ICommand OpenPathCommand
-        {
-            get { return new RelayCommand(param => Process.Start(this.Path)); }
-        }
+        public IReactiveCommand OpenPathCommand { get; private set; }
 
         public double? Rating
         {
