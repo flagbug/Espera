@@ -30,7 +30,6 @@ namespace Espera.View
         public AppBootstrapper()
         {
             this.windowManager = new WindowManager();
-            RxApp.Initialize();
         }
 
         protected override void Configure()
