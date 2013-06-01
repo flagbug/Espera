@@ -4,7 +4,6 @@ using Espera.View.Properties;
 using MoreLinq;
 using Rareform.Validation;
 using ReactiveUI;
-using ReactiveUI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +32,7 @@ namespace Espera.View.ViewModels
 
             library.IsUpdating.Where(x => x).Subscribe(p =>
             {
-                this.RaisePropertyChanged(x => x.Artists);
+                this.RaisePropertyChanged("Artists");
                 this.UpdateSelectableSongs();
             });
 
@@ -120,7 +119,7 @@ namespace Espera.View.ViewModels
         public ArtistViewModel SelectedArtist
         {
             get { return this.selectedArtist; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.selectedArtist, value); }
         }
 
         public StatusViewModel StatusViewModel { get; private set; }
@@ -147,7 +146,7 @@ namespace Espera.View.ViewModels
                 if (x.Song.Artist != lastArtist)
                 {
                     lastArtist = x.Song.Artist;
-                    this.RaisePropertyChanged(p => p.Artists);
+                    this.RaisePropertyChanged("Artists");
                 }
             });
 
@@ -247,7 +246,7 @@ namespace Espera.View.ViewModels
                 }
             }
 
-            this.RaisePropertyChanged(x => x.Artists);
+            this.RaisePropertyChanged("Artists");
 
             this.allArtistsViewModel.ArtistCount = artistInfos.Count;
 

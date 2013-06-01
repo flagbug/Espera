@@ -1,4 +1,4 @@
-﻿using ReactiveUI.Xaml;
+﻿using ReactiveUI;
 using System.Collections.Generic;
 
 namespace Espera.View.ViewModels

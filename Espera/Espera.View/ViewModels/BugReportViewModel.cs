@@ -1,6 +1,5 @@
 ﻿using Espera.Services;
 using ReactiveUI;
-using ReactiveUI.Xaml;
 using System;
 using System.Reflection;
 
@@ -39,13 +38,13 @@ namespace Espera.View.ViewModels
         public string Message
         {
             get { return this.message; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.message, value); }
         }
 
         public bool? SendingSucceeded
         {
             get { return this.sendingSucceeded; }
-            private set { this.RaiseAndSetIfChanged(value); }
+            private set { this.RaiseAndSetIfChanged(ref this.sendingSucceeded, value); }
         }
 
         public IReactiveCommand SubmitBugReport { get; private set; }

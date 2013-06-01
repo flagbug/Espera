@@ -24,13 +24,13 @@ namespace Espera.View.ViewModels
             this.isUpdating = this.library.IsUpdating.ToProperty(this, x => x.IsUpdating);
 
             this.WhenAny(x => x.IsAdding, x => Unit.Default)
-                .Subscribe(p => this.RaisePropertyChanged(x => x.IsProgressUnkown));
+                .Subscribe(p => this.RaisePropertyChanged("IsProgressUnkown"));
         }
 
         public bool IsAdding
         {
             get { return this.isAdding; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.isAdding, value); }
         }
 
         public bool IsProgressUnkown
@@ -46,19 +46,19 @@ namespace Espera.View.ViewModels
         public string Path
         {
             get { return this.path; }
-            private set { this.RaiseAndSetIfChanged(value); }
+            private set { this.RaiseAndSetIfChanged(ref this.path, value); }
         }
 
         public int ProcessedTags
         {
             get { return this.processedTags; }
-            private set { this.RaiseAndSetIfChanged(value); }
+            private set { this.RaiseAndSetIfChanged(ref this.processedTags, value); }
         }
 
         public int TotalTags
         {
             get { return this.totalTags; }
-            private set { this.RaiseAndSetIfChanged(value); }
+            private set { this.RaiseAndSetIfChanged(ref this.totalTags, value); }
         }
 
         public void Reset()
@@ -84,7 +84,7 @@ namespace Espera.View.ViewModels
             this.ProcessedTags = processedTags;
             this.TotalTags = totalTags;
 
-            this.RaisePropertyChanged(x => x.IsProgressUnkown);
+            this.RaisePropertyChanged("IsProgressUnkown");
         }
     }
 }

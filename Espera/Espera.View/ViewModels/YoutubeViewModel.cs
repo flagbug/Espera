@@ -37,7 +37,7 @@ namespace Espera.View.ViewModels
         public bool IsSearching
         {
             get { return this.isSearching; }
-            private set { this.RaiseAndSetIfChanged(value); }
+            private set { this.RaiseAndSetIfChanged(ref this.isSearching, value); }
         }
 
         public int LinkColumnWidth

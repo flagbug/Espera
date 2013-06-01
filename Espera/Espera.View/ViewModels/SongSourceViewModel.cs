@@ -1,6 +1,5 @@
 ﻿using Espera.Core.Management;
 using ReactiveUI;
-using ReactiveUI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,19 +65,19 @@ namespace Espera.View.ViewModels
         public string SearchText
         {
             get { return this.searchText; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.searchText, value); }
         }
 
         public IEnumerable<T> SelectableSongs
         {
             get { return this.selectableSongs; }
-            protected set { this.RaiseAndSetIfChanged(value); }
+            protected set { this.RaiseAndSetIfChanged(ref this.selectableSongs, value); }
         }
 
         public IEnumerable<SongViewModelBase> SelectedSongs
         {
             get { return this.selectedSongs; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.selectedSongs, value); }
         }
 
         public IObservable<Unit> TimeoutWarning

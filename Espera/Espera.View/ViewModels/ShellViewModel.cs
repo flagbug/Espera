@@ -5,7 +5,6 @@ using Espera.Core.Management;
 using Espera.View.Properties;
 using Rareform.Extensions;
 using ReactiveUI;
-using ReactiveUI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +25,7 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly ObservableAsPropertyHelper<bool> isPlaying;
         private readonly Library library;
-        private readonly ReactiveCollection<PlaylistViewModel> playlists;
+        private readonly ReactiveList<PlaylistViewModel> playlists;
         private readonly Timer playlistTimeoutUpdateTimer;
         private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
         private readonly ObservableAsPropertyHelper<TimeSpan> totalTime;
@@ -45,7 +44,7 @@ namespace Espera.View.ViewModels
 
             this.library.SongStarted.Subscribe(x => this.HandleSongStarted());
             this.library.PlaybackState.Where(x => x == AudioPlayerState.Finished).Subscribe(x => this.HandleSongFinished());
-            this.library.CurrentPlaylistChanged.Subscribe(x => this.RaisePropertyChanged(p => p.CurrentPlaylist));
+            this.library.CurrentPlaylistChanged.Subscribe(x => this.RaisePropertyChanged("CurrentPlaylist"));
             this.UpdateScreenState = this.library.AccessMode;
 
             this.canChangeTime = this.library.CanChangeTime.ToProperty(this, x => x.CanChangeTime);
@@ -286,7 +285,7 @@ namespace Espera.View.ViewModels
         public bool DisplayTimeoutWarning
         {
             get { return this.displayTimeoutWarning; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.displayTimeoutWarning, value); }
         }
 
         public IReactiveCommand EditPlaylistNameCommand { get; private set; }
@@ -299,7 +298,7 @@ namespace Espera.View.ViewModels
         public bool IsLocal
         {
             get { return this.isLocal; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.isLocal, value); }
         }
 
         public bool IsPlaying
@@ -310,7 +309,7 @@ namespace Espera.View.ViewModels
         public bool IsYoutube
         {
             get { return this.isYoutube; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.isYoutube, value); }
         }
 
         public LocalViewModel LocalViewModel { get; private set; }
@@ -415,7 +414,7 @@ namespace Espera.View.ViewModels
         public IEnumerable<PlaylistEntryViewModel> SelectedPlaylistEntries
         {
             get { return this.selectedPlaylistEntries; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.selectedPlaylistEntries, value); }
         }
 
         public SettingsViewModel SettingsViewModel { get; private set; }
@@ -430,7 +429,7 @@ namespace Espera.View.ViewModels
         public bool ShowVideoPlayer
         {
             get { return this.showVideoPlayer; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.showVideoPlayer, value); }
         }
 
         public IReactiveCommand ShufflePlaylistCommand { get; private set; }
@@ -541,22 +540,22 @@ namespace Espera.View.ViewModels
 
         private void UpdateCurrentTime()
         {
-            this.RaisePropertyChanged(x => x.CurrentSeconds);
-            this.RaisePropertyChanged(x => x.CurrentTime);
+            this.RaisePropertyChanged("CurrentSeconds");
+            this.RaisePropertyChanged("CurrentTime");
         }
 
         private void UpdateRemainingPlaylistTimeout()
         {
             if (this.RemainingPlaylistTimeout > TimeSpan.Zero)
             {
-                this.RaisePropertyChanged(x => x.RemainingPlaylistTimeout);
+                this.RaisePropertyChanged("RemainingPlaylistTimeout");
             }
         }
 
         private void UpdateTotalTime()
         {
-            this.RaisePropertyChanged(x => x.TotalSeconds);
-            this.RaisePropertyChanged(x => x.TotalTime);
+            this.RaisePropertyChanged("TotalSeconds");
+            this.RaisePropertyChanged("TotalTime");
         }
     }
 }
