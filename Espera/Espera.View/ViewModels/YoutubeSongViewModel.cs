@@ -2,10 +2,11 @@
 using Rareform.Patterns.MVVM;
 using ReactiveUI;
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -14,11 +15,16 @@ namespace Espera.View.ViewModels
 {
     internal sealed class YoutubeSongViewModel : SongViewModelBase
     {
+        private readonly ObservableAsPropertyHelper<bool> hasThumbnail;
         private BitmapImage thumbnail;
 
         public YoutubeSongViewModel(YoutubeSong wrapped)
             : base(wrapped)
-        { }
+        {
+            this.hasThumbnail = this.WhenAny(x => x.Thumbnail, x => x.Value)
+                .Select(x => x != null)
+                .ToProperty(this, x => x.HasThumbnail);
+        }
 
         public string Description
         {
@@ -32,7 +38,7 @@ namespace Espera.View.ViewModels
 
         public bool HasThumbnail
         {
-            get { return this.thumbnail != null; }
+            get { return this.hasThumbnail.Value; }
         }
 
         public ICommand OpenPathCommand
@@ -56,7 +62,7 @@ namespace Espera.View.ViewModels
             {
                 if (this.thumbnail == null)
                 {
-                    this.GetThumbnail();
+                    this.GetThumbnailAsync();
                 }
 
                 return this.thumbnail;
@@ -78,63 +84,48 @@ namespace Espera.View.ViewModels
             }
         }
 
-        private void GetThumbnail()
+        private async void GetThumbnailAsync()
         {
-            var worker = new BackgroundWorker();
-
-            worker.DoWork += (s, e) =>
+            BitmapImage image = await Task.Run(() =>
             {
-                var uri = (Uri)e.Argument;
-
                 using (var webClient = new WebClient())
                 {
                     try
                     {
-                        byte[] imageBytes = webClient.DownloadData(uri);
+                        byte[] imageBytes = webClient.DownloadData(((YoutubeSong)this.Model).ThumbnailSource);
 
                         if (imageBytes == null)
                         {
-                            e.Result = null;
-                            return;
+                            return null;
                         }
 
                         using (var imageStream = new MemoryStream(imageBytes))
                         {
-                            var image = new BitmapImage();
+                            var img = new BitmapImage();
 
-                            image.BeginInit();
-                            image.StreamSource = imageStream;
-                            image.CacheOption = BitmapCacheOption.OnLoad;
-                            image.EndInit();
+                            img.BeginInit();
+                            img.StreamSource = imageStream;
+                            img.CacheOption = BitmapCacheOption.OnLoad;
+                            img.EndInit();
 
-                            image.Freeze();
+                            img.Freeze();
 
-                            e.Result = image;
+                            return img;
                         }
                     }
 
-                    catch (WebException ex)
+                    catch (WebException)
                     {
-                        e.Result = ex;
+                        return null;
                     }
                 }
-            };
+            });
 
-            worker.RunWorkerCompleted += (s, e) =>
+            if (image != null)
             {
-                var bitmapImage = e.Result as BitmapImage;
-
-                if (bitmapImage != null)
-                {
-                    this.thumbnail = bitmapImage;
-                    this.RaisePropertyChanged("Thumbnail");
-                    this.RaisePropertyChanged("HasThumbnail");
-                }
-
-                worker.Dispose();
-            };
-
-            worker.RunWorkerAsync(((YoutubeSong)this.Model).ThumbnailSource);
+                this.thumbnail = image;
+                this.RaisePropertyChanged("Thumbnail");
+            }
         }
     }
 }
