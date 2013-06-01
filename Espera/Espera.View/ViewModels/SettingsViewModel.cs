@@ -242,7 +242,7 @@ namespace Espera.View.ViewModels
         public string SelectedSongSourcePath
         {
             get { return this.selectedSongSourcePath; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.selectedSongSourcePath, value); }
         }
 
         public bool ShowLogin

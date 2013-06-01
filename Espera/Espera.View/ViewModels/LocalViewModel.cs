@@ -37,7 +37,7 @@ namespace Espera.View.ViewModels
                 .Where(x => x.Any())
                 .Subscribe(p =>
                 {
-                    this.RaisePropertyChanged(x => x.Artists);
+                    this.RaisePropertyChanged("Artists");
                     this.UpdateSelectableSongs();
                 });
 
