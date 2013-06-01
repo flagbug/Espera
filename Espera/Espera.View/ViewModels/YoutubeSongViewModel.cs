@@ -28,12 +28,7 @@ namespace Espera.View.ViewModels
 
         public string Description
         {
-            get
-            {
-                var song = (YoutubeSong)this.Model;
-
-                return song.Description;
-            }
+            get { return ((YoutubeSong)this.Model).Description; }
         }
 
         public bool HasThumbnail
@@ -48,12 +43,7 @@ namespace Espera.View.ViewModels
 
         public double? Rating
         {
-            get
-            {
-                var song = (YoutubeSong)this.Model;
-
-                return song.Rating;
-            }
+            get { return ((YoutubeSong)this.Model).Rating; }
         }
 
         public ImageSource Thumbnail
@@ -76,12 +66,7 @@ namespace Espera.View.ViewModels
 
         public string Views
         {
-            get
-            {
-                var song = (YoutubeSong)this.Model;
-
-                return String.Format("{0:N0}", song.Views);
-            }
+            get { return String.Format("{0:N0}", ((YoutubeSong)this.Model).Views); }
         }
 
         private async void GetThumbnailAsync()
