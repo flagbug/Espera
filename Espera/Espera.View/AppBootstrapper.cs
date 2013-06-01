@@ -4,7 +4,6 @@ using Espera.Core.Settings;
 using Espera.View.Properties;
 using Espera.View.ViewModels;
 using Ninject;
-using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -41,7 +40,6 @@ namespace Espera.View
             this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", FilePath);
             this.kernel.Bind<ILibrarySettings>().To<LibrarySettingsWrapper>();
             this.kernel.Bind<IWindowManager>().To<WindowManager>();
-            this.kernel.Bind<ILogger>().To<DebugLogger>();
         }
 
         protected override IEnumerable<object> GetAllInstances(Type serviceType)
