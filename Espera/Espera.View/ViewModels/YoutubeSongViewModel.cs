@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -14,7 +13,7 @@ namespace Espera.View.ViewModels
     internal sealed class YoutubeSongViewModel : SongViewModelBase
     {
         private readonly ObservableAsPropertyHelper<bool> hasThumbnail;
-        private BitmapImage thumbnail;
+        private ImageSource thumbnail;
 
         public YoutubeSongViewModel(YoutubeSong wrapped)
             : base(wrapped)
@@ -55,6 +54,8 @@ namespace Espera.View.ViewModels
 
                 return this.thumbnail;
             }
+
+            private set { this.RaiseAndSetIfChanged(ref this.thumbnail, value); }
         }
 
         public int ViewCount
@@ -69,45 +70,34 @@ namespace Espera.View.ViewModels
 
         private async void GetThumbnailAsync()
         {
-            BitmapImage image = await Task.Run(() =>
+            using (var webClient = new WebClient())
             {
-                using (var webClient = new WebClient())
+                try
                 {
-                    try
+                    byte[] imageBytes = await webClient.DownloadDataTaskAsync(((YoutubeSong)this.Model).ThumbnailSource);
+
+                    if (imageBytes == null)
                     {
-                        byte[] imageBytes = webClient.DownloadData(((YoutubeSong)this.Model).ThumbnailSource);
-
-                        if (imageBytes == null)
-                        {
-                            return null;
-                        }
-
-                        using (var imageStream = new MemoryStream(imageBytes))
-                        {
-                            var img = new BitmapImage();
-
-                            img.BeginInit();
-                            img.StreamSource = imageStream;
-                            img.CacheOption = BitmapCacheOption.OnLoad;
-                            img.EndInit();
-
-                            img.Freeze();
-
-                            return img;
-                        }
+                        return;
                     }
 
-                    catch (WebException)
+                    using (var imageStream = new MemoryStream(imageBytes))
                     {
-                        return null;
+                        var image = new BitmapImage();
+
+                        image.BeginInit();
+                        image.StreamSource = imageStream;
+                        image.CacheOption = BitmapCacheOption.OnLoad;
+                        image.EndInit();
+
+                        image.Freeze();
+
+                        this.Thumbnail = image;
                     }
                 }
-            });
 
-            if (image != null)
-            {
-                this.thumbnail = image;
-                this.RaisePropertyChanged("Thumbnail");
+                catch (WebException)
+                { } // We can't load the thumbnail, ignore it
             }
         }
     }
