@@ -17,7 +17,7 @@ namespace Espera.View.ViewModels
     internal sealed class PlaylistViewModel : ReactiveObject, IDataErrorInfo, IDisposable
     {
         private readonly CompositeDisposable disposable;
-        private readonly ReactiveCollection<PlaylistEntryViewModel> entries;
+        private readonly ReactiveUI.ReactiveList<PlaylistEntryViewModel> entries;
         private readonly Playlist playlist;
         private readonly Func<string, bool> renameRequest;
         private readonly ObservableAsPropertyHelper<int> songCount;
@@ -41,7 +41,7 @@ namespace Espera.View.ViewModels
             this.entries = playlist.CreateDerivedCollection(entry => new PlaylistEntryViewModel(entry));
             this.entries.ItemsRemoved.Subscribe(x => x.Dispose());
 
-            this.songCount = this.entries.CollectionCountChanged
+            this.songCount = this.entries.CountChanged
                 .ToProperty(this, x => x.SongCount, this.entries.Count)
                 .DisposeWith(this.disposable);
 
@@ -114,7 +114,7 @@ namespace Espera.View.ViewModels
             get { return this.songCount.Value; }
         }
 
-        public ReactiveCollection<PlaylistEntryViewModel> Songs
+        public ReactiveUI.ReactiveList<PlaylistEntryViewModel> Songs
         {
             get { return this.entries; }
         }

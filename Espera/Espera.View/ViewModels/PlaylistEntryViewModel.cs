@@ -86,7 +86,7 @@ namespace Espera.View.ViewModels
         public bool IsPlaying
         {
             get { return this.isPlaying; }
-            set { this.RaiseAndSetIfChanged(value); }
+            set { this.RaiseAndSetIfChanged(ref this.isPlaying, value); }
         }
 
         public bool ShowCaching
