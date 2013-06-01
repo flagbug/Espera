@@ -128,7 +128,7 @@ namespace Espera.View.ViewModels
                 {
                     this.thumbnail = bitmapImage;
                     this.RaisePropertyChanged("Thumbnail");
-                    this.RaisePropertyChanged("HasThumbnai");
+                    this.RaisePropertyChanged("HasThumbnail");
                 }
 
                 worker.Dispose();
