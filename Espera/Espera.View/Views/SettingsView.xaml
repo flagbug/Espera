@@ -154,28 +154,14 @@
                 <StackPanel Orientation="Vertical">
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="song sources" />
                     <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
-                        <ListBox Width="500"
-                                 Height="300"
+                        <TextBox Width="400"
                                  VerticalAlignment="Top"
-                                 ItemsSource="{Binding Path=SongSourcePaths}"
-                                 SelectedItem="{Binding Path=SelectedSongSourcePath}" />
-                        <StackPanel Margin="10, 0, 0, 0">
-                            <Button Width="25"
-                                    Height="25"
-                                    Click="AddSongSourceButtonClick"
-                                    Padding="0"
-                                    ToolTip="Add song source">
-                                <Image Source="/Espera;component/Images/Add.png" />
-                            </Button>
-                            <Button Width="25"
-                                    Height="25"
-                                    Margin="0, 10, 0, 0"
-                                    Command="{Binding Path=RemoveSelectedSongSourcePath}"
-                                    Padding="0"
-                                    ToolTip="Remove song source">
-                                <Image Source="/Espera;component/Images/Remove.png" />
-                            </Button>
-                        </StackPanel>
+                                 IsReadOnly="True"
+                                 Text="{Binding Path=LibrarySource,
+                                                Mode=OneWay}" />
+                        <Button Margin="10, 0, 0, 0"
+                                Click="AddSongSourceButtonClick"
+                                Content="Change library path" />
                     </StackPanel>
                     <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
                         <TextBlock Text="Update interval" />

@@ -32,13 +32,13 @@ namespace Espera.Core.Management
         private readonly ILibrarySettings settings;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
-        private readonly ObservableCollection<string> songSourcePaths;
+        private readonly BehaviorSubject<string> songSourcePath;
         private readonly Subject<Unit> songStarted;
         private readonly Subject<Unit> songsUpdated;
         private bool abortUpdate;
         private AccessMode accessMode;
-        private LocalSongFinderAggregator currentAggregator;
         private Playlist currentPlayingPlaylist;
+        private LocalSongFinder currentSongFinder;
         private Playlist instantPlaylist;
         private bool isUpdatingSources;
         private bool isWaitingOnCache;
@@ -65,8 +65,7 @@ namespace Espera.Core.Management
             this.CanPlayPreviousSong = this.currentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
             this.currentPlayer = new BehaviorSubject<AudioPlayer>(null);
             this.songStarted = new Subject<Unit>();
-            this.songSourcePaths = new ObservableCollection<string>();
-            this.SongSourcePaths = new ReadOnlyObservableCollection<string>(this.songSourcePaths);
+            this.songSourcePath = new BehaviorSubject<string>(null);
             this.songsUpdated = new Subject<Unit>();
 
             this.LoadedSong = this.currentPlayer
@@ -138,9 +137,7 @@ namespace Espera.Core.Management
             this.CanSwitchPlaylist = this.AccessMode.CombineLatest(this.LockPlaylistSwitching,
                 (accessMode, lockPlaylistSwitching) => accessMode == Management.AccessMode.Administrator || !lockPlaylistSwitching);
 
-            this.songSourcePaths
-                .Changed()
-                .Throttle(TimeSpan.FromSeconds(1))
+            this.songSourcePath
                 .Select(x => Unit.Default)
                 .Merge(this.SongSourceUpdateInterval
                     .Select(Observable.Interval)
@@ -284,7 +281,10 @@ namespace Espera.Core.Management
             }
         }
 
-        public ReadOnlyObservableCollection<string> SongSourcePaths { get; private set; }
+        public IObservable<string> SongSourcePath
+        {
+            get { return this.songSourcePath.AsObservable(); }
+        }
 
         public ReactiveProperty<TimeSpan> SongSourceUpdateInterval { get; private set; }
 
@@ -393,14 +393,6 @@ namespace Espera.Core.Management
             this.playlists.Add(new Playlist(name));
         }
 
-        public void AddSongSourcePath(string path)
-        {
-            if (!Directory.Exists(path))
-                throw new ArgumentException("Directory does't exist");
-
-            this.songSourcePaths.Add(path);
-        }
-
         /// <summary>
         /// Adds the specified song to the end of the playlist.
         /// This method is only available in administrator mode.
@@ -429,6 +421,14 @@ namespace Espera.Core.Management
             this.CurrentPlaylist.AddSongs(new[] { song });
 
             this.lastSongAddTime = DateTime.Now;
+        }
+
+        public void ChangeSongSourcePath(string path)
+        {
+            if (!Directory.Exists(path))
+                throw new ArgumentException("Directory does't exist");
+
+            this.songSourcePath.OnNext(path);
         }
 
         /// <summary>
@@ -666,14 +666,7 @@ namespace Espera.Core.Management
             this.playlists.Remove(playlist);
         }
 
-        public void RemoveSongSourcePath(string source)
-        {
-            this.ThrowIfNotAdmin();
-
-            this.songSourcePaths.Remove(source);
-        }
-
-        public void Save()
+        public async void Save()
         {
             HashSet<LocalSong> casted;
 
@@ -694,7 +687,7 @@ namespace Espera.Core.Management
                 playlist.RemoveSongs(indexes);
             }
 
-            this.libraryWriter.Write(casted, this.playlists.Where(playlist => !playlist.IsTemporary), this.songSourcePaths);
+            this.libraryWriter.Write(casted, this.playlists.Where(playlist => !playlist.IsTemporary), await this.songSourcePath.FirstAsync());
         }
 
         public void ShufflePlaylist()
@@ -912,10 +905,7 @@ namespace Espera.Core.Management
                 this.playlists.Add(playlist);
             }
 
-            foreach (string path in this.libraryReader.ReadSongSourcePaths())
-            {
-                this.songSourcePaths.Add(path);
-            }
+            this.songSourcePath.OnNext(this.libraryReader.ReadSongSourcePath());
         }
 
         private void RemoveFromPlaylist(Playlist playlist, IEnumerable<int> indexes)
@@ -944,8 +934,10 @@ namespace Espera.Core.Management
                 currentSongs = this.songs.ToList();
             }
 
+            string sourcePath = await this.songSourcePath.FirstAsync();
+
             List<Song> notInAnySongSource = currentSongs
-                .Where(song => !this.songSourcePaths.Any(path => song.OriginalPath.StartsWith(path)))
+                .Where(song => !song.OriginalPath.StartsWith(sourcePath))
                 .ToList();
 
             await Task.Run(() =>
@@ -996,10 +988,10 @@ namespace Espera.Core.Management
 
         private async Task UpdateSourcesAsync()
         {
-            if (this.currentAggregator != null)
+            if (this.currentSongFinder != null)
             {
-                await this.currentAggregator.AbortAsync();
-                this.currentAggregator = null;
+                await this.currentSongFinder.AbortAsync();
+                this.currentSongFinder = null;
             }
 
             this.isUpdatingSources = true;
@@ -1008,15 +1000,15 @@ namespace Espera.Core.Management
 
             this.songsUpdated.OnNext(Unit.Default);
 
-            var aggregator = new LocalSongFinderAggregator(this.songSourcePaths);
+            var songFinder = new LocalSongFinder(await this.songSourcePath.FirstAsync());
 
-            this.currentAggregator = aggregator;
+            this.currentSongFinder = songFinder;
 
-            aggregator.Songs.Subscribe(async song =>
+            songFinder.SongFound.Subscribe(async song =>
             {
                 if (this.abortUpdate)
                 {
-                    await aggregator.AbortAsync();
+                    await songFinder.AbortAsync();
                     return;
                 }
 
@@ -1036,9 +1028,9 @@ namespace Espera.Core.Management
                 }
             });
 
-            await aggregator.ExecuteAsync();
+            await songFinder.ExecuteAsync();
 
-            this.currentAggregator = null;
+            this.currentSongFinder = null;
             this.abortUpdate = false;
             this.isUpdatingSources = false;
         }

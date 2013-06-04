@@ -25,7 +25,7 @@ namespace Espera.View.Views
 
             if (!string.IsNullOrWhiteSpace(dialog.SelectedPath))
             {
-                ((SettingsViewModel)this.DataContext).AddLibrarySource(dialog.SelectedPath);
+                ((SettingsViewModel)this.DataContext).ChangeLibrarySource(dialog.SelectedPath);
             }
         }
 

@@ -22,9 +22,9 @@ namespace Espera.View.ViewModels
         private readonly IWindowManager windowManager;
         private string creationPassword;
         private bool isWrongPassword;
+        private ObservableAsPropertyHelper<string> librarySource;
         private string loginPassword;
         private double scaling;
-        private string selectedSongSourcePath;
         private bool showLogin;
         private bool showSettings;
 
@@ -84,11 +84,7 @@ namespace Espera.View.ViewModels
             this.ChangeAccentColorCommand = new ReactiveCommand();
             this.ChangeAccentColorCommand.Subscribe(p => Settings.Default.AccentColor = (string)p);
 
-            this.SongSourcePaths = this.library.SongSourcePaths.CreateDerivedCollection(x => x);
-
-            this.RemoveSelectedSongSourcePath = new ReactiveCommand(this.WhenAny(x => x.SelectedSongSourcePath, x => x.Value)
-                .Select(x => !string.IsNullOrEmpty(x)));
-            this.RemoveSelectedSongSourcePath.Subscribe(x => this.library.RemoveSongSourcePath(this.SelectedSongSourcePath));
+            this.librarySource = this.library.SongSourcePath.ToProperty(this, x => x.LibrarySource);
         }
 
         public static IEnumerable<YoutubeStreamingQuality> YoutubeStreamingQualities
@@ -157,6 +153,11 @@ namespace Espera.View.ViewModels
         {
             get { return this.isWrongPassword; }
             set { this.RaiseAndSetIfChanged(ref this.isWrongPassword, value); }
+        }
+
+        public string LibrarySource
+        {
+            get { return this.librarySource.Value; }
         }
 
         public bool LockLibraryRemoval
@@ -229,20 +230,12 @@ namespace Espera.View.ViewModels
             get { return "http://espera.flagbug.com/release-notes"; }
         }
 
-        public ReactiveCommand RemoveSelectedSongSourcePath { get; private set; }
-
         public IReactiveCommand ReportBugCommand { get; private set; }
 
         public double Scaling
         {
             get { return this.scaling; }
             set { this.RaiseAndSetIfChanged(ref this.scaling, value); }
-        }
-
-        public string SelectedSongSourcePath
-        {
-            get { return this.selectedSongSourcePath; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedSongSourcePath, value); }
         }
 
         public bool ShowLogin
@@ -256,8 +249,6 @@ namespace Espera.View.ViewModels
             get { return this.showSettings; }
             private set { this.RaiseAndSetIfChanged(ref this.showSettings, value); }
         }
-
-        public ReactiveDerivedCollection<string> SongSourcePaths { get; private set; }
 
         public int SongSourceUpdateInterval
         {
@@ -307,9 +298,9 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public void AddLibrarySource(string source)
+        public void ChangeLibrarySource(string source)
         {
-            this.library.AddSongSourcePath(source);
+            this.library.ChangeSongSourcePath(source);
         }
 
         public void HandleSettings()
