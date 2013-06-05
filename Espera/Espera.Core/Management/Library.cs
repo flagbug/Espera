@@ -40,7 +40,6 @@ namespace Espera.Core.Management
         private Playlist currentPlayingPlaylist;
         private LocalSongFinder currentSongFinder;
         private Playlist instantPlaylist;
-        private bool isUpdatingSources;
         private bool isWaitingOnCache;
         private DateTime lastSongAddTime;
         private bool overrideCurrentCaching;
@@ -979,8 +978,6 @@ namespace Espera.Core.Management
                 this.currentSongFinder = null;
             }
 
-            this.isUpdatingSources = true;
-
             await this.RemoveMissingSongsAsync();
 
             this.songsUpdated.OnNext(Unit.Default);
@@ -1017,7 +1014,6 @@ namespace Espera.Core.Management
 
             this.currentSongFinder = null;
             this.abortUpdate = false;
-            this.isUpdatingSources = false;
         }
     }
 }
