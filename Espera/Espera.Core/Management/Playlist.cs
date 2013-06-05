@@ -233,7 +233,6 @@ namespace Espera.Core.Management
         {
             int index = 0;
             int? migrateIndex = null;
-            var newPlaylist = new List<PlaylistEntry>(this.playlist.Capacity);
 
             foreach (var entry in this.playlist)
             {
@@ -242,14 +241,10 @@ namespace Espera.Core.Management
                     migrateIndex = index;
                 }
 
-                newPlaylist.Add(entry);
                 entry.Index = index;
 
                 index++;
             }
-
-            this.playlist.Clear();
-            this.playlist.AddRange(newPlaylist);
 
             if (migrateIndex.HasValue)
             {
