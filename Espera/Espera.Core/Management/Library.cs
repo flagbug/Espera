@@ -940,24 +940,18 @@ namespace Espera.Core.Management
                 .Where(song => !song.OriginalPath.StartsWith(sourcePath))
                 .ToList();
 
+            HashSet<Song> removable = null;
+
             await Task.Run(() =>
             {
                 List<Song> nonExistant = currentSongs
                     .Where(song => !File.Exists(song.OriginalPath))
                     .ToList();
 
-                var removable = new HashSet<Song>(notInAnySongSource.Concat(nonExistant));
-
-                DisposeSongs(removable);
-
-                foreach (Song song in removable)
-                {
-                    lock (this.songLock)
-                    {
-                        this.songs.Remove(song);
-                    }
-                }
+                removable = new HashSet<Song>(notInAnySongSource.Concat(nonExistant));
             });
+
+            this.RemoveFromLibrary(removable);
         }
 
         private AudioPlayer RenewCurrentPlayer(Song song)
