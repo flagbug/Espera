@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -19,11 +20,12 @@ namespace Espera.Core
     internal sealed class LocalSongFinder : SongFinder<LocalSong>
     {
         private static readonly string[] AllowedExtensions = new[] { ".mp3", ".wav" };
+        private readonly AsyncSubject<Unit> aborted;
         private readonly string directoryPath;
+        private readonly DriveType driveType;
         private readonly ConcurrentQueue<string> pathQueue;
         private readonly Subject<int> songsFound;
         private volatile bool abort;
-        private readonly DriveType driveType;
         private volatile bool isSearching;
         private volatile bool isTagging;
         private int songCount;
@@ -36,6 +38,7 @@ namespace Espera.Core
             this.pathQueue = new ConcurrentQueue<string>();
             this.directoryPath = directoryPath;
             this.songsFound = new Subject<int>();
+            this.aborted = new AsyncSubject<Unit>();
 
             this.driveType = new DriveInfo(Path.GetPathRoot(directoryPath)).DriveType;
         }
@@ -48,9 +51,11 @@ namespace Espera.Core
             get { return this.songsFound.AsObservable(); }
         }
 
-        public void Abort()
+        public async Task AbortAsync()
         {
             this.abort = true;
+
+            await this.aborted.FirstAsync();
         }
 
         public async override Task ExecuteAsync()
@@ -60,6 +65,12 @@ namespace Espera.Core
             this.isSearching = true;
 
             await Task.Run(() => this.StartTagScan());
+
+            if (abort)
+            {
+                this.aborted.OnNext(Unit.Default);
+                this.aborted.OnCompleted();
+            }
 
             this.OnCompleted();
         }

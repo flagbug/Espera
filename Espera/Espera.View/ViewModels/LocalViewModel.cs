@@ -2,7 +2,6 @@
 using Espera.Core.Management;
 using Espera.View.Properties;
 using MoreLinq;
-using Rareform.Validation;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -30,16 +29,17 @@ namespace Espera.View.ViewModels
         {
             this.updateSemaphore = new SemaphoreSlim(1, 1);
 
-            library.IsUpdating.Where(x => x).Subscribe(p =>
-            {
-                this.RaisePropertyChanged("Artists");
-                this.UpdateSelectableSongs();
-            });
-
-            this.StatusViewModel = new StatusViewModel(library);
-
             this.artists = new Dictionary<string, ArtistViewModel>();
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
+
+            library.SongsUpdated
+                .Buffer(TimeSpan.FromSeconds(1))
+                .Where(x => x.Any())
+                .Subscribe(p =>
+                {
+                    this.RaisePropertyChanged("Artists");
+                    this.UpdateSelectableSongs();
+                });
 
             // We need a default sorting order
             this.OrderByArtist();
@@ -48,20 +48,6 @@ namespace Espera.View.ViewModels
 
             this.WhenAny(x => x.SearchText, x => x.SelectedArtist, (x1, x2) => Unit.Default)
                 .Subscribe(x => this.UpdateSelectableSongs());
-
-            IObservable<bool> canRemoveFromLibrary = this
-                .WhenAny(x => x.SelectedSongs, x => x.Value)
-                .CombineLatest(this.Library.AccessMode, this.Library.LockLibraryRemoval,
-                    (selectedSongs, accessMode, lockLibraryRemoval) =>
-                        selectedSongs != null && selectedSongs.Any() && (accessMode == AccessMode.Administrator || !lockLibraryRemoval));
-
-            this.RemoveFromLibraryCommand = new ReactiveCommand(canRemoveFromLibrary);
-            this.RemoveFromLibraryCommand.Subscribe(p =>
-            {
-                this.Library.RemoveFromLibrary(this.SelectedSongs.Select(song => song.Model));
-
-                this.UpdateSelectableSongs();
-            });
 
             this.PlayNowCommand = new ReactiveCommand();
             this.PlayNowCommand.Subscribe(p =>
@@ -114,52 +100,16 @@ namespace Espera.View.ViewModels
 
         public IReactiveCommand PlayNowCommand { get; private set; }
 
-        public IReactiveCommand RemoveFromLibraryCommand { get; private set; }
-
         public ArtistViewModel SelectedArtist
         {
             get { return this.selectedArtist; }
             set { this.RaiseAndSetIfChanged(ref this.selectedArtist, value); }
         }
 
-        public StatusViewModel StatusViewModel { get; private set; }
-
         public int TitleColumnWidth
         {
             get { return Settings.Default.LocalTitleColumnWidth; }
             set { Settings.Default.LocalTitleColumnWidth = value; }
-        }
-
-        public async void AddSongs(string folderPath)
-        {
-            if (folderPath == null)
-                Throw.ArgumentNullException(() => folderPath);
-
-            string lastArtist = null;
-
-            this.StatusViewModel.IsAdding = true;
-
-            IDisposable songAddedSubscription = this.Library.SongAdded.Subscribe(x =>
-            {
-                this.StatusViewModel.Update(x.Song.OriginalPath, x.ProcessedTagCount, x.TotalTagCount);
-
-                if (x.Song.Artist != lastArtist)
-                {
-                    lastArtist = x.Song.Artist;
-                    this.RaisePropertyChanged("Artists");
-                }
-            });
-
-            IDisposable intervalSubscription = Observable.Interval(TimeSpan.FromSeconds(1.5))
-                .Subscribe(p => this.UpdateSelectableSongs());
-
-            await this.Library.AddLocalSongsAsync(folderPath);
-
-            songAddedSubscription.Dispose();
-            intervalSubscription.Dispose();
-
-            this.UpdateSelectableSongs();
-            this.StatusViewModel.Reset();
         }
 
         public void OrderByAlbum()

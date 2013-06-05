@@ -107,15 +107,9 @@
     <Reference Include="ReactiveUI">
       <HintPath>..\packages\reactiveui-core.5.0.0.20130531-alpha\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Blend">
-      <HintPath>..\packages\reactiveui-platforms.5.0.0.20130531-alpha\lib\net45\ReactiveUI.Blend.dll</HintPath>
-    </Reference>
-    <Reference Include="ReactiveUI.Xaml">
-      <HintPath>..\packages\reactiveui-platforms.5.0.0.20130531-alpha\lib\net45\ReactiveUI.Xaml.dll</HintPath>
-    </Reference>
+    <Reference Include="System" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Net" />
     <Reference Include="System.Reactive.Core">
       <HintPath>..\packages\Rx-Core.2.1.30214.0\lib\Net45\System.Reactive.Core.dll</HintPath>
     </Reference>
@@ -129,9 +123,6 @@
       <HintPath>..\packages\Rx-PlatformServices.2.1.30214.0\lib\Net45\System.Reactive.PlatformServices.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.0.10.1.1\lib\net45\System.Windows.Interactivity.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml">
@@ -151,9 +142,6 @@
     </Compile>
     <Compile Include="AppBootstrapper.cs" />
     <Compile Include="DesignTime.cs" />
-    <Compile Include="FolderBrowserDialogEx.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="SearchEngine.cs" />
     <Compile Include="SortHelpers.cs" />
     <Compile Include="SortOrder.cs" />
@@ -170,7 +158,6 @@
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\SongSourceViewModel.cs" />
     <Compile Include="ViewModels\SongViewModelBase.cs" />
-    <Compile Include="ViewModels\StatusViewModel.cs" />
     <Compile Include="ViewModels\YoutubeSongViewModel.cs" />
     <Compile Include="ViewModels\YoutubeViewModel.cs" />
     <Compile Include="Views\SettingsView.xaml.cs">
@@ -290,7 +277,7 @@
     <Resource Include="Images\EditPlaylistName.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\RemovePlaylist.png" />
+    <Resource Include="Images\Remove.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\ShufflePlaylist.png" />

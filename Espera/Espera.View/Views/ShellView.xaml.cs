@@ -2,9 +2,7 @@ using Espera.Core;
 using Espera.Core.Management;
 using Espera.View.Properties;
 using Espera.View.ViewModels;
-using Ionic.Utils;
 using MahApps.Metro;
-using Ookii.Dialogs.Wpf;
 using Rareform.Reflection;
 using System;
 using System.ComponentModel;
@@ -47,35 +45,6 @@ namespace Espera.View.Views
                     this.ChangeColor(Settings.Default.AccentColor);
                 }
             };
-        }
-
-        private void AddSongsButtonClick(object sender, RoutedEventArgs e)
-        {
-            string selectedPath;
-
-            if (VistaFolderBrowserDialog.IsVistaFolderDialogSupported)
-            {
-                var dialog = new VistaFolderBrowserDialog();
-
-                dialog.ShowDialog(this);
-
-                selectedPath = dialog.SelectedPath;
-            }
-
-            else
-            {
-                using (var dialog = new FolderBrowserDialogEx())
-                {
-                    dialog.ShowDialog();
-
-                    selectedPath = dialog.SelectedPath;
-                }
-            }
-
-            if (!String.IsNullOrEmpty(selectedPath))
-            {
-                this.shellViewModel.LocalViewModel.AddSongs(selectedPath);
-            }
         }
 
         private void ChangeColor(string color)

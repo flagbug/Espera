@@ -41,16 +41,6 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        [Ignore("How do we test async methods?")]
-        public void AddLocalSongsAsync_PathIsNull_ThrowsArgumentNullException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentNullException>(() => library.AddLocalSongsAsync(null));
-            }
-        }
-
-        [Test]
         public void AddPlayist_AddTwoPlaylistsWithSameName_ThrowInvalidOperationException()
         {
             using (Library library = Helpers.CreateLibrary())
@@ -756,29 +746,6 @@ namespace Espera.Core.Tests
         }
 
         [Test]
-        public void RemoveFromLibrary_IsNotAdministratorAndRemovalIsLocked_ThrowsInvalidOperationException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.LockLibraryRemoval.Value = true;
-
-                library.CreateAdmin("Password");
-                library.ChangeToParty();
-
-                Assert.Throws<InvalidOperationException>(() => library.RemoveFromLibrary(Helpers.SetupSongMocks(1)));
-            }
-        }
-
-        [Test]
-        public void RemoveFromLibrary_SongListIsNull_ThrowsArgumentNullException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentNullException>(() => library.RemoveFromLibrary(null));
-            }
-        }
-
-        [Test]
         public void RemoveFromPlaylist_AccessModeIsPartyAndLockPlaylistRemovalIsTrue_ThrowsInvalidOperationException()
         {
             var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
@@ -901,7 +868,7 @@ namespace Espera.Core.Tests
         public void Save_LibraryWithTemporaryPlaylist_DoesntSaveTemporaryPlaylist()
         {
             var libraryWriter = new Mock<ILibraryWriter>();
-            libraryWriter.Setup(x => x.Write(It.IsAny<IEnumerable<LocalSong>>(), It.IsAny<IEnumerable<Playlist>>()))
+            libraryWriter.Setup(x => x.Write(It.IsAny<IEnumerable<LocalSong>>(), It.IsAny<IEnumerable<Playlist>>(), It.IsAny<string>()))
                 .Callback<IEnumerable<LocalSong>, IEnumerable<Playlist>>((songs, playlists) => Assert.AreEqual(1, playlists.Count()));
 
             using (Library library = Helpers.CreateLibrary(libraryWriter.Object))
@@ -916,7 +883,7 @@ namespace Espera.Core.Tests
                 library.Save();
             }
 
-            libraryWriter.Verify(x => x.Write(It.IsAny<IEnumerable<LocalSong>>(), It.IsAny<IEnumerable<Playlist>>()), Times.Once());
+            libraryWriter.Verify(x => x.Write(It.IsAny<IEnumerable<LocalSong>>(), It.IsAny<IEnumerable<Playlist>>(), It.IsAny<string>()), Times.Once());
         }
 
         [Test]

@@ -17,7 +17,7 @@ namespace Espera.Core.Tests
 
                 var playlists = new[] { Helpers.Playlist1, Helpers.Playlist2 };
 
-                LibraryWriter.Write(songs, playlists, targetStream);
+                LibraryWriter.Write(songs, playlists, Helpers.SongSourcePath, targetStream);
 
                 string expected = Helpers.GenerateSaveFile();
                 string actual = Helpers.StreamToString(targetStream).Replace("\r\n", String.Empty);

@@ -23,24 +23,22 @@ namespace Espera.Core.Management
         private readonly AutoResetEvent cacheResetHandle;
         private readonly BehaviorSubject<AudioPlayer> currentPlayer;
         private readonly Subject<Playlist> currentPlaylistChanged;
-
-        // We need a lock when disposing songs to prevent a modification of the enumeration
-        private readonly object disposeLock;
-
+        private readonly object disposeLock; // We need a lock when disposing songs to prevent a modification of the enumeration
         private readonly IRemovableDriveWatcher driveWatcher;
-        private readonly Subject<bool> isUpdating;
         private readonly ILibraryReader libraryReader;
         private readonly ILibraryWriter libraryWriter;
         private readonly ObservableCollection<Playlist> playlists;
         private readonly ReadOnlyObservableCollection<Playlist> publicPlaylistWrapper;
         private readonly ILibrarySettings settings;
-        private readonly Subject<LibraryFillEventArgs> songAdded;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
+        private readonly BehaviorSubject<string> songSourcePath;
         private readonly Subject<Unit> songStarted;
-        private bool abortSongAdding;
+        private readonly Subject<Unit> songsUpdated;
+        private bool abortUpdate;
         private AccessMode accessMode;
         private Playlist currentPlayingPlaylist;
+        private LocalSongFinder currentSongFinder;
         private Playlist instantPlaylist;
         private bool isWaitingOnCache;
         private DateTime lastSongAddTime;
@@ -62,12 +60,12 @@ namespace Espera.Core.Management
             this.libraryWriter = libraryWriter;
             this.disposeLock = new object();
             this.settings = settings;
-            this.isUpdating = new Subject<bool>();
             this.CanPlayNextSong = this.currentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
             this.CanPlayPreviousSong = this.currentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
             this.currentPlayer = new BehaviorSubject<AudioPlayer>(null);
-            this.songAdded = new Subject<LibraryFillEventArgs>();
             this.songStarted = new Subject<Unit>();
+            this.songSourcePath = new BehaviorSubject<string>(null);
+            this.songsUpdated = new Subject<Unit>();
 
             this.LoadedSong = this.currentPlayer
                 .Select(x => x == null ? null : x.Song);
@@ -98,10 +96,6 @@ namespace Espera.Core.Management
                 () => this.settings.EnablePlaylistTimeout, x => this.settings.EnablePlaylistTimeout = x,
                 x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
 
-            this.LockLibraryRemoval = new ReactiveProperty<bool>(
-                () => this.settings.LockLibraryRemoval, x => this.settings.LockLibraryRemoval = x,
-                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
-
             this.LockPlaylistRemoval = new ReactiveProperty<bool>(
                 () => this.settings.LockPlaylistRemoval, x => this.settings.LockPlaylistRemoval = x,
                 x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
@@ -121,6 +115,10 @@ namespace Espera.Core.Management
             this.LockVolume = new ReactiveProperty<bool>(
                 () => this.settings.LockVolume, x => this.settings.LockVolume = x,
                 x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
+
+            this.SongSourceUpdateInterval = new ReactiveProperty<TimeSpan>(
+                () => this.settings.SongSourceUpdateInterval, x => this.settings.SongSourceUpdateInterval = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
             /*
              * End boring, repeating glue code
              */
@@ -133,6 +131,14 @@ namespace Espera.Core.Management
 
             this.CanSwitchPlaylist = this.AccessMode.CombineLatest(this.LockPlaylistSwitching,
                 (accessMode, lockPlaylistSwitching) => accessMode == Management.AccessMode.Administrator || !lockPlaylistSwitching);
+
+            this.songSourcePath
+                .Select(x => Unit.Default)
+                .Merge(this.SongSourceUpdateInterval
+                    .Select(Observable.Interval)
+                    .Switch()
+                    .Select(x => Unit.Default))
+                .Subscribe(x => this.UpdateSourcesAsync());
         }
 
         /// <summary>
@@ -205,19 +211,9 @@ namespace Espera.Core.Management
         public bool IsAdministratorCreated { get; private set; }
 
         /// <summary>
-        /// Occurs when the library is updating. <c>True</c>, when the updated starts, <c>false</c> when the update finished.
-        /// </summary>
-        public IObservable<bool> IsUpdating
-        {
-            get { return this.isUpdating.AsObservable(); }
-        }
-
-        /// <summary>
         /// Gets the song that is currently loaded.
         /// </summary>
         public IObservable<Song> LoadedSong { get; private set; }
-
-        public ReactiveProperty<bool> LockLibraryRemoval { get; private set; }
 
         public ReactiveProperty<bool> LockPlaylistRemoval { get; private set; }
 
@@ -261,14 +257,6 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Occurs when a song has been added to the library.
-        /// </summary>
-        public IObservable<LibraryFillEventArgs> SongAdded
-        {
-            get { return this.songAdded.AsObservable(); }
-        }
-
-        /// <summary>
         /// Gets all songs that are currently in the library.
         /// </summary>
         public IEnumerable<Song> Songs
@@ -286,12 +274,27 @@ namespace Espera.Core.Management
             }
         }
 
+        public IObservable<string> SongSourcePath
+        {
+            get { return this.songSourcePath.AsObservable(); }
+        }
+
+        public ReactiveProperty<TimeSpan> SongSourceUpdateInterval { get; private set; }
+
         /// <summary>
         /// Occurs when a song has started the playback.
         /// </summary>
         public IObservable<Unit> SongStarted
         {
             get { return this.songStarted.AsObservable(); }
+        }
+
+        /// <summary>
+        /// Occurs when a song has been added to the library.
+        /// </summary>
+        public IObservable<Unit> SongsUpdated
+        {
+            get { return this.songsUpdated.AsObservable(); }
         }
 
         public bool StreamHighestYoutubeQuality
@@ -368,54 +371,6 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Adds the song that are contained in the specified directory recursively to the library.
-        /// </summary>
-        /// <param name="path">The path of the directory to search.</param>
-        public async Task AddLocalSongsAsync(string path)
-        {
-            if (path == null)
-                Throw.ArgumentNullException(() => path);
-
-            if (!Directory.Exists(path))
-                Throw.ArgumentException("The directory doesn't exist.", () => path);
-
-            var finder = new LocalSongFinder(path);
-
-            int totalSongs = 0;
-            int songsProcessed = 0;
-
-            finder.SongsFound.Subscribe(i => totalSongs = i);
-
-            finder.SongFound
-                .Subscribe(song =>
-                {
-                    if (this.abortSongAdding)
-                    {
-                        finder.Abort();
-                        return;
-                    }
-
-                    bool added;
-
-                    lock (this.songLock)
-                    {
-                        lock (this.disposeLock)
-                        {
-                            added = this.songs.Add(song);
-                        }
-                    }
-
-                    if (added)
-                    {
-                        songsProcessed++;
-                        this.songAdded.OnNext(new LibraryFillEventArgs(song, songsProcessed, totalSongs));
-                    }
-                });
-
-            await finder.ExecuteAsync();
-        }
-
-        /// <summary>
         /// Adds a new playlist with the specified name to the library.
         /// </summary>
         /// <param name="name">The name of the playlist. It is required that no other playlist has this name.</param>
@@ -459,6 +414,14 @@ namespace Espera.Core.Management
             this.CurrentPlaylist.AddSongs(new[] { song });
 
             this.lastSongAddTime = DateTime.Now;
+        }
+
+        public void ChangeSongSourcePath(string path)
+        {
+            if (!Directory.Exists(path))
+                throw new ArgumentException("Directory does't exist");
+
+            this.songSourcePath.OnNext(path);
         }
 
         /// <summary>
@@ -527,7 +490,7 @@ namespace Espera.Core.Management
 
             this.driveWatcher.Dispose();
 
-            this.abortSongAdding = true;
+            this.abortUpdate = true;
 
             this.cacheResetHandle.Dispose();
 
@@ -557,7 +520,7 @@ namespace Espera.Core.Management
             }
 
             this.driveWatcher.Initialize();
-            this.driveWatcher.DriveRemoved += (sender, args) => Task.Run(() => this.Update());
+            this.driveWatcher.DriveRemoved += (sender, args) => this.RemoveMissingSongsAsync();
 
             this.Load();
         }
@@ -633,31 +596,6 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Removes the specified songs from the library.
-        /// </summary>
-        /// <param name="songList">The list of the songs to remove from the library.</param>
-        public void RemoveFromLibrary(IEnumerable<Song> songList)
-        {
-            if (songList == null)
-                Throw.ArgumentNullException(() => songList);
-
-            if (this.LockLibraryRemoval.Value && this.accessMode == Management.AccessMode.Party)
-                throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
-
-            DisposeSongs(songList);
-
-            lock (this.songLock)
-            {
-                this.playlists.ForEach(playlist => this.RemoveFromPlaylist(playlist, songList));
-
-                foreach (Song song in songList)
-                {
-                    this.songs.Remove(song);
-                }
-            }
-        }
-
-        /// <summary>
         /// Removes the songs with the specified indexes from the playlist.
         /// </summary>
         /// <param name="indexes">The indexes of the songs to remove from the playlist.</param>
@@ -696,7 +634,7 @@ namespace Espera.Core.Management
             this.playlists.Remove(playlist);
         }
 
-        public void Save()
+        public async void Save()
         {
             HashSet<LocalSong> casted;
 
@@ -706,7 +644,7 @@ namespace Espera.Core.Management
             }
 
             // Clean up the songs that aren't in the library anymore
-            // This happens when the user adds a song from a removable device to the playlistx
+            // This happens when the user adds a song from a removable device to the playlist
             // then removes the device, so the song is removed from the library, but not from the playlist
             foreach (Playlist playlist in this.playlists)
             {
@@ -717,7 +655,7 @@ namespace Espera.Core.Management
                 playlist.RemoveSongs(indexes);
             }
 
-            this.libraryWriter.Write(casted, this.playlists.Where(playlist => !playlist.IsTemporary));
+            this.libraryWriter.Write(casted, this.playlists.Where(playlist => !playlist.IsTemporary), await this.songSourcePath.FirstAsync());
         }
 
         public void ShufflePlaylist()
@@ -934,6 +872,30 @@ namespace Espera.Core.Management
             {
                 this.playlists.Add(playlist);
             }
+
+            this.songSourcePath.OnNext(this.libraryReader.ReadSongSourcePath());
+        }
+
+        /// <summary>
+        /// Removes the specified songs from the library.
+        /// </summary>
+        /// <param name="songList">The list of the songs to remove from the library.</param>
+        private void RemoveFromLibrary(IEnumerable<Song> songList)
+        {
+            if (songList == null)
+                Throw.ArgumentNullException(() => songList);
+
+            DisposeSongs(songList);
+
+            this.playlists.ForEach(playlist => this.RemoveFromPlaylist(playlist, songList));
+
+            lock (this.songLock)
+            {
+                foreach (Song song in songList)
+                {
+                    this.songs.Remove(song);
+                }
+            }
         }
 
         private void RemoveFromPlaylist(Playlist playlist, IEnumerable<int> indexes)
@@ -951,6 +913,35 @@ namespace Espera.Core.Management
         private void RemoveFromPlaylist(Playlist playlist, IEnumerable<Song> songList)
         {
             this.RemoveFromPlaylist(playlist, playlist.GetIndexes(songList));
+        }
+
+        private async Task RemoveMissingSongsAsync()
+        {
+            List<Song> currentSongs;
+
+            lock (this.songLock)
+            {
+                currentSongs = this.songs.ToList();
+            }
+
+            string sourcePath = await this.songSourcePath.FirstAsync();
+
+            List<Song> notInAnySongSource = currentSongs
+                .Where(song => !song.OriginalPath.StartsWith(sourcePath))
+                .ToList();
+
+            HashSet<Song> removable = null;
+
+            await Task.Run(() =>
+            {
+                List<Song> nonExistant = currentSongs
+                    .Where(song => !File.Exists(song.OriginalPath))
+                    .ToList();
+
+                removable = new HashSet<Song>(notInAnySongSource.Concat(nonExistant));
+            });
+
+            this.RemoveFromLibrary(removable);
         }
 
         private AudioPlayer RenewCurrentPlayer(Song song)
@@ -979,30 +970,50 @@ namespace Espera.Core.Management
                 throw new InvalidOperationException("Not in administrator mode.");
         }
 
-        private void Update()
+        private async Task UpdateSourcesAsync()
         {
-            this.isUpdating.OnNext(true);
-
-            IEnumerable<Song> removable;
-
-            lock (this.songLock)
+            if (this.currentSongFinder != null)
             {
-                removable = this.songs
-                    .Where(song => !File.Exists(song.OriginalPath))
-                    .ToList();
+                await this.currentSongFinder.AbortAsync();
+                this.currentSongFinder = null;
             }
 
-            DisposeSongs(removable);
+            await this.RemoveMissingSongsAsync();
 
-            foreach (Song song in removable)
+            this.songsUpdated.OnNext(Unit.Default);
+
+            var songFinder = new LocalSongFinder(await this.songSourcePath.FirstAsync());
+
+            this.currentSongFinder = songFinder;
+
+            songFinder.SongFound.Subscribe(async song =>
             {
+                if (this.abortUpdate)
+                {
+                    await songFinder.AbortAsync();
+                    return;
+                }
+
+                bool added;
+
                 lock (this.songLock)
                 {
-                    this.songs.Remove(song);
+                    lock (this.disposeLock)
+                    {
+                        added = this.songs.Add(song);
+                    }
                 }
-            }
 
-            this.isUpdating.OnNext(false);
+                if (added)
+                {
+                    this.songsUpdated.OnNext(Unit.Default);
+                }
+            });
+
+            await songFinder.ExecuteAsync();
+
+            this.currentSongFinder = null;
+            this.abortUpdate = false;
         }
     }
 }

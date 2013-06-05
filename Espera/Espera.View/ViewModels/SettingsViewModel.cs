@@ -22,12 +22,11 @@ namespace Espera.View.ViewModels
         private readonly IWindowManager windowManager;
         private string creationPassword;
         private bool isWrongPassword;
+        private ObservableAsPropertyHelper<string> librarySource;
         private string loginPassword;
         private double scaling;
         private bool showLogin;
         private bool showSettings;
-
-        private YoutubeStreamingQuality youtubeStreamingQuality;
 
         public SettingsViewModel(Library library, IWindowManager windowManager)
         {
@@ -84,6 +83,8 @@ namespace Espera.View.ViewModels
 
             this.ChangeAccentColorCommand = new ReactiveCommand();
             this.ChangeAccentColorCommand.Subscribe(p => Settings.Default.AccentColor = (string)p);
+
+            this.librarySource = this.library.SongSourcePath.ToProperty(this, x => x.LibrarySource);
         }
 
         public static IEnumerable<YoutubeStreamingQuality> YoutubeStreamingQualities
@@ -154,10 +155,9 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.isWrongPassword, value); }
         }
 
-        public bool LockLibraryRemoval
+        public string LibrarySource
         {
-            get { return this.library.LockLibraryRemoval.Value; }
-            set { this.library.LockLibraryRemoval.Value = value; }
+            get { return this.librarySource.Value; }
         }
 
         public bool LockPlaylistRemoval
@@ -244,6 +244,17 @@ namespace Espera.View.ViewModels
             private set { this.RaiseAndSetIfChanged(ref this.showSettings, value); }
         }
 
+        public int SongSourceUpdateInterval
+        {
+            get { return (int)this.library.SongSourceUpdateInterval.Value.TotalMinutes; }
+            set
+            {
+                this.library.SongSourceUpdateInterval.Value = TimeSpan.FromMinutes(value);
+
+                this.RaisePropertyChanged();
+            }
+        }
+
         public bool StreamHighestYoutubeQuality
         {
             get { return this.library.StreamHighestYoutubeQuality; }
@@ -279,6 +290,11 @@ namespace Espera.View.ViewModels
                 this.library.YoutubeStreamingQuality = value;
                 this.RaisePropertyChanged();
             }
+        }
+
+        public void ChangeLibrarySource(string source)
+        {
+            this.library.ChangeSongSourcePath(source);
         }
 
         public void HandleSettings()
