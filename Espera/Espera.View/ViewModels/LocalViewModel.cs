@@ -206,7 +206,7 @@ namespace Espera.View.ViewModels
                 .OrderBy(this.SongOrderFunc)
                 .ToList();
 
-            this.SelectedSongs = this.SelectableSongs.Take(1);
+            this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
 
             this.updateSemaphore.Release();
         }
