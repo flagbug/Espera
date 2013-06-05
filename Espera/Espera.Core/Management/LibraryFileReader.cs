@@ -41,6 +41,17 @@ namespace Espera.Core.Management
             }
         }
 
+        public string ReadSongSourcePath()
+        {
+            if (!File.Exists(this.sourcePath))
+                return null;
+
+            using (FileStream sourceStream = File.OpenRead(this.sourcePath))
+            {
+                return LibraryReader.ReadSongSourcePath(sourceStream);
+            }
+        }
+
         private DriveType GetDriveType(string path)
         {
             string root = Path.GetPathRoot(path);

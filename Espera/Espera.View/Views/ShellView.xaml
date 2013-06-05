@@ -82,7 +82,7 @@
         <Controls:Flyout Header="settings"
                          IsOpen="{Binding Path=SettingsViewModel.ShowSettings}"
                          Position="Right">
-            <Views:SettingsView Width="500" DataContext="{Binding Path=SettingsViewModel}" />
+            <Views:SettingsView Width="575" DataContext="{Binding Path=SettingsViewModel}" />
         </Controls:Flyout>
         <Controls:Flyout Header="Login"
                          IsOpen="{Binding Path=SettingsViewModel.ShowLogin}"
@@ -139,14 +139,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <Button Click="AddSongsButtonClick"
-                        Padding="0"
-                        ToolTip="Add music">
-                    <Image Source="/Espera;component/Images/Add.png" />
-                </Button>
-                <Button Width="30"
-                        Margin="15, 0, 0, 0"
-                        Padding="0">
+                <Button Width="30" Padding="0">
                     <Button.Style>
                         <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="{x:Type Button}">
                             <Style.Triggers>
@@ -388,7 +381,6 @@
                                 <ContextMenu>
                                     <MenuItem Command="{Binding Path=PlayNowCommand}" Header="Play Now" />
                                     <MenuItem Command="{Binding Path=AddToPlaylistCommand}" Header="Add to playlist" />
-                                    <MenuItem Command="{Binding Path=RemoveFromLibraryCommand}" Header="Remove from library" />
                                 </ContextMenu>
                             </ListView.ContextMenu>
                             <ListView.ItemContainerStyle>
@@ -581,7 +573,7 @@
                                         IsEnabled="{Binding Path=CanSwitchPlaylist}"
                                         Padding="0"
                                         ToolTip="Remove playlist">
-                                    <Image Source="/Espera;component/Images/RemovePlaylist.png" />
+                                    <Image Source="/Espera;component/Images/Remove.png" />
                                 </Button>
                                 <Button Grid.Column="2"
                                         Width="30"
@@ -830,51 +822,5 @@
                 </Grid>
             </Grid>
         </Grid>
-        <StatusBar Grid.Row="2"
-                   Height="25"
-                   Margin="0, 5, 0, 0"
-                   Background="Transparent"
-                   DataContext="{Binding Path=LocalViewModel.StatusViewModel}"
-                   Visibility="{Binding Path=IsUpdating,
-                                        Converter={StaticResource BooleanToVisibilityConverter}}">
-            <StatusBarItem Content="Updating library..." />
-        </StatusBar>
-        <StatusBar Grid.Row="2"
-                   Height="25"
-                   Margin="0, 5, 0, 0"
-                   Background="Transparent"
-                   DataContext="{Binding Path=LocalViewModel.StatusViewModel}"
-                   Visibility="{Binding Path=IsAdding,
-                                        Converter={StaticResource BooleanToVisibilityConverter}}">
-            <StatusBarItem>
-                <ProgressBar Width="200"
-                             IsIndeterminate="{Binding Path=IsProgressUnkown}"
-                             Maximum="{Binding Path=TotalTags}"
-                             Value="{Binding Path=ProcessedTags,
-                                             Mode=OneWay}" />
-            </StatusBarItem>
-            <StatusBarItem>
-                <Grid>
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel.Style>
-                            <Style TargetType="{x:Type StackPanel}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=IsProgressUnkown}" Value="True">
-                                        <Setter Property="Visibility" Value="Hidden" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-                        <TextBlock Text="Added " />
-                        <TextBlock Text="{Binding Path=ProcessedTags}" />
-                        <TextBlock Text=" of " />
-                        <TextBlock Text="{Binding Path=TotalTags}" />
-                        <TextBlock Text=" found Songs: " />
-                        <TextBlock Text="{Binding Path=Path}" />
-                    </StackPanel>
-                    <TextBlock Text="Searching..." Visibility="{Binding Path=IsProgressUnkown, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-            </StatusBarItem>
-        </StatusBar>
     </Grid>
 </Controls:MetroWindow>

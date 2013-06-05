@@ -10,12 +10,6 @@ namespace Espera.Core.Settings
             set { CoreSettings.Default.EnablePlaylistTimeout = value; }
         }
 
-        public bool LockLibraryRemoval
-        {
-            get { return CoreSettings.Default.LockLibraryRemoval; }
-            set { CoreSettings.Default.LockLibraryRemoval = value; }
-        }
-
         public bool LockPlaylistRemoval
         {
             get { return CoreSettings.Default.LockPlaylistRemoval; }
@@ -50,6 +44,12 @@ namespace Espera.Core.Settings
         {
             get { return CoreSettings.Default.PlaylistTimeout; }
             set { CoreSettings.Default.PlaylistTimeout = value; }
+        }
+
+        public TimeSpan SongSourceUpdateInterval
+        {
+            get { return CoreSettings.Default.SongSourceUpdateInterval; }
+            set { CoreSettings.Default.SongSourceUpdateInterval = value; }
         }
 
         public bool StreamHighestYoutubeQuality

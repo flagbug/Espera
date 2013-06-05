@@ -7,5 +7,7 @@ namespace Espera.Core.Management
         IEnumerable<Playlist> ReadPlaylists();
 
         IEnumerable<LocalSong> ReadSongs();
+
+        string ReadSongSourcePath();
     }
 }

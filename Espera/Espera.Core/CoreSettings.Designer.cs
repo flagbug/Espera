@@ -98,18 +98,6 @@ namespace Espera.Core {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool LockLibraryRemoval {
-            get {
-                return ((bool)(this["LockLibraryRemoval"]));
-            }
-            set {
-                this["LockLibraryRemoval"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool LockPlayPause {
             get {
                 return ((bool)(this["LockPlayPause"]));
@@ -176,6 +164,18 @@ namespace Espera.Core {
             }
             set {
                 this["StreamHighestYoutubeQuality"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("00:30:00")]
+        public global::System.TimeSpan SongSourceUpdateInterval {
+            get {
+                return ((global::System.TimeSpan)(this["SongSourceUpdateInterval"]));
+            }
+            set {
+                this["SongSourceUpdateInterval"] = value;
             }
         }
     }

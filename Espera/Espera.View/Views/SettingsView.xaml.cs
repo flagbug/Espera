@@ -1,4 +1,5 @@
 ﻿using Espera.View.ViewModels;
+using Ookii.Dialogs.Wpf;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,6 +15,18 @@ namespace Espera.View.Views
         public SettingsView()
         {
             InitializeComponent();
+        }
+
+        private void AddSongSourceButtonClick(object sender, RoutedEventArgs e)
+        {
+            var dialog = new VistaFolderBrowserDialog();
+
+            dialog.ShowDialog();
+
+            if (!string.IsNullOrWhiteSpace(dialog.SelectedPath))
+            {
+                ((SettingsViewModel)this.DataContext).ChangeLibrarySource(dialog.SelectedPath);
+            }
         }
 
         private void CreateAdminButtonClick(object sender, RoutedEventArgs e)
