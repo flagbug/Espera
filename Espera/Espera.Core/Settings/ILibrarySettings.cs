@@ -6,8 +6,6 @@ namespace Espera.Core.Settings
     {
         bool EnablePlaylistTimeout { get; set; }
 
-        bool LockLibraryRemoval { get; set; }
-
         bool LockPlaylistRemoval { get; set; }
 
         bool LockPlaylistSwitching { get; set; }

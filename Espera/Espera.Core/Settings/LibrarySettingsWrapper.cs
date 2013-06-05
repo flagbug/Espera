@@ -10,12 +10,6 @@ namespace Espera.Core.Settings
             set { CoreSettings.Default.EnablePlaylistTimeout = value; }
         }
 
-        public bool LockLibraryRemoval
-        {
-            get { return CoreSettings.Default.LockLibraryRemoval; }
-            set { CoreSettings.Default.LockLibraryRemoval = value; }
-        }
-
         public bool LockPlaylistRemoval
         {
             get { return CoreSettings.Default.LockPlaylistRemoval; }

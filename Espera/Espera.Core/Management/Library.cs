@@ -97,10 +97,6 @@ namespace Espera.Core.Management
                 () => this.settings.EnablePlaylistTimeout, x => this.settings.EnablePlaylistTimeout = x,
                 x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
 
-            this.LockLibraryRemoval = new ReactiveProperty<bool>(
-                () => this.settings.LockLibraryRemoval, x => this.settings.LockLibraryRemoval = x,
-                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
-
             this.LockPlaylistRemoval = new ReactiveProperty<bool>(
                 () => this.settings.LockPlaylistRemoval, x => this.settings.LockPlaylistRemoval = x,
                 x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
@@ -219,8 +215,6 @@ namespace Espera.Core.Management
         /// Gets the song that is currently loaded.
         /// </summary>
         public IObservable<Song> LoadedSong { get; private set; }
-
-        public ReactiveProperty<bool> LockLibraryRemoval { get; private set; }
 
         public ReactiveProperty<bool> LockPlaylistRemoval { get; private set; }
 
@@ -603,31 +597,6 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Removes the specified songs from the library.
-        /// </summary>
-        /// <param name="songList">The list of the songs to remove from the library.</param>
-        public void RemoveFromLibrary(IEnumerable<Song> songList)
-        {
-            if (songList == null)
-                Throw.ArgumentNullException(() => songList);
-
-            if (this.LockLibraryRemoval.Value && this.accessMode == Management.AccessMode.Party)
-                throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
-
-            DisposeSongs(songList);
-
-            lock (this.songLock)
-            {
-                this.playlists.ForEach(playlist => this.RemoveFromPlaylist(playlist, songList));
-
-                foreach (Song song in songList)
-                {
-                    this.songs.Remove(song);
-                }
-            }
-        }
-
-        /// <summary>
         /// Removes the songs with the specified indexes from the playlist.
         /// </summary>
         /// <param name="indexes">The indexes of the songs to remove from the playlist.</param>
@@ -906,6 +875,28 @@ namespace Espera.Core.Management
             }
 
             this.songSourcePath.OnNext(this.libraryReader.ReadSongSourcePath());
+        }
+
+        /// <summary>
+        /// Removes the specified songs from the library.
+        /// </summary>
+        /// <param name="songList">The list of the songs to remove from the library.</param>
+        private void RemoveFromLibrary(IEnumerable<Song> songList)
+        {
+            if (songList == null)
+                Throw.ArgumentNullException(() => songList);
+
+            DisposeSongs(songList);
+
+            this.playlists.ForEach(playlist => this.RemoveFromPlaylist(playlist, songList));
+
+            lock (this.songLock)
+            {
+                foreach (Song song in songList)
+                {
+                    this.songs.Remove(song);
+                }
+            }
         }
 
         private void RemoveFromPlaylist(Playlist playlist, IEnumerable<int> indexes)

@@ -49,20 +49,6 @@ namespace Espera.View.ViewModels
             this.WhenAny(x => x.SearchText, x => x.SelectedArtist, (x1, x2) => Unit.Default)
                 .Subscribe(x => this.UpdateSelectableSongs());
 
-            IObservable<bool> canRemoveFromLibrary = this
-                .WhenAny(x => x.SelectedSongs, x => x.Value)
-                .CombineLatest(this.Library.AccessMode, this.Library.LockLibraryRemoval,
-                    (selectedSongs, accessMode, lockLibraryRemoval) =>
-                        selectedSongs != null && selectedSongs.Any() && (accessMode == AccessMode.Administrator || !lockLibraryRemoval));
-
-            this.RemoveFromLibraryCommand = new ReactiveCommand(canRemoveFromLibrary);
-            this.RemoveFromLibraryCommand.Subscribe(p =>
-            {
-                this.Library.RemoveFromLibrary(this.SelectedSongs.Select(song => song.Model));
-
-                this.UpdateSelectableSongs();
-            });
-
             this.PlayNowCommand = new ReactiveCommand();
             this.PlayNowCommand.Subscribe(p =>
             {
@@ -113,8 +99,6 @@ namespace Espera.View.ViewModels
         }
 
         public IReactiveCommand PlayNowCommand { get; private set; }
-
-        public IReactiveCommand RemoveFromLibraryCommand { get; private set; }
 
         public ArtistViewModel SelectedArtist
         {

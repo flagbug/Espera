@@ -381,7 +381,6 @@
                                 <ContextMenu>
                                     <MenuItem Command="{Binding Path=PlayNowCommand}" Header="Play Now" />
                                     <MenuItem Command="{Binding Path=AddToPlaylistCommand}" Header="Add to playlist" />
-                                    <MenuItem Command="{Binding Path=RemoveFromLibraryCommand}" Header="Remove from library" />
                                 </ContextMenu>
                             </ListView.ContextMenu>
                             <ListView.ItemContainerStyle>

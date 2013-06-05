@@ -160,12 +160,6 @@ namespace Espera.View.ViewModels
             get { return this.librarySource.Value; }
         }
 
-        public bool LockLibraryRemoval
-        {
-            get { return this.library.LockLibraryRemoval.Value; }
-            set { this.library.LockLibraryRemoval.Value = value; }
-        }
-
         public bool LockPlaylistRemoval
         {
             get { return this.library.LockPlaylistRemoval.Value; }
