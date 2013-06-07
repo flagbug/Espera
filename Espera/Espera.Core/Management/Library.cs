@@ -10,6 +10,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -35,10 +36,9 @@ namespace Espera.Core.Management
         private readonly BehaviorSubject<string> songSourcePath;
         private readonly Subject<Unit> songStarted;
         private readonly Subject<Unit> songsUpdated;
-        private bool abortUpdate;
         private AccessMode accessMode;
         private Playlist currentPlayingPlaylist;
-        private LocalSongFinder currentSongFinder;
+        private IDisposable currentSongFinderSubscription;
         private Playlist instantPlaylist;
         private bool isWaitingOnCache;
         private DateTime lastSongAddTime;
@@ -490,7 +490,10 @@ namespace Espera.Core.Management
 
             this.driveWatcher.Dispose();
 
-            this.abortUpdate = true;
+            if (this.currentSongFinderSubscription != null)
+            {
+                this.currentSongFinderSubscription.Dispose();
+            }
 
             this.cacheResetHandle.Dispose();
 
@@ -972,10 +975,10 @@ namespace Espera.Core.Management
 
         private async Task UpdateSourcesAsync()
         {
-            if (this.currentSongFinder != null)
+            if (this.currentSongFinderSubscription != null)
             {
-                await this.currentSongFinder.AbortAsync();
-                this.currentSongFinder = null;
+                this.currentSongFinderSubscription.Dispose();
+                this.currentSongFinderSubscription = null;
             }
 
             await this.RemoveMissingSongsAsync();
@@ -984,36 +987,25 @@ namespace Espera.Core.Management
 
             var songFinder = new LocalSongFinder(await this.songSourcePath.FirstAsync());
 
-            this.currentSongFinder = songFinder;
-
-            songFinder.SongFound.Subscribe(async song =>
-            {
-                if (this.abortUpdate)
+            this.currentSongFinderSubscription = songFinder.GetSongs()
+                .SubscribeOn(TaskPoolScheduler.Default)
+                .Subscribe(song =>
                 {
-                    await songFinder.AbortAsync();
-                    return;
-                }
+                    bool added;
 
-                bool added;
-
-                lock (this.songLock)
-                {
-                    lock (this.disposeLock)
+                    lock (this.songLock)
                     {
-                        added = this.songs.Add(song);
+                        lock (this.disposeLock)
+                        {
+                            added = this.songs.Add(song);
+                        }
                     }
-                }
 
-                if (added)
-                {
-                    this.songsUpdated.OnNext(Unit.Default);
-                }
-            });
-
-            await songFinder.ExecuteAsync();
-
-            this.currentSongFinder = null;
-            this.abortUpdate = false;
+                    if (added)
+                    {
+                        this.songsUpdated.OnNext(Unit.Default);
+                    }
+                });
         }
     }
 }

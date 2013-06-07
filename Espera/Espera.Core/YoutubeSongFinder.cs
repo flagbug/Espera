@@ -4,11 +4,11 @@ using Google.GData.YouTube;
 using Google.YouTube;
 using Rareform.Validation;
 using System;
-using System.Threading.Tasks;
+using System.Reactive.Linq;
 
 namespace Espera.Core
 {
-    public sealed class YoutubeSongFinder : SongFinder<YoutubeSong>
+    public sealed class YoutubeSongFinder : ISongFinder<YoutubeSong>
     {
         private const string ApiKey =
             "AI39si5_zcffmO_ErRSZ9xUkfy_XxPZLWuxTOzI_1RH9HhXDI-GaaQ-j6MONkl2JiF01yBDgBFPbC8-mn6U9Qo4Ek50nKcqH5g";
@@ -23,7 +23,7 @@ namespace Espera.Core
             this.searchString = searchString;
         }
 
-        public override async Task ExecuteAsync()
+        public IObservable<YoutubeSong> GetSongs()
         {
             var query = new YouTubeQuery(YouTubeQuery.DefaultVideoUri)
             {
@@ -34,37 +34,41 @@ namespace Espera.Core
 
             var settings = new YouTubeRequestSettings("Espera", ApiKey);
             var request = new YouTubeRequest(settings);
-            Feed<Video> feed = await Task.Run(() => request.Get<Video>(query));
+            Feed<Video> feed = request.Get<Video>(query);
 
-            try
+            return Observable.Create<YoutubeSong>(o =>
             {
-                foreach (Video video in feed.Entries)
+                try
                 {
-                    var duration = TimeSpan.FromSeconds(Int32.Parse(video.YouTubeEntry.Duration.Seconds));
-                    string url = video.WatchPage.OriginalString
-                        .Replace("&feature=youtube_gdata_player", String.Empty) // Unnecessary long url
-                        .Replace("https://", "http://"); // Secure connections are not always easy to handle when streaming
-
-                    var song = new YoutubeSong(url, AudioType.Mp3, duration, CoreSettings.Default.StreamYoutube)
+                    foreach (Video video in feed.Entries)
                     {
-                        Title = video.Title,
-                        Description = video.Description,
-                        Rating = video.RatingAverage >= 1 ? video.RatingAverage : (double?)null,
-                        ThumbnailSource = new Uri(video.Thumbnails[0].Url),
-                        Views = video.ViewCount
-                    };
+                        var duration = TimeSpan.FromSeconds(Int32.Parse(video.YouTubeEntry.Duration.Seconds));
+                        string url = video.WatchPage.OriginalString
+                            .Replace("&feature=youtube_gdata_player", String.Empty) // Unnecessary long url
+                            .Replace("https://", "http://"); // Secure connections are not always easy to handle when streaming
 
-                    this.OnSongFound(song);
+                        var song = new YoutubeSong(url, AudioType.Mp3, duration, CoreSettings.Default.StreamYoutube)
+                        {
+                            Title = video.Title,
+                            Description = video.Description,
+                            Rating = video.RatingAverage >= 1 ? video.RatingAverage : (double?)null,
+                            ThumbnailSource = new Uri(video.Thumbnails[0].Url),
+                            Views = video.ViewCount
+                        };
+
+                        o.OnNext(song);
+                    }
                 }
-            }
 
-            catch (GDataRequestException ex)
-            {
-                this.OnError(ex);
-                return;
-            }
+                catch (GDataRequestException ex)
+                {
+                    o.OnError(ex);
+                }
 
-            this.OnCompleted();
+                o.OnCompleted();
+
+                return () => { };
+            });
         }
     }
 }

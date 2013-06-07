@@ -132,7 +132,7 @@
     <Compile Include="Settings\LibrarySettingsWrapper.cs" />
     <Compile Include="Song.cs" />
     <Compile Include="LocalSongFinder.cs" />
-    <Compile Include="SongFinder.cs" />
+    <Compile Include="ISongFinder.cs" />
     <Compile Include="IVideoPlayerCallback.cs" />
     <Compile Include="TagSanitizer.cs" />
     <Compile Include="YoutubeSong.cs" />

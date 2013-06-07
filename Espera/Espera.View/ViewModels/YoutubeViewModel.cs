@@ -5,13 +5,13 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 
 namespace Espera.View.ViewModels
 {
     internal sealed class YoutubeViewModel : SongSourceViewModel<YoutubeSongViewModel>
     {
-        private List<YoutubeSong> currentSongs;
         private SortOrder durationOrder;
         private bool isSearching;
         private SortOrder ratingOrder;
@@ -84,34 +84,32 @@ namespace Espera.View.ViewModels
             this.ApplyOrder(SortHelpers.GetOrderByViews, ref this.viewsOrder);
         }
 
-        public async Task StartSearch()
+        public void StartSearch()
         {
             this.IsSearching = true;
 
-            await this.UpdateSelectableSongs();
+            this.UpdateSelectableSongs();
         }
 
-        private async Task UpdateSelectableSongs()
+        private void UpdateSelectableSongs()
         {
-            this.currentSongs = new List<YoutubeSong>();
+            var finder = new YoutubeSongFinder(this.SearchText);
 
-            if (this.IsSearching || this.currentSongs == null)
-            {
-                var finder = new YoutubeSongFinder(this.SearchText);
+            var songs = new List<YoutubeSongViewModel>();
 
-                finder.SongFound.Subscribe(currentSongs.Add, ex => { }); //TODO: Handle error
-
-                await finder.ExecuteAsync();
-
-                this.IsSearching = false;
-            }
-
-            this.SelectableSongs = this.currentSongs
+            finder.GetSongs()
                 .Select(song => new YoutubeSongViewModel(song))
-                .OrderBy(this.SongOrderFunc)
-                .ToList();
+                .SubscribeOn(TaskPoolScheduler.Default)
+                .Subscribe(song => songs.Add(song), () =>
+                {
+                    this.IsSearching = false;
 
-            this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
+                    this.SelectableSongs = songs
+                        .OrderBy(this.SongOrderFunc)
+                        .ToList();
+
+                    this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
+                });
         }
     }
 }
