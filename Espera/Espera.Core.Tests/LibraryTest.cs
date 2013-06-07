@@ -869,7 +869,8 @@ namespace Espera.Core.Tests
         {
             var libraryWriter = new Mock<ILibraryWriter>();
             libraryWriter.Setup(x => x.Write(It.IsAny<IEnumerable<LocalSong>>(), It.IsAny<IEnumerable<Playlist>>(), It.IsAny<string>()))
-                .Callback<IEnumerable<LocalSong>, IEnumerable<Playlist>>((songs, playlists) => Assert.AreEqual(1, playlists.Count()));
+                .Callback<IEnumerable<LocalSong>, IEnumerable<Playlist>, string>((songs, playlists, songSourcePath) =>
+                    Assert.AreEqual(1, playlists.Count()));
 
             using (Library library = Helpers.CreateLibrary(libraryWriter.Object))
             {
