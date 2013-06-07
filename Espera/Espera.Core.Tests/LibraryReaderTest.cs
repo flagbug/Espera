@@ -61,6 +61,17 @@ namespace Espera.Core.Tests
             }
         }
 
+        [Test]
+        public void ReadSongSourcePath()
+        {
+            using (Stream saveFileStream = Helpers.GenerateSaveFile().ToStream())
+            {
+                string songSourcePath = LibraryReader.ReadSongSourcePath(saveFileStream);
+
+                Assert.AreEqual(songSourcePath, Helpers.SongSourcePath);
+            }
+        }
+
         private static void AssertSongsAreEqual(Song song1, Song song2)
         {
             Assert.AreEqual(song1.Album, song2.Album);

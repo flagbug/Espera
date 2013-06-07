@@ -131,14 +131,6 @@ namespace Espera.Core.Management
 
             this.CanSwitchPlaylist = this.AccessMode.CombineLatest(this.LockPlaylistSwitching,
                 (accessMode, lockPlaylistSwitching) => accessMode == Management.AccessMode.Administrator || !lockPlaylistSwitching);
-
-            this.songSourcePath
-                .Select(x => Unit.Default)
-                .Merge(this.SongSourceUpdateInterval
-                    .Select(Observable.Interval)
-                    .Switch()
-                    .Select(x => Unit.Default))
-                .Subscribe(x => this.UpdateSourcesAsync());
         }
 
         /// <summary>
@@ -524,6 +516,14 @@ namespace Espera.Core.Management
 
             this.driveWatcher.Initialize();
             this.driveWatcher.DriveRemoved += (sender, args) => this.RemoveMissingSongsAsync();
+
+            this.songSourcePath
+                .Select(x => Unit.Default)
+                .Merge(this.SongSourceUpdateInterval
+                    .Select(Observable.Interval)
+                    .Switch()
+                    .Select(x => Unit.Default))
+                .Subscribe(x => this.UpdateSourcesAsync());
 
             this.Load();
         }
