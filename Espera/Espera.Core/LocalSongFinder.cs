@@ -30,7 +30,7 @@ namespace Espera.Core
 
         public IObservable<LocalSong> GetSongs()
         {
-            return this.StartFileScan()
+            return this.ScanDirectoryForValidPaths()
                 .Select(this.ProcessFile)
                 .Where(song => song != null);
         }
@@ -100,7 +100,7 @@ namespace Espera.Core
             }
         }
 
-        private IObservable<string> StartFileScan()
+        private IObservable<string> ScanDirectoryForValidPaths()
         {
             return Observable.Create<string>(o =>
             {
