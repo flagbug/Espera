@@ -1,10 +1,8 @@
 # Espera
-<a href="http://flattr.com/thing/1092917/Espera" target="_blank">
-<img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" />
-</a>
+
 ## Overview
 
-Espera is an open-source media player that plays MP3s, WAV files and YouTube videos and has a special "party mode".
+Espera is a media player that plays MP3s, WAV files and YouTube videos and has a special "party mode".
 
 ## Features
 
@@ -39,25 +37,6 @@ very clean look.
 ## Development
 
 Espera is written in C#, with WPF as frontend.
-
-If you want to contribute to Espera, just send me a pull request!
-
-### License
-
-Espera is released under the [MIT-License](http://opensource.org/licenses/mit-license.php)
-
-### Used libraries
-
-- [Rareform](http://github.com/flagbug/Rareform/)
-- [YoutubeExtractor](http://github.com/flagbug/YoutubeExtractor/)
-- [MahApps.Metro](http://github.com/flagbug/MahApps.Metro/)
-- [NAudio](http://naudio.codeplex.com/)
-- [Taglib#](http://github.com/mono/taglib-sharp/)
-- [Moq](http://code.google.com/p/moq/)
-- [Caliburn.Mirco](http://caliburnmicro.codeplex.com/)
-- [NUnit](http://www.nunit.org/)
-- [Ninject](http://www.ninject.org/)
-- [MoreLinq](http://code.google.com/p/morelinq/)
 
 ## Screenshot
 
