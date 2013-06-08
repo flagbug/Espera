@@ -5,7 +5,6 @@ using ReactiveMarrow;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
@@ -46,8 +45,9 @@ namespace Espera.View.ViewModels
                 .DisposeWith(this.disposable);
 
             IObservable<int?> currentSongUpdated = this.playlist.CurrentSongIndex.Do(this.UpdateCurrentSong);
-            IObservable<IEnumerable<PlaylistEntryViewModel>> remainingSongs = this.entries.Changed.StartWith(new NotifyCollectionChangedEventArgs[] { null })
-                .CombineLatest(currentSongUpdated, (changed, index) => Unit.Default)
+            IObservable<IEnumerable<PlaylistEntryViewModel>> remainingSongs = this.entries.Changed
+                .Select(x => Unit.Default)
+                .Merge(currentSongUpdated.Select(x => Unit.Default))
                 .Select(x => this.entries.Reverse().TakeWhile(entry => !entry.IsPlaying).ToList());
 
             this.songsRemaining = remainingSongs

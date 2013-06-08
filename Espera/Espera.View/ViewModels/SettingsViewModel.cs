@@ -19,10 +19,10 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> canCreateAdmin;
         private readonly ObservableAsPropertyHelper<bool> canLogin;
         private readonly Library library;
+        private readonly ObservableAsPropertyHelper<string> librarySource;
         private readonly IWindowManager windowManager;
         private string creationPassword;
         private bool isWrongPassword;
-        private ObservableAsPropertyHelper<string> librarySource;
         private string loginPassword;
         private double scaling;
         private bool showLogin;
