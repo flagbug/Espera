@@ -91,7 +91,7 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.CurrentSongSource, null, ImmediateScheduler.Instance);
 
             this.isAdmin = isAdminObservable
-                .ToProperty(this, x => x.IsAdmin, true);
+                .ToProperty(this, x => x.IsAdmin);
 
             this.showPlaylistTimeout = isAdminObservable
                 .CombineLatest(this.WhenAny(x => x.SettingsViewModel.EnablePlaylistTimeout, x => x.Value), (isAdmin, enableTimeout) => !isAdmin && enableTimeout)
@@ -127,7 +127,7 @@ namespace Espera.View.ViewModels
             this.ShufflePlaylistCommand.Subscribe(x => this.library.ShufflePlaylist());
 
             this.PlayCommand = new ReactiveCommand(this.WhenAny(x => x.SelectedPlaylistEntries, x => x.Value)
-                .CombineLatest(this.isAdmin, this.library.LockPlayPause, this.library.LoadedSong, this.library.PlaybackState,
+                .CombineLatest(isAdminObservable, this.library.LockPlayPause, this.library.LoadedSong, this.library.PlaybackState,
                     (selectedPlaylistEntries, isAdmin, lockPlayPause, loadedSong, playBackState) =>
 
                         // The admin can always play, but if we are in party mode, we have to check whether it is allowed to play
