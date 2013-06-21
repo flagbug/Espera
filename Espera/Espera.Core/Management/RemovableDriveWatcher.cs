@@ -19,7 +19,7 @@ namespace Espera.Core.Management
         {
             this.driveWatcher = Rareform.IO.RemovableDriveWatcher.Create();
 
-            this.DriveRemoved = Observable.FromEvent<EventHandler, EventArgs>(
+            this.DriveRemoved = Observable.FromEventPattern<EventHandler, EventArgs>(
                 handler => this.driveWatcher.DriveRemoved += handler,
                 handler => this.driveWatcher.DriveRemoved -= handler)
                 .Select(_ => Unit.Default)
