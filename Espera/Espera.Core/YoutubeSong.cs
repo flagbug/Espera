@@ -11,7 +11,7 @@ namespace Espera.Core
 {
     public sealed class YoutubeSong : Song
     {
-        private static readonly Dictionary<YoutubeStreamingQuality, IEnumerable<int>> StreamingQualityMap =
+        private static readonly IReadOnlyDictionary<YoutubeStreamingQuality, IEnumerable<int>> StreamingQualityMap =
             new Dictionary<YoutubeStreamingQuality, IEnumerable<int>>
             {
                 { YoutubeStreamingQuality.High, new HashSet<int> { 1080, 720 } },

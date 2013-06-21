@@ -19,10 +19,10 @@ namespace Espera.Core.Management
             this.driveTypeCache = new Dictionary<string, DriveType>();
         }
 
-        public IEnumerable<Playlist> ReadPlaylists()
+        public IReadOnlyList<Playlist> ReadPlaylists()
         {
             if (!File.Exists(this.sourcePath))
-                return Enumerable.Empty<Playlist>();
+                return new List<Playlist>();
 
             using (FileStream sourceStream = File.OpenRead(this.sourcePath))
             {
@@ -30,10 +30,10 @@ namespace Espera.Core.Management
             }
         }
 
-        public IEnumerable<LocalSong> ReadSongs()
+        public IReadOnlyList<LocalSong> ReadSongs()
         {
             if (!File.Exists(this.sourcePath))
-                return Enumerable.Empty<LocalSong>();
+                return new List<LocalSong>();
 
             using (FileStream sourceStream = File.OpenRead(this.sourcePath))
             {
