@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reactive;
+using System.Reactive.Linq;
 
 namespace Espera.Core.Management
 {
@@ -6,11 +8,7 @@ namespace Espera.Core.Management
     {
         private Rareform.IO.RemovableDriveWatcher driveWatcher;
 
-        public event EventHandler DriveRemoved
-        {
-            add { this.driveWatcher.DriveRemoved += value; }
-            remove { this.driveWatcher.DriveRemoved -= value; }
-        }
+        public IObservable<Unit> DriveRemoved { get; private set; }
 
         public void Dispose()
         {
@@ -20,6 +18,12 @@ namespace Espera.Core.Management
         public void Initialize()
         {
             this.driveWatcher = Rareform.IO.RemovableDriveWatcher.Create();
+
+            this.DriveRemoved = Observable.FromEvent<EventHandler, EventArgs>(
+                handler => this.driveWatcher.DriveRemoved += handler,
+                handler => this.driveWatcher.DriveRemoved -= handler)
+                .Select(_ => Unit.Default)
+                .AsObservable();
         }
     }
 }

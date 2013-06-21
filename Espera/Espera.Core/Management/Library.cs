@@ -515,15 +515,15 @@ namespace Espera.Core.Management
             }
 
             this.driveWatcher.Initialize();
-            this.driveWatcher.DriveRemoved += (sender, args) => this.RemoveMissingSongsAsync();
 
-            this.songSourcePath
-                .Select(x => Unit.Default)
-                .Merge(this.SongSourceUpdateInterval
-                    .Select(Observable.Interval)
-                    .Switch()
-                    .Select(x => Unit.Default))
-                .Subscribe(x => this.UpdateSourcesAsync());
+            IObservable<Unit> songSourcePathChanged = this.songSourcePath.Select(_ => Unit.Default);
+            IObservable<Unit> updateInterval = this.SongSourceUpdateInterval
+                .Select(Observable.Interval)
+                .Switch()
+                .Select(x => Unit.Default);
+
+            Observable.Merge(songSourcePathChanged, updateInterval, this.driveWatcher.DriveRemoved)
+                .Subscribe(_ => this.UpdateSourcesAsync());
 
             this.Load();
         }
