@@ -516,16 +516,21 @@ namespace Espera.Core.Management
 
             this.driveWatcher.Initialize();
 
-            IObservable<Unit> songSourcePathChanged = this.songSourcePath.Select(_ => Unit.Default);
-            IObservable<Unit> updateInterval = this.SongSourceUpdateInterval
+            IObservable<Unit> update = this.SongSourceUpdateInterval
                 .Select(Observable.Interval)
                 .Switch()
-                .Select(x => Unit.Default);
+                .Select(_ => Unit.Default)
+                .Merge(this.driveWatcher.DriveRemoved)
+                .StartWith(Unit.Default);
 
-            Observable.Merge(songSourcePathChanged, updateInterval, this.driveWatcher.DriveRemoved)
-                .Subscribe(_ => this.UpdateSourcesAsync());
+            update.CombineLatest(this.songSourcePath, (_, path) => path)
+                .Where(path => !String.IsNullOrEmpty(path))
+                .Subscribe(path => this.UpdateSongsAsync(path));
 
-            this.Load();
+            if (this.libraryReader.LibraryExists)
+            {
+                this.Load();
+            }
         }
 
         /// <summary>
@@ -918,7 +923,7 @@ namespace Espera.Core.Management
             this.RemoveFromPlaylist(playlist, playlist.GetIndexes(songList));
         }
 
-        private async Task RemoveMissingSongsAsync()
+        private async Task RemoveMissingSongsAsync(string currentPath)
         {
             List<Song> currentSongs;
 
@@ -927,10 +932,8 @@ namespace Espera.Core.Management
                 currentSongs = this.songs.ToList();
             }
 
-            string sourcePath = await this.songSourcePath.FirstAsync();
-
             List<Song> notInAnySongSource = currentSongs
-                .Where(song => !song.OriginalPath.StartsWith(sourcePath))
+                .Where(song => !song.OriginalPath.StartsWith(currentPath))
                 .ToList();
 
             HashSet<Song> removable = null;
@@ -973,7 +976,7 @@ namespace Espera.Core.Management
                 throw new InvalidOperationException("Not in administrator mode.");
         }
 
-        private async Task UpdateSourcesAsync()
+        private async Task UpdateSongsAsync(string path)
         {
             if (this.currentSongFinderSubscription != null)
             {
@@ -981,11 +984,11 @@ namespace Espera.Core.Management
                 this.currentSongFinderSubscription = null;
             }
 
-            await this.RemoveMissingSongsAsync();
+            await this.RemoveMissingSongsAsync(path);
 
             this.songsUpdated.OnNext(Unit.Default);
 
-            var songFinder = new LocalSongFinder(await this.songSourcePath.FirstAsync());
+            var songFinder = new LocalSongFinder(path);
 
             this.currentSongFinderSubscription = songFinder.GetSongs()
                 .SubscribeOn(TaskPoolScheduler.Default)

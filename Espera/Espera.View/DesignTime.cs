@@ -14,7 +14,7 @@ namespace Espera.View
             if (library == null)
             {
                 string directoryPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Espera\");
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\");
                 string filePath = Path.Combine(directoryPath, "Library.xml");
 
                 library = new Library(new RemovableDriveWatcher(), new LibraryFileReader(filePath),

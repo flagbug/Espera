@@ -4,6 +4,8 @@ namespace Espera.Core.Management
 {
     public interface ILibraryReader
     {
+        bool LibraryExists { get; }
+
         IReadOnlyList<Playlist> ReadPlaylists();
 
         IReadOnlyList<LocalSong> ReadSongs();

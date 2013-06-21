@@ -1,7 +1,6 @@
 ﻿using Rareform.Validation;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace Espera.Core.Management
 {
@@ -19,11 +18,13 @@ namespace Espera.Core.Management
             this.driveTypeCache = new Dictionary<string, DriveType>();
         }
 
+        public bool LibraryExists
+        {
+            get { return File.Exists(this.sourcePath); }
+        }
+
         public IReadOnlyList<Playlist> ReadPlaylists()
         {
-            if (!File.Exists(this.sourcePath))
-                return new List<Playlist>();
-
             using (FileStream sourceStream = File.OpenRead(this.sourcePath))
             {
                 return LibraryReader.ReadPlaylists(sourceStream, this.GetDriveType);
@@ -32,9 +33,6 @@ namespace Espera.Core.Management
 
         public IReadOnlyList<LocalSong> ReadSongs()
         {
-            if (!File.Exists(this.sourcePath))
-                return new List<LocalSong>();
-
             using (FileStream sourceStream = File.OpenRead(this.sourcePath))
             {
                 return LibraryReader.ReadSongs(sourceStream, this.GetDriveType);
@@ -43,9 +41,6 @@ namespace Espera.Core.Management
 
         public string ReadSongSourcePath()
         {
-            if (!File.Exists(this.sourcePath))
-                return null;
-
             using (FileStream sourceStream = File.OpenRead(this.sourcePath))
             {
                 return LibraryReader.ReadSongSourcePath(sourceStream);

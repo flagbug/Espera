@@ -22,7 +22,7 @@ namespace Espera.View
 
         static AppBootstrapper()
         {
-            DirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Espera\");
+            DirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\");
             FilePath = Path.Combine(DirectoryPath, "Library.xml");
         }
 
