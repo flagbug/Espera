@@ -62,6 +62,8 @@ namespace Espera.View.ViewModels
             get { return this.isAdmin.Value; }
         }
 
+        public abstract IReactiveCommand PlayNowCommand { get; }
+
         public string SearchText
         {
             get { return this.searchText; }

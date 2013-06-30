@@ -7,6 +7,8 @@ namespace Espera.View.ViewModels
     {
         IReactiveCommand AddToPlaylistCommand { get; }
 
+        IReactiveCommand PlayNowCommand { get; }
+
         string SearchText { get; set; }
 
         IEnumerable<SongViewModelBase> SelectedSongs { set; }

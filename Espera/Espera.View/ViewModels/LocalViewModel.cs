@@ -16,6 +16,7 @@ namespace Espera.View.ViewModels
     {
         private readonly ArtistViewModel allArtistsViewModel;
         private readonly Dictionary<string, ArtistViewModel> artists;
+        private readonly IReactiveCommand playNowCommand;
         private readonly SemaphoreSlim updateSemaphore;
         private SortOrder albumOrder;
         private SortOrder artistOrder;
@@ -49,7 +50,7 @@ namespace Espera.View.ViewModels
             this.WhenAny(x => x.SearchText, x => x.SelectedArtist, (x1, x2) => Unit.Default)
                 .Subscribe(x => this.UpdateSelectableSongs());
 
-            this.PlayNowCommand = new ReactiveCommand();
+            this.playNowCommand = new ReactiveCommand();
             this.PlayNowCommand.Subscribe(p =>
             {
                 int songIndex = this.SelectableSongs.TakeWhile(x => x.Model != this.SelectedSongs.First().Model).Count();
@@ -98,7 +99,10 @@ namespace Espera.View.ViewModels
             set { Settings.Default.LocalPathColumnWidth = value; }
         }
 
-        public IReactiveCommand PlayNowCommand { get; private set; }
+        public override IReactiveCommand PlayNowCommand
+        {
+            get { return this.playNowCommand; }
+        }
 
         public ArtistViewModel SelectedArtist
         {
