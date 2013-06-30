@@ -84,14 +84,18 @@
                                     CommandParameter="Orange"
                                     Style="{StaticResource ColorPickerButtonStyle}" />
                         </StackPanel>
+                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="scaling" />
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="EXPERIMENTAL: Scaling" />
-                            <Slider Width="100"
+                            <Slider Width="200"
                                     Margin="10, 0, 0, 0"
                                     Maximum="2"
                                     Minimum="0.5"
                                     Value="{Binding Path=Scaling}" />
-                            <TextBlock Margin="10, 0, 0, 0" Text="{Binding Path=Scaling}" />
+                            <TextBox Width="30"
+                                     Margin="10, 0, 0, 0"
+                                     Text="{Binding Path=Scaling,
+                                                    UpdateSourceTrigger=PropertyChanged,
+                                                    StringFormat=\{0:F1\}}" />
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
