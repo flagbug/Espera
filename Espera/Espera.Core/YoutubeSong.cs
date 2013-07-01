@@ -84,7 +84,7 @@ namespace Espera.Core
                 if (ex is IOException || ex is WebException || ex is VideoNotAvailableException ||
                     ex is YoutubeParseException || ex is AudioExtractionException)
                 {
-                    this.OnCachingFailed(PreparationFailureCause.CachingFailed);
+                    this.OnPreparationFailed(PreparationFailureCause.CachingFailed);
                 }
 
                 else
@@ -114,7 +114,7 @@ namespace Espera.Core
                 {
                     if (ex is WebException || ex is VideoNotAvailableException || ex is YoutubeParseException)
                     {
-                        this.OnCachingFailed(PreparationFailureCause.StreamingFailed);
+                        this.OnPreparationFailed(PreparationFailureCause.StreamingFailed);
 
                         throw new AudioPlayerCreatingException();
                     }
@@ -122,7 +122,7 @@ namespace Espera.Core
 
                 if (video == null)
                 {
-                    this.OnCachingFailed(PreparationFailureCause.StreamingFailed);
+                    this.OnPreparationFailed(PreparationFailureCause.StreamingFailed);
 
                     throw new AudioPlayerCreatingException();
                 }

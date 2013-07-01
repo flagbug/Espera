@@ -202,11 +202,6 @@ namespace Espera.Core
         /// <returns>The audio player for playback.</returns>
         internal abstract AudioPlayer CreateAudioPlayer();
 
-        protected void OnCachingFailed(PreparationFailureCause failureCause)
-        {
-            this.preparationFailed.OnNext(failureCause);
-        }
-
         /// <summary>
         /// Sets the caching progress in a range from 0 to 100.
         /// </summary>
@@ -220,6 +215,11 @@ namespace Espera.Core
                 Throw.ArgumentOutOfRangeException(() => value, 100);
 
             this.preparationProgress.OnNext(value);
+        }
+
+        protected void OnPreparationFailed(PreparationFailureCause failureCause)
+        {
+            this.preparationFailed.OnNext(failureCause);
         }
     }
 }

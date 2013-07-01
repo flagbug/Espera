@@ -41,17 +41,20 @@ namespace Espera.View.ViewModels
                     .Select(progress => this.Model.HasToCache && progress != 100 || this.HasCachingFailed)
                     .ToProperty(this, x => x.ShowCaching)
                     .DisposeWith(this.disposable);
+
+                this.hasCachingFailed = this.Model.PreparationFailed
+                    .Select(x => x == PreparationFailureCause.CachingFailed)
+                    .ToProperty(this, x => x.HasCachingFailed)
+                    .DisposeWith(this.disposable);
             }
 
-            this.hasCachingFailed = this.Model.PreparationFailed
-                .Select(x => x == PreparationFailureCause.CachingFailed)
-                .ToProperty(this, x => x.HasCachingFailed)
-                .DisposeWith(this.disposable);
-
-            this.hasStreamingFailed = this.Model.PreparationFailed
-                .Select(x => x == PreparationFailureCause.StreamingFailed)
-                .ToProperty(this, x => x.HasStreamingFailed)
-                .DisposeWith(this.disposable);
+            if (this.Model is YoutubeSong)
+            {
+                this.hasStreamingFailed = this.Model.PreparationFailed
+                    .Select(x => x == PreparationFailureCause.StreamingFailed)
+                    .ToProperty(this, x => x.HasStreamingFailed)
+                    .DisposeWith(this.disposable);
+            }
 
             this.isCorrupted = this.Model.IsCorrupted
                 .ToProperty(this, x => x.IsCorrupted)
@@ -70,7 +73,7 @@ namespace Espera.View.ViewModels
 
         public bool HasStreamingFailed
         {
-            get { return this.hasStreamingFailed.Value; }
+            get { return this.hasStreamingFailed != null && this.hasStreamingFailed.Value; }
         }
 
         public int Index
