@@ -250,6 +250,7 @@
                            Text="artists" />
                 <ListBox Grid.Row="1"
                          DataContext="{Binding Path=LocalViewModel}"
+                         FocusVisualStyle="{x:Null}"
                          ItemsSource="{Binding Path=Artists}"
                          SelectedItem="{Binding Path=SelectedArtist}">
                     <ListBox.ItemTemplate>
@@ -383,6 +384,7 @@
                             <ListView.ItemContainerStyle>
                                 <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                                     <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick" />
+                                    <EventSetter Event="KeyUp" Handler="SongKeyPressed" />
                                 </Style>
                             </ListView.ItemContainerStyle>
                             <ListView.View>
@@ -465,6 +467,7 @@
                                 <ListView.ItemContainerStyle>
                                     <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                                         <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick" />
+                                        <EventSetter Event="KeyUp" Handler="SongKeyPressed" />
                                     </Style>
                                 </ListView.ItemContainerStyle>
                                 <ListView.View>

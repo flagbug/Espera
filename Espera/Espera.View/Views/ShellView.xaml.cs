@@ -192,6 +192,19 @@ namespace Espera.View.Views
             }
         }
 
+        private void SongKeyPressed(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                ICommand command = this.shellViewModel.CurrentSongSource.PlayNowCommand;
+
+                if (command.CanExecute(null))
+                {
+                    command.Execute(null);
+                }
+            }
+        }
+
         private void SongListContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             if (((ListView)sender).Items.IsEmpty)
