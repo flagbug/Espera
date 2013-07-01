@@ -1,7 +1,6 @@
 ﻿using Espera.Core;
 using Espera.Core.Management;
 using Espera.View.Properties;
-using MoreLinq;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -15,7 +14,7 @@ namespace Espera.View.ViewModels
     internal sealed class LocalViewModel : SongSourceViewModel<LocalSongViewModel>
     {
         private readonly ArtistViewModel allArtistsViewModel;
-        private readonly Dictionary<string, ArtistViewModel> artists;
+        private readonly ReactiveMarrow.ReactiveList<ArtistViewModel> artists;
         private readonly IReactiveCommand playNowCommand;
         private readonly SemaphoreSlim updateSemaphore;
         private SortOrder albumOrder;
@@ -30,25 +29,30 @@ namespace Espera.View.ViewModels
         {
             this.updateSemaphore = new SemaphoreSlim(1, 1);
 
-            this.artists = new Dictionary<string, ArtistViewModel>();
+            this.artists = new ReactiveMarrow.ReactiveList<ArtistViewModel>();
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
-
-            library.SongsUpdated
-                .Buffer(TimeSpan.FromSeconds(1))
-                .Where(x => x.Any())
-                .Subscribe(p =>
-                {
-                    this.RaisePropertyChanged("Artists");
-                    this.UpdateSelectableSongs();
-                });
+            this.artists.Add(this.allArtistsViewModel);
 
             // We need a default sorting order
             this.OrderByArtist();
 
-            this.SelectedArtist = this.Artists.First();
+            this.SelectedArtist = this.allArtistsViewModel;
 
-            this.WhenAny(x => x.SearchText, x => x.SelectedArtist, (x1, x2) => Unit.Default)
-                .Subscribe(x => this.UpdateSelectableSongs());
+            this.Library.SongsUpdated
+                .Buffer(TimeSpan.FromSeconds(1))
+                .Where(x => x.Any())
+                .Select(_ => Unit.Default)
+                .Merge(this.WhenAny(x => x.SearchText, _ => Unit.Default)
+                    .Do(_ => this.SelectedArtist = this.allArtistsViewModel))
+                .SubscribeOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ =>
+                {
+                    this.UpdateSelectableSongs();
+                    this.UpdateArtists();
+                });
+
+            this.WhenAny(x => x.SelectedArtist, _ => Unit.Default)
+                .Subscribe(_ => this.UpdateSelectableSongs());
 
             this.playNowCommand = new ReactiveCommand();
             this.PlayNowCommand.Subscribe(p =>
@@ -73,12 +77,7 @@ namespace Espera.View.ViewModels
 
         public IEnumerable<ArtistViewModel> Artists
         {
-            get
-            {
-                return this.artists.Values
-                    .OrderBy(artist => RemoveArtistPrefixes(artist.Name, new[] { "A", "The" }))
-                    .Prepend(this.allArtistsViewModel);
-            }
+            get { return this.artists; }
         }
 
         public int DurationColumnWidth
@@ -141,23 +140,45 @@ namespace Espera.View.ViewModels
             this.ApplyOrder(SortHelpers.GetOrderByTitle<LocalSongViewModel>, ref this.titleOrder);
         }
 
-        /// <example>
-        /// With prefixes "A" and "The":
-        /// "A Bar" -> "Bar", "The Foos" -> "Foos"
-        /// </example>
-        private static string RemoveArtistPrefixes(string artistName, IEnumerable<string> prefixes)
+        private void UpdateArtists()
         {
-            foreach (string s in prefixes)
-            {
-                int lengthWithSpace = s.Length + 1;
+            List<ArtistViewModel> artistInfos = this.SelectableSongs
+                .GroupBy(song => song.Artist)
+                .Select(group =>
+                    new ArtistViewModel(group.Key, group.Select(song => song.Album).Distinct().Count(), group.Count()))
+                .Concat(new[] { this.allArtistsViewModel })
+                .ToList();
 
-                if (artistName.Length >= lengthWithSpace && artistName.Substring(0, lengthWithSpace) == s + " ")
+            List<ArtistViewModel> artistsToRemove = this.artists
+                .Except(artistInfos)
+                .ToList();
+
+            foreach (ArtistViewModel artist in artistsToRemove)
+            {
+                this.artists.Remove(artist);
+            }
+
+            foreach (ArtistViewModel artist in artistInfos)
+            {
+                int index = this.artists.IndexOf(artist);
+
+                if (index != -1)
                 {
-                    return artistName.Substring(lengthWithSpace);
+                    ArtistViewModel updated = this.artists[index];
+
+                    updated.AlbumCount = artist.AlbumCount;
+                    updated.SongCount = artist.SongCount;
+                }
+
+                else
+                {
+                    this.artists.Add(artist);
                 }
             }
 
-            return artistName;
+            this.allArtistsViewModel.ArtistCount = this.artists.Count - 1;
+
+            this.artists.Sort();
         }
 
         private void UpdateSelectableSongs()
@@ -168,49 +189,11 @@ namespace Espera.View.ViewModels
 
             IEnumerable<Song> filtered = this.Library.Songs.FilterSongs(this.SearchText).ToList();
 
-            var artistInfos = filtered
-                .GroupBy(song => song.Artist)
-                .Select(group =>
-                    new ArtistViewModel(group.Key, group.Select(song => song.Album).Distinct().Count(), group.Count()))
-                .ToDictionary(model => model.Name);
-
-            List<string> removableArtists = this.artists
-                .Where(pair => !artistInfos.ContainsKey(pair.Key))
-                .Select(pair => pair.Key)
-                .ToList();
-
-            foreach (string artist in removableArtists)
-            {
-                this.artists.Remove(artist);
-            }
-
-            foreach (ArtistViewModel artist in artistInfos.Values)
-            {
-                ArtistViewModel updated;
-
-                if (this.artists.TryGetValue(artist.Name, out updated))
-                {
-                    updated.AlbumCount = artist.AlbumCount;
-                    updated.SongCount = artist.SongCount;
-                }
-
-                else
-                {
-                    this.artists.Add(artist.Name, artist);
-                }
-            }
-
-            this.RaisePropertyChanged("Artists");
-
-            this.allArtistsViewModel.ArtistCount = artistInfos.Count;
-
             this.SelectableSongs = filtered
-                .Where(song => this.SelectedArtist.IsAllArtists || song.Artist == this.SelectedArtist.Name)
+                .Where(song => this.SelectedArtist == null || this.SelectedArtist.IsAllArtists || song.Artist == this.SelectedArtist.Name)
                 .Select(song => new LocalSongViewModel(song))
                 .OrderBy(this.SongOrderFunc)
                 .ToList();
-
-            this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
 
             this.updateSemaphore.Release();
         }
