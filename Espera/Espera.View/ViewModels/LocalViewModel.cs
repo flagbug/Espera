@@ -14,7 +14,7 @@ namespace Espera.View.ViewModels
     internal sealed class LocalViewModel : SongSourceViewModel<LocalSongViewModel>
     {
         private readonly ArtistViewModel allArtistsViewModel;
-        private readonly ReactiveMarrow.ReactiveList<ArtistViewModel> artists;
+        private readonly ReactiveList<ArtistViewModel> artists;
         private readonly IReactiveCommand playNowCommand;
         private readonly SemaphoreSlim updateSemaphore;
         private SortOrder albumOrder;
@@ -29,9 +29,8 @@ namespace Espera.View.ViewModels
         {
             this.updateSemaphore = new SemaphoreSlim(1, 1);
 
-            this.artists = new ReactiveMarrow.ReactiveList<ArtistViewModel>();
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
-            this.artists.Add(this.allArtistsViewModel);
+            this.artists = new ReactiveList<ArtistViewModel> { this.allArtistsViewModel };
 
             // We need a default sorting order
             this.OrderByArtist();
