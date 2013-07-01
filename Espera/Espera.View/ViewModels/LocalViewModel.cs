@@ -153,10 +153,7 @@ namespace Espera.View.ViewModels
                 .Except(artistInfos)
                 .ToList();
 
-            foreach (ArtistViewModel artist in artistsToRemove)
-            {
-                this.artists.Remove(artist);
-            }
+            this.artists.RemoveAll(artistsToRemove);
 
             foreach (ArtistViewModel artist in artistInfos)
             {
