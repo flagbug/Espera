@@ -142,10 +142,11 @@ namespace Espera.View.ViewModels
         private void UpdateArtists()
         {
             List<ArtistViewModel> artistInfos = this.SelectableSongs
+                .AsParallel()
                 .GroupBy(song => song.Artist)
                 .Select(group =>
                     new ArtistViewModel(group.Key, group.Select(song => song.Album).Distinct().Count(), group.Count()))
-                .Concat(new[] { this.allArtistsViewModel })
+                .Concat(new[] { this.allArtistsViewModel }.AsParallel())
                 .ToList();
 
             List<ArtistViewModel> artistsToRemove = this.artists
@@ -189,6 +190,7 @@ namespace Espera.View.ViewModels
             IEnumerable<Song> filtered = this.Library.Songs.FilterSongs(this.SearchText).ToList();
 
             this.SelectableSongs = filtered
+                .AsParallel()
                 .Where(song => this.SelectedArtist.IsAllArtists || song.Artist == this.SelectedArtist.Name)
                 .Select(song => new LocalSongViewModel(song))
                 .OrderBy(this.SongOrderFunc)
