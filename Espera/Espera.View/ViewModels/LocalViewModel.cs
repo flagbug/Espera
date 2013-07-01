@@ -189,7 +189,7 @@ namespace Espera.View.ViewModels
             IEnumerable<Song> filtered = this.Library.Songs.FilterSongs(this.SearchText).ToList();
 
             this.SelectableSongs = filtered
-                .Where(song => this.SelectedArtist == null || this.SelectedArtist.IsAllArtists || song.Artist == this.SelectedArtist.Name)
+                .Where(song => this.SelectedArtist.IsAllArtists || song.Artist == this.SelectedArtist.Name)
                 .Select(song => new LocalSongViewModel(song))
                 .OrderBy(this.SongOrderFunc)
                 .ToList();
