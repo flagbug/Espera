@@ -364,9 +364,6 @@
                                   ItemsSource="{Binding Path=SelectableSongs}"
                                   ScrollViewer.CanContentScroll="True"
                                   SelectionChanged="SongListSelectionChanged">
-                            <ListView.InputBindings>
-                                <KeyBinding Key="Delete" Command="{Binding Path=RemoveFromLibraryCommand}" />
-                            </ListView.InputBindings>
                             <ListView.Style>
                                 <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="{x:Type ListView}">
                                     <Setter Property="SelectionMode" Value="Extended" />
