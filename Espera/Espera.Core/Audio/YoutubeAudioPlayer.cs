@@ -2,6 +2,7 @@
 using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
 
 namespace Espera.Core.Audio
 {
@@ -67,43 +68,43 @@ namespace Espera.Core.Audio
 
         public void Finished()
         {
-            this.Finish();
+            this.FinishAsync();
         }
 
-        public override void Load()
+        public override async Task LoadAsync()
         {
-            base.Load();
+            await base.LoadAsync();
 
-            this.LoadRequest();
+            await Task.Run(this.LoadRequest);
 
             this.totalTime.OnNext(this.Song.Duration);
         }
 
-        public override void Pause()
+        public override async Task PauseAsync()
         {
             if (this.PlaybackStateProperty.Value == AudioPlayerState.Finished ||
                 this.PlaybackStateProperty.Value == AudioPlayerState.Stopped)
                 throw new InvalidOperationException("Audio player has already finished playback");
 
-            this.PauseRequest();
+            await Task.Run(this.PauseRequest);
 
             this.PlaybackStateProperty.Value = AudioPlayerState.Paused;
         }
 
-        public override void Play()
+        public override async Task PlayAsync()
         {
             if (this.PlaybackStateProperty.Value == AudioPlayerState.Finished ||
                 this.PlaybackStateProperty.Value == AudioPlayerState.Stopped)
                 throw new InvalidOperationException("Audio player has already finished playback");
 
-            this.PlayRequest();
+            await Task.Run(this.PlayRequest);
 
             this.PlaybackStateProperty.Value = AudioPlayerState.Playing;
         }
 
-        public override void Stop()
+        public override async Task StopAsync()
         {
-            this.StopRequest();
+            await Task.Run(this.StopRequest);
 
             this.PlaybackStateProperty.Value = AudioPlayerState.Stopped;
         }

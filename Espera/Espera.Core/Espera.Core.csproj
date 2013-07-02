@@ -128,6 +128,7 @@
     <Compile Include="Management\RemovableDriveWatcher.cs" />
     <Compile Include="PreparationFailureCause.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReactiveHelpers.cs" />
     <Compile Include="Settings\ILibrarySettings.cs" />
     <Compile Include="Settings\LibrarySettingsWrapper.cs" />
     <Compile Include="Song.cs" />

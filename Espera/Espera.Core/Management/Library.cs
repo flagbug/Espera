@@ -87,7 +87,8 @@ namespace Espera.Core.Management
                 .Where(x => x != null)
                 .Select(x => x.PlaybackState.Where(p => p == AudioPlayerState.Finished).Select(q => x))
                 .Switch()
-                .Subscribe(this.HandleSongFinish);
+                .Left(this.CanPlayNextSong, Tuple.Create)
+                .Subscribe(t => this.HandleSongFinishAsync(t.Item1, t.Item2));
 
             /*
              * Start boring, repeating glue code
@@ -447,11 +448,11 @@ namespace Espera.Core.Management
         /// <summary>
         /// Continues the currently loaded song.
         /// </summary>
-        public void ContinueSong()
+        public async Task ContinueSongAsync()
         {
             this.ThrowIfNotAdmin();
 
-            this.currentPlayer.FirstAsync().Wait().Play();
+            await (await this.currentPlayer.FirstAsync()).PlayAsync();
         }
 
         /// <summary>
@@ -536,15 +537,15 @@ namespace Espera.Core.Management
         /// <summary>
         /// Pauses the currently loaded song.
         /// </summary>
-        public void PauseSong()
+        public async Task PauseSongAsync()
         {
             if (this.LockPlayPause.Value && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to play when in party mode.");
 
-            this.currentPlayer.FirstAsync().Wait().Pause();
+            await (await this.currentPlayer.FirstAsync()).PauseAsync();
         }
 
-        public void PlayInstantly(IEnumerable<Song> songList)
+        public async Task PlayInstantlyAsync(IEnumerable<Song> songList)
         {
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
@@ -562,37 +563,37 @@ namespace Espera.Core.Management
 
             this.AddSongsToPlaylist(songList);
 
-            this.PlaySong(0);
+            await this.PlaySongAsync(0);
         }
 
         /// <summary>
         /// Plays the next song in the playlist.
         /// </summary>
-        public void PlayNextSong()
+        public async Task PlayNextSongAsync()
         {
             this.ThrowIfNotAdmin();
 
-            this.InternPlayNextSong();
+            await this.InternPlayNextSongAsync();
         }
 
         /// <summary>
         /// Plays the previous song in the playlist.
         /// </summary>
-        public void PlayPreviousSong()
+        public async Task PlayPreviousSongAsync()
         {
             this.ThrowIfNotAdmin();
 
-            if (!this.CurrentPlaylist.CanPlayPreviousSong.FirstAsync().Wait() || !this.CurrentPlaylist.CurrentSongIndex.Value.HasValue)
+            if (!await this.CurrentPlaylist.CanPlayPreviousSong.FirstAsync() || !this.CurrentPlaylist.CurrentSongIndex.Value.HasValue)
                 throw new InvalidOperationException("The previous song couldn't be played.");
 
-            this.PlaySong(this.CurrentPlaylist.CurrentSongIndex.Value.Value - 1);
+            await this.PlaySongAsync(this.CurrentPlaylist.CurrentSongIndex.Value.Value - 1);
         }
 
         /// <summary>
         /// Plays the song with the specified index in the playlist.
         /// </summary>
         /// <param name="playlistIndex">The index of the song in the playlist.</param>
-        public void PlaySong(int playlistIndex)
+        public async Task PlaySongAsync(int playlistIndex)
         {
             if (playlistIndex < 0)
                 Throw.ArgumentOutOfRangeException(() => playlistIndex, 0);
@@ -600,7 +601,7 @@ namespace Espera.Core.Management
             if (this.LockPlayPause.Value && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to play when in party mode.");
 
-            this.InternPlaySong(playlistIndex);
+            await this.InternPlaySongAsync(playlistIndex);
         }
 
         /// <summary>
@@ -728,22 +729,22 @@ namespace Espera.Core.Management
             return true;
         }
 
-        private void HandleSongCorruption()
+        private async Task HandleSongCorruptionAsync()
         {
-            if (!this.CurrentPlaylist.CanPlayNextSong.FirstAsync().Wait())
+            if (!await this.CurrentPlaylist.CanPlayNextSong.FirstAsync())
             {
                 this.CurrentPlaylist.CurrentSongIndex.Value = null;
             }
 
             else
             {
-                this.InternPlayNextSong();
+                await this.InternPlayNextSongAsync();
             }
         }
 
-        private void HandleSongFinish(AudioPlayer audioPlayer)
+        private async Task HandleSongFinishAsync(AudioPlayer audioPlayer, bool canPlayNextSong)
         {
-            if (!this.CurrentPlaylist.CanPlayNextSong.FirstAsync().Wait())
+            if (!canPlayNextSong)
             {
                 this.CurrentPlaylist.CurrentSongIndex.Value = null;
             }
@@ -751,15 +752,15 @@ namespace Espera.Core.Management
             audioPlayer.Dispose();
             this.currentPlayer.OnNext(null);
 
-            if (this.CurrentPlaylist.CanPlayNextSong.FirstAsync().Wait())
+            if (canPlayNextSong)
             {
-                this.InternPlayNextSong();
+                await this.InternPlayNextSongAsync();
             }
         }
 
-        private void InternPlayNextSong()
+        private async Task InternPlayNextSongAsync()
         {
-            if (!this.CurrentPlaylist.CanPlayNextSong.FirstAsync().Wait() || !this.CurrentPlaylist.CurrentSongIndex.Value.HasValue)
+            if (!await this.CurrentPlaylist.CanPlayNextSong.FirstAsync() || !this.CurrentPlaylist.CurrentSongIndex.Value.HasValue)
                 throw new InvalidOperationException("The next song couldn't be played.");
 
             int nextIndex = this.CurrentPlaylist.CurrentSongIndex.Value.Value + 1;
@@ -778,10 +779,10 @@ namespace Espera.Core.Management
                 }
             }
 
-            this.InternPlaySong(nextIndex);
+            await this.InternPlaySongAsync(nextIndex);
         }
 
-        private void InternPlaySong(int playlistIndex)
+        private async Task InternPlaySongAsync(int playlistIndex)
         {
             if (playlistIndex < 0)
                 Throw.ArgumentOutOfRangeException(() => playlistIndex, 0);
@@ -814,55 +815,52 @@ namespace Espera.Core.Management
 
             catch (AudioPlayerCreatingException)
             {
-                this.HandleSongCorruption();
+                this.HandleSongCorruptionAsync();
 
                 return;
             }
 
-            Task.Run(() =>
+            if (song.HasToCache && !song.IsCached)
             {
-                if (song.HasToCache && !song.IsCached)
+                bool cached = this.AwaitCaching(song);
+
+                if (!cached)
                 {
-                    bool cached = this.AwaitCaching(song);
-
-                    if (!cached)
-                    {
-                        return;
-                    }
-                }
-
-                this.overrideCurrentCaching = false;
-
-                try
-                {
-                    audioPlayer.Load();
-                }
-
-                catch (SongLoadException)
-                {
-                    song.IsCorrupted.Value = true;
-
-                    this.HandleSongCorruption();
-
                     return;
                 }
+            }
 
-                try
-                {
-                    audioPlayer.Play();
-                }
+            this.overrideCurrentCaching = false;
 
-                catch (PlaybackException)
-                {
-                    song.IsCorrupted.Value = true;
+            try
+            {
+                await audioPlayer.LoadAsync();
+            }
 
-                    this.HandleSongCorruption();
+            catch (SongLoadException)
+            {
+                song.IsCorrupted.Value = true;
 
-                    return;
-                }
+                this.HandleSongCorruptionAsync();
 
-                this.songStarted.OnNext(Unit.Default);
-            });
+                return;
+            }
+
+            try
+            {
+                await audioPlayer.PlayAsync();
+            }
+
+            catch (PlaybackException)
+            {
+                song.IsCorrupted.Value = true;
+
+                this.HandleSongCorruptionAsync();
+
+                return;
+            }
+
+            this.songStarted.OnNext(Unit.Default);
         }
 
         private void Load()
@@ -914,7 +912,7 @@ namespace Espera.Core.Management
 
             if (stopCurrentSong)
             {
-                this.currentPlayer.FirstAsync().Wait().Stop();
+                this.currentPlayer.FirstAsync().Wait().StopAsync();
             }
         }
 

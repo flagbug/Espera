@@ -1,6 +1,7 @@
 ﻿using ReactiveMarrow;
 using System;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace Espera.Core.Audio
 {
@@ -56,10 +57,12 @@ namespace Espera.Core.Audio
         /// </summary>
         /// <exception cref="SongLoadException">The song could not be loaded.</exception>
         /// <exception cref="InvalidOperationException">The method was called more than once.</exception>
-        public virtual void Load()
+        public virtual Task LoadAsync()
         {
             if (this.PlaybackStateProperty.Value != AudioPlayerState.None)
                 throw new InvalidOperationException("Load was already called");
+
+            return Task.Delay(0);
         }
 
         /// <summary>
@@ -71,8 +74,8 @@ namespace Espera.Core.Audio
         /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded or is paused.
         /// In this case it shouldn't perform any operation.
         /// </remarks>
-        /// <exception cref="InvalidOperationException">The method is called after <see cref="Finish"/> or <see cref="Stop"/> has been called.</exception>
-        public abstract void Pause();
+        /// <exception cref="InvalidOperationException">The method is called after <see cref="FinishAsync"/> or <see cref="StopAsync"/> has been called.</exception>
+        public abstract Task PauseAsync();
 
         /// <summary>
         /// Starts or continues the playback of the <see cref="Song"/>.
@@ -84,8 +87,8 @@ namespace Espera.Core.Audio
         /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded or is playing.
         /// In this case it shouldn't perform any operation.
         /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
-        /// <exception cref="InvalidOperationException">The method is called after <see cref="Finish"/> or <see cref="Stop"/> has been called.</exception>
-        public abstract void Play();
+        /// <exception cref="InvalidOperationException">The method is called after <see cref="FinishAsync"/> or <see cref="StopAsync"/> has been called.</exception>
+        public abstract Task PlayAsync();
 
         /// <summary>
         /// Prematurely stops the playback of a song.
@@ -95,9 +98,9 @@ namespace Espera.Core.Audio
         /// before leaving the method.
         /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded or is paused.
         /// In this case it shouldn't perform any operation.
-        /// After this method is called, the <see cref="Play"/> and <see cref="Pause"/> methods have to throw an <see cref="InvalidOperationException"/> if they are called.
+        /// After this method is called, the <see cref="PlayAsync"/> and <see cref="PauseAsync"/> methods have to throw an <see cref="InvalidOperationException"/> if they are called.
         /// </remarks>
-        public abstract void Stop();
+        public abstract Task StopAsync();
 
         /// <summary>
         /// Finishes the playback of the <see cref="Song"/>. This method is called when a song has ended.
@@ -107,14 +110,16 @@ namespace Espera.Core.Audio
         /// before leaving the method.
         /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded, is stopped or is paused.
         /// In this case it shouldn't perform any operation.
-        /// After this method is called, the <see cref="Play"/> and <see cref="Pause"/> methods have to throw an <see cref="InvalidOperationException"/> if they are called.
+        /// After this method is called, the <see cref="PlayAsync"/> and <see cref="PauseAsync"/> methods have to throw an <see cref="InvalidOperationException"/> if they are called.
         /// </remarks>
-        protected virtual void Finish()
+        protected virtual Task FinishAsync()
         {
             if (this.PlaybackStateProperty.Value != AudioPlayerState.Finished)
             {
                 this.PlaybackStateProperty.Value = AudioPlayerState.Finished;
             }
+
+            return Task.Delay(0);
         }
     }
 }

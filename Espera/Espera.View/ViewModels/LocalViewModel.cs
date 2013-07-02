@@ -54,11 +54,11 @@ namespace Espera.View.ViewModels
                 .Subscribe(_ => this.UpdateSelectableSongs());
 
             this.playNowCommand = new ReactiveCommand();
-            this.PlayNowCommand.Subscribe(p =>
+            this.PlayNowCommand.RegisterAsyncTask(_ =>
             {
                 int songIndex = this.SelectableSongs.TakeWhile(x => x.Model != this.SelectedSongs.First().Model).Count();
 
-                this.Library.PlayInstantly(this.SelectableSongs.Skip(songIndex).Select(x => x.Model));
+                return this.Library.PlayInstantlyAsync(this.SelectableSongs.Skip(songIndex).Select(x => x.Model));
             });
         }
 

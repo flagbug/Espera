@@ -1,11 +1,12 @@
 ﻿using Espera.Core.Audio;
 using System;
+using System.Threading.Tasks;
 
 namespace Espera.Core.Tests.Mocks
 {
     /// <summary>
     /// A <see cref="AudioPlayer"/> mock that sets the <see cref="AudioPlayer.PlaybackState"/> to <see cref="AudioPlayerState.Finished"/>
-    /// immediately after the <see cref="AudioPlayer.Play"/> method is called.
+    /// immediately after the <see cref="AudioPlayer.PlayAsync"/> method is called.
     /// </summary>
     internal class JumpAudioPlayer : AudioPlayer
     {
@@ -26,20 +27,23 @@ namespace Espera.Core.Tests.Mocks
         {
         }
 
-        public override void Pause()
+        public override Task PauseAsync()
         {
             throw new NotImplementedException();
         }
 
-        public override void Play()
+        public override async Task PlayAsync()
         {
             this.PlaybackStateProperty.Value = AudioPlayerState.Playing;
-            this.Finish();
+
+            await this.FinishAsync();
         }
 
-        public override void Stop()
+        public override Task StopAsync()
         {
             this.PlaybackStateProperty.Value = AudioPlayerState.Stopped;
+
+            return Task.Delay(0);
         }
     }
 }

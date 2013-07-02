@@ -15,9 +15,9 @@ namespace Espera.Core.Audio
     /// </summary>
     internal sealed class LocalAudioPlayer : AudioPlayer
     {
-        private readonly object playerLock;
         private readonly BehaviorSubject<TimeSpan> totalTime;
         private WaveChannel32 inputStream;
+        private IDisposable updateSubscription;
         private float volume;
         private IWavePlayer wavePlayer;
 
@@ -30,7 +30,6 @@ namespace Espera.Core.Audio
             this.Volume = 1.0f;
 
             this.totalTime = new BehaviorSubject<TimeSpan>(TimeSpan.Zero);
-            this.playerLock = new object();
         }
 
         public override TimeSpan CurrentTime
@@ -60,141 +59,129 @@ namespace Espera.Core.Audio
 
         public override void Dispose()
         {
-            lock (this.playerLock)
+            if (wavePlayer != null)
             {
-                if (wavePlayer != null)
+                this.wavePlayer.Stop();
+                this.wavePlayer.Dispose();
+                this.wavePlayer = null;
+            }
+
+            if (inputStream != null)
+            {
+                try
                 {
-                    this.wavePlayer.Stop();
-                    this.wavePlayer.Dispose();
-                    this.wavePlayer = null;
+                    this.inputStream.Dispose();
                 }
 
-                if (inputStream != null)
-                {
-                    try
-                    {
-                        this.inputStream.Dispose();
-                    }
+                // TODO: NAudio sometimes thows an exception here for unknown reasons
+                catch (MmException)
+                { }
 
-                    // TODO: NAudio sometimes thows an exception here for unknown reasons
-                    catch (MmException)
-                    { }
+                this.inputStream = null;
+            }
 
-                    this.inputStream = null;
-                }
+            if (this.updateSubscription != null)
+            {
+                this.updateSubscription.Dispose();
             }
         }
 
-        public override void Load()
+        public override async Task LoadAsync()
         {
-            lock (this.playerLock)
+            await base.LoadAsync();
+
+            this.wavePlayer = new WaveOutEvent();
+
+            try
             {
-                base.Load();
-
-                this.wavePlayer = new WaveOutEvent();
-
-                try
+                await Task.Run(() =>
                 {
                     this.CreateInputStream(this.Song);
                     this.wavePlayer.Init(inputStream);
-                }
-
-                // NAudio can throw a broad range of exceptions when opening a song, so we catch everything
-                catch (Exception ex)
-                {
-                    throw new SongLoadException("Song could not be loaded.", ex);
-                }
-
-                this.totalTime.OnNext(this.inputStream.TotalTime);
-            }
-        }
-
-        public override void Pause()
-        {
-            lock (this.playerLock)
-            {
-                if (this.PlaybackStateProperty.Value == AudioPlayerState.Finished ||
-                    this.PlaybackStateProperty.Value == AudioPlayerState.Stopped)
-                    throw new InvalidOperationException("Audio player has already finished playback");
-
-                if (this.wavePlayer == null || this.inputStream == null || this.PlaybackStateProperty.Value == AudioPlayerState.Paused)
-                    return;
-
-                this.wavePlayer.Pause();
-
-                this.EnsureState(NAudio.Wave.PlaybackState.Paused);
-                this.PlaybackStateProperty.Value = AudioPlayerState.Paused;
-            }
-        }
-
-        public override void Play()
-        {
-            lock (this.playerLock)
-            {
-                if (this.PlaybackStateProperty.Value == AudioPlayerState.Finished ||
-                    this.PlaybackStateProperty.Value == AudioPlayerState.Stopped)
-                    throw new InvalidOperationException("Audio player has already finished playback");
-
-                if (this.wavePlayer == null || this.inputStream == null || this.PlaybackStateProperty.Value == AudioPlayerState.Playing)
-                    return;
-
-                // Create a new thread, so that we can spawn the song state check on the same thread as the play method
-                // With this, we can avoid cross-threading issues with the NAudio library
-                Task.Run(() =>
-                {
-                    bool wasPaused = this.PlaybackStateProperty.Value == AudioPlayerState.Paused;
-
-                    try
-                    {
-                        this.wavePlayer.Play();
-                    }
-
-                    catch (MmException ex)
-                    {
-                        throw new PlaybackException("The playback couldn't be started.", ex);
-                    }
-
-                    if (!wasPaused)
-                    {
-                        while (this.PlaybackStateProperty.Value != AudioPlayerState.Finished)
-                        {
-                            this.UpdateSongState();
-                            Thread.Sleep(250);
-                        }
-                    }
                 });
+            }
 
-                this.EnsureState(NAudio.Wave.PlaybackState.Playing);
-                this.PlaybackStateProperty.Value = AudioPlayerState.Playing;
+            // NAudio can throw a broad range of exceptions when opening a song, so we catch everything
+            catch (Exception ex)
+            {
+                throw new SongLoadException("Song could not be loaded.", ex);
+            }
+
+            this.totalTime.OnNext(this.inputStream.TotalTime);
+
+            this.updateSubscription = Observable
+                .Interval(TimeSpan.FromMilliseconds(300))
+                .CombineLatest(this.PlaybackState, (l, state) => state)
+                .Where(state => state == AudioPlayerState.Playing)
+                .CombineLatest(this.totalTime, (interval, time) => time)
+                .FirstAsync(time => this.CurrentTime >= time)
+                .Subscribe(_ => this.FinishAsync());
+        }
+
+        public override async Task PauseAsync()
+        {
+            if (this.PlaybackStateProperty.Value == AudioPlayerState.Finished ||
+                this.PlaybackStateProperty.Value == AudioPlayerState.Stopped)
+                throw new InvalidOperationException("Audio player has already finished playback");
+
+            if (this.wavePlayer == null || this.inputStream == null || this.PlaybackStateProperty.Value == AudioPlayerState.Paused)
+                return;
+
+            await Task.Run(() => this.wavePlayer.Pause());
+
+            await this.EnsureState(NAudio.Wave.PlaybackState.Paused);
+            this.PlaybackStateProperty.Value = AudioPlayerState.Paused;
+        }
+
+        public override async Task PlayAsync()
+        {
+            if (this.PlaybackStateProperty.Value == AudioPlayerState.Finished ||
+                this.PlaybackStateProperty.Value == AudioPlayerState.Stopped)
+                throw new InvalidOperationException("Audio player has already finished playback");
+
+            if (this.wavePlayer == null || this.inputStream == null || this.PlaybackStateProperty.Value == AudioPlayerState.Playing)
+                return;
+
+            // Create a new thread, so that we can spawn the song state check on the same thread as the play method
+            // With this, we can avoid cross-threading issues with the NAudio library
+            await Task.Run(() =>
+            {
+                try
+                {
+                    this.wavePlayer.Play();
+                }
+
+                catch (MmException ex)
+                {
+                    throw new PlaybackException("The playback couldn't be started.", ex);
+                }
+            });
+
+            await this.EnsureState(NAudio.Wave.PlaybackState.Playing);
+            this.PlaybackStateProperty.Value = AudioPlayerState.Playing;
+        }
+
+        public override async Task StopAsync()
+        {
+            if (this.wavePlayer != null && this.PlaybackStateProperty.Value != AudioPlayerState.Stopped)
+            {
+                await Task.Run(() => this.wavePlayer.Stop());
+
+                await this.EnsureState(NAudio.Wave.PlaybackState.Stopped);
+
+                this.PlaybackStateProperty.Value = AudioPlayerState.Stopped;
             }
         }
 
-        public override void Stop()
+        protected override async Task FinishAsync()
         {
-            lock (this.playerLock)
+            if (this.wavePlayer != null && this.PlaybackStateProperty.Value != AudioPlayerState.Finished)
             {
-                if (this.wavePlayer != null && this.PlaybackStateProperty.Value != AudioPlayerState.Stopped)
-                {
-                    this.wavePlayer.Stop();
+                await Task.Run(() => this.wavePlayer.Stop());
 
-                    this.EnsureState(NAudio.Wave.PlaybackState.Stopped);
-                    this.PlaybackStateProperty.Value = AudioPlayerState.Stopped;
-                }
-            }
-        }
+                await this.EnsureState(NAudio.Wave.PlaybackState.Stopped);
 
-        protected override void Finish()
-        {
-            lock (this.playerLock)
-            {
-                if (this.wavePlayer != null && this.PlaybackStateProperty.Value != AudioPlayerState.Finished)
-                {
-                    this.wavePlayer.Stop();
-
-                    this.EnsureState(NAudio.Wave.PlaybackState.Stopped);
-
-                    base.Finish();
-                }
+                await base.FinishAsync();
             }
         }
 
@@ -245,20 +232,15 @@ namespace Espera.Core.Audio
             this.inputStream.Volume = this.Volume;
         }
 
-        private void EnsureState(PlaybackState state)
+        private async Task EnsureState(PlaybackState state)
         {
-            while (this.wavePlayer.PlaybackState != state)
+            await Task.Run(() =>
             {
-                Thread.Sleep(200);
-            }
-        }
-
-        private void UpdateSongState()
-        {
-            if (this.CurrentTime >= this.TotalTime.FirstAsync().Wait())
-            {
-                this.Finish();
-            }
+                while (this.wavePlayer.PlaybackState != state)
+                {
+                    Thread.Sleep(200);
+                }
+            });
         }
     }
 }

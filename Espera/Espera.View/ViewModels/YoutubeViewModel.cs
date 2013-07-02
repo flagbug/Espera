@@ -23,7 +23,7 @@ namespace Espera.View.ViewModels
             : base(library)
         {
             this.playNowCommand = new ReactiveCommand();
-            this.playNowCommand.Subscribe(x => this.Library.PlayInstantly(this.SelectedSongs.Select(vm => vm.Model)));
+            this.playNowCommand.Subscribe(x => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model)));
 
             // We need a default sorting order
             this.OrderByTitle();

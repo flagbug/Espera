@@ -1,12 +1,13 @@
 ﻿using Espera.Core.Audio;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Espera.Core.Tests.Mocks
 {
     /// <summary>
     /// A <see cref="AudioPlayer"/> mock that sets the <see cref="AudioPlayer.PlaybackState"/> to <see cref="AudioPlayerState.Finished"/>
-    /// when the <see cref="ManualResetEvent"/> is set, after <see cref="Play"/> is called.
+    /// when the <see cref="ManualResetEvent"/> is set, after <see cref="PlayAsync"/> is called.
     /// </summary>
     internal class HandledAudioPlayer : AudioPlayer
     {
@@ -34,21 +35,21 @@ namespace Espera.Core.Tests.Mocks
         {
         }
 
-        public override void Pause()
+        public override Task PauseAsync()
         {
             throw new NotImplementedException();
         }
 
-        public override void Play()
+        public override async Task PlayAsync()
         {
             this.PlaybackStateProperty.Value = AudioPlayerState.Playing;
 
             handle.WaitOne();
 
-            this.Finish();
+            await this.FinishAsync();
         }
 
-        public override void Stop()
+        public override Task StopAsync()
         {
             throw new NotImplementedException();
         }

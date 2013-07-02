@@ -28,6 +28,7 @@ namespace Espera.View.ViewModels
         private readonly ReactiveList<PlaylistViewModel> playlists;
         private readonly Timer playlistTimeoutUpdateTimer;
         private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
+        private readonly ObservableAsPropertyHelper<int> totalSeconds;
         private readonly ObservableAsPropertyHelper<TimeSpan> totalTime;
         private readonly Timer updateTimer;
         private bool displayTimeoutWarning;
@@ -42,8 +43,8 @@ namespace Espera.View.ViewModels
 
             this.library.Initialize();
 
-            this.library.SongStarted.Subscribe(x => this.HandleSongStarted());
-            this.library.PlaybackState.Where(x => x == AudioPlayerState.Finished).Subscribe(x => this.HandleSongFinished());
+            this.library.SongStarted.Subscribe(x => this.updateTimer.Start());
+            this.library.PlaybackState.Where(x => x == AudioPlayerState.Finished).Subscribe(x => this.updateTimer.Stop());
             this.library.CurrentPlaylistChanged.Subscribe(x => this.RaisePropertyChanged("CurrentPlaylist"));
             this.UpdateScreenState = this.library.AccessMode;
 
@@ -56,11 +57,11 @@ namespace Espera.View.ViewModels
 
             this.NextSongCommand = new ReactiveCommand(isAdminObservable
                 .CombineLatest(this.library.CanPlayNextSong, (b, b1) => b && b1));
-            this.NextSongCommand.Subscribe(x => this.library.PlayNextSong());
+            this.NextSongCommand.RegisterAsyncTask(_ => this.library.PlayNextSongAsync());
 
             this.PreviousSongCommand = new ReactiveCommand(isAdminObservable
                 .CombineLatest(this.library.CanPlayPreviousSong, (b, b1) => b && b1));
-            this.PreviousSongCommand.Subscribe(x => this.library.PlayPreviousSong());
+            this.PreviousSongCommand.RegisterAsyncTask(_ => this.library.PlayPreviousSongAsync());
 
             if (!this.library.Playlists.Any())
             {
@@ -114,6 +115,10 @@ namespace Espera.View.ViewModels
             this.totalTime = this.library.TotalTime
                 .ToProperty(this, x => x.TotalTime);
 
+            this.totalSeconds = this.library.TotalTime
+                .Select(x => (int)x.TotalSeconds)
+                .ToProperty(this, x => x.TotalSeconds);
+
             this.AddPlaylistCommand = new ReactiveCommand(this.WhenAny(x => x.CanSwitchPlaylist, x => x.Value));
             this.AddPlaylistCommand.Subscribe(x => this.AddPlaylist());
 
@@ -138,32 +143,29 @@ namespace Espera.View.ViewModels
 
                         // If the current song is paused, the command can be executed
                         (loadedSong != null || playBackState == AudioPlayerState.Paused))));
-            this.PlayCommand.Subscribe(x =>
+            this.PlayCommand.Subscribe(async x =>
             {
-                if (this.library.PlaybackState.FirstAsync().Wait() == AudioPlayerState.Paused || this.library.LoadedSong.FirstAsync().Wait() != null)
+                if (await this.library.PlaybackState.FirstAsync() == AudioPlayerState.Paused || await this.library.LoadedSong.FirstAsync() != null)
                 {
-                    this.library.ContinueSong();
+                    await this.library.ContinueSongAsync();
                     this.updateTimer.Start();
                 }
 
                 else
                 {
-                    this.library.PlaySong(this.SelectedPlaylistEntries.First().Index);
+                    await this.library.PlaySongAsync(this.SelectedPlaylistEntries.First().Index);
                 }
             });
 
             this.PlayOverrideCommand = new ReactiveCommand(this.WhenAny(x => x.SelectedPlaylistEntries, x => x.Value)
                 .CombineLatest(this.isAdmin, this.library.LockPlayPause, (selectedPlaylistEntries, isAdmin, lockPlayPause) =>
                     (isAdmin || !lockPlayPause) && (selectedPlaylistEntries != null && selectedPlaylistEntries.Count() == 1)));
-            this.PlayOverrideCommand.Subscribe(x => this.library.PlaySong(this.SelectedPlaylistEntries.First().Index));
+            this.PlayOverrideCommand.RegisterAsyncTask(_ => this.library.PlaySongAsync(this.SelectedPlaylistEntries.First().Index));
 
             this.PauseCommand = new ReactiveCommand(this.isAdmin.CombineLatest(this.library.LockPlayPause, this.isPlaying,
                 (isAdmin, lockPlayPause, isPlaying) => (isAdmin || !lockPlayPause) && isPlaying));
-            this.PauseCommand.Subscribe(x =>
-            {
-                this.library.PauseSong();
-                this.updateTimer.Stop();
-            });
+            this.PauseCommand.RegisterAsyncTask(_ => this.library.PauseSongAsync())
+                .Subscribe(_ => this.updateTimer.Stop());
 
             this.PauseContinueCommand = new ReactiveCommand(this
                 .WhenAny(x => x.IsPlaying, x => x.Value)
@@ -442,7 +444,7 @@ namespace Espera.View.ViewModels
 
         public int TotalSeconds
         {
-            get { return (int)this.TotalTime.TotalSeconds; }
+            get { return this.totalSeconds.Value; }
         }
 
         public TimeSpan TotalTime
@@ -520,18 +522,6 @@ namespace Espera.View.ViewModels
             return newName;
         }
 
-        private void HandleSongFinished()
-        {
-            this.updateTimer.Stop();
-        }
-
-        private void HandleSongStarted()
-        {
-            this.UpdateTotalTime();
-
-            this.updateTimer.Start();
-        }
-
         private void TriggerTimeoutWarning()
         {
             this.DisplayTimeoutWarning = true;
@@ -550,12 +540,6 @@ namespace Espera.View.ViewModels
             {
                 this.RaisePropertyChanged("RemainingPlaylistTimeout");
             }
-        }
-
-        private void UpdateTotalTime()
-        {
-            this.RaisePropertyChanged("TotalSeconds");
-            this.RaisePropertyChanged("TotalTime");
         }
     }
 }

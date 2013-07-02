@@ -1,5 +1,6 @@
 ﻿using Espera.Core.Audio;
 using System;
+using System.Threading.Tasks;
 
 namespace Espera.Core.Tests.Mocks
 {
@@ -18,19 +19,25 @@ namespace Espera.Core.Tests.Mocks
         {
         }
 
-        public override void Pause()
+        public override Task PauseAsync()
         {
             this.PlaybackStateProperty.Value = AudioPlayerState.Paused;
+
+            return Task.Delay(0);
         }
 
-        public override void Play()
+        public override Task PlayAsync()
         {
             this.PlaybackStateProperty.Value = AudioPlayerState.Playing;
+
+            return Task.Delay(0);
         }
 
-        public override void Stop()
+        public override Task StopAsync()
         {
             this.PlaybackStateProperty.Value = AudioPlayerState.Stopped;
+
+            return Task.Delay(0);
         }
     }
 }
