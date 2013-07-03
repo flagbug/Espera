@@ -127,9 +127,9 @@ namespace Espera.Core.Audio
             if (this.wavePlayer == null || this.inputStream == null || this.PlaybackStateProperty.Value == AudioPlayerState.Paused)
                 return;
 
-            await Task.Run(() => this.wavePlayer.Pause());
+            this.wavePlayer.Pause();
 
-            await this.EnsureState(NAudio.Wave.PlaybackState.Paused);
+            await this.EnsureStateAsync(NAudio.Wave.PlaybackState.Paused);
             this.PlaybackStateProperty.Value = AudioPlayerState.Paused;
         }
 
@@ -142,22 +142,17 @@ namespace Espera.Core.Audio
             if (this.wavePlayer == null || this.inputStream == null || this.PlaybackStateProperty.Value == AudioPlayerState.Playing)
                 return;
 
-            // Create a new thread, so that we can spawn the song state check on the same thread as the play method
-            // With this, we can avoid cross-threading issues with the NAudio library
-            await Task.Run(() =>
+            try
             {
-                try
-                {
-                    this.wavePlayer.Play();
-                }
+                this.wavePlayer.Play();
+            }
 
-                catch (MmException ex)
-                {
-                    throw new PlaybackException("The playback couldn't be started.", ex);
-                }
-            });
+            catch (MmException ex)
+            {
+                throw new PlaybackException("The playback couldn't be started.", ex);
+            }
 
-            await this.EnsureState(NAudio.Wave.PlaybackState.Playing);
+            await this.EnsureStateAsync(NAudio.Wave.PlaybackState.Playing);
             this.PlaybackStateProperty.Value = AudioPlayerState.Playing;
         }
 
@@ -165,9 +160,9 @@ namespace Espera.Core.Audio
         {
             if (this.wavePlayer != null && this.PlaybackStateProperty.Value != AudioPlayerState.Stopped)
             {
-                await Task.Run(() => this.wavePlayer.Stop());
+                this.wavePlayer.Stop();
 
-                await this.EnsureState(NAudio.Wave.PlaybackState.Stopped);
+                await this.EnsureStateAsync(NAudio.Wave.PlaybackState.Stopped);
 
                 this.PlaybackStateProperty.Value = AudioPlayerState.Stopped;
             }
@@ -177,9 +172,9 @@ namespace Espera.Core.Audio
         {
             if (this.wavePlayer != null && this.PlaybackStateProperty.Value != AudioPlayerState.Finished)
             {
-                await Task.Run(() => this.wavePlayer.Stop());
+                this.wavePlayer.Stop();
 
-                await this.EnsureState(NAudio.Wave.PlaybackState.Stopped);
+                await this.EnsureStateAsync(NAudio.Wave.PlaybackState.Stopped);
 
                 await base.FinishAsync();
             }
@@ -232,7 +227,7 @@ namespace Espera.Core.Audio
             this.inputStream.Volume = this.Volume;
         }
 
-        private async Task EnsureState(PlaybackState state)
+        private async Task EnsureStateAsync(PlaybackState state)
         {
             await Task.Run(() =>
             {
