@@ -25,7 +25,6 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly ObservableAsPropertyHelper<bool> isPlaying;
         private readonly Library library;
-        private readonly IReactiveDerivedList<PlaylistViewModel> playlists;
         private readonly Timer playlistTimeoutUpdateTimer;
         private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
         private readonly ObservableAsPropertyHelper<int> totalSeconds;
@@ -122,8 +121,8 @@ namespace Espera.View.ViewModels
             this.AddPlaylistCommand = new ReactiveCommand(this.WhenAny(x => x.CanSwitchPlaylist, x => x.Value));
             this.AddPlaylistCommand.Subscribe(x => this.AddPlaylist());
 
-            this.playlists = this.library.Playlists.CreateDerivedCollection(this.CreatePlaylistViewModel);
-            this.playlists.ItemsRemoved.Subscribe(x => x.Dispose());
+            this.Playlists = this.library.Playlists.CreateDerivedCollection(this.CreatePlaylistViewModel);
+            this.Playlists.ItemsRemoved.Subscribe(x => x.Dispose());
 
             this.ShowSettingsCommand = new ReactiveCommand();
             this.ShowSettingsCommand.Subscribe(x => this.SettingsViewModel.HandleSettings());
@@ -191,7 +190,7 @@ namespace Espera.View.ViewModels
             this.RemovePlaylistCommand = new ReactiveCommand(this.WhenAny(x => x.CurrentEditedPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 != null || x2 != null));
             this.RemovePlaylistCommand.Subscribe(x =>
             {
-                int index = this.playlists.TakeWhile(p => p != this.CurrentPlaylist).Count();
+                int index = this.Playlists.TakeWhile(p => p != this.CurrentPlaylist).Count();
 
                 this.library.RemovePlaylist(this.CurrentPlaylist.Model);
 
@@ -200,19 +199,19 @@ namespace Espera.View.ViewModels
                     this.AddPlaylist();
                 }
 
-                if (this.playlists.Count > index)
+                if (this.Playlists.Count > index)
                 {
-                    this.CurrentPlaylist = this.playlists[index];
+                    this.CurrentPlaylist = this.Playlists[index];
                 }
 
-                else if (this.playlists.Count >= 1)
+                else if (this.Playlists.Count >= 1)
                 {
-                    this.CurrentPlaylist = this.playlists[index - 1];
+                    this.CurrentPlaylist = this.Playlists[index - 1];
                 }
 
                 else
                 {
-                    this.CurrentPlaylist = this.playlists[0];
+                    this.CurrentPlaylist = this.Playlists[0];
                 }
             });
 
@@ -257,7 +256,7 @@ namespace Espera.View.ViewModels
 
         public PlaylistViewModel CurrentPlaylist
         {
-            get { return this.playlists.SingleOrDefault(vm => vm.Model == this.library.CurrentPlaylist); }
+            get { return this.Playlists.SingleOrDefault(vm => vm.Model == this.library.CurrentPlaylist); }
             set
             {
                 if (value != null) // There always has to be a playlist selected
@@ -377,10 +376,7 @@ namespace Espera.View.ViewModels
             set { Settings.Default.PlaylistHeight = new GridLengthConverter().ConvertToString(value); }
         }
 
-        public IReactiveDerivedList<PlaylistViewModel> Playlists
-        {
-            get { return this.playlists; }
-        }
+        public IReactiveDerivedList<PlaylistViewModel> Playlists { get; private set; }
 
         public int PlaylistSourceColumnWidth
         {
@@ -494,18 +490,18 @@ namespace Espera.View.ViewModels
         {
             this.library.AddAndSwitchToPlaylist(this.GetNewPlaylistName());
 
-            this.CurrentPlaylist = this.playlists.Last();
+            this.CurrentPlaylist = this.Playlists.Last();
             this.CurrentPlaylist.EditName = true;
         }
 
         private PlaylistViewModel CreatePlaylistViewModel(Playlist playlist)
         {
-            return new PlaylistViewModel(playlist, name => this.playlists.Count(p => p.Name == name) == 1);
+            return new PlaylistViewModel(playlist, name => this.Playlists.Count(p => p.Name == name) == 1);
         }
 
         private string GetNewPlaylistName()
         {
-            string newName = (this.playlists ?? Enumerable.Empty<PlaylistViewModel>())
+            string newName = (this.Playlists ?? Enumerable.Empty<PlaylistViewModel>())
                 .Select(playlist => playlist.Name)
                 .CreateUnique(i =>
                 {
