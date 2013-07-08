@@ -1,49 +1,48 @@
 ﻿using Espera.Core.Audio;
-using NUnit.Framework;
 using System;
 using System.Reactive.Linq;
+using Xunit;
 
 namespace Espera.Core.Tests
 {
-    [TestFixture]
     public class LocalAudioPlayerTest
     {
-        [Test]
-        public void Constructor_SongIsNull_ThrowsArgumentNullException()
+        [Fact]
+        public void ConstructorShouldThrowArgumentNullExceptionIfSongIsNull()
         {
             Assert.Throws<ArgumentNullException>(() => new LocalAudioPlayer(null));
         }
 
-        [Test]
-        public void CurrentTime_NoSongLoaded_ReturnsTimeSpandZero()
+        [Fact]
+        public void CurrentTimeShouldBeZeroIfNoSongIsLoaded()
         {
             var audioPlayer = new LocalAudioPlayer(Helpers.SetupSongMock());
 
-            Assert.AreEqual(TimeSpan.Zero, audioPlayer.CurrentTime);
+            Assert.Equal(TimeSpan.Zero, audioPlayer.CurrentTime);
         }
 
-        [Test]
-        public void PlaybackState_NoSongLoaded_ReturnsNone()
+        [Fact]
+        public async void PlaybackStateShouldBeNoneIfNoSongIsLoaded()
         {
             var audioPlayer = new LocalAudioPlayer(Helpers.SetupSongMock());
 
-            Assert.AreEqual(AudioPlayerState.None, audioPlayer.PlaybackState.FirstAsync().Wait());
+            Assert.Equal(AudioPlayerState.None, await audioPlayer.PlaybackState.FirstAsync());
         }
 
-        [Test]
-        public void TotalTime_NoSongLoaded_ReturnsTimeSpanZero()
+        [Fact]
+        public async void TotalTimeShouldBeZeroIfNoSongIsLoaded()
         {
             var audioPlayer = new LocalAudioPlayer(Helpers.SetupSongMock());
 
-            Assert.AreEqual(TimeSpan.Zero, audioPlayer.TotalTime.FirstAsync().Wait());
+            Assert.Equal(TimeSpan.Zero, await audioPlayer.TotalTime.FirstAsync());
         }
 
-        [Test]
-        public void Volume_NoSongLoadedAndVolumeIsSet_ReturnsSettedVolume()
+        [Fact]
+        public void VolumeShouldBeSettedVolumeIfNoSongIsLoadedButVolumeIsSet()
         {
             var audioPlayer = new LocalAudioPlayer(Helpers.SetupSongMock()) { Volume = 0.5f };
 
-            Assert.AreEqual(0.5f, audioPlayer.Volume);
+            Assert.Equal(0.5f, audioPlayer.Volume);
         }
     }
 }
