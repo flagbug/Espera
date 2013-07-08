@@ -7,6 +7,11 @@ namespace Espera.Core
 {
     internal static class ReactiveHelpers
     {
+        /// <summary>
+        /// Takes the left observable and combines it with the latest value of the right observable.
+        /// This method is like <see cref="Observable.CombineLatest{TSource1,TSource2,TResult}"/>, 
+        /// except it propagates only when the value of the left observable sequence changes.
+        /// </summary>
         public static IObservable<TResult> Left<TLeft, TRight, TResult>(this IObservable<TLeft> left, IObservable<TRight> right, Func<TLeft, TRight, TResult> resultSelector)
         {
             TRight latest = default(TRight);
