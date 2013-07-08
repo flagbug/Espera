@@ -25,7 +25,7 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly ObservableAsPropertyHelper<bool> isPlaying;
         private readonly Library library;
-        private readonly ReactiveList<PlaylistViewModel> playlists;
+        private readonly IReactiveDerivedList<PlaylistViewModel> playlists;
         private readonly Timer playlistTimeoutUpdateTimer;
         private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
         private readonly ObservableAsPropertyHelper<int> totalSeconds;
@@ -191,7 +191,7 @@ namespace Espera.View.ViewModels
             this.RemovePlaylistCommand = new ReactiveCommand(this.WhenAny(x => x.CurrentEditedPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 != null || x2 != null));
             this.RemovePlaylistCommand.Subscribe(x =>
             {
-                int index = this.playlists.IndexOf(this.CurrentPlaylist);
+                int index = this.playlists.TakeWhile(p => p != this.CurrentPlaylist).Count();
 
                 this.library.RemovePlaylist(this.CurrentPlaylist.Model);
 
@@ -377,7 +377,7 @@ namespace Espera.View.ViewModels
             set { Settings.Default.PlaylistHeight = new GridLengthConverter().ConvertToString(value); }
         }
 
-        public IReactiveCollection<PlaylistViewModel> Playlists
+        public IReactiveDerivedList<PlaylistViewModel> Playlists
         {
             get { return this.playlists; }
         }
