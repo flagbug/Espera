@@ -27,13 +27,10 @@ namespace Espera.Core
 
             return Observable.Create<TResult>(o =>
             {
-                left.Subscribe(x =>
-                {
-                    if (initialized)
-                    {
-                        o.OnNext(resultSelector(x, latest));
-                    }
-                }, o.OnError, o.OnCompleted).DisposeWith(disp);
+                left.Where(_ => initialized)
+                    .Subscribe(x => o.OnNext(resultSelector(x, latest)), 
+                        o.OnError, o.OnCompleted)
+                    .DisposeWith(disp);
 
                 return disp;
             });
