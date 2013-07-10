@@ -30,6 +30,8 @@ namespace Espera.Core.Settings
 
         YoutubeStreamingQuality YoutubeStreamingQuality { get; set; }
 
+        string YoutubeDownloadPath { get; set; }
+
         void Save();
 
         void Upgrade();

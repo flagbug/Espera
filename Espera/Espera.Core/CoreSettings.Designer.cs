@@ -178,5 +178,17 @@ namespace Espera.Core {
                 this["SongSourceUpdateInterval"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string YoutubeDownloadPath {
+            get {
+                return ((string)(this["YoutubeDownloadPath"]));
+            }
+            set {
+                this["YoutubeDownloadPath"] = value;
+            }
+        }
     }
 }

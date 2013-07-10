@@ -282,6 +282,12 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public string YoutubeDownloadPath
+        {
+            get { return this.library.YoutubeDownloadPath; }
+            set { this.library.YoutubeDownloadPath = value; }
+        }
+
         public YoutubeStreamingQuality YoutubeStreamingQuality
         {
             get { return this.library.YoutubeStreamingQuality; }
