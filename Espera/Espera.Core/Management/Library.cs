@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
@@ -26,6 +27,7 @@ namespace Espera.Core.Management
         private readonly Subject<Playlist> currentPlaylistChanged;
         private readonly object disposeLock; // We need a lock when disposing songs to prevent a modification of the enumeration
         private readonly IRemovableDriveWatcher driveWatcher;
+        private readonly IFileSystem fileSystem;
         private readonly ILibraryReader libraryReader;
         private readonly ILibraryWriter libraryWriter;
         private readonly ObservableCollection<Playlist> playlists;
@@ -45,8 +47,14 @@ namespace Espera.Core.Management
         private bool overrideCurrentCaching;
         private string password;
 
-        public Library(IRemovableDriveWatcher driveWatcher, ILibraryReader libraryReader, ILibraryWriter libraryWriter, ILibrarySettings settings)
+        public Library(IRemovableDriveWatcher driveWatcher, ILibraryReader libraryReader, ILibraryWriter libraryWriter, ILibrarySettings settings, IFileSystem fileSystem)
         {
+            this.driveWatcher = driveWatcher;
+            this.libraryReader = libraryReader;
+            this.libraryWriter = libraryWriter;
+            this.settings = settings;
+            this.fileSystem = fileSystem;
+
             this.songLock = new object();
             this.songs = new HashSet<Song>();
             this.playlists = new ObservableCollection<Playlist>();
@@ -55,11 +63,7 @@ namespace Espera.Core.Management
             this.accessModeSubject = new BehaviorSubject<AccessMode>(Management.AccessMode.Administrator); // We want implicit to be the administrator, till we change to user mode manually
             this.accessMode = Management.AccessMode.Administrator;
             this.cacheResetHandle = new AutoResetEvent(false);
-            this.driveWatcher = driveWatcher;
-            this.libraryReader = libraryReader;
-            this.libraryWriter = libraryWriter;
             this.disposeLock = new object();
-            this.settings = settings;
             this.CanPlayNextSong = this.currentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
             this.CanPlayPreviousSong = this.currentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
             this.currentPlayer = new BehaviorSubject<AudioPlayer>(null);
@@ -348,7 +352,7 @@ namespace Espera.Core.Management
             {
                 this.ThrowIfNotAdmin();
 
-                if (!Directory.Exists(value))
+                if (!this.fileSystem.Directory.Exists(value))
                     throw new ArgumentException("Directory doesn't exist.");
 
                 this.settings.YoutubeDownloadPath = value;
@@ -427,7 +431,7 @@ namespace Espera.Core.Management
         {
             this.ThrowIfNotAdmin();
 
-            if (!Directory.Exists(path))
+            if (!this.fileSystem.Directory.Exists(path))
                 throw new ArgumentException("Directory does't exist.");
 
             this.songSourcePath.OnNext(path);
@@ -955,7 +959,7 @@ namespace Espera.Core.Management
             await Task.Run(() =>
             {
                 List<Song> nonExistant = currentSongs
-                    .Where(song => !File.Exists(song.OriginalPath))
+                    .Where(song => !this.fileSystem.File.Exists(song.OriginalPath))
                     .ToList();
 
                 removable = new HashSet<Song>(notInAnySongSource.Concat(nonExistant));

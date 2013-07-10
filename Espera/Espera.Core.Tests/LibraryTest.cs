@@ -5,6 +5,7 @@ using Espera.Core.Tests.Mocks;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
@@ -229,6 +230,28 @@ namespace Espera.Core.Tests
             using (Library library = Helpers.CreateLibrary())
             {
                 Assert.True(await library.CanSwitchPlaylist.FirstAsync());
+            }
+        }
+
+        [Fact]
+        public async void ChangeSongSourcePathSmokeTest()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.Directory.CreateDirectory("C://Test");
+
+            using (Library library = Helpers.CreateLibrary(fileSystem: fileSystem))
+            {
+                library.ChangeSongSourcePath("C://Test");
+                Assert.Equal("C://Test", await library.SongSourcePath.FirstAsync());
+            }
+        }
+
+        [Fact]
+        public void ChangeSongSourcePathThrowsArgumentExceptionIfDirectoryDoesntExist()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                Assert.Throws<ArgumentException>(() => library.ChangeSongSourcePath("C://Test"));
             }
         }
 
@@ -978,6 +1001,27 @@ namespace Espera.Core.Tests
                 library.ChangeToParty();
 
                 Assert.Throws<InvalidOperationException>(() => library.SwitchToPlaylist(library.GetPlaylistByName("Playlist 2")));
+            }
+        }
+
+        [Fact]
+        public void YoutubeDownloadPathSetterThrowsArgumentExceptionIfDirectoryDoesntExist()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                Assert.Throws<ArgumentException>(() => library.YoutubeDownloadPath = "C://Test");
+            }
+        }
+
+        [Fact]
+        public void YoutubeDownloadPathSmokeTest()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.Directory.CreateDirectory("C://Test");
+
+            using (Library library = Helpers.CreateLibrary(fileSystem: fileSystem))
+            {
+                library.YoutubeDownloadPath = "C://Test";
             }
         }
     }

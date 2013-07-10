@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Abstractions;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -41,11 +42,12 @@ namespace Espera.View
             this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", FilePath);
             this.kernel.Bind<ILibrarySettings>().To<LibrarySettingsWrapper>().OnActivation(wrapper =>
             {
-                if(wrapper.YoutubeDownloadPath == String.Empty)
+                if (wrapper.YoutubeDownloadPath == String.Empty)
                 {
                     wrapper.YoutubeDownloadPath = KnownFolders.Downloads.Path;
                 }
             });
+            this.kernel.Bind<IFileSystem>().To<FileSystem>();
             this.kernel.Bind<IWindowManager>().To<WindowManager>();
         }
 

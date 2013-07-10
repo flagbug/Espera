@@ -5,6 +5,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions.TestingHelpers;
 
 namespace Espera.Core.Tests
 {
@@ -51,13 +52,14 @@ namespace Espera.Core.Tests
             return CreateLibrary(null, writer);
         }
 
-        public static Library CreateLibrary(ILibrarySettings settings = null, ILibraryWriter writer = null)
+        public static Library CreateLibrary(ILibrarySettings settings = null, ILibraryWriter writer = null, MockFileSystem fileSystem = null)
         {
             return new Library(
                 new Mock<IRemovableDriveWatcher>().Object,
                 new Mock<ILibraryReader>().Object,
                 writer ?? new Mock<ILibraryWriter>().Object,
-                settings ?? new Mock<ILibrarySettings>().SetupAllProperties().Object);
+                settings ?? new Mock<ILibrarySettings>().SetupAllProperties().Object,
+                fileSystem ?? new MockFileSystem());
         }
 
         public static Library CreateLibraryWithPlaylist(string playlistName = "Playlist", ILibrarySettings settings = null)
