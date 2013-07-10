@@ -7,6 +7,7 @@ using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
 
 namespace Espera.Core
 {
@@ -194,13 +195,13 @@ namespace Espera.Core
         /// <summary>
         /// Loads the songs to a cache and sets the <see cref="StreamingPath"/> property.
         /// </summary>
-        public abstract void LoadToCache();
+        public abstract Task LoadToCacheAsync();
 
         /// <summary>
         /// Creates the audio player for the song.
         /// </summary>
         /// <returns>The audio player for playback.</returns>
-        internal abstract AudioPlayer CreateAudioPlayer();
+        internal abstract Task<AudioPlayer> CreateAudioPlayerAsync();
 
         /// <summary>
         /// Sets the caching progress in a range from 0 to 100.

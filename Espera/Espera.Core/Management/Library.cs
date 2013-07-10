@@ -830,7 +830,7 @@ namespace Espera.Core.Management
 
             try
             {
-                audioPlayer = this.RenewCurrentPlayer(song);
+                audioPlayer = await this.RenewCurrentPlayerAsync(song);
             }
 
             catch (AudioPlayerCreatingException)
@@ -968,16 +968,16 @@ namespace Espera.Core.Management
             this.RemoveFromLibrary(removable);
         }
 
-        private AudioPlayer RenewCurrentPlayer(Song song)
+        private async Task<AudioPlayer> RenewCurrentPlayerAsync(Song song)
         {
-            AudioPlayer player = this.currentPlayer.FirstAsync().Wait();
+            AudioPlayer player = await this.currentPlayer.FirstAsync();
 
             if (player != null)
             {
                 player.Dispose();
             }
 
-            AudioPlayer newAudioPlayer = song.CreateAudioPlayer();
+            AudioPlayer newAudioPlayer = await song.CreateAudioPlayerAsync();
 
             this.currentPlayer.OnNext(newAudioPlayer);
 

@@ -160,7 +160,7 @@ namespace Espera.Core.Management
             {
                 if (song.HasToCache && !song.IsCaching)
                 {
-                    GlobalSongCacheQueue.Instance.Enqueue(song);
+                    GlobalSongCacheQueue.Instance.EnqueueAsync(song);
                 }
 
                 itemsToAdd.Add(new PlaylistEntry(index++, song));
