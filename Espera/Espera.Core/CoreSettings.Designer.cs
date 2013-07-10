@@ -98,18 +98,6 @@ namespace Espera.Core {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool LockLibraryRemoval {
-            get {
-                return ((bool)(this["LockLibraryRemoval"]));
-            }
-            set {
-                this["LockLibraryRemoval"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool LockPlayPause {
             get {
                 return ((bool)(this["LockPlayPause"]));
@@ -152,6 +140,54 @@ namespace Espera.Core {
             }
             set {
                 this["Volume"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int YoutubeStreamingQuality {
+            get {
+                return ((int)(this["YoutubeStreamingQuality"]));
+            }
+            set {
+                this["YoutubeStreamingQuality"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool StreamHighestYoutubeQuality {
+            get {
+                return ((bool)(this["StreamHighestYoutubeQuality"]));
+            }
+            set {
+                this["StreamHighestYoutubeQuality"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("00:30:00")]
+        public global::System.TimeSpan SongSourceUpdateInterval {
+            get {
+                return ((global::System.TimeSpan)(this["SongSourceUpdateInterval"]));
+            }
+            set {
+                this["SongSourceUpdateInterval"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string YoutubeDownloadPath {
+            get {
+                return ((string)(this["YoutubeDownloadPath"]));
+            }
+            set {
+                this["YoutubeDownloadPath"] = value;
             }
         }
     }

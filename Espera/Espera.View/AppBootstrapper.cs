@@ -3,6 +3,7 @@ using Espera.Core.Management;
 using Espera.Core.Settings;
 using Espera.View.Properties;
 using Espera.View.ViewModels;
+using Microsoft.WindowsAPICodePack.Shell;
 using Ninject;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace Espera.View
 
         static AppBootstrapper()
         {
-            DirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Espera\");
+            DirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\");
             FilePath = Path.Combine(DirectoryPath, "Library.xml");
         }
 
@@ -38,7 +39,13 @@ namespace Espera.View
             this.kernel.Bind<IRemovableDriveWatcher>().To<RemovableDriveWatcher>();
             this.kernel.Bind<ILibraryReader>().To<LibraryFileReader>().WithConstructorArgument("sourcePath", FilePath);
             this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", FilePath);
-            this.kernel.Bind<ILibrarySettings>().To<LibrarySettingsWrapper>();
+            this.kernel.Bind<ILibrarySettings>().To<LibrarySettingsWrapper>().OnActivation(wrapper =>
+            {
+                if(wrapper.YoutubeDownloadPath == String.Empty)
+                {
+                    wrapper.YoutubeDownloadPath = KnownFolders.Downloads.Path;
+                }
+            });
             this.kernel.Bind<IWindowManager>().To<WindowManager>();
         }
 

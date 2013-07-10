@@ -3,26 +3,24 @@
     /// <summary>
     /// Represents the current playback state of an <see cref="AudioPlayer"/> object.
     /// </summary>
-    internal enum AudioPlayerState
+    public enum AudioPlayerState
     {
         /// <summary>
-        /// The <see cref="AudioPlayer"/> is playing.
+        /// The initial state of the <see cref="AudioPlayer"/>.
         /// </summary>
-        Playing,
+        None,
 
-        /// <summary>
-        /// The <see cref="AudioPlayer"/>  is paused.
-        /// </summary>
+        Playing,
         Paused,
 
         /// <summary>
-        /// The <see cref="AudioPlayer"/>  is stopped.
+        /// The playback of the <see cref="AudioPlayer"/> was prematurely stopped and cannot be started again.
         /// </summary>
         Stopped,
 
         /// <summary>
-        /// The <see cref="AudioPlayer"/>  has no state.
+        /// The <see cref="AudioPlayer"/> has finished the playback and cannot be started again.
         /// </summary>
-        None
+        Finished
     }
 }

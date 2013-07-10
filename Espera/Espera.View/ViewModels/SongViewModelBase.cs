@@ -1,11 +1,11 @@
-﻿using Caliburn.Micro;
-using Espera.Core;
+﻿using Espera.Core;
 using Rareform.Validation;
+using ReactiveUI;
 using System;
 
 namespace Espera.View.ViewModels
 {
-    public abstract class SongViewModelBase : PropertyChangedBase
+    public abstract class SongViewModelBase : ReactiveObject
     {
         protected SongViewModelBase(Song model)
         {

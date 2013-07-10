@@ -7,11 +7,12 @@ namespace Espera.Core.Management
 {
     internal static class LibraryWriter
     {
-        public static void Write(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists, Stream targetStream)
+        public static void Write(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists, string songSourcePath, Stream targetStream)
         {
             var document = new XDocument(
                 new XElement("Root",
-                    new XElement("Version", "1.0.0"),
+                    new XElement("Version", "2.0.0"),
+                    new XElement("SongSourcePath", songSourcePath),
                     new XElement("Songs", songs.Select(song =>
                         new XElement("Song",
                             new XAttribute("Album", song.Album),

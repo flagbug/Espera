@@ -6,8 +6,6 @@ namespace Espera.Core.Settings
     {
         bool EnablePlaylistTimeout { get; set; }
 
-        bool LockLibraryRemoval { get; set; }
-
         bool LockPlaylistRemoval { get; set; }
 
         bool LockPlaylistSwitching { get; set; }
@@ -20,11 +18,19 @@ namespace Espera.Core.Settings
 
         TimeSpan PlaylistTimeout { get; set; }
 
+        TimeSpan SongSourceUpdateInterval { get; set; }
+
+        bool StreamHighestYoutubeQuality { get; set; }
+
         bool StreamYoutube { get; set; }
 
         bool UpgradeRequired { get; set; }
 
         float Volume { get; set; }
+
+        YoutubeStreamingQuality YoutubeStreamingQuality { get; set; }
+
+        string YoutubeDownloadPath { get; set; }
 
         void Save();
 

@@ -1,20 +1,30 @@
 ﻿using Caliburn.Micro;
+using Espera.Core;
 using Espera.Core.Management;
 using Espera.View.Properties;
-using Rareform.Patterns.MVVM;
 using Rareform.Validation;
+using ReactiveUI;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Reflection;
-using System.Windows.Input;
 
 namespace Espera.View.ViewModels
 {
-    internal class SettingsViewModel : PropertyChangedBase
+    internal class SettingsViewModel : ReactiveObject
     {
+        private readonly ObservableAsPropertyHelper<bool> canCreateAdmin;
+        private readonly ObservableAsPropertyHelper<bool> canLogin;
         private readonly Library library;
+        private readonly ObservableAsPropertyHelper<string> librarySource;
         private readonly IWindowManager windowManager;
+        private string creationPassword;
         private bool isWrongPassword;
+        private string loginPassword;
+        private double scaling;
         private bool showLogin;
         private bool showSettings;
 
@@ -24,55 +34,90 @@ namespace Espera.View.ViewModels
                 Throw.ArgumentNullException(() => library);
 
             this.library = library;
-
             this.windowManager = windowManager;
+
+            this.Scaling = 1;
+
+            this.canCreateAdmin = this
+                .WhenAny(x => x.CreationPassword, x => !string.IsNullOrWhiteSpace(x.Value) && !this.library.IsAdministratorCreated)
+                .ToProperty(this, x => x.CanCreateAdmin);
+
+            this.CreateAdminCommand = new ReactiveCommand(this.canCreateAdmin, false,
+                ImmediateScheduler.Instance); // Immediate execution, because we set the password to an empty string afterwards
+            this.CreateAdminCommand.Subscribe(p => this.library.CreateAdmin(this.CreationPassword));
+
+            this.ChangeToPartyCommand = new ReactiveCommand(this.CreateAdminCommand.Select(x => true).StartWith(false));
+            this.ChangeToPartyCommand.Subscribe(p =>
+            {
+                this.library.ChangeToParty();
+                this.ShowSettings = false;
+            });
+
+            this.canLogin = this.WhenAny(x => x.LoginPassword, x => !string.IsNullOrWhiteSpace(x.Value))
+                .ToProperty(this, x => x.CanLogin);
+
+            this.LoginCommand = new ReactiveCommand(this.canLogin, false,
+                ImmediateScheduler.Instance); // Immediate execution, because we set the password to an empty string afterwards
+            this.LoginCommand.Subscribe(p =>
+            {
+                try
+                {
+                    this.library.ChangeToAdmin(this.LoginPassword);
+                    this.IsWrongPassword = false;
+
+                    this.ShowLogin = false;
+                    this.ShowSettings = true;
+                }
+
+                catch (WrongPasswordException)
+                {
+                    this.IsWrongPassword = true;
+                }
+            });
+
+            this.OpenLinkCommand = new ReactiveCommand();
+            this.OpenLinkCommand.Subscribe(p => Process.Start((string)p));
+
+            this.ReportBugCommand = new ReactiveCommand();
+            this.ReportBugCommand.Subscribe(p => this.windowManager.ShowWindow(new BugReportViewModel()));
+
+            this.ChangeAccentColorCommand = new ReactiveCommand();
+            this.ChangeAccentColorCommand.Subscribe(p => Settings.Default.AccentColor = (string)p);
+
+            this.librarySource = this.library.SongSourcePath.ToProperty(this, x => x.LibrarySource);
         }
 
-        public ICommand ChangeAccentColorCommand
+        public static IEnumerable<YoutubeStreamingQuality> YoutubeStreamingQualities
         {
             get
             {
-                return new RelayCommand
-                (
-                    param => Settings.Default.AccentColor = (string)param
-                );
+                return Enum.GetValues(typeof(YoutubeStreamingQuality))
+                    .Cast<YoutubeStreamingQuality>()
+                    .Reverse();
             }
         }
 
-        public ICommand ChangeToPartyCommand
+        public bool CanCreateAdmin
         {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        this.library.ChangeToParty();
-                        this.ShowSettings = false;
-                    },
-                    param => this.IsAdminCreated
-                );
-            }
+            get { return this.canCreateAdmin.Value; }
         }
 
-        public ICommand CreateAdminCommand
+        public bool CanLogin
         {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        this.library.CreateAdmin(this.CreationPassword);
-
-                        this.NotifyOfPropertyChange(() => this.IsAdminCreated);
-                    },
-                    param => !string.IsNullOrWhiteSpace(this.CreationPassword) && !this.IsAdminCreated
-                );
-            }
+            get { return this.canLogin.Value; }
         }
 
-        public string CreationPassword { get; set; }
+        public IReactiveCommand ChangeAccentColorCommand { get; private set; }
+
+        public IReactiveCommand ChangeToPartyCommand { get; private set; }
+
+        public IReactiveCommand CreateAdminCommand { get; private set; }
+
+        public string CreationPassword
+        {
+            private get { return this.creationPassword; }
+            set { this.RaiseAndSetIfChanged(ref this.creationPassword, value); }
+        }
 
         public string DonationPage
         {
@@ -81,14 +126,14 @@ namespace Espera.View.ViewModels
 
         public bool EnablePlaylistTimeout
         {
-            get { return this.library.EnablePlaylistTimeout; }
+            get { return this.library.EnablePlaylistTimeout.Value; }
             set
             {
-                if (this.library.EnablePlaylistTimeout != value)
+                if (this.library.EnablePlaylistTimeout.Value != value)
                 {
-                    this.library.EnablePlaylistTimeout = value;
+                    this.library.EnablePlaylistTimeout.Value = value;
 
-                    this.NotifyOfPropertyChange(() => this.EnablePlaylistTimeout);
+                    this.RaisePropertyChanged();
                 }
             }
         }
@@ -104,58 +149,45 @@ namespace Espera.View.ViewModels
             get { return "http://espera.flagbug.com"; }
         }
 
-        public bool IsAdminCreated
-        {
-            get { return this.library.IsAdministratorCreated; }
-        }
-
         public bool IsWrongPassword
         {
             get { return this.isWrongPassword; }
-            set
-            {
-                if (this.IsWrongPassword != value)
-                {
-                    this.isWrongPassword = value;
-                    this.NotifyOfPropertyChange(() => this.IsWrongPassword);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(ref this.isWrongPassword, value); }
         }
 
-        public bool LockLibraryRemoval
+        public string LibrarySource
         {
-            get { return this.library.LockLibraryRemoval; }
-            set { this.library.LockLibraryRemoval = value; }
+            get { return this.librarySource.Value; }
         }
 
         public bool LockPlaylistRemoval
         {
-            get { return this.library.LockPlaylistRemoval; }
-            set { this.library.LockPlaylistRemoval = value; }
+            get { return this.library.LockPlaylistRemoval.Value; }
+            set { this.library.LockPlaylistRemoval.Value = value; }
         }
 
         public bool LockPlaylistSwitching
         {
-            get { return this.library.LockPlaylistSwitching; }
-            set { this.library.LockPlaylistSwitching = value; }
+            get { return this.library.LockPlaylistSwitching.Value; }
+            set { this.library.LockPlaylistSwitching.Value = value; }
         }
 
         public bool LockPlayPause
         {
-            get { return this.library.LockPlayPause; }
-            set { this.library.LockPlayPause = value; }
+            get { return this.library.LockPlayPause.Value; }
+            set { this.library.LockPlayPause.Value = value; }
         }
 
         public bool LockTime
         {
-            get { return this.library.LockTime; }
-            set { this.library.LockTime = value; }
+            get { return this.library.LockTime.Value; }
+            set { this.library.LockTime.Value = value; }
         }
 
         public bool LockVolume
         {
-            get { return this.library.LockVolume; }
-            set { this.library.LockVolume = value; }
+            get { return this.library.LockVolume.Value; }
+            set { this.library.LockVolume.Value = value; }
         }
 
         public bool LockWindow
@@ -166,49 +198,20 @@ namespace Espera.View.ViewModels
                 if (this.LockWindow != value)
                 {
                     Settings.Default.LockWindow = value;
-                    this.NotifyOfPropertyChange(() => this.LockWindow);
+                    this.RaisePropertyChanged();
                 }
             }
         }
 
-        public ICommand LoginCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        try
-                        {
-                            this.library.ChangeToAdmin(this.LoginPassword);
-                            this.IsWrongPassword = false;
-                            this.ShowLogin = false;
-                            this.ShowSettings = true;
-                        }
+        public IReactiveCommand LoginCommand { get; private set; }
 
-                        catch (WrongPasswordException)
-                        {
-                            this.IsWrongPassword = true;
-                        }
-                    },
-                    param => !string.IsNullOrWhiteSpace(this.LoginPassword)
-                );
-            }
+        public string LoginPassword
+        {
+            private get { return this.loginPassword; }
+            set { this.RaiseAndSetIfChanged(ref this.loginPassword, value); }
         }
 
-        public string LoginPassword { get; set; }
-
-        public ICommand OpenLinkCommand
-        {
-            get
-            {
-                return new RelayCommand
-                (
-                    param => Process.Start((string)param)
-                );
-            }
-        }
+        public IReactiveCommand OpenLinkCommand { get; private set; }
 
         public int PlaylistTimeout
         {
@@ -221,37 +224,45 @@ namespace Espera.View.ViewModels
             get { return "http://espera.flagbug.com/release-notes"; }
         }
 
-        public ICommand ReportBugCommand
+        public IReactiveCommand ReportBugCommand { get; private set; }
+
+        public double Scaling
         {
-            get
-            {
-                return new RelayCommand(param => this.windowManager.ShowWindow(new BugReportViewModel()));
-            }
+            get { return this.scaling; }
+            set { this.RaiseAndSetIfChanged(ref this.scaling, value); }
         }
 
         public bool ShowLogin
         {
             get { return this.showLogin; }
-            set
-            {
-                if (this.ShowLogin != value)
-                {
-                    this.showLogin = value;
-                    this.NotifyOfPropertyChange(() => this.ShowLogin);
-                }
-            }
+            private set { this.RaiseAndSetIfChanged(ref this.showLogin, value); }
         }
 
         public bool ShowSettings
         {
             get { return this.showSettings; }
+            private set { this.RaiseAndSetIfChanged(ref this.showSettings, value); }
+        }
+
+        public int SongSourceUpdateInterval
+        {
+            get { return (int)this.library.SongSourceUpdateInterval.Value.TotalMinutes; }
             set
             {
-                if (this.ShowSettings != value)
-                {
-                    this.showSettings = value;
-                    this.NotifyOfPropertyChange(() => this.ShowSettings);
-                }
+                this.library.SongSourceUpdateInterval.Value = TimeSpan.FromMinutes(value);
+
+                this.RaisePropertyChanged();
+            }
+        }
+
+        public bool StreamHighestYoutubeQuality
+        {
+            get { return this.library.StreamHighestYoutubeQuality; }
+            set
+            {
+                this.library.StreamHighestYoutubeQuality = value;
+
+                this.RaisePropertyChanged();
             }
         }
 
@@ -271,9 +282,30 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public string YoutubeDownloadPath
+        {
+            get { return this.library.YoutubeDownloadPath; }
+            set { this.library.YoutubeDownloadPath = value; }
+        }
+
+        public YoutubeStreamingQuality YoutubeStreamingQuality
+        {
+            get { return this.library.YoutubeStreamingQuality; }
+            set
+            {
+                this.library.YoutubeStreamingQuality = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        public void ChangeLibrarySource(string source)
+        {
+            this.library.ChangeSongSourcePath(source);
+        }
+
         public void HandleSettings()
         {
-            if (this.IsAdminCreated && this.library.AccessMode == AccessMode.Party)
+            if (this.library.IsAdministratorCreated && this.library.AccessMode.FirstAsync().Wait() == AccessMode.Party)
             {
                 this.ShowLogin = true;
             }

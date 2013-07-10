@@ -1,91 +1,90 @@
-﻿using Caliburn.Micro;
-using Espera.Core.Management;
-using Rareform.Extensions;
-using Rareform.Patterns.MVVM;
+﻿using Espera.Core.Management;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Input;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace Espera.View.ViewModels
 {
-    internal abstract class SongSourceViewModel<T> : PropertyChangedBase, ISongSourceViewModel
+    internal abstract class SongSourceViewModel<T> : ReactiveObject, ISongSourceViewModel
         where T : SongViewModelBase
     {
+        private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly Library library;
+        private readonly Subject<Unit> timeoutWarning;
+        private string searchText;
         private IEnumerable<T> selectableSongs;
         private IEnumerable<SongViewModelBase> selectedSongs;
 
         protected SongSourceViewModel(Library library)
         {
             this.library = library;
+
+            this.searchText = String.Empty;
             this.selectableSongs = Enumerable.Empty<T>();
-        }
+            this.timeoutWarning = new Subject<Unit>();
 
-        public event EventHandler TimeoutWarning;
-
-        public ICommand AddToPlaylistCommand
-        {
-            get
+            IObservable<bool> canAddToPlaylist = this.WhenAny(x => x.SelectedSongs, x => x.Value != null && x.Value.Any());
+            this.AddToPlaylistCommand = new ReactiveCommand(canAddToPlaylist);
+            this.AddToPlaylistCommand.Subscribe(p =>
             {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        if (!this.Library.CanAddSongToPlaylist)
-                        {
-                            // Trigger the animation
-                            this.TimeoutWarning.RaiseSafe(this, EventArgs.Empty);
+                if (!this.Library.CanAddSongToPlaylist)
+                {
+                    // Trigger the animation
+                    this.timeoutWarning.OnNext(Unit.Default);
 
-                            return;
-                        }
+                    return;
+                }
 
-                        if (this.IsAdmin)
-                        {
-                            this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model));
-                        }
+                if (this.IsAdmin)
+                {
+                    this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model));
+                }
 
-                        else
-                        {
-                            this.library.AddSongToPlaylist(this.SelectedSongs.Select(song => song.Model).Single());
-                        }
-                    },
-                    param => this.SelectedSongs != null && this.SelectedSongs.Any()
-                );
-            }
+                else
+                {
+                    this.library.AddSongToPlaylist(this.SelectedSongs.Select(song => song.Model).Single());
+                }
+            });
+
+            this.isAdmin = this.Library.AccessMode
+                .Select(x => x == AccessMode.Administrator)
+                .ToProperty(this, x => x.IsAdmin);
         }
+
+        public IReactiveCommand AddToPlaylistCommand { get; private set; }
 
         public bool IsAdmin
         {
-            get { return this.library.AccessMode == AccessMode.Administrator; }
+            get { return this.isAdmin.Value; }
         }
 
-        public abstract string SearchText { get; set; }
+        public abstract IReactiveCommand PlayNowCommand { get; }
+
+        public string SearchText
+        {
+            get { return this.searchText; }
+            set { this.RaiseAndSetIfChanged(ref this.searchText, value); }
+        }
 
         public IEnumerable<T> SelectableSongs
         {
             get { return this.selectableSongs; }
-            protected set
-            {
-                if (this.selectableSongs != value)
-                {
-                    this.selectableSongs = value;
-                    this.NotifyOfPropertyChange(() => this.SelectableSongs);
-                }
-            }
+            protected set { this.RaiseAndSetIfChanged(ref this.selectableSongs, value); }
         }
 
         public IEnumerable<SongViewModelBase> SelectedSongs
         {
             get { return this.selectedSongs; }
-            set
-            {
-                if (this.selectedSongs != value)
-                {
-                    this.selectedSongs = value;
-                    this.NotifyOfPropertyChange(() => this.SelectedSongs);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(ref this.selectedSongs, value); }
+        }
+
+        public IObservable<Unit> TimeoutWarning
+        {
+            get { return this.timeoutWarning.AsObservable(); }
         }
 
         protected Library Library

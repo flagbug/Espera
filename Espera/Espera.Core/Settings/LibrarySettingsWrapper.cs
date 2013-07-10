@@ -10,12 +10,6 @@ namespace Espera.Core.Settings
             set { CoreSettings.Default.EnablePlaylistTimeout = value; }
         }
 
-        public bool LockLibraryRemoval
-        {
-            get { return CoreSettings.Default.LockLibraryRemoval; }
-            set { CoreSettings.Default.LockLibraryRemoval = value; }
-        }
-
         public bool LockPlaylistRemoval
         {
             get { return CoreSettings.Default.LockPlaylistRemoval; }
@@ -52,6 +46,18 @@ namespace Espera.Core.Settings
             set { CoreSettings.Default.PlaylistTimeout = value; }
         }
 
+        public TimeSpan SongSourceUpdateInterval
+        {
+            get { return CoreSettings.Default.SongSourceUpdateInterval; }
+            set { CoreSettings.Default.SongSourceUpdateInterval = value; }
+        }
+
+        public bool StreamHighestYoutubeQuality
+        {
+            get { return CoreSettings.Default.StreamHighestYoutubeQuality; }
+            set { CoreSettings.Default.StreamHighestYoutubeQuality = value; }
+        }
+
         public bool StreamYoutube
         {
             get { return CoreSettings.Default.StreamYoutube; }
@@ -68,6 +74,18 @@ namespace Espera.Core.Settings
         {
             get { return CoreSettings.Default.Volume; }
             set { CoreSettings.Default.Volume = value; }
+        }
+
+        public YoutubeStreamingQuality YoutubeStreamingQuality
+        {
+            get { return (YoutubeStreamingQuality)CoreSettings.Default.YoutubeStreamingQuality; }
+            set { CoreSettings.Default.YoutubeStreamingQuality = (int)value; }
+        }
+
+        public string YoutubeDownloadPath
+        {
+            get { return CoreSettings.Default.YoutubeDownloadPath; }
+            set { CoreSettings.Default.YoutubeDownloadPath = value; }
         }
 
         public void Save()

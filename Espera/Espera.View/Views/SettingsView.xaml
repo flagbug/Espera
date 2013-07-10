@@ -5,6 +5,7 @@
              xmlns:ViewModels="clr-namespace:Espera.View.ViewModels"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:valueConverters="clr-namespace:Rareform.ValueConverters;assembly=Rareform"
              d:DataContext="{d:DesignInstance ViewModels:DesignTimeSettingsViewModel,
                                               IsDesignTimeCreatable=True}"
              d:DesignHeight="800"
@@ -45,6 +46,7 @@
                 <Setter Property="OnLabel" Value="Yes" />
                 <Setter Property="OffLabel" Value="No" />
             </Style>
+            <valueConverters:BoolNegationValueConverter x:Key="BoolNegationConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -82,6 +84,19 @@
                                     CommandParameter="Orange"
                                     Style="{StaticResource ColorPickerButtonStyle}" />
                         </StackPanel>
+                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="scaling" />
+                        <StackPanel Orientation="Horizontal">
+                            <Slider Width="200"
+                                    Margin="10, 0, 0, 0"
+                                    Maximum="2"
+                                    Minimum="0.5"
+                                    Value="{Binding Path=Scaling}" />
+                            <TextBox Width="30"
+                                     Margin="10, 0, 0, 0"
+                                     Text="{Binding Path=Scaling,
+                                                    UpdateSourceTrigger=PropertyChanged,
+                                                    StringFormat=\{0:F1\}}" />
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -93,7 +108,6 @@
                         <Controls:ToggleSwitch Header="Lock time" IsChecked="{Binding Path=LockTime}" />
                         <Controls:ToggleSwitch Header="Lock playlist switching" IsChecked="{Binding Path=LockPlaylistSwitching}" />
                         <Controls:ToggleSwitch Header="Lock song removal from playlist" IsChecked="{Binding Path=LockPlaylistRemoval}" />
-                        <Controls:ToggleSwitch Header="Lock song removal from library" IsChecked="{Binding Path=LockLibraryRemoval}" />
                         <Controls:ToggleSwitch Header="Enable timeout when adding songs to the playlist" IsChecked="{Binding Path=EnablePlaylistTimeout}" />
                         <StackPanel Margin="30, 5, 0, 0"
                                     IsEnabled="{Binding Path=EnablePlaylistTimeout}"
@@ -128,8 +142,8 @@
                                     Margin="0, 5, 0, 0"
                                     HorizontalAlignment="Left"
                                     Click="CreateAdminButtonClick"
-                                    Command="{Binding Path=CreateAdminCommand}"
-                                    Content="Create Administrator" />
+                                    Content="Create Administrator"
+                                    IsEnabled="{Binding Path=CanCreateAdmin}" />
                             <Button Width="200"
                                     Margin="0, 15, 0, 0"
                                     HorizontalAlignment="Left"
@@ -139,8 +153,62 @@
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
+            <TabItem Header="library">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="song source" />
+                    <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
+                        <TextBox Width="400"
+                                 VerticalAlignment="Top"
+                                 IsReadOnly="True"
+                                 Text="{Binding Path=LibrarySource,
+                                                Mode=OneWay}" />
+                        <Button Margin="10, 0, 0, 0"
+                                Click="AddSongSourceButtonClick"
+                                Content="Change library path" />
+                    </StackPanel>
+                    <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
+                        <TextBlock Text="Update interval" />
+                        <Slider Width="200"
+                                Margin="5, 0, 0, 0"
+                                Maximum="60"
+                                Minimum="1"
+                                Value="{Binding Path=SongSourceUpdateInterval}" />
+                        <TextBlock Margin="5, 0, 0, 0" Text="{Binding Path=SongSourceUpdateInterval, StringFormat=\{0\} Minutes}" />
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
             <TabItem Header="youtube">
-                <Controls:ToggleSwitch Header="Stream from Youtube instead of downloading.&#10;Changing this option requires a restart." IsChecked="{Binding Path=StreamYoutube}" />
+                <StackPanel>
+                    <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="streaming" />
+                    <Controls:ToggleSwitch Header="Stream from Youtube instead of downloading.&#10;Changing this option requires a restart." IsChecked="{Binding Path=StreamYoutube}" />
+                    <Controls:ToggleSwitch Margin="10, 0, 0, 0"
+                                           Header="Always stream highest quality"
+                                           IsChecked="{Binding Path=StreamHighestYoutubeQuality}" />
+                    <StackPanel Margin="20, 0, 0, 0"
+                                IsEnabled="{Binding Path=StreamHighestYoutubeQuality,
+                                                    Converter={StaticResource BoolNegationConverter}}"
+                                Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="Streaming quality" />
+                        <ComboBox Width="100"
+                                  Margin="10, 0, 0, 0"
+                                  ItemsSource="{Binding Path=YoutubeStreamingQualities}"
+                                  SelectedIndex="0"
+                                  SelectedItem="{Binding Path=YoutubeStreamingQuality}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="download path" />
+                        <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
+                            <TextBox Width="350"
+                                     VerticalAlignment="Top"
+                                     IsReadOnly="True"
+                                     Text="{Binding Path=YoutubeDownloadPath,
+                                                    Mode=OneWay}" />
+                            <Button Margin="10, 0, 0, 0"
+                                    Click="ChangeYoutubeDownloadPath"
+                                    Content="Change download path" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
             </TabItem>
             <TabItem Header="about">
                 <StackPanel>

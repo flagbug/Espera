@@ -1,9 +1,8 @@
 using Espera.Core;
+using Espera.Core.Management;
 using Espera.View.Properties;
 using Espera.View.ViewModels;
-using Ionic.Utils;
 using MahApps.Metro;
-using Ookii.Dialogs.Wpf;
 using Rareform.Reflection;
 using System;
 using System.ComponentModel;
@@ -13,11 +12,15 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using ListView = System.Windows.Controls.ListView;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace Espera.View.Views
 {
     public partial class ShellView
     {
+        private IVideoPlayerCallback currentVideoPlayerCallback;
         private ShellViewModel shellViewModel;
 
         public ShellView()
@@ -44,35 +47,6 @@ namespace Espera.View.Views
             };
         }
 
-        private void AddSongsButtonClick(object sender, RoutedEventArgs e)
-        {
-            string selectedPath;
-
-            if (VistaFolderBrowserDialog.IsVistaFolderDialogSupported)
-            {
-                var dialog = new VistaFolderBrowserDialog();
-
-                dialog.ShowDialog(this);
-
-                selectedPath = dialog.SelectedPath;
-            }
-
-            else
-            {
-                using (var dialog = new FolderBrowserDialogEx())
-                {
-                    dialog.ShowDialog();
-
-                    selectedPath = dialog.SelectedPath;
-                }
-            }
-
-            if (!String.IsNullOrEmpty(selectedPath))
-            {
-                this.shellViewModel.LocalViewModel.AddSongs(selectedPath);
-            }
-        }
-
         private void ChangeColor(string color)
         {
             ThemeManager.ChangeTheme(this, ThemeManager.DefaultAccents.First(accent => accent.Name == color), Theme.Dark);
@@ -81,6 +55,7 @@ namespace Espera.View.Views
         private void LoginButtonClick(object sender, RoutedEventArgs e)
         {
             ICommand command = this.shellViewModel.SettingsViewModel.LoginCommand;
+
             if (command.CanExecute(null))
             {
                 command.Execute(null);
@@ -192,29 +167,41 @@ namespace Espera.View.Views
             e.Handled = true;
         }
 
-        private void SetupVideoPlayer()
+        private void SetupVideoPlayer(IVideoPlayerCallback callback)
         {
-            IVideoPlayerCallback callback = this.shellViewModel.VideoPlayerCallback;
-
-            callback.GetTime = () => (TimeSpan)this.Dispatcher.Invoke(new Func<TimeSpan>(() => this.videoPlayer.Position));
+            this.currentVideoPlayerCallback = callback;
+            callback.GetTime = () => this.Dispatcher.Invoke(() => this.videoPlayer.Position);
             callback.SetTime = time => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Position = time));
 
-            callback.GetVolume = () => (float)this.Dispatcher.Invoke(new Func<float>(() => (float)this.videoPlayer.Volume));
+            callback.GetVolume = () => this.Dispatcher.Invoke(() => (float)this.videoPlayer.Volume);
             callback.SetVolume = volume => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Volume = volume));
 
             callback.LoadRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Source = callback.VideoUrl));
-            callback.PauseRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Pause()));
-            callback.PlayRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Play()));
-            callback.StopRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Stop()));
+            callback.PauseRequest = () => this.Dispatcher.Invoke(() => this.videoPlayer.Pause());
+            callback.PlayRequest = () => this.Dispatcher.Invoke(() => this.videoPlayer.Play());
+            callback.StopRequest = () => this.Dispatcher.Invoke(() => this.videoPlayer.Stop());
         }
 
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ICommand addToPlaylist = this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
+            ICommand command = this.shellViewModel.CurrentSongSource.PlayNowCommand;
 
-            if (e.LeftButton == MouseButtonState.Pressed && addToPlaylist.CanExecute(null))
+            if (e.LeftButton == MouseButtonState.Pressed && command.CanExecute(null))
             {
-                addToPlaylist.Execute(null);
+                command.Execute(null);
+            }
+        }
+
+        private void SongKeyPressed(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                ICommand command = this.shellViewModel.CurrentSongSource.PlayNowCommand;
+
+                if (command.CanExecute(null))
+                {
+                    command.Execute(null);
+                }
             }
         }
 
@@ -278,7 +265,7 @@ namespace Espera.View.Views
 
         private void VideoPlayerMediaEnded(object sender, RoutedEventArgs e)
         {
-            this.shellViewModel.VideoPlayerCallback.Finished();
+            this.currentVideoPlayerCallback.Finished();
         }
 
         private void WireDataContext()
@@ -288,23 +275,23 @@ namespace Espera.View.Views
 
         private void WireScreenStateUpdater()
         {
-            this.shellViewModel.UpdateScreenState += (sender2, args2) =>
+            this.shellViewModel.UpdateScreenState.Subscribe(x =>
             {
                 if (Settings.Default.LockWindow && Settings.Default.GoFullScreenOnLock)
                 {
-                    this.IgnoreTaskbarOnMaximize = !this.shellViewModel.IsAdmin && Settings.Default.GoFullScreenOnLock;
+                    this.IgnoreTaskbarOnMaximize = x == AccessMode.Party && Settings.Default.GoFullScreenOnLock;
 
                     this.WindowState = WindowState.Normal;
                     this.WindowState = WindowState.Maximized;
 
                     this.Topmost = this.IgnoreTaskbarOnMaximize;
                 }
-            };
+            });
         }
 
         private void WireVideoPlayer()
         {
-            this.shellViewModel.VideoPlayerCallbackChanged += (sender, args) => this.SetupVideoPlayer();
+            this.shellViewModel.VideoPlayerCallback.Subscribe(this.SetupVideoPlayer);
         }
     }
 }

@@ -82,7 +82,7 @@
         <Controls:Flyout Header="settings"
                          IsOpen="{Binding Path=SettingsViewModel.ShowSettings}"
                          Position="Right">
-            <Views:SettingsView Width="500" DataContext="{Binding Path=SettingsViewModel}" />
+            <Views:SettingsView Width="575" DataContext="{Binding Path=SettingsViewModel}" />
         </Controls:Flyout>
         <Controls:Flyout Header="Login"
                          IsOpen="{Binding Path=SettingsViewModel.ShowLogin}"
@@ -99,8 +99,8 @@
                              x:FieldModifier="private" />
                 <Button Margin="0, 10, 0, 0"
                         Click="LoginButtonClick"
-                        Command="{Binding Path=LoginCommand}"
-                        Content="Login" />
+                        Content="Login"
+                        IsEnabled="{Binding Path=CanLogin}" />
                 <TextBlock Margin="0, 10, 0, 0"
                            HorizontalAlignment="Center"
                            Foreground="Red"
@@ -109,8 +109,20 @@
                                                 Converter={StaticResource BooleanToVisibilityConverter}}" />
             </StackPanel>
         </Controls:Flyout>
+        <Controls:Flyout Header="Video"
+                         IsOpen="{Binding Path=ShowVideoPlayer}"
+                         Position="Right">
+            <MediaElement x:Name="videoPlayer"
+                          Width="{Binding RelativeSource={RelativeSource AncestorType=Controls:MetroWindow},
+                                          Path=Width}"
+                          LoadedBehavior="Manual"
+                          MediaEnded="VideoPlayerMediaEnded" />
+        </Controls:Flyout>
     </Controls:MetroWindow.Flyouts>
     <Grid x:Name="mainGrid" Margin="10">
+        <Grid.LayoutTransform>
+            <ScaleTransform ScaleX="{Binding Path=SettingsViewModel.Scaling}" ScaleY="{Binding Path=SettingsViewModel.Scaling}" />
+        </Grid.LayoutTransform>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -124,16 +136,10 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <Button Click="AddSongsButtonClick"
-                        Padding="0"
-                        ToolTip="Add music">
-                    <Image Source="/Espera;component/Images/Add.png" />
-                </Button>
-                <Button Width="30"
-                        Margin="15, 0, 0, 0"
-                        Padding="0">
+                <Button Width="30" Padding="0">
                     <Button.Style>
                         <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="{x:Type Button}">
                             <Style.Triggers>
@@ -220,6 +226,14 @@
                      KeyUp="SearchTextBoxKeyUp"
                      Text="{Binding Path=CurrentSongSource.SearchText,
                                     UpdateSourceTrigger=PropertyChanged}" />
+            <ToggleButton Grid.Column="5"
+                          Width="30"
+                          Margin="5, 0, 0, 0"
+                          IsChecked="{Binding Path=ShowVideoPlayer}"
+                          Padding="0"
+                          ToolTip="YouTube video player">
+                <Image Source="/Espera;component/Images/VideoPlayer.png" />
+            </ToggleButton>
         </Grid>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
@@ -236,6 +250,7 @@
                            Text="artists" />
                 <ListBox Grid.Row="1"
                          DataContext="{Binding Path=LocalViewModel}"
+                         FocusVisualStyle="{x:Null}"
                          ItemsSource="{Binding Path=Artists}"
                          SelectedItem="{Binding Path=SelectedArtist}">
                     <ListBox.ItemTemplate>
@@ -350,9 +365,6 @@
                                   ItemsSource="{Binding Path=SelectableSongs}"
                                   ScrollViewer.CanContentScroll="True"
                                   SelectionChanged="SongListSelectionChanged">
-                            <ListView.InputBindings>
-                                <KeyBinding Key="Delete" Command="{Binding Path=RemoveFromLibraryCommand}" />
-                            </ListView.InputBindings>
                             <ListView.Style>
                                 <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="{x:Type ListView}">
                                     <Setter Property="SelectionMode" Value="Extended" />
@@ -365,13 +377,14 @@
                             </ListView.Style>
                             <ListView.ContextMenu>
                                 <ContextMenu>
+                                    <MenuItem Command="{Binding Path=PlayNowCommand}" Header="Play Now" />
                                     <MenuItem Command="{Binding Path=AddToPlaylistCommand}" Header="Add to playlist" />
-                                    <MenuItem Command="{Binding Path=RemoveFromLibraryCommand}" Header="Remove from library" />
                                 </ContextMenu>
                             </ListView.ContextMenu>
                             <ListView.ItemContainerStyle>
                                 <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                                     <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick" />
+                                    <EventSetter Event="KeyUp" Handler="SongKeyPressed" />
                                 </Style>
                             </ListView.ItemContainerStyle>
                             <ListView.View>
@@ -380,7 +393,9 @@
                                         <GridViewColumnHeader Click="SortLocalSongTitle" Content="Title" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Title}" TextTrimming="CharacterEllipsis" />
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Path=Title}" TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
@@ -447,13 +462,72 @@
                                     </Style>
                                 </ListView.Style>
                                 <ListView.ContextMenu>
-                                    <ContextMenu>
+                                    <ContextMenu IsOpen="{Binding Path=SelectedSong.IsContextMenuOpen}">
+                                        <MenuItem Command="{Binding Path=PlayNowCommand}" Header="Play Now" />
                                         <MenuItem Command="{Binding Path=AddToPlaylistCommand}" Header="Add to playlist" />
+                                        <Separator />
+                                        <MenuItem ItemsSource="{Binding Path=SelectedSong.VideosToDownload}">
+                                            <MenuItem.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Path=VideoType, StringFormat=Type: \{0\}}" />
+                                                        <TextBlock Margin="10, 0, 0, 0" Text="{Binding Path=Resolution, StringFormat=Resolution: \{0\}p}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </MenuItem.ItemTemplate>
+                                            <MenuItem.ItemContainerStyle>
+                                                <Style TargetType="MenuItem">
+                                                    <Setter Property="Command" Value="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=DataContext.SelectedSong.DownloadVideoCommand}" />
+                                                    <Setter Property="CommandParameter" Value="{Binding RelativeSource={RelativeSource Self}, Path=DataContext}" />
+                                                </Style>
+                                            </MenuItem.ItemContainerStyle>
+                                            <MenuItem.Style>
+                                                <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=SelectedSong.IsLoadingContextMenu}" Value="True">
+                                                            <Setter Property="Header" Value="Loading video infos..." />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Path=SelectedSong.IsLoadingContextMenu}" Value="False">
+                                                            <Setter Property="Header" Value="Download video" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </MenuItem.Style>
+                                        </MenuItem>
+                                        <MenuItem ItemsSource="{Binding Path=SelectedSong.AudioToDownload}">
+                                            <MenuItem.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Path=AudioType, StringFormat=Type: \{0\}}" />
+                                                        <TextBlock Margin="10, 0, 0, 0" Text="{Binding Path=AudioBitrate, StringFormat=Bitrate: \{0\} kbit/s}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </MenuItem.ItemTemplate>
+                                            <MenuItem.ItemContainerStyle>
+                                                <Style TargetType="MenuItem">
+                                                    <Setter Property="Command" Value="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=DataContext.SelectedSong.DownloadAudioCommand}" />
+                                                    <Setter Property="CommandParameter" Value="{Binding RelativeSource={RelativeSource Self}, Path=DataContext}" />
+                                                </Style>
+                                            </MenuItem.ItemContainerStyle>
+                                            <MenuItem.Style>
+                                                <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=SelectedSong.IsLoadingContextMenu}" Value="True">
+                                                            <Setter Property="Header" Value="Loading audio infos..." />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Path=SelectedSong.IsLoadingContextMenu}" Value="False">
+                                                            <Setter Property="Header" Value="Download audio" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </MenuItem.Style>
+                                        </MenuItem>
                                     </ContextMenu>
                                 </ListView.ContextMenu>
                                 <ListView.ItemContainerStyle>
                                     <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                                         <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick" />
+                                        <EventSetter Event="KeyUp" Handler="SongKeyPressed" />
                                     </Style>
                                 </ListView.ItemContainerStyle>
                                 <ListView.View>
@@ -462,7 +536,20 @@
                                             <GridViewColumnHeader Click="SortYoutubeSongTitle" Content="Title" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding Path=Title}" TextTrimming="CharacterEllipsis" />
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Margin="0, 0, 10, 0"
+                                                                   FontWeight="Bold"
+                                                                   Text="{Binding Path=DownloadProgress,
+                                                                                  StringFormat=Downloading: \{0\}%}"
+                                                                   Visibility="{Binding Path=IsDownloading,
+                                                                                        Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                        <TextBlock Margin="0, 0, 10, 0"
+                                                                   FontWeight="Bold"
+                                                                   Text="Download failed"
+                                                                   Visibility="{Binding Path=DownloadFailed,
+                                                                                        Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                        <TextBlock Text="{Binding Path=Title}" TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
@@ -549,7 +636,6 @@
                                 <Button Grid.Column="0"
                                         Width="30"
                                         Command="{Binding Path=AddPlaylistCommand}"
-                                        IsEnabled="{Binding Path=CanSwitchPlaylist}"
                                         Padding="0"
                                         ToolTip="Add playlist">
                                     <Image Source="/Espera;component/Images/NewPlaylist.png" />
@@ -560,12 +646,11 @@
                                         IsEnabled="{Binding Path=CanSwitchPlaylist}"
                                         Padding="0"
                                         ToolTip="Remove playlist">
-                                    <Image Source="/Espera;component/Images/RemovePlaylist.png" />
+                                    <Image Source="/Espera;component/Images/Remove.png" />
                                 </Button>
                                 <Button Grid.Column="2"
                                         Width="30"
                                         Command="{Binding Path=EditPlaylistNameCommand}"
-                                        IsEnabled="{Binding Path=CanSwitchPlaylist}"
                                         Padding="0"
                                         ToolTip="Edit playlist name">
                                     <Image Source="/Espera;component/Images/EditPlaylistName.png" />
@@ -666,11 +751,6 @@
                             <ListView.ItemContainerStyle>
                                 <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
                                     <EventSetter Event="MouseDoubleClick" Handler="PlaylistDoubleClick" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=IsInactive}" Value="True">
-                                            <Setter Property="Foreground" Value="Gray" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
                                 </Style>
                             </ListView.ItemContainerStyle>
                             <ListView.View>
@@ -740,16 +820,7 @@
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Grid>
-                                                    <Grid.Style>
-                                                        <Style TargetType="{x:Type Grid}">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Path=ShowCaching}" Value="False">
-                                                                    <Setter Property="Visibility" Value="Hidden" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Grid.Style>
-                                                    <TextBlock VerticalAlignment="Center">
+                                                    <TextBlock VerticalAlignment="Center" Visibility="{Binding Path=ShowCaching, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                         <TextBlock.Style>
                                                             <Style TargetType="{x:Type TextBlock}">
                                                                 <Style.Triggers>
@@ -763,6 +834,7 @@
                                                             </Style>
                                                         </TextBlock.Style>
                                                     </TextBlock>
+                                                    <TextBlock Text="Streaming failed!" Visibility="{Binding Path=HasStreamingFailed, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                                 </Grid>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
@@ -774,7 +846,7 @@
                     <StackPanel Grid.Row="1"
                                 HorizontalAlignment="Center"
                                 Orientation="Horizontal">
-                        <TextBlock Text="{Binding Path=SongsRemaining}" />
+                        <TextBlock Text="{Binding Path=CurrentPlaylist.SongsRemaining}" />
                         <TextBlock Text=" song" />
                         <TextBlock Text="s">
                             <TextBlock.Style>
@@ -788,14 +860,14 @@
                             </TextBlock.Style>
                         </TextBlock>
                         <TextBlock Text=" remaining, with " />
-                        <TextBlock Text="{Binding Path=TimeRemaining.TotalMinutes, FallbackValue=0, StringFormat=\{0:0.0\}}" />
+                        <TextBlock Text="{Binding Path=CurrentPlaylist.TimeRemaining.TotalMinutes, FallbackValue=0, StringFormat=\{0:0.0\}}" />
                         <TextBlock Text=" minutes play time" />
                     </StackPanel>
                     <StackPanel Grid.Row="2"
                                 Margin="0, 5, 0, 0"
                                 HorizontalAlignment="Center"
                                 Orientation="Horizontal"
-                                Visibility="{Binding Path=ShowPlaylistTimeOut,
+                                Visibility="{Binding Path=ShowPlaylistTimeout,
                                                      Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel.Style>
                             <Style TargetType="{x:Type StackPanel}">
@@ -823,57 +895,5 @@
                 </Grid>
             </Grid>
         </Grid>
-        <StatusBar Grid.Row="2"
-                   Height="25"
-                   Margin="0, 5, 0, 0"
-                   Background="Transparent"
-                   DataContext="{Binding Path=LocalViewModel.StatusViewModel}"
-                   Visibility="{Binding Path=IsUpdating,
-                                        Converter={StaticResource BooleanToVisibilityConverter}}">
-            <StatusBarItem Content="Updating library..." />
-        </StatusBar>
-        <StatusBar Grid.Row="2"
-                   Height="25"
-                   Margin="0, 5, 0, 0"
-                   Background="Transparent"
-                   DataContext="{Binding Path=LocalViewModel.StatusViewModel}"
-                   Visibility="{Binding Path=IsAdding,
-                                        Converter={StaticResource BooleanToVisibilityConverter}}">
-            <StatusBarItem>
-                <ProgressBar Width="200"
-                             IsIndeterminate="{Binding Path=IsProgressUnkown}"
-                             Maximum="{Binding Path=TotalTags}"
-                             Value="{Binding Path=ProcessedTags,
-                                             Mode=OneWay}" />
-            </StatusBarItem>
-            <StatusBarItem>
-                <Grid>
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel.Style>
-                            <Style TargetType="{x:Type StackPanel}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=IsProgressUnkown}" Value="True">
-                                        <Setter Property="Visibility" Value="Hidden" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-                        <TextBlock Text="Added " />
-                        <TextBlock Text="{Binding Path=ProcessedTags}" />
-                        <TextBlock Text=" of " />
-                        <TextBlock Text="{Binding Path=TotalTags}" />
-                        <TextBlock Text=" found Songs: " />
-                        <TextBlock Text="{Binding Path=Path}" />
-                    </StackPanel>
-                    <TextBlock Text="Searching..." Visibility="{Binding Path=IsProgressUnkown, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                </Grid>
-            </StatusBarItem>
-        </StatusBar>
-        <MediaElement x:Name="videoPlayer"
-                      Width="0"
-                      Height="0"
-                      LoadedBehavior="Manual"
-                      MediaEnded="VideoPlayerMediaEnded"
-                      Visibility="Hidden" />
     </Grid>
 </Controls:MetroWindow>

@@ -31,15 +31,15 @@ namespace Espera.View
                     song => keyWords.All
                     (
                         keyword =>
-                            song.Artist.ContainsIngoreCase(keyword) ||
-                            song.Album.ContainsIngoreCase(keyword) ||
-                            song.Genre.ContainsIngoreCase(keyword) ||
-                            song.Title.ContainsIngoreCase(keyword)
+                            song.Artist.ContainsIgnoreCase(keyword) ||
+                            song.Album.ContainsIgnoreCase(keyword) ||
+                            song.Genre.ContainsIgnoreCase(keyword) ||
+                            song.Title.ContainsIgnoreCase(keyword)
                     )
                 );
         }
 
-        private static bool ContainsIngoreCase(this string value, string other)
+        private static bool ContainsIgnoreCase(this string value, string other)
         {
             return value.IndexOf(other, StringComparison.InvariantCultureIgnoreCase) >= 0;
         }

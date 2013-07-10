@@ -4,8 +4,12 @@ namespace Espera.Core.Management
 {
     public interface ILibraryReader
     {
-        IEnumerable<Playlist> ReadPlaylists();
+        bool LibraryExists { get; }
 
-        IEnumerable<LocalSong> ReadSongs();
+        IReadOnlyList<Playlist> ReadPlaylists();
+
+        IReadOnlyList<LocalSong> ReadSongs();
+
+        string ReadSongSourcePath();
     }
 }

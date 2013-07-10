@@ -1,8 +1,10 @@
-﻿using Caliburn.Micro;
+﻿using ReactiveUI;
+using System;
+using System.Collections.Generic;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class ArtistViewModel : PropertyChangedBase
+    internal sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>
     {
         private int? albumCount;
         private int? artistCount;
@@ -24,27 +26,13 @@ namespace Espera.View.ViewModels
         public int? AlbumCount
         {
             get { return this.albumCount; }
-            set
-            {
-                if (this.AlbumCount != value)
-                {
-                    this.albumCount = value;
-                    this.NotifyOfPropertyChange(() => this.AlbumCount);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(ref this.albumCount, value); }
         }
 
         public int? ArtistCount
         {
             get { return this.artistCount; }
-            set
-            {
-                if (this.ArtistCount != value)
-                {
-                    this.artistCount = value;
-                    this.NotifyOfPropertyChange(() => this.ArtistCount);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(ref this.artistCount, value); }
         }
 
         public bool IsAllArtists { get; private set; }
@@ -54,14 +42,53 @@ namespace Espera.View.ViewModels
         public int? SongCount
         {
             get { return this.songCount; }
-            set
+            set { this.RaiseAndSetIfChanged(ref this.songCount, value); }
+        }
+
+        public int CompareTo(ArtistViewModel other)
+        {
+            if (this.IsAllArtists)
             {
-                if (this.SongCount != value)
+                return -1;
+            }
+
+            if (other.IsAllArtists)
+            {
+                return 1;
+            }
+
+            if (this.IsAllArtists && other.IsAllArtists)
+            {
+                return 0;
+            }
+
+            var prefixes = new[] { "A", "The" };
+
+            return String.Compare(RemoveArtistPrefixes(this.Name, prefixes), RemoveArtistPrefixes(other.Name, prefixes), StringComparison.Ordinal);
+        }
+
+        public bool Equals(ArtistViewModel other)
+        {
+            return this.Name == other.Name;
+        }
+
+        /// <example>
+        /// With prefixes "A" and "The":
+        /// "A Bar" -> "Bar", "The Foos" -> "Foos"
+        /// </example>
+        private static string RemoveArtistPrefixes(string artistName, IEnumerable<string> prefixes)
+        {
+            foreach (string s in prefixes)
+            {
+                int lengthWithSpace = s.Length + 1;
+
+                if (artistName.Length >= lengthWithSpace && artistName.Substring(0, lengthWithSpace) == s + " ")
                 {
-                    this.songCount = value;
-                    this.NotifyOfPropertyChange(() => this.SongCount);
+                    return artistName.Substring(lengthWithSpace);
                 }
             }
+
+            return artistName;
         }
     }
 }

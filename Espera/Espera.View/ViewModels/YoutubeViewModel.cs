@@ -1,27 +1,36 @@
-﻿using Espera.Core;
+﻿using System.Diagnostics;
+using Espera.Core;
 using Espera.Core.Management;
 using Espera.View.Properties;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 
 namespace Espera.View.ViewModels
 {
     internal sealed class YoutubeViewModel : SongSourceViewModel<YoutubeSongViewModel>
     {
-        private IEnumerable<YoutubeSong> currentSongs;
+        private readonly IReactiveCommand playNowCommand;
+        private readonly ObservableAsPropertyHelper<YoutubeSongViewModel> selectedSong;
         private SortOrder durationOrder;
         private bool isSearching;
         private SortOrder ratingOrder;
-        private string searchText;
         private SortOrder titleOrder;
         private SortOrder viewsOrder;
 
         public YoutubeViewModel(Library library)
             : base(library)
         {
-            this.searchText = String.Empty;
+            this.playNowCommand = new ReactiveCommand();
+            this.playNowCommand.Subscribe(x => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model)));
+
+            this.selectedSong = this.WhenAny(x => x.SelectedSongs, x => x.Value)
+                .Select(x => x == null ? null : this.SelectedSongs.FirstOrDefault())
+                .Select(x => x == null ? null : (YoutubeSongViewModel)x)
+                .ToProperty(this, x => x.SelectedSong);
 
             // We need a default sorting order
             this.OrderByTitle();
@@ -39,14 +48,7 @@ namespace Espera.View.ViewModels
         public bool IsSearching
         {
             get { return this.isSearching; }
-            private set
-            {
-                if (this.IsSearching != value)
-                {
-                    this.isSearching = value;
-                    this.NotifyOfPropertyChange(() => this.IsSearching);
-                }
-            }
+            private set { this.RaiseAndSetIfChanged(ref this.isSearching, value); }
         }
 
         public int LinkColumnWidth
@@ -55,23 +57,20 @@ namespace Espera.View.ViewModels
             set { Settings.Default.YoutubeLinkColumnWidth = value; }
         }
 
+        public override IReactiveCommand PlayNowCommand
+        {
+            get { return this.playNowCommand; }
+        }
+
         public int RatingColumnWidth
         {
             get { return Settings.Default.YoutubeRatingColumnWidth; }
             set { Settings.Default.YoutubeRatingColumnWidth = value; }
         }
 
-        public override string SearchText
+        public YoutubeSongViewModel SelectedSong
         {
-            get { return this.searchText; }
-            set
-            {
-                if (this.SearchText != value)
-                {
-                    this.searchText = value;
-                    this.NotifyOfPropertyChange(() => this.SearchText);
-                }
-            }
+            get { return this.selectedSong.Value; }
         }
 
         public int TitleColumnWidth
@@ -110,27 +109,28 @@ namespace Espera.View.ViewModels
         {
             this.IsSearching = true;
 
-            Task.Factory.StartNew(this.UpdateSelectableSongs);
+            this.UpdateSelectableSongs();
         }
 
         private void UpdateSelectableSongs()
         {
-            if (this.IsSearching || this.currentSongs == null)
-            {
-                var finder = new YoutubeSongFinder(this.SearchText);
-                finder.Start();
+            var finder = new YoutubeSongFinder(this.SearchText);
 
-                this.IsSearching = false;
+            var songs = new List<YoutubeSongViewModel>();
 
-                this.currentSongs = finder.SongsFound;
-            }
-
-            this.SelectableSongs = currentSongs
+            finder.GetSongs()
                 .Select(song => new YoutubeSongViewModel(song))
-                .OrderBy(this.SongOrderFunc)
-                .ToList();
+                .SubscribeOn(TaskPoolScheduler.Default)
+                .Subscribe(song => songs.Add(song), () =>
+                {
+                    this.IsSearching = false;
 
-            this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
+                    this.SelectableSongs = songs
+                        .OrderBy(this.SongOrderFunc)
+                        .ToList();
+
+                    this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
+                });
         }
     }
 }

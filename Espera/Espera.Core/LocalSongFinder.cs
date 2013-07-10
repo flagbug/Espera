@@ -2,10 +2,9 @@
 using Rareform.IO;
 using Rareform.Validation;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Reactive.Linq;
 using TagLib;
 
 namespace Espera.Core
@@ -13,107 +12,27 @@ namespace Espera.Core
     /// <summary>
     /// Encapsulates a recursive call through the local filesystem that reads the tags of all WAV and MP3 files and returns them.
     /// </summary>
-    internal sealed class LocalSongFinder : SongFinder<LocalSong>
+    internal sealed class LocalSongFinder : ISongFinder<LocalSong>
     {
         private static readonly string[] AllowedExtensions = new[] { ".mp3", ".wav" };
-        private readonly List<string> corruptFiles;
-        private readonly Queue<string> pathQueue;
-        private readonly DirectoryScanner scanner;
-        private readonly object songListLock;
-        private readonly object tagLock;
-        private volatile bool abort;
-        private DriveType driveType;
-        private volatile bool isSearching;
-        private volatile bool isTagging;
+        private readonly string directoryPath;
+        private readonly DriveType driveType;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LocalSongFinder"/> class.
-        /// </summary>
-        /// <param name="path">The path of the directory where the recursive search should start.</param>
-        public LocalSongFinder(string path)
+        public LocalSongFinder(string directoryPath)
         {
-            if (path == null)
-                Throw.ArgumentNullException(() => path);
+            if (directoryPath == null)
+                Throw.ArgumentNullException(() => directoryPath);
 
-            this.tagLock = new object();
-            this.songListLock = new object();
+            this.directoryPath = directoryPath;
 
-            this.pathQueue = new Queue<string>();
-            this.corruptFiles = new List<string>();
-            this.scanner = new DirectoryScanner(path);
-            this.scanner.FileFound += ScannerFileFound;
-
-            this.driveType = new DriveInfo(Path.GetPathRoot(path)).DriveType;
+            this.driveType = new DriveInfo(Path.GetPathRoot(directoryPath)).DriveType;
         }
 
-        /// <summary>
-        /// Gets the files that are corrupt and could not be read.
-        /// </summary>
-        public IEnumerable<string> CorruptFiles
+        public IObservable<LocalSong> GetSongs()
         {
-            get { return this.corruptFiles; }
-        }
-
-        /// <summary>
-        /// Gets the total number of songs that are counted yet.
-        /// </summary>
-        public int CurrentTotalSongs
-        {
-            get
-            {
-                int pathCount;
-
-                lock (this.tagLock)
-                {
-                    pathCount = this.pathQueue.Count;
-                }
-
-                lock (this.songListLock)
-                {
-                    pathCount += this.InternSongsFound.Count;
-                }
-
-                return pathCount;
-            }
-        }
-
-        /// <summary>
-        /// Gets the number of tags that are processed yet.
-        /// </summary>
-        public int TagsProcessed
-        {
-            get
-            {
-                int songCount;
-
-                lock (this.songListLock)
-                {
-                    songCount = this.InternSongsFound.Count;
-                }
-
-                return songCount;
-            }
-        }
-
-        public void Abort()
-        {
-            this.abort = true;
-        }
-
-        /// <summary>
-        /// Starts the <see cref="LocalSongFinder"/>.
-        /// </summary>
-        public override void Start()
-        {
-            var fileScanTask = Task.Factory.StartNew(this.StartFileScan);
-
-            this.isSearching = true;
-
-            var tagScanTask = Task.Factory.StartNew(this.StartTagScan);
-
-            Task.WaitAll(fileScanTask, tagScanTask);
-
-            this.OnFinished(EventArgs.Empty);
+            return this.ScanDirectoryForValidPaths()
+                .Select(this.ProcessFile)
+                .Where(song => song != null);
         }
 
         private static LocalSong CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath, DriveType driveType)
@@ -133,25 +52,13 @@ namespace Espera.Core
             return tag == null ? replacementIfNull : TagSanitizer.Sanitize(tag);
         }
 
-        private void AddSong(TagLib.File file, AudioType audioType)
+        private LocalSong ProcessFile(string filePath)
         {
-            var song = CreateSong(file.Tag, file.Properties.Duration, audioType, file.Name, this.driveType);
+            TagLib.File file = null;
 
-            lock (this.songListLock)
-            {
-                this.InternSongsFound.Add(song);
-            }
-
-            this.OnSongFound(new SongEventArgs(song));
-        }
-
-        private void ProcessFile(string filePath)
-        {
             try
             {
                 AudioType? audioType = null; // Use a nullable value so that we don't have to assign a enum value
-
-                TagLib.File file = null;
 
                 switch (Path.GetExtension(filePath))
                 {
@@ -166,71 +73,56 @@ namespace Espera.Core
                         break;
                 }
 
-                if (file != null)
+                if (file != null && file.Tag != null)
                 {
-                    if (file.Tag != null)
-                    {
-                        this.AddSong(file, audioType.Value);
-                    }
-
-                    file.Dispose();
+                    return CreateSong(file.Tag, file.Properties.Duration, audioType.Value, file.Name, this.driveType);
                 }
+
+                return null;
             }
 
             catch (CorruptFileException)
             {
-                this.corruptFiles.Add(filePath);
+                return null;
             }
 
             catch (IOException)
             {
-                this.corruptFiles.Add(filePath);
+                return null;
             }
-        }
 
-        private void ScannerFileFound(object sender, FileEventArgs e)
-        {
-            if (this.abort || !AllowedExtensions.Contains(e.File.Extension))
-                return;
-
-            lock (this.tagLock)
+            finally
             {
-                this.pathQueue.Enqueue(e.File.FullName);
-            }
-        }
-
-        private void StartFileScan()
-        {
-            this.scanner.Start();
-            this.isSearching = false;
-        }
-
-        private void StartTagScan()
-        {
-            this.isTagging = true;
-
-            while ((this.isSearching || this.isTagging) && !this.abort)
-            {
-                string filePath = null;
-
-                lock (this.tagLock)
+                if (file != null)
                 {
-                    if (this.pathQueue.Any())
-                    {
-                        filePath = this.pathQueue.Dequeue();
-                    }
-
-                    else if (!this.isSearching)
-                    {
-                        this.isTagging = false;
-                    }
-                }
-
-                if (filePath != null)
-                {
-                    this.ProcessFile(filePath);
+                    file.Dispose();
                 }
             }
+        }
+
+        private IObservable<string> ScanDirectoryForValidPaths()
+        {
+            return Observable.Create<string>(o =>
+            {
+                var scanner = new DirectoryScanner(this.directoryPath);
+
+                IDisposable sub = Observable.FromEventPattern<FileEventArgs>(
+                    handler => scanner.FileFound += handler,
+                    handler => scanner.FileFound -= handler)
+                .Select(x => x.EventArgs.File)
+                .Where(file => AllowedExtensions.Contains(file.Extension))
+                .Subscribe(file => o.OnNext(file.FullName));
+
+                scanner.Finished += (sender, args) =>
+                {
+                    sub.Dispose();
+                    o.OnCompleted();
+                };
+
+                scanner.Start();
+
+                return scanner.Stop;
+            });
         }
     }
 }
