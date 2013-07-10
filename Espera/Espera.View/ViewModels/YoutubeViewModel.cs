@@ -1,4 +1,5 @@
-﻿using Espera.Core;
+﻿using System.Diagnostics;
+using Espera.Core;
 using Espera.Core.Management;
 using Espera.View.Properties;
 using ReactiveUI;
@@ -13,6 +14,7 @@ namespace Espera.View.ViewModels
     internal sealed class YoutubeViewModel : SongSourceViewModel<YoutubeSongViewModel>
     {
         private readonly IReactiveCommand playNowCommand;
+        private readonly ObservableAsPropertyHelper<YoutubeSongViewModel> selectedSong;
         private SortOrder durationOrder;
         private bool isSearching;
         private SortOrder ratingOrder;
@@ -24,6 +26,11 @@ namespace Espera.View.ViewModels
         {
             this.playNowCommand = new ReactiveCommand();
             this.playNowCommand.Subscribe(x => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model)));
+
+            this.selectedSong = this.WhenAny(x => x.SelectedSongs, x => x.Value)
+                .Select(x => x == null ? null : this.SelectedSongs.FirstOrDefault())
+                .Select(x => x == null ? null : (YoutubeSongViewModel)x)
+                .ToProperty(this, x => x.SelectedSong);
 
             // We need a default sorting order
             this.OrderByTitle();
@@ -59,6 +66,11 @@ namespace Espera.View.ViewModels
         {
             get { return Settings.Default.YoutubeRatingColumnWidth; }
             set { Settings.Default.YoutubeRatingColumnWidth = value; }
+        }
+
+        public YoutubeSongViewModel SelectedSong
+        {
+            get { return this.selectedSong.Value; }
         }
 
         public int TitleColumnWidth

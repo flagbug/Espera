@@ -136,6 +136,7 @@
     <Compile Include="ISongFinder.cs" />
     <Compile Include="IVideoPlayerCallback.cs" />
     <Compile Include="TagSanitizer.cs" />
+    <Compile Include="YoutubeDownloadException.cs" />
     <Compile Include="YoutubeSong.cs" />
     <Compile Include="YoutubeSongFinder.cs" />
     <Compile Include="YoutubeStreamingQuality.cs" />

@@ -179,6 +179,7 @@
             </TabItem>
             <TabItem Header="youtube">
                 <StackPanel>
+                    <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="streaming" />
                     <Controls:ToggleSwitch Header="Stream from Youtube instead of downloading.&#10;Changing this option requires a restart." IsChecked="{Binding Path=StreamYoutube}" />
                     <Controls:ToggleSwitch Margin="10, 0, 0, 0"
                                            Header="Always stream highest quality"
@@ -193,6 +194,19 @@
                                   ItemsSource="{Binding Path=YoutubeStreamingQualities}"
                                   SelectedIndex="0"
                                   SelectedItem="{Binding Path=YoutubeStreamingQuality}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="download path" />
+                        <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
+                            <TextBox Width="350"
+                                     VerticalAlignment="Top"
+                                     IsReadOnly="True"
+                                     Text="{Binding Path=YoutubeDownloadPath,
+                                                    Mode=OneWay}" />
+                            <Button Margin="10, 0, 0, 0"
+                                    Click="ChangeYoutubeDownloadPath"
+                                    Content="Change download path" />
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </TabItem>
