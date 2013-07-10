@@ -341,6 +341,20 @@ namespace Espera.Core.Management
             }
         }
 
+        public string YoutubeDownloadPath
+        {
+            get { return this.settings.YoutubeDownloadPath; }
+            set
+            {
+                this.ThrowIfNotAdmin();
+
+                if (!Directory.Exists(value))
+                    throw new ArgumentException("Directory doesn't exist.");
+
+                this.settings.YoutubeDownloadPath = value;
+            }
+        }
+
         public YoutubeStreamingQuality YoutubeStreamingQuality
         {
             get { return this.settings.YoutubeStreamingQuality; }
@@ -411,8 +425,10 @@ namespace Espera.Core.Management
 
         public void ChangeSongSourcePath(string path)
         {
+            this.ThrowIfNotAdmin();
+
             if (!Directory.Exists(path))
-                throw new ArgumentException("Directory does't exist");
+                throw new ArgumentException("Directory does't exist.");
 
             this.songSourcePath.OnNext(path);
         }

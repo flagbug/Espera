@@ -41,5 +41,8 @@
     <Setting Name="SongSourceUpdateInterval" Type="System.TimeSpan" Scope="User">
       <Value Profile="(Default)">00:30:00</Value>
     </Setting>
+    <Setting Name="YoutubeDownloadPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

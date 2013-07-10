@@ -29,6 +29,18 @@ namespace Espera.View.Views
             }
         }
 
+        private void ChangeYoutubeDownloadPath(object sender, RoutedEventArgs e)
+        {
+            var dialog = new VistaFolderBrowserDialog();
+
+            dialog.ShowDialog();
+
+            if (!string.IsNullOrWhiteSpace(dialog.SelectedPath))
+            {
+                ((SettingsViewModel)this.DataContext).YoutubeDownloadPath = dialog.SelectedPath;
+            }
+        }
+
         private void CreateAdminButtonClick(object sender, RoutedEventArgs e)
         {
             ICommand command = ((SettingsViewModel)this.DataContext).CreateAdminCommand;

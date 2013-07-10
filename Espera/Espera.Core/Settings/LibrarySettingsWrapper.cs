@@ -82,6 +82,12 @@ namespace Espera.Core.Settings
             set { CoreSettings.Default.YoutubeStreamingQuality = (int)value; }
         }
 
+        public string YoutubeDownloadPath
+        {
+            get { return CoreSettings.Default.YoutubeDownloadPath; }
+            set { CoreSettings.Default.YoutubeDownloadPath = value; }
+        }
+
         public void Save()
         {
             CoreSettings.Default.Save();
