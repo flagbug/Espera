@@ -87,7 +87,6 @@
                         <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="scaling" />
                         <StackPanel Orientation="Horizontal">
                             <Slider Width="200"
-                                    Margin="10, 0, 0, 0"
                                     Maximum="2"
                                     Minimum="0.5"
                                     Value="{Binding Path=Scaling}" />
