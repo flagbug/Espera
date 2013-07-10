@@ -199,13 +199,13 @@
                         <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="download path" />
                         <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
                             <TextBox Width="350"
-                                 VerticalAlignment="Top"
-                                 IsReadOnly="True"
-                                 Text="{Binding Path=YoutubeDownloadPath,
-                                                Mode=OneWay}" />
+                                     VerticalAlignment="Top"
+                                     IsReadOnly="True"
+                                     Text="{Binding Path=YoutubeDownloadPath,
+                                                    Mode=OneWay}" />
                             <Button Margin="10, 0, 0, 0"
-                                Click="ChangeYoutubeDownloadPath"
-                                Content="Change download path" />
+                                    Click="ChangeYoutubeDownloadPath"
+                                    Content="Change download path" />
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
