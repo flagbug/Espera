@@ -221,6 +221,7 @@
             <TextBox Grid.Column="4"
                      Width="150"
                      Margin="10, 0, 0, 0"
+                     Style="{DynamicResource SearchMetroTextBox}"
                      VerticalAlignment="Center"
                      VerticalContentAlignment="Center"
                      Controls:TextboxHelper.ClearTextButton="True"
