@@ -79,45 +79,47 @@
         </Controls:WindowCommands>
     </Controls:MetroWindow.WindowCommands>
     <Controls:MetroWindow.Flyouts>
-        <Controls:Flyout Header="settings"
-                         IsOpen="{Binding Path=SettingsViewModel.ShowSettings}"
-                         Position="Right">
-            <Views:SettingsView Width="575" DataContext="{Binding Path=SettingsViewModel}" />
-        </Controls:Flyout>
-        <Controls:Flyout Header="Login"
-                         IsOpen="{Binding Path=SettingsViewModel.ShowLogin}"
-                         Position="Right">
-            <StackPanel Width="200"
-                        Margin="10, 0, 10, 0"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Center"
-                        DataContext="{Binding Path=SettingsViewModel}">
-                <PasswordBox Name="LoginPasswordBox"
-                             VerticalContentAlignment="Center"
-                             Controls:TextboxHelper.Watermark="Administrator password"
-                             PasswordChanged="LoginPasswordChanged"
-                             x:FieldModifier="private" />
-                <Button Margin="0, 10, 0, 0"
-                        Click="LoginButtonClick"
-                        Content="Login"
-                        IsEnabled="{Binding Path=CanLogin}" />
-                <TextBlock Margin="0, 10, 0, 0"
-                           HorizontalAlignment="Center"
-                           Foreground="Red"
-                           Text="Wrong password!"
-                           Visibility="{Binding Path=IsWrongPassword,
-                                                Converter={StaticResource BooleanToVisibilityConverter}}" />
-            </StackPanel>
-        </Controls:Flyout>
-        <Controls:Flyout Header="Video"
-                         IsOpen="{Binding Path=ShowVideoPlayer}"
-                         Position="Right">
-            <MediaElement x:Name="videoPlayer"
-                          Width="{Binding RelativeSource={RelativeSource AncestorType=Controls:MetroWindow},
-                                          Path=Width}"
-                          LoadedBehavior="Manual"
-                          MediaEnded="VideoPlayerMediaEnded" />
-        </Controls:Flyout>
+        <Controls:FlyoutsControl>
+            <Controls:Flyout Header="settings"
+                             IsOpen="{Binding Path=SettingsViewModel.ShowSettings}"
+                             Position="Right">
+                <Views:SettingsView Width="575" DataContext="{Binding Path=SettingsViewModel}" />
+            </Controls:Flyout>
+            <Controls:Flyout Header="Login"
+                             IsOpen="{Binding Path=SettingsViewModel.ShowLogin}"
+                             Position="Right">
+                <StackPanel Width="200"
+                            Margin="10, 0, 10, 0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            DataContext="{Binding Path=SettingsViewModel}">
+                    <PasswordBox Name="LoginPasswordBox"
+                                 VerticalContentAlignment="Center"
+                                 Controls:TextboxHelper.Watermark="Administrator password"
+                                 PasswordChanged="LoginPasswordChanged"
+                                 x:FieldModifier="private" />
+                    <Button Margin="0, 10, 0, 0"
+                            Click="LoginButtonClick"
+                            Content="Login"
+                            IsEnabled="{Binding Path=CanLogin}" />
+                    <TextBlock Margin="0, 10, 0, 0"
+                               HorizontalAlignment="Center"
+                               Foreground="Red"
+                               Text="Wrong password!"
+                               Visibility="{Binding Path=IsWrongPassword,
+                                                    Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </StackPanel>
+            </Controls:Flyout>
+            <Controls:Flyout Header="Video"
+                             IsOpen="{Binding Path=ShowVideoPlayer}"
+                             Position="Right">
+                <MediaElement x:Name="videoPlayer"
+                              Width="{Binding RelativeSource={RelativeSource AncestorType=Controls:MetroWindow},
+                                              Path=Width}"
+                              LoadedBehavior="Manual"
+                              MediaEnded="VideoPlayerMediaEnded" />
+            </Controls:Flyout>
+        </Controls:FlyoutsControl>
     </Controls:MetroWindow.Flyouts>
     <Grid x:Name="mainGrid" Margin="10">
         <Grid.LayoutTransform>
