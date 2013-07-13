@@ -42,9 +42,10 @@
                 <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
             </Style>
             <Style x:Key="SettingsTextStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="18" />
+                <Setter Property="FontSize" Value="14" />
                 <Setter Property="FontFamily" Value="{DynamicResource ContentFontFamily}" />
                 <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+                <Setter Property="Opacity" Value="0.6" />
             </Style>
             <Style BasedOn="{StaticResource {x:Type Controls:ToggleSwitch}}" TargetType="{x:Type Controls:ToggleSwitch}">
                 <Setter Property="Margin" Value="0, 10, 0, 0" />
@@ -160,7 +161,7 @@
             <TabItem Header="library">
                 <StackPanel Orientation="Vertical">
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="song source" />
-                    <TextBlock Style="{StaticResource SettingsTextStyle}" Text="The path where Espera will search for songs" />
+                    <TextBlock Style="{StaticResource SettingsTextStyle}" Text="The path where Espera searches for songs" />
                     <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
                         <TextBox Width="400"
                                  VerticalAlignment="Top"
@@ -202,7 +203,7 @@
                     </StackPanel>
                     <StackPanel Orientation="Vertical">
                         <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="download path" />
-                        <TextBlock Style="{StaticResource SettingsTextStyle}" Text="The path where Espera downloads the YouTube videos" />
+                        <TextBlock Style="{StaticResource SettingsTextStyle}" Text="The path where Espera downloads the YouTube videos and audio tracks" />
                         <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
                             <TextBox Width="350"
                                      VerticalAlignment="Top"
