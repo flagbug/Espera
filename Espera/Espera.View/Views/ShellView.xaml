@@ -221,12 +221,12 @@
             <TextBox Grid.Column="4"
                      Width="150"
                      Margin="10, 0, 0, 0"
-                     Style="{DynamicResource SearchMetroTextBox}"
                      VerticalAlignment="Center"
                      VerticalContentAlignment="Center"
                      Controls:TextboxHelper.ClearTextButton="True"
                      Controls:TextboxHelper.Watermark="Search"
                      KeyUp="SearchTextBoxKeyUp"
+                     Style="{DynamicResource SearchMetroTextBox}"
                      Text="{Binding Path=CurrentSongSource.SearchText,
                                     UpdateSourceTrigger=PropertyChanged}" />
             <ToggleButton Grid.Column="5"
@@ -431,13 +431,6 @@
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding Path=Genre}" TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=PathColumnWidth, Mode=TwoWay}" Header="Path">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Path}" TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
