@@ -76,8 +76,6 @@ namespace Espera.View.ViewModels
 
             this.LocalViewModel = new LocalViewModel(this.library);
             this.YoutubeViewModel = new YoutubeViewModel(this.library);
-            Observable.CombineLatest(this.LocalViewModel.TimeoutWarning, this.YoutubeViewModel.TimeoutWarning)
-                .Subscribe(x => this.TriggerTimeoutWarning());
 
             this.updateTimer = new Timer(333);
             this.updateTimer.Elapsed += (sender, e) => this.UpdateCurrentTime();
@@ -89,6 +87,11 @@ namespace Espera.View.ViewModels
             this.currentSongSource = this.WhenAny(x => x.IsLocal, x => x.IsYoutube,
                 (x1, x2) => x1.Value ? (ISongSourceViewModel)this.LocalViewModel : this.YoutubeViewModel)
                 .ToProperty(this, x => x.CurrentSongSource, null, ImmediateScheduler.Instance);
+
+            this.currentSongSource
+                .Select(x => x.TimeoutWarning)
+                .Switch()
+                .Subscribe(_ => this.TriggerTimeoutWarning());
 
             this.isAdmin = isAdminObservable
                 .ToProperty(this, x => x.IsAdmin);

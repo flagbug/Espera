@@ -1,5 +1,7 @@
 ﻿using ReactiveUI;
+using System;
 using System.Collections.Generic;
+using System.Reactive;
 
 namespace Espera.View.ViewModels
 {
@@ -12,5 +14,7 @@ namespace Espera.View.ViewModels
         string SearchText { get; set; }
 
         IEnumerable<SongViewModelBase> SelectedSongs { set; }
+
+        IObservable<Unit> TimeoutWarning { get; }
     }
 }
