@@ -1,11 +1,11 @@
-﻿using System.Diagnostics;
-using Espera.Core;
+﻿using Espera.Core;
 using Espera.Core.Management;
 using Espera.View.Properties;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 
@@ -13,6 +13,7 @@ namespace Espera.View.ViewModels
 {
     internal sealed class YoutubeViewModel : SongSourceViewModel<YoutubeSongViewModel>
     {
+        private readonly ObservableAsPropertyHelper<bool> isNetworkUnavailable;
         private readonly IReactiveCommand playNowCommand;
         private readonly ObservableAsPropertyHelper<YoutubeSongViewModel> selectedSong;
         private SortOrder durationOrder;
@@ -32,6 +33,13 @@ namespace Espera.View.ViewModels
                 .Select(x => x == null ? null : (YoutubeSongViewModel)x)
                 .ToProperty(this, x => x.SelectedSong);
 
+            this.isNetworkUnavailable = Observable.FromEventPattern<NetworkAvailabilityChangedEventHandler, NetworkAvailabilityEventArgs>(
+                h => NetworkChange.NetworkAvailabilityChanged += h,
+                h => NetworkChange.NetworkAvailabilityChanged -= h)
+                .Select(x => !x.EventArgs.IsAvailable)
+                .Do(_ => this.StartSearch())
+                .ToProperty(this, x => x.IsNetworkUnavailable, NetworkInterface.GetIsNetworkAvailable());
+
             // We need a default sorting order
             this.OrderByTitle();
 
@@ -43,6 +51,11 @@ namespace Espera.View.ViewModels
         {
             get { return Settings.Default.YoutubeDurationColumnWidth; }
             set { Settings.Default.YoutubeDurationColumnWidth = value; }
+        }
+
+        public bool IsNetworkUnavailable
+        {
+            get { return this.isNetworkUnavailable.Value; }
         }
 
         public bool IsSearching
