@@ -323,12 +323,6 @@ namespace Espera.Core.Management
 
         public IObservable<IVideoPlayerCallback> VideoPlayerCallback { get; private set; }
 
-        /// <summary>
-        /// Gets or sets the current volume.
-        /// </summary>
-        /// <value>
-        /// The current volume.
-        /// </value>
         public float Volume
         {
             get { return this.settings.Volume; }

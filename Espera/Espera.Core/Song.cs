@@ -11,9 +11,6 @@ using System.Threading.Tasks;
 
 namespace Espera.Core
 {
-    /// <summary>
-    /// Represents a song
-    /// </summary>
     [DebuggerDisplay("{Artist}-{Album}-{Title}")]
     public abstract class Song : IEquatable<Song>
     {
@@ -157,36 +154,16 @@ namespace Espera.Core
             this.OnCachingProgressChanged(0);
         }
 
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object"/> to compare with this instance.</param>
-        /// <returns>
-        /// true if the specified <see cref="System.Object"/> is equal to this instance; otherwise, false.
-        /// </returns>
         public override bool Equals(object obj)
         {
             return this.Equals(obj as Song);
         }
 
-        /// <summary>
-        /// Indicates whether the current object is equal to another object of the same type.
-        /// </summary>
-        /// <param name="other">An object to compare with this object.</param>
-        /// <returns>
-        /// true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
-        /// </returns>
         public bool Equals(Song other)
         {
             return other != null && this.OriginalPath == other.OriginalPath;
         }
 
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
-        /// </returns>
         public override int GetHashCode()
         {
             return new { this.OriginalPath, this.Duration, this.AudioType }.GetHashCode();
