@@ -184,7 +184,7 @@ namespace Espera.View.Views
 
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ICommand command = this.shellViewModel.CurrentSongSource.PlayNowCommand;
+            ICommand command = this.shellViewModel.IsAdmin ? this.shellViewModel.CurrentSongSource.PlayNowCommand : this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
 
             if (e.LeftButton == MouseButtonState.Pressed && command.CanExecute(null))
             {
@@ -196,7 +196,7 @@ namespace Espera.View.Views
         {
             if (e.Key == Key.Enter)
             {
-                ICommand command = this.shellViewModel.CurrentSongSource.PlayNowCommand;
+                ICommand command = this.shellViewModel.IsAdmin ? this.shellViewModel.CurrentSongSource.PlayNowCommand : this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
 
                 if (command.CanExecute(null))
                 {
