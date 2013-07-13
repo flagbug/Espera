@@ -41,6 +41,11 @@
                 <!--  For some reason the foreground has to be set manually, otherwise it would be black.  -->
                 <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
             </Style>
+            <Style x:Key="SettingsTextStyle" TargetType="{x:Type TextBlock}">
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="FontFamily" Value="{DynamicResource ContentFontFamily}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            </Style>
             <Style BasedOn="{StaticResource {x:Type Controls:ToggleSwitch}}" TargetType="{x:Type Controls:ToggleSwitch}">
                 <Setter Property="Margin" Value="0, 10, 0, 0" />
                 <Setter Property="OnLabel" Value="Yes" />
@@ -155,6 +160,7 @@
             <TabItem Header="library">
                 <StackPanel Orientation="Vertical">
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="song source" />
+                    <TextBlock Style="{StaticResource SettingsTextStyle}" Text="The path where Espera will search for songs" />
                     <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
                         <TextBox Width="400"
                                  VerticalAlignment="Top"
@@ -176,7 +182,7 @@
                     </StackPanel>
                 </StackPanel>
             </TabItem>
-            <TabItem Header="youtube">
+            <TabItem Header="youtube" RenderTransformOrigin="-0.233,15.955">
                 <StackPanel>
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="streaming" />
                     <Controls:ToggleSwitch Header="Stream from Youtube instead of downloading.&#10;Changing this option requires a restart." IsChecked="{Binding Path=StreamYoutube}" />
@@ -196,6 +202,7 @@
                     </StackPanel>
                     <StackPanel Orientation="Vertical">
                         <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="download path" />
+                        <TextBlock Style="{StaticResource SettingsTextStyle}" Text="The path where Espera downloads the YouTube videos" />
                         <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
                             <TextBox Width="350"
                                      VerticalAlignment="Top"
