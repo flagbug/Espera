@@ -26,7 +26,7 @@ namespace Espera.View.ViewModels
             : base(library)
         {
             this.playNowCommand = new ReactiveCommand();
-            this.playNowCommand.Subscribe(x => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model)));
+            this.playNowCommand.RegisterAsyncTask(_ => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model)));
 
             this.selectedSong = this.WhenAny(x => x.SelectedSongs, x => x.Value)
                 .Select(x => x == null ? null : this.SelectedSongs.FirstOrDefault())
