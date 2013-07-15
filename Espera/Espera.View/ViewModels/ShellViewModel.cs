@@ -29,7 +29,8 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
         private readonly ObservableAsPropertyHelper<int> totalSeconds;
         private readonly ObservableAsPropertyHelper<TimeSpan> totalTime;
-        private readonly Timer updateTimer;
+        private ObservableAsPropertyHelper<int> currentSeconds;
+        private ObservableAsPropertyHelper<TimeSpan> currentTime;
         private bool displayTimeoutWarning;
         private bool isLocal;
         private bool isYoutube;
@@ -42,8 +43,6 @@ namespace Espera.View.ViewModels
 
             this.library.Initialize();
 
-            this.library.SongStarted.Subscribe(x => this.updateTimer.Start());
-            this.library.PlaybackState.Where(x => x == AudioPlayerState.Finished).Subscribe(x => this.updateTimer.Stop());
             this.library.CurrentPlaylistChanged.Subscribe(x => this.RaisePropertyChanged("CurrentPlaylist"));
             this.UpdateScreenState = this.library.AccessMode;
 
@@ -76,9 +75,6 @@ namespace Espera.View.ViewModels
 
             this.LocalViewModel = new LocalViewModel(this.library);
             this.YoutubeViewModel = new YoutubeViewModel(this.library);
-
-            this.updateTimer = new Timer(333);
-            this.updateTimer.Elapsed += (sender, e) => this.UpdateCurrentTime();
 
             this.playlistTimeoutUpdateTimer = new Timer(333);
             this.playlistTimeoutUpdateTimer.Elapsed += (sender, e) => this.UpdateRemainingPlaylistTimeout();
@@ -113,6 +109,13 @@ namespace Espera.View.ViewModels
             this.isPlaying = this.library.PlaybackState
                 .Select(x => x == AudioPlayerState.Playing)
                 .ToProperty(this, x => x.IsPlaying);
+
+            this.currentTime = this.library.CurrentTimeChanged
+                .ToProperty(this, x => x.CurrentTime);
+
+            this.currentSeconds = this.library.CurrentTimeChanged
+                .Select(x => (int)x.TotalSeconds)
+                .ToProperty(this, x => x.CurrentSeconds);
 
             this.totalTime = this.library.TotalTime
                 .ToProperty(this, x => x.TotalTime);
@@ -150,7 +153,6 @@ namespace Espera.View.ViewModels
                 if (await this.library.PlaybackState.FirstAsync() == AudioPlayerState.Paused || await this.library.LoadedSong.FirstAsync() != null)
                 {
                     await this.library.ContinueSongAsync();
-                    this.updateTimer.Start();
                 }
 
                 else
@@ -166,8 +168,7 @@ namespace Espera.View.ViewModels
 
             this.PauseCommand = new ReactiveCommand(this.isAdmin.CombineLatest(this.library.LockPlayPause, this.isPlaying,
                 (isAdmin, lockPlayPause, isPlaying) => (isAdmin || !lockPlayPause) && isPlaying));
-            this.PauseCommand.RegisterAsyncTask(_ => this.library.PauseSongAsync())
-                .Subscribe(_ => this.updateTimer.Stop());
+            this.PauseCommand.RegisterAsyncTask(_ => this.library.PauseSongAsync());
 
             this.PauseContinueCommand = new ReactiveCommand(this
                 .WhenAny(x => x.IsPlaying, x => x.Value)
@@ -272,7 +273,7 @@ namespace Espera.View.ViewModels
 
         public int CurrentSeconds
         {
-            get { return (int)this.CurrentTime.TotalSeconds; }
+            get { return this.currentSeconds.Value; }
             set { this.library.CurrentTime = TimeSpan.FromSeconds(value); }
         }
 
@@ -283,7 +284,7 @@ namespace Espera.View.ViewModels
 
         public TimeSpan CurrentTime
         {
-            get { return this.library.CurrentTime; }
+            get { return this.currentTime.Value; }
         }
 
         public bool DisplayTimeoutWarning
@@ -486,7 +487,6 @@ namespace Espera.View.ViewModels
             this.library.Dispose();
 
             this.playlistTimeoutUpdateTimer.Dispose();
-            this.updateTimer.Dispose();
         }
 
         private void AddPlaylist()
@@ -525,12 +525,6 @@ namespace Espera.View.ViewModels
         {
             this.DisplayTimeoutWarning = true;
             this.DisplayTimeoutWarning = false;
-        }
-
-        private void UpdateCurrentTime()
-        {
-            this.RaisePropertyChanged("CurrentSeconds");
-            this.RaisePropertyChanged("CurrentTime");
         }
 
         private void UpdateRemainingPlaylistTimeout()

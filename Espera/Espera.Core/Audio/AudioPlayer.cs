@@ -1,22 +1,32 @@
 ﻿using ReactiveMarrow;
 using System;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 
 namespace Espera.Core.Audio
 {
     internal abstract class AudioPlayer : IDisposable
     {
+        private readonly Subject<TimeSpan> currentTimeChangedFromOuter;
+
         protected AudioPlayer()
         {
             this.PlaybackStateProperty = new ReactiveProperty<AudioPlayerState>();
+
+            this.currentTimeChangedFromOuter = new Subject<TimeSpan>();
+
+            this.CurrentTimeChanged = Observable.Interval(TimeSpan.FromMilliseconds(300))
+                .CombineLatest(this.PlaybackState, (l, state) => state)
+                .Where(x => x == AudioPlayerState.Playing)
+                .Select(x => this.CurrentTime)
+                .Merge(this.currentTimeChangedFromOuter)
+                .DistinctUntilChanged(x => x.TotalSeconds);
         }
 
-        /// <summary>
-        /// Gets or sets the current time.
-        /// </summary>
-        /// <value>The current time.</value>
-        public abstract TimeSpan CurrentTime { get; set; }
+        public virtual TimeSpan CurrentTime { get; set; }
+
+        public IObservable<TimeSpan> CurrentTimeChanged { get; private set; }
 
         /// <summary>
         /// Gets the current playback state.
@@ -101,6 +111,11 @@ namespace Espera.Core.Audio
         /// After this method is called, the <see cref="PlayAsync"/> and <see cref="PauseAsync"/> methods have to throw an <see cref="InvalidOperationException"/> if they are called.
         /// </remarks>
         public abstract Task StopAsync();
+
+        protected void CurrentTimeSet()
+        {
+            this.currentTimeChangedFromOuter.OnNext(this.CurrentTime);
+        }
 
         /// <summary>
         /// Finishes the playback of the <see cref="Song"/>. This method is called when a song has ended.

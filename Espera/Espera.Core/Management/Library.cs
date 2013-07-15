@@ -94,6 +94,11 @@ namespace Espera.Core.Management
                 .Left(this.CanPlayNextSong, Tuple.Create)
                 .Subscribe(t => this.HandleSongFinishAsync(t.Item1, t.Item2));
 
+            this.CurrentTimeChanged = this.currentPlayer
+                .Where(x => x != null)
+                .Select(x => x.CurrentTimeChanged)
+                .Switch();
+
             /*
              * Start boring, repeating glue code
              */
@@ -196,6 +201,8 @@ namespace Espera.Core.Management
                 }
             }
         }
+
+        public IObservable<TimeSpan> CurrentTimeChanged { get; private set; }
 
         public ReactiveProperty<bool> EnablePlaylistTimeout { get; private set; }
 

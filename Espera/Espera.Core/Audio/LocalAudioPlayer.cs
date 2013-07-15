@@ -35,7 +35,11 @@ namespace Espera.Core.Audio
         public override TimeSpan CurrentTime
         {
             get { return this.inputStream == null ? TimeSpan.Zero : this.inputStream.CurrentTime; }
-            set { this.inputStream.CurrentTime = value; }
+            set
+            {
+                this.inputStream.CurrentTime = value;
+                this.CurrentTimeSet();
+            }
         }
 
         public override IObservable<TimeSpan> TotalTime

@@ -26,7 +26,11 @@ namespace Espera.Core.Audio
         public override TimeSpan CurrentTime
         {
             get { return this.GetTime(); }
-            set { this.SetTime(value); }
+            set
+            {
+                this.SetTime(value);
+                this.CurrentTimeSet();
+            }
         }
 
         public Func<TimeSpan> GetTime { set; private get; }
