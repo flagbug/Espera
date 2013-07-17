@@ -258,7 +258,7 @@
                          SelectedItem="{Binding Path=SelectedArtist}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Margin="0, 5, 0, 5" Orientation="Horizontal">
+                            <StackPanel Margin="0, 3, 0, 3" Orientation="Horizontal">
                                 <Image Width="35"
                                        Height="35"
                                        Source="{Binding Path=Cover}" />
