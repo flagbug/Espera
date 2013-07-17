@@ -33,10 +33,9 @@ namespace Espera.View.ViewModels
         {
             this.cover = this.WhenAny(x => x.Songs, x => x.Value)
                 .Where(x => x != null)
-                .Select(x => x.FirstOrDefault(p => ((LocalSong)p.Model).HasAlbumCover))
-                .Where(x => x != null)
+                .Select(x => x.Where(p => ((LocalSong)p.Model).HasAlbumCover))
                 .ObserveOn(RxApp.TaskpoolScheduler)
-                .Select(x => LoadCoverAsync(x.Path).Result)
+                .Select(x => LoadCoverAsync(x.Select(p => p.Path)).Result)
                 .ToProperty(this, x => x.Cover);
         }
 
@@ -93,44 +92,49 @@ namespace Espera.View.ViewModels
             return this.Name == other.Name;
         }
 
-        private static async Task<BitmapSource> LoadCoverAsync(string key)
+        private static async Task<BitmapSource> LoadCoverAsync(IEnumerable<string> availableKeys)
         {
-            byte[] imageBytes;
-
-            try
+            foreach (string key in availableKeys)
             {
-                imageBytes = await BlobCache.LocalMachine.GetAsync(key);
-            }
-
-            catch (KeyNotFoundException)
-            {
-                return null;
-            }
-
-            using (var imageStream = new MemoryStream(imageBytes))
-            {
-                var image = new BitmapImage();
-
-                image.BeginInit();
-                image.StreamSource = imageStream;
-                image.CacheOption = BitmapCacheOption.OnLoad;
-                image.DecodePixelHeight = 35;
-                image.DecodePixelWidth = 35;
+                byte[] imageBytes;
 
                 try
                 {
-                    image.EndInit();
+                    imageBytes = await BlobCache.LocalMachine.GetAsync(key);
                 }
 
-                catch (NotSupportedException)
+                catch (KeyNotFoundException)
                 {
-                    return null;
+                    continue;
                 }
 
-                image.Freeze();
+                using (var imageStream = new MemoryStream(imageBytes))
+                {
+                    var image = new BitmapImage();
 
-                return image;
+                    image.BeginInit();
+                    image.StreamSource = imageStream;
+                    image.CacheOption = BitmapCacheOption.OnLoad;
+                    image.DecodePixelHeight = 35;
+                    image.DecodePixelWidth = 35;
+
+                    try
+                    {
+                        image.EndInit();
+                    }
+
+                    catch (NotSupportedException)
+                    {
+                        continue;
+                    }
+
+                    image.Freeze();
+
+                    return image;
+                }
             }
+
+            return null;
         }
 
         /// <example>
