@@ -17,11 +17,15 @@ namespace Espera.Core
         /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
         /// <param name="sourceDriveType">The drive type where the song comes from.</param>
-        public LocalSong(string path, AudioType audioType, TimeSpan duration, DriveType sourceDriveType)
+        /// <param name="hasAlbumCover">A value indicating whether this song has an album cover.</param>
+        public LocalSong(string path, AudioType audioType, TimeSpan duration, DriveType sourceDriveType, bool hasAlbumCover)
             : base(path, audioType, duration)
         {
             this.sourceDriveType = sourceDriveType;
+            this.HasAlbumCover = hasAlbumCover;
         }
+
+        public bool HasAlbumCover { get; private set; }
 
         public override bool HasToCache
         {

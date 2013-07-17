@@ -1,52 +1,70 @@
-﻿using ReactiveUI;
+﻿using Akavache;
+using Espera.Core;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>
+    internal sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>, IDisposable
     {
-        private int? albumCount;
-        private int? artistCount;
-        private int? songCount;
+        private readonly ObservableAsPropertyHelper<BitmapSource> cover;
 
-        public ArtistViewModel(string name, int albumCount, int songCount)
+        private IEnumerable<LocalSongViewModel> songs;
+
+        public ArtistViewModel(IEnumerable<LocalSongViewModel> songs)
+            : this(songs.First().Artist)
         {
-            this.Name = name;
-            this.AlbumCount = albumCount;
-            this.SongCount = songCount;
+            this.Songs = songs.ToList();
         }
 
         public ArtistViewModel(string name)
+            : this()
         {
             this.Name = name;
-            this.IsAllArtists = true;
         }
 
-        public int? AlbumCount
+        private ArtistViewModel()
         {
-            get { return this.albumCount; }
-            set { this.RaiseAndSetIfChanged(ref this.albumCount, value); }
+            this.cover = this.WhenAny(x => x.Songs, x => x.Value)
+                .Where(x => x != null)
+                .Select(x => x.FirstOrDefault(p => ((LocalSong)p.Model).HasAlbumCover))
+                .Where(x => x != null)
+                .ObserveOn(RxApp.TaskpoolScheduler)
+                .Select(x => LoadCoverAsync(x.Path).Result)
+                .ToProperty(this, x => x.Cover);
         }
 
-        public int? ArtistCount
+        public BitmapSource Cover
         {
-            get { return this.artistCount; }
-            set { this.RaiseAndSetIfChanged(ref this.artistCount, value); }
+            get { return this.cover == null ? null : this.cover.Value; }
         }
 
-        public bool IsAllArtists { get; private set; }
+        public bool IsAllArtists
+        {
+            get { return this.Songs == null; }
+        }
 
         public string Name { get; private set; }
 
-        public int? SongCount
+        public IEnumerable<LocalSongViewModel> Songs
         {
-            get { return this.songCount; }
-            set { this.RaiseAndSetIfChanged(ref this.songCount, value); }
+            get { return this.songs; }
+            set { this.RaiseAndSetIfChanged(ref this.songs, value); }
         }
 
         public int CompareTo(ArtistViewModel other)
         {
+            if (this.IsAllArtists && other.IsAllArtists)
+            {
+                return 0;
+            }
+
             if (this.IsAllArtists)
             {
                 return -1;
@@ -57,19 +75,60 @@ namespace Espera.View.ViewModels
                 return 1;
             }
 
-            if (this.IsAllArtists && other.IsAllArtists)
-            {
-                return 0;
-            }
-
             var prefixes = new[] { "A", "The" };
 
             return String.Compare(RemoveArtistPrefixes(this.Name, prefixes), RemoveArtistPrefixes(other.Name, prefixes), StringComparison.Ordinal);
         }
 
+        public void Dispose()
+        {
+            if (this.cover != null)
+            {
+                this.cover.Dispose();
+            }
+        }
+
         public bool Equals(ArtistViewModel other)
         {
             return this.Name == other.Name;
+        }
+
+        private static async Task<BitmapSource> LoadCoverAsync(string key)
+        {
+            byte[] imageBytes;
+
+            try
+            {
+                imageBytes = await BlobCache.LocalMachine.GetAsync(key);
+            }
+
+            catch (KeyNotFoundException)
+            {
+                return null;
+            }
+
+            using (var imageStream = new MemoryStream(imageBytes))
+            {
+                var image = new BitmapImage();
+
+                image.BeginInit();
+                image.StreamSource = imageStream;
+                image.CacheOption = BitmapCacheOption.OnLoad;
+
+                try
+                {
+                    image.EndInit();
+                }
+
+                catch (NotSupportedException)
+                {
+                    return null;
+                }
+
+                image.Freeze();
+
+                return image;
+            }
         }
 
         /// <example>

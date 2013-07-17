@@ -44,6 +44,7 @@ namespace Espera.View.ViewModels
                 .Merge(this.WhenAny(x => x.SearchText, _ => Unit.Default)
                     .Do(_ => this.SelectedArtist = this.allArtistsViewModel))
                 .SubscribeOn(RxApp.MainThreadScheduler)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ =>
                 {
                     this.UpdateSelectableSongs();
@@ -141,39 +142,35 @@ namespace Espera.View.ViewModels
 
         private void UpdateArtists()
         {
-            List<ArtistViewModel> artistInfos = this.SelectableSongs
-                .AsParallel()
-                .GroupBy(song => song.Artist)
-                .Select(group =>
-                    new ArtistViewModel(group.Key, group.Select(song => song.Album).Distinct().Count(), group.Count()))
-                .Concat(new[] { this.allArtistsViewModel }.AsParallel())
-                .ToList();
+            var groupedByArtist = this.SelectableSongs
+               .AsParallel()
+               .GroupBy(song => song.Artist)
+               .ToDictionary(x => x.Key, x => x.ToList());
 
-            List<ArtistViewModel> artistsToRemove = this.artists
-                .Except(artistInfos)
-                .ToList();
+            List<ArtistViewModel> artistsToRemove = this.artists.Where(x => !groupedByArtist.ContainsKey(x.Name)).ToList();
+            artistsToRemove.Remove(this.allArtistsViewModel);
+
+            foreach (ArtistViewModel artistViewModel in artistsToRemove)
+            {
+                artistViewModel.Dispose();
+            }
 
             this.artists.RemoveAll(artistsToRemove);
 
-            foreach (ArtistViewModel artist in artistInfos)
+            foreach (var artist in groupedByArtist)
             {
-                int index = this.artists.IndexOf(artist);
+                ArtistViewModel model = this.artists.FirstOrDefault(x => x.Name == artist.Key);
 
-                if (index != -1)
+                if (model == null)
                 {
-                    ArtistViewModel updated = this.artists[index];
-
-                    updated.AlbumCount = artist.AlbumCount;
-                    updated.SongCount = artist.SongCount;
+                    this.artists.Add(new ArtistViewModel(artist.Value));
                 }
 
                 else
                 {
-                    this.artists.Add(artist);
+                    model.Songs = artist.Value;
                 }
             }
-
-            this.allArtistsViewModel.ArtistCount = this.artists.Count - 1;
 
             this.artists.Sort();
         }
