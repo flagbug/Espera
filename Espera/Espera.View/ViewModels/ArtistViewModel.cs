@@ -114,6 +114,8 @@ namespace Espera.View.ViewModels
                 image.BeginInit();
                 image.StreamSource = imageStream;
                 image.CacheOption = BitmapCacheOption.OnLoad;
+                image.DecodePixelHeight = 35;
+                image.DecodePixelWidth = 35;
 
                 try
                 {
