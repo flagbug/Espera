@@ -33,9 +33,9 @@ namespace Espera.View.ViewModels
         {
             this.cover = this.WhenAny(x => x.Songs, x => x.Value)
                 .Where(x => x != null)
-                .Select(x => x.Where(p => ((LocalSong)p.Model).HasAlbumCover))
+                .Select(x => x.Where(p => ((LocalSong)p.Model).AlbumCoverKey != null))
                 .ObserveOn(RxApp.TaskpoolScheduler)
-                .Select(x => LoadCoverAsync(x.Select(p => p.Path)).Result)
+                .Select(x => LoadCoverAsync(x.Select(p => ((LocalSong)p.Model).AlbumCoverKey)).Result)
                 .ToProperty(this, x => x.Cover);
         }
 
