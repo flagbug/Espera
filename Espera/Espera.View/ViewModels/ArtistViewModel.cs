@@ -14,29 +14,27 @@ namespace Espera.View.ViewModels
     internal sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>, IDisposable
     {
         private readonly ObservableAsPropertyHelper<BitmapSource> cover;
-
         private IEnumerable<LocalSongViewModel> songs;
 
         public ArtistViewModel(IEnumerable<LocalSongViewModel> songs)
             : this(songs.First().Artist)
         {
             this.Songs = songs.ToList();
+
+            List<string> keys = this.Songs
+                .Select(x => x.Model)
+                .Cast<LocalSong>()
+                .Where(x => x.AlbumCoverKey != null)
+                .Select(x => x.AlbumCoverKey)
+                .ToList();
+
+            this.cover = Observable.StartAsync(() => LoadCoverAsync(keys))
+                .ToProperty(this, x => x.Cover);
         }
 
         public ArtistViewModel(string name)
-            : this()
         {
             this.Name = name;
-        }
-
-        private ArtistViewModel()
-        {
-            this.cover = this.WhenAny(x => x.Songs, x => x.Value)
-                .Where(x => x != null)
-                .Select(x => x.Where(p => ((LocalSong)p.Model).AlbumCoverKey != null))
-                .ObserveOn(RxApp.TaskpoolScheduler)
-                .Select(x => LoadCoverAsync(x.Select(p => ((LocalSong)p.Model).AlbumCoverKey)).Result)
-                .ToProperty(this, x => x.Cover);
         }
 
         public BitmapSource Cover
