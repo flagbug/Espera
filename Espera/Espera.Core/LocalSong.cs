@@ -17,11 +17,18 @@ namespace Espera.Core
         /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
         /// <param name="sourceDriveType">The drive type where the song comes from.</param>
-        public LocalSong(string path, AudioType audioType, TimeSpan duration, DriveType sourceDriveType)
+        /// <param name="albumCoverKey">The key of the album cover for Akavache to retrieve. Null, if there is no album cover.</param>
+        public LocalSong(string path, AudioType audioType, TimeSpan duration, DriveType sourceDriveType, string albumCoverKey)
             : base(path, audioType, duration)
         {
             this.sourceDriveType = sourceDriveType;
+            this.AlbumCoverKey = albumCoverKey;
         }
+
+        /// <summary>
+        /// Gets the key of the album cover for Akavache to retrieve. Null, if there is no album cover.
+        /// </summary>
+        public string AlbumCoverKey { get; private set; }
 
         public override bool HasToCache
         {

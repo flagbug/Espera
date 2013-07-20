@@ -258,69 +258,13 @@
                          SelectedItem="{Binding Path=SelectedArtist}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Margin="0, 5, 0, 5" Orientation="Vertical">
-                                <TextBlock Text="{Binding Path=Name}" />
-                                <StackPanel Orientation="Horizontal">
-                                    <StackPanel.Style>
-                                        <Style TargetType="{x:Type StackPanel}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Path=IsAllArtists}" Value="True">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </StackPanel.Style>
-                                    <TextBlock Style="{StaticResource ArtistInfoStyle}" Text="{Binding Path=AlbumCount}" />
-                                    <TextBlock>
-                                        <TextBlock.Style>
-                                            <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
-                                                <Setter Property="Text" Value=" Albums, " />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Path=AlbumCount}" Value="1">
-                                                        <Setter Property="Text" Value=" Album, " />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                    <TextBlock Style="{StaticResource ArtistInfoStyle}" Text="{Binding Path=SongCount}" />
-                                    <TextBlock>
-                                        <TextBlock.Style>
-                                            <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
-                                                <Setter Property="Text" Value=" Songs" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Path=SongCount}" Value="1">
-                                                        <Setter Property="Text" Value=" Song" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <StackPanel.Style>
-                                        <Style TargetType="{x:Type StackPanel}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Path=IsAllArtists}" Value="False">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </StackPanel.Style>
-                                    <TextBlock Style="{StaticResource ArtistInfoStyle}" Text="{Binding Path=ArtistCount}" />
-                                    <TextBlock>
-                                        <TextBlock.Style>
-                                            <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
-                                                <Setter Property="Text" Value=" Artists" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Path=ArtistCount}" Value="1">
-                                                        <Setter Property="Text" Value=" Artist" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </StackPanel>
+                            <StackPanel Margin="0, 3, 0, 3" Orientation="Horizontal">
+                                <Image Width="35"
+                                       Height="35"
+                                       Source="{Binding Path=Cover}" />
+                                <TextBlock Margin="10, 0, 0, 0"
+                                           VerticalAlignment="Center"
+                                           Text="{Binding Path=Name}" />
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>

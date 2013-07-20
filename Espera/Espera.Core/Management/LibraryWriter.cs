@@ -22,7 +22,8 @@ namespace Espera.Core.Management
                             new XAttribute("Genre", song.Genre),
                             new XAttribute("Path", song.OriginalPath),
                             new XAttribute("Title", song.Title),
-                            new XAttribute("TrackNumber", song.TrackNumber)))),
+                            new XAttribute("TrackNumber", song.TrackNumber),
+                            new XAttribute("AlbumCoverKey", song.AlbumCoverKey)))),
                     new XElement("Playlists", playlists.Select(playlist =>
                         new XElement("Playlist",
                             new XAttribute("Name", playlist.Name),

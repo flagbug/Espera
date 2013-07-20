@@ -1,4 +1,5 @@
-﻿using Espera.Core.Audio;
+﻿using Akavache;
+using Espera.Core.Audio;
 using Rareform.IO;
 using Rareform.Validation;
 using System;
@@ -37,7 +38,16 @@ namespace Espera.Core
 
         private static LocalSong CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath, DriveType driveType)
         {
-            return new LocalSong(filePath, audioType, duration, driveType)
+            IPicture picture = tag.Pictures.FirstOrDefault();
+
+            string albumCoverKey = picture == null ? null : Guid.NewGuid().ToString();
+
+            if (picture != null)
+            {
+                BlobCache.LocalMachine.Insert(albumCoverKey, picture.Data.Data);
+            }
+
+            return new LocalSong(filePath, audioType, duration, driveType, albumCoverKey)
             {
                 Album = PrepareTag(tag.Album, String.Empty),
                 Artist = PrepareTag(tag.FirstPerformer, "Unknown Artist"), //HACK: In the future retrieve the string for an unkown artist from the view if we want to localize it
