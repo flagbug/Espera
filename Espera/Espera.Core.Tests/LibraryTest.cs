@@ -9,6 +9,7 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Espera.Core.Tests
@@ -304,7 +305,7 @@ namespace Espera.Core.Tests
                 Mock<Song> song = Helpers.CreateSongMock();
                 var audioPlayer = new Mock<AudioPlayer>();
 
-                song.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
+                song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(audioPlayer.Object));
 
                 library.AddSongToPlaylist(song.Object);
 
@@ -416,7 +417,7 @@ namespace Espera.Core.Tests
                 Mock<Song> song = Helpers.CreateSongMock();
                 var audioPlayer = new Mock<AudioPlayer>();
 
-                song.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
+                song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(audioPlayer.Object));
 
                 library.AddSongToPlaylist(song.Object);
 
@@ -458,8 +459,8 @@ namespace Espera.Core.Tests
                 player2.PlaybackState.Where(x => x == AudioPlayerState.Playing).Subscribe(x => play2Called = true);
 
                 Mock<Song>[] songs = Helpers.CreateSongMocks(2, false);
-                songs[0].Setup(p => p.CreateAudioPlayer()).Returns(player1);
-                songs[1].Setup(p => p.CreateAudioPlayer()).Returns(player2);
+                songs[0].Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)player1));
+                songs[1].Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)player2));
 
                 var handle = new CountdownEvent(2);
 
@@ -483,7 +484,7 @@ namespace Espera.Core.Tests
                 var player = new Mock<AudioPlayer>();
 
                 Mock<Song> song = Helpers.CreateSongMock();
-                song.Setup(p => p.CreateAudioPlayer()).Returns(player.Object);
+                song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(player.Object));
 
                 await library.PlayInstantlyAsync(new[] { song.Object });
 
@@ -499,10 +500,10 @@ namespace Espera.Core.Tests
                 library.SwitchToPlaylist(library.Playlists.First());
 
                 Mock<Song> song = Helpers.CreateSongMock();
-                song.Setup(x => x.CreateAudioPlayer()).Returns(new JumpAudioPlayer());
+                song.Setup(x => x.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)new JumpAudioPlayer()));
 
                 Mock<Song> instantSong = Helpers.CreateSongMock();
-                instantSong.Setup(x => x.CreateAudioPlayer()).Returns(new JumpAudioPlayer());
+                instantSong.Setup(x => x.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)new JumpAudioPlayer()));
 
                 library.AddSongToPlaylist(song.Object);
 
@@ -541,10 +542,10 @@ namespace Espera.Core.Tests
                 audioPlayer.Setup(p => p.PlayAsync()).Throws<PlaybackException>();
 
                 Mock<Song> corruptedSong = Helpers.CreateSongMock();
-                corruptedSong.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
+                corruptedSong.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(audioPlayer.Object));
 
                 Mock<Song> nextSong = Helpers.CreateSongMock();
-                nextSong.Setup(p => p.CreateAudioPlayer()).Returns(new JumpAudioPlayer());
+                nextSong.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)new JumpAudioPlayer()));
 
                 library.AddSongsToPlaylist(new[] { corruptedSong.Object, nextSong.Object });
 
@@ -592,7 +593,7 @@ namespace Espera.Core.Tests
                 audioPlayer.Setup(p => p.PlayAsync()).Throws<PlaybackException>();
 
                 Mock<Song> song = Helpers.CreateSongMock();
-                song.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
+                song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(audioPlayer.Object));
 
                 library.AddSongToPlaylist(song.Object);
 
@@ -613,7 +614,7 @@ namespace Espera.Core.Tests
                 audioPlayer.Setup(p => p.LoadAsync()).Throws<SongLoadException>();
 
                 Mock<Song> song = Helpers.CreateSongMock();
-                song.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
+                song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(audioPlayer.Object));
 
                 library.AddSongToPlaylist(song.Object);
 
@@ -635,10 +636,10 @@ namespace Espera.Core.Tests
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-                song1.Setup(p => p.CreateAudioPlayer()).Returns(() => new JumpAudioPlayer());
+                song1.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)new JumpAudioPlayer()));
 
                 var song2 = new Mock<Song>("TestPath2", AudioType.Mp3, TimeSpan.Zero);
-                song2.Setup(p => p.CreateAudioPlayer()).Returns(() => new JumpAudioPlayer());
+                song2.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)new JumpAudioPlayer()));
 
                 library.AddSongsToPlaylist(new[] { song1.Object, song2.Object });
 
@@ -771,7 +772,7 @@ namespace Espera.Core.Tests
             audioPlayerMock.PlaybackState.Where(x => x == AudioPlayerState.Stopped).Subscribe(x => finishedFired = true);
 
             var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-            songMock.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayerMock);
+            songMock.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)audioPlayerMock));
 
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
@@ -820,7 +821,7 @@ namespace Espera.Core.Tests
                 library.AddAndSwitchToPlaylist("Playlist");
 
                 Mock<Song> song = Helpers.CreateSongMock();
-                song.Setup(x => x.CreateAudioPlayer()).Returns(new JumpAudioPlayer());
+                song.Setup(x => x.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)new JumpAudioPlayer()));
 
                 await library.PlayInstantlyAsync(new[] { song.Object });
 
@@ -838,7 +839,7 @@ namespace Espera.Core.Tests
             var jumpAudioPlayer = new JumpAudioPlayer();
 
             var jumpSong = new Mock<Song>("JumpSong", AudioType.Mp3, TimeSpan.Zero);
-            jumpSong.Setup(p => p.CreateAudioPlayer()).Returns(jumpAudioPlayer);
+            jumpSong.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)jumpAudioPlayer));
             jumpSong.SetupGet(p => p.HasToCache).Returns(false);
 
             var foreverAudioPlayer = new Mock<AudioPlayer>();
@@ -847,13 +848,13 @@ namespace Espera.Core.Tests
 
             var cachingSong = new Mock<Song>("CachingSong", AudioType.Mp3, TimeSpan.Zero);
             cachingSong.SetupGet(p => p.HasToCache).Returns(true);
-            cachingSong.Setup(p => p.CreateAudioPlayer()).Returns(foreverAudioPlayer.Object);
+            cachingSong.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(foreverAudioPlayer.Object));
 
             var cachingSong2 = new Mock<Song>("CachingSong2", AudioType.Mp3, TimeSpan.Zero);
             cachingSong2.SetupGet(p => p.HasToCache).Returns(true);
 
             var nextSong = new Mock<Song>("NextSong", AudioType.Mp3, TimeSpan.Zero);
-            nextSong.Setup(p => p.CreateAudioPlayer()).Returns(jumpAudioPlayer);
+            nextSong.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)jumpAudioPlayer));
             nextSong.SetupGet(p => p.HasToCache).Returns(false);
 
             using (Library library = Helpers.CreateLibraryWithPlaylist())
@@ -902,7 +903,7 @@ namespace Espera.Core.Tests
             blockingPlayer.Setup(p => p.PlayAsync()).Callback(() => { });
 
             var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-            song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
+            song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(blockingPlayer.Object));
 
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
@@ -933,13 +934,13 @@ namespace Espera.Core.Tests
                 var player = new HandledAudioPlayer(handle);
 
                 var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-                song.Setup(p => p.CreateAudioPlayer()).Returns(player);
+                song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)player));
 
                 bool played = false;
 
                 var notPlayedSong = new Mock<Song>("TestPath2", AudioType.Mp3, TimeSpan.Zero);
-                notPlayedSong.Setup(p => p.CreateAudioPlayer())
-                    .Returns(new Mock<AudioPlayer>().Object)
+                notPlayedSong.Setup(p => p.CreateAudioPlayerAsync())
+                    .Returns(Task.FromResult(new Mock<AudioPlayer>().Object))
                     .Callback(() => played = true);
 
                 library.AddSongToPlaylist(song.Object);
@@ -960,7 +961,7 @@ namespace Espera.Core.Tests
             blockingPlayer.Setup(p => p.PlayAsync()).Callback(() => { });
 
             var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-            song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
+            song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(blockingPlayer.Object));
 
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
