@@ -2,6 +2,7 @@
 using Rareform.IO;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Espera.Core
 {
@@ -33,19 +34,19 @@ namespace Espera.Core
             protected set { base.StreamingPath = value; }
         }
 
-        public override void LoadToCache()
+        public override async Task LoadToCacheAsync()
         {
             this.IsCaching = true;
 
             try
             {
-                this.LoadToTempFile();
+                await this.LoadToTempFileAsync();
                 this.IsCached = true;
             }
 
             catch (IOException)
             {
-                this.OnCachingFailed(EventArgs.Empty);
+                this.OnPreparationFailed(PreparationFailureCause.CachingFailed);
             }
 
             finally
@@ -54,12 +55,12 @@ namespace Espera.Core
             }
         }
 
-        internal override AudioPlayer CreateAudioPlayer()
+        internal override async Task<AudioPlayer> CreateAudioPlayerAsync()
         {
-            return new LocalAudioPlayer(this);
+            return await Task.FromResult(new LocalAudioPlayer(this));
         }
 
-        private void LoadToTempFile()
+        private async Task LoadToTempFileAsync()
         {
             string path = Path.GetTempFileName();
 
@@ -70,11 +71,9 @@ namespace Espera.Core
                     var operation = new StreamCopyOperation(sourceStream, targetStream);
 
                     operation.CopyProgressChanged += (sender, e) =>
-                    {
-                        this.CachingProgress = (int)e.ProgressPercentage;
-                    };
+                        this.OnCachingProgressChanged((int)e.ProgressPercentage);
 
-                    operation.Execute();
+                    await Task.Run(() => operation.Execute());
                 }
             }
 

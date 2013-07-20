@@ -1,52 +1,116 @@
 ﻿using Espera.Core;
-using Rareform.Patterns.MVVM;
+using ReactiveUI;
 using System;
-using System.ComponentModel;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
-using System.Windows.Input;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using YoutubeExtractor;
 
 namespace Espera.View.ViewModels
 {
     internal sealed class YoutubeSongViewModel : SongViewModelBase
     {
-        private BitmapImage thumbnail;
+        private readonly ObservableAsPropertyHelper<bool> hasThumbnail;
+        private readonly ObservableAsPropertyHelper<bool> isDownloading;
+        private IEnumerable<VideoInfo> audioToDownload;
+        private bool downloadFailed;
+        private double downloadProgress;
+        private bool isContextMenuOpen;
+        private bool isLoadingContextMenu;
+        private ImageSource thumbnail;
+        private IEnumerable<VideoInfo> videosToDownload;
 
         public YoutubeSongViewModel(YoutubeSong wrapped)
             : base(wrapped)
-        { }
+        {
+            this.OpenPathCommand = new ReactiveCommand();
+            this.OpenPathCommand.Subscribe(x => Process.Start(this.Path));
+
+            this.hasThumbnail = this.WhenAny(x => x.Thumbnail, x => x.Value)
+                .Select(x => x != null)
+                .ToProperty(this, x => x.HasThumbnail);
+
+            // Wait for the opening of the context menu to download the YouTube information
+            this.WhenAny(x => x.IsContextMenuOpen, x => x.Value)
+                .Where(x => x)
+                .FirstAsync()
+                .Subscribe(_ => this.LoadContextMenu());
+
+            // We have to set a dummy here, so that we can connect the commands
+            this.isDownloading = Observable.Never<bool>().ToProperty(this, x => x.IsDownloading);
+
+            this.DownloadVideoCommand = new ReactiveCommand(this.WhenAny(x => x.IsDownloading, x => x.Value).Select(x => !x));
+            this.DownloadVideoCommand.RegisterAsyncTask(x => this.DownloadVideo((VideoInfo)x));
+
+            this.DownloadAudioCommand = new ReactiveCommand(this.WhenAny(x => x.IsDownloading, x => x.Value).Select(x => !x));
+            this.DownloadAudioCommand.RegisterAsyncTask(x => this.DownloadAudio((VideoInfo)x));
+
+            this.isDownloading = this.DownloadVideoCommand.IsExecuting
+                .CombineLatest(this.DownloadAudioCommand.IsExecuting, (x1, x2) => x1 || x2)
+                .ToProperty(this, x => x.IsDownloading);
+        }
+
+        public IEnumerable<VideoInfo> AudioToDownload
+        {
+            get { return this.audioToDownload; }
+            private set { this.RaiseAndSetIfChanged(ref this.audioToDownload, value); }
+        }
 
         public string Description
         {
-            get
-            {
-                var song = (YoutubeSong)this.Model;
-
-                return song.Description;
-            }
+            get { return ((YoutubeSong)this.Model).Description; }
         }
+
+        public IReactiveCommand DownloadAudioCommand { get; private set; }
+
+        public bool DownloadFailed
+        {
+            get { return this.downloadFailed; }
+            set { this.RaiseAndSetIfChanged(ref this.downloadFailed, value); }
+        }
+
+        public double DownloadProgress
+        {
+            get { return this.downloadProgress; }
+            set { this.RaiseAndSetIfChanged(ref this.downloadProgress, value); }
+        }
+
+        public IReactiveCommand DownloadVideoCommand { get; private set; }
 
         public bool HasThumbnail
         {
-            get { return this.thumbnail != null; }
+            get { return this.hasThumbnail.Value; }
         }
 
-        public ICommand OpenPathCommand
+        public bool IsContextMenuOpen
         {
-            get { return new RelayCommand(param => Process.Start(this.Path)); }
+            get { return this.isContextMenuOpen; }
+            set { this.RaiseAndSetIfChanged(ref this.isContextMenuOpen, value); }
         }
+
+        public bool IsDownloading
+        {
+            get { return this.isDownloading.Value; }
+        }
+
+        public bool IsLoadingContextMenu
+        {
+            get { return this.isLoadingContextMenu; }
+            private set { this.RaiseAndSetIfChanged(ref this.isLoadingContextMenu, value); }
+        }
+
+        public IReactiveCommand OpenPathCommand { get; private set; }
 
         public double? Rating
         {
-            get
-            {
-                var song = (YoutubeSong)this.Model;
-
-                return song.Rating;
-            }
+            get { return ((YoutubeSong)this.Model).Rating; }
         }
 
         public ImageSource Thumbnail
@@ -55,11 +119,19 @@ namespace Espera.View.ViewModels
             {
                 if (this.thumbnail == null)
                 {
-                    this.GetThumbnail();
+                    this.GetThumbnailAsync();
                 }
 
                 return this.thumbnail;
             }
+
+            private set { this.RaiseAndSetIfChanged(ref this.thumbnail, value); }
+        }
+
+        public IEnumerable<VideoInfo> VideosToDownload
+        {
+            get { return this.videosToDownload; }
+            private set { this.RaiseAndSetIfChanged(ref this.videosToDownload, value); }
         }
 
         public int ViewCount
@@ -69,71 +141,77 @@ namespace Espera.View.ViewModels
 
         public string Views
         {
-            get
-            {
-                var song = (YoutubeSong)this.Model;
+            get { return String.Format("{0:N0}", ((YoutubeSong)this.Model).Views); }
+        }
 
-                return String.Format("{0:N0}", song.Views);
+        public async Task LoadContextMenu()
+        {
+            this.IsLoadingContextMenu = true;
+
+            IEnumerable<VideoInfo> infos = await Task.Run(() => DownloadUrlResolver.GetDownloadUrls(this.Path).ToList());
+            this.VideosToDownload = infos.OrderBy(x => x.VideoType).ThenByDescending(x => x.Resolution).ToList();
+            this.AudioToDownload = infos.Where(x => x.CanExtractAudio).OrderByDescending(x => x.AudioBitrate).ToList();
+
+            this.IsLoadingContextMenu = false;
+        }
+
+        private async Task DownloadAudio(VideoInfo videoInfo)
+        {
+            await this.DownloadFromYoutube(() => ((YoutubeSong)this.Model).DownloadAudioAsync(videoInfo, Observer.Create<double>(progress => this.DownloadProgress = progress)));
+        }
+
+        private async Task DownloadFromYoutube(Func<Task> downloadFunction)
+        {
+            this.DownloadProgress = 0;
+            this.DownloadFailed = false;
+
+            try
+            {
+                await downloadFunction();
+            }
+
+            catch (YoutubeDownloadException)
+            {
+                this.DownloadFailed = true;
             }
         }
 
-        private void GetThumbnail()
+        private async Task DownloadVideo(VideoInfo videoInfo)
         {
-            var worker = new BackgroundWorker();
+            await this.DownloadFromYoutube(() => ((YoutubeSong)this.Model).DownloadVideoAsync(videoInfo, Observer.Create<double>(progress => this.DownloadProgress = progress)));
+        }
 
-            worker.DoWork += (s, e) =>
+        private async void GetThumbnailAsync()
+        {
+            using (var webClient = new WebClient())
             {
-                var uri = (Uri)e.Argument;
-
-                using (var webClient = new WebClient())
+                try
                 {
-                    try
+                    byte[] imageBytes = await webClient.DownloadDataTaskAsync(((YoutubeSong)this.Model).ThumbnailSource);
+
+                    if (imageBytes == null)
                     {
-                        byte[] imageBytes = webClient.DownloadData(uri);
-
-                        if (imageBytes == null)
-                        {
-                            e.Result = null;
-                            return;
-                        }
-
-                        using (var imageStream = new MemoryStream(imageBytes))
-                        {
-                            var image = new BitmapImage();
-
-                            image.BeginInit();
-                            image.StreamSource = imageStream;
-                            image.CacheOption = BitmapCacheOption.OnLoad;
-                            image.EndInit();
-
-                            image.Freeze();
-
-                            e.Result = image;
-                        }
+                        return;
                     }
 
-                    catch (WebException ex)
+                    using (var imageStream = new MemoryStream(imageBytes))
                     {
-                        e.Result = ex;
+                        var image = new BitmapImage();
+
+                        image.BeginInit();
+                        image.StreamSource = imageStream;
+                        image.CacheOption = BitmapCacheOption.OnLoad;
+                        image.EndInit();
+
+                        image.Freeze();
+
+                        this.Thumbnail = image;
                     }
                 }
-            };
 
-            worker.RunWorkerCompleted += (s, e) =>
-            {
-                var bitmapImage = e.Result as BitmapImage;
-
-                if (bitmapImage != null)
-                {
-                    this.thumbnail = bitmapImage;
-                    this.NotifyOfPropertyChange(() => this.Thumbnail);
-                    this.NotifyOfPropertyChange(() => this.HasThumbnail);
-                }
-
-                worker.Dispose();
-            };
-
-            worker.RunWorkerAsync(((YoutubeSong)this.Model).ThumbnailSource);
+                catch (WebException)
+                { } // We can't load the thumbnail, ignore it
+            }
         }
     }
 }

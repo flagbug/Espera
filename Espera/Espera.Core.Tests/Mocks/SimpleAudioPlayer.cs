@@ -4,17 +4,9 @@ using System.Threading.Tasks;
 
 namespace Espera.Core.Tests.Mocks
 {
-    /// <summary>
-    /// A <see cref="AudioPlayer"/> mock that sets the <see cref="AudioPlayer.PlaybackState"/> to <see cref="AudioPlayerState.Finished"/>
-    /// immediately after the <see cref="AudioPlayer.PlayAsync"/> method is called.
-    /// </summary>
-    internal class JumpAudioPlayer : AudioPlayer
+    internal class SimpleAudioPlayer : AudioPlayer
     {
-        public override TimeSpan CurrentTime
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
+        public override TimeSpan CurrentTime { get; set; }
 
         public override IObservable<TimeSpan> TotalTime
         {
@@ -29,14 +21,16 @@ namespace Espera.Core.Tests.Mocks
 
         public override Task PauseAsync()
         {
-            throw new NotImplementedException();
+            this.PlaybackStateProperty.Value = AudioPlayerState.Paused;
+
+            return Task.Delay(0);
         }
 
-        public override async Task PlayAsync()
+        public override Task PlayAsync()
         {
             this.PlaybackStateProperty.Value = AudioPlayerState.Playing;
 
-            await this.FinishAsync();
+            return Task.Delay(0);
         }
 
         public override Task StopAsync()

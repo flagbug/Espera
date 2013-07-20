@@ -2,10 +2,18 @@
 using Espera.Core.Settings;
 using Rareform.Extensions;
 using Rareform.Validation;
+using ReactiveMarrow;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,113 +21,144 @@ namespace Espera.Core.Management
 {
     public sealed class Library : IDisposable
     {
+        private readonly BehaviorSubject<AccessMode> accessModeSubject;
         private readonly AutoResetEvent cacheResetHandle;
-
-        // We need a lock when disposing songs to prevent a modification of the enumeration
-        private readonly object disposeLock;
-
+        private readonly BehaviorSubject<AudioPlayer> currentPlayer;
+        private readonly Subject<Playlist> currentPlaylistChanged;
+        private readonly object disposeLock; // We need a lock when disposing songs to prevent a modification of the enumeration
         private readonly IRemovableDriveWatcher driveWatcher;
+        private readonly IFileSystem fileSystem;
         private readonly ILibraryReader libraryReader;
         private readonly ILibraryWriter libraryWriter;
-        private readonly List<Playlist> playlists;
+        private readonly ObservableCollection<Playlist> playlists;
+        private readonly ReadOnlyObservableCollection<Playlist> publicPlaylistWrapper;
         private readonly ILibrarySettings settings;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
-        private bool abortSongAdding;
+        private readonly BehaviorSubject<string> songSourcePath;
+        private readonly Subject<Unit> songStarted;
+        private readonly Subject<Unit> songsUpdated;
         private AccessMode accessMode;
-        private AudioPlayer currentPlayer;
         private Playlist currentPlayingPlaylist;
+        private IDisposable currentSongFinderSubscription;
+        private Playlist instantPlaylist;
         private bool isWaitingOnCache;
         private DateTime lastSongAddTime;
         private bool overrideCurrentCaching;
         private string password;
 
-        public Library(IRemovableDriveWatcher driveWatcher, ILibraryReader libraryReader, ILibraryWriter libraryWriter, ILibrarySettings settings)
+        public Library(IRemovableDriveWatcher driveWatcher, ILibraryReader libraryReader, ILibraryWriter libraryWriter, ILibrarySettings settings, IFileSystem fileSystem)
         {
-            this.songLock = new object();
-            this.songs = new HashSet<Song>();
-            this.playlists = new List<Playlist>();
-            this.AccessMode = AccessMode.Administrator; // We want implicit to be the administrator, till we change to user mode manually
-            this.cacheResetHandle = new AutoResetEvent(false);
             this.driveWatcher = driveWatcher;
             this.libraryReader = libraryReader;
             this.libraryWriter = libraryWriter;
-            this.disposeLock = new object();
             this.settings = settings;
+            this.fileSystem = fileSystem;
+
+            this.songLock = new object();
+            this.songs = new HashSet<Song>();
+            this.playlists = new ObservableCollection<Playlist>();
+            this.publicPlaylistWrapper = new ReadOnlyObservableCollection<Playlist>(this.playlists);
+            this.currentPlaylistChanged = new Subject<Playlist>();
+            this.accessModeSubject = new BehaviorSubject<AccessMode>(Management.AccessMode.Administrator); // We want implicit to be the administrator, till we change to user mode manually
+            this.accessMode = Management.AccessMode.Administrator;
+            this.cacheResetHandle = new AutoResetEvent(false);
+            this.disposeLock = new object();
+            this.CanPlayNextSong = this.currentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
+            this.CanPlayPreviousSong = this.currentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
+            this.currentPlayer = new BehaviorSubject<AudioPlayer>(null);
+            this.songStarted = new Subject<Unit>();
+            this.songSourcePath = new BehaviorSubject<string>(null);
+            this.songsUpdated = new Subject<Unit>();
+
+            this.LoadedSong = this.currentPlayer
+                .Select(x => x == null ? null : x.Song);
+
+            this.TotalTime = this.currentPlayer
+                .Select(x => x == null ? Observable.Return(TimeSpan.Zero) : x.TotalTime)
+                .Switch()
+                .StartWith(TimeSpan.Zero);
+
+            this.PlaybackState = this.currentPlayer
+                .Select(x => x == null ? Observable.Return(AudioPlayerState.None) : x.PlaybackState)
+                .Switch()
+                .StartWith(AudioPlayerState.None);
+
+            this.VideoPlayerCallback = this.currentPlayer
+                .OfType<IVideoPlayerCallback>();
+
+            this.currentPlayer
+                .Where(x => x != null)
+                .Select(x => x.PlaybackState.Where(p => p == AudioPlayerState.Finished).Select(q => x))
+                .Switch()
+                .Left(this.CanPlayNextSong, Tuple.Create)
+                .Subscribe(t => this.HandleSongFinishAsync(t.Item1, t.Item2));
+
+            this.CurrentTimeChanged = this.currentPlayer
+                .Where(x => x != null)
+                .Select(x => x.CurrentTimeChanged)
+                .Switch();
+
+            /*
+             * Start boring, repeating glue code
+             */
+            this.EnablePlaylistTimeout = new ReactiveProperty<bool>(
+                () => this.settings.EnablePlaylistTimeout, x => this.settings.EnablePlaylistTimeout = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
+
+            this.LockPlaylistRemoval = new ReactiveProperty<bool>(
+                () => this.settings.LockPlaylistRemoval, x => this.settings.LockPlaylistRemoval = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
+
+            this.LockPlaylistSwitching = new ReactiveProperty<bool>(
+                () => this.settings.LockPlaylistSwitching, x => this.settings.LockPlaylistSwitching = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
+
+            this.LockPlayPause = new ReactiveProperty<bool>(
+                () => this.settings.LockPlayPause, x => this.settings.LockPlayPause = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
+
+            this.LockTime = new ReactiveProperty<bool>(
+                () => this.settings.LockTime, x => this.settings.LockTime = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
+
+            this.LockVolume = new ReactiveProperty<bool>(
+                () => this.settings.LockVolume, x => this.settings.LockVolume = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
+
+            this.SongSourceUpdateInterval = new ReactiveProperty<TimeSpan>(
+                () => this.settings.SongSourceUpdateInterval, x => this.settings.SongSourceUpdateInterval = x,
+                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
+            /*
+             * End boring, repeating glue code
+             */
+
+            this.CanChangeTime = this.AccessMode.CombineLatest(this.LockTime,
+                (accessMode, lockTime) => accessMode == Management.AccessMode.Administrator || !lockTime);
+
+            this.CanChangeVolume = this.AccessMode.CombineLatest(this.LockVolume,
+                (accessMode, lockVolume) => accessMode == Management.AccessMode.Administrator || !lockVolume);
+
+            this.CanSwitchPlaylist = this.AccessMode.CombineLatest(this.LockPlaylistSwitching,
+                (accessMode, lockPlaylistSwitching) => accessMode == Management.AccessMode.Administrator || !lockPlaylistSwitching);
         }
-
-        /// <summary>
-        /// Occurs when <see cref="AccessMode"/> property has changed.
-        /// </summary>
-        public event EventHandler AccessModeChanged;
-
-        /// <summary>
-        /// Occurs when the playlist has changed.
-        /// </summary>
-        public event EventHandler PlaylistChanged;
-
-        /// <summary>
-        /// Occurs when a song has been added to the library.
-        /// </summary>
-        public event EventHandler<LibraryFillEventArgs> SongAdded;
-
-        /// <summary>
-        /// Occurs when a corrupted song has been attempted to be played.
-        /// </summary>
-        public event EventHandler SongCorrupted;
-
-        /// <summary>
-        /// Occurs when a song has finished the playback.
-        /// </summary>
-        public event EventHandler SongFinished;
-
-        /// <summary>
-        /// Occurs when a song has started the playback.
-        /// </summary>
-        public event EventHandler SongStarted;
-
-        /// <summary>
-        /// Occurs when the library is finished with updating.
-        /// </summary>
-        public event EventHandler Updated;
-
-        /// <summary>
-        /// Occurs when the library is updating.
-        /// </summary>
-        public event EventHandler Updating;
-
-        public event EventHandler VideoPlayerCallbackChanged;
 
         /// <summary>
         /// Gets the access mode that is currently enabled.
         /// </summary>
-        public AccessMode AccessMode
+        public IObservable<AccessMode> AccessMode
         {
-            get { return this.accessMode; }
-            private set
-            {
-                if (this.AccessMode != value)
-                {
-                    this.accessMode = value;
-                    this.AccessModeChanged.RaiseSafe(this, EventArgs.Empty);
-                }
-            }
+            get { return this.accessModeSubject.AsObservable(); }
         }
 
         public bool CanAddSongToPlaylist
         {
-            get { return this.AccessMode == AccessMode.Administrator || this.RemainingPlaylistTimeout <= TimeSpan.Zero; }
+            get { return this.accessMode == Management.AccessMode.Administrator || this.RemainingPlaylistTimeout <= TimeSpan.Zero; }
         }
 
-        public bool CanChangeTime
-        {
-            get { return this.AccessMode == AccessMode.Administrator || !this.LockTime; }
-        }
+        public IObservable<bool> CanChangeTime { get; private set; }
 
-        public bool CanChangeVolume
-        {
-            get { return this.AccessMode == AccessMode.Administrator || !this.LockVolume; }
-        }
+        public IObservable<bool> CanChangeVolume { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the next song in the playlist can be played.
@@ -127,10 +166,7 @@ namespace Espera.Core.Management
         /// <value>
         /// true if the next song in the playlist can be played; otherwise, false.
         /// </value>
-        public bool CanPlayNextSong
-        {
-            get { return this.CurrentPlaylist.CanPlayNextSong; }
-        }
+        public IObservable<bool> CanPlayNextSong { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the previous song in the playlist can be played.
@@ -138,42 +174,37 @@ namespace Espera.Core.Management
         /// <value>
         /// true if the previous song in the playlist can be played; otherwise, false.
         /// </value>
-        public bool CanPlayPreviousSong
-        {
-            get { return this.CurrentPlaylist.CanPlayPreviousSong; }
-        }
+        public IObservable<bool> CanPlayPreviousSong { get; private set; }
 
-        public bool CanSwitchPlaylist
-        {
-            get { return this.AccessMode == AccessMode.Administrator || !this.LockPlaylistSwitching; }
-        }
+        public IObservable<bool> CanSwitchPlaylist { get; private set; }
 
         public Playlist CurrentPlaylist { get; private set; }
+
+        public IObservable<Playlist> CurrentPlaylistChanged
+        {
+            get { return this.currentPlaylistChanged.AsObservable(); }
+        }
 
         /// <summary>
         /// Gets or sets the current song's elapsed time.
         /// </summary>
         public TimeSpan CurrentTime
         {
-            get { return this.currentPlayer == null ? TimeSpan.Zero : this.currentPlayer.CurrentTime; }
+            get { return this.currentPlayer.FirstAsync().Wait() == null ? TimeSpan.Zero : this.currentPlayer.FirstAsync().Wait().CurrentTime; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                this.currentPlayer.CurrentTime = value;
+                if (this.currentPlayer.FirstAsync().Wait() != null)
+                {
+                    this.currentPlayer.FirstAsync().Wait().CurrentTime = value;
+                }
             }
         }
 
-        public bool EnablePlaylistTimeout
-        {
-            get { return this.settings.EnablePlaylistTimeout; }
-            set
-            {
-                this.ThrowIfNotAdmin();
+        public IObservable<TimeSpan> CurrentTimeChanged { get; private set; }
 
-                this.settings.EnablePlaylistTimeout = value;
-            }
-        }
+        public ReactiveProperty<bool> EnablePlaylistTimeout { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the administrator is created.
@@ -184,104 +215,28 @@ namespace Espera.Core.Management
         public bool IsAdministratorCreated { get; private set; }
 
         /// <summary>
-        /// Gets a value indicating whether the playback is paused.
-        /// </summary>
-        /// <value>
-        /// true if the playback is paused; otherwise, false.
-        /// </value>
-        public bool IsPaused
-        {
-            get { return this.currentPlayer != null && this.currentPlayer.PlaybackState == AudioPlayerState.Paused; }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the playback is started.
-        /// </summary>
-        /// <value>
-        /// true if the playback is started; otherwise, false.
-        /// </value>
-        public bool IsPlaying
-        {
-            get { return this.currentPlayer != null && this.currentPlayer.PlaybackState == AudioPlayerState.Playing; }
-        }
-
-        /// <summary>
         /// Gets the song that is currently loaded.
         /// </summary>
-        public Song LoadedSong
+        public IObservable<Song> LoadedSong { get; private set; }
+
+        public ReactiveProperty<bool> LockPlaylistRemoval { get; private set; }
+
+        public ReactiveProperty<bool> LockPlaylistSwitching { get; private set; }
+
+        public ReactiveProperty<bool> LockPlayPause { get; private set; }
+
+        public ReactiveProperty<bool> LockTime { get; private set; }
+
+        public ReactiveProperty<bool> LockVolume { get; private set; }
+
+        public IObservable<AudioPlayerState> PlaybackState { get; private set; }
+
+        /// <summary>
+        /// Returns an enumeration of playlists that implements <see cref="INotifyCollectionChanged"/>.
+        /// </summary>
+        public ReadOnlyObservableCollection<Playlist> Playlists
         {
-            get { return this.currentPlayer == null ? null : this.currentPlayer.Song; }
-        }
-
-        public bool LockLibraryRemoval
-        {
-            get { return this.settings.LockLibraryRemoval; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                this.settings.LockLibraryRemoval = value;
-            }
-        }
-
-        public bool LockPlaylistRemoval
-        {
-            get { return this.settings.LockPlaylistRemoval; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                this.settings.LockPlaylistRemoval = value;
-            }
-        }
-
-        public bool LockPlaylistSwitching
-        {
-            get { return this.settings.LockPlaylistSwitching; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                this.settings.LockPlaylistSwitching = value;
-            }
-        }
-
-        public bool LockPlayPause
-        {
-            get { return this.settings.LockPlayPause; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                this.settings.LockPlayPause = value;
-            }
-        }
-
-        public bool LockTime
-        {
-            get { return this.settings.LockTime; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                this.settings.LockTime = value;
-            }
-        }
-
-        public bool LockVolume
-        {
-            get { return this.settings.LockVolume; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                this.settings.LockVolume = value;
-            }
-        }
-
-        public IEnumerable<Playlist> Playlists
-        {
-            get { return this.playlists; }
+            get { return this.publicPlaylistWrapper; }
         }
 
         public TimeSpan PlaylistTimeout
@@ -323,6 +278,40 @@ namespace Espera.Core.Management
             }
         }
 
+        public IObservable<string> SongSourcePath
+        {
+            get { return this.songSourcePath.AsObservable(); }
+        }
+
+        public ReactiveProperty<TimeSpan> SongSourceUpdateInterval { get; private set; }
+
+        /// <summary>
+        /// Occurs when a song has started the playback.
+        /// </summary>
+        public IObservable<Unit> SongStarted
+        {
+            get { return this.songStarted.AsObservable(); }
+        }
+
+        /// <summary>
+        /// Occurs when a song has been added to the library.
+        /// </summary>
+        public IObservable<Unit> SongsUpdated
+        {
+            get { return this.songsUpdated.AsObservable(); }
+        }
+
+        public bool StreamHighestYoutubeQuality
+        {
+            get { return this.settings.StreamHighestYoutubeQuality; }
+            set
+            {
+                this.ThrowIfNotAdmin();
+
+                this.settings.StreamHighestYoutubeQuality = value;
+            }
+        }
+
         public bool StreamYoutube
         {
             get { return this.settings.StreamYoutube; }
@@ -337,22 +326,10 @@ namespace Espera.Core.Management
         /// <summary>
         /// Gets the duration of the current song.
         /// </summary>
-        public TimeSpan TotalTime
-        {
-            get { return this.currentPlayer == null ? TimeSpan.Zero : this.currentPlayer.TotalTime; }
-        }
+        public IObservable<TimeSpan> TotalTime { get; private set; }
 
-        public IVideoPlayerCallback VideoPlayerCallback
-        {
-            get { return this.currentPlayer as IVideoPlayerCallback; }
-        }
+        public IObservable<IVideoPlayerCallback> VideoPlayerCallback { get; private set; }
 
-        /// <summary>
-        /// Gets or sets the current volume.
-        /// </summary>
-        /// <value>
-        /// The current volume.
-        /// </value>
         public float Volume
         {
             get { return this.settings.Volume; }
@@ -362,10 +339,35 @@ namespace Espera.Core.Management
 
                 this.settings.Volume = value;
 
-                if (this.currentPlayer != null)
+                if (this.currentPlayer.FirstAsync().Wait() != null)
                 {
-                    this.currentPlayer.Volume = value;
+                    this.currentPlayer.FirstAsync().Wait().Volume = value;
                 }
+            }
+        }
+
+        public string YoutubeDownloadPath
+        {
+            get { return this.settings.YoutubeDownloadPath; }
+            set
+            {
+                this.ThrowIfNotAdmin();
+
+                if (!this.fileSystem.Directory.Exists(value))
+                    throw new ArgumentException("Directory doesn't exist.");
+
+                this.settings.YoutubeDownloadPath = value;
+            }
+        }
+
+        public YoutubeStreamingQuality YoutubeStreamingQuality
+        {
+            get { return this.settings.YoutubeStreamingQuality; }
+            set
+            {
+                this.ThrowIfNotAdmin();
+
+                this.settings.YoutubeStreamingQuality = value;
             }
         }
 
@@ -378,19 +380,6 @@ namespace Espera.Core.Management
         {
             this.AddPlaylist(name);
             this.SwitchToPlaylist(this.GetPlaylistByName(name));
-        }
-
-        /// <summary>
-        /// Adds the song that are contained in the specified directory recursively in an asynchronous manner to the library.
-        /// </summary>
-        /// <param name="path">The path of the directory to search.</param>
-        /// <returns>The <see cref="Task"/> that did the work.</returns>
-        public Task AddLocalSongsAsync(string path)
-        {
-            if (path == null)
-                Throw.ArgumentNullException(() => path);
-
-            return Task.Factory.StartNew(() => this.AddLocalSongs(path));
         }
 
         /// <summary>
@@ -422,8 +411,6 @@ namespace Espera.Core.Management
             this.ThrowIfNotAdmin();
 
             this.CurrentPlaylist.AddSongs(songList.ToList()); // Copy the sequence to a list, so that the enumeration doesn't gets modified
-
-            this.PlaylistChanged.RaiseSafe(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -439,8 +426,16 @@ namespace Espera.Core.Management
             this.CurrentPlaylist.AddSongs(new[] { song });
 
             this.lastSongAddTime = DateTime.Now;
+        }
 
-            this.PlaylistChanged.RaiseSafe(this, EventArgs.Empty);
+        public void ChangeSongSourcePath(string path)
+        {
+            this.ThrowIfNotAdmin();
+
+            if (!this.fileSystem.Directory.Exists(path))
+                throw new ArgumentException("Directory does't exist.");
+
+            this.songSourcePath.OnNext(path);
         }
 
         /// <summary>
@@ -455,7 +450,8 @@ namespace Espera.Core.Management
             if (this.password != adminPassword)
                 throw new WrongPasswordException("The password is incorrect.");
 
-            this.AccessMode = AccessMode.Administrator;
+            this.accessMode = Management.AccessMode.Administrator;
+            this.accessModeSubject.OnNext(Management.AccessMode.Administrator);
         }
 
         /// <summary>
@@ -466,17 +462,18 @@ namespace Espera.Core.Management
             if (!this.IsAdministratorCreated)
                 throw new InvalidOperationException("Administrator is not created.");
 
-            this.AccessMode = AccessMode.Party;
+            this.accessMode = Management.AccessMode.Party;
+            this.accessModeSubject.OnNext(Management.AccessMode.Party);
         }
 
         /// <summary>
         /// Continues the currently loaded song.
         /// </summary>
-        public void ContinueSong()
+        public async Task ContinueSongAsync()
         {
             this.ThrowIfNotAdmin();
 
-            this.currentPlayer.Play();
+            await (await this.currentPlayer.FirstAsync()).PlayAsync();
         }
 
         /// <summary>
@@ -500,14 +497,17 @@ namespace Espera.Core.Management
 
         public void Dispose()
         {
-            if (this.currentPlayer != null)
+            if (this.currentPlayer.FirstAsync().Wait() != null)
             {
-                this.currentPlayer.Dispose();
+                this.currentPlayer.FirstAsync().Wait().Dispose();
             }
 
             this.driveWatcher.Dispose();
 
-            this.abortSongAdding = true;
+            if (this.currentSongFinderSubscription != null)
+            {
+                this.currentSongFinderSubscription.Dispose();
+            }
 
             this.cacheResetHandle.Dispose();
 
@@ -537,83 +537,92 @@ namespace Espera.Core.Management
             }
 
             this.driveWatcher.Initialize();
-            this.driveWatcher.DriveRemoved += (sender, args) => Task.Factory.StartNew(this.Update);
 
-            this.Load();
+            IObservable<Unit> update = this.SongSourceUpdateInterval
+                .Select(Observable.Interval)
+                .Switch()
+                .Select(_ => Unit.Default)
+                .Merge(this.driveWatcher.DriveRemoved)
+                .StartWith(Unit.Default);
+
+            update.CombineLatest(this.songSourcePath, (_, path) => path)
+                .Where(path => !String.IsNullOrEmpty(path))
+                .Subscribe(path => this.UpdateSongsAsync(path));
+
+            if (this.libraryReader.LibraryExists)
+            {
+                this.Load();
+            }
         }
 
         /// <summary>
         /// Pauses the currently loaded song.
         /// </summary>
-        public void PauseSong()
+        public async Task PauseSongAsync()
         {
-            if (this.LockPlayPause && this.AccessMode == AccessMode.Party)
+            if (this.LockPlayPause.Value && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to play when in party mode.");
 
-            this.currentPlayer.Pause();
+            await (await this.currentPlayer.FirstAsync()).PauseAsync();
+        }
+
+        public async Task PlayInstantlyAsync(IEnumerable<Song> songList)
+        {
+            if (songList == null)
+                Throw.ArgumentNullException(() => songList);
+
+            if (this.instantPlaylist != null)
+            {
+                this.playlists.Remove(instantPlaylist);
+            }
+
+            string instantPlaylistName = Guid.NewGuid().ToString();
+            this.instantPlaylist = new Playlist(instantPlaylistName, true);
+
+            this.playlists.Add(this.instantPlaylist);
+            this.SwitchToPlaylist(this.instantPlaylist);
+
+            this.AddSongsToPlaylist(songList);
+
+            await this.PlaySongAsync(0);
         }
 
         /// <summary>
         /// Plays the next song in the playlist.
         /// </summary>
-        public void PlayNextSong()
+        public async Task PlayNextSongAsync()
         {
             this.ThrowIfNotAdmin();
 
-            this.InternPlayNextSong();
+            await this.InternPlayNextSongAsync();
         }
 
         /// <summary>
         /// Plays the previous song in the playlist.
         /// </summary>
-        public void PlayPreviousSong()
+        public async Task PlayPreviousSongAsync()
         {
             this.ThrowIfNotAdmin();
 
-            if (!this.CurrentPlaylist.CanPlayPreviousSong || !this.CurrentPlaylist.CurrentSongIndex.HasValue)
+            if (!await this.CurrentPlaylist.CanPlayPreviousSong.FirstAsync() || !this.CurrentPlaylist.CurrentSongIndex.Value.HasValue)
                 throw new InvalidOperationException("The previous song couldn't be played.");
 
-            this.PlaySong(this.CurrentPlaylist.CurrentSongIndex.Value - 1);
+            await this.PlaySongAsync(this.CurrentPlaylist.CurrentSongIndex.Value.Value - 1);
         }
 
         /// <summary>
         /// Plays the song with the specified index in the playlist.
         /// </summary>
         /// <param name="playlistIndex">The index of the song in the playlist.</param>
-        public void PlaySong(int playlistIndex)
+        public async Task PlaySongAsync(int playlistIndex)
         {
             if (playlistIndex < 0)
                 Throw.ArgumentOutOfRangeException(() => playlistIndex, 0);
 
-            if (this.LockPlayPause && this.AccessMode == AccessMode.Party)
+            if (this.LockPlayPause.Value && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to play when in party mode.");
 
-            this.InternPlaySong(playlistIndex);
-        }
-
-        /// <summary>
-        /// Removes the specified songs from the library.
-        /// </summary>
-        /// <param name="songList">The list of the songs to remove from the library.</param>
-        public void RemoveFromLibrary(IEnumerable<Song> songList)
-        {
-            if (songList == null)
-                Throw.ArgumentNullException(() => songList);
-
-            if (this.LockLibraryRemoval && this.AccessMode == AccessMode.Party)
-                throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
-
-            DisposeSongs(songList);
-
-            lock (this.songLock)
-            {
-                this.playlists.ForEach(playlist => this.RemoveFromPlaylist(playlist, songList));
-
-                foreach (Song song in songList)
-                {
-                    this.songs.Remove(song);
-                }
-            }
+            await this.InternPlaySongAsync(playlistIndex);
         }
 
         /// <summary>
@@ -625,7 +634,7 @@ namespace Espera.Core.Management
             if (indexes == null)
                 Throw.ArgumentNullException(() => indexes);
 
-            if (this.LockPlaylistRemoval && this.AccessMode == AccessMode.Party)
+            if (this.LockPlaylistRemoval.Value && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
 
             this.RemoveFromPlaylist(this.CurrentPlaylist, indexes);
@@ -646,25 +655,16 @@ namespace Espera.Core.Management
         /// <summary>
         /// Removes the playlist with the specified name from the library.
         /// </summary>
-        /// <param name="playlistName">The name of the playlist to remove.</param>
-        /// <exception cref="InvalidOperationException">No playlist exists, or no playlist with the specified name exists.</exception>
-        public void RemovePlaylist(string playlistName)
+        /// <param name="playlist">The playlist to remove.</param>
+        public void RemovePlaylist(Playlist playlist)
         {
-            if (playlistName == null)
-                Throw.ArgumentNullException(() => playlistName);
-
-            if (!this.Playlists.Any())
-                throw new InvalidOperationException("There are no playlists.");
-
-            Playlist playlist = this.GetPlaylistByName(playlistName);
-
             if (playlist == null)
-                throw new InvalidOperationException("No playlist with the specified name exists.");
+                Throw.ArgumentNullException(() => playlist);
 
             this.playlists.Remove(playlist);
         }
 
-        public void Save()
+        public async void Save()
         {
             HashSet<LocalSong> casted;
 
@@ -674,7 +674,7 @@ namespace Espera.Core.Management
             }
 
             // Clean up the songs that aren't in the library anymore
-            // This happens when the user adds a song from a removable device to the playlistx
+            // This happens when the user adds a song from a removable device to the playlist
             // then removes the device, so the song is removed from the library, but not from the playlist
             foreach (Playlist playlist in this.playlists)
             {
@@ -685,7 +685,7 @@ namespace Espera.Core.Management
                 playlist.RemoveSongs(indexes);
             }
 
-            this.libraryWriter.Write(casted, this.playlists);
+            this.libraryWriter.Write(casted, this.playlists.Where(playlist => !playlist.IsTemporary), await this.songSourcePath.FirstAsync());
         }
 
         public void ShufflePlaylist()
@@ -698,10 +698,11 @@ namespace Espera.Core.Management
             if (playlist == null)
                 Throw.ArgumentNullException(() => playlist);
 
-            if (!this.CanSwitchPlaylist)
+            if (!this.CanSwitchPlaylist.FirstAsync().Wait())
                 throw new InvalidOperationException("Not allowed to switch playlist.");
 
             this.CurrentPlaylist = playlist;
+            this.currentPlaylistChanged.OnNext(playlist);
         }
 
         /// <summary>
@@ -723,47 +724,6 @@ namespace Espera.Core.Management
                     // Swallow the exception, we don't care about temporary files that could not be deleted
                 }
             }
-        }
-
-        /// <summary>
-        /// Adds the song that are contained in the specified directory recursively to the library.
-        /// </summary>
-        /// <param name="path">The path of the directory to search.</param>
-        private void AddLocalSongs(string path)
-        {
-            if (path == null)
-                Throw.ArgumentNullException(() => path);
-
-            if (!Directory.Exists(path))
-                Throw.ArgumentException("The directory doesn't exist.", () => path);
-
-            var finder = new LocalSongFinder(path);
-
-            finder.SongFound += (sender, e) =>
-            {
-                if (this.abortSongAdding)
-                {
-                    finder.Abort();
-                    return;
-                }
-
-                bool added;
-
-                lock (this.songLock)
-                {
-                    lock (this.disposeLock)
-                    {
-                        added = this.songs.Add(e.Song);
-                    }
-                }
-
-                if (added)
-                {
-                    this.SongAdded.RaiseSafe(this, new LibraryFillEventArgs(e.Song, finder.TagsProcessed, finder.CurrentTotalSongs));
-                }
-            };
-
-            finder.Start();
         }
 
         private bool AwaitCaching(Song song)
@@ -790,43 +750,41 @@ namespace Espera.Core.Management
             return true;
         }
 
-        private void HandleSongCorruption()
+        private async Task HandleSongCorruptionAsync()
         {
-            if (!this.CurrentPlaylist.CanPlayNextSong)
+            if (!await this.CurrentPlaylist.CanPlayNextSong.FirstAsync())
             {
-                this.CurrentPlaylist.CurrentSongIndex = null;
+                this.CurrentPlaylist.CurrentSongIndex.Value = null;
             }
 
             else
             {
-                this.InternPlayNextSong();
+                await this.InternPlayNextSongAsync();
             }
         }
 
-        private void HandleSongFinish()
+        private async Task HandleSongFinishAsync(AudioPlayer audioPlayer, bool canPlayNextSong)
         {
-            if (!this.CurrentPlaylist.CanPlayNextSong)
+            if (!canPlayNextSong)
             {
-                this.CurrentPlaylist.CurrentSongIndex = null;
+                this.CurrentPlaylist.CurrentSongIndex.Value = null;
             }
 
-            this.currentPlayer.Dispose();
-            this.currentPlayer = null;
+            audioPlayer.Dispose();
+            this.currentPlayer.OnNext(null);
 
-            this.SongFinished.RaiseSafe(this, EventArgs.Empty);
-
-            if (this.CurrentPlaylist.CanPlayNextSong)
+            if (canPlayNextSong)
             {
-                this.InternPlayNextSong();
+                await this.InternPlayNextSongAsync();
             }
         }
 
-        private void InternPlayNextSong()
+        private async Task InternPlayNextSongAsync()
         {
-            if (!this.CurrentPlaylist.CanPlayNextSong || !this.CurrentPlaylist.CurrentSongIndex.HasValue)
+            if (!await this.CurrentPlaylist.CanPlayNextSong.FirstAsync() || !this.CurrentPlaylist.CurrentSongIndex.Value.HasValue)
                 throw new InvalidOperationException("The next song couldn't be played.");
 
-            int nextIndex = this.CurrentPlaylist.CurrentSongIndex.Value + 1;
+            int nextIndex = this.CurrentPlaylist.CurrentSongIndex.Value.Value + 1;
             Song nextSong = this.CurrentPlaylist[nextIndex].Song;
 
             // We want the to swap the songs, if the song that should be played next is currently caching
@@ -842,10 +800,10 @@ namespace Espera.Core.Management
                 }
             }
 
-            this.InternPlaySong(nextIndex);
+            await this.InternPlaySongAsync(nextIndex);
         }
 
-        private void InternPlaySong(int playlistIndex)
+        private async Task InternPlaySongAsync(int playlistIndex)
         {
             if (playlistIndex < 0)
                 Throw.ArgumentOutOfRangeException(() => playlistIndex, 0);
@@ -858,65 +816,72 @@ namespace Espera.Core.Management
                 cacheResetHandle.WaitOne();
             }
 
-            if (this.currentPlayingPlaylist != null)
+            if (this.currentPlayingPlaylist != null && this.currentPlayingPlaylist != this.CurrentPlaylist)
             {
-                this.currentPlayingPlaylist.CurrentSongIndex = null;
+                this.currentPlayingPlaylist.CurrentSongIndex.Value = null;
             }
 
             this.currentPlayingPlaylist = this.CurrentPlaylist;
 
-            this.CurrentPlaylist.CurrentSongIndex = playlistIndex;
+            this.CurrentPlaylist.CurrentSongIndex.Value = playlistIndex;
 
             Song song = this.CurrentPlaylist[playlistIndex].Song;
 
-            this.RenewCurrentPlayer(song);
+            AudioPlayer audioPlayer;
 
-            Task.Factory.StartNew(() =>
+            try
             {
-                if (song.HasToCache && !song.IsCached)
+                audioPlayer = await this.RenewCurrentPlayerAsync(song);
+            }
+
+            catch (AudioPlayerCreatingException)
+            {
+                this.HandleSongCorruptionAsync();
+
+                return;
+            }
+
+            if (song.HasToCache && !song.IsCached)
+            {
+                bool cached = this.AwaitCaching(song);
+
+                if (!cached)
                 {
-                    bool cached = this.AwaitCaching(song);
-
-                    if (!cached)
-                    {
-                        return;
-                    }
-                }
-
-                this.overrideCurrentCaching = false;
-
-                try
-                {
-                    this.currentPlayer.Load();
-                }
-
-                catch (SongLoadException)
-                {
-                    song.IsCorrupted = true;
-                    this.SongCorrupted.RaiseSafe(this, EventArgs.Empty);
-
-                    this.HandleSongCorruption();
-
                     return;
                 }
+            }
 
-                try
-                {
-                    this.currentPlayer.Play();
-                }
+            this.overrideCurrentCaching = false;
 
-                catch (PlaybackException)
-                {
-                    song.IsCorrupted = true;
-                    this.SongCorrupted.RaiseSafe(this, EventArgs.Empty);
+            try
+            {
+                await audioPlayer.LoadAsync();
+            }
 
-                    this.HandleSongCorruption();
+            catch (SongLoadException)
+            {
+                song.IsCorrupted.Value = true;
 
-                    return;
-                }
+                this.HandleSongCorruptionAsync();
 
-                this.SongStarted.RaiseSafe(this, EventArgs.Empty);
-            });
+                return;
+            }
+
+            try
+            {
+                await audioPlayer.PlayAsync();
+            }
+
+            catch (PlaybackException)
+            {
+                song.IsCorrupted.Value = true;
+
+                this.HandleSongCorruptionAsync();
+
+                return;
+            }
+
+            this.songStarted.OnNext(Unit.Default);
         }
 
         private void Load()
@@ -930,21 +895,45 @@ namespace Espera.Core.Management
 
             IEnumerable<Playlist> savedPlaylists = this.libraryReader.ReadPlaylists();
 
-            this.playlists.AddRange(savedPlaylists);
+            foreach (Playlist playlist in savedPlaylists)
+            {
+                this.playlists.Add(playlist);
+            }
+
+            this.songSourcePath.OnNext(this.libraryReader.ReadSongSourcePath());
+        }
+
+        /// <summary>
+        /// Removes the specified songs from the library.
+        /// </summary>
+        /// <param name="songList">The list of the songs to remove from the library.</param>
+        private void RemoveFromLibrary(IEnumerable<Song> songList)
+        {
+            if (songList == null)
+                Throw.ArgumentNullException(() => songList);
+
+            DisposeSongs(songList);
+
+            this.playlists.ForEach(playlist => this.RemoveFromPlaylist(playlist, songList));
+
+            lock (this.songLock)
+            {
+                foreach (Song song in songList)
+                {
+                    this.songs.Remove(song);
+                }
+            }
         }
 
         private void RemoveFromPlaylist(Playlist playlist, IEnumerable<int> indexes)
         {
-            bool stopCurrentSong = playlist == this.CurrentPlaylist && indexes.Any(index => index == this.CurrentPlaylist.CurrentSongIndex);
+            bool stopCurrentSong = playlist == this.CurrentPlaylist && indexes.Any(index => index == this.CurrentPlaylist.CurrentSongIndex.Value);
 
             playlist.RemoveSongs(indexes);
 
-            this.PlaylistChanged.RaiseSafe(this, EventArgs.Empty);
-
             if (stopCurrentSong)
             {
-                this.currentPlayer.Stop();
-                this.SongFinished.RaiseSafe(this, EventArgs.Empty);
+                this.currentPlayer.FirstAsync().Wait().StopAsync();
             }
         }
 
@@ -953,54 +942,92 @@ namespace Espera.Core.Management
             this.RemoveFromPlaylist(playlist, playlist.GetIndexes(songList));
         }
 
-        private void RenewCurrentPlayer(Song song)
+        private async Task RemoveMissingSongsAsync(string currentPath)
         {
-            if (this.currentPlayer != null)
+            List<Song> currentSongs;
+
+            lock (this.songLock)
             {
-                this.currentPlayer.Dispose();
+                currentSongs = this.songs.ToList();
             }
 
-            this.currentPlayer = song.CreateAudioPlayer();
+            List<Song> notInAnySongSource = currentSongs
+                .Where(song => !song.OriginalPath.StartsWith(currentPath))
+                .ToList();
 
-            if (this.currentPlayer is IVideoPlayerCallback)
+            HashSet<Song> removable = null;
+
+            await Task.Run(() =>
             {
-                this.VideoPlayerCallbackChanged.RaiseSafe(this, EventArgs.Empty);
+                List<Song> nonExistant = currentSongs
+                    .Where(song => !this.fileSystem.File.Exists(song.OriginalPath))
+                    .ToList();
+
+                removable = new HashSet<Song>(notInAnySongSource.Concat(nonExistant));
+            });
+
+            this.RemoveFromLibrary(removable);
+        }
+
+        private async Task<AudioPlayer> RenewCurrentPlayerAsync(Song song)
+        {
+            AudioPlayer player = await this.currentPlayer.FirstAsync();
+
+            if (player != null)
+            {
+                player.Dispose();
             }
 
-            this.currentPlayer.SongFinished += (sender, e) => this.HandleSongFinish();
-            this.currentPlayer.Volume = this.Volume;
+            AudioPlayer newAudioPlayer = await song.CreateAudioPlayerAsync();
+
+            this.currentPlayer.OnNext(newAudioPlayer);
+
+            // Set the volume after the currentPlayer is propagated so that an potential
+            // IVideoPlayerCallback user can attach to the new AudioPlayer prior to that
+            newAudioPlayer.Volume = this.Volume;
+
+            return newAudioPlayer;
         }
 
         private void ThrowIfNotAdmin()
         {
-            if (this.AccessMode != AccessMode.Administrator)
+            if (this.accessMode != Management.AccessMode.Administrator)
                 throw new InvalidOperationException("Not in administrator mode.");
         }
 
-        private void Update()
+        private async Task UpdateSongsAsync(string path)
         {
-            this.Updating.RaiseSafe(this, EventArgs.Empty);
-
-            IEnumerable<Song> removable;
-
-            lock (this.songLock)
+            if (this.currentSongFinderSubscription != null)
             {
-                removable = this.songs
-                    .Where(song => !File.Exists(song.OriginalPath))
-                    .ToList();
+                this.currentSongFinderSubscription.Dispose();
+                this.currentSongFinderSubscription = null;
             }
 
-            DisposeSongs(removable);
+            await this.RemoveMissingSongsAsync(path);
 
-            foreach (Song song in removable)
-            {
-                lock (this.songLock)
+            this.songsUpdated.OnNext(Unit.Default);
+
+            var songFinder = new LocalSongFinder(path);
+
+            this.currentSongFinderSubscription = songFinder.GetSongs()
+                .SubscribeOn(TaskPoolScheduler.Default)
+                .Subscribe(song =>
                 {
-                    this.songs.Remove(song);
-                }
-            }
+                    bool added;
 
-            this.Updated.RaiseSafe(this, EventArgs.Empty);
+                    lock (this.songLock)
+                    {
+                        lock (this.disposeLock)
+                        {
+                            added = this.songs.Add(song);
+                        }
+                    }
+
+                    if (added)
+                    {
+                        this.songsUpdated.OnNext(Unit.Default);
+                    }
+                });
         }
     }
 }
