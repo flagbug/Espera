@@ -1,5 +1,6 @@
 ﻿using Espera.Core.Audio;
 using Rareform.IO;
+using Rareform.Validation;
 using System;
 using System.IO;
 using System.Reactive.Linq;
@@ -24,6 +25,9 @@ namespace Espera.Core
         public LocalSong(string path, AudioType audioType, TimeSpan duration, DriveType sourceDriveType, string artworkKey = null)
             : base(path, audioType, duration)
         {
+            if (artworkKey == String.Empty)
+                Throw.ArgumentException("Artwork key cannot be an empty string", () => artworkKey);
+
             this.sourceDriveType = sourceDriveType;
             this.artworkKey = new BehaviorSubject<string>(artworkKey);
         }
