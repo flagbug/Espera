@@ -264,16 +264,6 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Espera.Core\Espera.Core.csproj">
-      <Project>{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}</Project>
-      <Name>Espera.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Espera.Services\Espera.Services.csproj">
-      <Project>{cd457ebc-86cc-434b-bb0d-0db4f93e4a56}</Project>
-      <Name>Espera.Services</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\Add.png" />
     <Resource Include="Images\ApplicationIcon.png" />
     <Resource Include="Images\Mute.png" />
@@ -332,6 +322,14 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
+    <ProjectReference Include="..\Espera.Core\Espera.Core.csproj">
+      <Project>{d4ad0e4a-fecb-4ca9-9258-6bd1f22fac0d}</Project>
+      <Name>Espera.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Espera.Services\Espera.Services.csproj">
+      <Project>{cd457ebc-86cc-434b-bb0d-0db4f93e4a56}</Project>
+      <Name>Espera.Services</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
