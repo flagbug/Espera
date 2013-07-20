@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
@@ -13,22 +15,30 @@ namespace Espera.View.ViewModels
 {
     internal sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>, IDisposable
     {
+        private static readonly SemaphoreSlim ArtworkLock;
         private readonly ObservableAsPropertyHelper<BitmapSource> cover;
         private IEnumerable<LocalSongViewModel> songs;
+
+        static ArtistViewModel()
+        {
+            ArtworkLock = new SemaphoreSlim(1, 1);
+        }
 
         public ArtistViewModel(IEnumerable<LocalSongViewModel> songs)
             : this(songs.First().Artist)
         {
             this.Songs = songs.ToList();
 
-            List<string> keys = this.Songs
+            this.cover = this.Songs
                 .Select(x => x.Model)
                 .Cast<LocalSong>()
-                .Where(x => x.AlbumCoverKey != null)
-                .Select(x => x.AlbumCoverKey)
-                .ToList();
-
-            this.cover = Observable.StartAsync(() => LoadCoverAsync(keys))
+                .Select(song => song.ArtworkKey)
+                .Merge()
+                .Where(key => key != null)
+                .Select(key => LoadArtworkAsync(key).ToObservable())
+                .Merge()
+                .Where(image => image != null)
+                .Take(1)
                 .ToProperty(this, x => x.Cover);
         }
 
@@ -90,57 +100,54 @@ namespace Espera.View.ViewModels
             return this.Name == other.Name;
         }
 
-        private static async Task<BitmapSource> LoadCoverAsync(IEnumerable<string> availableKeys)
+        private static async Task<BitmapSource> LoadArtworkAsync(string key)
         {
-            foreach (string key in availableKeys)
+            byte[] imageBytes;
+
+            await ArtworkLock.WaitAsync(); // Limit the I/O access
+
+            try
             {
-                byte[] imageBytes;
-
-                try
-                {
-                    imageBytes = await BlobCache.LocalMachine.GetAsync(key);
-                }
-
-                catch (KeyNotFoundException)
-                {
-                    continue;
-                }
-
-                BitmapImage image = await Task.Run(() =>
-                {
-                    using (var imageStream = new MemoryStream(imageBytes))
-                    {
-                        var img = new BitmapImage();
-
-                        img.BeginInit();
-                        img.StreamSource = imageStream;
-                        img.CacheOption = BitmapCacheOption.OnLoad;
-                        img.DecodePixelHeight = 35;
-                        img.DecodePixelWidth = 35;
-
-                        try
-                        {
-                            img.EndInit();
-                        }
-
-                        catch (NotSupportedException)
-                        {
-                            return null;
-                        }
-
-                        img.Freeze();
-
-                        return img;
-                    }
-                });
-
-                if (image != null)
-                {
-                    return image;
-                }
+                imageBytes = await BlobCache.LocalMachine.GetAsync(key);
             }
 
-            return null;
+            catch (KeyNotFoundException)
+            {
+                return null;
+            }
+
+            finally
+            {
+                ArtworkLock.Release();
+            }
+
+            return await Task.Run(() =>
+            {
+                using (var imageStream = new MemoryStream(imageBytes))
+                {
+                    var img = new BitmapImage();
+
+                    img.BeginInit();
+                    img.StreamSource = imageStream;
+                    img.CacheOption = BitmapCacheOption.OnLoad;
+                    img.DecodePixelHeight = 35;
+                    img.DecodePixelWidth = 35;
+
+                    try
+                    {
+                        img.EndInit();
+                    }
+
+                    catch (NotSupportedException)
+                    {
+                        return null;
+                    }
+
+                    img.Freeze();
+
+                    return img;
+                }
+            });
         }
 
         /// <example>

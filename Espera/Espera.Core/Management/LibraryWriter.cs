@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Xml.Linq;
 
 namespace Espera.Core.Management
@@ -23,7 +24,7 @@ namespace Espera.Core.Management
                             new XAttribute("Path", song.OriginalPath),
                             new XAttribute("Title", song.Title),
                             new XAttribute("TrackNumber", song.TrackNumber),
-                            new XAttribute("AlbumCoverKey", song.AlbumCoverKey)))),
+                            new XAttribute("ArtworkKey", song.ArtworkKey.FirstAsync().Wait())))),
                     new XElement("Playlists", playlists.Select(playlist =>
                         new XElement("Playlist",
                             new XAttribute("Name", playlist.Name),

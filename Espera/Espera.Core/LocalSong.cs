@@ -2,12 +2,15 @@
 using Rareform.IO;
 using System;
 using System.IO;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 
 namespace Espera.Core
 {
     public sealed class LocalSong : Song
     {
+        private readonly BehaviorSubject<string> artworkKey;
         private readonly DriveType sourceDriveType;
 
         /// <summary>
@@ -17,18 +20,21 @@ namespace Espera.Core
         /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
         /// <param name="sourceDriveType">The drive type where the song comes from.</param>
-        /// <param name="albumCoverKey">The key of the album cover for Akavache to retrieve. Null, if there is no album cover.</param>
-        public LocalSong(string path, AudioType audioType, TimeSpan duration, DriveType sourceDriveType, string albumCoverKey)
+        /// <param name="artworkKey">The key of the artwork for Akavache to retrieve. Null, if there is no album cover or the artwork isn't retrieved yet.</param>
+        public LocalSong(string path, AudioType audioType, TimeSpan duration, DriveType sourceDriveType, string artworkKey = null)
             : base(path, audioType, duration)
         {
             this.sourceDriveType = sourceDriveType;
-            this.AlbumCoverKey = albumCoverKey;
+            this.artworkKey = new BehaviorSubject<string>(artworkKey);
         }
 
         /// <summary>
-        /// Gets the key of the album cover for Akavache to retrieve. Null, if there is no album cover.
+        /// Gets the key of the artwork for Akavache to retrieve. Null, if there is no album cover.
         /// </summary>
-        public string AlbumCoverKey { get; private set; }
+        public IObservable<string> ArtworkKey
+        {
+            get { return this.artworkKey.AsObservable(); }
+        }
 
         public override bool HasToCache
         {
@@ -65,6 +71,15 @@ namespace Espera.Core
         internal override async Task<AudioPlayer> CreateAudioPlayerAsync()
         {
             return await Task.FromResult(new LocalAudioPlayer(this));
+        }
+
+        /// <summary>
+        /// Notifies the <see cref="LocalSong"/> that the artwork has been stored to the permanent storage.
+        /// </summary>
+        /// <param name="key">The key of the artwork for Akavache to be retrieved.</param>
+        internal void NotifyArtworkStored(string key)
+        {
+            this.artworkKey.OnNext(key);
         }
 
         private async Task LoadToTempFileAsync()

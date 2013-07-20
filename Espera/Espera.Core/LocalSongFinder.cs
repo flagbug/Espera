@@ -38,16 +38,7 @@ namespace Espera.Core
 
         private static LocalSong CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath, DriveType driveType)
         {
-            IPicture picture = tag.Pictures.FirstOrDefault();
-
-            string albumCoverKey = picture == null ? null : Guid.NewGuid().ToString();
-
-            if (picture != null)
-            {
-                BlobCache.LocalMachine.Insert(albumCoverKey, picture.Data.Data);
-            }
-
-            return new LocalSong(filePath, audioType, duration, driveType, albumCoverKey)
+            var song = new LocalSong(filePath, audioType, duration, driveType)
             {
                 Album = PrepareTag(tag.Album, String.Empty),
                 Artist = PrepareTag(tag.FirstPerformer, "Unknown Artist"), //HACK: In the future retrieve the string for an unkown artist from the view if we want to localize it
@@ -55,6 +46,20 @@ namespace Espera.Core
                 Title = PrepareTag(tag.Title, Path.GetFileNameWithoutExtension(filePath)),
                 TrackNumber = (int)tag.Track
             };
+
+            IPicture picture = tag.Pictures.FirstOrDefault();
+
+            string albumCoverKey = picture == null ? null : Guid.NewGuid().ToString();
+
+            if (picture != null)
+            {
+                // Note that this methods acts asynchronous
+                // Also we make sure that, after this method completes, the song is notified that its artwork is stored
+                BlobCache.LocalMachine.Insert(albumCoverKey, picture.Data.Data)
+                    .Subscribe(x => song.NotifyArtworkStored(albumCoverKey));
+            }
+
+            return song;
         }
 
         private static string PrepareTag(string tag, string replacementIfNull)

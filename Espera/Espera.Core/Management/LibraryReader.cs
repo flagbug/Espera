@@ -101,7 +101,7 @@ namespace Espera.Core.Management
                             (AudioType)Enum.Parse(typeof(AudioType), song.Attribute("AudioType").Value),
                             TimeSpan.FromTicks(Int64.Parse(song.Attribute("Duration").Value)),
                             driveTypeCallback(song.Attribute("Path").Value),
-                            song.Attribute("AlbumCoverKey").Value
+                            song.Attribute("ArtworkKey").Value
                         )
                         {
                             Album = song.Attribute("Album").Value,
