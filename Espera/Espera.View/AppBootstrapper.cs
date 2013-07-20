@@ -66,6 +66,8 @@ namespace Espera.View
         protected override void OnExit(object sender, EventArgs e)
         {
             this.kernel.Dispose();
+
+            BlobCache.Shutdown().Wait();
         }
 
         protected override void OnStartup(object sender, StartupEventArgs e)
