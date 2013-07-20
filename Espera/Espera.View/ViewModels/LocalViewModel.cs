@@ -1,5 +1,4 @@
-﻿using Espera.Core;
-using Espera.Core.Management;
+﻿using Espera.Core.Management;
 using Espera.View.Properties;
 using ReactiveUI;
 using System;
@@ -20,6 +19,7 @@ namespace Espera.View.ViewModels
         private SortOrder albumOrder;
         private SortOrder artistOrder;
         private SortOrder durationOrder;
+        private List<LocalSongViewModel> filteredSongs;
         private SortOrder genreOrder;
         private ArtistViewModel selectedArtist;
         private SortOrder titleOrder;
@@ -142,7 +142,7 @@ namespace Espera.View.ViewModels
 
         private void UpdateArtists()
         {
-            var groupedByArtist = this.SelectableSongs
+            var groupedByArtist = this.filteredSongs
                .AsParallel()
                .GroupBy(song => song.Artist)
                .ToDictionary(x => x.Key, x => x.ToList());
@@ -181,12 +181,11 @@ namespace Espera.View.ViewModels
             // which are on a different thread, don't interfere
             this.updateSemaphore.Wait();
 
-            IEnumerable<Song> filtered = this.Library.Songs.FilterSongs(this.SearchText).ToList();
+            this.filteredSongs = this.Library.Songs.FilterSongs(this.SearchText).Select(song => new LocalSongViewModel(song)).ToList();
 
-            this.SelectableSongs = filtered
+            this.SelectableSongs = this.filteredSongs
                 .AsParallel()
                 .Where(song => this.SelectedArtist.IsAllArtists || song.Artist == this.SelectedArtist.Name)
-                .Select(song => new LocalSongViewModel(song))
                 .OrderBy(this.SongOrderFunc)
                 .ToList();
 
