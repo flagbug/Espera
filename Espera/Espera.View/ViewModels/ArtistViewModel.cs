@@ -106,28 +106,36 @@ namespace Espera.View.ViewModels
                     continue;
                 }
 
-                using (var imageStream = new MemoryStream(imageBytes))
+                BitmapImage image = await Task.Run(() =>
                 {
-                    var image = new BitmapImage();
-
-                    image.BeginInit();
-                    image.StreamSource = imageStream;
-                    image.CacheOption = BitmapCacheOption.OnLoad;
-                    image.DecodePixelHeight = 35;
-                    image.DecodePixelWidth = 35;
-
-                    try
+                    using (var imageStream = new MemoryStream(imageBytes))
                     {
-                        image.EndInit();
+                        var img = new BitmapImage();
+
+                        img.BeginInit();
+                        img.StreamSource = imageStream;
+                        img.CacheOption = BitmapCacheOption.OnLoad;
+                        img.DecodePixelHeight = 35;
+                        img.DecodePixelWidth = 35;
+
+                        try
+                        {
+                            img.EndInit();
+                        }
+
+                        catch (NotSupportedException)
+                        {
+                            return null;
+                        }
+
+                        img.Freeze();
+
+                        return img;
                     }
+                });
 
-                    catch (NotSupportedException)
-                    {
-                        continue;
-                    }
-
-                    image.Freeze();
-
+                if (image != null)
+                {
                     return image;
                 }
             }
