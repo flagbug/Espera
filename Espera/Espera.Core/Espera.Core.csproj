@@ -145,7 +145,6 @@
     <Compile Include="Settings\LibrarySettingsWrapper.cs" />
     <Compile Include="Song.cs" />
     <Compile Include="LocalSongFinder.cs" />
-    <Compile Include="ISongFinder.cs" />
     <Compile Include="IVideoPlayerCallback.cs" />
     <Compile Include="TagSanitizer.cs" />
     <Compile Include="YoutubeDownloadException.cs" />

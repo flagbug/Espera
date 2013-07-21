@@ -1,5 +1,4 @@
-﻿using Akavache;
-using Espera.Core.Audio;
+﻿using Espera.Core.Audio;
 using Rareform.IO;
 using Rareform.Validation;
 using System;
@@ -13,9 +12,9 @@ namespace Espera.Core
     /// <summary>
     /// Encapsulates a recursive call through the local filesystem that reads the tags of all WAV and MP3 files and returns them.
     /// </summary>
-    internal sealed class LocalSongFinder : ISongFinder<LocalSong>
+    internal sealed class LocalSongFinder
     {
-        private static readonly string[] AllowedExtensions = new[] { ".mp3", ".wav" };
+        private static readonly string[] AllowedExtensions = { ".mp3", ".wav" };
         private readonly string directoryPath;
         private readonly DriveType driveType;
 
@@ -29,14 +28,17 @@ namespace Espera.Core
             this.driveType = new DriveInfo(Path.GetPathRoot(directoryPath)).DriveType;
         }
 
-        public IObservable<LocalSong> GetSongs()
+        /// <summary>
+        /// This method scans the directory, specified in the constructor, and returns an observable with a tuple that contains the song and the data of the artwork.
+        /// </summary>
+        public IObservable<Tuple<LocalSong, byte[]>> GetSongs()
         {
             return this.ScanDirectoryForValidPaths()
                 .Select(this.ProcessFile)
-                .Where(song => song != null);
+                .Where(t => t != null);
         }
 
-        private static LocalSong CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath, DriveType driveType)
+        private static Tuple<LocalSong, byte[]> CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath, DriveType driveType)
         {
             var song = new LocalSong(filePath, audioType, duration, driveType)
             {
@@ -49,17 +51,7 @@ namespace Espera.Core
 
             IPicture picture = tag.Pictures.FirstOrDefault();
 
-            string albumCoverKey = picture == null ? null : Guid.NewGuid().ToString();
-
-            if (picture != null)
-            {
-                // Note that this methods acts asynchronous
-                // Also we make sure that, after this method completes, the song is notified that its artwork is stored
-                BlobCache.LocalMachine.Insert(albumCoverKey, picture.Data.Data)
-                    .Subscribe(x => song.NotifyArtworkStored(albumCoverKey));
-            }
-
-            return song;
+            return Tuple.Create(song, picture == null ? null : picture.Data.Data);
         }
 
         private static string PrepareTag(string tag, string replacementIfNull)
@@ -67,7 +59,7 @@ namespace Espera.Core
             return tag == null ? replacementIfNull : TagSanitizer.Sanitize(tag);
         }
 
-        private LocalSong ProcessFile(string filePath)
+        private Tuple<LocalSong, byte[]> ProcessFile(string filePath)
         {
             TagLib.File file = null;
 

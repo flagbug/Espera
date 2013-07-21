@@ -1,4 +1,5 @@
-﻿using Espera.Core.Audio;
+﻿using Akavache;
+using Espera.Core.Audio;
 using Espera.Core.Settings;
 using Rareform.Extensions;
 using Rareform.Validation;
@@ -1011,8 +1012,10 @@ namespace Espera.Core.Management
 
             this.currentSongFinderSubscription = songFinder.GetSongs()
                 .SubscribeOn(TaskPoolScheduler.Default)
-                .Subscribe(song =>
+                .Subscribe(t =>
                 {
+                    LocalSong song = t.Item1;
+
                     bool added;
 
                     lock (this.songLock)
@@ -1025,6 +1028,15 @@ namespace Espera.Core.Management
 
                     if (added)
                     {
+                        byte[] artworkData = t.Item2;
+
+                        if (artworkData != null)
+                        {
+                            string artworkKey = Guid.NewGuid().ToString();
+
+                            BlobCache.LocalMachine.Insert(artworkKey, artworkData).Subscribe(x => song.NotifyArtworkStored(artworkKey));
+                        }
+
                         this.songsUpdated.OnNext(Unit.Default);
                     }
                 });
