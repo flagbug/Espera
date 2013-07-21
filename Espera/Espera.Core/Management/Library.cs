@@ -712,8 +712,15 @@ namespace Espera.Core.Management
         /// <param name="songList">The songs to dispose.</param>
         private static void DisposeSongs(IEnumerable<Song> songList)
         {
+            IEnumerable<Song> enumerable = songList.ToList();
+
+            foreach (string key in enumerable.Cast<LocalSong>().Select(s => s.ArtworkKey.FirstAsync().Wait()).Where(key => key != null))
+            {
+                BlobCache.LocalMachine.Invalidate(key);
+            }
+
             // If the condition is removed, every file that has been added to the library will be deleted...
-            foreach (Song song in songList.Where(song => song.HasToCache && song.IsCached))
+            foreach (LocalSong song in enumerable.Where(song => song.HasToCache && song.IsCached))
             {
                 try
                 {
