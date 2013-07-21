@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
@@ -35,10 +34,9 @@ namespace Espera.View.ViewModels
                 .Select(song => song.ArtworkKey)
                 .Merge()
                 .Where(key => key != null)
-                .Select(key => LoadArtworkAsync(key).ToObservable())
-                .Merge()
-                .Where(image => image != null)
-                .Take(1)
+                .ObserveOn(RxApp.TaskpoolScheduler)
+                .Select(key => LoadArtworkAsync(key).Result)
+                .FirstOrDefaultAsync(pic => pic != null)
                 .ToProperty(this, x => x.Cover);
         }
 
