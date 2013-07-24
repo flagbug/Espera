@@ -14,7 +14,7 @@ namespace Espera.View.ViewModels
 {
     internal sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>, IDisposable
     {
-        private static readonly SemaphoreSlim ArtworkLock;
+        private static readonly SemaphoreSlim ArtworkLock; // This semaphore is used to limit the I/O access when accessing the artwork cache to 1 item at a time
         private readonly ObservableAsPropertyHelper<BitmapSource> cover;
         private IEnumerable<LocalSongViewModel> songs;
 
