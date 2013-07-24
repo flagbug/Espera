@@ -8,7 +8,7 @@ using System.Reactive.Linq;
 
 namespace Espera.Core
 {
-    public sealed class YoutubeSongFinder : ISongFinder<YoutubeSong>
+    public sealed class YoutubeSongFinder
     {
         private const string ApiKey =
             "AI39si5_zcffmO_ErRSZ9xUkfy_XxPZLWuxTOzI_1RH9HhXDI-GaaQ-j6MONkl2JiF01yBDgBFPbC8-mn6U9Qo4Ek50nKcqH5g";

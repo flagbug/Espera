@@ -1,4 +1,5 @@
-﻿using Caliburn.Micro;
+﻿using Akavache;
+using Caliburn.Micro;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Espera.View.Properties;
@@ -26,6 +27,7 @@ namespace Espera.View
         {
             DirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\");
             FilePath = Path.Combine(DirectoryPath, "Library.xml");
+            BlobCache.ApplicationName = "Espera";
         }
 
         public AppBootstrapper()
@@ -64,6 +66,8 @@ namespace Espera.View
         protected override void OnExit(object sender, EventArgs e)
         {
             this.kernel.Dispose();
+
+            BlobCache.Shutdown().Wait();
         }
 
         protected override void OnStartup(object sender, StartupEventArgs e)

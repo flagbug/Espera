@@ -1,4 +1,5 @@
-﻿using Espera.Core.Audio;
+﻿using Akavache;
+using Espera.Core.Audio;
 using Espera.Core.Settings;
 using Rareform.Extensions;
 using Rareform.Validation;
@@ -712,7 +713,7 @@ namespace Espera.Core.Management
         private static void DisposeSongs(IEnumerable<Song> songList)
         {
             // If the condition is removed, every file that has been added to the library will be deleted...
-            foreach (Song song in songList.Where(song => song.HasToCache && song.IsCached))
+            foreach (LocalSong song in songList.Where(song => song.HasToCache && song.IsCached))
             {
                 try
                 {
@@ -912,13 +913,20 @@ namespace Espera.Core.Management
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
 
-            DisposeSongs(songList);
+            List<Song> enumerable = songList.ToList();
 
-            this.playlists.ForEach(playlist => this.RemoveFromPlaylist(playlist, songList));
+            foreach (LocalSong song in enumerable)
+            {
+                BlobCache.LocalMachine.Invalidate(song.ArtworkKey.FirstAsync().Wait());
+            }
+
+            DisposeSongs(enumerable);
+
+            this.playlists.ForEach(playlist => this.RemoveFromPlaylist(playlist, enumerable));
 
             lock (this.songLock)
             {
-                foreach (Song song in songList)
+                foreach (LocalSong song in enumerable)
                 {
                     this.songs.Remove(song);
                 }
@@ -1011,8 +1019,10 @@ namespace Espera.Core.Management
 
             this.currentSongFinderSubscription = songFinder.GetSongs()
                 .SubscribeOn(TaskPoolScheduler.Default)
-                .Subscribe(song =>
+                .Subscribe(t =>
                 {
+                    LocalSong song = t.Item1;
+
                     bool added;
 
                     lock (this.songLock)
@@ -1025,6 +1035,15 @@ namespace Espera.Core.Management
 
                     if (added)
                     {
+                        byte[] artworkData = t.Item2;
+
+                        if (artworkData != null)
+                        {
+                            string artworkKey = Guid.NewGuid().ToString();
+
+                            BlobCache.LocalMachine.Insert(artworkKey, artworkData).Subscribe(x => song.NotifyArtworkStored(artworkKey));
+                        }
+
                         this.songsUpdated.OnNext(Unit.Default);
                     }
                 });

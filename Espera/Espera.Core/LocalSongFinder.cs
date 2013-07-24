@@ -12,9 +12,9 @@ namespace Espera.Core
     /// <summary>
     /// Encapsulates a recursive call through the local filesystem that reads the tags of all WAV and MP3 files and returns them.
     /// </summary>
-    internal sealed class LocalSongFinder : ISongFinder<LocalSong>
+    internal sealed class LocalSongFinder
     {
-        private static readonly string[] AllowedExtensions = new[] { ".mp3", ".wav" };
+        private static readonly string[] AllowedExtensions = { ".mp3", ".wav" };
         private readonly string directoryPath;
         private readonly DriveType driveType;
 
@@ -28,16 +28,19 @@ namespace Espera.Core
             this.driveType = new DriveInfo(Path.GetPathRoot(directoryPath)).DriveType;
         }
 
-        public IObservable<LocalSong> GetSongs()
+        /// <summary>
+        /// This method scans the directory, specified in the constructor, and returns an observable with a tuple that contains the song and the data of the artwork.
+        /// </summary>
+        public IObservable<Tuple<LocalSong, byte[]>> GetSongs()
         {
             return this.ScanDirectoryForValidPaths()
                 .Select(this.ProcessFile)
-                .Where(song => song != null);
+                .Where(t => t != null);
         }
 
-        private static LocalSong CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath, DriveType driveType)
+        private static Tuple<LocalSong, byte[]> CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath, DriveType driveType)
         {
-            return new LocalSong(filePath, audioType, duration, driveType)
+            var song = new LocalSong(filePath, audioType, duration, driveType)
             {
                 Album = PrepareTag(tag.Album, String.Empty),
                 Artist = PrepareTag(tag.FirstPerformer, "Unknown Artist"), //HACK: In the future retrieve the string for an unkown artist from the view if we want to localize it
@@ -45,6 +48,10 @@ namespace Espera.Core
                 Title = PrepareTag(tag.Title, Path.GetFileNameWithoutExtension(filePath)),
                 TrackNumber = (int)tag.Track
             };
+
+            IPicture picture = tag.Pictures.FirstOrDefault();
+
+            return Tuple.Create(song, picture == null ? null : picture.Data.Data);
         }
 
         private static string PrepareTag(string tag, string replacementIfNull)
@@ -52,7 +59,7 @@ namespace Espera.Core
             return tag == null ? replacementIfNull : TagSanitizer.Sanitize(tag);
         }
 
-        private LocalSong ProcessFile(string filePath)
+        private Tuple<LocalSong, byte[]> ProcessFile(string filePath)
         {
             TagLib.File file = null;
 
