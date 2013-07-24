@@ -38,7 +38,7 @@ namespace Espera.View.ViewModels
                 h => NetworkChange.NetworkAvailabilityChanged -= h)
                 .Select(x => !x.EventArgs.IsAvailable)
                 .Do(_ => this.StartSearch())
-                .ToProperty(this, x => x.IsNetworkUnavailable, NetworkInterface.GetIsNetworkAvailable());
+                .ToProperty(this, x => x.IsNetworkUnavailable, !NetworkInterface.GetIsNetworkAvailable());
 
             // We need a default sorting order
             this.OrderByTitle();
