@@ -2,6 +2,7 @@
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
+using Espera.Services;
 using Rareform.Extensions;
 using ReactiveUI;
 using System;
@@ -9,7 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Timers;
+using System.Threading;
+using Timer = System.Timers.Timer;
 
 namespace Espera.View.ViewModels
 {
@@ -227,6 +229,9 @@ namespace Espera.View.ViewModels
             this.RemoveSelectedPlaylistEntriesCommand.Subscribe(x => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index)));
 
             this.IsLocal = true;
+
+            MobileApi.SendBroadcastAsync(new CancellationTokenSource());
+            new MobileApi(this.library).StartClientDiscovery(new CancellationTokenSource());
         }
 
         public IReactiveCommand AddPlaylistCommand { get; private set; }
