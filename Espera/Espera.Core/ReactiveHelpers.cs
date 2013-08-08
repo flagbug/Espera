@@ -9,10 +9,10 @@ namespace Espera.Core
     {
         /// <summary>
         /// Takes the left observable and combines it with the latest value of the right observable.
-        /// This method is like <see cref="Observable.CombineLatest{TSource1,TSource2,TResult}"/>, 
+        /// This method is like <see cref="Observable.CombineLatest{TSource1,TSource2,TResult}"/>,
         /// except it propagates only when the value of the left observable sequence changes.
         /// </summary>
-        public static IObservable<TResult> Left<TLeft, TRight, TResult>(this IObservable<TLeft> left, IObservable<TRight> right, Func<TLeft, TRight, TResult> resultSelector)
+        public static IObservable<TResult> CombineLatestValue<TLeft, TRight, TResult>(this IObservable<TLeft> left, IObservable<TRight> right, Func<TLeft, TRight, TResult> resultSelector)
         {
             TRight latest = default(TRight);
             bool initialized = false;
@@ -28,7 +28,7 @@ namespace Espera.Core
             return Observable.Create<TResult>(o =>
             {
                 left.Where(_ => initialized)
-                    .Subscribe(x => o.OnNext(resultSelector(x, latest)), 
+                    .Subscribe(x => o.OnNext(resultSelector(x, latest)),
                         o.OnError, o.OnCompleted)
                     .DisposeWith(disp);
 

@@ -92,7 +92,7 @@ namespace Espera.Core.Management
                 .Where(x => x != null)
                 .Select(x => x.PlaybackState.Where(p => p == AudioPlayerState.Finished).Select(q => x))
                 .Switch()
-                .Left(this.CanPlayNextSong, Tuple.Create)
+                .CombineLatestValue(this.CanPlayNextSong, Tuple.Create)
                 .Subscribe(t => this.HandleSongFinishAsync(t.Item1, t.Item2));
 
             this.CurrentTimeChanged = this.currentPlayer
