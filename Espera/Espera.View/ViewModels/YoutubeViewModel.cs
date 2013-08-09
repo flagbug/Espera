@@ -28,7 +28,7 @@ namespace Espera.View.ViewModels
             this.playNowCommand = new ReactiveCommand();
             this.playNowCommand.RegisterAsyncTask(_ => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model)));
 
-            this.selectedSong = this.WhenAny(x => x.SelectedSongs, x => x.Value)
+            this.selectedSong = this.WhenAnyValue(x => x.SelectedSongs)
                 .Select(x => x == null ? null : this.SelectedSongs.FirstOrDefault())
                 .Select(x => x == null ? null : (YoutubeSongViewModel)x)
                 .ToProperty(this, x => x.SelectedSong);

@@ -18,7 +18,7 @@ namespace Espera.View.ViewModels
             this.version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             this.SubmitCrashReport = new ReactiveCommand(
-                this.WhenAny(x => x.SendingSucceeded, x => x.Value)
+                this.WhenAnyValue(x => x.SendingSucceeded)
                 .Select(x => x == null || !x.Value));
 
             this.SubmitCrashReport.Subscribe(x =>

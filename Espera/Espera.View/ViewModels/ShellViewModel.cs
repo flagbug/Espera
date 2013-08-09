@@ -80,8 +80,8 @@ namespace Espera.View.ViewModels
             this.playlistTimeoutUpdateTimer.Elapsed += (sender, e) => this.UpdateRemainingPlaylistTimeout();
             this.playlistTimeoutUpdateTimer.Start();
 
-            this.currentSongSource = this.WhenAny(x => x.IsLocal, x => x.IsYoutube,
-                (x1, x2) => x1.Value ? (ISongSourceViewModel)this.LocalViewModel : this.YoutubeViewModel)
+            this.currentSongSource = this.WhenAnyValue(x => x.IsLocal, x => x.IsYoutube,
+                (x1, x2) => x1 ? (ISongSourceViewModel)this.LocalViewModel : this.YoutubeViewModel)
                 .ToProperty(this, x => x.CurrentSongSource, null, ImmediateScheduler.Instance);
 
             this.currentSongSource
@@ -93,7 +93,7 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.IsAdmin);
 
             this.showPlaylistTimeout = isAdminObservable
-                .CombineLatest(this.WhenAny(x => x.SettingsViewModel.EnablePlaylistTimeout, x => x.Value), (isAdmin, enableTimeout) => !isAdmin && enableTimeout)
+                .CombineLatest(this.WhenAnyValue(x => x.SettingsViewModel.EnablePlaylistTimeout), (isAdmin, enableTimeout) => !isAdmin && enableTimeout)
                 .ToProperty(this, x => x.ShowPlaylistTimeout);
 
             this.MuteCommand = new ReactiveCommand(this.isAdmin);
@@ -124,7 +124,7 @@ namespace Espera.View.ViewModels
                 .Select(x => (int)x.TotalSeconds)
                 .ToProperty(this, x => x.TotalSeconds);
 
-            this.AddPlaylistCommand = new ReactiveCommand(this.WhenAny(x => x.CanSwitchPlaylist, x => x.Value));
+            this.AddPlaylistCommand = new ReactiveCommand(this.WhenAnyValue(x => x.CanSwitchPlaylist));
             this.AddPlaylistCommand.Subscribe(x => this.AddPlaylist());
 
             this.Playlists = this.library.Playlists.CreateDerivedCollection(this.CreatePlaylistViewModel);
@@ -136,7 +136,7 @@ namespace Espera.View.ViewModels
             this.ShufflePlaylistCommand = new ReactiveCommand();
             this.ShufflePlaylistCommand.Subscribe(x => this.library.ShufflePlaylist());
 
-            this.PlayCommand = new ReactiveCommand(this.WhenAny(x => x.SelectedPlaylistEntries, x => x.Value)
+            this.PlayCommand = new ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .CombineLatest(isAdminObservable, this.library.LockPlayPause, this.library.LoadedSong, this.library.PlaybackState,
                     (selectedPlaylistEntries, isAdmin, lockPlayPause, loadedSong, playBackState) =>
 
@@ -161,7 +161,7 @@ namespace Espera.View.ViewModels
                 }
             });
 
-            this.PlayOverrideCommand = new ReactiveCommand(this.WhenAny(x => x.SelectedPlaylistEntries, x => x.Value)
+            this.PlayOverrideCommand = new ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .CombineLatest(this.isAdmin, this.library.LockPlayPause, (selectedPlaylistEntries, isAdmin, lockPlayPause) =>
                     (isAdmin || !lockPlayPause) && (selectedPlaylistEntries != null && selectedPlaylistEntries.Count() == 1)));
             this.PlayOverrideCommand.RegisterAsyncTask(_ => this.library.PlaySongAsync(this.SelectedPlaylistEntries.First().Index));
@@ -171,7 +171,7 @@ namespace Espera.View.ViewModels
             this.PauseCommand.RegisterAsyncTask(_ => this.library.PauseSongAsync());
 
             this.PauseContinueCommand = new ReactiveCommand(this
-                .WhenAny(x => x.IsPlaying, x => x.Value)
+                .WhenAnyValue(x => x.IsPlaying)
                 .Select(x => x ? this.PauseCommand.CanExecute(null) : this.PlayCommand.CanExecute(null)));
             this.PauseContinueCommand.Subscribe(x =>
             {
@@ -187,11 +187,11 @@ namespace Espera.View.ViewModels
             });
 
             IObservable<bool> canEditPlaylist = this
-                .WhenAny(x => x.CanSwitchPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1.Value && !x2.Value.Model.IsTemporary);
+                .WhenAnyValue(x => x.CanSwitchPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 && !x2.Model.IsTemporary);
             this.EditPlaylistNameCommand = new ReactiveCommand(canEditPlaylist);
             this.EditPlaylistNameCommand.Subscribe(x => this.CurrentPlaylist.EditName = true);
 
-            this.RemovePlaylistCommand = new ReactiveCommand(this.WhenAny(x => x.CurrentEditedPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 != null || x2 != null));
+            this.RemovePlaylistCommand = new ReactiveCommand(this.WhenAnyValue(x => x.CurrentEditedPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 != null || x2 != null));
             this.RemovePlaylistCommand.Subscribe(x =>
             {
                 int index = this.Playlists.TakeWhile(p => p != this.CurrentPlaylist).Count();
@@ -219,7 +219,7 @@ namespace Espera.View.ViewModels
                 }
             });
 
-            this.RemoveSelectedPlaylistEntriesCommand = new ReactiveCommand(this.WhenAny(x => x.SelectedPlaylistEntries, x => x.Value)
+            this.RemoveSelectedPlaylistEntriesCommand = new ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .CombineLatest(this.isAdmin, this.library.LockPlaylistRemoval,
                     (selectedPlaylistEntries, isAdmin, lockPlaylistRemoval) =>
                         selectedPlaylistEntries != null && selectedPlaylistEntries.Any() && (isAdmin || lockPlaylistRemoval)));

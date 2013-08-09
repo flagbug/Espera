@@ -27,7 +27,7 @@ namespace Espera.View.ViewModels
             this.selectableSongs = Enumerable.Empty<T>();
             this.timeoutWarning = new Subject<Unit>();
 
-            IObservable<bool> canAddToPlaylist = this.WhenAny(x => x.SelectedSongs, x => x.Value != null && x.Value.Any());
+            IObservable<bool> canAddToPlaylist = this.WhenAnyValue(x => x.SelectedSongs, x => x != null && x.Any());
             this.AddToPlaylistCommand = new ReactiveCommand(canAddToPlaylist);
             this.AddToPlaylistCommand.Subscribe(p =>
             {

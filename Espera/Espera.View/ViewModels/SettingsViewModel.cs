@@ -39,7 +39,7 @@ namespace Espera.View.ViewModels
             this.Scaling = 1;
 
             this.canCreateAdmin = this
-                .WhenAny(x => x.CreationPassword, x => !string.IsNullOrWhiteSpace(x.Value) && !this.library.IsAdministratorCreated)
+                .WhenAnyValue(x => x.CreationPassword, x => !string.IsNullOrWhiteSpace(x) && !this.library.IsAdministratorCreated)
                 .ToProperty(this, x => x.CanCreateAdmin);
 
             this.CreateAdminCommand = new ReactiveCommand(this.canCreateAdmin, false,
@@ -53,7 +53,7 @@ namespace Espera.View.ViewModels
                 this.ShowSettings = false;
             });
 
-            this.canLogin = this.WhenAny(x => x.LoginPassword, x => !string.IsNullOrWhiteSpace(x.Value))
+            this.canLogin = this.WhenAnyValue(x => x.LoginPassword, x => !string.IsNullOrWhiteSpace(x))
                 .ToProperty(this, x => x.CanLogin);
 
             this.LoginCommand = new ReactiveCommand(this.canLogin, false,

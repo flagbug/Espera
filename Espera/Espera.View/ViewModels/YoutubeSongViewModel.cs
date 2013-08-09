@@ -33,12 +33,12 @@ namespace Espera.View.ViewModels
             this.OpenPathCommand = new ReactiveCommand();
             this.OpenPathCommand.Subscribe(x => Process.Start(this.Path));
 
-            this.hasThumbnail = this.WhenAny(x => x.Thumbnail, x => x.Value)
+            this.hasThumbnail = this.WhenAnyValue(x => x.Thumbnail)
                 .Select(x => x != null)
                 .ToProperty(this, x => x.HasThumbnail);
 
             // Wait for the opening of the context menu to download the YouTube information
-            this.WhenAny(x => x.IsContextMenuOpen, x => x.Value)
+            this.WhenAnyValue(x => x.IsContextMenuOpen)
                 .Where(x => x)
                 .FirstAsync()
                 .Subscribe(_ => this.LoadContextMenu());
@@ -46,10 +46,10 @@ namespace Espera.View.ViewModels
             // We have to set a dummy here, so that we can connect the commands
             this.isDownloading = Observable.Never<bool>().ToProperty(this, x => x.IsDownloading);
 
-            this.DownloadVideoCommand = new ReactiveCommand(this.WhenAny(x => x.IsDownloading, x => x.Value).Select(x => !x));
+            this.DownloadVideoCommand = new ReactiveCommand(this.WhenAnyValue(x => x.IsDownloading).Select(x => !x));
             this.DownloadVideoCommand.RegisterAsyncTask(x => this.DownloadVideo((VideoInfo)x));
 
-            this.DownloadAudioCommand = new ReactiveCommand(this.WhenAny(x => x.IsDownloading, x => x.Value).Select(x => !x));
+            this.DownloadAudioCommand = new ReactiveCommand(this.WhenAnyValue(x => x.IsDownloading).Select(x => !x));
             this.DownloadAudioCommand.RegisterAsyncTask(x => this.DownloadAudio((VideoInfo)x));
 
             this.isDownloading = this.DownloadVideoCommand.IsExecuting

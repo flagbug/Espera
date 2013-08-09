@@ -51,7 +51,7 @@ namespace Espera.View.ViewModels
                     this.UpdateArtists();
                 });
 
-            this.WhenAny(x => x.SelectedArtist, _ => Unit.Default)
+            this.WhenAnyValue(x => x.SelectedArtist)
                 .Subscribe(_ => this.UpdateSelectableSongs());
 
             this.playNowCommand = new ReactiveCommand();
