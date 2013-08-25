@@ -5,6 +5,8 @@ using Newtonsoft.Json.Linq;
 using Rareform.Validation;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -56,6 +58,19 @@ namespace Espera.Services
                         await action(request["parameters"]);
                     }
                 }
+            }
+        }
+
+        private static async Task<byte[]> CompressContentAsync(byte[] content)
+        {
+            using (var targetStream = new MemoryStream())
+            {
+                using (var stream = new GZipStream(targetStream, CompressionMode.Compress))
+                {
+                    await stream.WriteAsync(content, 0, content.Length);
+                }
+
+                return targetStream.ToArray();
             }
         }
 
@@ -144,6 +159,9 @@ namespace Espera.Services
         private async Task SendMessage(JObject content)
         {
             byte[] contentBytes = Encoding.Unicode.GetBytes(content.ToString(Formatting.None));
+
+            contentBytes = await CompressContentAsync(contentBytes);
+
             byte[] length = BitConverter.GetBytes(contentBytes.Length); // We have a fixed size of 4 bytes
             byte[] headerBytes = Encoding.Unicode.GetBytes("espera-server-message");
 
