@@ -68,14 +68,14 @@ namespace Espera.Services
                         {
                             album = s.Album,
                             artist = s.Artist,
-                            duration = s.Duration,
+                            duration = s.Duration.TotalSeconds,
                             genre = s.Genre,
                             title = s.Title,
                             guid = s.Guid
                         }
             });
 
-            await this.SendMessage(content);
+            await this.SendResponse(200, "Ok", content);
         }
 
         private async Task PostPlaylistSong(JToken parameters)
@@ -90,17 +90,29 @@ namespace Espera.Services
                 if (song != null)
                 {
                     this.library.AddSongToPlaylist(song);
+                    await this.SendResponse(200, "Song added to playlist");
                 }
 
                 else
                 {
-                    // Handle error
+                    await this.SendResponse(404, "Song not found");
                 }
             }
 
             else
             {
-                // Handle error
+                await this.SendResponse(400, "Invalid GUID");
+            }
+        }
+
+        private async Task ReceiveAsync(byte[] buffer)
+        {
+            int received = 0;
+
+            while (received < buffer.Length)
+            {
+                int bytesRecieved = await this.client.GetStream().ReadAsync(buffer, received, buffer.Length - received);
+                received += bytesRecieved;
             }
         }
 
@@ -108,7 +120,7 @@ namespace Espera.Services
         {
             var buffer = new byte[42];
 
-            await this.RecieveAsync(buffer);
+            await this.ReceiveAsync(buffer);
 
             string header = Encoding.Unicode.GetString(buffer);
 
@@ -116,28 +128,17 @@ namespace Espera.Services
                 throw new Exception("Holy batman, something went terribly wrong!");
 
             buffer = new byte[4];
-            await this.RecieveAsync(buffer);
+            await this.ReceiveAsync(buffer);
 
             int length = BitConverter.ToInt32(buffer, 0);
 
             buffer = new byte[length];
 
-            await this.RecieveAsync(buffer);
+            await this.ReceiveAsync(buffer);
 
             string content = Encoding.Unicode.GetString(buffer);
 
             return JObject.Parse(content);
-        }
-
-        private async Task RecieveAsync(byte[] buffer)
-        {
-            int recieved = 0;
-
-            while (recieved < buffer.Length)
-            {
-                int bytesRecieved = await this.client.GetStream().ReadAsync(buffer, recieved, buffer.Length - recieved);
-                recieved += bytesRecieved;
-            }
         }
 
         private async Task SendMessage(JObject content)
@@ -153,6 +154,22 @@ namespace Espera.Services
 
             await client.GetStream().WriteAsync(message, 0, message.Length);
             await client.GetStream().FlushAsync();
+        }
+
+        private async Task SendResponse(int status, string message, JToken content = null)
+        {
+            var response = new JObject
+            {
+                {"status", status},
+                {"message", message},
+            };
+
+            if (content != null)
+            {
+                response.Add("content", content);
+            }
+
+            await this.SendMessage(response);
         }
     }
 }
