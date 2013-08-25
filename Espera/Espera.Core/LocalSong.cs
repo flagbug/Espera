@@ -22,6 +22,8 @@ namespace Espera.Core
                 Throw.ArgumentException("Artwork key cannot be an empty string", () => artworkKey);
 
             this.artworkKey = new BehaviorSubject<string>(artworkKey);
+
+            this.Guid = Guid.NewGuid();
         }
 
         /// <summary>
@@ -32,6 +34,10 @@ namespace Espera.Core
             get { return this.artworkKey.AsObservable(); }
         }
 
+        /// <summary>
+        /// A runtime identifier for interaction with the mobile API.
+        /// </summary>
+        public Guid Guid { get; private set; }
         /// <summary>
         /// Notifies the <see cref="LocalSong"/> that the artwork has been stored to the permanent storage.
         /// </summary>

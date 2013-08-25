@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace Espera.Services
 {
+    /// <summary>
+    /// Provides methods for connecting mobile endpoints with the application.
+    /// </summary>
     public class MobileApi
     {
         private static readonly int Port;

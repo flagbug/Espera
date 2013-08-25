@@ -32,7 +32,7 @@ namespace Espera.Core.Management
         private readonly ReadOnlyObservableCollection<Playlist> publicPlaylistWrapper;
         private readonly CoreSettings settings;
         private readonly object songLock;
-        private readonly HashSet<Song> songs;
+        private readonly HashSet<LocalSong> songs;
         private readonly BehaviorSubject<string> songSourcePath;
         private readonly Subject<Unit> songStarted;
         private readonly Subject<Unit> songsUpdated;
@@ -52,7 +52,7 @@ namespace Espera.Core.Management
             this.fileSystem = fileSystem;
 
             this.songLock = new object();
-            this.songs = new HashSet<Song>();
+            this.songs = new HashSet<LocalSong>();
             this.playlists = new ObservableCollection<Playlist>();
             this.publicPlaylistWrapper = new ReadOnlyObservableCollection<Playlist>(this.playlists);
             this.currentPlaylistChanged = new Subject<Playlist>();
@@ -195,11 +195,11 @@ namespace Espera.Core.Management
         /// <summary>
         /// Gets all songs that are currently in the library.
         /// </summary>
-        public IEnumerable<Song> Songs
+        public IEnumerable<LocalSong> Songs
         {
             get
             {
-                IEnumerable<Song> tempSongs;
+                IEnumerable<LocalSong> tempSongs;
 
                 lock (songLock)
                 {
@@ -706,9 +706,9 @@ namespace Espera.Core.Management
 
         private void Load()
         {
-            IEnumerable<Song> savedSongs = this.libraryReader.ReadSongs();
+            IEnumerable<LocalSong> savedSongs = this.libraryReader.ReadSongs();
 
-            foreach (Song song in savedSongs)
+            foreach (LocalSong song in savedSongs)
             {
                 this.songs.Add(song);
             }
@@ -769,14 +769,14 @@ namespace Espera.Core.Management
 
         private async Task RemoveMissingSongsAsync(string currentPath)
         {
-            List<Song> currentSongs;
+            List<LocalSong> currentSongs;
 
             lock (this.songLock)
             {
                 currentSongs = this.songs.ToList();
             }
 
-            List<Song> notInAnySongSource = currentSongs
+            List<LocalSong> notInAnySongSource = currentSongs
                 .Where(song => !song.OriginalPath.StartsWith(currentPath))
                 .ToList();
 
@@ -784,7 +784,7 @@ namespace Espera.Core.Management
 
             await Task.Run(() =>
             {
-                List<Song> nonExistant = currentSongs
+                List<LocalSong> nonExistant = currentSongs
                     .Where(song => !this.fileSystem.File.Exists(song.OriginalPath))
                     .ToList();
 
