@@ -80,8 +80,9 @@ namespace Espera.Services
             {
                 TcpClient tcpClient = await client.AcceptTcpClientAsync();
 
-                var mobileClient = new MobileClient(tcpClient, this.library);
-                mobileClient.StartAsync();
+                var mobileClient = new MobileClient(new EsperaNetworkClient(tcpClient), this.library);
+                mobileClient.StartAsync(token);
+
                 this.clients.Add(mobileClient);
             }
 

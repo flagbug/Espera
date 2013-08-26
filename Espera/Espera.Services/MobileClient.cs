@@ -5,11 +5,9 @@ using Newtonsoft.Json.Linq;
 using Rareform.Validation;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Espera.Services
@@ -17,13 +15,13 @@ namespace Espera.Services
     /// <summary>
     /// Represents one mobile endpoint and handles the interaction.
     /// </summary>
-    internal class MobileClient
+    public class MobileClient
     {
-        private readonly TcpClient client;
+        private readonly IEsperaNetworkClient client;
         private readonly Library library;
         private readonly Dictionary<string, Func<JToken, Task>> messageActionMap;
 
-        public MobileClient(TcpClient client, Library library)
+        public MobileClient(IEsperaNetworkClient client, Library library)
         {
             if (client == null)
                 Throw.ArgumentNullException(() => client);
@@ -42,13 +40,13 @@ namespace Espera.Services
             };
         }
 
-        public async Task StartAsync()
+        public async Task StartAsync(CancellationTokenSource token)
         {
             using (client)
             {
-                while (true)
+                while (!token.IsCancellationRequested)
                 {
-                    JObject request = await this.ReceiveMessage();
+                    JObject request = await this.client.ReceiveMessage();
 
                     string requestAction = request["action"].ToString();
 
@@ -62,34 +60,9 @@ namespace Espera.Services
             }
         }
 
-        private static async Task<byte[]> CompressContentAsync(byte[] content)
-        {
-            using (var targetStream = new MemoryStream())
-            {
-                using (var stream = new GZipStream(targetStream, CompressionMode.Compress))
-                {
-                    await stream.WriteAsync(content, 0, content.Length);
-                }
-
-                return targetStream.ToArray();
-            }
-        }
-
         private async Task GetLibraryContent(JToken dontCare)
         {
-            var content = JObject.FromObject(new
-            {
-                songs = this.library.Songs
-                    .Select(s => new
-                    {
-                        album = s.Album,
-                        artist = s.Artist,
-                        duration = s.Duration.TotalSeconds,
-                        genre = s.Genre,
-                        title = s.Title,
-                        guid = s.Guid
-                    })
-            });
+            var content = MobileHelper.SerializeSongs(this.library.Songs);
 
             await this.SendResponse(200, "Ok", content);
         }
@@ -168,53 +141,13 @@ namespace Espera.Services
             }
         }
 
-        private Task ReceiveAsync(byte[] buffer)
-        {
-            return Task.Run(async () =>
-            {
-                int received = 0;
-
-                while (received < buffer.Length)
-                {
-                    int bytesRecieved = await this.client.GetStream().ReadAsync(buffer, received, buffer.Length - received);
-                    received += bytesRecieved;
-                }
-            });
-        }
-
-        private async Task<JObject> ReceiveMessage()
-        {
-            var buffer = new byte[42];
-
-            await this.ReceiveAsync(buffer);
-
-            string header = Encoding.Unicode.GetString(buffer);
-
-            if (header != "espera-client-message")
-                throw new Exception("Holy batman, something went terribly wrong!");
-
-            buffer = new byte[4];
-            await this.ReceiveAsync(buffer);
-
-            int length = BitConverter.ToInt32(buffer, 0);
-
-            buffer = new byte[length];
-
-            await this.ReceiveAsync(buffer);
-
-            string content = Encoding.Unicode.GetString(buffer);
-
-            return JObject.Parse(content);
-        }
-
         private async Task SendMessage(JObject content)
         {
             byte[] contentBytes = Encoding.Unicode.GetBytes(content.ToString(Formatting.None));
 
-            contentBytes = await CompressContentAsync(contentBytes);
+            contentBytes = await MobileHelper.CompressContentAsync(contentBytes);
 
-            byte[] length = BitConverter.GetBytes(contentBytes.Length); // We have a fixed size of 4
-                                                                        // bytes
+            byte[] length = BitConverter.GetBytes(contentBytes.Length); // We have a fixed size of 4 bytes
             byte[] headerBytes = Encoding.Unicode.GetBytes("espera-server-message");
 
             var message = new byte[headerBytes.Length + length.Length + contentBytes.Length];
@@ -222,8 +155,7 @@ namespace Espera.Services
             length.CopyTo(message, headerBytes.Length);
             contentBytes.CopyTo(message, headerBytes.Length + length.Length);
 
-            await client.GetStream().WriteAsync(message, 0, message.Length);
-            await client.GetStream().FlushAsync();
+            await this.client.SendAsync(message);
         }
 
         private async Task SendResponse(int status, string message, JToken content = null)

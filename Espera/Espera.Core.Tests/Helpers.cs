@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Espera.Core.Tests
 {
-    internal static class Helpers
+    public static class Helpers
     {
         public static readonly LocalSong LocalSong1 = new LocalSong("C:/Music/Path1/Song1.mp3", TimeSpan.FromTicks(1), "artwork-7e316d0e701df0505fa72e2b89467910")
         {
