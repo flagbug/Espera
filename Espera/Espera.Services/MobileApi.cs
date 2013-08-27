@@ -1,8 +1,6 @@
 ﻿using Espera.Core.Management;
 using Rareform.Validation;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -54,16 +52,7 @@ namespace Espera.Services
                     {
                         address[3] = (byte)i;
 
-                        try
-                        {
-                            await client.SendAsync(message, message.Length, new IPEndPoint(new IPAddress(address), Port));
-                        }
-
-                        catch (Exception)
-                        {
-                            Debugger.Break();
-                            throw;
-                        }
+                        await client.SendAsync(message, message.Length, new IPEndPoint(new IPAddress(address), Port));
                     }
                 }
 
