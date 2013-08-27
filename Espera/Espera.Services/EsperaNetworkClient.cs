@@ -46,7 +46,7 @@ namespace Espera.Services
             if (header != "espera-client-message")
                 throw new Exception("Holy batman, something went terribly wrong!");
 
-            buffer = await this.ReceiveAsync(2);
+            buffer = await this.ReceiveAsync(4);
 
             int length = BitConverter.ToInt32(buffer, 0);
 
