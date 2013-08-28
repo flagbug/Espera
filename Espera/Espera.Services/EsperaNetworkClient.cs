@@ -25,16 +25,19 @@ namespace Espera.Services
 
         public async Task<byte[]> ReceiveAsync(int length)
         {
-            var buffer = new byte[length];
-            int received = 0;
-
-            while (received < length)
+            return await Task.Run(async () =>
             {
-                int bytesRecieved = await this.client.GetStream().ReadAsync(buffer, received, buffer.Length - received);
-                received += bytesRecieved;
-            }
+                var buffer = new byte[length];
+                int received = 0;
 
-            return buffer;
+                while (received < length)
+                {
+                    int bytesRecieved = await this.client.GetStream().ReadAsync(buffer, received, buffer.Length - received);
+                    received += bytesRecieved;
+                }
+
+                return buffer;
+            });
         }
 
         public async Task<JObject> ReceiveMessage()
