@@ -21,7 +21,9 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> canChangeVolume;
         private readonly ObservableAsPropertyHelper<bool> canModifyWindow;
         private readonly ObservableAsPropertyHelper<bool> canSwitchPlaylist;
+        private readonly ObservableAsPropertyHelper<int> currentSeconds;
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
+        private readonly ObservableAsPropertyHelper<TimeSpan> currentTime;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly ObservableAsPropertyHelper<bool> isPlaying;
         private readonly Library library;
@@ -29,8 +31,6 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
         private readonly ObservableAsPropertyHelper<int> totalSeconds;
         private readonly ObservableAsPropertyHelper<TimeSpan> totalTime;
-        private ObservableAsPropertyHelper<int> currentSeconds;
-        private ObservableAsPropertyHelper<TimeSpan> currentTime;
         private bool displayTimeoutWarning;
         private bool isLocal;
         private bool isYoutube;

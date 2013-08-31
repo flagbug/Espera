@@ -27,7 +27,7 @@ namespace Espera.View.ViewModels
                 {
                     FogBugzService.SubmitReport(this.ReportContent);
 
-                    this.sendingSucceeded = true;
+                    this.SendingSucceeded = true;
                 }
 
                 catch (Exception)
