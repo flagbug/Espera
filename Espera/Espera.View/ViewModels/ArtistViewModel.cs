@@ -12,7 +12,7 @@ using System.Windows.Media.Imaging;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>, IDisposable
+    internal sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>, IDisposable, IEnableLogger
     {
         private static readonly SemaphoreSlim ArtworkLock; // This semaphore is used to limit the I/O access when accessing the artwork cache to 1 item at a time
         private readonly ObservableAsPropertyHelper<BitmapSource> cover;
@@ -98,7 +98,26 @@ namespace Espera.View.ViewModels
             return this.Name == other.Name;
         }
 
-        private static async Task<BitmapSource> LoadArtworkAsync(string key)
+        /// <example>
+        /// With prefixes "A" and "The":
+        /// "A Bar" -> "Bar", "The Foos" -> "Foos"
+        /// </example>
+        private static string RemoveArtistPrefixes(string artistName, IEnumerable<string> prefixes)
+        {
+            foreach (string s in prefixes)
+            {
+                int lengthWithSpace = s.Length + 1;
+
+                if (artistName.Length >= lengthWithSpace && artistName.Substring(0, lengthWithSpace) == s + " ")
+                {
+                    return artistName.Substring(lengthWithSpace);
+                }
+            }
+
+            return artistName;
+        }
+
+        private async Task<BitmapSource> LoadArtworkAsync(string key)
         {
             byte[] imageBytes;
 
@@ -136,8 +155,10 @@ namespace Espera.View.ViewModels
                         img.EndInit();
                     }
 
-                    catch (NotSupportedException)
+                    catch (NotSupportedException ex)
                     {
+                        this.Log().Info("Unable to load artist cover: {0}", ex.Message);
+
                         return null;
                     }
 
@@ -146,25 +167,6 @@ namespace Espera.View.ViewModels
                     return img;
                 }
             });
-        }
-
-        /// <example>
-        /// With prefixes "A" and "The":
-        /// "A Bar" -> "Bar", "The Foos" -> "Foos"
-        /// </example>
-        private static string RemoveArtistPrefixes(string artistName, IEnumerable<string> prefixes)
-        {
-            foreach (string s in prefixes)
-            {
-                int lengthWithSpace = s.Length + 1;
-
-                if (artistName.Length >= lengthWithSpace && artistName.Substring(0, lengthWithSpace) == s + " ")
-                {
-                    return artistName.Substring(lengthWithSpace);
-                }
-            }
-
-            return artistName;
         }
     }
 }

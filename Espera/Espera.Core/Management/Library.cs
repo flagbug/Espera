@@ -17,10 +17,11 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
+using ReactiveUI;
 
 namespace Espera.Core.Management
 {
-    public sealed class Library : IDisposable
+    public sealed class Library : IDisposable, IEnableLogger
     {
         private readonly BehaviorSubject<AccessMode> accessModeSubject;
         private readonly AutoResetEvent cacheResetHandle;
@@ -451,6 +452,8 @@ namespace Espera.Core.Management
             if (this.password != adminPassword)
                 throw new WrongPasswordException("The password is incorrect.");
 
+            this.Log().Info("Changing to administrator mode.");
+
             this.accessMode = Management.AccessMode.Administrator;
             this.accessModeSubject.OnNext(Management.AccessMode.Administrator);
         }
@@ -462,6 +465,8 @@ namespace Espera.Core.Management
         {
             if (!this.IsAdministratorCreated)
                 throw new InvalidOperationException("Administrator is not created.");
+
+            this.Log().Info("Changing to party mode.");
 
             this.accessMode = Management.AccessMode.Party;
             this.accessModeSubject.OnNext(Management.AccessMode.Party);
@@ -491,6 +496,8 @@ namespace Espera.Core.Management
 
             if (this.IsAdministratorCreated)
                 throw new InvalidOperationException("The administrator is already created.");
+
+            this.Log().Info("Creating administrator.");
 
             this.password = adminPassword;
             this.IsAdministratorCreated = true;
@@ -548,6 +555,7 @@ namespace Espera.Core.Management
 
             update.CombineLatest(this.songSourcePath, (_, path) => path)
                 .Where(path => !String.IsNullOrEmpty(path))
+                .Do(_ => this.Log().Info("Triggering library update."))
                 .Subscribe(path => this.UpdateSongsAsync(path));
 
             if (this.libraryReader.LibraryExists)
