@@ -174,6 +174,11 @@ namespace Espera.Core
         /// </summary>
         public abstract Task LoadToCacheAsync();
 
+        public override string ToString()
+        {
+            return String.Format("Title: {0}, Artist: {1}, Path: {2}", this.Title, this.Artist, this.OriginalPath);
+        }
+
         /// <summary>
         /// Creates the audio player for the song.
         /// </summary>

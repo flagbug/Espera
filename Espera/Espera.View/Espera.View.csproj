@@ -129,6 +129,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\reactiveui-platforms.5.1.2\lib\net45\ReactiveUI.Xaml.dll</HintPath>
     </Reference>
+    <Reference Include="Splat">
+      <HintPath>..\packages\Splat.0.3.0\lib\Net45\Splat.dll</HintPath>
+    </Reference>
+    <Reference Include="Splat.Portable">
+      <HintPath>..\packages\Splat.0.3.0\lib\Net45\Splat.Portable.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System" />
     <Reference Include="System.Data" />

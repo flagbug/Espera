@@ -1,26 +1,25 @@
 ﻿using Akavache;
 using Espera.Core;
 using ReactiveUI;
+using Splat;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>, IDisposable, IEnableLogger
+    internal sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>, IDisposable
     {
-        private static readonly SemaphoreSlim ArtworkLock; // This semaphore is used to limit the I/O access when accessing the artwork cache to 1 item at a time
+        private static readonly object Gate; // This gate is used to limit the I/O access when accessing the artwork cache to 1 item at a time
         private readonly ObservableAsPropertyHelper<BitmapSource> cover;
         private IEnumerable<LocalSongViewModel> songs;
 
         static ArtistViewModel()
         {
-            ArtworkLock = new SemaphoreSlim(1, 1);
+            Gate = new object();
         }
 
         public ArtistViewModel(IEnumerable<LocalSongViewModel> songs)
@@ -31,10 +30,11 @@ namespace Espera.View.ViewModels
             this.cover = this.Songs
                 .Select(x => x.Model)
                 .Cast<LocalSong>()
-                .Select(song => song.ArtworkKey)
+                .Select(song => song.ArtworkKey.Where(x => x != null))
                 .Merge()
-                .Where(key => key != null)
+                .Distinct() // Ignore duplicate artworks
                 .ObserveOn(RxApp.TaskpoolScheduler)
+                .Synchronize(Gate)
                 .Select(key => LoadArtworkAsync(key).Result)
                 .FirstOrDefaultAsync(pic => pic != null)
                 .ToProperty(this, x => x.Cover);
@@ -119,54 +119,26 @@ namespace Espera.View.ViewModels
 
         private async Task<BitmapSource> LoadArtworkAsync(string key)
         {
-            byte[] imageBytes;
-
-            await ArtworkLock.WaitAsync(); // Limit the I/O access
-
             try
             {
-                imageBytes = await BlobCache.LocalMachine.GetAsync(key);
+                IBitmap img = await BlobCache.LocalMachine.LoadImage(key, 35, 35);
+
+                return img.ToNative();
             }
 
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
+                this.Log().Warn("Could not find key of album cover. This reeks like a threading problem: {0}", ex.Message);
+
                 return null;
             }
 
-            finally
+            catch (NotSupportedException ex)
             {
-                ArtworkLock.Release();
+                this.Log().Info("Unable to load artist cover: {0}", ex.Message);
+
+                return null;
             }
-
-            return await Task.Run(() =>
-            {
-                using (var imageStream = new MemoryStream(imageBytes))
-                {
-                    var img = new BitmapImage();
-
-                    img.BeginInit();
-                    img.StreamSource = imageStream;
-                    img.CacheOption = BitmapCacheOption.OnLoad;
-                    img.DecodePixelHeight = 35;
-                    img.DecodePixelWidth = 35;
-
-                    try
-                    {
-                        img.EndInit();
-                    }
-
-                    catch (NotSupportedException ex)
-                    {
-                        this.Log().Info("Unable to load artist cover: {0}", ex.Message);
-
-                        return null;
-                    }
-
-                    img.Freeze();
-
-                    return img;
-                }
-            });
         }
     }
 }

@@ -4,6 +4,7 @@ using Espera.Core.Settings;
 using Rareform.Extensions;
 using Rareform.Validation;
 using ReactiveMarrow;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,9 +16,9 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using ReactiveUI;
 
 namespace Espera.Core.Management
 {
@@ -1023,6 +1024,8 @@ namespace Espera.Core.Management
 
             this.songsUpdated.OnNext(Unit.Default);
 
+            var artworkLookup = new HashSet<string>(this.Songs.Cast<LocalSong>().Select(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null));
+
             var songFinder = new LocalSongFinder(path);
 
             this.currentSongFinderSubscription = songFinder.GetSongs()
@@ -1047,9 +1050,18 @@ namespace Espera.Core.Management
 
                         if (artworkData != null)
                         {
-                            string artworkKey = Guid.NewGuid().ToString();
+                            byte[] hash = MD5.Create().ComputeHash(artworkData);
 
-                            BlobCache.LocalMachine.Insert(artworkKey, artworkData).Subscribe(x => song.NotifyArtworkStored(artworkKey));
+                            string artworkKey = "artwork-" + BitConverter.ToString(hash).Replace("-", "").ToLower();
+
+                            if (artworkLookup.Add(artworkKey))
+                            {
+                                this.Log().Info("Adding new artwork {0} of {1} to the BlobCache", artworkKey, song);
+
+                                BlobCache.LocalMachine.Insert(artworkKey, artworkData)
+                                    .Do(_ => this.Log().Debug("Added artwork {0} to the BlobCache", artworkKey))
+                                    .Subscribe(x => song.NotifyArtworkStored(artworkKey));
+                            }
                         }
 
                         this.songsUpdated.OnNext(Unit.Default);
