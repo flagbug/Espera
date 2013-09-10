@@ -31,8 +31,7 @@ namespace Espera.Core.Tests
                 Song youtubeSong1 = Helpers.YoutubeSong1;
 
                 Assert.Equal("Playlist2", playlist2.Name);
-                Assert.Equal(localSong1.OriginalPath, songs2[0].OriginalPath);
-                Assert.IsType<YoutubeSong>(songs2[0]);
+                AssertSongsAreEqual(songs2[0], Helpers.LocalSong1);
 
                 Assert.Equal(youtubeSong1.OriginalPath, songs2[1].OriginalPath);
                 Assert.Equal(youtubeSong1.Title, songs2[1].Title);

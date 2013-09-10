@@ -6,12 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
+using System.Reactive.Linq;
 
 namespace Espera.Core.Tests
 {
     internal static class Helpers
     {
-        public static readonly LocalSong LocalSong1 = new LocalSong("C:/Music/Path1/Song1.mp3", AudioType.Mp3, TimeSpan.FromTicks(1), DriveType.Fixed, null)
+        public static readonly LocalSong LocalSong1 = new LocalSong("C:/Music/Path1/Song1.mp3", AudioType.Mp3, TimeSpan.FromTicks(1), DriveType.Fixed, "artwork-7e316d0e701df0505fa72e2b89467910")
         {
             Album = "Album1",
             Artist = "Artist1",
@@ -92,11 +93,11 @@ namespace Espera.Core.Tests
             return
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
                 "<Root>" +
-                "  <Version>1.1.0</Version>" +
+                "  <Version>2.0.0</Version>" +
                 "  <SongSourcePath>" + SongSourcePath + "</SongSourcePath>" +
                 "  <Songs>" +
-                "    <Song Album=\"" + LocalSong1.Album + "\" Artist=\"" + LocalSong1.Artist + "\" AudioType=\"" + LocalSong1.AudioType + "\" Duration=\"" + LocalSong1.Duration.Ticks + "\" Genre=\"" + LocalSong1.Genre + "\" Path=\"" + LocalSong1.OriginalPath + "\" Title=\"" + LocalSong1.Title + "\" TrackNumber=\"" + LocalSong1.TrackNumber + "\" />" +
-                "    <Song Album=\"" + LocalSong2.Album + "\" Artist=\"" + LocalSong2.Artist + "\" AudioType=\"" + LocalSong2.AudioType + "\" Duration=\"" + LocalSong2.Duration.Ticks + "\" Genre=\"" + LocalSong2.Genre + "\" Path=\"" + LocalSong2.OriginalPath + "\" Title=\"" + LocalSong2.Title + "\" TrackNumber=\"" + LocalSong2.TrackNumber + "\" />" +
+                "    <Song Album=\"" + LocalSong1.Album + "\" Artist=\"" + LocalSong1.Artist + "\" AudioType=\"" + LocalSong1.AudioType + "\" Duration=\"" + LocalSong1.Duration.Ticks + "\" Genre=\"" + LocalSong1.Genre + "\" Path=\"" + LocalSong1.OriginalPath + "\" Title=\"" + LocalSong1.Title + "\" TrackNumber=\"" + LocalSong1.TrackNumber + "\" ArtworkKey=\"" + (LocalSong1.ArtworkKey.FirstAsync().Wait() ?? String.Empty) + "\" />" +
+                "    <Song Album=\"" + LocalSong2.Album + "\" Artist=\"" + LocalSong2.Artist + "\" AudioType=\"" + LocalSong2.AudioType + "\" Duration=\"" + LocalSong2.Duration.Ticks + "\" Genre=\"" + LocalSong2.Genre + "\" Path=\"" + LocalSong2.OriginalPath + "\" Title=\"" + LocalSong2.Title + "\" TrackNumber=\"" + LocalSong2.TrackNumber + "\" ArtworkKey=\"" + (LocalSong2.ArtworkKey.FirstAsync().Wait() ?? String.Empty) + "\" />" +
                 "  </Songs>" +
                 "  <Playlists>" +
                 "    <Playlist Name=\"" + Playlist1.Name + "\">" +
