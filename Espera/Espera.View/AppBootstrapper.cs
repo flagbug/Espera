@@ -72,10 +72,7 @@ namespace Espera.View
 
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
-            if (!Directory.Exists(DirectoryPath))
-            {
-                Directory.CreateDirectory(DirectoryPath);
-            }
+            Directory.CreateDirectory(DirectoryPath);
 
             if (Settings.Default.UpgradeRequired)
             {
