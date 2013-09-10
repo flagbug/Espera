@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
@@ -13,13 +14,13 @@ namespace Espera.View.ViewModels
 {
     internal sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>, IDisposable
     {
-        private static readonly object Gate; // This gate is used to limit the I/O access when accessing the artwork cache to 1 item at a time
+        private static readonly SemaphoreSlim Gate; // This gate is used to limit the I/O access when accessing the artwork cache to 1 item at a time
         private readonly ObservableAsPropertyHelper<BitmapSource> cover;
         private IEnumerable<LocalSongViewModel> songs;
 
         static ArtistViewModel()
         {
-            Gate = new object();
+            Gate = new SemaphoreSlim(1, 1);
         }
 
         public ArtistViewModel(IEnumerable<LocalSongViewModel> songs)
@@ -34,7 +35,6 @@ namespace Espera.View.ViewModels
                 .Merge()
                 .Distinct() // Ignore duplicate artworks
                 .ObserveOn(RxApp.TaskpoolScheduler)
-                .Synchronize(Gate)
                 .Select(key => LoadArtworkAsync(key).Result)
                 .FirstOrDefaultAsync(pic => pic != null)
                 .ToProperty(this, x => x.Cover);
@@ -121,7 +121,10 @@ namespace Espera.View.ViewModels
         {
             try
             {
-                IBitmap img = await BlobCache.LocalMachine.LoadImage(key, 35, 35);
+                await Gate.WaitAsync();
+
+                IBitmap img = await BlobCache.LocalMachine.LoadImage(key, 35, 35)
+                    .Finally(() => Gate.Release());
 
                 return img.ToNative();
             }
