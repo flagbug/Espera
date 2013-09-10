@@ -469,7 +469,6 @@ namespace Espera.Core.Tests
                 await library.PlayInstantlyAsync(songs.Select(x => x.Object));
 
                 handle.Wait();
-                handle.Wait();
 
                 Assert.True(play1Called);
                 Assert.True(play2Called);
@@ -929,9 +928,7 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
-                var handle = new ManualResetEvent(false);
-
-                var player = new HandledAudioPlayer(handle);
+                var player = new JumpAudioPlayer();
 
                 var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
                 song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)player));
@@ -944,11 +941,11 @@ namespace Espera.Core.Tests
                     .Callback(() => played = true);
 
                 library.AddSongToPlaylist(song.Object);
+
+                player.PlaybackState.Where(x => x == AudioPlayerState.Playing)
+                    .Subscribe(_ => library.AddAndSwitchToPlaylist("Playlist2"));
+
                 await library.PlaySongAsync(0);
-
-                library.AddAndSwitchToPlaylist("Playlist2");
-
-                handle.Set();
 
                 Assert.False(played);
             }
