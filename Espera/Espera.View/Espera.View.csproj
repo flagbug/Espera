@@ -328,7 +328,6 @@
     <Resource Include="Images\VideoPlayer.png" />
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadata Include="Service References\" />
     <ProjectReference Include="..\Espera.Core\Espera.Core.csproj">
       <Project>{d4ad0e4a-fecb-4ca9-9258-6bd1f22fac0d}</Project>
       <Name>Espera.Core</Name>
