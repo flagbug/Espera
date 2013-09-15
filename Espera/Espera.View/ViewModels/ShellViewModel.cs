@@ -230,8 +230,10 @@ namespace Espera.View.ViewModels
 
             this.IsLocal = true;
 
-            MobileApi.SendBroadcastAsync(new CancellationTokenSource());
-            new MobileApi(this.library).StartClientDiscovery(new CancellationTokenSource());
+            var mobileApi = new MobileApi(this.library);
+
+            mobileApi.SendBroadcastAsync(new CancellationTokenSource());
+            mobileApi.StartClientDiscovery(new CancellationTokenSource());
         }
 
         public IReactiveCommand AddPlaylistCommand { get; private set; }
