@@ -144,10 +144,9 @@ namespace Espera.View.ViewModels
         {
             var groupedByArtist = this.filteredSongs
                .AsParallel()
-               .GroupBy(song => song.Artist)
-               .ToDictionary(x => x.Key, x => x.ToList());
+               .ToLookup(x => x.Artist, new ArtistComparer());
 
-            List<ArtistViewModel> artistsToRemove = this.artists.Where(x => !groupedByArtist.ContainsKey(x.Name)).ToList();
+            List<ArtistViewModel> artistsToRemove = this.artists.Where(x => !groupedByArtist.Contains(x.Name)).ToList();
             artistsToRemove.Remove(this.allArtistsViewModel);
 
             foreach (ArtistViewModel artistViewModel in artistsToRemove)
@@ -157,18 +156,18 @@ namespace Espera.View.ViewModels
 
             this.artists.RemoveAll(artistsToRemove);
 
-            foreach (var artist in groupedByArtist)
+            foreach (var songs in groupedByArtist)
             {
-                ArtistViewModel model = this.artists.FirstOrDefault(x => x.Name == artist.Key);
+                ArtistViewModel model = this.artists.FirstOrDefault(x => x.Name == songs.Key);
 
                 if (model == null)
                 {
-                    this.artists.Add(new ArtistViewModel(artist.Value));
+                    this.artists.Add(new ArtistViewModel(songs));
                 }
 
                 else
                 {
-                    model.Songs = artist.Value;
+                    model.Songs = songs;
                 }
             }
 
@@ -190,6 +189,19 @@ namespace Espera.View.ViewModels
                 .ToList();
 
             this.updateSemaphore.Release();
+        }
+
+        private class ArtistComparer : EqualityComparer<string>
+        {
+            public override bool Equals(string x, string y)
+            {
+                return x.Equals(y, StringComparison.InvariantCultureIgnoreCase);
+            }
+
+            public override int GetHashCode(string obj)
+            {
+                return obj.ToLowerInvariant().GetHashCode();
+            }
         }
     }
 }
