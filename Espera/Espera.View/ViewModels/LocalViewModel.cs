@@ -144,7 +144,7 @@ namespace Espera.View.ViewModels
         {
             var groupedByArtist = this.filteredSongs
                .AsParallel()
-               .ToLookup(x => x.Artist, new ArtistComparer());
+               .ToLookup(x => x.Artist, StringComparer.InvariantCultureIgnoreCase);
 
             List<ArtistViewModel> artistsToRemove = this.artists.Where(x => !groupedByArtist.Contains(x.Name)).ToList();
             artistsToRemove.Remove(this.allArtistsViewModel);
@@ -189,19 +189,6 @@ namespace Espera.View.ViewModels
                 .ToList();
 
             this.updateSemaphore.Release();
-        }
-
-        private class ArtistComparer : EqualityComparer<string>
-        {
-            public override bool Equals(string x, string y)
-            {
-                return x.Equals(y, StringComparison.InvariantCultureIgnoreCase);
-            }
-
-            public override int GetHashCode(string obj)
-            {
-                return obj.ToLowerInvariant().GetHashCode();
-            }
         }
     }
 }
