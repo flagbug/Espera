@@ -924,9 +924,9 @@ namespace Espera.Core.Management
 
             List<Song> enumerable = songList.ToList();
 
-            foreach (LocalSong song in enumerable)
+            foreach (string key in enumerable.Cast<LocalSong>().Select(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null))
             {
-                BlobCache.LocalMachine.Invalidate(song.ArtworkKey.FirstAsync().Wait());
+                BlobCache.LocalMachine.Invalidate(key);
             }
 
             DisposeSongs(enumerable);
