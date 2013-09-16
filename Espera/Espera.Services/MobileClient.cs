@@ -36,7 +36,8 @@ namespace Espera.Services
             {
                 {"get-library-content", this.GetLibraryContent},
                 {"post-playlist-song", this.PostPlaylistSong},
-                {"post-play-instantly", this.PostPlayInstantly}
+                {"post-play-instantly", this.PostPlayInstantly},
+                {"get-current-playlist", this.GetCurrentPlaylist}
             };
         }
 
@@ -60,9 +61,18 @@ namespace Espera.Services
             }
         }
 
+        private async Task GetCurrentPlaylist(JToken dontCare)
+        {
+            Playlist playlist = this.library.CurrentPlaylist;
+
+            JObject content = MobileHelper.SerializePlaylist(playlist);
+
+            await this.SendResponse(200, "Ok", content);
+        }
+
         private async Task GetLibraryContent(JToken dontCare)
         {
-            var content = MobileHelper.SerializeSongs(this.library.Songs);
+            JObject content = MobileHelper.SerializeSongs(this.library.Songs);
 
             await this.SendResponse(200, "Ok", content);
         }

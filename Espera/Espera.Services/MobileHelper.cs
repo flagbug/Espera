@@ -1,5 +1,7 @@
 ﻿using Espera.Core;
+using Espera.Core.Management;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -21,6 +23,20 @@ namespace Espera.Services
 
                 return targetStream.ToArray();
             }
+        }
+
+        public static JObject SerializePlaylist(Playlist playlist)
+        {
+            return JObject.FromObject(new
+            {
+                name = playlist.Name,
+                current = playlist.CurrentSongIndex.Value.ToString(),
+                songs = playlist.Select(x => new
+                {
+                    title = x.Song is LocalSong ? String.Format("{0} - {1}", x.Song.Artist, x.Song.Title) : x.Song.Title,
+                    guid = x.Guid
+                })
+            });
         }
 
         public static JObject SerializeSongs(IEnumerable<LocalSong> songs)
