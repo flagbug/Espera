@@ -52,7 +52,7 @@ namespace Espera.Services
                     byte[] address = ipAddress.GetAddressBytes();
                     byte[] message = Encoding.Unicode.GetBytes("espera-server-discovery");
 
-                    foreach (int i in Enumerable.Range(1, 254))
+                    foreach (int i in Enumerable.Range(1, 254).Where(x => x != address[3]).ToList()) // Save to a list before we change the last address byte
                     {
                         address[3] = (byte)i;
 
