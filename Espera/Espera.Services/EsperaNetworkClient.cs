@@ -2,13 +2,18 @@
 using System;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Espera.Services
 {
+    /// <summary>
+    /// Represents a connection to a mobile device and abstracts the network protocol implementation.
+    /// </summary>
     internal class EsperaNetworkClient : IEsperaNetworkClient
     {
         private readonly TcpClient client;
+        private readonly SemaphoreSlim gate;
 
         public EsperaNetworkClient(TcpClient client)
         {
@@ -16,11 +21,14 @@ namespace Espera.Services
                 throw new ArgumentNullException("client");
 
             this.client = client;
+
+            this.gate = new SemaphoreSlim(1, 1);
         }
 
         public void Dispose()
         {
             this.client.Close();
+            this.gate.Dispose();
         }
 
         public async Task<byte[]> ReceiveAsync(int length)
@@ -42,6 +50,8 @@ namespace Espera.Services
 
         public async Task<JObject> ReceiveMessage()
         {
+            await this.gate.WaitAsync();
+
             byte[] buffer = await this.ReceiveAsync(42);
 
             string header = Encoding.Unicode.GetString(buffer);
@@ -55,6 +65,8 @@ namespace Espera.Services
 
             buffer = await this.ReceiveAsync(length);
 
+            this.gate.Release();
+
             string content = Encoding.Unicode.GetString(buffer);
 
             return JObject.Parse(content);
@@ -62,8 +74,12 @@ namespace Espera.Services
 
         public async Task SendAsync(byte[] data)
         {
+            await this.gate.WaitAsync();
+
             await client.GetStream().WriteAsync(data, 0, data.Length);
             await client.GetStream().FlushAsync();
+
+            this.gate.Release();
         }
     }
 }
