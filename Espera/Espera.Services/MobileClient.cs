@@ -37,7 +37,8 @@ namespace Espera.Services
                 {"get-library-content", this.GetLibraryContent},
                 {"post-playlist-song", this.PostPlaylistSong},
                 {"post-play-instantly", this.PostPlayInstantly},
-                {"get-current-playlist", this.GetCurrentPlaylist}
+                {"get-current-playlist", this.GetCurrentPlaylist},
+                {"post-play-playlist-song", this.PostPlayPlaylistSong}
             };
         }
 
@@ -142,6 +143,33 @@ namespace Espera.Services
                 else
                 {
                     await this.SendResponse(404, "Song not found");
+                }
+            }
+
+            else
+            {
+                await this.SendResponse(400, "Malformed GUID");
+            }
+        }
+
+        private async Task PostPlayPlaylistSong(JToken parameters)
+        {
+            Guid songGuid;
+            bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
+
+            if (valid)
+            {
+                PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
+
+                if (entry != null)
+                {
+                    await this.library.PlaySongAsync(entry.Index);
+                    await this.SendResponse(200, "Playing song");
+                }
+
+                else
+                {
+                    await this.SendResponse(404, "Playlist entry not found");
                 }
             }
 
