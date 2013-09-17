@@ -28,7 +28,7 @@ namespace Espera.Services.Tests
             {
             });
 
-            await client.StartAsync(token);
+            await client.ListenAsync(token);
         }
 
         [Fact]

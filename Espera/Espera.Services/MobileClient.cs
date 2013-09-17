@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using Rareform.Validation;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -42,9 +43,10 @@ namespace Espera.Services
             };
         }
 
-        public async Task StartAsync(CancellationTokenSource token)
+        public async Task ListenAsync(CancellationTokenSource token)
         {
             using (client)
+            using (var gate = new SemaphoreSlim(1, 1))
             {
                 while (!token.IsCancellationRequested)
                 {
@@ -56,7 +58,27 @@ namespace Espera.Services
 
                     if (this.messageActionMap.TryGetValue(requestAction, out action))
                     {
-                        await action(request["parameters"]);
+                        await gate.WaitAsync();
+
+                        try
+                        {
+                            await action(request["parameters"]);
+                        }
+
+                        catch (Exception)
+                        {
+                            if (Debugger.IsAttached)
+                            {
+                                Debugger.Break();
+                            }
+
+                            // Don't crash the listener if we receive a bogus message that we can't handle
+                        }
+
+                        finally
+                        {
+                            gate.Release();
+                        }
                     }
                 }
             }

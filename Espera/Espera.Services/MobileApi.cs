@@ -81,7 +81,7 @@ namespace Espera.Services
                 }
 
                 var mobileClient = new MobileClient(new EsperaNetworkClient(tcpClient), this.library);
-                mobileClient.StartAsync(token);
+                mobileClient.ListenAsync(token);
 
                 this.clients.Add(mobileClient);
             }
