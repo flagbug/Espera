@@ -29,7 +29,7 @@ namespace Espera.Services
             return JObject.FromObject(new
             {
                 name = playlist.Name,
-                current = playlist.CurrentSongIndex.Value.ToString(),
+                current = playlist.CurrentSongIndex.Value,
                 songs = playlist.Select(x => new
                 {
                     artist = x.Song.Artist,
