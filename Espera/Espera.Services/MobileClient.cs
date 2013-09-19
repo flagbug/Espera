@@ -3,10 +3,12 @@ using Espera.Core.Management;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Rareform.Validation;
+using ReactiveSockets;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,19 +20,19 @@ namespace Espera.Services
     /// </summary>
     public class MobileClient
     {
-        private readonly IEsperaNetworkClient client;
         private readonly Library library;
         private readonly Dictionary<string, Func<JToken, Task>> messageActionMap;
+        private readonly IReactiveSocket socket;
 
-        public MobileClient(IEsperaNetworkClient client, Library library)
+        public MobileClient(IReactiveSocket socket, Library library)
         {
-            if (client == null)
-                Throw.ArgumentNullException(() => client);
+            if (socket == null)
+                Throw.ArgumentNullException(() => socket);
 
             if (library == null)
                 Throw.ArgumentNullException(() => library);
 
-            this.client = client;
+            this.socket = socket;
             this.library = library;
 
             this.messageActionMap = new Dictionary<string, Func<JToken, Task>>
@@ -45,43 +47,38 @@ namespace Espera.Services
 
         public async Task ListenAsync(CancellationTokenSource token)
         {
-            using (client)
-            using (var gate = new SemaphoreSlim(1, 1))
+            IObservable<JObject> messages =
+                socket.Receiver.Buffer(42)
+                    .Select(_ => this.socket.Receiver.Take(4).ToEnumerable().ToArray())
+                    .Select(length => BitConverter.ToInt32(length.ToArray(), 0))
+                    .Select(length => this.socket.Receiver.Take(length).ToEnumerable().ToArray())
+                    .Select(body => Encoding.Unicode.GetString(body))
+                    .Select(JObject.Parse);
+
+            await messages.ForEachAsync(async request =>
             {
-                while (!token.IsCancellationRequested)
+                string requestAction = request["action"].ToString();
+
+                Func<JToken, Task> action;
+
+                if (this.messageActionMap.TryGetValue(requestAction, out action))
                 {
-                    JObject request = await this.client.ReceiveMessage();
-
-                    string requestAction = request["action"].ToString();
-
-                    Func<JToken, Task> action;
-
-                    if (this.messageActionMap.TryGetValue(requestAction, out action))
+                    try
                     {
-                        await gate.WaitAsync();
+                        await action(request["parameters"]);
+                    }
 
-                        try
+                    catch (Exception)
+                    {
+                        if (Debugger.IsAttached)
                         {
-                            await action(request["parameters"]);
+                            Debugger.Break();
                         }
 
-                        catch (Exception)
-                        {
-                            if (Debugger.IsAttached)
-                            {
-                                Debugger.Break();
-                            }
-
-                            // Don't crash the listener if we receive a bogus message that we can't handle
-                        }
-
-                        finally
-                        {
-                            gate.Release();
-                        }
+                        // Don't crash the listener if we receive a bogus message that we can't handle
                     }
                 }
-            }
+            });
         }
 
         private async Task GetCurrentPlaylist(JToken dontCare)
@@ -215,7 +212,7 @@ namespace Espera.Services
             length.CopyTo(message, headerBytes.Length);
             contentBytes.CopyTo(message, headerBytes.Length + length.Length);
 
-            await this.client.SendAsync(message);
+            await this.socket.SendAsync(message);
         }
 
         private async Task SendResponse(int status, string message, JToken content = null)

@@ -1,5 +1,7 @@
 ﻿using Espera.Core.Management;
 using Rareform.Validation;
+using ReactiveSockets;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -18,7 +20,6 @@ namespace Espera.Services
         private static readonly int Port;
         private readonly List<MobileClient> clients;
         private readonly Library library;
-        private byte[] subnet; // We use this to store the sub net, once we've found it
 
         static MobileApi()
         {
@@ -42,8 +43,7 @@ namespace Espera.Services
 
             while (!token.IsCancellationRequested)
             {
-                IEnumerable<IPAddress> localSubnets = this.subnet == null ?
-                    addresses.Where(x => x.AddressFamily == AddressFamily.InterNetwork) : new[] { new IPAddress(this.subnet) };
+                IEnumerable<IPAddress> localSubnets = addresses.Where(x => x.AddressFamily == AddressFamily.InterNetwork);
 
                 // Get all intern networks and fire our discovery message on the last byte up and down
                 // This is the only way to ensure that the clients can discover the server reliably
@@ -64,29 +64,18 @@ namespace Espera.Services
             }
         }
 
-        public async Task StartClientDiscovery(CancellationTokenSource token)
+        public void StartClientDiscovery(CancellationTokenSource token)
         {
-            var client = new TcpListener(IPAddress.Any, Port);
-            client.Start();
-
-            while (!token.IsCancellationRequested)
+            var listener = new ReactiveListener(Port);
+            listener.Connections.Subscribe(socket =>
             {
-                TcpClient tcpClient = await client.AcceptTcpClientAsync();
-
-                if (subnet == null)
-                {
-                    var endpoint = (IPEndPoint)tcpClient.Client.RemoteEndPoint;
-                    subnet = endpoint.Address.GetAddressBytes();
-                    subnet[3] = 0;
-                }
-
-                var mobileClient = new MobileClient(new EsperaNetworkClient(tcpClient), this.library);
+                var mobileClient = new MobileClient(socket, this.library);
                 mobileClient.ListenAsync(token);
 
                 this.clients.Add(mobileClient);
-            }
+            });
 
-            client.Stop();
+            listener.Start();
         }
     }
 }
