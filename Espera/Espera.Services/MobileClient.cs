@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Rareform.Validation;
 using ReactiveSockets;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,7 +23,7 @@ namespace Espera.Services
     public class MobileClient
     {
         private readonly Library library;
-        private readonly Dictionary<string, Func<JToken, Task>> messageActionMap;
+        private readonly Dictionary<string, Func<JToken, Task<JObject>>> messageActionMap;
         private readonly IReactiveSocket socket;
 
         public MobileClient(IReactiveSocket socket, Library library)
@@ -36,7 +37,7 @@ namespace Espera.Services
             this.socket = socket;
             this.library = library;
 
-            this.messageActionMap = new Dictionary<string, Func<JToken, Task>>
+            this.messageActionMap = new Dictionary<string, Func<JToken, Task<JObject>>>
             {
                 {"get-library-content", this.GetLibraryContent},
                 {"post-playlist-song", this.PostPlaylistSong},
@@ -56,17 +57,21 @@ namespace Espera.Services
                     .Select(body => Encoding.Unicode.GetString(body))
                     .Select(JObject.Parse);
 
-            await messages.ForEachAsync(async request =>
+            await messages.ObserveOn(RxApp.MainThreadScheduler).ForEachAsync(async request =>
             {
                 string requestAction = request["action"].ToString();
 
-                Func<JToken, Task> action;
+                Func<JToken, Task<JObject>> action;
 
                 if (this.messageActionMap.TryGetValue(requestAction, out action))
                 {
                     try
                     {
-                        await action(request["parameters"]);
+                        JObject response = await action(request["parameters"]);
+
+                        response.Add("id", request["id"]);
+
+                        await this.SendMessage(response);
                     }
 
                     catch (Exception)
@@ -82,23 +87,40 @@ namespace Espera.Services
             });
         }
 
-        private async Task GetCurrentPlaylist(JToken dontCare)
+        private JObject CreateResponse(int status, string message, JToken content = null)
+        {
+            var response = new JObject
+            {
+                {"status", status},
+                {"message", message},
+                {"type", "response"},
+            };
+
+            if (content != null)
+            {
+                response.Add("content", content);
+            }
+
+            return response;
+        }
+
+        private Task<JObject> GetCurrentPlaylist(JToken dontCare)
         {
             Playlist playlist = this.library.CurrentPlaylist;
 
             JObject content = MobileHelper.SerializePlaylist(playlist);
 
-            await this.SendResponse(200, "Ok", content);
+            return Task.FromResult(this.CreateResponse(200, "Ok", content));
         }
 
-        private async Task GetLibraryContent(JToken dontCare)
+        private Task<JObject> GetLibraryContent(JToken dontCare)
         {
             JObject content = MobileHelper.SerializeSongs(this.library.Songs);
 
-            await this.SendResponse(200, "Ok", content);
+            return Task.FromResult(this.CreateResponse(200, "Ok", content));
         }
 
-        private async Task PostPlayInstantly(JToken parameters)
+        private async Task<JObject> PostPlayInstantly(JToken parameters)
         {
             var guids = new List<Guid>();
 
@@ -115,37 +137,33 @@ namespace Espera.Services
 
                 else
                 {
-                    await this.SendResponse(400, "One or more GUIDs are malformed");
+                    return this.CreateResponse(400, "One or more GUIDs are malformed");
                 }
             }
 
             Dictionary<Guid, LocalSong> dic = this.library.Songs.ToDictionary(x => x.Guid);
+
             List<LocalSong> songs = guids.Select(x =>
             {
                 LocalSong song;
 
-                bool hasSong = dic.TryGetValue(x, out song);
-
-                if (!hasSong)
-                {
-                    this.SendResponse(404, "One or more songs could not be found");
-
-                    return null;
-                }
+                dic.TryGetValue(x, out song);
 
                 return song;
             })
-            .TakeWhile(x => x != null)
+            .Where(x => x != null)
             .ToList();
 
             if (guids.Count == songs.Count)
             {
                 await this.library.PlayInstantlyAsync(songs);
-                await this.SendResponse(200, "Ok");
+                return this.CreateResponse(200, "Ok");
             }
+
+            return this.CreateResponse(404, "One or more songs could not be found");
         }
 
-        private async Task PostPlaylistSong(JToken parameters)
+        private Task<JObject> PostPlaylistSong(JToken parameters)
         {
             Guid songGuid;
             bool valid = Guid.TryParse(parameters["songGuid"].ToString(), out songGuid);
@@ -157,22 +175,16 @@ namespace Espera.Services
                 if (song != null)
                 {
                     this.library.AddSongToPlaylist(song);
-                    await this.SendResponse(200, "Song added to playlist");
+                    return Task.FromResult(this.CreateResponse(200, "Song added to playlist"));
                 }
 
-                else
-                {
-                    await this.SendResponse(404, "Song not found");
-                }
+                return Task.FromResult(this.CreateResponse(404, "Song not found"));
             }
 
-            else
-            {
-                await this.SendResponse(400, "Malformed GUID");
-            }
+            return Task.FromResult(this.CreateResponse(400, "Malformed GUID"));
         }
 
-        private async Task PostPlayPlaylistSong(JToken parameters)
+        private async Task<JObject> PostPlayPlaylistSong(JToken parameters)
         {
             Guid songGuid;
             bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
@@ -184,19 +196,13 @@ namespace Espera.Services
                 if (entry != null)
                 {
                     await this.library.PlaySongAsync(entry.Index);
-                    await this.SendResponse(200, "Playing song");
+                    return this.CreateResponse(200, "Playing song");
                 }
 
-                else
-                {
-                    await this.SendResponse(404, "Playlist entry not found");
-                }
+                return this.CreateResponse(404, "Playlist entry not found");
             }
 
-            else
-            {
-                await this.SendResponse(400, "Malformed GUID");
-            }
+            return this.CreateResponse(400, "Malformed GUID");
         }
 
         private async Task SendMessage(JObject content)
@@ -210,23 +216,6 @@ namespace Espera.Services
             byte[] message = length.Concat(contentBytes).ToArray();
 
             await this.socket.SendAsync(message);
-        }
-
-        private async Task SendResponse(int status, string message, JToken content = null)
-        {
-            var response = new JObject
-            {
-                {"status", status},
-                {"message", message},
-                {"type", "response"}
-            };
-
-            if (content != null)
-            {
-                response.Add("content", content);
-            }
-
-            await this.SendMessage(response);
         }
     }
 }
