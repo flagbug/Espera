@@ -87,7 +87,7 @@ namespace Espera.Services
             });
         }
 
-        private JObject CreateResponse(int status, string message, JToken content = null)
+        private static JObject CreateResponse(int status, string message, JToken content = null)
         {
             var response = new JObject
             {
@@ -110,14 +110,14 @@ namespace Espera.Services
 
             JObject content = MobileHelper.SerializePlaylist(playlist);
 
-            return Task.FromResult(this.CreateResponse(200, "Ok", content));
+            return Task.FromResult(CreateResponse(200, "Ok", content));
         }
 
         private Task<JObject> GetLibraryContent(JToken dontCare)
         {
             JObject content = MobileHelper.SerializeSongs(this.library.Songs);
 
-            return Task.FromResult(this.CreateResponse(200, "Ok", content));
+            return Task.FromResult(CreateResponse(200, "Ok", content));
         }
 
         private async Task<JObject> PostPlayInstantly(JToken parameters)
@@ -137,7 +137,7 @@ namespace Espera.Services
 
                 else
                 {
-                    return this.CreateResponse(400, "One or more GUIDs are malformed");
+                    return CreateResponse(400, "One or more GUIDs are malformed");
                 }
             }
 
@@ -157,10 +157,10 @@ namespace Espera.Services
             if (guids.Count == songs.Count)
             {
                 await this.library.PlayInstantlyAsync(songs);
-                return this.CreateResponse(200, "Ok");
+                return CreateResponse(200, "Ok");
             }
 
-            return this.CreateResponse(404, "One or more songs could not be found");
+            return CreateResponse(404, "One or more songs could not be found");
         }
 
         private Task<JObject> PostPlaylistSong(JToken parameters)
@@ -175,13 +175,13 @@ namespace Espera.Services
                 if (song != null)
                 {
                     this.library.AddSongToPlaylist(song);
-                    return Task.FromResult(this.CreateResponse(200, "Song added to playlist"));
+                    return Task.FromResult(CreateResponse(200, "Song added to playlist"));
                 }
 
-                return Task.FromResult(this.CreateResponse(404, "Song not found"));
+                return Task.FromResult(CreateResponse(404, "Song not found"));
             }
 
-            return Task.FromResult(this.CreateResponse(400, "Malformed GUID"));
+            return Task.FromResult(CreateResponse(400, "Malformed GUID"));
         }
 
         private async Task<JObject> PostPlayPlaylistSong(JToken parameters)
@@ -196,13 +196,13 @@ namespace Espera.Services
                 if (entry != null)
                 {
                     await this.library.PlaySongAsync(entry.Index);
-                    return this.CreateResponse(200, "Playing song");
+                    return CreateResponse(200, "Playing song");
                 }
 
-                return this.CreateResponse(404, "Playlist entry not found");
+                return CreateResponse(404, "Playlist entry not found");
             }
 
-            return this.CreateResponse(400, "Malformed GUID");
+            return CreateResponse(400, "Malformed GUID");
         }
 
         private async Task SendMessage(JObject content)
