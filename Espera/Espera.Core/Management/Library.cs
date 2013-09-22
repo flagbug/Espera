@@ -480,11 +480,10 @@ namespace Espera.Core.Management
 
             string instantPlaylistName = Guid.NewGuid().ToString();
             this.instantPlaylist = new Playlist(instantPlaylistName, true);
+            this.instantPlaylist.AddSongs(songList.ToList());
 
             this.playlists.Add(this.instantPlaylist);
             this.SwitchToPlaylist(this.instantPlaylist);
-
-            this.AddSongsToPlaylist(songList);
 
             await this.PlaySongAsync(0);
         }

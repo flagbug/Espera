@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Text;
@@ -22,6 +23,7 @@ namespace Espera.Services
     /// </summary>
     public class MobileClient
     {
+        private readonly SemaphoreSlim gate;
         private readonly Library library;
         private readonly Dictionary<string, Func<JToken, Task<JObject>>> messageActionMap;
         private readonly IReactiveSocket socket;
@@ -37,6 +39,8 @@ namespace Espera.Services
             this.socket = socket;
             this.library = library;
 
+            this.gate = new SemaphoreSlim(1, 1);
+
             this.messageActionMap = new Dictionary<string, Func<JToken, Task<JObject>>>
             {
                 {"get-library-content", this.GetLibraryContent},
@@ -45,6 +49,14 @@ namespace Espera.Services
                 {"get-current-playlist", this.GetCurrentPlaylist},
                 {"post-play-playlist-song", this.PostPlayPlaylistSong}
             };
+
+            this.library.CurrentPlaylistChanged.Select(_ => Unit.Default)
+                .Merge(this.library.CurrentPlaylistChanged.Select(x => x.CurrentSongIndex)
+                    .Switch()
+                    .Select(_ => Unit.Default))
+                .Throttle(TimeSpan.FromMilliseconds(200))
+                .Select(_ => this.library.CurrentPlaylist)
+                .Subscribe(x => this.PushPlaylist(x));
         }
 
         public async Task ListenAsync(CancellationTokenSource token)
@@ -85,6 +97,27 @@ namespace Espera.Services
                     }
                 }
             });
+        }
+
+        public async Task PushPlaylist(Playlist playlist)
+        {
+            JObject content = MobileHelper.SerializePlaylist(playlist);
+
+            JObject message = CreatePush("update-current-index", content);
+
+            await this.SendMessage(message);
+        }
+
+        private static JObject CreatePush(string action, JToken content)
+        {
+            var payload = new JObject
+            {
+                {"action", action},
+                {"type", "push"},
+                {"content", content}
+            };
+
+            return payload;
         }
 
         private static JObject CreateResponse(int status, string message, JToken content = null)
@@ -215,7 +248,9 @@ namespace Espera.Services
 
             byte[] message = length.Concat(contentBytes).ToArray();
 
+            await this.gate.WaitAsync();
             await this.socket.SendAsync(message);
+            this.gate.Release();
         }
     }
 }
