@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -48,10 +49,10 @@ namespace Espera.Services
         public async Task ListenAsync(CancellationTokenSource token)
         {
             IObservable<JObject> messages =
-                socket.Receiver.Buffer(42)
-                    .Select(_ => this.socket.Receiver.Take(4).ToEnumerable().ToArray())
+                socket.Receiver.Buffer(4)
                     .Select(length => BitConverter.ToInt32(length.ToArray(), 0))
                     .Select(length => this.socket.Receiver.Take(length).ToEnumerable().ToArray())
+                    .SelectMany(body => MobileHelper.DecompressDataAsync(body).ToObservable())
                     .Select(body => Encoding.Unicode.GetString(body))
                     .Select(JObject.Parse);
 
@@ -202,15 +203,11 @@ namespace Espera.Services
         {
             byte[] contentBytes = Encoding.Unicode.GetBytes(content.ToString(Formatting.None));
 
-            contentBytes = await MobileHelper.CompressContentAsync(contentBytes);
+            contentBytes = await MobileHelper.CompressDataAsync(contentBytes);
 
             byte[] length = BitConverter.GetBytes(contentBytes.Length); // We have a fixed size of 4 bytes
-            byte[] headerBytes = Encoding.Unicode.GetBytes("espera-server-message");
 
-            var message = new byte[headerBytes.Length + length.Length + contentBytes.Length];
-            headerBytes.CopyTo(message, 0);
-            length.CopyTo(message, headerBytes.Length);
-            contentBytes.CopyTo(message, headerBytes.Length + length.Length);
+            byte[] message = length.Concat(contentBytes).ToArray();
 
             await this.socket.SendAsync(message);
         }
@@ -220,7 +217,8 @@ namespace Espera.Services
             var response = new JObject
             {
                 {"status", status},
-                {"message", message}
+                {"message", message},
+                {"type", "response"}
             };
 
             if (content != null)

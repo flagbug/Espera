@@ -11,16 +11,31 @@ namespace Espera.Services
 {
     public static class MobileHelper
     {
-        public static async Task<byte[]> CompressContentAsync(byte[] content)
+        public static async Task<byte[]> CompressDataAsync(byte[] data)
         {
             using (var targetStream = new MemoryStream())
             {
                 using (var stream = new GZipStream(targetStream, CompressionMode.Compress))
                 {
-                    await stream.WriteAsync(content, 0, content.Length);
+                    await stream.WriteAsync(data, 0, data.Length);
                 }
 
                 return targetStream.ToArray();
+            }
+        }
+
+        public static async Task<byte[]> DecompressDataAsync(byte[] data)
+        {
+            using (var sourceStream = new MemoryStream(data))
+            {
+                using (var stream = new GZipStream(sourceStream, CompressionMode.Decompress))
+                {
+                    using (var targetStream = new MemoryStream())
+                    {
+                        await stream.CopyToAsync(targetStream);
+                        return targetStream.ToArray();
+                    }
+                }
             }
         }
 
