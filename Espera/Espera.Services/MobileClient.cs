@@ -51,7 +51,8 @@ namespace Espera.Services
             };
 
             this.library.CurrentPlaylistChanged.Select(_ => Unit.Default)
-                .Merge(this.library.CurrentPlaylistChanged.Select(x => x.CurrentSongIndex)
+                .Merge(this.library.CurrentPlaylistChanged.StartWith(this.library.CurrentPlaylist)
+                    .Select(x => x.CurrentSongIndex.Skip(1))
                     .Switch()
                     .Select(_ => Unit.Default))
                 .Throttle(TimeSpan.FromMilliseconds(200))
