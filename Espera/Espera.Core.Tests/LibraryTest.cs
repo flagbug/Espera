@@ -124,7 +124,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanChangeTimeIsFalseIfIsNotAdministratorAndLockTimeIsTrue()
+        public async Task CanChangeTimeIsFalseIfIsNotAdministratorAndLockTimeIsTrue()
         {
             using (Library library = Helpers.CreateLibrary())
             {
@@ -138,7 +138,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanChangeTimeIsTrueIfIsAdministrator()
+        public async Task CanChangeTimeIsTrueIfIsAdministrator()
         {
             using (Library library = Helpers.CreateLibrary())
             {
@@ -147,7 +147,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanChangeTimeIsTrueIfIsNotAdministratorAndLockTimeIsFalse()
+        public async Task CanChangeTimeIsTrueIfIsNotAdministratorAndLockTimeIsFalse()
         {
             using (Library library = Helpers.CreateLibrary())
             {
@@ -161,7 +161,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanChangeVolumeIsFalseIsNotAdministratorAndLockVolumeIsTrue()
+        public async Task CanChangeVolumeIsFalseIsNotAdministratorAndLockVolumeIsTrue()
         {
             using (Library library = Helpers.CreateLibrary())
             {
@@ -175,7 +175,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanChangeVolumeIsTrueIfIsAdministrator()
+        public async Task CanChangeVolumeIsTrueIfIsAdministrator()
         {
             using (Library library = Helpers.CreateLibrary())
             {
@@ -184,7 +184,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanChangeVolumeIsTrueIfIsNotAdministratorAndLockVolumeIsFalse()
+        public async Task CanChangeVolumeIsTrueIfIsNotAdministratorAndLockVolumeIsFalse()
         {
             using (Library library = Helpers.CreateLibrary())
             {
@@ -198,7 +198,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanSwitchPlaylistIsFalseIfIsNotAdministratorAndLockPlaylistSwitchingIsTrue()
+        public async Task CanSwitchPlaylistIsFalseIfIsNotAdministratorAndLockPlaylistSwitchingIsTrue()
         {
             using (Library library = Helpers.CreateLibrary())
             {
@@ -212,7 +212,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanSwitchPlaylistIsTrueIfIsNotAdministratorAndLockPlaylistSwitchingIsFalse()
+        public async Task CanSwitchPlaylistIsTrueIfIsNotAdministratorAndLockPlaylistSwitchingIsFalse()
         {
             using (Library library = Helpers.CreateLibrary())
             {
@@ -226,7 +226,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanSwitchPlaylistIsTrueIsAdministrator()
+        public async Task CanSwitchPlaylistIsTrueIsAdministrator()
         {
             using (Library library = Helpers.CreateLibrary())
             {
@@ -235,7 +235,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void ChangeSongSourcePathSmokeTest()
+        public async Task ChangeSongSourcePathSmokeTest()
         {
             var fileSystem = new MockFileSystem();
             fileSystem.Directory.CreateDirectory("C://Test");
@@ -257,7 +257,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void ChangeToAdminChangesAccessModeToAdministratorIfPasswordIsCorrect()
+        public async Task ChangeToAdminChangesAccessModeToAdministratorIfPasswordIsCorrect()
         {
             using (Library library = Helpers.CreateLibrary())
             {
@@ -298,7 +298,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void ContinueSongCallsAudioPlayerPlay()
+        public async Task ContinueSongCallsAudioPlayerPlay()
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
@@ -410,7 +410,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void PauseSongCallsAudioPlayerPause()
+        public async Task PauseSongCallsAudioPlayerPause()
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
@@ -445,7 +445,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void PlayInstantlyPlaysMultipleSongsInARow()
+        public async Task PlayInstantlyPlaysMultipleSongsInARow()
         {
             using (Library library = Helpers.CreateLibrary())
             {
@@ -476,7 +476,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void PlayInstantlySmokeTest()
+        public async Task PlayInstantlySmokeTest()
         {
             using (Library library = Helpers.CreateLibrary())
             {
@@ -492,7 +492,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void PlayInstantlyStopsCurrentSong()
+        public async Task PlayInstantlyStopsCurrentSong()
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
@@ -533,7 +533,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void PlayJumpsOverCorruptedSong()
+        public async Task PlayJumpsOverCorruptedSong()
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
@@ -584,7 +584,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void PlaySetsSongIsCorruptedToTrueÍfFailing()
+        public async Task PlaySetsSongIsCorruptedToTrueÍfFailing()
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
@@ -630,7 +630,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void PlaysNextSongAutomatically()
+        public async Task PlaysNextSongAutomatically()
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
@@ -763,7 +763,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void RemoveFromPlaylistWhileSongIsPlayingStopsCurrentSong()
+        public async Task RemoveFromPlaylistWhileSongIsPlayingStopsCurrentSong()
         {
             bool finishedFired = false;
 
@@ -808,7 +808,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void SaveDoesNotSaveTemporaryPlaylist()
+        public async Task SaveDoesNotSaveTemporaryPlaylist()
         {
             var libraryWriter = new Mock<ILibraryWriter>();
             libraryWriter.Setup(x => x.Write(It.IsAny<IEnumerable<LocalSong>>(), It.IsAny<IEnumerable<Playlist>>(), It.IsAny<string>()))
@@ -831,7 +831,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void SongsAreSwappedIfTheNextSongIsCaching()
+        public async Task SongsAreSwappedIfTheNextSongIsCaching()
         {
             var eventWait = new ManualResetEvent(false); // We need this, because Library.PlaySong() pops up a new thread internally and then returns
 
@@ -896,7 +896,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void SwitchingPlaylistAndPlayingSongsChangesCurrentSongIndex()
+        public async Task SwitchingPlaylistAndPlayingSongsChangesCurrentSongIndex()
         {
             var blockingPlayer = new Mock<AudioPlayer>();
             blockingPlayer.Setup(p => p.PlayAsync()).Callback(() => { });
@@ -924,7 +924,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void SwitchingPlaylistPreventsNextSongFromPlaying()
+        public async Task SwitchingPlaylistPreventsNextSongFromPlaying()
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
@@ -952,7 +952,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void SwitchToPlaylistSetsCurrentSongIndexIfChangingfToOtherPlaylistAndPlayingFirstSong()
+        public async Task SwitchToPlaylistSetsCurrentSongIndexIfChangingfToOtherPlaylistAndPlayingFirstSong()
         {
             var blockingPlayer = new Mock<AudioPlayer>();
             blockingPlayer.Setup(p => p.PlayAsync()).Callback(() => { });

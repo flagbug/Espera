@@ -1,6 +1,7 @@
 ﻿using Espera.Core.Audio;
 using System;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Espera.Core.Tests
@@ -22,7 +23,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void PlaybackStateShouldBeNoneIfNoSongIsLoaded()
+        public async Task PlaybackStateShouldBeNoneIfNoSongIsLoaded()
         {
             var audioPlayer = new LocalAudioPlayer(Helpers.SetupSongMock());
 
@@ -30,7 +31,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void TotalTimeShouldBeZeroIfNoSongIsLoaded()
+        public async Task TotalTimeShouldBeZeroIfNoSongIsLoaded()
         {
             var audioPlayer = new LocalAudioPlayer(Helpers.SetupSongMock());
 

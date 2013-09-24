@@ -181,7 +181,7 @@ namespace Espera.View.ViewModels
             await this.DownloadFromYoutube(() => ((YoutubeSong)this.Model).DownloadVideoAsync(videoInfo, Observer.Create<double>(progress => this.DownloadProgress = progress)));
         }
 
-        private async void GetThumbnailAsync()
+        private async Task GetThumbnailAsync()
         {
             using (var webClient = new WebClient())
             {

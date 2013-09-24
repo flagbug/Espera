@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Espera.Core.Tests
@@ -44,7 +45,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanPlayNextSongReturnsFalseIfCurrentSongIndexIsLastSong()
+        public async Task CanPlayNextSongReturnsFalseIfCurrentSongIndexIsLastSong()
         {
             Song[] songs = Helpers.SetupSongMocks(4);
             Playlist playlist = Helpers.SetupPlaylist(songs);
@@ -55,7 +56,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanPlayNextSongReturnsFalseIfCurrentSongIndexIsNull()
+        public async Task CanPlayNextSongReturnsFalseIfCurrentSongIndexIsNull()
         {
             Song[] songs = Helpers.SetupSongMocks(4);
             Playlist playlist = Helpers.SetupPlaylist(songs);
@@ -66,7 +67,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanPlayNextSongReturnsFalseIfPlaylistIsEmpty()
+        public async Task CanPlayNextSongReturnsFalseIfPlaylistIsEmpty()
         {
             var playlist = new Playlist("Playlist");
 
@@ -74,7 +75,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanPlayNextSongReturnsTrueIfCurrentSongIndexIsZero()
+        public async Task CanPlayNextSongReturnsTrueIfCurrentSongIndexIsZero()
         {
             Song[] songs = Helpers.SetupSongMocks(4);
             Playlist playlist = Helpers.SetupPlaylist(songs);
@@ -85,7 +86,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanPlayPreviousSongReturnsFalseIfCurrentSongIndexIsNull()
+        public async Task CanPlayPreviousSongReturnsFalseIfCurrentSongIndexIsNull()
         {
             Song[] songs = Helpers.SetupSongMocks(4);
             Playlist playlist = Helpers.SetupPlaylist(songs);
@@ -96,7 +97,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanPlayPreviousSongReturnsFalseIfCurrentSongIndexIsZero()
+        public async Task CanPlayPreviousSongReturnsFalseIfCurrentSongIndexIsZero()
         {
             Song[] songs = Helpers.SetupSongMocks(4);
             Playlist playlist = Helpers.SetupPlaylist(songs);
@@ -107,7 +108,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanPlayPreviousSongReturnsFalseIfPlaylistIsEmpty()
+        public async Task CanPlayPreviousSongReturnsFalseIfPlaylistIsEmpty()
         {
             var playlist = new Playlist("Playlist");
 
@@ -115,7 +116,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async void CanPlayPreviousSongReturnsTrueIfCurrentSongIndexIsLastSong()
+        public async Task CanPlayPreviousSongReturnsTrueIfCurrentSongIndexIsLastSong()
         {
             Song[] songs = Helpers.SetupSongMocks(4);
             Playlist playlist = Helpers.SetupPlaylist(songs);

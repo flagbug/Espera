@@ -674,7 +674,7 @@ namespace Espera.Core.Management
             this.playlists.Remove(playlist);
         }
 
-        public async void Save()
+        public async Task Save()
         {
             HashSet<LocalSong> casted;
 

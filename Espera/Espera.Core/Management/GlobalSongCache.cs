@@ -1,5 +1,6 @@
 ﻿using Rareform.Validation;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Espera.Core.Management
 {
@@ -18,7 +19,7 @@ namespace Espera.Core.Management
             get { return instance ?? (instance = new GlobalSongCacheQueue()); }
         }
 
-        public async void EnqueueAsync(Song song)
+        public async Task EnqueueAsync(Song song)
         {
             if (song == null)
                 Throw.ArgumentNullException(() => song);
