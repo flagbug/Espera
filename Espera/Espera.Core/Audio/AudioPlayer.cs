@@ -6,13 +6,21 @@ using System.Threading.Tasks;
 
 namespace Espera.Core.Audio
 {
-    internal abstract class AudioPlayer : IDisposable
+    /// <summary>
+    /// An <see cref="AudioPlayer"/> that streams songs from YouTube.
+    /// </summary>
+    public sealed class AudioPlayer : IAudioPlayerCallback
     {
         private readonly Subject<TimeSpan> currentTimeChangedFromOuter;
+        private readonly BehaviorSubject<Song> loadedSong;
+        private readonly ReactiveProperty<AudioPlayerState> playbackStateProperty;
 
-        protected AudioPlayer()
+        internal AudioPlayer()
         {
-            this.PlaybackStateProperty = new ReactiveProperty<AudioPlayerState>();
+            this.playbackStateProperty = new ReactiveProperty<AudioPlayerState>();
+
+            this.loadedSong = new BehaviorSubject<Song>(null);
+            this.TotalTime = this.loadedSong.Select(x => x == null ? TimeSpan.Zero : x.Duration);
 
             this.currentTimeChangedFromOuter = new Subject<TimeSpan>();
 
@@ -24,9 +32,35 @@ namespace Espera.Core.Audio
                 .DistinctUntilChanged(x => x.TotalSeconds);
         }
 
-        public virtual TimeSpan CurrentTime { get; set; }
+        public TimeSpan CurrentTime
+        {
+            get { return this.GetTime(); }
+            set
+            {
+                this.SetTime(value);
+                this.currentTimeChangedFromOuter.OnNext(this.CurrentTime);
+            }
+        }
 
         public IObservable<TimeSpan> CurrentTimeChanged { get; private set; }
+
+        public Func<TimeSpan> GetTime { set; private get; }
+
+        public Func<float> GetVolume { set; private get; }
+
+        public IObservable<Song> LoadedSong
+        {
+            get { return this.loadedSong.AsObservable(); }
+        }
+
+        public Action LoadRequest { set; private get; }
+
+        public Uri Path
+        {
+            get { return new Uri(this.loadedSong.FirstAsync().Wait().StreamingPath); }
+        }
+
+        public Action PauseRequest { set; private get; }
 
         /// <summary>
         /// Gets the current playback state.
@@ -36,105 +70,67 @@ namespace Espera.Core.Audio
         /// </value>
         public IObservable<AudioPlayerState> PlaybackState
         {
-            get { return this.PlaybackStateProperty.AsObservable(); }
+            get { return this.playbackStateProperty.AsObservable(); }
         }
 
-        /// <summary>
-        /// Gets the song that the <see cref="AudioPlayer"/> is assigned to.
-        /// </summary>
-        /// <value>The song that the <see cref="AudioPlayer"/> is assigned to.</value>
-        public Song Song { get; protected set; }
+        public Action PlayRequest { set; private get; }
 
-        /// <summary>
-        /// Gets the total time.
-        /// </summary>
-        /// <value>The total time.</value>
-        public abstract IObservable<TimeSpan> TotalTime { get; }
+        public Action<TimeSpan> SetTime { set; private get; }
 
-        /// <summary>
-        /// Gets or sets the volume (a value from 0.0 to 1.0).
-        /// </summary>
-        /// <value>The volume.</value>
-        public abstract float Volume { get; set; }
+        public Action<float> SetVolume { set; private get; }
 
-        protected ReactiveProperty<AudioPlayerState> PlaybackStateProperty { get; private set; }
+        public Action StopRequest { set; private get; }
 
-        public abstract void Dispose();
+        public IObservable<TimeSpan> TotalTime { get; private set; }
 
-        /// <summary>
-        /// Loads the specified song into the <see cref="Espera.Core.Audio.LocalAudioPlayer"/>.
-        /// Override this if the <see cref="AudioPlayer"/> needs to initialize before playing a song.
-        /// </summary>
-        /// <exception cref="SongLoadException">The song could not be loaded.</exception>
-        /// <exception cref="InvalidOperationException">The method was called more than once.</exception>
-        public virtual Task LoadAsync()
+        public float Volume
         {
-            if (this.PlaybackStateProperty.Value != AudioPlayerState.None)
-                throw new InvalidOperationException("Load was already called");
-
-            return Task.Delay(0);
+            get { return this.GetVolume(); }
+            set { this.SetVolume(value); }
         }
 
-        /// <summary>
-        /// Pauses the playback of the <see cref="Song"/>.
-        /// </summary>
-        /// <remarks>
-        /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Paused"/>
-        /// before leaving the method.
-        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded or is paused.
-        /// In this case it shouldn't perform any operation.
-        /// </remarks>
-        /// <exception cref="InvalidOperationException">The method is called after <see cref="FinishAsync"/> or <see cref="StopAsync"/> has been called.</exception>
-        public abstract Task PauseAsync();
-
-        /// <summary>
-        /// Starts or continues the playback of the <see cref="Song"/>.
-        /// </summary>
-        /// <remarks>
-        /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Playing"/>
-        /// before leaving the method.
-        /// </remarks>
-        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded or is playing.
-        /// In this case it shouldn't perform any operation.
-        /// <exception cref="PlaybackException">The playback couldn't be started.</exception>
-        /// <exception cref="InvalidOperationException">The method is called after <see cref="FinishAsync"/> or <see cref="StopAsync"/> has been called.</exception>
-        public abstract Task PlayAsync();
-
-        /// <summary>
-        /// Prematurely stops the playback of a song.
-        /// </summary>
-        /// <remarks>
-        /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Stopped"/>
-        /// before leaving the method.
-        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded or is paused.
-        /// In this case it shouldn't perform any operation.
-        /// After this method is called, the <see cref="PlayAsync"/> and <see cref="PauseAsync"/> methods have to throw an <see cref="InvalidOperationException"/> if they are called.
-        /// </remarks>
-        public abstract Task StopAsync();
-
-        protected void CurrentTimeSet()
+        public void Dispose()
         {
-            this.currentTimeChangedFromOuter.OnNext(this.CurrentTime);
+            this.StopRequest();
         }
 
-        /// <summary>
-        /// Finishes the playback of the <see cref="Song"/>. This method is called when a song has ended.
-        /// </summary>
-        /// <remarks>
-        /// This method has to ensure that the <see cref="PlaybackState"/> is set to <see cref="AudioPlayerState.Finished"/>
-        /// before leaving the method.
-        /// This method must always be callable, even if the <see cref="AudioPlayer"/> isn't loaded, is stopped or is paused.
-        /// In this case it shouldn't perform any operation.
-        /// After this method is called, the <see cref="PlayAsync"/> and <see cref="PauseAsync"/> methods have to throw an <see cref="InvalidOperationException"/> if they are called.
-        /// </remarks>
-        protected virtual Task FinishAsync()
+        public void Finished()
         {
-            if (this.PlaybackStateProperty.Value != AudioPlayerState.Finished)
+            if (this.playbackStateProperty.Value != AudioPlayerState.Finished)
             {
-                this.PlaybackStateProperty.Value = AudioPlayerState.Finished;
+                this.playbackStateProperty.Value = AudioPlayerState.Finished;
             }
+        }
 
-            return Task.Delay(0);
+        internal async Task LoadAsync(Song song)
+        {
+            if (song == null)
+                throw new ArgumentNullException("song");
+
+            this.loadedSong.OnNext(song);
+
+            await Task.Run(this.LoadRequest);
+        }
+
+        internal async Task PauseAsync()
+        {
+            await Task.Run(this.PauseRequest);
+
+            this.playbackStateProperty.Value = AudioPlayerState.Paused;
+        }
+
+        internal async Task PlayAsync()
+        {
+            await Task.Run(this.PlayRequest);
+
+            this.playbackStateProperty.Value = AudioPlayerState.Playing;
+        }
+
+        internal async Task StopAsync()
+        {
+            await Task.Run(this.StopRequest);
+
+            this.playbackStateProperty.Value = AudioPlayerState.Stopped;
         }
     }
 }

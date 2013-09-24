@@ -180,10 +180,12 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Creates the audio player for the song.
+        /// Prepares the song for playback.
         /// </summary>
-        /// <returns>The audio player for playback.</returns>
-        internal abstract Task<AudioPlayer> CreateAudioPlayerAsync();
+        internal virtual Task PrepareAsync()
+        {
+            return Task.Delay(0);
+        }
 
         /// <summary>
         /// Sets the caching progress in a range from 0 to 100.

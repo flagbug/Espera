@@ -1,5 +1,4 @@
-﻿using Espera.Core.Audio;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -119,7 +118,7 @@ namespace Espera.Core
             }
         }
 
-        internal override async Task<AudioPlayer> CreateAudioPlayerAsync()
+        internal override async Task PrepareAsync()
         {
             if (this.isStreaming)
             {
@@ -149,8 +148,6 @@ namespace Espera.Core
 
                 this.StreamingPath = video.DownloadUrl;
             }
-
-            return this.isStreaming ? (AudioPlayer)new YoutubeAudioPlayer(this) : new LocalAudioPlayer(this);
         }
 
         private static async Task DownloadFromYoutube(Downloader downloader, IEnumerable<Type> exceptionTypes, IObserver<double> progress)

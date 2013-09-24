@@ -72,11 +72,6 @@ namespace Espera.Core
             }
         }
 
-        internal override async Task<AudioPlayer> CreateAudioPlayerAsync()
-        {
-            return await Task.FromResult(new LocalAudioPlayer(this));
-        }
-
         /// <summary>
         /// Notifies the <see cref="LocalSong"/> that the artwork has been stored to the permanent storage.
         /// </summary>
