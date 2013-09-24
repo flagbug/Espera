@@ -7,7 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -481,6 +483,8 @@ namespace Espera.Core.Tests
             using (Library library = Helpers.CreateLibrary())
             {
                 var player = new Mock<AudioPlayer>();
+                player.Setup(x => x.LoadAsync()).Returns(Task.Delay(0));
+                player.Setup(x => x.PlayAsync()).Returns(Task.Delay(0));
 
                 Mock<Song> song = Helpers.CreateSongMock();
                 song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(player.Object));
@@ -584,49 +588,44 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async Task PlaySetsSongIsCorruptedToTrueÍfFailing()
+        public async Task PlaySetsSongIsCorruptedToTrueIfFailing()
         {
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
+            Func<AudioPlayer, Task> test = async player =>
             {
-                var audioPlayer = new Mock<AudioPlayer>();
-                audioPlayer.Setup(p => p.PlayAsync()).Throws<PlaybackException>();
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    Mock<Song> song = Helpers.CreateSongMock();
+                    song.Setup(x => x.CreateAudioPlayerAsync()).Returns(Task.FromResult(player));
 
-                Mock<Song> song = Helpers.CreateSongMock();
-                song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(audioPlayer.Object));
+                    library.AddSongToPlaylist(song.Object);
 
-                library.AddSongToPlaylist(song.Object);
+                    var subject = new AsyncSubject<Unit>();
 
-                var handle = new ManualResetEvent(false);
+                    song.Object.IsCorrupted.FirstAsync(x => x)
+                        .Subscribe(x =>
+                        {
+                            subject.OnNext(Unit.Default);
+                            subject.OnCompleted();
+                        });
 
-                song.Object.IsCorrupted.Where(x => x).Subscribe(x => handle.Set());
+                    await library.PlaySongAsync(0);
 
-                await library.PlaySongAsync(0);
+                    await subject.Timeout(TimeSpan.FromSeconds(10));
 
-                handle.WaitOne();
+                    Assert.True(song.Object.IsCorrupted.Value);
+                }
+            };
 
-                Assert.True(song.Object.IsCorrupted.Value);
-            }
+            var audioPlayer = new Mock<AudioPlayer>();
+            audioPlayer.Setup(x => x.LoadAsync()).Throws<SongLoadException>();
 
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
-            {
-                var audioPlayer = new Mock<AudioPlayer>();
-                audioPlayer.Setup(p => p.LoadAsync()).Throws<SongLoadException>();
+            await test(audioPlayer.Object);
 
-                Mock<Song> song = Helpers.CreateSongMock();
-                song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(audioPlayer.Object));
+            audioPlayer = new Mock<AudioPlayer>();
+            audioPlayer.Setup(x => x.LoadAsync()).Returns(Task.Delay(0));
+            audioPlayer.Setup(x => x.PlayAsync()).Throws<PlaybackException>();
 
-                library.AddSongToPlaylist(song.Object);
-
-                var handle = new ManualResetEvent(false);
-
-                song.Object.IsCorrupted.Where(x => x).Subscribe(x => handle.Set());
-
-                await library.PlaySongAsync(0);
-
-                handle.WaitOne();
-
-                Assert.True(song.Object.IsCorrupted.Value);
-            }
+            await test(audioPlayer.Object);
         }
 
         [Fact]

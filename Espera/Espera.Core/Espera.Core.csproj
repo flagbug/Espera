@@ -67,9 +67,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Rareform.1.5.2\lib\Rareform.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveMarrow, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveMarrow, Version=0.3.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ReactiveMarrow.0.3.0-alpha\lib\ReactiveMarrow.dll</HintPath>
+      <HintPath>..\packages\ReactiveMarrow.0.3.1-alpha\lib\ReactiveMarrow.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveUI, Version=5.1.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
