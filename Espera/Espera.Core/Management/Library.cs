@@ -736,7 +736,7 @@ namespace Espera.Core.Management
             }
         }
 
-        private bool AwaitCaching(Song song)
+        private async Task<bool> AwaitCachingAsync(Song song)
         {
             this.isWaitingOnCache = true;
 
@@ -752,7 +752,7 @@ namespace Espera.Core.Management
                     return false;
                 }
 
-                Thread.Sleep(250);
+                await Task.Delay(200);
             }
 
             this.isWaitingOnCache = false;
@@ -853,7 +853,7 @@ namespace Espera.Core.Management
 
             if (song.HasToCache && !song.IsCached)
             {
-                bool cached = this.AwaitCaching(song);
+                bool cached = await this.AwaitCachingAsync(song);
 
                 if (!cached)
                 {
