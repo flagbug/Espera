@@ -302,9 +302,11 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
-                Mock<Song> song = Helpers.CreateSongMock();
                 var audioPlayer = new Mock<AudioPlayer>();
+                audioPlayer.Setup(x => x.LoadAsync()).Returns(Task.Delay(0));
+                audioPlayer.Setup(x => x.PlayAsync()).Returns(Task.Delay(0)).Verifiable();
 
+                Mock<Song> song = Helpers.CreateSongMock();
                 song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(audioPlayer.Object));
 
                 library.AddSongToPlaylist(song.Object);
@@ -414,9 +416,12 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
-                Mock<Song> song = Helpers.CreateSongMock();
                 var audioPlayer = new Mock<AudioPlayer>();
+                audioPlayer.Setup(x => x.LoadAsync()).Returns(Task.Delay(0));
+                audioPlayer.Setup(x => x.PlayAsync()).Returns(Task.Delay(0));
+                audioPlayer.Setup(x => x.PauseAsync()).Returns(Task.Delay(0)).Verifiable();
 
+                Mock<Song> song = Helpers.CreateSongMock();
                 song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(audioPlayer.Object));
 
                 library.AddSongToPlaylist(song.Object);
@@ -500,28 +505,24 @@ namespace Espera.Core.Tests
             {
                 library.SwitchToPlaylist(library.Playlists.First());
 
+                var audioPlayer = new Mock<AudioPlayer>();
+                audioPlayer.Setup(x => x.LoadAsync()).Returns(Task.Delay(0));
+                audioPlayer.Setup(x => x.PlayAsync()).Returns(Task.Delay(0));
+                audioPlayer.Setup(x => x.Dispose()).Verifiable();
+
                 Mock<Song> song = Helpers.CreateSongMock();
-                song.Setup(x => x.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)new JumpAudioPlayer()));
+                song.Setup(x => x.CreateAudioPlayerAsync()).Returns(Task.FromResult(audioPlayer.Object));
 
                 Mock<Song> instantSong = Helpers.CreateSongMock();
                 instantSong.Setup(x => x.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)new JumpAudioPlayer()));
 
                 library.AddSongToPlaylist(song.Object);
 
-                var handle = new ManualResetEventSlim();
-
-                library.PlaybackState
-                    .Where(x => x == AudioPlayerState.Finished)
-                    .Subscribe(x => handle.Set());
-
                 await library.PlaySongAsync(0);
 
                 await library.PlayInstantlyAsync(new[] { instantSong.Object });
 
-                if (!handle.Wait(5000))
-                {
-                    Assert.True(false, "Timeout");
-                }
+                audioPlayer.Verify(x => x.Dispose(), Times.Once);
             }
         }
 
@@ -540,27 +541,23 @@ namespace Espera.Core.Tests
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 var audioPlayer = new Mock<AudioPlayer>();
-                audioPlayer.Setup(p => p.PlayAsync()).Throws<PlaybackException>();
+                audioPlayer.Setup(x => x.LoadAsync()).Throws<SongLoadException>();
 
                 Mock<Song> corruptedSong = Helpers.CreateSongMock();
                 corruptedSong.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(audioPlayer.Object));
 
+                AudioPlayer audioPlayer2 = new JumpAudioPlayer();
+
                 Mock<Song> nextSong = Helpers.CreateSongMock();
-                nextSong.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)new JumpAudioPlayer()));
+                nextSong.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(audioPlayer2));
 
-                library.AddSongsToPlaylist(new[] { corruptedSong.Object, nextSong.Object });
+                var conn = audioPlayer2.PlaybackState.FirstAsync(x => x == AudioPlayerState.Playing)
+                    .PublishLast();
+                conn.Connect();
 
-                var handle = new AutoResetEvent(false);
+                await library.PlayInstantlyAsync(new[] { corruptedSong.Object, nextSong.Object });
 
-                corruptedSong.Object.IsCorrupted.Subscribe(x => handle.Set());
-                library.SongStarted.Subscribe(x => handle.Set());
-
-                await library.PlaySongAsync(0);
-
-                handle.WaitOne(5000);
-                handle.WaitOne(5000);
-
-                // The test will fail, if the last wait timeouts
+                await conn.Timeout(TimeSpan.FromSeconds(5));
             }
         }
 
@@ -890,7 +887,8 @@ namespace Espera.Core.Tests
         public async Task SwitchingPlaylistAndPlayingSongsChangesCurrentSongIndex()
         {
             var blockingPlayer = new Mock<AudioPlayer>();
-            blockingPlayer.Setup(p => p.PlayAsync()).Callback(() => { });
+            blockingPlayer.Setup(x => x.LoadAsync()).Returns(Task.Delay(0));
+            blockingPlayer.Setup(p => p.PlayAsync()).Returns(Task.Delay(0));
 
             var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
             song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(blockingPlayer.Object));
@@ -943,10 +941,11 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async Task SwitchToPlaylistSetsCurrentSongIndexIfChangingfToOtherPlaylistAndPlayingFirstSong()
+        public async Task SwitchToPlaylistSetsCurrentSongIndexIfChangingToOtherPlaylistAndPlayingFirstSong()
         {
             var blockingPlayer = new Mock<AudioPlayer>();
-            blockingPlayer.Setup(p => p.PlayAsync()).Callback(() => { });
+            blockingPlayer.Setup(p => p.PlayAsync()).Returns(Task.Delay(0));
+            blockingPlayer.Setup(x => x.LoadAsync()).Returns(Task.Delay(0));
 
             var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
             song.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(blockingPlayer.Object));
