@@ -808,6 +808,8 @@ namespace Espera.Core.Management
 
             this.CurrentPlaylist.CurrentSongIndex.Value = playlistIndex;
 
+            this.audioPlayer.Volume = this.Volume;
+
             Song song = this.CurrentPlaylist[playlistIndex].Song;
 
             try
