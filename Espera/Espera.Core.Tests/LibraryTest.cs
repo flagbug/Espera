@@ -7,9 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -599,18 +597,12 @@ namespace Espera.Core.Tests
 
                     library.AddSongToPlaylist(song.Object);
 
-                    var subject = new AsyncSubject<Unit>();
-
-                    song.Object.IsCorrupted.FirstAsync(x => x)
-                        .Subscribe(x =>
-                        {
-                            subject.OnNext(Unit.Default);
-                            subject.OnCompleted();
-                        });
+                    var observable = song.Object.IsCorrupted.FirstAsync(x => x).PublishLast();
+                    observable.Connect();
 
                     await library.PlaySongAsync(0);
 
-                    await subject.Timeout(TimeSpan.FromSeconds(10));
+                    await observable.Timeout(TimeSpan.FromSeconds(10));
 
                     Assert.True(song.Object.IsCorrupted.Value);
                 }
