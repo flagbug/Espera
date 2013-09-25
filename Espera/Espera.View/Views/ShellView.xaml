@@ -767,29 +767,6 @@
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=PlaylistCachingProgressColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Grid>
-                                                    <TextBlock VerticalAlignment="Center" Visibility="{Binding Path=ShowCaching, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="{x:Type TextBlock}">
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding Path=HasCachingFailed}" Value="True">
-                                                                        <Setter Property="Text" Value="Caching failed!" />
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding Path=HasCachingFailed}" Value="False">
-                                                                        <Setter Property="Text" Value="{Binding Path=CacheProgress, StringFormat=Caching... \{0\}%, IsAsync=True}" />
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
-                                                    <TextBlock Text="Streaming failed!" Visibility="{Binding Path=HasStreamingFailed, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                                </Grid>
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
                                 </GridView>
                             </ListView.View>
                         </ListView>

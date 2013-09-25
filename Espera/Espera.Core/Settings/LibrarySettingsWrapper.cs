@@ -58,12 +58,6 @@ namespace Espera.Core.Settings
             set { CoreSettings.Default.StreamHighestYoutubeQuality = value; }
         }
 
-        public bool StreamYoutube
-        {
-            get { return CoreSettings.Default.StreamYoutube; }
-            set { CoreSettings.Default.StreamYoutube = value; }
-        }
-
         public bool UpgradeRequired
         {
             get { return CoreSettings.Default.UpgradeRequired; }
@@ -76,16 +70,16 @@ namespace Espera.Core.Settings
             set { CoreSettings.Default.Volume = value; }
         }
 
-        public YoutubeStreamingQuality YoutubeStreamingQuality
-        {
-            get { return (YoutubeStreamingQuality)CoreSettings.Default.YoutubeStreamingQuality; }
-            set { CoreSettings.Default.YoutubeStreamingQuality = (int)value; }
-        }
-
         public string YoutubeDownloadPath
         {
             get { return CoreSettings.Default.YoutubeDownloadPath; }
             set { CoreSettings.Default.YoutubeDownloadPath = value; }
+        }
+
+        public YoutubeStreamingQuality YoutubeStreamingQuality
+        {
+            get { return (YoutubeStreamingQuality)CoreSettings.Default.YoutubeStreamingQuality; }
+            set { CoreSettings.Default.YoutubeStreamingQuality = (int)value; }
         }
 
         public void Save()

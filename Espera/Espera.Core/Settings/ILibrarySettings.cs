@@ -22,15 +22,13 @@ namespace Espera.Core.Settings
 
         bool StreamHighestYoutubeQuality { get; set; }
 
-        bool StreamYoutube { get; set; }
-
         bool UpgradeRequired { get; set; }
 
         float Volume { get; set; }
 
-        YoutubeStreamingQuality YoutubeStreamingQuality { get; set; }
-
         string YoutubeDownloadPath { get; set; }
+
+        YoutubeStreamingQuality YoutubeStreamingQuality { get; set; }
 
         void Save();
 

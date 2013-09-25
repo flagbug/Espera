@@ -186,7 +186,6 @@
             <TabItem Header="youtube" RenderTransformOrigin="-0.233,15.955">
                 <StackPanel>
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="streaming" />
-                    <Controls:ToggleSwitch Header="Stream from Youtube instead of downloading.&#10;Changing this option requires a restart." IsChecked="{Binding Path=StreamYoutube}" />
                     <Controls:ToggleSwitch Margin="10, 0, 0, 0"
                                            Header="Always stream highest quality"
                                            IsChecked="{Binding Path=StreamHighestYoutubeQuality}" />

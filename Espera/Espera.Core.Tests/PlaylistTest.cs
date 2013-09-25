@@ -215,52 +215,6 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public void InsertMoveSmokeTest()
-        {
-            Song[] songs = Helpers.SetupSongMocks(5);
-
-            Playlist playlist = Helpers.SetupPlaylist(songs);
-
-            playlist.InsertMove(3, 1);
-
-            var expected = new[] { songs[0], songs[3], songs[1], songs[2], songs[4] };
-
-            Assert.Equal(playlist.Select(entry => entry.Song), expected);
-        }
-
-        [Fact]
-        public void InsertMoveThrowsArgumentExceptionIfToIndexIsBiggerThanFromIndex()
-        {
-            var playlist = new Playlist("Playlist");
-
-            Assert.Throws<ArgumentException>(() => playlist.InsertMove(0, 1));
-        }
-
-        [Fact]
-        public void InsertMoveThrowsArgumentExceptionIfToIndexIsEqualFromIndex()
-        {
-            var playlist = new Playlist("Playlist");
-
-            Assert.Throws<ArgumentException>(() => playlist.InsertMove(0, 0));
-        }
-
-        [Fact]
-        public void InsertMoveThrowsArgumentOutOfRangeExceptionIfFromIndexIsLessThanZero()
-        {
-            var playlist = new Playlist("Playlist");
-
-            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.InsertMove(-1, 0));
-        }
-
-        [Fact]
-        public void InsertMoveThrowsArgumentOutOfRangeExceptionIfToIndexIsLessThanZero()
-        {
-            var playlist = new Playlist("Playlist");
-
-            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.InsertMove(0, -1));
-        }
-
-        [Fact]
         public void NameSetterThrowsInvalidOperationExceptionIfIsTemporaryIsTrue()
         {
             var playlist = new Playlist("Playlist", true);

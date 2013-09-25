@@ -12,7 +12,7 @@ namespace Espera.Core.Tests
         {
             using (Stream saveFileStream = Helpers.GenerateSaveFile().ToStream())
             {
-                Playlist[] playlists = LibraryReader.ReadPlaylists(saveFileStream, x => DriveType.Fixed).ToArray();
+                Playlist[] playlists = LibraryReader.ReadPlaylists(saveFileStream).ToArray();
 
                 Playlist playlist1 = playlists[0];
                 Song[] songs1 = playlist1.Select(entry => entry.Song).ToArray();
@@ -56,7 +56,7 @@ namespace Espera.Core.Tests
         {
             using (Stream saveFileStream = Helpers.GenerateSaveFile().ToStream())
             {
-                LocalSong[] songs = LibraryReader.ReadSongs(saveFileStream, x => DriveType.Fixed).ToArray();
+                LocalSong[] songs = LibraryReader.ReadSongs(saveFileStream).ToArray();
 
                 Song actualSong1 = songs[0];
                 Song expectedSong1 = Helpers.LocalSong1;

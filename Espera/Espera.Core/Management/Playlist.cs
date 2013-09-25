@@ -1,5 +1,4 @@
-﻿using Rareform.Reflection;
-using Rareform.Validation;
+﻿using Rareform.Validation;
 using ReactiveMarrow;
 using System;
 using System.Collections;
@@ -152,52 +151,11 @@ namespace Espera.Core.Management
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
 
-            var itemsToAdd = new List<PlaylistEntry>();
-
             int index = this.playlist.Count;
 
-            foreach (Song song in songList)
-            {
-                if (song.HasToCache && !song.IsCaching)
-                {
-                    GlobalSongCacheQueue.Instance.EnqueueAsync(song);
-                }
-
-                itemsToAdd.Add(new PlaylistEntry(index++, song));
-            }
+            var itemsToAdd = songList.Select(song => new PlaylistEntry(index++, song)).ToList();
 
             this.playlist.AddRange(itemsToAdd);
-        }
-
-        /// <summary>
-        /// Inserts a song from a specified index to a other index in the playlist and moves all songs in between these indexes one index back.
-        /// </summary>
-        /// <param name="fromIndex">The index of the song to move.</param>
-        /// <param name="toIndex">To index to insert the song.</param>
-        internal void InsertMove(int fromIndex, int toIndex)
-        {
-            if (fromIndex < 0)
-                Throw.ArgumentOutOfRangeException(() => fromIndex, 0);
-
-            if (toIndex < 0)
-                Throw.ArgumentOutOfRangeException(() => toIndex, 0);
-
-            if (toIndex >= fromIndex)
-                Throw.ArgumentException(
-                    String.Format("{0} has to be smaller than {1}",
-                    Reflector.GetMemberName(() => toIndex), Reflector.GetMemberName(() => fromIndex)),
-                    () => toIndex);
-
-            PlaylistEntry from = this[fromIndex];
-
-            for (int i = fromIndex; i > toIndex; i--)
-            {
-                this.playlist[i].Index = i - 1;
-                this.playlist[i] = this[i - 1];
-            }
-
-            from.Index = toIndex;
-            this.playlist[toIndex] = from;
         }
 
         /// <summary>

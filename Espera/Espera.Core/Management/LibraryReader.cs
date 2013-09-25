@@ -8,9 +8,9 @@ namespace Espera.Core.Management
 {
     internal static class LibraryReader
     {
-        public static IReadOnlyList<Playlist> ReadPlaylists(Stream stream, Func<string, DriveType> driveTypeCallback)
+        public static IReadOnlyList<Playlist> ReadPlaylists(Stream stream)
         {
-            IEnumerable<Song> songs = ReadSongs(stream, driveTypeCallback);
+            IEnumerable<Song> songs = ReadSongs(stream);
 
             stream.Position = 0;
 
@@ -67,7 +67,7 @@ namespace Espera.Core.Management
                             {
                                 if (entry.Type == typeof(YoutubeSong))
                                 {
-                                    return new YoutubeSong(entry.Path, entry.Duration.Value, CoreSettings.Default.StreamYoutube)
+                                    return new YoutubeSong(entry.Path, entry.Duration.Value)
                                     {
                                         Title = entry.Title
                                     };
@@ -85,7 +85,7 @@ namespace Espera.Core.Management
             .ToList();
         }
 
-        public static IReadOnlyList<LocalSong> ReadSongs(Stream stream, Func<string, DriveType> driveTypeCallback)
+        public static IReadOnlyList<LocalSong> ReadSongs(Stream stream)
         {
             return XDocument.Load(stream)
                 .Descendants("Root")
@@ -98,7 +98,6 @@ namespace Espera.Core.Management
                         (
                             song.Attribute("Path").Value,
                             TimeSpan.FromTicks(Int64.Parse(song.Attribute("Duration").Value)),
-                            driveTypeCallback(song.Attribute("Path").Value),
                             song.Attribute("ArtworkKey").Value == String.Empty ? null : song.Attribute("ArtworkKey").Value
                         )
                         {

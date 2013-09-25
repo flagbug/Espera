@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
@@ -17,7 +16,6 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Security.Cryptography;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Espera.Core.Management
@@ -26,9 +24,7 @@ namespace Espera.Core.Management
     {
         private readonly BehaviorSubject<AccessMode> accessModeSubject;
         private readonly AudioPlayer audioPlayer;
-        private readonly AutoResetEvent cacheResetHandle;
         private readonly Subject<Playlist> currentPlaylistChanged;
-        private readonly object disposeLock; // We need a lock when disposing songs to prevent a modification of the enumeration
         private readonly IRemovableDriveWatcher driveWatcher;
         private readonly IFileSystem fileSystem;
         private readonly ILibraryReader libraryReader;
@@ -45,9 +41,7 @@ namespace Espera.Core.Management
         private Playlist currentPlayingPlaylist;
         private IDisposable currentSongFinderSubscription;
         private Playlist instantPlaylist;
-        private bool isWaitingOnCache;
         private DateTime lastSongAddTime;
-        private bool overrideCurrentCaching;
         private string password;
 
         public Library(IRemovableDriveWatcher driveWatcher, ILibraryReader libraryReader, ILibraryWriter libraryWriter, ILibrarySettings settings, IFileSystem fileSystem)
@@ -65,8 +59,6 @@ namespace Espera.Core.Management
             this.currentPlaylistChanged = new Subject<Playlist>();
             this.accessModeSubject = new BehaviorSubject<AccessMode>(Management.AccessMode.Administrator); // We want implicit to be the administrator, till we change to user mode manually
             this.accessMode = Management.AccessMode.Administrator;
-            this.cacheResetHandle = new AutoResetEvent(false);
-            this.disposeLock = new object();
             this.CanPlayNextSong = this.currentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
             this.CanPlayPreviousSong = this.currentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
             this.songStarted = new Subject<Unit>();
@@ -299,17 +291,6 @@ namespace Espera.Core.Management
             }
         }
 
-        public bool StreamYoutube
-        {
-            get { return this.settings.StreamYoutube; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                this.settings.StreamYoutube = value;
-            }
-        }
-
         /// <summary>
         /// Gets the duration of the current song.
         /// </summary>
@@ -492,13 +473,6 @@ namespace Espera.Core.Management
             if (this.currentSongFinderSubscription != null)
             {
                 this.currentSongFinderSubscription.Dispose();
-            }
-
-            this.cacheResetHandle.Dispose();
-
-            lock (this.disposeLock)
-            {
-                DisposeSongs(this.songs);
             }
 
             this.settings.Save();
@@ -691,51 +665,6 @@ namespace Espera.Core.Management
             this.currentPlaylistChanged.OnNext(playlist);
         }
 
-        /// <summary>
-        /// Disposes the all songs and clear their cache.
-        /// </summary>
-        /// <param name="songList">The songs to dispose.</param>
-        private static void DisposeSongs(IEnumerable<Song> songList)
-        {
-            // If the condition is removed, every file that has been added to the library will be deleted...
-            foreach (LocalSong song in songList.Where(song => song.HasToCache && song.IsCached))
-            {
-                try
-                {
-                    song.ClearCache();
-                }
-
-                catch (IOException)
-                {
-                    // Swallow the exception, we don't care about temporary files that could not be deleted
-                }
-            }
-        }
-
-        private async Task<bool> AwaitCachingAsync(Song song)
-        {
-            this.isWaitingOnCache = true;
-
-            while (!song.IsCached)
-            {
-                if (this.overrideCurrentCaching)
-                {
-                    // If we wait on a song that is currently caching, but the user wants to play an other song,
-                    // let the other song pass and discard the waiting of the current song
-                    this.isWaitingOnCache = false;
-                    this.overrideCurrentCaching = false;
-                    this.cacheResetHandle.Set();
-                    return false;
-                }
-
-                await Task.Delay(200);
-            }
-
-            this.isWaitingOnCache = false;
-
-            return true;
-        }
-
         private async Task HandleSongCorruptionAsync()
         {
             if (!await this.CurrentPlaylist.CanPlayNextSong.FirstAsync())
@@ -768,20 +697,6 @@ namespace Espera.Core.Management
                 throw new InvalidOperationException("The next song couldn't be played.");
 
             int nextIndex = this.CurrentPlaylist.CurrentSongIndex.Value.Value + 1;
-            Song nextSong = this.CurrentPlaylist[nextIndex].Song;
-
-            // We want the to swap the songs, if the song that should be played next is currently caching
-            if (nextSong.HasToCache && !nextSong.IsCached && this.CurrentPlaylist.ContainsIndex(nextIndex + 1))
-            {
-                var nextReady = this.CurrentPlaylist
-                    .Skip(nextIndex)
-                    .FirstOrDefault(entry => !entry.Song.HasToCache || entry.Song.IsCached);
-
-                if (nextReady != null)
-                {
-                    this.CurrentPlaylist.InsertMove(nextReady.Index, nextIndex);
-                }
-            }
 
             await this.InternPlaySongAsync(nextIndex);
         }
@@ -790,14 +705,6 @@ namespace Espera.Core.Management
         {
             if (playlistIndex < 0)
                 Throw.ArgumentOutOfRangeException(() => playlistIndex, 0);
-
-            if (this.isWaitingOnCache)
-            {
-                this.overrideCurrentCaching = true;
-
-                // Let the song that is selected to be played wait here, if there is currently another song caching
-                cacheResetHandle.WaitOne();
-            }
 
             if (this.currentPlayingPlaylist != null && this.currentPlayingPlaylist != this.CurrentPlaylist)
             {
@@ -817,24 +724,12 @@ namespace Espera.Core.Management
                 await song.PrepareAsync();
             }
 
-            catch (AudioPlayerCreatingException)
+            catch (SongPreparationException)
             {
                 this.HandleSongCorruptionAsync();
 
                 return;
             }
-
-            if (song.HasToCache && !song.IsCached)
-            {
-                bool cached = await this.AwaitCachingAsync(song);
-
-                if (!cached)
-                {
-                    return;
-                }
-            }
-
-            this.overrideCurrentCaching = false;
 
             try
             {
@@ -901,8 +796,6 @@ namespace Espera.Core.Management
             {
                 BlobCache.LocalMachine.Invalidate(key);
             }
-
-            DisposeSongs(enumerable);
 
             this.playlists.ForEach(playlist => this.RemoveFromPlaylist(playlist, enumerable));
 
@@ -991,10 +884,7 @@ namespace Espera.Core.Management
 
                     lock (this.songLock)
                     {
-                        lock (this.disposeLock)
-                        {
-                            added = this.songs.Add(song);
-                        }
+                        added = this.songs.Add(song);
                     }
 
                     if (added)
