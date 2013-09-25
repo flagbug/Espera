@@ -68,7 +68,7 @@ namespace Espera.Core.Tests
             c.GetVolume = () => 1.0f;
             c.LoadRequest = () => { };
             c.PauseRequest = () => { };
-            c.PlayRequest = () => { };
+            c.PlayRequest = c.Finished;
             c.SetTime = x => { };
             c.SetVolume = x => { };
             c.StopRequest = () => { };

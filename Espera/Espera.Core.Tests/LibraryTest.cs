@@ -448,21 +448,14 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                int called = 0;
+                var conn = library.SongStarted
+                    .Take(2)
+                    .PublishLast();
+                conn.Connect();
 
-                library.AudioPlayerCallback.PlayRequest = () => called++;
+                await library.PlayInstantlyAsync(Helpers.SetupSongMocks(2));
 
-                Mock<Song>[] songs = Helpers.CreateSongMocks(2, false);
-
-                var handle = new CountdownEvent(2);
-
-                library.SongStarted.Subscribe(x => handle.Signal());
-
-                await library.PlayInstantlyAsync(songs.Select(x => x.Object));
-
-                handle.Wait();
-
-                Assert.Equal(2, called);
+                await conn.Timeout(TimeSpan.FromSeconds(5));
             }
         }
 
