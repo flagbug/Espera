@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using YoutubeExtractor;
-using AudioType = Espera.Core.Audio.AudioType;
 
 namespace Espera.Core
 {
@@ -25,12 +24,11 @@ namespace Espera.Core
         /// Initializes a new instance of the <see cref="YoutubeSong"/> class.
         /// </summary>
         /// <param name="path">The path of the song.</param>
-        /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
         /// <param name="isStreaming">if set to true, the song streams from YouTube, instead of downloading.</param>
         /// <exception cref="ArgumentNullException"><paramref name="path"/> is null.</exception>
-        public YoutubeSong(string path, AudioType audioType, TimeSpan duration, bool isStreaming)
-            : base(path, audioType, duration)
+        public YoutubeSong(string path, TimeSpan duration, bool isStreaming)
+            : base(path, duration)
         {
             this.isStreaming = isStreaming;
         }

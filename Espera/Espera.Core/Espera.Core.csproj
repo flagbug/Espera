@@ -120,7 +120,6 @@
     </Compile>
     <Compile Include="Management\AccessMode.cs" />
     <Compile Include="Audio\AudioPlayerState.cs" />
-    <Compile Include="Audio\AudioType.cs" />
     <Compile Include="Audio\AudioPlayer.cs" />
     <Compile Include="Management\GlobalSongCache.cs" />
     <Compile Include="Management\IDriveWatcher.cs" />
