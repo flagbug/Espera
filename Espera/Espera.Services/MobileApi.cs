@@ -75,7 +75,16 @@ namespace Espera.Services
                 mobileClient.Disconnected.FirstAsync()
                     .Subscribe(x =>
                     {
-                        mobileClient.Dispose();
+                        try
+                        {
+                            mobileClient.Dispose();
+                        }
+
+                        catch (ObjectDisposedException)
+                        {
+                            // ReactiveSocket bug
+                        }
+
                         this.clients.Remove(mobileClient);
                     });
 
