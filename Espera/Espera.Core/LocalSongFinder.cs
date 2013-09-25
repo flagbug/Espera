@@ -15,7 +15,6 @@ namespace Espera.Core
     {
         private static readonly string[] AllowedExtensions = { ".mp3", ".wav", ".m4a", ".aac" };
         private readonly string directoryPath;
-        private readonly DriveType driveType;
 
         public LocalSongFinder(string directoryPath)
         {
@@ -23,8 +22,6 @@ namespace Espera.Core
                 Throw.ArgumentNullException(() => directoryPath);
 
             this.directoryPath = directoryPath;
-
-            this.driveType = new DriveInfo(Path.GetPathRoot(directoryPath)).DriveType;
         }
 
         /// <summary>
@@ -37,9 +34,9 @@ namespace Espera.Core
                 .Where(t => t != null);
         }
 
-        private static Tuple<LocalSong, byte[]> CreateSong(Tag tag, TimeSpan duration, string filePath, DriveType driveType)
+        private static Tuple<LocalSong, byte[]> CreateSong(Tag tag, TimeSpan duration, string filePath)
         {
-            var song = new LocalSong(filePath, duration, driveType)
+            var song = new LocalSong(filePath, duration)
             {
                 Album = PrepareTag(tag.Album, String.Empty),
                 Artist = PrepareTag(tag.FirstPerformer, "Unknown Artist"), //HACK: In the future retrieve the string for an unkown artist from the view if we want to localize it
@@ -66,7 +63,7 @@ namespace Espera.Core
                 {
                     if (file != null && file.Tag != null)
                     {
-                        return CreateSong(file.Tag, file.Properties.Duration, file.Name, this.driveType);
+                        return CreateSong(file.Tag, file.Properties.Duration, file.Name);
                     }
 
                     return null;

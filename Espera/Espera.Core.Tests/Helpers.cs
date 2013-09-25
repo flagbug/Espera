@@ -13,7 +13,7 @@ namespace Espera.Core.Tests
 {
     internal static class Helpers
     {
-        public static readonly LocalSong LocalSong1 = new LocalSong("C:/Music/Path1/Song1.mp3", TimeSpan.FromTicks(1), DriveType.Fixed, "artwork-7e316d0e701df0505fa72e2b89467910")
+        public static readonly LocalSong LocalSong1 = new LocalSong("C:/Music/Path1/Song1.mp3", TimeSpan.FromTicks(1), "artwork-7e316d0e701df0505fa72e2b89467910")
         {
             Album = "Album1",
             Artist = "Artist1",
@@ -22,7 +22,7 @@ namespace Espera.Core.Tests
             TrackNumber = 1
         };
 
-        public static readonly LocalSong LocalSong2 = new LocalSong("C:/Music/Path2/Song2.mp3", TimeSpan.FromTicks(2), DriveType.Fixed, null)
+        public static readonly LocalSong LocalSong2 = new LocalSong("C:/Music/Path2/Song2.mp3", TimeSpan.FromTicks(2))
         {
             Album = "Album2",
             Artist = "Artist2",
@@ -38,7 +38,7 @@ namespace Espera.Core.Tests
         public static readonly string SongSourcePath = "C:/Music/";
 
         public static readonly YoutubeSong YoutubeSong1 =
-            new YoutubeSong("www.youtube.com?watch=xyz", TimeSpan.FromTicks(1), true) { Title = "Title1" };
+            new YoutubeSong("www.youtube.com?watch=xyz", TimeSpan.FromTicks(1)) { Title = "Title1" };
 
         static Helpers()
         {

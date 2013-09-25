@@ -157,7 +157,7 @@ namespace Espera.View.ViewModels
 
         private async Task DownloadAudio(VideoInfo videoInfo)
         {
-            await this.DownloadFromYoutube(() => ((YoutubeSong)this.Model).DownloadAudioAsync(videoInfo, Observer.Create<double>(progress => this.DownloadProgress = progress)));
+            await this.DownloadFromYoutube(() => YoutubeSong.DownloadAudioAsync(videoInfo, Observer.Create<double>(progress => this.DownloadProgress = progress)));
         }
 
         private async Task DownloadFromYoutube(Func<Task> downloadFunction)
@@ -178,7 +178,7 @@ namespace Espera.View.ViewModels
 
         private async Task DownloadVideo(VideoInfo videoInfo)
         {
-            await this.DownloadFromYoutube(() => ((YoutubeSong)this.Model).DownloadVideoAsync(videoInfo, Observer.Create<double>(progress => this.DownloadProgress = progress)));
+            await this.DownloadFromYoutube(() => YoutubeSong.DownloadVideoAsync(videoInfo, Observer.Create<double>(progress => this.DownloadProgress = progress)));
         }
 
         private async Task GetThumbnailAsync()

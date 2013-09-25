@@ -360,12 +360,6 @@ namespace Espera.View.ViewModels
             set { Settings.Default.PlaylistArtistColumnWidth = value; }
         }
 
-        public int PlaylistCachingProgressColumnWidth
-        {
-            get { return Settings.Default.PlaylistCachingProgressColumnWidth; }
-            set { Settings.Default.PlaylistCachingProgressColumnWidth = value; }
-        }
-
         public int PlaylistDurationColumnWidth
         {
             get { return Settings.Default.PlaylistDurationColumnWidth; }

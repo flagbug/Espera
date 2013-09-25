@@ -755,69 +755,6 @@ namespace Espera.Core.Tests
             libraryWriter.Verify(x => x.Write(It.IsAny<IEnumerable<LocalSong>>(), It.IsAny<IEnumerable<Playlist>>(), It.IsAny<string>()), Times.Once());
         }
 
-        /*
-        [Fact]
-        public async Task SongsAreSwappedIfTheNextSongIsCaching()
-        {
-            var eventWait = new ManualResetEvent(false); // We need this, because Library.PlaySong() pops up a new thread internally and then returns
-
-            var jumpSong = new Mock<Song>("JumpSong", TimeSpan.Zero);
-            jumpSong.SetupGet(p => p.HasToCache).Returns(false);
-
-            var foreverAudioPlayer = new Mock<AudioPlayer>();
-            foreverAudioPlayer.SetupProperty(p => p.Volume);
-            foreverAudioPlayer.Setup(p => p.PlayAsync()).Callback(() => { }); // Never raises SongFinished
-
-            var cachingSong = new Mock<Song>("CachingSong", AudioType.Mp3, TimeSpan.Zero);
-            cachingSong.SetupGet(p => p.HasToCache).Returns(true);
-            cachingSong.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult(foreverAudioPlayer.Object));
-
-            var cachingSong2 = new Mock<Song>("CachingSong2", AudioType.Mp3, TimeSpan.Zero);
-            cachingSong2.SetupGet(p => p.HasToCache).Returns(true);
-
-            var nextSong = new Mock<Song>("NextSong", AudioType.Mp3, TimeSpan.Zero);
-            nextSong.Setup(p => p.CreateAudioPlayerAsync()).Returns(Task.FromResult((AudioPlayer)jumpAudioPlayer));
-            nextSong.SetupGet(p => p.HasToCache).Returns(false);
-
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
-            {
-                int finished = 0;
-
-                // We need to wait till the second played song has finished and then release our lock,
-                // otherwise it would directly call the assertion, without anything changed
-                library.PlaybackState.Where(x => x == AudioPlayerState.Finished).Subscribe(x =>
-                {
-                    finished++;
-
-                    if (finished == 2)
-                    {
-                        eventWait.Set();
-                    }
-                });
-
-                IEnumerable<Song> songs = new[]
-                {
-                    jumpSong.Object, cachingSong.Object, cachingSong2.Object, nextSong.Object
-                };
-
-                library.AddSongsToPlaylist(songs);
-
-                await library.PlaySongAsync(0);
-
-                if (!eventWait.WaitOne(5000))
-                {
-                    Assert.True(false, "Timeout");
-                }
-
-                var expectedSongs = new[]
-                {
-                    jumpSong.Object, nextSong.Object, cachingSong.Object, cachingSong2.Object
-                };
-
-                Assert.Equal(expectedSongs, library.CurrentPlaylist.Select(entry => entry.Song));
-            }
-        }*/
-
         [Fact]
         public async Task SwitchingPlaylistAndPlayingSongsChangesCurrentSongIndex()
         {
