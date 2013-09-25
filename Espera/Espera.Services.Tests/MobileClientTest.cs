@@ -21,11 +21,30 @@ namespace Espera.Services.Tests
             {
                 var client = new MobileClient(socket.Object, library);
 
-                var conn = client.Disconnected.FirstAsync()
-                    .PublishLast();
+                var conn = client.Disconnected.FirstAsync().PublishLast();
                 conn.Connect();
 
                 socket.Raise(x => x.Disconnected += null, EventArgs.Empty);
+
+                await conn.Timeout(TimeSpan.FromSeconds(5));
+            }
+        }
+
+        [Fact]
+        public async Task FiresDisconnectOnSocketException()
+        {
+            var socket = new Mock<IReactiveSocket>();
+            socket.SetupGet(x => x.Receiver).Returns(Observable.Never<byte>());
+            socket.Setup(x => x.SendAsync(It.IsAny<byte[]>())).Throws<Exception>();
+
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
+            {
+                var client = new MobileClient(socket.Object, library);
+
+                var conn = client.Disconnected.FirstAsync().PublishLast();
+                conn.Connect();
+
+                library.AddAndSwitchToPlaylist("lolol");
 
                 await conn.Timeout(TimeSpan.FromSeconds(5));
             }
