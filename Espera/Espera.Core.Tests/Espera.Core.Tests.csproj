@@ -103,11 +103,7 @@
     <Compile Include="LibraryReaderTest.cs" />
     <Compile Include="LibraryTest.cs" />
     <Compile Include="LibraryWriterTest.cs" />
-    <Compile Include="LocalAudioPlayerTest.cs" />
     <Compile Include="LocalSongTest.cs" />
-    <Compile Include="Mocks\HandledAudioPlayer.cs" />
-    <Compile Include="Mocks\JumpAudioPlayer.cs" />
-    <Compile Include="Mocks\SimpleAudioPlayer.cs" />
     <Compile Include="PlaylistTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SongTest.cs" />

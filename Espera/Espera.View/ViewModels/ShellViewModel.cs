@@ -1,5 +1,4 @@
 ﻿using Caliburn.Micro;
-using Espera.Core;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.View.Properties;
@@ -229,6 +228,11 @@ namespace Espera.View.ViewModels
         }
 
         public IReactiveCommand AddPlaylistCommand { get; private set; }
+
+        public IAudioPlayerCallback AudioPlayerCallback
+        {
+            get { return this.library.AudioPlayerCallback; }
+        }
 
         public bool CanChangeTime
         {
@@ -461,11 +465,6 @@ namespace Espera.View.ViewModels
         /// Occurs when the view should update the screen state to maximized state or restore it to normal state
         /// </summary>
         public IObservable<AccessMode> UpdateScreenState { get; private set; }
-
-        public IObservable<IVideoPlayerCallback> VideoPlayerCallback
-        {
-            get { return this.library.VideoPlayerCallback; }
-        }
 
         public double Volume
         {

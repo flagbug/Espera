@@ -7,12 +7,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace Espera.Core.Tests
 {
     internal static class Helpers
     {
-        public static readonly LocalSong LocalSong1 = new LocalSong("C:/Music/Path1/Song1.mp3", AudioType.Mp3, TimeSpan.FromTicks(1), DriveType.Fixed, "artwork-7e316d0e701df0505fa72e2b89467910")
+        public static readonly LocalSong LocalSong1 = new LocalSong("C:/Music/Path1/Song1.mp3", TimeSpan.FromTicks(1), DriveType.Fixed, "artwork-7e316d0e701df0505fa72e2b89467910")
         {
             Album = "Album1",
             Artist = "Artist1",
@@ -21,7 +22,7 @@ namespace Espera.Core.Tests
             TrackNumber = 1
         };
 
-        public static readonly LocalSong LocalSong2 = new LocalSong("C:/Music/Path2/Song2.mp3", AudioType.Wav, TimeSpan.FromTicks(2), DriveType.Fixed, null)
+        public static readonly LocalSong LocalSong2 = new LocalSong("C:/Music/Path2/Song2.mp3", TimeSpan.FromTicks(2), DriveType.Fixed, null)
         {
             Album = "Album2",
             Artist = "Artist2",
@@ -37,7 +38,7 @@ namespace Espera.Core.Tests
         public static readonly string SongSourcePath = "C:/Music/";
 
         public static readonly YoutubeSong YoutubeSong1 =
-            new YoutubeSong("www.youtube.com?watch=xyz", AudioType.Mp3, TimeSpan.FromTicks(1), true) { Title = "Title1" };
+            new YoutubeSong("www.youtube.com?watch=xyz", TimeSpan.FromTicks(1), true) { Title = "Title1" };
 
         static Helpers()
         {
@@ -55,12 +56,24 @@ namespace Espera.Core.Tests
 
         public static Library CreateLibrary(ILibrarySettings settings = null, ILibraryWriter writer = null, MockFileSystem fileSystem = null)
         {
-            return new Library(
+            var library = new Library(
                 new Mock<IRemovableDriveWatcher>().Object,
                 new Mock<ILibraryReader>().Object,
                 writer ?? new Mock<ILibraryWriter>().Object,
                 settings ?? new Mock<ILibrarySettings>().SetupAllProperties().Object,
                 fileSystem ?? new MockFileSystem());
+
+            IAudioPlayerCallback c = library.AudioPlayerCallback;
+            c.GetTime = () => TimeSpan.Zero;
+            c.GetVolume = () => 1.0f;
+            c.LoadRequest = () => { };
+            c.PauseRequest = () => { };
+            c.PlayRequest = c.Finished;
+            c.SetTime = x => { };
+            c.SetVolume = x => { };
+            c.StopRequest = () => { };
+
+            return library;
         }
 
         public static Library CreateLibraryWithPlaylist(string playlistName = "Playlist", ILibrarySettings settings = null)
@@ -71,9 +84,12 @@ namespace Espera.Core.Tests
             return library;
         }
 
-        public static Mock<Song> CreateSongMock(string name = "Song", bool callBase = false, AudioType audioType = AudioType.Mp3, TimeSpan duration = new TimeSpan())
+        public static Mock<Song> CreateSongMock(string name = "Song", bool callBase = false, TimeSpan duration = new TimeSpan())
         {
-            return new Mock<Song>(name, audioType, duration) { CallBase = callBase };
+            var mock = new Mock<Song>(name, duration) { CallBase = callBase };
+            mock.Setup(x => x.PrepareAsync()).Returns(Task.Delay(0));
+
+            return mock;
         }
 
         public static Mock<Song>[] CreateSongMocks(int count, bool callBase)
@@ -96,8 +112,8 @@ namespace Espera.Core.Tests
                 "  <Version>2.0.0</Version>" +
                 "  <SongSourcePath>" + SongSourcePath + "</SongSourcePath>" +
                 "  <Songs>" +
-                "    <Song Album=\"" + LocalSong1.Album + "\" Artist=\"" + LocalSong1.Artist + "\" AudioType=\"" + LocalSong1.AudioType + "\" Duration=\"" + LocalSong1.Duration.Ticks + "\" Genre=\"" + LocalSong1.Genre + "\" Path=\"" + LocalSong1.OriginalPath + "\" Title=\"" + LocalSong1.Title + "\" TrackNumber=\"" + LocalSong1.TrackNumber + "\" ArtworkKey=\"" + (LocalSong1.ArtworkKey.FirstAsync().Wait() ?? String.Empty) + "\" />" +
-                "    <Song Album=\"" + LocalSong2.Album + "\" Artist=\"" + LocalSong2.Artist + "\" AudioType=\"" + LocalSong2.AudioType + "\" Duration=\"" + LocalSong2.Duration.Ticks + "\" Genre=\"" + LocalSong2.Genre + "\" Path=\"" + LocalSong2.OriginalPath + "\" Title=\"" + LocalSong2.Title + "\" TrackNumber=\"" + LocalSong2.TrackNumber + "\" ArtworkKey=\"" + (LocalSong2.ArtworkKey.FirstAsync().Wait() ?? String.Empty) + "\" />" +
+                "    <Song Album=\"" + LocalSong1.Album + "\" Artist=\"" + LocalSong1.Artist + "\" Duration=\"" + LocalSong1.Duration.Ticks + "\" Genre=\"" + LocalSong1.Genre + "\" Path=\"" + LocalSong1.OriginalPath + "\" Title=\"" + LocalSong1.Title + "\" TrackNumber=\"" + LocalSong1.TrackNumber + "\" ArtworkKey=\"" + (LocalSong1.ArtworkKey.FirstAsync().Wait() ?? String.Empty) + "\" />" +
+                "    <Song Album=\"" + LocalSong2.Album + "\" Artist=\"" + LocalSong2.Artist + "\" Duration=\"" + LocalSong2.Duration.Ticks + "\" Genre=\"" + LocalSong2.Genre + "\" Path=\"" + LocalSong2.OriginalPath + "\" Title=\"" + LocalSong2.Title + "\" TrackNumber=\"" + LocalSong2.TrackNumber + "\" ArtworkKey=\"" + (LocalSong2.ArtworkKey.FirstAsync().Wait() ?? String.Empty) + "\" />" +
                 "  </Songs>" +
                 "  <Playlists>" +
                 "    <Playlist Name=\"" + Playlist1.Name + "\">" +
@@ -116,9 +132,9 @@ namespace Espera.Core.Tests
                 "</Root>";
         }
 
-        public static Song SetupSongMock(string name = "Song", bool callBase = false, AudioType audioType = AudioType.Mp3, TimeSpan duration = new TimeSpan())
+        public static Song SetupSongMock(string name = "Song", bool callBase = false, TimeSpan duration = new TimeSpan())
         {
-            return CreateSongMock(name, callBase, audioType, duration).Object;
+            return CreateSongMock(name, callBase, duration).Object;
         }
 
         public static Song[] SetupSongMocks(int count, bool callBase = false)

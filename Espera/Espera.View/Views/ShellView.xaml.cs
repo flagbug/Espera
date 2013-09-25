@@ -1,4 +1,4 @@
-using Espera.Core;
+using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.View.Properties;
 using Espera.View.ViewModels;
@@ -20,7 +20,7 @@ namespace Espera.View.Views
 {
     public partial class ShellView
     {
-        private IVideoPlayerCallback currentVideoPlayerCallback;
+        private IAudioPlayerCallback currentVideoPlayerCallback;
         private ShellViewModel shellViewModel;
 
         public ShellView()
@@ -34,7 +34,7 @@ namespace Espera.View.Views
             this.DataContextChanged += (sender, args) =>
             {
                 this.WireDataContext();
-                this.WireVideoPlayer();
+                this.WirePlayer();
                 this.WireScreenStateUpdater();
             };
 
@@ -167,21 +167,6 @@ namespace Espera.View.Views
             e.Handled = true;
         }
 
-        private void SetupVideoPlayer(IVideoPlayerCallback callback)
-        {
-            this.currentVideoPlayerCallback = callback;
-            callback.GetTime = () => this.Dispatcher.Invoke(() => this.videoPlayer.Position);
-            callback.SetTime = time => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Position = time));
-
-            callback.GetVolume = () => this.Dispatcher.Invoke(() => (float)this.videoPlayer.Volume);
-            callback.SetVolume = volume => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Volume = volume));
-
-            callback.LoadRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Source = callback.VideoUrl));
-            callback.PauseRequest = () => this.Dispatcher.Invoke(() => this.videoPlayer.Pause());
-            callback.PlayRequest = () => this.Dispatcher.Invoke(() => this.videoPlayer.Play());
-            callback.StopRequest = () => this.Dispatcher.Invoke(() => this.videoPlayer.Stop());
-        }
-
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
         {
             ICommand command = this.shellViewModel.IsAdmin ? this.shellViewModel.CurrentSongSource.PlayNowCommand : this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
@@ -265,12 +250,27 @@ namespace Espera.View.Views
 
         private void VideoPlayerMediaEnded(object sender, RoutedEventArgs e)
         {
-            this.currentVideoPlayerCallback.Finished();
+            this.shellViewModel.AudioPlayerCallback.Finished();
         }
 
         private void WireDataContext()
         {
             this.shellViewModel = (ShellViewModel)this.DataContext;
+        }
+
+        private void WirePlayer()
+        {
+            IAudioPlayerCallback callback = this.shellViewModel.AudioPlayerCallback;
+            callback.GetTime = () => this.Dispatcher.Invoke(() => this.videoPlayer.Position);
+            callback.SetTime = time => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Position = time));
+
+            callback.GetVolume = () => this.Dispatcher.Invoke(() => (float)this.videoPlayer.Volume);
+            callback.SetVolume = volume => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Volume = volume));
+
+            callback.LoadRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Source = callback.Path));
+            callback.PauseRequest = () => this.Dispatcher.Invoke(() => this.videoPlayer.Pause());
+            callback.PlayRequest = () => this.Dispatcher.Invoke(() => this.videoPlayer.Play());
+            callback.StopRequest = () => this.Dispatcher.Invoke(() => this.videoPlayer.Stop());
         }
 
         private void WireScreenStateUpdater()
@@ -287,11 +287,6 @@ namespace Espera.View.Views
                     this.Topmost = this.IgnoreTaskbarOnMaximize;
                 }
             });
-        }
-
-        private void WireVideoPlayer()
-        {
-            this.shellViewModel.VideoPlayerCallback.Subscribe(this.SetupVideoPlayer);
         }
     }
 }

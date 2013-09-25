@@ -19,7 +19,6 @@ namespace Espera.Core.Management
                         new XElement("Song",
                             new XAttribute("Album", song.Album),
                             new XAttribute("Artist", song.Artist),
-                            new XAttribute("AudioType", song.AudioType),
                             new XAttribute("Duration", song.Duration.Ticks),
                             new XAttribute("Genre", song.Genre),
                             new XAttribute("Path", song.OriginalPath),

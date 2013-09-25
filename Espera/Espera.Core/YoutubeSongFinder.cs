@@ -1,5 +1,4 @@
-﻿using Espera.Core.Audio;
-using Google.GData.Client;
+﻿using Google.GData.Client;
 using Google.GData.YouTube;
 using Google.YouTube;
 using Rareform.Validation;
@@ -47,7 +46,7 @@ namespace Espera.Core
                             .Replace("&feature=youtube_gdata_player", String.Empty) // Unnecessary long url
                             .Replace("https://", "http://"); // Secure connections are not always easy to handle when streaming
 
-                        var song = new YoutubeSong(url, AudioType.Mp3, duration, CoreSettings.Default.StreamYoutube)
+                        var song = new YoutubeSong(url, duration, CoreSettings.Default.StreamYoutube)
                         {
                             Title = video.Title,
                             Description = video.Description,

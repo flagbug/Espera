@@ -51,10 +51,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Google.GData.YouTube.2.1.0.0\lib\Google.GData.YouTube.dll</HintPath>
     </Reference>
-    <Reference Include="NAudio, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NAudio.1.6\lib\net20\NAudio.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.5.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -115,6 +111,7 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AudioPlayerCreatingException.cs" />
+    <Compile Include="Audio\IAudioPlayerCallback.cs" />
     <Compile Include="Audio\SongLoadException.cs" />
     <Compile Include="CoreSettings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -122,11 +119,8 @@
       <DependentUpon>CoreSettings.settings</DependentUpon>
     </Compile>
     <Compile Include="Management\AccessMode.cs" />
-    <Compile Include="Audio\AudioPlayer.cs" />
-    <Compile Include="Audio\LocalAudioPlayer.cs" />
     <Compile Include="Audio\AudioPlayerState.cs" />
-    <Compile Include="Audio\AudioType.cs" />
-    <Compile Include="Audio\YoutubeAudioPlayer.cs" />
+    <Compile Include="Audio\AudioPlayer.cs" />
     <Compile Include="Management\GlobalSongCache.cs" />
     <Compile Include="Management\IDriveWatcher.cs" />
     <Compile Include="Management\ILibraryReader.cs" />
@@ -149,7 +143,6 @@
     <Compile Include="Settings\LibrarySettingsWrapper.cs" />
     <Compile Include="Song.cs" />
     <Compile Include="LocalSongFinder.cs" />
-    <Compile Include="IVideoPlayerCallback.cs" />
     <Compile Include="TagSanitizer.cs" />
     <Compile Include="YoutubeDownloadException.cs" />
     <Compile Include="YoutubeSong.cs" />

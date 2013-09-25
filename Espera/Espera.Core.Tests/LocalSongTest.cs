@@ -1,5 +1,4 @@
-﻿using Espera.Core.Audio;
-using System;
+﻿using System;
 using System.IO;
 using Xunit;
 
@@ -10,7 +9,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void HasToCacheShouldBeFalseIfDriveTypeIsFixed()
         {
-            var song = new LocalSong("C://", AudioType.Mp3, TimeSpan.Zero, DriveType.Fixed, null);
+            var song = new LocalSong("C://", TimeSpan.Zero, DriveType.Fixed, null);
 
             Assert.False(song.HasToCache);
         }
@@ -18,7 +17,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void HasToCacheShouldBeFalseIfDriveTypeIsNetwork()
         {
-            var song = new LocalSong("C://", AudioType.Mp3, TimeSpan.Zero, DriveType.Network, null);
+            var song = new LocalSong("C://", TimeSpan.Zero, DriveType.Network, null);
 
             Assert.False(song.HasToCache);
         }
