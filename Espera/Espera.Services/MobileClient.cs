@@ -259,7 +259,7 @@ namespace Espera.Services
         {
             var content = new JObject
             {
-                { "index", index.ToString()}
+                { "index", index }
             };
 
             JObject message = CreatePush("update-current-index", content);
