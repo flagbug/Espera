@@ -1,5 +1,4 @@
-﻿using ReactiveMarrow;
-using System;
+﻿using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
@@ -13,11 +12,12 @@ namespace Espera.Core.Audio
     {
         private readonly Subject<TimeSpan> currentTimeChangedFromOuter;
         private readonly BehaviorSubject<Song> loadedSong;
-        private readonly ReactiveProperty<AudioPlayerState> playbackStateProperty;
+        private readonly BehaviorSubject<AudioPlayerState> playbackState;
 
         internal AudioPlayer()
         {
-            this.playbackStateProperty = new ReactiveProperty<AudioPlayerState>();
+            this.playbackState = new BehaviorSubject<AudioPlayerState>(AudioPlayerState.None);
+            this.PlaybackState = this.playbackState.DistinctUntilChanged();
 
             this.loadedSong = new BehaviorSubject<Song>(null);
             this.TotalTime = this.loadedSong.Select(x => x == null ? TimeSpan.Zero : x.Duration);
@@ -68,10 +68,7 @@ namespace Espera.Core.Audio
         /// <value>
         /// The current playback state.
         /// </value>
-        public IObservable<AudioPlayerState> PlaybackState
-        {
-            get { return this.playbackStateProperty.AsObservable(); }
-        }
+        public IObservable<AudioPlayerState> PlaybackState { get; private set; }
 
         public Action PlayRequest { set; private get; }
 
@@ -96,10 +93,7 @@ namespace Espera.Core.Audio
 
         public void Finished()
         {
-            if (this.playbackStateProperty.Value != AudioPlayerState.Finished)
-            {
-                this.playbackStateProperty.Value = AudioPlayerState.Finished;
-            }
+            this.playbackState.OnNext(AudioPlayerState.Finished);
         }
 
         internal async Task LoadAsync(Song song)
@@ -124,7 +118,7 @@ namespace Espera.Core.Audio
         {
             await Task.Run(this.PauseRequest);
 
-            this.playbackStateProperty.Value = AudioPlayerState.Paused;
+            this.playbackState.OnNext(AudioPlayerState.Paused);
         }
 
         internal async Task PlayAsync()
@@ -139,14 +133,14 @@ namespace Espera.Core.Audio
                 throw new PlaybackException("Could not play song", ex);
             }
 
-            this.playbackStateProperty.Value = AudioPlayerState.Playing;
+            this.playbackState.OnNext(AudioPlayerState.Playing);
         }
 
         internal async Task StopAsync()
         {
             await Task.Run(this.StopRequest);
 
-            this.playbackStateProperty.Value = AudioPlayerState.Stopped;
+            this.playbackState.OnNext(AudioPlayerState.Stopped);
         }
     }
 }
