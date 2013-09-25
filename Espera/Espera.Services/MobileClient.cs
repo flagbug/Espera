@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading;
@@ -21,8 +22,9 @@ namespace Espera.Services
     /// <summary>
     /// Represents one mobile endpoint and handles the interaction.
     /// </summary>
-    public class MobileClient
+    public class MobileClient : IDisposable
     {
+        private readonly Subject<Unit> disconnected;
         private readonly SemaphoreSlim gate;
         private readonly Library library;
         private readonly Dictionary<string, Func<JToken, Task<JObject>>> messageActionMap;
@@ -40,6 +42,7 @@ namespace Espera.Services
             this.library = library;
 
             this.gate = new SemaphoreSlim(1, 1);
+            this.disconnected = new Subject<Unit>();
 
             this.messageActionMap = new Dictionary<string, Func<JToken, Task<JObject>>>
             {
@@ -58,6 +61,20 @@ namespace Espera.Services
                 .Throttle(TimeSpan.FromMilliseconds(200))
                 .Select(_ => this.library.CurrentPlaylist)
                 .Subscribe(x => this.PushPlaylist(x));
+
+            this.Disconnected = Observable.FromEventPattern(h => this.socket.Disconnected += h, h => this.socket.Disconnected -= h)
+                .Select(_ => Unit.Default)
+                .Merge(this.disconnected)
+                .FirstAsync();
+        }
+
+        public IObservable<Unit> Disconnected { get; private set; }
+
+        public void Dispose()
+        {
+            this.socket.Dispose();
+            this.gate.Dispose();
+            this.disconnected.Dispose();
         }
 
         public async Task ListenAsync(CancellationTokenSource token)
@@ -98,15 +115,6 @@ namespace Espera.Services
                     }
                 }
             });
-        }
-
-        public async Task PushPlaylist(Playlist playlist)
-        {
-            JObject content = MobileHelper.SerializePlaylist(playlist);
-
-            JObject message = CreatePush("update-current-index", content);
-
-            await this.SendMessage(message);
         }
 
         private static JObject CreatePush(string action, JToken content)
@@ -239,6 +247,15 @@ namespace Espera.Services
             return CreateResponse(400, "Malformed GUID");
         }
 
+        private async Task PushPlaylist(Playlist playlist)
+        {
+            JObject content = MobileHelper.SerializePlaylist(playlist);
+
+            JObject message = CreatePush("update-current-index", content);
+
+            await this.SendMessage(message);
+        }
+
         private async Task SendMessage(JObject content)
         {
             byte[] contentBytes = Encoding.Unicode.GetBytes(content.ToString(Formatting.None));
@@ -250,8 +267,21 @@ namespace Espera.Services
             byte[] message = length.Concat(contentBytes).ToArray();
 
             await this.gate.WaitAsync();
-            await this.socket.SendAsync(message);
-            this.gate.Release();
+
+            try
+            {
+                await this.socket.SendAsync(message);
+            }
+
+            catch (Exception)
+            {
+                this.disconnected.OnNext(Unit.Default);
+            }
+
+            finally
+            {
+                this.gate.Release();
+            }
         }
     }
 }

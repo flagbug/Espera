@@ -1,39 +1,34 @@
-﻿namespace Espera.Services.Tests
+﻿using Espera.Core.Management;
+using Espera.Core.Tests;
+using Moq;
+using ReactiveSockets;
+using System;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using Xunit;
+
+namespace Espera.Services.Tests
 {
-    internal class MobileClientTest
+    public class MobileClientTest
     {
-        /*[Fact]
-        public async void GetLibraryContentReturnsAllSongs()
-        {
-            var message = new JObject { "action", "get-library-content" };
-
-            var token = new CancellationTokenSource();
-
-            var networkClient = new Mock<IR>();
-            networkClient.Setup(x => x.ReceiveMessage()).Returns(Task.FromResult(message)).Callback(token.Cancel);
-
-            Library library = Helpers.CreateLibrary();
-
-            var client = new MobileClient(networkClient.Object, library);
-
-            var content = JObject.FromObject(new
-            {
-            });
-
-            await client.ListenAsync(token);
-        }
-
         [Fact]
-        public void PostPlaylistSong()
+        public async Task FiresDisconnectOnSocketDisconnect()
         {
-            var message = new JObject
-            {
-                {"action", "post-playlist-song"},
-                {"guid"}
-            };
+            var socket = new Mock<IReactiveSocket>();
+            socket.SetupGet(x => x.Receiver).Returns(Observable.Never<byte>());
 
-            var networkClient = new Mock<IEsperaNetworkClient>();
-            networkClient.Setup(x => x.ReceiveMessage()).Returns(Task.FromResult(message));
-        }*/
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
+            {
+                var client = new MobileClient(socket.Object, library);
+
+                var conn = client.Disconnected.FirstAsync()
+                    .PublishLast();
+                conn.Connect();
+
+                socket.Raise(x => x.Disconnected += null, EventArgs.Empty);
+
+                await conn.Timeout(TimeSpan.FromSeconds(5));
+            }
+        }
     }
 }

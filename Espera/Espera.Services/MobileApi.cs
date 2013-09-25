@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -70,6 +71,14 @@ namespace Espera.Services
             listener.Connections.Subscribe(socket =>
             {
                 var mobileClient = new MobileClient(socket, this.library);
+
+                mobileClient.Disconnected.FirstAsync()
+                    .Subscribe(x =>
+                    {
+                        mobileClient.Dispose();
+                        this.clients.Remove(mobileClient);
+                    });
+
                 mobileClient.ListenAsync(token);
 
                 this.clients.Add(mobileClient);
