@@ -46,7 +46,7 @@ namespace Espera.Core
                             .Replace("&feature=youtube_gdata_player", String.Empty) // Unnecessary long url
                             .Replace("https://", "http://"); // Secure connections are not always easy to handle when streaming
 
-                        var song = new YoutubeSong(url, duration, CoreSettings.Default.StreamYoutube)
+                        var song = new YoutubeSong(url, duration)
                         {
                             Title = video.Title,
                             Description = video.Description,

@@ -7,15 +7,6 @@ namespace Espera.Core.Tests
     public sealed class SongTest
     {
         [Fact]
-        public void ClearCacheThrowsInvalidOperationExceptionIfSongHasNotToBeCached()
-        {
-            var song = new Mock<Song>("TestPath1", TimeSpan.Zero);
-            song.SetupGet(p => p.HasToCache).Returns(false);
-
-            Assert.Throws<InvalidOperationException>(() => song.Object.ClearCache());
-        }
-
-        [Fact]
         public void EqualsNullIsFalse()
         {
             var song = new Mock<Song>("TestPath", TimeSpan.Zero).Object;

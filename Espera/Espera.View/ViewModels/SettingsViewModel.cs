@@ -266,12 +266,6 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public bool StreamYoutube
-        {
-            get { return this.library.StreamYoutube; }
-            set { this.library.StreamYoutube = value; }
-        }
-
         public string Version
         {
             get

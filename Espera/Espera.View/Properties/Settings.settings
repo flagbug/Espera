@@ -50,9 +50,6 @@
     <Setting Name="PlaylistSourceColumnWidth" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">100</Value>
     </Setting>
-    <Setting Name="PlaylistCachingProgressColumnWidth" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">100</Value>
-    </Setting>
     <Setting Name="LocalPathColumnWidth" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">100</Value>
     </Setting>
