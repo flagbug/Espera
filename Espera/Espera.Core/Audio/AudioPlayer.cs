@@ -109,7 +109,15 @@ namespace Espera.Core.Audio
 
             this.loadedSong.OnNext(song);
 
-            await Task.Run(this.LoadRequest);
+            try
+            {
+                await Task.Run(this.LoadRequest);
+            }
+
+            catch (Exception ex)
+            {
+                throw new SongLoadException("Could not load song", ex);
+            }
         }
 
         internal async Task PauseAsync()
@@ -121,7 +129,15 @@ namespace Espera.Core.Audio
 
         internal async Task PlayAsync()
         {
-            await Task.Run(this.PlayRequest);
+            try
+            {
+                await Task.Run(this.PlayRequest);
+            }
+
+            catch (Exception ex)
+            {
+                throw new PlaybackException("Could not play song", ex);
+            }
 
             this.playbackStateProperty.Value = AudioPlayerState.Playing;
         }
