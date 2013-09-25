@@ -39,8 +39,7 @@ namespace Espera.View.ViewModels
 
             // Wait for the opening of the context menu to download the YouTube information
             this.WhenAnyValue(x => x.IsContextMenuOpen)
-                .Where(x => x)
-                .FirstAsync()
+                .FirstAsync(x => x)
                 .Subscribe(_ => this.LoadContextMenu());
 
             // We have to set a dummy here, so that we can connect the commands
