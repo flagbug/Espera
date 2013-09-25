@@ -1,5 +1,4 @@
-﻿using Espera.Core.Audio;
-using Rareform.IO;
+﻿using Rareform.IO;
 using Rareform.Validation;
 using System;
 using System.IO;
@@ -14,7 +13,7 @@ namespace Espera.Core
     /// </summary>
     internal sealed class LocalSongFinder
     {
-        private static readonly string[] AllowedExtensions = { ".mp3", ".wav" };
+        private static readonly string[] AllowedExtensions = { ".mp3", ".wav", ".m4a", ".aac" };
         private readonly string directoryPath;
         private readonly DriveType driveType;
 
@@ -38,9 +37,9 @@ namespace Espera.Core
                 .Where(t => t != null);
         }
 
-        private static Tuple<LocalSong, byte[]> CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath, DriveType driveType)
+        private static Tuple<LocalSong, byte[]> CreateSong(Tag tag, TimeSpan duration, string filePath, DriveType driveType)
         {
-            var song = new LocalSong(filePath, audioType, duration, driveType)
+            var song = new LocalSong(filePath, duration, driveType)
             {
                 Album = PrepareTag(tag.Album, String.Empty),
                 Artist = PrepareTag(tag.FirstPerformer, "Unknown Artist"), //HACK: In the future retrieve the string for an unkown artist from the view if we want to localize it
@@ -61,31 +60,17 @@ namespace Espera.Core
 
         private Tuple<LocalSong, byte[]> ProcessFile(string filePath)
         {
-            TagLib.File file = null;
-
             try
             {
-                AudioType? audioType = null; // Use a nullable value so that we don't have to assign a enum value
-
-                switch (Path.GetExtension(filePath))
+                using (var file = TagLib.File.Create(filePath))
                 {
-                    case ".mp3":
-                        file = new TagLib.Mpeg.AudioFile(filePath);
-                        audioType = AudioType.Mp3;
-                        break;
+                    if (file != null && file.Tag != null)
+                    {
+                        return CreateSong(file.Tag, file.Properties.Duration, file.Name, this.driveType);
+                    }
 
-                    case ".wav":
-                        file = new TagLib.WavPack.File(filePath);
-                        audioType = AudioType.Wav;
-                        break;
+                    return null;
                 }
-
-                if (file != null && file.Tag != null)
-                {
-                    return CreateSong(file.Tag, file.Properties.Duration, audioType.Value, file.Name, this.driveType);
-                }
-
-                return null;
             }
 
             catch (CorruptFileException)
@@ -96,14 +81,6 @@ namespace Espera.Core
             catch (IOException)
             {
                 return null;
-            }
-
-            finally
-            {
-                if (file != null)
-                {
-                    file.Dispose();
-                }
             }
         }
 
@@ -117,7 +94,7 @@ namespace Espera.Core
                     handler => scanner.FileFound += handler,
                     handler => scanner.FileFound -= handler)
                 .Select(x => x.EventArgs.File)
-                .Where(file => AllowedExtensions.Contains(file.Extension))
+                .Where(file => AllowedExtensions.Contains(file.Extension.ToLowerInvariant()))
                 .Subscribe(file => o.OnNext(file.FullName));
 
                 scanner.Finished += (sender, args) =>

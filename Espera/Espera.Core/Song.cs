@@ -1,5 +1,4 @@
-﻿using Espera.Core.Audio;
-using Rareform.Validation;
+﻿using Rareform.Validation;
 using ReactiveMarrow;
 using System;
 using System.Diagnostics;
@@ -23,16 +22,14 @@ namespace Espera.Core
         /// Initializes a new instance of the <see cref="Song"/> class.
         /// </summary>
         /// <param name="path">The path of the song.</param>
-        /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
         /// <exception cref="ArgumentNullException"><c>path</c> is null.</exception>
-        protected Song(string path, AudioType audioType, TimeSpan duration)
+        protected Song(string path, TimeSpan duration)
         {
             if (path == null)
                 Throw.ArgumentNullException(() => path);
 
             this.OriginalPath = path;
-            this.AudioType = audioType;
             this.Duration = duration;
 
             this.Album = String.Empty;
@@ -49,8 +46,6 @@ namespace Espera.Core
         public string Album { get; set; }
 
         public string Artist { get; set; }
-
-        public AudioType AudioType { get; private set; }
 
         public TimeSpan Duration { get; private set; }
 
@@ -166,7 +161,7 @@ namespace Espera.Core
 
         public override int GetHashCode()
         {
-            return new { this.OriginalPath, this.Duration, this.AudioType }.GetHashCode();
+            return new { this.OriginalPath, this.Duration }.GetHashCode();
         }
 
         /// <summary>
@@ -180,10 +175,12 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Creates the audio player for the song.
+        /// Prepares the song for playback.
         /// </summary>
-        /// <returns>The audio player for playback.</returns>
-        internal abstract Task<AudioPlayer> CreateAudioPlayerAsync();
+        internal virtual Task PrepareAsync()
+        {
+            return Task.Delay(0);
+        }
 
         /// <summary>
         /// Sets the caching progress in a range from 0 to 100.

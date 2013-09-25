@@ -1,17 +1,16 @@
-﻿using System;
+using System;
 
-namespace Espera.Core
+namespace Espera.Core.Audio
 {
-    /// <summary>
-    /// The interface through which the user interface video player can interact.
-    /// </summary>
-    public interface IVideoPlayerCallback
+    public interface IAudioPlayerCallback
     {
         Func<TimeSpan> GetTime { set; }
 
         Func<float> GetVolume { set; }
 
         Action LoadRequest { set; }
+
+        Uri Path { get; }
 
         Action PauseRequest { set; }
 
@@ -22,8 +21,6 @@ namespace Espera.Core
         Action<float> SetVolume { set; }
 
         Action StopRequest { set; }
-
-        Uri VideoUrl { get; }
 
         void Finished();
     }

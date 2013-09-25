@@ -74,7 +74,6 @@ namespace Espera.Core.Tests
         {
             Assert.Equal(song1.Album, song2.Album);
             Assert.Equal(song1.Artist, song2.Artist);
-            Assert.Equal(song1.AudioType, song2.AudioType);
             Assert.Equal(song1.Duration, song2.Duration);
             Assert.Equal(song1.Genre, song2.Genre);
             Assert.Equal(song1.OriginalPath, song2.OriginalPath);

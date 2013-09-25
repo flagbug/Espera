@@ -25,8 +25,8 @@ namespace Espera.Core.Management
     public sealed class Library : IDisposable, IEnableLogger
     {
         private readonly BehaviorSubject<AccessMode> accessModeSubject;
+        private readonly AudioPlayer audioPlayer;
         private readonly AutoResetEvent cacheResetHandle;
-        private readonly BehaviorSubject<AudioPlayer> currentPlayer;
         private readonly Subject<Playlist> currentPlaylistChanged;
         private readonly object disposeLock; // We need a lock when disposing songs to prevent a modification of the enumeration
         private readonly IRemovableDriveWatcher driveWatcher;
@@ -69,38 +69,20 @@ namespace Espera.Core.Management
             this.disposeLock = new object();
             this.CanPlayNextSong = this.currentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
             this.CanPlayPreviousSong = this.currentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
-            this.currentPlayer = new BehaviorSubject<AudioPlayer>(null);
             this.songStarted = new Subject<Unit>();
             this.songSourcePath = new BehaviorSubject<string>(null);
             this.songsUpdated = new Subject<Unit>();
+            this.audioPlayer = new AudioPlayer();
 
-            this.LoadedSong = this.currentPlayer
-                .Select(x => x == null ? null : x.Song);
+            this.LoadedSong = this.audioPlayer.LoadedSong;
+            this.TotalTime = this.audioPlayer.TotalTime;
+            this.PlaybackState = this.audioPlayer.PlaybackState;
 
-            this.TotalTime = this.currentPlayer
-                .Select(x => x == null ? Observable.Return(TimeSpan.Zero) : x.TotalTime)
-                .Switch()
-                .StartWith(TimeSpan.Zero);
+            this.audioPlayer.PlaybackState.Where(p => p == AudioPlayerState.Finished)
+                .CombineLatestValue(this.CanPlayNextSong, (state, canPlayNextSong) => canPlayNextSong)
+                .Subscribe(canPlayNextSong => this.HandleSongFinishAsync(canPlayNextSong));
 
-            this.PlaybackState = this.currentPlayer
-                .Select(x => x == null ? Observable.Return(AudioPlayerState.None) : x.PlaybackState)
-                .Switch()
-                .StartWith(AudioPlayerState.None);
-
-            this.VideoPlayerCallback = this.currentPlayer
-                .OfType<IVideoPlayerCallback>();
-
-            this.currentPlayer
-                .Where(x => x != null)
-                .Select(x => x.PlaybackState.Where(p => p == AudioPlayerState.Finished).Select(q => x))
-                .Switch()
-                .CombineLatestValue(this.CanPlayNextSong, Tuple.Create)
-                .Subscribe(t => this.HandleSongFinishAsync(t.Item1, t.Item2));
-
-            this.CurrentTimeChanged = this.currentPlayer
-                .Where(x => x != null)
-                .Select(x => x.CurrentTimeChanged)
-                .Switch();
+            this.CurrentTimeChanged = this.audioPlayer.CurrentTimeChanged;
 
             /*
              * Start boring, repeating glue code
@@ -154,6 +136,11 @@ namespace Espera.Core.Management
             get { return this.accessModeSubject.AsObservable(); }
         }
 
+        public IAudioPlayerCallback AudioPlayerCallback
+        {
+            get { return this.audioPlayer; }
+        }
+
         public bool CanAddSongToPlaylist
         {
             get { return this.accessMode == Management.AccessMode.Administrator || this.RemainingPlaylistTimeout <= TimeSpan.Zero; }
@@ -193,15 +180,12 @@ namespace Espera.Core.Management
         /// </summary>
         public TimeSpan CurrentTime
         {
-            get { return this.currentPlayer.FirstAsync().Wait() == null ? TimeSpan.Zero : this.currentPlayer.FirstAsync().Wait().CurrentTime; }
+            get { return this.audioPlayer.CurrentTime; }
             set
             {
                 this.ThrowIfNotAdmin();
 
-                if (this.currentPlayer.FirstAsync().Wait() != null)
-                {
-                    this.currentPlayer.FirstAsync().Wait().CurrentTime = value;
-                }
+                this.audioPlayer.CurrentTime = value;
             }
         }
 
@@ -331,8 +315,6 @@ namespace Espera.Core.Management
         /// </summary>
         public IObservable<TimeSpan> TotalTime { get; private set; }
 
-        public IObservable<IVideoPlayerCallback> VideoPlayerCallback { get; private set; }
-
         public float Volume
         {
             get { return this.settings.Volume; }
@@ -342,10 +324,7 @@ namespace Espera.Core.Management
 
                 this.settings.Volume = value;
 
-                if (this.currentPlayer.FirstAsync().Wait() != null)
-                {
-                    this.currentPlayer.FirstAsync().Wait().Volume = value;
-                }
+                this.audioPlayer.Volume = value;
             }
         }
 
@@ -480,7 +459,7 @@ namespace Espera.Core.Management
         {
             this.ThrowIfNotAdmin();
 
-            await (await this.currentPlayer.FirstAsync()).PlayAsync();
+            await this.audioPlayer.PlayAsync();
         }
 
         /// <summary>
@@ -506,10 +485,7 @@ namespace Espera.Core.Management
 
         public void Dispose()
         {
-            if (this.currentPlayer.FirstAsync().Wait() != null)
-            {
-                this.currentPlayer.FirstAsync().Wait().Dispose();
-            }
+            this.audioPlayer.Dispose();
 
             this.driveWatcher.Dispose();
 
@@ -573,7 +549,7 @@ namespace Espera.Core.Management
             if (this.LockPlayPause.Value && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to play when in party mode.");
 
-            await (await this.currentPlayer.FirstAsync()).PauseAsync();
+            await this.audioPlayer.PauseAsync();
         }
 
         public async Task PlayInstantlyAsync(IEnumerable<Song> songList)
@@ -773,15 +749,12 @@ namespace Espera.Core.Management
             }
         }
 
-        private async Task HandleSongFinishAsync(AudioPlayer audioPlayer, bool canPlayNextSong)
+        private async Task HandleSongFinishAsync(bool canPlayNextSong)
         {
             if (!canPlayNextSong)
             {
                 this.CurrentPlaylist.CurrentSongIndex.Value = null;
             }
-
-            audioPlayer.Dispose();
-            this.currentPlayer.OnNext(null);
 
             if (canPlayNextSong)
             {
@@ -835,13 +808,13 @@ namespace Espera.Core.Management
 
             this.CurrentPlaylist.CurrentSongIndex.Value = playlistIndex;
 
-            Song song = this.CurrentPlaylist[playlistIndex].Song;
+            this.audioPlayer.Volume = this.Volume;
 
-            AudioPlayer audioPlayer;
+            Song song = this.CurrentPlaylist[playlistIndex].Song;
 
             try
             {
-                audioPlayer = await this.RenewCurrentPlayerAsync(song);
+                await song.PrepareAsync();
             }
 
             catch (AudioPlayerCreatingException)
@@ -865,7 +838,7 @@ namespace Espera.Core.Management
 
             try
             {
-                await audioPlayer.LoadAsync();
+                await this.audioPlayer.LoadAsync(song);
             }
 
             catch (SongLoadException)
@@ -879,7 +852,7 @@ namespace Espera.Core.Management
 
             try
             {
-                await audioPlayer.PlayAsync();
+                await this.audioPlayer.PlayAsync();
             }
 
             catch (PlaybackException)
@@ -950,7 +923,7 @@ namespace Espera.Core.Management
 
             if (stopCurrentSong)
             {
-                this.currentPlayer.FirstAsync().Wait().StopAsync();
+                this.audioPlayer.StopAsync();
             }
         }
 
@@ -984,26 +957,6 @@ namespace Espera.Core.Management
             });
 
             this.RemoveFromLibrary(removable);
-        }
-
-        private async Task<AudioPlayer> RenewCurrentPlayerAsync(Song song)
-        {
-            AudioPlayer player = await this.currentPlayer.FirstAsync();
-
-            if (player != null)
-            {
-                player.Dispose();
-            }
-
-            AudioPlayer newAudioPlayer = await song.CreateAudioPlayerAsync();
-
-            this.currentPlayer.OnNext(newAudioPlayer);
-
-            // Set the volume after the currentPlayer is propagated so that an potential
-            // IVideoPlayerCallback user can attach to the new AudioPlayer prior to that
-            newAudioPlayer.Volume = this.Volume;
-
-            return newAudioPlayer;
         }
 
         private void ThrowIfNotAdmin()

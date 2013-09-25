@@ -1,12 +1,10 @@
-﻿using Espera.Core.Audio;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using YoutubeExtractor;
-using AudioType = Espera.Core.Audio.AudioType;
 
 namespace Espera.Core
 {
@@ -26,12 +24,11 @@ namespace Espera.Core
         /// Initializes a new instance of the <see cref="YoutubeSong"/> class.
         /// </summary>
         /// <param name="path">The path of the song.</param>
-        /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
         /// <param name="isStreaming">if set to true, the song streams from YouTube, instead of downloading.</param>
         /// <exception cref="ArgumentNullException"><paramref name="path"/> is null.</exception>
-        public YoutubeSong(string path, AudioType audioType, TimeSpan duration, bool isStreaming)
-            : base(path, audioType, duration)
+        public YoutubeSong(string path, TimeSpan duration, bool isStreaming)
+            : base(path, duration)
         {
             this.isStreaming = isStreaming;
         }
@@ -119,7 +116,7 @@ namespace Espera.Core
             }
         }
 
-        internal override async Task<AudioPlayer> CreateAudioPlayerAsync()
+        internal override async Task PrepareAsync()
         {
             if (this.isStreaming)
             {
@@ -149,8 +146,6 @@ namespace Espera.Core
 
                 this.StreamingPath = video.DownloadUrl;
             }
-
-            return this.isStreaming ? (AudioPlayer)new YoutubeAudioPlayer(this) : new LocalAudioPlayer(this);
         }
 
         private static async Task DownloadFromYoutube(Downloader downloader, IEnumerable<Type> exceptionTypes, IObserver<double> progress)

@@ -1,5 +1,4 @@
-﻿using Espera.Core.Audio;
-using Rareform.IO;
+﻿using Rareform.IO;
 using Rareform.Validation;
 using System;
 using System.IO;
@@ -18,12 +17,11 @@ namespace Espera.Core
         /// Initializes a new instance of the <see cref="LocalSong"/> class.
         /// </summary>
         /// <param name="path">The path of the file.</param>
-        /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
         /// <param name="sourceDriveType">The drive type where the song comes from.</param>
         /// <param name="artworkKey">The key of the artwork for Akavache to retrieve. Null, if there is no album cover or the artwork isn't retrieved yet.</param>
-        public LocalSong(string path, AudioType audioType, TimeSpan duration, DriveType sourceDriveType, string artworkKey = null)
-            : base(path, audioType, duration)
+        public LocalSong(string path, TimeSpan duration, DriveType sourceDriveType, string artworkKey = null)
+            : base(path, duration)
         {
             if (artworkKey == String.Empty)
                 Throw.ArgumentException("Artwork key cannot be an empty string", () => artworkKey);
@@ -70,11 +68,6 @@ namespace Espera.Core
             {
                 this.IsCaching = false;
             }
-        }
-
-        internal override async Task<AudioPlayer> CreateAudioPlayerAsync()
-        {
-            return await Task.FromResult(new LocalAudioPlayer(this));
         }
 
         /// <summary>

@@ -1,5 +1,4 @@
-﻿using Espera.Core.Audio;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -68,7 +67,7 @@ namespace Espera.Core.Management
                             {
                                 if (entry.Type == typeof(YoutubeSong))
                                 {
-                                    return new YoutubeSong(entry.Path, AudioType.Mp3, entry.Duration.Value, CoreSettings.Default.StreamYoutube)
+                                    return new YoutubeSong(entry.Path, entry.Duration.Value, CoreSettings.Default.StreamYoutube)
                                     {
                                         Title = entry.Title
                                     };
@@ -98,7 +97,6 @@ namespace Espera.Core.Management
                         new LocalSong
                         (
                             song.Attribute("Path").Value,
-                            (AudioType)Enum.Parse(typeof(AudioType), song.Attribute("AudioType").Value),
                             TimeSpan.FromTicks(Int64.Parse(song.Attribute("Duration").Value)),
                             driveTypeCallback(song.Attribute("Path").Value),
                             song.Attribute("ArtworkKey").Value == String.Empty ? null : song.Attribute("ArtworkKey").Value
