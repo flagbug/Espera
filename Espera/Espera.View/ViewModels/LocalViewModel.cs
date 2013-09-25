@@ -184,7 +184,7 @@ namespace Espera.View.ViewModels
 
             this.SelectableSongs = this.filteredSongs
                 .AsParallel()
-                .Where(song => this.SelectedArtist.IsAllArtists || song.Artist == this.SelectedArtist.Name)
+                .Where(song => this.SelectedArtist.IsAllArtists || song.Artist.Equals(this.SelectedArtist.Name, StringComparison.InvariantCultureIgnoreCase))
                 .OrderBy(this.SongOrderFunc)
                 .ToList();
 
