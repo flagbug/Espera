@@ -3,6 +3,7 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -140,7 +141,7 @@ namespace Espera.View.ViewModels
 
         public string Views
         {
-            get { return String.Format("{0:N0}", ((YoutubeSong)this.Model).Views); }
+            get { return String.Format(NumberFormatInfo.InvariantInfo, "{0:N0}", ((YoutubeSong)this.Model).Views); }
         }
 
         public async Task LoadContextMenu()
