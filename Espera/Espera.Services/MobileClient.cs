@@ -53,14 +53,13 @@ namespace Espera.Services
                 {"post-play-playlist-song", this.PostPlayPlaylistSong}
             };
 
-            this.library.CurrentPlaylistChanged.Select(_ => Unit.Default)
-                .Merge(this.library.CurrentPlaylistChanged.StartWith(this.library.CurrentPlaylist)
-                    .Select(x => x.CurrentSongIndex.Skip(1))
-                    .Switch()
-                    .Select(_ => Unit.Default))
-                .Throttle(TimeSpan.FromMilliseconds(200))
-                .Select(_ => this.library.CurrentPlaylist)
+            this.library.CurrentPlaylistChanged
                 .Subscribe(x => this.PushPlaylist(x));
+
+            this.library.CurrentPlaylistChanged.StartWith(this.library.CurrentPlaylist)
+                .Select(x => x.CurrentSongIndex.Skip(1))
+                .Switch()
+                .Subscribe(x => this.PushPlaylistIndex(x));
 
             this.Disconnected = Observable.FromEventPattern(h => this.socket.Disconnected += h, h => this.socket.Disconnected -= h)
                 .Select(_ => Unit.Default)
@@ -250,6 +249,18 @@ namespace Espera.Services
         private async Task PushPlaylist(Playlist playlist)
         {
             JObject content = MobileHelper.SerializePlaylist(playlist);
+
+            JObject message = CreatePush("update-current-playlist", content);
+
+            await this.SendMessage(message);
+        }
+
+        private async Task PushPlaylistIndex(int? index)
+        {
+            var content = new JObject
+            {
+                { "index", index.ToString()}
+            };
 
             JObject message = CreatePush("update-current-index", content);
 
