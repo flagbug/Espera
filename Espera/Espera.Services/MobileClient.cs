@@ -89,7 +89,7 @@ namespace Espera.Services
                     .Select(length => BitConverter.ToInt32(length.ToArray(), 0))
                     .Select(length => this.socket.Receiver.Take(length).ToEnumerable().ToArray())
                     .SelectMany(body => MobileHelper.DecompressDataAsync(body).ToObservable())
-                    .Select(body => Encoding.Unicode.GetString(body))
+                    .Select(body => Encoding.UTF8.GetString(body))
                     .Select(JObject.Parse);
 
             messages.ObserveOn(RxApp.MainThreadScheduler).Subscribe(async request =>

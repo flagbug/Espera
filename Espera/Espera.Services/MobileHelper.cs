@@ -44,7 +44,7 @@ namespace Espera.Services
 
         public static async Task<byte[]> PackMessage(JObject message)
         {
-            byte[] contentBytes = Encoding.Unicode.GetBytes(message.ToString(Formatting.None));
+            byte[] contentBytes = Encoding.UTF8.GetBytes(message.ToString(Formatting.None));
 
             contentBytes = await CompressDataAsync(contentBytes);
 
