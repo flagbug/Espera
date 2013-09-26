@@ -1,8 +1,8 @@
 ﻿using Espera.Core;
 using Espera.Core.Management;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Rareform.Validation;
+using ReactiveMarrow;
 using ReactiveSockets;
 using ReactiveUI;
 using System;
@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
@@ -25,6 +26,7 @@ namespace Espera.Services
     public class MobileClient : IDisposable
     {
         private readonly Subject<Unit> disconnected;
+        private readonly CompositeDisposable disposable;
         private readonly SemaphoreSlim gate;
         private readonly Library library;
         private readonly Dictionary<string, Func<JToken, Task<JObject>>> messageActionMap;
@@ -53,13 +55,7 @@ namespace Espera.Services
                 {"post-play-playlist-song", this.PostPlayPlaylistSong}
             };
 
-            this.library.CurrentPlaylistChanged
-                .Subscribe(x => this.PushPlaylist(x));
-
-            this.library.CurrentPlaylistChanged.StartWith(this.library.CurrentPlaylist)
-                .Select(x => x.CurrentSongIndex.Skip(1))
-                .Switch()
-                .Subscribe(x => this.PushPlaylistIndex(x));
+            this.disposable = new CompositeDisposable();
 
             this.Disconnected = Observable.FromEventPattern(h => this.socket.Disconnected += h, h => this.socket.Disconnected -= h)
                 .Select(_ => Unit.Default)
@@ -71,12 +67,22 @@ namespace Espera.Services
 
         public void Dispose()
         {
-            this.socket.Dispose();
+            try
+            {
+                this.socket.Dispose();
+            }
+
+            catch (ObjectDisposedException)
+            {
+                // ReactiveSocket bug
+            }
+
             this.gate.Dispose();
             this.disconnected.Dispose();
+            this.disposable.Dispose();
         }
 
-        public async Task ListenAsync(CancellationTokenSource token)
+        public void ListenAsync()
         {
             IObservable<JObject> messages =
                 socket.Receiver.Buffer(4)
@@ -86,7 +92,7 @@ namespace Espera.Services
                     .Select(body => Encoding.Unicode.GetString(body))
                     .Select(JObject.Parse);
 
-            await messages.ObserveOn(RxApp.MainThreadScheduler).ForEachAsync(async request =>
+            messages.ObserveOn(RxApp.MainThreadScheduler).Subscribe(async request =>
             {
                 string requestAction = request["action"].ToString();
 
@@ -113,7 +119,17 @@ namespace Espera.Services
                         // Don't crash the listener if we receive a bogus message that we can't handle
                     }
                 }
-            });
+            }).DisposeWith(this.disposable);
+
+            this.library.CurrentPlaylistChanged
+                .Subscribe(x => this.PushPlaylist(x))
+                .DisposeWith(this.disposable);
+
+            this.library.CurrentPlaylistChanged.StartWith(this.library.CurrentPlaylist)
+                .Select(x => x.CurrentSongIndex.Skip(1))
+                .Switch()
+                .Subscribe(x => this.PushPlaylistIndex(x))
+                .DisposeWith(this.disposable);
         }
 
         private static JObject CreatePush(string action, JToken content)
@@ -269,13 +285,7 @@ namespace Espera.Services
 
         private async Task SendMessage(JObject content)
         {
-            byte[] contentBytes = Encoding.Unicode.GetBytes(content.ToString(Formatting.None));
-
-            contentBytes = await MobileHelper.CompressDataAsync(contentBytes);
-
-            byte[] length = BitConverter.GetBytes(contentBytes.Length); // We have a fixed size of 4 bytes
-
-            byte[] message = length.Concat(contentBytes).ToArray();
+            byte[] message = await MobileHelper.PackMessage(content);
 
             await this.gate.WaitAsync();
 

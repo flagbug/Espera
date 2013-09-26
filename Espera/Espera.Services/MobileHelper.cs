@@ -1,10 +1,13 @@
 ﻿using Espera.Core;
 using Espera.Core.Management;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Espera.Services
@@ -37,6 +40,17 @@ namespace Espera.Services
                     }
                 }
             }
+        }
+
+        public static async Task<byte[]> PackMessage(JObject message)
+        {
+            byte[] contentBytes = Encoding.Unicode.GetBytes(message.ToString(Formatting.None));
+
+            contentBytes = await CompressDataAsync(contentBytes);
+
+            byte[] length = BitConverter.GetBytes(contentBytes.Length); // We have a fixed size of 4 bytes
+
+            return length.Concat(contentBytes).ToArray();
         }
 
         public static JObject SerializePlaylist(Playlist playlist)
