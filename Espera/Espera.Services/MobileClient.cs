@@ -73,16 +73,7 @@ namespace Espera.Services
 
         public void Dispose()
         {
-            try
-            {
-                this.socket.Dispose();
-            }
-
-            catch (ObjectDisposedException)
-            {
-                // ReactiveSocket bug
-            }
-
+            this.socket.Dispose();
             this.gate.Dispose();
             this.disconnected.Dispose();
             this.disposable.Dispose();
