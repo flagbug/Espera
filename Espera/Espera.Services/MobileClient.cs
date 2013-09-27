@@ -1,4 +1,5 @@
 ﻿using Espera.Core;
+using Espera.Core.Audio;
 using Espera.Core.Management;
 using Newtonsoft.Json.Linq;
 using Rareform.Validation;
@@ -52,7 +53,12 @@ namespace Espera.Services
                 {"post-playlist-song", this.PostPlaylistSong},
                 {"post-play-instantly", this.PostPlayInstantly},
                 {"get-current-playlist", this.GetCurrentPlaylist},
-                {"post-play-playlist-song", this.PostPlayPlaylistSong}
+                {"post-play-playlist-song", this.PostPlayPlaylistSong},
+                {"post-continue-song", this.PostContinueSong},
+                {"post-pause-song", this.PostPauseSong},
+                {"post-play-next-song", this.PostPlayNextSong},
+                {"post-play-previous-song", this.PostPlayPreviousSong},
+                {"get-playback-state", this.GetPlaybackState}
             };
 
             this.disposable = new CompositeDisposable();
@@ -132,6 +138,10 @@ namespace Espera.Services
                 .Switch()
                 .Subscribe(x => this.PushPlaylistIndex(x))
                 .DisposeWith(this.disposable);
+
+            this.library.PlaybackState.Skip(1)
+                .Subscribe(x => this.PushPlaybackState(x))
+                .DisposeWith(this.disposable);
         }
 
         private static JObject CreatePush(string action, JToken content)
@@ -177,6 +187,48 @@ namespace Espera.Services
             JObject content = MobileHelper.SerializeSongs(this.library.Songs);
 
             return Task.FromResult(CreateResponse(200, "Ok", content));
+        }
+
+        private async Task<JObject> GetPlaybackState(JToken dontCare)
+        {
+            AudioPlayerState state = await this.library.PlaybackState.FirstAsync();
+
+            var content = new JObject
+            {
+                {"state", state.ToString()}
+            };
+
+            return CreateResponse(200, "Ok", content);
+        }
+
+        private async Task<JObject> PostContinueSong(JToken dontCare)
+        {
+            try
+            {
+                await this.library.ContinueSongAsync();
+            }
+
+            catch (Exception)
+            {
+                return CreateResponse(401, "Unauthorized");
+            }
+
+            return CreateResponse(200, "Ok");
+        }
+
+        private async Task<JObject> PostPauseSong(JToken dontCare)
+        {
+            try
+            {
+                await this.library.PauseSongAsync();
+            }
+
+            catch (Exception)
+            {
+                return CreateResponse(401, "Unauthorized");
+            }
+
+            return CreateResponse(200, "Ok");
         }
 
         private async Task<JObject> PostPlayInstantly(JToken parameters)
@@ -243,6 +295,21 @@ namespace Espera.Services
             return Task.FromResult(CreateResponse(400, "Malformed GUID"));
         }
 
+        private async Task<JObject> PostPlayNextSong(JToken dontCare)
+        {
+            try
+            {
+                await this.library.PlayNextSongAsync();
+            }
+
+            catch (Exception)
+            {
+                return CreateResponse(401, "Unauthorized");
+            }
+
+            return CreateResponse(200, "Ok");
+        }
+
         private async Task<JObject> PostPlayPlaylistSong(JToken parameters)
         {
             Guid songGuid;
@@ -262,6 +329,33 @@ namespace Espera.Services
             }
 
             return CreateResponse(400, "Malformed GUID");
+        }
+
+        private async Task<JObject> PostPlayPreviousSong(JToken dontCare)
+        {
+            try
+            {
+                await this.library.PlayPreviousSongAsync();
+            }
+
+            catch (Exception)
+            {
+                return CreateResponse(401, "Unauthorized");
+            }
+
+            return CreateResponse(200, "Ok");
+        }
+
+        private async Task PushPlaybackState(AudioPlayerState state)
+        {
+            var content = new JObject
+            {
+                {"state", state.ToString()}
+            };
+
+            JObject message = CreatePush("update-playback-state", content);
+
+            await this.SendMessage(message);
         }
 
         private async Task PushPlaylist(Playlist playlist)
