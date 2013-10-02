@@ -149,16 +149,11 @@ namespace Espera.View.ViewModels
             List<ArtistViewModel> artistsToRemove = this.artists.Where(x => !groupedByArtist.Contains(x.Name)).ToList();
             artistsToRemove.Remove(this.allArtistsViewModel);
 
-            foreach (ArtistViewModel artistViewModel in artistsToRemove)
-            {
-                artistViewModel.Dispose();
-            }
-
             this.artists.RemoveAll(artistsToRemove);
 
             foreach (var songs in groupedByArtist)
             {
-                ArtistViewModel model = this.artists.FirstOrDefault(x => x.Name == songs.Key);
+                ArtistViewModel model = this.artists.FirstOrDefault(x => x.Name.Equals(songs.Key, StringComparison.InvariantCultureIgnoreCase));
 
                 if (model == null)
                 {
