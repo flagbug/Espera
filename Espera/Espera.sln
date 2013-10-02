@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.20827.3
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.Core", "Espera.Core\Espera.Core.csproj", "{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.View", "Espera.View\Espera.View.csproj", "{3DB64346-7403-48C0-9766-D62A5862973F}"
@@ -27,6 +29,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		GlobalAssemblyInfo.cs = GlobalAssemblyInfo.cs
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.View.Tests", "Espera.View.Tests\Espera.View.Tests.csproj", "{49FD0B93-B56E-44B1-815B-D3E9607B7F2F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3DB64346-7403-48C0-9766-D62A5862973F} = {3DB64346-7403-48C0-9766-D62A5862973F}
+		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D} = {D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +56,10 @@ Global
 		{CD457EBC-86CC-434B-BB0D-0DB4F93E4A56}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD457EBC-86CC-434B-BB0D-0DB4F93E4A56}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD457EBC-86CC-434B-BB0D-0DB4F93E4A56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49FD0B93-B56E-44B1-815B-D3E9607B7F2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49FD0B93-B56E-44B1-815B-D3E9607B7F2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49FD0B93-B56E-44B1-815B-D3E9607B7F2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49FD0B93-B56E-44B1-815B-D3E9607B7F2F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

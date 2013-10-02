@@ -12,7 +12,7 @@ using System.Windows.Media.Imaging;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>, IDisposable
+    public sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>, IDisposable
     {
         private static readonly SemaphoreSlim Gate; // This gate is used to limit the I/O access when accessing the artwork cache to 1 item at a time
         private readonly ObservableAsPropertyHelper<BitmapSource> cover;
@@ -82,7 +82,7 @@ namespace Espera.View.ViewModels
 
             var prefixes = new[] { "A", "The" };
 
-            return String.Compare(RemoveArtistPrefixes(this.Name, prefixes), RemoveArtistPrefixes(other.Name, prefixes), StringComparison.Ordinal);
+            return String.Compare(RemoveArtistPrefixes(this.Name, prefixes), RemoveArtistPrefixes(other.Name, prefixes), StringComparison.InvariantCultureIgnoreCase);
         }
 
         public void Dispose()
@@ -108,7 +108,7 @@ namespace Espera.View.ViewModels
             {
                 int lengthWithSpace = s.Length + 1;
 
-                if (artistName.Length >= lengthWithSpace && artistName.Substring(0, lengthWithSpace) == s + " ")
+                if (artistName.Length >= lengthWithSpace && artistName.Substring(0, lengthWithSpace).Equals(s + " ", StringComparison.InvariantCultureIgnoreCase))
                 {
                     return artistName.Substring(lengthWithSpace);
                 }
