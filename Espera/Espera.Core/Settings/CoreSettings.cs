@@ -51,6 +51,12 @@ namespace Espera.Core.Settings
             set { this.SetOrCreate(value); }
         }
 
+        public int Port
+        {
+            get { return this.GetOrCreate(48093); }
+            set { this.SetOrCreate(value); }
+        }
+
         public TimeSpan SongSourceUpdateInterval
         {
             get { return this.GetOrCreate(TimeSpan.FromMinutes(30)); }

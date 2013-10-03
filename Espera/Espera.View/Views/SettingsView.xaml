@@ -36,7 +36,7 @@
                 </Style.Triggers>
             </Style>
             <Style x:Key="SettingsHeaderStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="64" />
+                <Setter Property="FontSize" Value="60" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
                 <!--  For some reason the foreground has to be set manually, otherwise it would be black.  -->
                 <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
@@ -184,7 +184,7 @@
                     </StackPanel>
                 </StackPanel>
             </TabItem>
-            <TabItem Header="youtube" RenderTransformOrigin="-0.233,15.955">
+            <TabItem Header="youtube">
                 <StackPanel>
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="streaming" />
                     <Controls:ToggleSwitch Margin="10, 0, 0, 0"
@@ -214,6 +214,15 @@
                                     Click="ChangeYoutubeDownloadPath"
                                     Content="Change download path" />
                         </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="remote control">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Port (49152 - 65535)" VerticalAlignment="Center" />
+                        <TextBox Margin="10, 0, 0, 0" Width="50" Text="{Binding Path=Port, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Margin="10, 0, 0, 0" Content="Change port" Command="{Binding Path=ChangePortCommand}" />
                     </StackPanel>
                 </StackPanel>
             </TabItem>

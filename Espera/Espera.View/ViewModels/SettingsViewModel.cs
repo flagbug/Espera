@@ -26,6 +26,7 @@ namespace Espera.View.ViewModels
         private string creationPassword;
         private bool isWrongPassword;
         private string loginPassword;
+        private int port;
         private bool showLogin;
         private bool showSettings;
 
@@ -94,6 +95,12 @@ namespace Espera.View.ViewModels
             this.ChangeAccentColorCommand.Subscribe(p => this.viewSettings.AccentColor = (string)p);
 
             this.librarySource = this.library.SongSourcePath.ToProperty(this, x => x.LibrarySource);
+
+            this.port = this.coreSettings.Port;
+            this.ChangePortCommand = this.WhenAnyValue(x => x.Port)
+                .Select(x => x > 49152 && x < 65535)
+                .ToCommand();
+            this.ChangePortCommand.Subscribe(x => this.coreSettings.Port = this.Port);
         }
 
         public static IEnumerable<YoutubeStreamingQuality> YoutubeStreamingQualities
@@ -117,6 +124,8 @@ namespace Espera.View.ViewModels
         }
 
         public IReactiveCommand ChangeAccentColorCommand { get; private set; }
+
+        public ReactiveCommand ChangePortCommand { get; private set; }
 
         public IReactiveCommand ChangeToPartyCommand { get; private set; }
 
@@ -222,6 +231,12 @@ namespace Espera.View.ViewModels
         {
             get { return (int)this.library.PlaylistTimeout.TotalSeconds; }
             set { this.library.PlaylistTimeout = TimeSpan.FromSeconds(value); }
+        }
+
+        public int Port
+        {
+            get { return this.port; }
+            set { this.RaiseAndSetIfChanged(ref port, value); }
         }
 
         public string ReleaseNotes

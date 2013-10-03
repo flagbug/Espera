@@ -8,7 +8,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reactive.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Espera.Services
@@ -16,33 +15,44 @@ namespace Espera.Services
     /// <summary>
     /// Provides methods for connecting mobile endpoints with the application.
     /// </summary>
-    public class MobileApi
+    public class MobileApi : IDisposable
     {
-        private static readonly int Port;
         private readonly List<MobileClient> clients;
         private readonly Library library;
+        private readonly int port;
 
-        static MobileApi()
-        {
-            Port = 12345;
-        }
+        private bool dispose;
 
-        public MobileApi(Library library)
+        public MobileApi(int port, Library library)
         {
+            if (port < 49152 || port > 65535)
+                Throw.ArgumentOutOfRangeException(() => port);
+
             if (library == null)
                 Throw.ArgumentNullException(() => library);
 
+            this.port = port;
             this.library = library;
             this.clients = new List<MobileClient>();
         }
 
-        public async Task SendBroadcastAsync(CancellationTokenSource token)
+        public void Dispose()
+        {
+            this.dispose = true;
+
+            foreach (MobileClient client in clients)
+            {
+                client.Dispose();
+            }
+        }
+
+        public async Task SendBroadcastAsync()
         {
             var client = new UdpClient();
 
             IPAddress[] addresses = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
 
-            while (!token.IsCancellationRequested)
+            while (!this.dispose)
             {
                 IEnumerable<IPAddress> localSubnets = addresses.Where(x => x.AddressFamily == AddressFamily.InterNetwork);
 
@@ -57,7 +67,7 @@ namespace Espera.Services
                     {
                         address[3] = (byte)i;
 
-                        await client.SendAsync(message, message.Length, new IPEndPoint(new IPAddress(address), Port));
+                        await client.SendAsync(message, message.Length, new IPEndPoint(new IPAddress(address), this.port));
                     }
                 }
 
@@ -65,9 +75,9 @@ namespace Espera.Services
             }
         }
 
-        public void StartClientDiscovery(CancellationTokenSource token)
+        public void StartClientDiscovery()
         {
-            var listener = new ReactiveListener(Port);
+            var listener = new ReactiveListener(this.port);
             listener.Connections.Subscribe(socket =>
             {
                 var mobileClient = new MobileClient(socket, this.library);

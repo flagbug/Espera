@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Threading;
 using Timer = System.Timers.Timer;
 
 namespace Espera.View.ViewModels
@@ -35,6 +34,7 @@ namespace Espera.View.ViewModels
         private bool displayTimeoutWarning;
         private bool isLocal;
         private bool isYoutube;
+        private MobileApi mobileApi;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
         private bool showVideoPlayer;
 
@@ -230,10 +230,17 @@ namespace Espera.View.ViewModels
 
             this.IsLocal = true;
 
-            var mobileApi = new MobileApi(this.library);
+            this.coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged().Subscribe(x =>
+            {
+                if (this.mobileApi != null)
+                {
+                    this.mobileApi.Dispose();
+                }
 
-            mobileApi.SendBroadcastAsync(new CancellationTokenSource());
-            mobileApi.StartClientDiscovery(new CancellationTokenSource());
+                this.mobileApi = new MobileApi(x, this.library);
+                this.mobileApi.SendBroadcastAsync();
+                this.mobileApi.StartClientDiscovery();
+            });
         }
 
         public IReactiveCommand AddPlaylistCommand { get; private set; }
