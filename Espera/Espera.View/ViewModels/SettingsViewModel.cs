@@ -2,7 +2,6 @@
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
-using Espera.View.Properties;
 using Rareform.Validation;
 using ReactiveUI;
 using System;
@@ -19,10 +18,11 @@ namespace Espera.View.ViewModels
     {
         private readonly ObservableAsPropertyHelper<bool> canCreateAdmin;
         private readonly ObservableAsPropertyHelper<bool> canLogin;
+        private readonly CoreSettings coreSettings;
         private readonly Library library;
         private readonly ObservableAsPropertyHelper<string> librarySource;
+        private readonly ViewSettings viewSettings;
         private readonly IWindowManager windowManager;
-        private CoreSettings coreSettings;
         private string creationPassword;
         private bool isWrongPassword;
         private string loginPassword;
@@ -30,15 +30,19 @@ namespace Espera.View.ViewModels
         private bool showLogin;
         private bool showSettings;
 
-        public SettingsViewModel(Library library, CoreSettings coreSettings, IWindowManager windowManager)
+        public SettingsViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, IWindowManager windowManager)
         {
             if (library == null)
                 Throw.ArgumentNullException(() => library);
+
+            if (viewSettings == null)
+                Throw.ArgumentNullException(() => viewSettings);
 
             if (coreSettings == null)
                 Throw.ArgumentNullException(() => coreSettings);
 
             this.library = library;
+            this.viewSettings = viewSettings;
             this.coreSettings = coreSettings;
             this.windowManager = windowManager;
 
@@ -88,7 +92,7 @@ namespace Espera.View.ViewModels
             this.ReportBugCommand.Subscribe(p => this.windowManager.ShowWindow(new BugReportViewModel()));
 
             this.ChangeAccentColorCommand = new ReactiveCommand();
-            this.ChangeAccentColorCommand.Subscribe(p => Settings.Default.AccentColor = (string)p);
+            this.ChangeAccentColorCommand.Subscribe(p => this.viewSettings.AccentColor = (string)p);
 
             this.librarySource = this.library.SongSourcePath.ToProperty(this, x => x.LibrarySource);
         }
@@ -142,8 +146,8 @@ namespace Espera.View.ViewModels
 
         public bool GoFullScreenOnLock
         {
-            get { return Settings.Default.GoFullScreenOnLock; }
-            set { Settings.Default.GoFullScreenOnLock = value; }
+            get { return this.viewSettings.GoFullScreenOnLock; }
+            set { this.viewSettings.GoFullScreenOnLock = value; }
         }
 
         public string Homepage
@@ -194,12 +198,12 @@ namespace Espera.View.ViewModels
 
         public bool LockWindow
         {
-            get { return Settings.Default.LockWindow; }
+            get { return this.viewSettings.LockWindow; }
             set
             {
                 if (this.LockWindow != value)
                 {
-                    Settings.Default.LockWindow = value;
+                    this.viewSettings.LockWindow = value;
                     this.RaisePropertyChanged();
                 }
             }

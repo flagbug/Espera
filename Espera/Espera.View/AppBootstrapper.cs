@@ -2,7 +2,6 @@
 using Caliburn.Micro;
 using Espera.Core.Management;
 using Espera.Core.Settings;
-using Espera.View.Properties;
 using Espera.View.ViewModels;
 using Microsoft.WindowsAPICodePack.Shell;
 using Ninject;
@@ -41,6 +40,7 @@ namespace Espera.View
             this.kernel.Bind<IRemovableDriveWatcher>().To<RemovableDriveWatcher>();
             this.kernel.Bind<ILibraryReader>().To<LibraryFileReader>().WithConstructorArgument("sourcePath", FilePath);
             this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", FilePath);
+            this.kernel.Bind<ViewSettings>().To<ViewSettings>().InSingletonScope().WithConstructorArgument("blobCache", BlobCache.LocalMachine);
             this.kernel.Bind<CoreSettings>().To<CoreSettings>().InSingletonScope().WithConstructorArgument("blobCache", BlobCache.LocalMachine)
                 .OnActivation(x =>
                 {
@@ -73,13 +73,6 @@ namespace Espera.View
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
             Directory.CreateDirectory(DirectoryPath);
-
-            if (Settings.Default.UpgradeRequired)
-            {
-                Settings.Default.Upgrade();
-                Settings.Default.UpgradeRequired = false;
-                Settings.Default.Save();
-            }
 
             base.OnStartup(sender, e);
         }

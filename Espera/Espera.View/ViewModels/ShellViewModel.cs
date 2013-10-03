@@ -2,7 +2,6 @@
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
-using Espera.View.Properties;
 using Rareform.Extensions;
 using ReactiveUI;
 using System;
@@ -21,6 +20,7 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> canChangeVolume;
         private readonly ObservableAsPropertyHelper<bool> canModifyWindow;
         private readonly ObservableAsPropertyHelper<bool> canSwitchPlaylist;
+        private readonly CoreSettings coreSettings;
         private readonly ObservableAsPropertyHelper<int> currentSeconds;
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
         private readonly ObservableAsPropertyHelper<TimeSpan> currentTime;
@@ -31,16 +31,16 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
         private readonly ObservableAsPropertyHelper<int> totalSeconds;
         private readonly ObservableAsPropertyHelper<TimeSpan> totalTime;
-        private CoreSettings coreSettings;
         private bool displayTimeoutWarning;
         private bool isLocal;
         private bool isYoutube;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
         private bool showVideoPlayer;
 
-        public ShellViewModel(Library library, CoreSettings coreSettings, IWindowManager windowManager)
+        public ShellViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, IWindowManager windowManager)
         {
             this.library = library;
+            this.ViewSettings = viewSettings;
             this.coreSettings = coreSettings;
 
             this.library.Initialize();
@@ -73,10 +73,10 @@ namespace Espera.View.ViewModels
                 this.library.SwitchToPlaylist(this.library.Playlists.First());
             }
 
-            this.SettingsViewModel = new SettingsViewModel(this.library, coreSettings, windowManager);
+            this.SettingsViewModel = new SettingsViewModel(this.library, this.ViewSettings, this.coreSettings, windowManager);
 
-            this.LocalViewModel = new LocalViewModel(this.library);
-            this.YoutubeViewModel = new YoutubeViewModel(this.library, this.coreSettings);
+            this.LocalViewModel = new LocalViewModel(this.library, this.ViewSettings);
+            this.YoutubeViewModel = new YoutubeViewModel(this.library, this.ViewSettings, this.coreSettings);
 
             this.playlistTimeoutUpdateTimer = new Timer(333);
             this.playlistTimeoutUpdateTimer.Elapsed += (sender, e) => this.UpdateRemainingPlaylistTimeout();
@@ -105,7 +105,7 @@ namespace Espera.View.ViewModels
             this.UnMuteCommand.Subscribe(x => this.Volume = 1);
 
             this.canModifyWindow = isAdminObservable
-                .Select(isAdmin => isAdmin || !Settings.Default.LockWindow)
+                .Select(isAdmin => isAdmin || !this.ViewSettings.LockWindow)
                 .ToProperty(this, x => x.CanModifyWindow);
 
             this.isPlaying = this.library.PlaybackState
@@ -353,46 +353,46 @@ namespace Espera.View.ViewModels
 
         public int PlaylistAlbumColumnWidth
         {
-            get { return Settings.Default.PlaylistAlbumColumnWidth; }
-            set { Settings.Default.PlaylistAlbumColumnWidth = value; }
+            get { return this.ViewSettings.PlaylistAlbumColumnWidth; }
+            set { this.ViewSettings.PlaylistAlbumColumnWidth = value; }
         }
 
         public int PlaylistArtistColumnWidth
         {
-            get { return Settings.Default.PlaylistArtistColumnWidth; }
-            set { Settings.Default.PlaylistArtistColumnWidth = value; }
+            get { return this.ViewSettings.PlaylistArtistColumnWidth; }
+            set { this.ViewSettings.PlaylistArtistColumnWidth = value; }
         }
 
         public int PlaylistDurationColumnWidth
         {
-            get { return Settings.Default.PlaylistDurationColumnWidth; }
-            set { Settings.Default.PlaylistDurationColumnWidth = value; }
+            get { return this.ViewSettings.PlaylistDurationColumnWidth; }
+            set { this.ViewSettings.PlaylistDurationColumnWidth = value; }
         }
 
         public int PlaylistGenreColumnWidth
         {
-            get { return Settings.Default.PlaylistGenreColumnWidth; }
-            set { Settings.Default.PlaylistGenreColumnWidth = value; }
+            get { return this.ViewSettings.PlaylistGenreColumnWidth; }
+            set { this.ViewSettings.PlaylistGenreColumnWidth = value; }
         }
 
         public GridLength PlaylistHeight
         {
-            get { return (GridLength)new GridLengthConverter().ConvertFromString(Settings.Default.PlaylistHeight); }
-            set { Settings.Default.PlaylistHeight = new GridLengthConverter().ConvertToString(value); }
+            get { return (GridLength)new GridLengthConverter().ConvertFromString(this.ViewSettings.PlaylistHeight); }
+            set { this.ViewSettings.PlaylistHeight = new GridLengthConverter().ConvertToString(value); }
         }
 
         public IReactiveDerivedList<PlaylistViewModel> Playlists { get; private set; }
 
         public int PlaylistSourceColumnWidth
         {
-            get { return Settings.Default.PlaylistSourceColumnWidth; }
-            set { Settings.Default.PlaylistSourceColumnWidth = value; }
+            get { return this.ViewSettings.PlaylistSourceColumnWidth; }
+            set { this.ViewSettings.PlaylistSourceColumnWidth = value; }
         }
 
         public int PlaylistTitleColumnWidth
         {
-            get { return Settings.Default.PlaylistTitleColumnWidth; }
-            set { Settings.Default.PlaylistTitleColumnWidth = value; }
+            get { return this.ViewSettings.PlaylistTitleColumnWidth; }
+            set { this.ViewSettings.PlaylistTitleColumnWidth = value; }
         }
 
         /// <summary>
@@ -439,8 +439,8 @@ namespace Espera.View.ViewModels
 
         public GridLength SongSourceHeight
         {
-            get { return (GridLength)new GridLengthConverter().ConvertFromString(Settings.Default.SongSourceHeight); }
-            set { Settings.Default.SongSourceHeight = new GridLengthConverter().ConvertToString(value); }
+            get { return (GridLength)new GridLengthConverter().ConvertFromString(this.ViewSettings.SongSourceHeight); }
+            set { this.ViewSettings.SongSourceHeight = new GridLengthConverter().ConvertToString(value); }
         }
 
         public int TotalSeconds
@@ -463,6 +463,8 @@ namespace Espera.View.ViewModels
         /// </summary>
         public IObservable<AccessMode> UpdateScreenState { get; private set; }
 
+        public ViewSettings ViewSettings { get; private set; }
+
         public double Volume
         {
             get { return this.library.Volume; }
@@ -477,8 +479,6 @@ namespace Espera.View.ViewModels
 
         public void Dispose()
         {
-            Settings.Default.Save();
-
             this.library.Save();
             this.library.Dispose();
 

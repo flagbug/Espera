@@ -1,5 +1,5 @@
 ﻿using Espera.Core.Management;
-using Espera.View.Properties;
+using Rareform.Validation;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -16,6 +16,7 @@ namespace Espera.View.ViewModels
         private readonly ReactiveList<ArtistViewModel> artists;
         private readonly IReactiveCommand playNowCommand;
         private readonly SemaphoreSlim updateSemaphore;
+        private readonly ViewSettings viewSettings;
         private SortOrder albumOrder;
         private SortOrder artistOrder;
         private SortOrder durationOrder;
@@ -24,9 +25,13 @@ namespace Espera.View.ViewModels
         private ArtistViewModel selectedArtist;
         private SortOrder titleOrder;
 
-        public LocalViewModel(Library library)
+        public LocalViewModel(Library library, ViewSettings viewSettings)
             : base(library)
         {
+            if (viewSettings == null)
+                Throw.ArgumentNullException(() => viewSettings);
+
+            this.viewSettings = viewSettings;
             this.updateSemaphore = new SemaphoreSlim(1, 1);
 
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
@@ -65,14 +70,14 @@ namespace Espera.View.ViewModels
 
         public int AlbumColumnWidth
         {
-            get { return Settings.Default.LocalAlbumColumnWidth; }
-            set { Settings.Default.LocalAlbumColumnWidth = value; }
+            get { return this.viewSettings.LocalAlbumColumnWidth; }
+            set { this.viewSettings.LocalAlbumColumnWidth = value; }
         }
 
         public int ArtistColumnWidth
         {
-            get { return Settings.Default.LocalArtistColumnWidth; }
-            set { Settings.Default.LocalArtistColumnWidth = value; }
+            get { return this.viewSettings.LocalArtistColumnWidth; }
+            set { this.viewSettings.LocalArtistColumnWidth = value; }
         }
 
         public IEnumerable<ArtistViewModel> Artists
@@ -82,20 +87,20 @@ namespace Espera.View.ViewModels
 
         public int DurationColumnWidth
         {
-            get { return Settings.Default.LocalDurationColumnWidth; }
-            set { Settings.Default.LocalDurationColumnWidth = value; }
+            get { return this.viewSettings.LocalDurationColumnWidth; }
+            set { this.viewSettings.LocalDurationColumnWidth = value; }
         }
 
         public int GenreColumnWidth
         {
-            get { return Settings.Default.LocalGenreColumnWidth; }
-            set { Settings.Default.LocalGenreColumnWidth = value; }
+            get { return this.viewSettings.LocalGenreColumnWidth; }
+            set { this.viewSettings.LocalGenreColumnWidth = value; }
         }
 
         public int PathColumnWidth
         {
-            get { return Settings.Default.LocalPathColumnWidth; }
-            set { Settings.Default.LocalPathColumnWidth = value; }
+            get { return this.viewSettings.LocalPathColumnWidth; }
+            set { this.viewSettings.LocalPathColumnWidth = value; }
         }
 
         public override IReactiveCommand PlayNowCommand
@@ -111,8 +116,8 @@ namespace Espera.View.ViewModels
 
         public int TitleColumnWidth
         {
-            get { return Settings.Default.LocalTitleColumnWidth; }
-            set { Settings.Default.LocalTitleColumnWidth = value; }
+            get { return this.viewSettings.LocalTitleColumnWidth; }
+            set { this.viewSettings.LocalTitleColumnWidth = value; }
         }
 
         public void OrderByAlbum()

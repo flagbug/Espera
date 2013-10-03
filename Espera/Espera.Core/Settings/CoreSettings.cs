@@ -1,22 +1,13 @@
 ﻿using Akavache;
 using System;
-using System.ComponentModel;
-using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Espera.Core.Settings
 {
-    public class CoreSettings : INotifyPropertyChanged
+    public class CoreSettings : Settings
     {
-        public readonly string CachePrefix = "__CoreSettings__";
-        private readonly IBlobCache blobCache;
-
         public CoreSettings(IBlobCache blobCache)
-        {
-            this.blobCache = blobCache;
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
+            : base("__CoreSettings__", blobCache)
+        { }
 
         public bool EnablePlaylistTimeout
         {
@@ -88,30 +79,6 @@ namespace Espera.Core.Settings
         {
             get { return this.GetOrCreate(YoutubeStreamingQuality.High); }
             set { this.SetOrCreate(value); }
-        }
-
-        protected virtual void OnPropertyChanged(string propertyName = null)
-        {
-            if (this.PropertyChanged != null)
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private T GetOrCreate<T>(T defaultValue, [CallerMemberName] string key = null)
-        {
-            if (key == null)
-                throw new InvalidOperationException("Key is null!");
-
-            return this.blobCache.GetOrCreateObject(string.Format("{0}:{1}", CachePrefix, key), () => defaultValue).Wait();
-        }
-
-        private void SetOrCreate<T>(T value, [CallerMemberName] string key = null)
-        {
-            if (key == null)
-                throw new InvalidOperationException("Key is null!");
-
-            this.blobCache.InsertObject(string.Format("{0}:{1}", CachePrefix, key), value);
-
-            this.OnPropertyChanged(key);
         }
     }
 }

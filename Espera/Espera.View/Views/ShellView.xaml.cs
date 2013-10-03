@@ -1,9 +1,8 @@
 using Espera.Core.Audio;
 using Espera.Core.Management;
-using Espera.View.Properties;
 using Espera.View.ViewModels;
 using MahApps.Metro;
-using Rareform.Reflection;
+using ReactiveUI;
 using System;
 using System.ComponentModel;
 using System.Globalization;
@@ -20,7 +19,6 @@ namespace Espera.View.Views
 {
     public partial class ShellView
     {
-        private IAudioPlayerCallback currentVideoPlayerCallback;
         private ShellViewModel shellViewModel;
 
         public ShellView()
@@ -29,21 +27,11 @@ namespace Espera.View.Views
 
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("en-us");
 
-            this.ChangeColor(Settings.Default.AccentColor);
-
             this.DataContextChanged += (sender, args) =>
             {
                 this.WireDataContext();
                 this.WirePlayer();
                 this.WireScreenStateUpdater();
-            };
-
-            Settings.Default.PropertyChanged += (sender, args) =>
-            {
-                if (args.PropertyName == Reflector.GetMemberName(() => Settings.Default.AccentColor))
-                {
-                    this.ChangeColor(Settings.Default.AccentColor);
-                }
             };
         }
 
@@ -256,6 +244,11 @@ namespace Espera.View.Views
         private void WireDataContext()
         {
             this.shellViewModel = (ShellViewModel)this.DataContext;
+
+            this.ChangeColor(this.shellViewModel.ViewSettings.AccentColor);
+
+            this.shellViewModel.ViewSettings.WhenAnyValue(x => x.AccentColor)
+                .Subscribe(this.ChangeColor);
         }
 
         private void WirePlayer()
@@ -277,9 +270,9 @@ namespace Espera.View.Views
         {
             this.shellViewModel.UpdateScreenState.Subscribe(x =>
             {
-                if (Settings.Default.LockWindow && Settings.Default.GoFullScreenOnLock)
+                if (this.shellViewModel.ViewSettings.LockWindow && this.shellViewModel.ViewSettings.GoFullScreenOnLock)
                 {
-                    this.IgnoreTaskbarOnMaximize = x == AccessMode.Party && Settings.Default.GoFullScreenOnLock;
+                    this.IgnoreTaskbarOnMaximize = x == AccessMode.Party && this.shellViewModel.ViewSettings.GoFullScreenOnLock;
 
                     this.WindowState = WindowState.Normal;
                     this.WindowState = WindowState.Maximized;

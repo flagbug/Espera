@@ -566,7 +566,7 @@ namespace Espera.Core.Management
             this.playlists.Remove(playlist);
         }
 
-        public async Task Save()
+        public void Save()
         {
             HashSet<LocalSong> casted;
 
@@ -587,7 +587,7 @@ namespace Espera.Core.Management
                 playlist.RemoveSongs(indexes);
             }
 
-            this.libraryWriter.Write(casted, this.playlists.Where(playlist => !playlist.IsTemporary), await this.songSourcePath.FirstAsync());
+            this.libraryWriter.Write(casted, this.playlists.Where(playlist => !playlist.IsTemporary), this.songSourcePath.FirstAsync().Wait());
         }
 
         public void ShufflePlaylist()

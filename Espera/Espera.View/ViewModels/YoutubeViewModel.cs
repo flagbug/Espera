@@ -1,35 +1,40 @@
 ﻿using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
-using Espera.View.Properties;
 using Rareform.Validation;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 
 namespace Espera.View.ViewModels
 {
     internal sealed class YoutubeViewModel : SongSourceViewModel<YoutubeSongViewModel>
     {
+        private readonly CoreSettings coreSettings;
         private readonly ObservableAsPropertyHelper<bool> isNetworkUnavailable;
         private readonly IReactiveCommand playNowCommand;
         private readonly ObservableAsPropertyHelper<YoutubeSongViewModel> selectedSong;
-        private CoreSettings coreSettings;
+        private readonly ViewSettings viewSettings;
         private SortOrder durationOrder;
         private bool isSearching;
         private SortOrder ratingOrder;
         private SortOrder titleOrder;
         private SortOrder viewsOrder;
 
-        public YoutubeViewModel(Library library, CoreSettings coreSettings)
+        public YoutubeViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings)
             : base(library)
         {
+            if (viewSettings == null)
+                Throw.ArgumentNullException(() => viewSettings);
+
             if (coreSettings == null)
                 Throw.ArgumentNullException(() => coreSettings);
+
+            this.viewSettings = viewSettings;
+            this.coreSettings = coreSettings;
 
             this.playNowCommand = new ReactiveCommand();
             this.playNowCommand.RegisterAsyncTask(_ => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model)));
@@ -55,8 +60,8 @@ namespace Espera.View.ViewModels
 
         public int DurationColumnWidth
         {
-            get { return Settings.Default.YoutubeDurationColumnWidth; }
-            set { Settings.Default.YoutubeDurationColumnWidth = value; }
+            get { return this.viewSettings.YoutubeDurationColumnWidth; }
+            set { this.viewSettings.YoutubeDurationColumnWidth = value; }
         }
 
         public bool IsNetworkUnavailable
@@ -72,8 +77,8 @@ namespace Espera.View.ViewModels
 
         public int LinkColumnWidth
         {
-            get { return Settings.Default.YoutubeLinkColumnWidth; }
-            set { Settings.Default.YoutubeLinkColumnWidth = value; }
+            get { return this.viewSettings.YoutubeLinkColumnWidth; }
+            set { this.viewSettings.YoutubeLinkColumnWidth = value; }
         }
 
         public override IReactiveCommand PlayNowCommand
@@ -83,8 +88,8 @@ namespace Espera.View.ViewModels
 
         public int RatingColumnWidth
         {
-            get { return Settings.Default.YoutubeRatingColumnWidth; }
-            set { Settings.Default.YoutubeRatingColumnWidth = value; }
+            get { return this.viewSettings.YoutubeRatingColumnWidth; }
+            set { this.viewSettings.YoutubeRatingColumnWidth = value; }
         }
 
         public YoutubeSongViewModel SelectedSong
@@ -94,14 +99,14 @@ namespace Espera.View.ViewModels
 
         public int TitleColumnWidth
         {
-            get { return Settings.Default.YoutubeTitleColumnWidth; }
-            set { Settings.Default.YoutubeTitleColumnWidth = value; }
+            get { return this.viewSettings.YoutubeTitleColumnWidth; }
+            set { this.viewSettings.YoutubeTitleColumnWidth = value; }
         }
 
         public int ViewsColumnWidth
         {
-            get { return Settings.Default.YoutubeViewsColumnWidth; }
-            set { Settings.Default.YoutubeViewsColumnWidth = value; }
+            get { return this.viewSettings.YoutubeViewsColumnWidth; }
+            set { this.viewSettings.YoutubeViewsColumnWidth = value; }
         }
 
         public void OrderByDuration()
@@ -139,7 +144,7 @@ namespace Espera.View.ViewModels
 
             finder.GetSongs()
                 .Select(song => new YoutubeSongViewModel(song, () => this.coreSettings.YoutubeDownloadPath))
-                .SubscribeOn(TaskPoolScheduler.Default)
+                .SubscribeOn(RxApp.TaskpoolScheduler)
                 .Subscribe(song => songs.Add(song), () =>
                 {
                     this.IsSearching = false;
