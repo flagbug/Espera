@@ -230,17 +230,25 @@ namespace Espera.View.ViewModels
 
             this.IsLocal = true;
 
-            this.coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged().Subscribe(x =>
-            {
-                if (this.mobileApi != null)
+            this.coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged()
+                .CombineLatest(this.coreSettings.WhenAnyValue(x => x.EnableRemoteControl), Tuple.Create)
+                .Where(x => x.Item2)
+                .Select(x => x.Item1)
+                .Subscribe(x =>
                 {
-                    this.mobileApi.Dispose();
-                }
+                    if (this.mobileApi != null)
+                    {
+                        this.mobileApi.Dispose();
+                    }
 
-                this.mobileApi = new MobileApi(x, this.library);
-                this.mobileApi.SendBroadcastAsync();
-                this.mobileApi.StartClientDiscovery();
-            });
+                    this.mobileApi = new MobileApi(x, this.library);
+                    this.mobileApi.SendBroadcastAsync();
+                    this.mobileApi.StartClientDiscovery();
+                });
+
+            this.coreSettings.WhenAnyValue(x => x.EnablePlaylistTimeout)
+                .Where(x => !x && this.mobileApi != null)
+                .Subscribe(x => this.mobileApi.Dispose());
         }
 
         public IReactiveCommand AddPlaylistCommand { get; private set; }

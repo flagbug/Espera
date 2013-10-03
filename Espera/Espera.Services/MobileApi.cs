@@ -20,7 +20,6 @@ namespace Espera.Services
         private readonly List<MobileClient> clients;
         private readonly Library library;
         private readonly int port;
-
         private bool dispose;
 
         public MobileApi(int port, Library library)

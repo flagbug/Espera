@@ -15,6 +15,12 @@ namespace Espera.Core.Settings
             set { this.SetOrCreate(value); }
         }
 
+        public bool EnableRemoteControl
+        {
+            get { return this.GetOrCreate(true); }
+            set { this.SetOrCreate(value); }
+        }
+
         public bool LockPlaylistRemoval
         {
             get { return this.GetOrCreate(true); }

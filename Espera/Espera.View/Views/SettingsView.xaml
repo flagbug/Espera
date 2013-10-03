@@ -219,7 +219,8 @@
             </TabItem>
             <TabItem Header="remote control">
                 <StackPanel>
-                    <StackPanel Orientation="Horizontal">
+                    <Controls:ToggleSwitch Header="Enable remote control" IsChecked="{Binding Path=EnableRemoteControl}" />
+                    <StackPanel Margin="15, 0, 0, 0" Orientation="Horizontal" IsEnabled="{Binding Path=EnableRemoteControl}">
                         <TextBlock Text="Port (49152 - 65535)" VerticalAlignment="Center" />
                         <TextBox Margin="10, 0, 0, 0" Width="50" Text="{Binding Path=Port, UpdateSourceTrigger=PropertyChanged}" />
                         <Button Margin="10, 0, 0, 0" Content="Change port" Command="{Binding Path=ChangePortCommand}" />

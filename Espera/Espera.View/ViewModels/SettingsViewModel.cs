@@ -152,6 +152,16 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public bool EnableRemoteControl
+        {
+            get { return this.coreSettings.EnableRemoteControl; }
+            set
+            {
+                this.coreSettings.EnableRemoteControl = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
         public bool GoFullScreenOnLock
         {
             get { return this.viewSettings.GoFullScreenOnLock; }
