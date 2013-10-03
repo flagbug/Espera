@@ -157,7 +157,7 @@ namespace Espera.Core.Tests
                 LockTime = false
             };
 
-            using (Library library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibrary(settings))
             {
                 library.CreateAdmin("password");
                 library.ChangeToParty();
