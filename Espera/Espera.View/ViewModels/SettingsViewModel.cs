@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Espera.Core;
 using Espera.Core.Management;
+using Espera.Core.Settings;
 using Espera.View.Properties;
 using Rareform.Validation;
 using ReactiveUI;
@@ -21,6 +22,7 @@ namespace Espera.View.ViewModels
         private readonly Library library;
         private readonly ObservableAsPropertyHelper<string> librarySource;
         private readonly IWindowManager windowManager;
+        private CoreSettings coreSettings;
         private string creationPassword;
         private bool isWrongPassword;
         private string loginPassword;
@@ -28,12 +30,16 @@ namespace Espera.View.ViewModels
         private bool showLogin;
         private bool showSettings;
 
-        public SettingsViewModel(Library library, IWindowManager windowManager)
+        public SettingsViewModel(Library library, CoreSettings coreSettings, IWindowManager windowManager)
         {
             if (library == null)
                 Throw.ArgumentNullException(() => library);
 
+            if (coreSettings == null)
+                Throw.ArgumentNullException(() => coreSettings);
+
             this.library = library;
+            this.coreSettings = coreSettings;
             this.windowManager = windowManager;
 
             this.Scaling = 1;
@@ -126,15 +132,11 @@ namespace Espera.View.ViewModels
 
         public bool EnablePlaylistTimeout
         {
-            get { return this.library.EnablePlaylistTimeout.Value; }
+            get { return this.coreSettings.EnablePlaylistTimeout; }
             set
             {
-                if (this.library.EnablePlaylistTimeout.Value != value)
-                {
-                    this.library.EnablePlaylistTimeout.Value = value;
-
-                    this.RaisePropertyChanged();
-                }
+                this.coreSettings.EnablePlaylistTimeout = value;
+                this.RaisePropertyChanged();
             }
         }
 
@@ -162,32 +164,32 @@ namespace Espera.View.ViewModels
 
         public bool LockPlaylistRemoval
         {
-            get { return this.library.LockPlaylistRemoval.Value; }
-            set { this.library.LockPlaylistRemoval.Value = value; }
+            get { return this.coreSettings.LockPlaylistRemoval; }
+            set { this.coreSettings.LockPlaylistRemoval = value; }
         }
 
         public bool LockPlaylistSwitching
         {
-            get { return this.library.LockPlaylistSwitching.Value; }
-            set { this.library.LockPlaylistSwitching.Value = value; }
+            get { return this.coreSettings.LockPlaylistSwitching; }
+            set { this.coreSettings.LockPlaylistSwitching = value; }
         }
 
         public bool LockPlayPause
         {
-            get { return this.library.LockPlayPause.Value; }
-            set { this.library.LockPlayPause.Value = value; }
+            get { return this.coreSettings.LockPlayPause; }
+            set { this.coreSettings.LockPlayPause = value; }
         }
 
         public bool LockTime
         {
-            get { return this.library.LockTime.Value; }
-            set { this.library.LockTime.Value = value; }
+            get { return this.coreSettings.LockTime; }
+            set { this.coreSettings.LockTime = value; }
         }
 
         public bool LockVolume
         {
-            get { return this.library.LockVolume.Value; }
-            set { this.library.LockVolume.Value = value; }
+            get { return this.coreSettings.LockVolume; }
+            set { this.coreSettings.LockVolume = value; }
         }
 
         public bool LockWindow
@@ -246,10 +248,10 @@ namespace Espera.View.ViewModels
 
         public int SongSourceUpdateInterval
         {
-            get { return (int)this.library.SongSourceUpdateInterval.Value.TotalMinutes; }
+            get { return (int)this.coreSettings.SongSourceUpdateInterval.TotalMinutes; }
             set
             {
-                this.library.SongSourceUpdateInterval.Value = TimeSpan.FromMinutes(value);
+                this.coreSettings.SongSourceUpdateInterval = TimeSpan.FromMinutes(value);
 
                 this.RaisePropertyChanged();
             }

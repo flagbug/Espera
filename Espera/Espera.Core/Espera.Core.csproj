@@ -113,11 +113,6 @@
     <Compile Include="Audio\SongPreparationException.cs" />
     <Compile Include="Audio\IAudioPlayerCallback.cs" />
     <Compile Include="Audio\SongLoadException.cs" />
-    <Compile Include="CoreSettings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>CoreSettings.settings</DependentUpon>
-    </Compile>
     <Compile Include="Management\AccessMode.cs" />
     <Compile Include="Audio\AudioPlayerState.cs" />
     <Compile Include="Audio\AudioPlayer.cs" />
@@ -137,8 +132,7 @@
     <Compile Include="Management\RemovableDriveWatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReactiveHelpers.cs" />
-    <Compile Include="Settings\ILibrarySettings.cs" />
-    <Compile Include="Settings\LibrarySettingsWrapper.cs" />
+    <Compile Include="Settings\CoreSettings.cs" />
     <Compile Include="Song.cs" />
     <Compile Include="LocalSongFinder.cs" />
     <Compile Include="TagSanitizer.cs" />
@@ -149,10 +143,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="CoreSettings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>CoreSettings.Designer.cs</LastGenOutput>
-    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

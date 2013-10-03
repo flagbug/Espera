@@ -1,4 +1,5 @@
-﻿using Espera.Core.Audio;
+﻿using Akavache;
+using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Moq;
@@ -54,13 +55,13 @@ namespace Espera.Core.Tests
             return CreateLibrary(null, writer);
         }
 
-        public static Library CreateLibrary(ILibrarySettings settings = null, ILibraryWriter writer = null, MockFileSystem fileSystem = null)
+        public static Library CreateLibrary(CoreSettings settings = null, ILibraryWriter writer = null, MockFileSystem fileSystem = null)
         {
             var library = new Library(
                 new Mock<IRemovableDriveWatcher>().Object,
                 new Mock<ILibraryReader>().Object,
                 writer ?? new Mock<ILibraryWriter>().Object,
-                settings ?? new Mock<ILibrarySettings>().SetupAllProperties().Object,
+                settings ?? new CoreSettings(BlobCache.InMemory),
                 fileSystem ?? new MockFileSystem());
 
             IAudioPlayerCallback c = library.AudioPlayerCallback;
@@ -76,7 +77,7 @@ namespace Espera.Core.Tests
             return library;
         }
 
-        public static Library CreateLibraryWithPlaylist(string playlistName = "Playlist", ILibrarySettings settings = null)
+        public static Library CreateLibraryWithPlaylist(string playlistName = "Playlist", CoreSettings settings = null)
         {
             var library = CreateLibrary(settings);
             library.AddAndSwitchToPlaylist(playlistName);
@@ -87,7 +88,7 @@ namespace Espera.Core.Tests
         public static Mock<Song> CreateSongMock(string name = "Song", bool callBase = false, TimeSpan duration = new TimeSpan())
         {
             var mock = new Mock<Song>(name, duration) { CallBase = callBase };
-            mock.Setup(x => x.PrepareAsync()).Returns(Task.Delay(0));
+            mock.Setup(x => x.PrepareAsync(It.IsAny<YoutubeStreamingQuality>())).Returns(Task.Delay(0));
 
             return mock;
         }

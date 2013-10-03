@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Espera.Core.Audio;
 using Espera.Core.Management;
+using Espera.Core.Settings;
 using Espera.View.Properties;
 using Rareform.Extensions;
 using ReactiveUI;
@@ -30,15 +31,17 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
         private readonly ObservableAsPropertyHelper<int> totalSeconds;
         private readonly ObservableAsPropertyHelper<TimeSpan> totalTime;
+        private CoreSettings coreSettings;
         private bool displayTimeoutWarning;
         private bool isLocal;
         private bool isYoutube;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
         private bool showVideoPlayer;
 
-        public ShellViewModel(Library library, IWindowManager windowManager)
+        public ShellViewModel(Library library, CoreSettings coreSettings, IWindowManager windowManager)
         {
             this.library = library;
+            this.coreSettings = coreSettings;
 
             this.library.Initialize();
 
@@ -70,10 +73,10 @@ namespace Espera.View.ViewModels
                 this.library.SwitchToPlaylist(this.library.Playlists.First());
             }
 
-            this.SettingsViewModel = new SettingsViewModel(this.library, windowManager);
+            this.SettingsViewModel = new SettingsViewModel(this.library, coreSettings, windowManager);
 
             this.LocalViewModel = new LocalViewModel(this.library);
-            this.YoutubeViewModel = new YoutubeViewModel(this.library);
+            this.YoutubeViewModel = new YoutubeViewModel(this.library, this.coreSettings);
 
             this.playlistTimeoutUpdateTimer = new Timer(333);
             this.playlistTimeoutUpdateTimer.Elapsed += (sender, e) => this.UpdateRemainingPlaylistTimeout();
@@ -136,7 +139,7 @@ namespace Espera.View.ViewModels
             this.ShufflePlaylistCommand.Subscribe(x => this.library.ShufflePlaylist());
 
             this.PlayCommand = new ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
-                .CombineLatest(isAdminObservable, this.library.LockPlayPause, this.library.LoadedSong, this.library.PlaybackState,
+                .CombineLatest(isAdminObservable, this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.library.LoadedSong, this.library.PlaybackState,
                     (selectedPlaylistEntries, isAdmin, lockPlayPause, loadedSong, playBackState) =>
 
                         // The admin can always play, but if we are in party mode, we have to check whether it is allowed to play
@@ -161,11 +164,11 @@ namespace Espera.View.ViewModels
             });
 
             this.PlayOverrideCommand = new ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
-                .CombineLatest(this.isAdmin, this.library.LockPlayPause, (selectedPlaylistEntries, isAdmin, lockPlayPause) =>
+                .CombineLatest(this.isAdmin, this.coreSettings.WhenAnyValue(x => x.LockPlayPause), (selectedPlaylistEntries, isAdmin, lockPlayPause) =>
                     (isAdmin || !lockPlayPause) && (selectedPlaylistEntries != null && selectedPlaylistEntries.Count() == 1)));
             this.PlayOverrideCommand.RegisterAsyncTask(_ => this.library.PlaySongAsync(this.SelectedPlaylistEntries.First().Index));
 
-            this.PauseCommand = new ReactiveCommand(this.isAdmin.CombineLatest(this.library.LockPlayPause, this.isPlaying,
+            this.PauseCommand = new ReactiveCommand(this.isAdmin.CombineLatest(this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.isPlaying,
                 (isAdmin, lockPlayPause, isPlaying) => (isAdmin || !lockPlayPause) && isPlaying));
             this.PauseCommand.RegisterAsyncTask(_ => this.library.PauseSongAsync());
 
@@ -219,7 +222,7 @@ namespace Espera.View.ViewModels
             });
 
             this.RemoveSelectedPlaylistEntriesCommand = new ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
-                .CombineLatest(this.isAdmin, this.library.LockPlaylistRemoval,
+                .CombineLatest(this.isAdmin, this.coreSettings.WhenAnyValue(x => x.LockPlaylistRemoval),
                     (selectedPlaylistEntries, isAdmin, lockPlaylistRemoval) =>
                         selectedPlaylistEntries != null && selectedPlaylistEntries.Any() && (isAdmin || lockPlaylistRemoval)));
             this.RemoveSelectedPlaylistEntriesCommand.Subscribe(x => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index)));

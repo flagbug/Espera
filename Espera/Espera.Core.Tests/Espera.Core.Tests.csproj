@@ -33,6 +33,12 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Akavache">
+      <HintPath>..\packages\akavache.3.0.2\lib\net45\Akavache.dll</HintPath>
+    </Reference>
+    <Reference Include="Akavache.Portable">
+      <HintPath>..\packages\akavache.portable.3.0.2\lib\net45\Akavache.Portable.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Reactive.Testing">
       <HintPath>..\packages\Rx-Testing.2.1.30214.0\lib\Net45-Full\Microsoft.Reactive.Testing.dll</HintPath>
     </Reference>
@@ -40,6 +46,9 @@
     <Reference Include="Moq, Version=4.1.1309.1617, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Moq.4.1.1309.1617\lib\net40\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.5.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveMarrow">
       <HintPath>..\Espera.Core\bin\Debug\ReactiveMarrow.dll</HintPath>

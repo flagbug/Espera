@@ -3,7 +3,6 @@ using Espera.Core.Audio;
 using Espera.Core.Settings;
 using Rareform.Extensions;
 using Rareform.Validation;
-using ReactiveMarrow;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -31,7 +30,7 @@ namespace Espera.Core.Management
         private readonly ILibraryWriter libraryWriter;
         private readonly ObservableCollection<Playlist> playlists;
         private readonly ReadOnlyObservableCollection<Playlist> publicPlaylistWrapper;
-        private readonly ILibrarySettings settings;
+        private readonly CoreSettings settings;
         private readonly object songLock;
         private readonly HashSet<Song> songs;
         private readonly BehaviorSubject<string> songSourcePath;
@@ -44,7 +43,7 @@ namespace Espera.Core.Management
         private DateTime lastSongAddTime;
         private string password;
 
-        public Library(IRemovableDriveWatcher driveWatcher, ILibraryReader libraryReader, ILibraryWriter libraryWriter, ILibrarySettings settings, IFileSystem fileSystem)
+        public Library(IRemovableDriveWatcher driveWatcher, ILibraryReader libraryReader, ILibraryWriter libraryWriter, CoreSettings settings, IFileSystem fileSystem)
         {
             this.driveWatcher = driveWatcher;
             this.libraryReader = libraryReader;
@@ -76,47 +75,13 @@ namespace Espera.Core.Management
 
             this.CurrentTimeChanged = this.audioPlayer.CurrentTimeChanged;
 
-            /*
-             * Start boring, repeating glue code
-             */
-            this.EnablePlaylistTimeout = new ReactiveProperty<bool>(
-                () => this.settings.EnablePlaylistTimeout, x => this.settings.EnablePlaylistTimeout = x,
-                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
-
-            this.LockPlaylistRemoval = new ReactiveProperty<bool>(
-                () => this.settings.LockPlaylistRemoval, x => this.settings.LockPlaylistRemoval = x,
-                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
-
-            this.LockPlaylistSwitching = new ReactiveProperty<bool>(
-                () => this.settings.LockPlaylistSwitching, x => this.settings.LockPlaylistSwitching = x,
-                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
-
-            this.LockPlayPause = new ReactiveProperty<bool>(
-                () => this.settings.LockPlayPause, x => this.settings.LockPlayPause = x,
-                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
-
-            this.LockTime = new ReactiveProperty<bool>(
-                () => this.settings.LockTime, x => this.settings.LockTime = x,
-                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
-
-            this.LockVolume = new ReactiveProperty<bool>(
-                () => this.settings.LockVolume, x => this.settings.LockVolume = x,
-                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
-
-            this.SongSourceUpdateInterval = new ReactiveProperty<TimeSpan>(
-                () => this.settings.SongSourceUpdateInterval, x => this.settings.SongSourceUpdateInterval = x,
-                x => this.accessMode == Management.AccessMode.Administrator, typeof(AccessViolationException));
-            /*
-             * End boring, repeating glue code
-             */
-
-            this.CanChangeTime = this.AccessMode.CombineLatest(this.LockTime,
+            this.CanChangeTime = this.AccessMode.CombineLatest(this.settings.WhenAnyValue(x => x.LockTime),
                 (accessMode, lockTime) => accessMode == Management.AccessMode.Administrator || !lockTime);
 
-            this.CanChangeVolume = this.AccessMode.CombineLatest(this.LockVolume,
+            this.CanChangeVolume = this.AccessMode.CombineLatest(this.settings.WhenAnyValue(x => x.LockVolume),
                 (accessMode, lockVolume) => accessMode == Management.AccessMode.Administrator || !lockVolume);
 
-            this.CanSwitchPlaylist = this.AccessMode.CombineLatest(this.LockPlaylistSwitching,
+            this.CanSwitchPlaylist = this.AccessMode.CombineLatest(this.settings.WhenAnyValue(x => x.LockPlaylistSwitching),
                 (accessMode, lockPlaylistSwitching) => accessMode == Management.AccessMode.Administrator || !lockPlaylistSwitching);
         }
 
@@ -183,8 +148,6 @@ namespace Espera.Core.Management
 
         public IObservable<TimeSpan> CurrentTimeChanged { get; private set; }
 
-        public ReactiveProperty<bool> EnablePlaylistTimeout { get; private set; }
-
         /// <summary>
         /// Gets a value indicating whether the administrator is created.
         /// </summary>
@@ -197,16 +160,6 @@ namespace Espera.Core.Management
         /// Gets the song that is currently loaded.
         /// </summary>
         public IObservable<Song> LoadedSong { get; private set; }
-
-        public ReactiveProperty<bool> LockPlaylistRemoval { get; private set; }
-
-        public ReactiveProperty<bool> LockPlaylistSwitching { get; private set; }
-
-        public ReactiveProperty<bool> LockPlayPause { get; private set; }
-
-        public ReactiveProperty<bool> LockTime { get; private set; }
-
-        public ReactiveProperty<bool> LockVolume { get; private set; }
 
         public IObservable<AudioPlayerState> PlaybackState { get; private set; }
 
@@ -261,8 +214,6 @@ namespace Espera.Core.Management
         {
             get { return this.songSourcePath.AsObservable(); }
         }
-
-        public ReactiveProperty<TimeSpan> SongSourceUpdateInterval { get; private set; }
 
         /// <summary>
         /// Occurs when a song has started the playback.
@@ -474,8 +425,6 @@ namespace Espera.Core.Management
             {
                 this.currentSongFinderSubscription.Dispose();
             }
-
-            this.settings.Save();
         }
 
         public Playlist GetPlaylistByName(string playlistName)
@@ -488,16 +437,9 @@ namespace Espera.Core.Management
 
         public void Initialize()
         {
-            if (this.settings.UpgradeRequired)
-            {
-                this.settings.Upgrade();
-                this.settings.UpgradeRequired = false;
-                this.settings.Save();
-            }
-
             this.driveWatcher.Initialize();
 
-            IObservable<Unit> update = this.SongSourceUpdateInterval
+            IObservable<Unit> update = this.settings.WhenAnyValue(x => x.SongSourceUpdateInterval)
                 .Select(Observable.Interval)
                 .Switch()
                 .Select(_ => Unit.Default)
@@ -520,7 +462,7 @@ namespace Espera.Core.Management
         /// </summary>
         public async Task PauseSongAsync()
         {
-            if (this.LockPlayPause.Value && this.accessMode == Management.AccessMode.Party)
+            if (this.settings.LockPlayPause && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to play when in party mode.");
 
             await this.audioPlayer.PauseAsync();
@@ -579,7 +521,7 @@ namespace Espera.Core.Management
             if (playlistIndex < 0)
                 Throw.ArgumentOutOfRangeException(() => playlistIndex, 0);
 
-            if (this.LockPlayPause.Value && this.accessMode == Management.AccessMode.Party)
+            if (this.settings.LockPlayPause && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to play when in party mode.");
 
             await this.InternPlaySongAsync(playlistIndex);
@@ -594,7 +536,7 @@ namespace Espera.Core.Management
             if (indexes == null)
                 Throw.ArgumentNullException(() => indexes);
 
-            if (this.LockPlaylistRemoval.Value && this.accessMode == Management.AccessMode.Party)
+            if (this.settings.LockPlaylistRemoval && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
 
             this.RemoveFromPlaylist(this.CurrentPlaylist, indexes);
@@ -721,7 +663,7 @@ namespace Espera.Core.Management
 
             try
             {
-                await song.PrepareAsync();
+                await song.PrepareAsync(this.settings.StreamHighestYoutubeQuality ? YoutubeStreamingQuality.High : this.settings.YoutubeStreamingQuality);
             }
 
             catch (SongPreparationException)

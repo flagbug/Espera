@@ -1,6 +1,8 @@
 ﻿using Espera.Core;
 using Espera.Core.Management;
+using Espera.Core.Settings;
 using Espera.View.Properties;
+using Rareform.Validation;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -16,15 +18,19 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> isNetworkUnavailable;
         private readonly IReactiveCommand playNowCommand;
         private readonly ObservableAsPropertyHelper<YoutubeSongViewModel> selectedSong;
+        private CoreSettings coreSettings;
         private SortOrder durationOrder;
         private bool isSearching;
         private SortOrder ratingOrder;
         private SortOrder titleOrder;
         private SortOrder viewsOrder;
 
-        public YoutubeViewModel(Library library)
+        public YoutubeViewModel(Library library, CoreSettings coreSettings)
             : base(library)
         {
+            if (coreSettings == null)
+                Throw.ArgumentNullException(() => coreSettings);
+
             this.playNowCommand = new ReactiveCommand();
             this.playNowCommand.RegisterAsyncTask(_ => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model)));
 
@@ -132,7 +138,7 @@ namespace Espera.View.ViewModels
             var songs = new List<YoutubeSongViewModel>();
 
             finder.GetSongs()
-                .Select(song => new YoutubeSongViewModel(song))
+                .Select(song => new YoutubeSongViewModel(song, () => this.coreSettings.YoutubeDownloadPath))
                 .SubscribeOn(TaskPoolScheduler.Default)
                 .Subscribe(song => songs.Add(song), () =>
                 {

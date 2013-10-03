@@ -1,4 +1,5 @@
-﻿using Espera.Core.Audio;
+﻿using Akavache;
+using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Moq;
@@ -125,10 +126,13 @@ namespace Espera.Core.Tests
         [Fact]
         public async Task CanChangeTimeIsFalseIfIsNotAdministratorAndLockTimeIsTrue()
         {
-            using (Library library = Helpers.CreateLibrary())
+            var settings = new CoreSettings(BlobCache.InMemory)
             {
-                library.LockTime.Value = true;
+                LockTime = true
+            };
 
+            using (Library library = Helpers.CreateLibrary(settings))
+            {
                 library.CreateAdmin("password");
                 library.ChangeToParty();
 
@@ -148,10 +152,13 @@ namespace Espera.Core.Tests
         [Fact]
         public async Task CanChangeTimeIsTrueIfIsNotAdministratorAndLockTimeIsFalse()
         {
+            var settings = new CoreSettings(BlobCache.InMemory)
+            {
+                LockTime = false
+            };
+
             using (Library library = Helpers.CreateLibrary())
             {
-                library.LockTime.Value = false;
-
                 library.CreateAdmin("password");
                 library.ChangeToParty();
 
@@ -162,10 +169,13 @@ namespace Espera.Core.Tests
         [Fact]
         public async Task CanChangeVolumeIsFalseIsNotAdministratorAndLockVolumeIsTrue()
         {
-            using (Library library = Helpers.CreateLibrary())
+            var settings = new CoreSettings(BlobCache.InMemory)
             {
-                library.LockVolume.Value = true;
+                LockVolume = true
+            };
 
+            using (Library library = Helpers.CreateLibrary(settings))
+            {
                 library.CreateAdmin("password");
                 library.ChangeToParty();
 
@@ -185,10 +195,13 @@ namespace Espera.Core.Tests
         [Fact]
         public async Task CanChangeVolumeIsTrueIfIsNotAdministratorAndLockVolumeIsFalse()
         {
-            using (Library library = Helpers.CreateLibrary())
+            var settings = new CoreSettings(BlobCache.InMemory)
             {
-                library.LockVolume.Value = false;
+                LockVolume = false
+            };
 
+            using (Library library = Helpers.CreateLibrary(settings))
+            {
                 library.CreateAdmin("password");
                 library.ChangeToParty();
 
@@ -199,10 +212,13 @@ namespace Espera.Core.Tests
         [Fact]
         public async Task CanSwitchPlaylistIsFalseIfIsNotAdministratorAndLockPlaylistSwitchingIsTrue()
         {
-            using (Library library = Helpers.CreateLibrary())
+            var settings = new CoreSettings(BlobCache.InMemory)
             {
-                library.LockPlaylistSwitching.Value = true;
+                LockPlaylistSwitching = true
+            };
 
+            using (Library library = Helpers.CreateLibrary(settings))
+            {
                 library.CreateAdmin("password");
                 library.ChangeToParty();
 
@@ -213,10 +229,13 @@ namespace Espera.Core.Tests
         [Fact]
         public async Task CanSwitchPlaylistIsTrueIfIsNotAdministratorAndLockPlaylistSwitchingIsFalse()
         {
-            using (Library library = Helpers.CreateLibrary())
+            var settings = new CoreSettings(BlobCache.InMemory)
             {
-                library.LockPlaylistSwitching.Value = false;
+                LockPlaylistSwitching = false
+            };
 
+            using (Library library = Helpers.CreateLibrary(settings))
+            {
                 library.CreateAdmin("password");
                 library.ChangeToParty();
 
@@ -395,20 +414,6 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public void InitializeUpgradesCoreSettingsIfRequired()
-        {
-            var settings = new Mock<ILibrarySettings>();
-            settings.SetupProperty(p => p.UpgradeRequired, true);
-
-            using (Library library = Helpers.CreateLibrary(settings.Object))
-            {
-                library.Initialize();
-            }
-
-            Assert.False(settings.Object.UpgradeRequired);
-        }
-
-        [Fact]
         public async Task PauseSongCallsAudioPlayerPause()
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
@@ -431,10 +436,12 @@ namespace Espera.Core.Tests
         [Fact]
         public void PauseSongThrowsInvalidOperationExceptionIfIsNotAdministratorAndPausingIsLocked()
         {
-            var settings = new Mock<ILibrarySettings>();
-            settings.SetupProperty(p => p.LockPlayPause, true);
+            var settings = new CoreSettings(BlobCache.InMemory)
+            {
+                LockPlayPause = true
+            };
 
-            using (Library library = Helpers.CreateLibrary(settings.Object))
+            using (Library library = Helpers.CreateLibrary(settings))
             {
                 library.CreateAdmin("Password");
                 library.ChangeToParty();
@@ -609,10 +616,12 @@ namespace Espera.Core.Tests
         [Fact]
         public void PlaySongThrowsInvalidOperationExceptionIfUserIsNotAdministratorAndLockPlayPauseIsTrue()
         {
-            var settings = new Mock<ILibrarySettings>();
-            settings.SetupProperty(p => p.LockPlayPause, true);
+            var settings = new CoreSettings(BlobCache.InMemory)
+            {
+                LockPlayPause = true
+            };
 
-            using (Library library = Helpers.CreateLibrary(settings.Object))
+            using (Library library = Helpers.CreateLibrary(settings))
             {
                 library.CreateAdmin("TestPassword");
                 library.ChangeToParty();
@@ -680,10 +689,12 @@ namespace Espera.Core.Tests
         {
             var songMock = new Mock<Song>("TestPath", TimeSpan.Zero);
 
-            var settings = new Mock<ILibrarySettings>();
-            settings.SetupProperty(p => p.LockPlaylistRemoval, true);
+            var settings = new CoreSettings(BlobCache.InMemory)
+            {
+                LockPlaylistRemoval = true
+            };
 
-            using (Library library = Helpers.CreateLibraryWithPlaylist(settings: settings.Object))
+            using (Library library = Helpers.CreateLibraryWithPlaylist(settings: settings))
             {
                 library.AddSongsToPlaylist(new[] { songMock.Object });
 
@@ -834,10 +845,13 @@ namespace Espera.Core.Tests
         [Fact]
         public void SwitchToPlaylistThrowsInvalidOperationExceptionIfPartyModeAndLockPlaylistSwitchingIsTrue()
         {
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
+            var settings = new CoreSettings(BlobCache.InMemory)
             {
-                library.LockPlaylistSwitching.Value = true;
+                LockPlaylistSwitching = true
+            };
 
+            using (Library library = Helpers.CreateLibraryWithPlaylist("Playlist 1", settings))
+            {
                 library.AddPlaylist("Playlist 2");
 
                 library.CreateAdmin("Password");

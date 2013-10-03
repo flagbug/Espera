@@ -38,17 +38,17 @@ namespace Espera.View
         protected override void Configure()
         {
             this.kernel = new StandardKernel();
-
             this.kernel.Bind<IRemovableDriveWatcher>().To<RemovableDriveWatcher>();
             this.kernel.Bind<ILibraryReader>().To<LibraryFileReader>().WithConstructorArgument("sourcePath", FilePath);
             this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", FilePath);
-            this.kernel.Bind<ILibrarySettings>().To<LibrarySettingsWrapper>().OnActivation(wrapper =>
-            {
-                if (wrapper.YoutubeDownloadPath == String.Empty)
+            this.kernel.Bind<CoreSettings>().To<CoreSettings>().InSingletonScope().WithConstructorArgument("blobCache", BlobCache.LocalMachine)
+                .OnActivation(x =>
                 {
-                    wrapper.YoutubeDownloadPath = KnownFolders.Downloads.Path;
-                }
-            });
+                    if (x.YoutubeDownloadPath == String.Empty)
+                    {
+                        x.YoutubeDownloadPath = KnownFolders.Downloads.Path;
+                    }
+                });
             this.kernel.Bind<IFileSystem>().To<FileSystem>();
             this.kernel.Bind<IWindowManager>().To<WindowManager>();
         }

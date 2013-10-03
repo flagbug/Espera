@@ -1,4 +1,5 @@
-﻿using Espera.Core.Management;
+﻿using Akavache;
+using Espera.Core.Management;
 using Espera.Core.Settings;
 using System;
 using System.IO;
@@ -19,7 +20,7 @@ namespace Espera.View
                 string filePath = Path.Combine(directoryPath, "Library.xml");
 
                 library = new Library(new RemovableDriveWatcher(), new LibraryFileReader(filePath),
-                                      new LibraryFileWriter(filePath), new LibrarySettingsWrapper(), new MockFileSystem());
+                                      new LibraryFileWriter(filePath), new CoreSettings(BlobCache.InMemory), new MockFileSystem());
             }
 
             return library;

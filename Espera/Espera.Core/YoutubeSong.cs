@@ -51,9 +51,9 @@ namespace Espera.Core
         /// </summary>
         public int Views { get; set; }
 
-        public static async Task DownloadAudioAsync(VideoInfo videoInfo, IObserver<double> progress)
+        public static async Task DownloadAudioAsync(VideoInfo videoInfo, string downloadPath, IObserver<double> progress)
         {
-            var downloader = new AudioDownloader(videoInfo, Path.Combine(CoreSettings.Default.YoutubeDownloadPath, videoInfo.Title + videoInfo.AudioExtension));
+            var downloader = new AudioDownloader(videoInfo, Path.Combine(downloadPath, videoInfo.Title + videoInfo.AudioExtension));
 
             downloader.DownloadProgressChanged += (sender, args) => progress.OnNext(args.ProgressPercentage * 0.95);
             downloader.AudioExtractionProgressChanged += (sender, args) => progress.OnNext(95 + args.ProgressPercentage * 0.05);
@@ -61,22 +61,22 @@ namespace Espera.Core
             await DownloadFromYoutube(downloader, new[] { typeof(IOException), typeof(WebException), typeof(AudioExtractionException) }, progress);
         }
 
-        public static async Task DownloadVideoAsync(VideoInfo videoInfo, IObserver<double> progress)
+        public static async Task DownloadVideoAsync(VideoInfo videoInfo, string downloadPath, IObserver<double> progress)
         {
-            var downloader = new VideoDownloader(videoInfo, Path.Combine(CoreSettings.Default.YoutubeDownloadPath, videoInfo.Title + videoInfo.VideoExtension));
+            var downloader = new VideoDownloader(videoInfo, Path.Combine(downloadPath, videoInfo.Title + videoInfo.VideoExtension));
 
             downloader.DownloadProgressChanged += (sender, args) => progress.OnNext(args.ProgressPercentage);
 
             await DownloadFromYoutube(downloader, new[] { typeof(IOException), typeof(WebException) }, progress);
         }
 
-        internal override async Task PrepareAsync()
+        internal override async Task PrepareAsync(YoutubeStreamingQuality qualityHint)
         {
             VideoInfo video = null;
 
             try
             {
-                video = await GetVideoInfoForStreaming(this.OriginalPath);
+                video = await GetVideoInfoForStreaming(this.OriginalPath, qualityHint);
             }
 
             catch (Exception ex)
@@ -121,7 +121,7 @@ namespace Espera.Core
         {
             videos = videos.ToList(); // Prevent multiple enumeration
 
-            if (CoreSettings.Default.StreamHighestYoutubeQuality)
+            if (quality == YoutubeStreamingQuality.High)
             {
                 return videos.OrderByDescending(x => x.Resolution)
                     .FirstOrDefault();
@@ -143,14 +143,14 @@ namespace Espera.Core
             return video;
         }
 
-        private static async Task<VideoInfo> GetVideoInfoForStreaming(string youtubeLink)
+        private static async Task<VideoInfo> GetVideoInfoForStreaming(string youtubeLink, YoutubeStreamingQuality qualitySetting)
         {
             IEnumerable<VideoInfo> videoInfos = await Task.Run(() => DownloadUrlResolver.GetDownloadUrls(youtubeLink));
 
             IEnumerable<VideoInfo> filtered = videoInfos
                 .Where(info => info.VideoType == VideoType.Mp4 && !info.Is3D);
 
-            return GetVideoByStreamingQuality(filtered, (YoutubeStreamingQuality)CoreSettings.Default.YoutubeStreamingQuality);
+            return GetVideoByStreamingQuality(filtered, qualitySetting);
         }
     }
 }

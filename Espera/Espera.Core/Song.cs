@@ -83,7 +83,7 @@ namespace Espera.Core
         /// <summary>
         /// Prepares the song for playback.
         /// </summary>
-        internal virtual Task PrepareAsync()
+        internal virtual Task PrepareAsync(YoutubeStreamingQuality qualityHint)
         {
             return Task.Delay(0);
         }
