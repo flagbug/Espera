@@ -5,8 +5,8 @@ namespace Espera.Core.Settings
 {
     public class CoreSettings : Settings
     {
-        public CoreSettings(IBlobCache blobCache, ISecureBlobCache secureBlobCache)
-            : base("__CoreSettings__", blobCache, secureBlobCache)
+        public CoreSettings()
+            : base("__CoreSettings__", BlobCache.LocalMachine, BlobCache.Secure)
         { }
 
         public bool EnablePlaylistTimeout

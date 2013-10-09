@@ -5,8 +5,8 @@ namespace Espera.View
 {
     public class ViewSettings : Settings
     {
-        public ViewSettings(IBlobCache blobCache)
-            : base("__ViewSettings__", blobCache)
+        public ViewSettings()
+            : base("__ViewSettings__", BlobCache.LocalMachine)
         { }
 
         public string AccentColor
