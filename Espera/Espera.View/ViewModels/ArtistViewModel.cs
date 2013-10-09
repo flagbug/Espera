@@ -1,11 +1,11 @@
 ﻿using Akavache;
-using Espera.Core;
+using MoreLinq;
 using ReactiveUI;
 using Splat;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
@@ -15,34 +15,37 @@ namespace Espera.View.ViewModels
     public sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>
     {
         private static readonly SemaphoreSlim Gate; // This gate is used to limit the I/O access when accessing the artwork cache to 1 item at a time
+        private readonly Subject<IObservable<string>> artworkKeys;
         private readonly ObservableAsPropertyHelper<BitmapSource> cover;
-        private IEnumerable<LocalSongViewModel> songs;
 
         static ArtistViewModel()
         {
             Gate = new SemaphoreSlim(1, 1);
         }
 
-        public ArtistViewModel(IEnumerable<LocalSongViewModel> songs)
-            : this(songs.First().Artist)
+        public ArtistViewModel(string artistName, IEnumerable<IObservable<string>> artworkKeys)
         {
-            this.Songs = songs.ToList();
+            this.artworkKeys = new Subject<IObservable<string>>();
 
-            this.cover = this.Songs
-                .Select(x => x.Model)
-                .Cast<LocalSong>()
-                .Select(song => song.ArtworkKey.Where(x => x != null))
+            this.cover = this.artworkKeys
                 .Merge()
-                .Distinct() // Ignore duplicate artworks
-                .ObserveOn(RxApp.TaskpoolScheduler)
-                .Select(key => LoadArtworkAsync(key).Result)
-                .FirstOrDefaultAsync(pic => pic != null)
-                .ToProperty(this, x => x.Cover);
+                 .Where(x => x != null)
+                 .Distinct() // Ignore duplicate artworks
+                 .ObserveOn(RxApp.TaskpoolScheduler)
+                 .Select(key => LoadArtworkAsync(key).Result)
+                 .FirstOrDefaultAsync(pic => pic != null)
+                 .ToProperty(this, x => x.Cover);
+
+            this.UpdateArtwork(artworkKeys);
+
+            this.Name = artistName;
+            this.IsAllArtists = false;
         }
 
-        public ArtistViewModel(string name)
+        public ArtistViewModel(string allArtistsName)
         {
-            this.Name = name;
+            this.Name = allArtistsName;
+            this.IsAllArtists = true;
         }
 
         public BitmapSource Cover
@@ -50,18 +53,9 @@ namespace Espera.View.ViewModels
             get { return this.cover == null ? null : this.cover.Value; }
         }
 
-        public bool IsAllArtists
-        {
-            get { return this.Songs == null; }
-        }
+        public bool IsAllArtists { get; private set; }
 
         public string Name { get; private set; }
-
-        public IEnumerable<LocalSongViewModel> Songs
-        {
-            get { return this.songs; }
-            set { this.RaiseAndSetIfChanged(ref this.songs, value); }
-        }
 
         public int CompareTo(ArtistViewModel other)
         {
@@ -88,6 +82,11 @@ namespace Espera.View.ViewModels
         public bool Equals(ArtistViewModel other)
         {
             return this.Name == other.Name;
+        }
+
+        public void UpdateArtwork(IEnumerable<IObservable<string>> keys)
+        {
+            keys.ForEach(x => this.artworkKeys.OnNext(x));
         }
 
         /// <example>
