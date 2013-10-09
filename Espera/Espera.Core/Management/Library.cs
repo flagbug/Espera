@@ -847,6 +847,11 @@ namespace Espera.Core.Management
                                     .Do(_ => this.Log().Debug("Added artwork {0} to the BlobCache", artworkKey))
                                     .Subscribe(x => song.NotifyArtworkStored(artworkKey));
                             }
+
+                            else
+                            {
+                                song.NotifyArtworkStored(artworkKey);
+                            }
                         }
 
                         this.songsUpdated.OnNext(Unit.Default);
