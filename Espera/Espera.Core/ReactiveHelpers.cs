@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 
 namespace Espera.Core
 {
-    internal static class ReactiveHelpers
+    public static class ReactiveHelpers
     {
         /// <summary>
         /// Takes the left observable and combines it with the latest value of the right observable.

@@ -5,8 +5,8 @@ namespace Espera.Core.Settings
 {
     public class CoreSettings : Settings
     {
-        public CoreSettings(IBlobCache blobCache)
-            : base("__CoreSettings__", blobCache)
+        public CoreSettings(IBlobCache blobCache, ISecureBlobCache secureBlobCache)
+            : base("__CoreSettings__", blobCache, secureBlobCache)
         { }
 
         public bool EnablePlaylistTimeout
@@ -39,6 +39,12 @@ namespace Espera.Core.Settings
             set { this.SetOrCreate(value); }
         }
 
+        public bool LockRemoteControl
+        {
+            get { return this.GetOrCreate(false); }
+            set { this.SetOrCreate(value); }
+        }
+
         public bool LockTime
         {
             get { return this.GetOrCreate(true); }
@@ -59,8 +65,14 @@ namespace Espera.Core.Settings
 
         public int Port
         {
-            get { return this.GetOrCreate(48093); }
+            get { return this.GetOrCreate(49587); }
             set { this.SetOrCreate(value); }
+        }
+
+        public string RemoteControlPassword
+        {
+            get { return this.GetOrCreateSecure((string)null); }
+            set { this.SetOrCreateSecure(value); }
         }
 
         public TimeSpan SongSourceUpdateInterval

@@ -7,8 +7,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace Espera.Core.Tests
 {
@@ -61,7 +63,7 @@ namespace Espera.Core.Tests
                 new Mock<IRemovableDriveWatcher>().Object,
                 new Mock<ILibraryReader>().Object,
                 writer ?? new Mock<ILibraryWriter>().Object,
-                settings ?? new CoreSettings(BlobCache.InMemory),
+                settings ?? SetupCoreSettings(),
                 fileSystem ?? new MockFileSystem());
 
             IAudioPlayerCallback c = library.AudioPlayerCallback;
@@ -80,7 +82,7 @@ namespace Espera.Core.Tests
         public static Library CreateLibraryWithPlaylist(string playlistName = "Playlist", CoreSettings settings = null)
         {
             var library = CreateLibrary(settings);
-            library.AddAndSwitchToPlaylist(playlistName);
+            library.AddAndSwitchToPlaylist(playlistName, library.LocalAccessControl.RegisterLocalAccessToken());
 
             return library;
         }
@@ -133,6 +135,12 @@ namespace Espera.Core.Tests
                 "</Root>";
         }
 
+        public static CoreSettings SetupCoreSettings()
+        {
+            var blobCache = new TestBlobCache(Scheduler.Immediate);
+            return new CoreSettings(blobCache, blobCache);
+        }
+
         public static Song SetupSongMock(string name = "Song", bool callBase = false, TimeSpan duration = new TimeSpan())
         {
             return CreateSongMock(name, callBase, duration).Object;
@@ -158,6 +166,21 @@ namespace Espera.Core.Tests
 
                 return reader.ReadToEnd();
             }
+        }
+
+        public async static Task<T> ThrowsAsync<T>(Func<Task> testCode) where T : Exception
+        {
+            try
+            {
+                await testCode();
+                Assert.Throws<T>(() => { }); // Use xUnit's default behavior.
+            }
+            catch (T exception)
+            {
+                return exception;
+            }
+
+            return null;
         }
 
         public static Stream ToStream(this string s)

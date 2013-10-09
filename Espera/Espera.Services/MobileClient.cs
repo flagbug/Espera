@@ -26,6 +26,7 @@ namespace Espera.Services
     /// </summary>
     public class MobileClient : IDisposable
     {
+        private readonly Guid accessToken;
         private readonly Subject<Unit> disconnected;
         private readonly CompositeDisposable disposable;
         private readonly SemaphoreSlim gate;
@@ -44,6 +45,9 @@ namespace Espera.Services
             this.socket = socket;
             this.library = library;
 
+            this.accessToken = this.library.RemoteAccessControl.RegisterRemoteAccessToken();
+
+            this.disposable = new CompositeDisposable();
             this.gate = new SemaphoreSlim(1, 1);
             this.disconnected = new Subject<Unit>();
 
@@ -60,8 +64,6 @@ namespace Espera.Services
                 {"post-play-previous-song", this.PostPlayPreviousSong},
                 {"get-playback-state", this.GetPlaybackState}
             };
-
-            this.disposable = new CompositeDisposable();
 
             this.Disconnected = Observable.FromEventPattern(h => this.socket.Disconnected += h, h => this.socket.Disconnected -= h)
                 .Select(_ => Unit.Default)
@@ -192,14 +194,14 @@ namespace Espera.Services
             return CreateResponse(200, "Ok", content);
         }
 
-        private async Task<JObject> PostContinueSong(JToken dontCare)
+        private async Task<JObject> PostContinueSong(JToken content)
         {
             try
             {
-                await this.library.ContinueSongAsync();
+                await this.library.ContinueSongAsync(this.accessToken);
             }
 
-            catch (Exception)
+            catch (AccessException)
             {
                 return CreateResponse(401, "Unauthorized");
             }
@@ -211,10 +213,10 @@ namespace Espera.Services
         {
             try
             {
-                await this.library.PauseSongAsync();
+                await this.library.PauseSongAsync(this.accessToken);
             }
 
-            catch (Exception)
+            catch (AccessException)
             {
                 return CreateResponse(401, "Unauthorized");
             }
@@ -258,7 +260,16 @@ namespace Espera.Services
 
             if (guids.Count == songs.Count)
             {
-                await this.library.PlayInstantlyAsync(songs);
+                try
+                {
+                    await this.library.PlayInstantlyAsync(songs, this.accessToken);
+                }
+
+                catch (AccessException)
+                {
+                    return CreateResponse(401, "Unauthorized");
+                }
+
                 return CreateResponse(200, "Ok");
             }
 
@@ -290,10 +301,10 @@ namespace Espera.Services
         {
             try
             {
-                await this.library.PlayNextSongAsync();
+                await this.library.PlayNextSongAsync(this.accessToken);
             }
 
-            catch (Exception)
+            catch (AccessException)
             {
                 return CreateResponse(401, "Unauthorized");
             }
@@ -312,7 +323,16 @@ namespace Espera.Services
 
                 if (entry != null)
                 {
-                    await this.library.PlaySongAsync(entry.Index);
+                    try
+                    {
+                        await this.library.PlaySongAsync(entry.Index, this.accessToken);
+                    }
+
+                    catch (AccessException)
+                    {
+                        return CreateResponse(401, "Unauthorized");
+                    }
+
                     return CreateResponse(200, "Playing song");
                 }
 
@@ -326,10 +346,10 @@ namespace Espera.Services
         {
             try
             {
-                await this.library.PlayPreviousSongAsync();
+                await this.library.PlayPreviousSongAsync(this.accessToken);
             }
 
-            catch (Exception)
+            catch (AccessException)
             {
                 return CreateResponse(401, "Unauthorized");
             }

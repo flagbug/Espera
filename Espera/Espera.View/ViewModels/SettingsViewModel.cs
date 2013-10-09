@@ -16,6 +16,7 @@ namespace Espera.View.ViewModels
 {
     internal class SettingsViewModel : ReactiveObject
     {
+        private readonly Guid accessToken;
         private readonly ObservableAsPropertyHelper<bool> canCreateAdmin;
         private readonly ObservableAsPropertyHelper<bool> canLogin;
         private readonly CoreSettings coreSettings;
@@ -24,13 +25,14 @@ namespace Espera.View.ViewModels
         private readonly ViewSettings viewSettings;
         private readonly IWindowManager windowManager;
         private string creationPassword;
+        private bool isAdminCreated;
         private bool isWrongPassword;
         private string loginPassword;
         private int port;
         private bool showLogin;
         private bool showSettings;
 
-        public SettingsViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, IWindowManager windowManager)
+        public SettingsViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, IWindowManager windowManager, Guid accessToken)
         {
             if (library == null)
                 Throw.ArgumentNullException(() => library);
@@ -45,21 +47,26 @@ namespace Espera.View.ViewModels
             this.viewSettings = viewSettings;
             this.coreSettings = coreSettings;
             this.windowManager = windowManager;
+            this.accessToken = accessToken;
 
             this.Scaling = 1;
 
             this.canCreateAdmin = this
-                .WhenAnyValue(x => x.CreationPassword, x => !string.IsNullOrWhiteSpace(x) && !this.library.IsAdministratorCreated)
+                .WhenAnyValue(x => x.CreationPassword, x => !string.IsNullOrWhiteSpace(x) && !this.isAdminCreated)
                 .ToProperty(this, x => x.CanCreateAdmin);
 
             this.CreateAdminCommand = new ReactiveCommand(this.canCreateAdmin, false,
                 ImmediateScheduler.Instance); // Immediate execution, because we set the password to an empty string afterwards
-            this.CreateAdminCommand.Subscribe(p => this.library.CreateAdmin(this.CreationPassword));
+            this.CreateAdminCommand.Subscribe(p =>
+            {
+                this.library.LocalAccessControl.SetLocalPassword(this.accessToken, this.CreationPassword);
+                this.isAdminCreated = true;
+            });
 
             this.ChangeToPartyCommand = new ReactiveCommand(this.CreateAdminCommand.Select(x => true).StartWith(false));
             this.ChangeToPartyCommand.Subscribe(p =>
             {
-                this.library.ChangeToParty();
+                this.library.LocalAccessControl.DowngradeLocalAccess(this.accessToken);
                 this.ShowSettings = false;
             });
 
@@ -72,7 +79,7 @@ namespace Espera.View.ViewModels
             {
                 try
                 {
-                    this.library.ChangeToAdmin(this.LoginPassword);
+                    this.library.LocalAccessControl.UpgradeLocalAccess(this.accessToken, this.LoginPassword);
                     this.IsWrongPassword = false;
 
                     this.ShowLogin = false;
@@ -101,6 +108,12 @@ namespace Espera.View.ViewModels
                 .Select(x => x > 49152 && x < 65535)
                 .ToCommand();
             this.ChangePortCommand.Subscribe(x => this.coreSettings.Port = this.Port);
+
+            this.remoteControlPassword = this.coreSettings.RemoteControlPassword;
+            this.ChangeRemoteControlPasswordCommand = this.WhenAnyValue(x => x.RemoteControlPassword)
+                .Select(x => !String.IsNullOrWhiteSpace(x))
+                .ToCommand();
+            this.ChangePortCommand.Subscribe(x => this.coreSettings.RemoteControlPassword = this.RemoteControlPassword);
         }
 
         public static IEnumerable<YoutubeStreamingQuality> YoutubeStreamingQualities
@@ -126,6 +139,8 @@ namespace Espera.View.ViewModels
         public IReactiveCommand ChangeAccentColorCommand { get; private set; }
 
         public ReactiveCommand ChangePortCommand { get; private set; }
+
+        public ReactiveCommand ChangeRemoteControlPasswordCommand { get; private set; }
 
         public IReactiveCommand ChangeToPartyCommand { get; private set; }
 
@@ -202,6 +217,16 @@ namespace Espera.View.ViewModels
             set { this.coreSettings.LockPlayPause = value; }
         }
 
+        public bool LockRemoteControl
+        {
+            get { return this.coreSettings.LockRemoteControl; }
+            set
+            {
+                this.coreSettings.LockRemoteControl = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
         public bool LockTime
         {
             get { return this.coreSettings.LockTime; }
@@ -239,8 +264,8 @@ namespace Espera.View.ViewModels
 
         public int PlaylistTimeout
         {
-            get { return (int)this.library.PlaylistTimeout.TotalSeconds; }
-            set { this.library.PlaylistTimeout = TimeSpan.FromSeconds(value); }
+            get { return (int)this.coreSettings.PlaylistTimeout.TotalSeconds; }
+            set { this.coreSettings.PlaylistTimeout = TimeSpan.FromSeconds(value); }
         }
 
         public int Port
@@ -252,6 +277,12 @@ namespace Espera.View.ViewModels
         public string ReleaseNotes
         {
             get { return "http://espera.flagbug.com/release-notes"; }
+        }
+
+        public string RemoteControlPassword
+        {
+            get { return this.remoteControlPassword; }
+            set { this.RaiseAndSetIfChanged(ref this.remoteControlPassword, value); }
         }
 
         public IReactiveCommand ReportBugCommand { get; private set; }
@@ -291,10 +322,10 @@ namespace Espera.View.ViewModels
 
         public bool StreamHighestYoutubeQuality
         {
-            get { return this.library.StreamHighestYoutubeQuality; }
+            get { return this.coreSettings.StreamHighestYoutubeQuality; }
             set
             {
-                this.library.StreamHighestYoutubeQuality = value;
+                this.coreSettings.StreamHighestYoutubeQuality = value;
 
                 this.RaisePropertyChanged();
             }
@@ -312,28 +343,28 @@ namespace Espera.View.ViewModels
 
         public string YoutubeDownloadPath
         {
-            get { return this.library.YoutubeDownloadPath; }
-            set { this.library.YoutubeDownloadPath = value; }
+            get { return this.coreSettings.YoutubeDownloadPath; }
+            set { this.coreSettings.YoutubeDownloadPath = value; }
         }
 
         public YoutubeStreamingQuality YoutubeStreamingQuality
         {
-            get { return this.library.YoutubeStreamingQuality; }
+            get { return this.coreSettings.YoutubeStreamingQuality; }
             set
             {
-                this.library.YoutubeStreamingQuality = value;
+                this.coreSettings.YoutubeStreamingQuality = value;
                 this.RaisePropertyChanged();
             }
         }
 
         public void ChangeLibrarySource(string source)
         {
-            this.library.ChangeSongSourcePath(source);
+            this.library.ChangeSongSourcePath(source, this.accessToken);
         }
 
         public void HandleSettings()
         {
-            if (this.library.IsAdministratorCreated && this.library.AccessMode.FirstAsync().Wait() == AccessMode.Party)
+            if (this.isAdminCreated && this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken).FirstAsync().Wait() == AccessPermission.Guest)
             {
                 this.ShowLogin = true;
             }

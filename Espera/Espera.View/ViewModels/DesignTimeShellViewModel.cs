@@ -7,7 +7,7 @@ namespace Espera.View.ViewModels
     internal class DesignTimeShellViewModel : ShellViewModel
     {
         public DesignTimeShellViewModel()
-            : base(DesignTime.LoadLibrary(), new ViewSettings(BlobCache.InMemory), new CoreSettings(BlobCache.InMemory), new WindowManager())
+            : base(DesignTime.LoadLibrary(), new ViewSettings(BlobCache.InMemory), new CoreSettings(BlobCache.InMemory, BlobCache.InMemory), new WindowManager())
         { }
     }
 }

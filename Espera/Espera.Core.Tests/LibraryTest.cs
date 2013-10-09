@@ -1,7 +1,5 @@
-﻿using Akavache;
-using Espera.Core.Audio;
+﻿using Espera.Core.Audio;
 using Espera.Core.Management;
-using Espera.Core.Settings;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -21,7 +19,7 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                library.AddAndSwitchToPlaylist("Playlist");
+                library.AddAndSwitchToPlaylist("Playlist", library.LocalAccessControl.RegisterLocalAccessToken());
 
                 Assert.Equal("Playlist", library.CurrentPlaylist.Name);
                 Assert.Equal("Playlist", library.Playlists.First().Name);
@@ -34,9 +32,10 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                library.AddAndSwitchToPlaylist("Playlist");
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                library.AddAndSwitchToPlaylist("Playlist", token);
 
-                Assert.Throws<InvalidOperationException>(() => library.AddAndSwitchToPlaylist("Playlist"));
+                Assert.Throws<InvalidOperationException>(() => library.AddAndSwitchToPlaylist("Playlist", token));
             }
         }
 
@@ -45,9 +44,11 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                library.AddPlaylist("Playlist");
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                Assert.Throws<InvalidOperationException>(() => library.AddPlaylist("Playlist"));
+                library.AddPlaylist("Playlist", token);
+
+                Assert.Throws<InvalidOperationException>(() => library.AddPlaylist("Playlist", token));
             }
         }
 
@@ -56,21 +57,12 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                Assert.Throws<ArgumentNullException>(() => library.AddPlaylist(null));
+                Assert.Throws<ArgumentNullException>(() => library.AddPlaylist(null, library.LocalAccessControl.RegisterLocalAccessToken()));
             }
         }
 
         [Fact]
-        public void AddSongsToPlaylistThrowsArgumentNullExceptionIfSongListIsNull()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentNullException>(() => library.AddSongsToPlaylist(null));
-            }
-        }
-
-        [Fact]
-        public void AddSongsToPlaylistThrowsInvalidOperationExceptionIfInPartyModeAndMultipleSongsAreAdded()
+        public void AddSongsToPlaylistThrowsAccessExceptionIfInPartyModeAndMultipleSongsAreAdded()
         {
             var songs = new[]
             {
@@ -80,10 +72,18 @@ namespace Espera.Core.Tests
 
             using (Library library = Helpers.CreateLibrary())
             {
-                library.CreateAdmin("TestPassword");
-                library.ChangeToParty();
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                Assert.Throws<InvalidOperationException>(() => library.AddSongsToPlaylist(songs));
+                Assert.Throws<AccessException>(() => library.AddSongsToPlaylist(songs, token));
+            }
+        }
+
+        [Fact]
+        public void AddSongsToPlaylistThrowsArgumentNullExceptionIfSongListIsNull()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                Assert.Throws<ArgumentNullException>(() => library.AddSongsToPlaylist(null, library.LocalAccessControl.RegisterLocalAccessToken()));
             }
         }
 
@@ -97,162 +97,6 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public void CanAddSongToPlaylistReturnsFalseIfIsPartyModeAndRemainingTimeIsBiggerThanZero()
-        {
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
-            {
-                library.PlaylistTimeout = TimeSpan.FromMinutes(1);
-
-                library.CreateAdmin("Password");
-                library.ChangeToParty();
-
-                Song song = Helpers.SetupSongMock();
-
-                library.AddSongToPlaylist(song);
-
-                Assert.False(library.CanAddSongToPlaylist);
-            }
-        }
-
-        [Fact]
-        public void CanAddSongToPlaylistReturnsTrueIfIsAdministrator()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.True(library.CanAddSongToPlaylist);
-            }
-        }
-
-        [Fact]
-        public async Task CanChangeTimeIsFalseIfIsNotAdministratorAndLockTimeIsTrue()
-        {
-            var settings = new CoreSettings(BlobCache.InMemory)
-            {
-                LockTime = true
-            };
-
-            using (Library library = Helpers.CreateLibrary(settings))
-            {
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.False(await library.CanChangeTime.FirstAsync());
-            }
-        }
-
-        [Fact]
-        public async Task CanChangeTimeIsTrueIfIsAdministrator()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.True(await library.CanChangeTime.FirstAsync());
-            }
-        }
-
-        [Fact]
-        public async Task CanChangeTimeIsTrueIfIsNotAdministratorAndLockTimeIsFalse()
-        {
-            var settings = new CoreSettings(BlobCache.InMemory)
-            {
-                LockTime = false
-            };
-
-            using (Library library = Helpers.CreateLibrary(settings))
-            {
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.True(await library.CanChangeTime.FirstAsync());
-            }
-        }
-
-        [Fact]
-        public async Task CanChangeVolumeIsFalseIsNotAdministratorAndLockVolumeIsTrue()
-        {
-            var settings = new CoreSettings(BlobCache.InMemory)
-            {
-                LockVolume = true
-            };
-
-            using (Library library = Helpers.CreateLibrary(settings))
-            {
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.False(await library.CanChangeVolume.FirstAsync());
-            }
-        }
-
-        [Fact]
-        public async Task CanChangeVolumeIsTrueIfIsAdministrator()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.True(await library.CanChangeVolume.FirstAsync());
-            }
-        }
-
-        [Fact]
-        public async Task CanChangeVolumeIsTrueIfIsNotAdministratorAndLockVolumeIsFalse()
-        {
-            var settings = new CoreSettings(BlobCache.InMemory)
-            {
-                LockVolume = false
-            };
-
-            using (Library library = Helpers.CreateLibrary(settings))
-            {
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.True(await library.CanChangeVolume.FirstAsync());
-            }
-        }
-
-        [Fact]
-        public async Task CanSwitchPlaylistIsFalseIfIsNotAdministratorAndLockPlaylistSwitchingIsTrue()
-        {
-            var settings = new CoreSettings(BlobCache.InMemory)
-            {
-                LockPlaylistSwitching = true
-            };
-
-            using (Library library = Helpers.CreateLibrary(settings))
-            {
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.False(await library.CanSwitchPlaylist.FirstAsync());
-            }
-        }
-
-        [Fact]
-        public async Task CanSwitchPlaylistIsTrueIfIsNotAdministratorAndLockPlaylistSwitchingIsFalse()
-        {
-            var settings = new CoreSettings(BlobCache.InMemory)
-            {
-                LockPlaylistSwitching = false
-            };
-
-            using (Library library = Helpers.CreateLibrary(settings))
-            {
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.True(await library.CanSwitchPlaylist.FirstAsync());
-            }
-        }
-
-        [Fact]
-        public async Task CanSwitchPlaylistIsTrueIsAdministrator()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.True(await library.CanSwitchPlaylist.FirstAsync());
-            }
-        }
-
-        [Fact]
         public async Task ChangeSongSourcePathSmokeTest()
         {
             var fileSystem = new MockFileSystem();
@@ -260,7 +104,7 @@ namespace Espera.Core.Tests
 
             using (Library library = Helpers.CreateLibrary(fileSystem: fileSystem))
             {
-                library.ChangeSongSourcePath("C://Test");
+                library.ChangeSongSourcePath("C://Test", library.LocalAccessControl.RegisterLocalAccessToken());
                 Assert.Equal("C://Test", await library.SongSourcePath.FirstAsync());
             }
         }
@@ -270,48 +114,7 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                Assert.Throws<ArgumentException>(() => library.ChangeSongSourcePath("C://Test"));
-            }
-        }
-
-        [Fact]
-        public async Task ChangeToAdminChangesAccessModeToAdministratorIfPasswordIsCorrect()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.CreateAdmin("TestPassword");
-                library.ChangeToAdmin("TestPassword");
-
-                Assert.Equal(AccessMode.Administrator, await library.AccessMode.FirstAsync());
-            }
-        }
-
-        [Fact]
-        public void ChangeToAdminThrowsArgumentNullExceptionIfPasswordIsNull_()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentNullException>(() => library.ChangeToAdmin(null));
-            }
-        }
-
-        [Fact]
-        public void ChangeToAdminThrowsWrongPasswordExceptionPasswordIsIncorrect()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.CreateAdmin("TestPassword");
-
-                Assert.Throws<WrongPasswordException>(() => library.ChangeToAdmin("WrongPassword"));
-            }
-        }
-
-        [Fact]
-        public void ChangeToPartyThrowsInvalidOperationExceptionIfAdministratorIsNotCreated()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<InvalidOperationException>(() => library.ChangeToParty());
+                Assert.Throws<ArgumentException>(() => library.ChangeSongSourcePath("C://Test", library.LocalAccessControl.RegisterLocalAccessToken()));
             }
         }
 
@@ -320,6 +123,8 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
                 bool called = false;
                 library.AudioPlayerCallback.PlayRequest = () => called = true;
 
@@ -327,71 +132,22 @@ namespace Espera.Core.Tests
 
                 library.AddSongToPlaylist(song.Object);
 
-                await library.PlaySongAsync(0);
+                await library.PlaySongAsync(0, token);
 
-                await library.ContinueSongAsync();
+                await library.ContinueSongAsync(token);
 
                 Assert.True(called);
             }
         }
 
         [Fact]
-        public void ContinueSongThrowsInvalidOperationExceptionIfIsNotAdmin()
+        public async Task ContinueSongThrowsAccessExceptionIfIsNotAdmin()
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                library.CreateAdmin("Password");
-                library.ChangeToParty();
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                Assert.Throws<InvalidOperationException>(async () => await library.ContinueSongAsync());
-            }
-        }
-
-        [Fact]
-        public void CreateAdminSetsIsAdministratorCreatedToTrue()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.CreateAdmin("TestPassword");
-
-                Assert.True(library.IsAdministratorCreated);
-            }
-        }
-
-        [Fact]
-        public void CreateAdminThrowsArgumentExceptionIfPasswordIsEmpty()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentException>(() => library.CreateAdmin(String.Empty));
-            }
-        }
-
-        [Fact]
-        public void CreateAdminThrowsArgumentExceptionIfPasswordIsWhiteSpace()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentException>(() => library.CreateAdmin(" "));
-            }
-        }
-
-        [Fact]
-        public void CreateAdminThrowsArgumentNullExceptionIfPasswordIsNull()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentNullException>(() => library.CreateAdmin(null));
-            }
-        }
-
-        [Fact]
-        public void CreateAdminThrowsInvalidOperationExceptionIfAdminIsAlreadyCreated()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.CreateAdmin("Password");
-                Assert.Throws<InvalidOperationException>(() => library.CreateAdmin("Password"));
+                await Helpers.ThrowsAsync<AccessException>(async () => await library.ContinueSongAsync(token));
             }
         }
 
@@ -425,28 +181,51 @@ namespace Espera.Core.Tests
 
                 library.AddSongToPlaylist(song.Object);
 
-                await library.PlaySongAsync(0);
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                await library.PauseSongAsync();
+                await library.PlaySongAsync(0, token);
+
+                await library.PauseSongAsync(token);
 
                 Assert.True(called);
             }
         }
 
         [Fact]
-        public void PauseSongThrowsInvalidOperationExceptionIfIsNotAdministratorAndPausingIsLocked()
+        public async Task PauseSongThrowsAccessExceptionIfIsNotAdministratorAndPausingIsLocked()
         {
-            var settings = new CoreSettings(BlobCache.InMemory)
-            {
-                LockPlayPause = true
-            };
+            var settings = Helpers.SetupCoreSettings();
+            settings.LockPlayPause = true;
 
             using (Library library = Helpers.CreateLibrary(settings))
             {
-                library.CreateAdmin("Password");
-                library.ChangeToParty();
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                Assert.Throws<InvalidOperationException>(async () => await library.PauseSongAsync());
+                await Helpers.ThrowsAsync<AccessException>(async () => await library.PauseSongAsync(token));
+            }
+        }
+
+        [Fact]
+        public async Task PlayInstantlyAsyncValidatesRemoteAccess()
+        {
+            var settings = Helpers.SetupCoreSettings();
+            settings.EnableRemoteControl = true;
+            settings.LockRemoteControl = true;
+            settings.RemoteControlPassword = "password";
+
+            Song[] songs = Helpers.SetupSongMocks(3);
+
+            using (Library library = Helpers.CreateLibrary(settings))
+            {
+                Guid token = library.RemoteAccessControl.RegisterRemoteAccessToken();
+
+                await Helpers.ThrowsAsync<AccessException>(async () => await library.PlayInstantlyAsync(songs, token));
+
+                settings.LockRemoteControl = false;
+                await library.PlayInstantlyAsync(songs, token);
+
+                settings.EnableRemoteControl = false;
+                await library.PlayInstantlyAsync(songs, token);
             }
         }
 
@@ -460,7 +239,7 @@ namespace Espera.Core.Tests
                     .PublishLast();
                 conn.Connect();
 
-                await library.PlayInstantlyAsync(Helpers.SetupSongMocks(2));
+                await library.PlayInstantlyAsync(Helpers.SetupSongMocks(2), library.LocalAccessControl.RegisterLocalAccessToken());
 
                 await conn.Timeout(TimeSpan.FromSeconds(5));
             }
@@ -475,18 +254,18 @@ namespace Espera.Core.Tests
                 library.AudioPlayerCallback.PlayRequest = () => called++;
                 Mock<Song> song = Helpers.CreateSongMock();
 
-                await library.PlayInstantlyAsync(new[] { song.Object });
+                await library.PlayInstantlyAsync(new[] { song.Object }, library.LocalAccessControl.RegisterLocalAccessToken());
 
                 Assert.Equal(1, called);
             }
         }
 
         [Fact]
-        public void PlayInstantlyThrowsArgumentNullExceptionIfSongListIsNull()
+        public async Task PlayInstantlyThrowsArgumentNullExceptionIfSongListIsNull()
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                Assert.Throws<ArgumentNullException>(async () => await library.PlayInstantlyAsync(null));
+                await Helpers.ThrowsAsync<ArgumentNullException>(async () => await library.PlayInstantlyAsync(null, library.LocalAccessControl.RegisterLocalAccessToken()));
             }
         }
 
@@ -512,7 +291,7 @@ namespace Espera.Core.Tests
 
                     Song[] songs = Helpers.SetupSongMocks(2);
 
-                    await library.PlayInstantlyAsync(songs);
+                    await library.PlayInstantlyAsync(songs, library.LocalAccessControl.RegisterLocalAccessToken());
 
                     if (!handle.Wait(5000))
                     {
@@ -523,23 +302,22 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public void PlayNextSongThrowsInvalidOperationExceptionIfUserIsNotAdministrator()
+        public async Task PlayNextSongThrowsAccessExceptionIfUserIsNotAdministrator()
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                library.CreateAdmin("TestPassword");
-                library.ChangeToParty();
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                Assert.Throws<InvalidOperationException>(async () => await library.PlayNextSongAsync());
+                await Helpers.ThrowsAsync<AccessException>(async () => await library.PlayNextSongAsync(token));
             }
         }
 
         [Fact]
-        public void PlayPreviousSongThrowsInvalidOperationExceptionIfPlaylistIsEmpty()
+        public async Task PlayPreviousSongThrowsInvalidOperationExceptionIfPlaylistIsEmpty()
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
-                Assert.Throws<InvalidOperationException>(async () => await library.PlayPreviousSongAsync());
+                await Helpers.ThrowsAsync<InvalidOperationException>(async () => await library.PlayPreviousSongAsync(library.LocalAccessControl.RegisterLocalAccessToken()));
             }
         }
 
@@ -555,7 +333,7 @@ namespace Espera.Core.Tests
                 var observable = song.IsCorrupted.FirstAsync(x => x).PublishLast();
                 observable.Connect();
 
-                await library.PlaySongAsync(0);
+                await library.PlaySongAsync(0, library.LocalAccessControl.RegisterLocalAccessToken());
 
                 await observable.Timeout(TimeSpan.FromSeconds(10));
 
@@ -580,7 +358,9 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
-                library.AddSongsToPlaylist(Helpers.SetupSongMocks(2));
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                library.AddSongsToPlaylist(Helpers.SetupSongMocks(2), token);
 
                 var handle = new ManualResetEvent(false);
                 int played = 0;
@@ -595,7 +375,7 @@ namespace Espera.Core.Tests
                     }
                 });
 
-                await library.PlaySongAsync(0);
+                await library.PlaySongAsync(0, token);
 
                 if (!handle.WaitOne(5000))
                 {
@@ -605,28 +385,43 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public void PlaySongThrowsArgumentOutOfRangeExceptionIfIndexIsLessThanZero()
+        public async Task PlaySongThrowsAccessExceptionIfUserIsNotAdministratorAndLockPlayPauseIsTrue()
         {
-            using (Library library = Helpers.CreateLibrary())
+            var settings = Helpers.SetupCoreSettings();
+            settings.LockPlayPause = true;
+
+            using (Library library = Helpers.CreateLibrary(settings))
             {
-                Assert.Throws<ArgumentOutOfRangeException>(async () => await library.PlaySongAsync(-1));
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                await Helpers.ThrowsAsync<AccessException>(async () => await library.PlaySongAsync(0, token));
             }
         }
 
         [Fact]
-        public void PlaySongThrowsInvalidOperationExceptionIfUserIsNotAdministratorAndLockPlayPauseIsTrue()
+        public async Task PlaySongThrowsArgumentOutOfRangeExceptionIfIndexIsLessThanZero()
         {
-            var settings = new CoreSettings(BlobCache.InMemory)
+            using (Library library = Helpers.CreateLibrary())
             {
-                LockPlayPause = true
-            };
+                await Helpers.ThrowsAsync<ArgumentOutOfRangeException>(async () => await library.PlaySongAsync(-1, library.LocalAccessControl.RegisterLocalAccessToken()));
+            }
+        }
 
-            using (Library library = Helpers.CreateLibrary(settings))
+        [Fact]
+        public void RemoveFromPlaylistAccessExceptionIfAccessModeIsPartyAndLockPlaylistRemovalIsTrue()
+        {
+            var songMock = new Mock<Song>("TestPath", TimeSpan.Zero);
+
+            var settings = Helpers.SetupCoreSettings();
+            settings.LockPlaylistRemoval = true;
+
+            using (Library library = Helpers.CreateLibraryWithPlaylist(settings: settings))
             {
-                library.CreateAdmin("TestPassword");
-                library.ChangeToParty();
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                Assert.Throws<InvalidOperationException>(async () => await library.PlaySongAsync(0));
+                library.AddSongsToPlaylist(new[] { songMock.Object }, token);
+
+                Assert.Throws<AccessException>(() => library.RemoveFromPlaylist(new[] { 0 }, token));
             }
         }
 
@@ -635,11 +430,13 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
                 Song[] songs = Helpers.SetupSongMocks(4);
 
-                library.AddSongsToPlaylist(songs);
+                library.AddSongsToPlaylist(songs, token);
 
-                library.RemoveFromPlaylist(new[] { 0, 2 });
+                library.RemoveFromPlaylist(new[] { 0, 2 }, token);
 
                 Song[] remaining = library.CurrentPlaylist.Select(entry => entry.Song).ToArray();
 
@@ -653,11 +450,13 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
                 Song[] songs = Helpers.SetupSongMocks(4, true);
 
-                library.AddSongsToPlaylist(songs);
+                library.AddSongsToPlaylist(songs, token);
 
-                library.RemoveFromPlaylist(new[] { songs[0], songs[2] });
+                library.RemoveFromPlaylist(new[] { songs[0], songs[2] }, token);
 
                 Song[] remaining = library.CurrentPlaylist.Select(entry => entry.Song).ToArray();
 
@@ -671,7 +470,7 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                Assert.Throws<ArgumentNullException>(() => library.RemoveFromPlaylist((IEnumerable<int>)null));
+                Assert.Throws<ArgumentNullException>(() => library.RemoveFromPlaylist((IEnumerable<int>)null, library.LocalAccessControl.RegisterLocalAccessToken()));
             }
         }
 
@@ -680,29 +479,7 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                Assert.Throws<ArgumentNullException>(() => library.RemoveFromPlaylist((IEnumerable<Song>)null));
-            }
-        }
-
-        [Fact]
-        public void RemoveFromPlaylistThrowsInvalidOperationExceptionIfAccessModeIsPartyAndLockPlaylistRemovalIsTrue()
-        {
-            var songMock = new Mock<Song>("TestPath", TimeSpan.Zero);
-
-            var settings = new CoreSettings(BlobCache.InMemory)
-            {
-                LockPlaylistRemoval = true
-            };
-
-            using (Library library = Helpers.CreateLibraryWithPlaylist(settings: settings))
-            {
-                library.AddSongsToPlaylist(new[] { songMock.Object });
-
-                library.CreateAdmin("SomePassword");
-
-                library.ChangeToParty();
-
-                Assert.Throws<InvalidOperationException>(() => library.RemoveFromPlaylist(new[] { 0 }));
+                Assert.Throws<ArgumentNullException>(() => library.RemoveFromPlaylist((IEnumerable<Song>)null, library.LocalAccessControl.RegisterLocalAccessToken()));
             }
         }
 
@@ -713,12 +490,14 @@ namespace Espera.Core.Tests
 
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
                 library.AudioPlayerCallback.StopRequest = () => finishedFired = true;
-                library.AddSongsToPlaylist(Helpers.SetupSongMocks(1));
+                library.AddSongsToPlaylist(Helpers.SetupSongMocks(1), token);
 
-                await library.PlaySongAsync(0);
+                await library.PlaySongAsync(0, token);
 
-                library.RemoveFromPlaylist(new[] { 0 });
+                library.RemoveFromPlaylist(new[] { 0 }, token);
             }
 
             Assert.True(finishedFired);
@@ -729,9 +508,11 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                library.AddPlaylist("Playlist");
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                library.RemovePlaylist(library.GetPlaylistByName("Playlist"));
+                library.AddPlaylist("Playlist", token);
+
+                library.RemovePlaylist(library.GetPlaylistByName("Playlist"), token);
 
                 Assert.Empty(library.Playlists);
             }
@@ -742,7 +523,7 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                Assert.Throws<ArgumentNullException>(() => library.RemovePlaylist(null));
+                Assert.Throws<ArgumentNullException>(() => library.RemovePlaylist(null, library.LocalAccessControl.RegisterLocalAccessToken()));
             }
         }
 
@@ -756,9 +537,11 @@ namespace Espera.Core.Tests
 
             using (Library library = Helpers.CreateLibrary(libraryWriter.Object))
             {
-                library.AddAndSwitchToPlaylist("Playlist");
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                await library.PlayInstantlyAsync(Helpers.SetupSongMocks(1));
+                library.AddAndSwitchToPlaylist("Playlist", token);
+
+                await library.PlayInstantlyAsync(Helpers.SetupSongMocks(1), token);
 
                 library.Save();
             }
@@ -771,17 +554,19 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
                 library.AddSongToPlaylist(Helpers.SetupSongMock());
 
-                await library.PlaySongAsync(0);
+                await library.PlaySongAsync(0, token);
 
-                library.AddPlaylist("Playlist 2");
-                library.SwitchToPlaylist(library.GetPlaylistByName("Playlist 2"));
+                library.AddPlaylist("Playlist 2", token);
+                library.SwitchToPlaylist(library.GetPlaylistByName("Playlist 2"), token);
                 library.AddSongToPlaylist(Helpers.SetupSongMock());
 
-                await library.PlaySongAsync(0);
+                await library.PlaySongAsync(0, token);
 
-                library.SwitchToPlaylist(library.GetPlaylistByName("Playlist"));
+                library.SwitchToPlaylist(library.GetPlaylistByName("Playlist"), token);
 
                 Assert.Equal(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex.Value);
                 Assert.Equal(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex.Value);
@@ -793,21 +578,23 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
                 int played = 0;
 
                 library.AudioPlayerCallback.PlayRequest = () =>
                 {
                     if (played == 0)
                     {
-                        library.AddAndSwitchToPlaylist("Playlist2");
+                        library.AddAndSwitchToPlaylist("Playlist2", token);
                     }
 
                     played++;
                 };
 
-                library.AddSongsToPlaylist(Helpers.SetupSongMocks(2));
+                library.AddSongsToPlaylist(Helpers.SetupSongMocks(2), token);
 
-                await library.PlaySongAsync(0);
+                await library.PlaySongAsync(0, token);
 
                 Assert.Equal(1, played);
             }
@@ -818,18 +605,36 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
                 library.AddSongToPlaylist(Helpers.SetupSongMock());
 
-                await library.PlaySongAsync(0);
+                await library.PlaySongAsync(0, token);
 
-                library.AddPlaylist("Playlist 2");
-                library.SwitchToPlaylist(library.Playlists.Last());
+                library.AddPlaylist("Playlist 2", token);
+                library.SwitchToPlaylist(library.Playlists.Last(), token);
                 library.AddSongToPlaylist(Helpers.SetupSongMock());
 
-                await library.PlaySongAsync(0);
+                await library.PlaySongAsync(0, token);
 
                 Assert.Equal(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex.Value);
                 Assert.Equal(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex.Value);
+            }
+        }
+
+        [Fact]
+        public void SwitchToPlaylistThrowsAccessExceptionIfPartyModeAndLockPlaylistSwitchingIsTrue()
+        {
+            var settings = Helpers.SetupCoreSettings();
+            settings.LockPlaylistSwitching = true;
+
+            using (Library library = Helpers.CreateLibraryWithPlaylist("Playlist 1", settings))
+            {
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                library.AddPlaylist("Playlist 2", token);
+
+                Assert.Throws<AccessException>(() => library.SwitchToPlaylist(library.GetPlaylistByName("Playlist 2"), token));
             }
         }
 
@@ -838,47 +643,7 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                Assert.Throws<ArgumentNullException>(() => library.SwitchToPlaylist(null));
-            }
-        }
-
-        [Fact]
-        public void SwitchToPlaylistThrowsInvalidOperationExceptionIfPartyModeAndLockPlaylistSwitchingIsTrue()
-        {
-            var settings = new CoreSettings(BlobCache.InMemory)
-            {
-                LockPlaylistSwitching = true
-            };
-
-            using (Library library = Helpers.CreateLibraryWithPlaylist("Playlist 1", settings))
-            {
-                library.AddPlaylist("Playlist 2");
-
-                library.CreateAdmin("Password");
-                library.ChangeToParty();
-
-                Assert.Throws<InvalidOperationException>(() => library.SwitchToPlaylist(library.GetPlaylistByName("Playlist 2")));
-            }
-        }
-
-        [Fact]
-        public void YoutubeDownloadPathSetterThrowsArgumentExceptionIfDirectoryDoesntExist()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentException>(() => library.YoutubeDownloadPath = "C://Test");
-            }
-        }
-
-        [Fact]
-        public void YoutubeDownloadPathSmokeTest()
-        {
-            var fileSystem = new MockFileSystem();
-            fileSystem.Directory.CreateDirectory("C://Test");
-
-            using (Library library = Helpers.CreateLibrary(fileSystem: fileSystem))
-            {
-                library.YoutubeDownloadPath = "C://Test";
+                Assert.Throws<ArgumentNullException>(() => library.SwitchToPlaylist(null, library.LocalAccessControl.RegisterLocalAccessToken()));
             }
         }
     }

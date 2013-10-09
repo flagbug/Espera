@@ -40,8 +40,10 @@ namespace Espera.View
             this.kernel.Bind<IRemovableDriveWatcher>().To<RemovableDriveWatcher>();
             this.kernel.Bind<ILibraryReader>().To<LibraryFileReader>().WithConstructorArgument("sourcePath", FilePath);
             this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", FilePath);
-            this.kernel.Bind<ViewSettings>().To<ViewSettings>().InSingletonScope().WithConstructorArgument("blobCache", BlobCache.LocalMachine);
-            this.kernel.Bind<CoreSettings>().To<CoreSettings>().InSingletonScope().WithConstructorArgument("blobCache", BlobCache.LocalMachine)
+            this.kernel.Bind<IBlobCache>().ToConstant(BlobCache.LocalMachine);
+            this.kernel.Bind<ISecureBlobCache>().ToConstant(BlobCache.Secure);
+            this.kernel.Bind<ViewSettings>().To<ViewSettings>().InSingletonScope();
+            this.kernel.Bind<CoreSettings>().To<CoreSettings>().InSingletonScope()
                 .OnActivation(x =>
                 {
                     if (x.YoutubeDownloadPath == String.Empty)

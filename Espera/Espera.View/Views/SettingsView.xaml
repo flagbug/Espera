@@ -225,6 +225,12 @@
                         <TextBox Margin="10, 0, 0, 0" Width="50" Text="{Binding Path=Port, UpdateSourceTrigger=PropertyChanged}" />
                         <Button Margin="10, 0, 0, 0" Content="Change port" Command="{Binding Path=ChangePortCommand}" />
                     </StackPanel>
+                    <Controls:ToggleSwitch Header="Lock remote control with password" IsChecked="{Binding Path=LockRemoteControl}" />
+                    <StackPanel IsEnabled="{Binding Path=LockRemoteControl}" Margin="15, 0, 0, 0" Orientation="Horizontal">
+                        <TextBlock Text="Password" VerticalAlignment="Center" />
+                        <PasswordBox Margin="10, 0, 0, 0" Width="100" />
+                        <Button Margin="10, 0, 0, 0" Content="Change password" />
+                    </StackPanel>
                 </StackPanel>
             </TabItem>
             <TabItem Header="about">

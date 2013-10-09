@@ -20,7 +20,7 @@ namespace Espera.View
                 string filePath = Path.Combine(directoryPath, "Library.xml");
 
                 library = new Library(new RemovableDriveWatcher(), new LibraryFileReader(filePath),
-                                      new LibraryFileWriter(filePath), new CoreSettings(BlobCache.InMemory), new MockFileSystem());
+                                      new LibraryFileWriter(filePath), new CoreSettings(BlobCache.InMemory, BlobCache.InMemory), new MockFileSystem());
             }
 
             return library;

@@ -21,7 +21,7 @@ namespace Espera.Core.Management
 {
     public sealed class Library : IDisposable, IEnableLogger
     {
-        private readonly BehaviorSubject<AccessMode> accessModeSubject;
+        private readonly AccessControl accessControl;
         private readonly AudioPlayer audioPlayer;
         private readonly Subject<Playlist> currentPlaylistChanged;
         private readonly IRemovableDriveWatcher driveWatcher;
@@ -36,12 +36,10 @@ namespace Espera.Core.Management
         private readonly BehaviorSubject<string> songSourcePath;
         private readonly Subject<Unit> songStarted;
         private readonly Subject<Unit> songsUpdated;
-        private AccessMode accessMode;
         private Playlist currentPlayingPlaylist;
         private IDisposable currentSongFinderSubscription;
         private Playlist instantPlaylist;
         private DateTime lastSongAddTime;
-        private string password;
 
         public Library(IRemovableDriveWatcher driveWatcher, ILibraryReader libraryReader, ILibraryWriter libraryWriter, CoreSettings settings, IFileSystem fileSystem)
         {
@@ -51,13 +49,12 @@ namespace Espera.Core.Management
             this.settings = settings;
             this.fileSystem = fileSystem;
 
+            this.accessControl = new AccessControl(settings);
             this.songLock = new object();
             this.songs = new HashSet<LocalSong>();
             this.playlists = new ObservableCollection<Playlist>();
             this.publicPlaylistWrapper = new ReadOnlyObservableCollection<Playlist>(this.playlists);
             this.currentPlaylistChanged = new Subject<Playlist>();
-            this.accessModeSubject = new BehaviorSubject<AccessMode>(Management.AccessMode.Administrator); // We want implicit to be the administrator, till we change to user mode manually
-            this.accessMode = Management.AccessMode.Administrator;
             this.CanPlayNextSong = this.currentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
             this.CanPlayPreviousSong = this.currentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
             this.songStarted = new Subject<Unit>();
@@ -74,38 +71,12 @@ namespace Espera.Core.Management
                 .Subscribe(canPlayNextSong => this.HandleSongFinishAsync(canPlayNextSong));
 
             this.CurrentTimeChanged = this.audioPlayer.CurrentTimeChanged;
-
-            this.CanChangeTime = this.AccessMode.CombineLatest(this.settings.WhenAnyValue(x => x.LockTime),
-                (accessMode, lockTime) => accessMode == Management.AccessMode.Administrator || !lockTime);
-
-            this.CanChangeVolume = this.AccessMode.CombineLatest(this.settings.WhenAnyValue(x => x.LockVolume),
-                (accessMode, lockVolume) => accessMode == Management.AccessMode.Administrator || !lockVolume);
-
-            this.CanSwitchPlaylist = this.AccessMode.CombineLatest(this.settings.WhenAnyValue(x => x.LockPlaylistSwitching),
-                (accessMode, lockPlaylistSwitching) => accessMode == Management.AccessMode.Administrator || !lockPlaylistSwitching);
-        }
-
-        /// <summary>
-        /// Gets the access mode that is currently enabled.
-        /// </summary>
-        public IObservable<AccessMode> AccessMode
-        {
-            get { return this.accessModeSubject.AsObservable(); }
         }
 
         public IAudioPlayerCallback AudioPlayerCallback
         {
             get { return this.audioPlayer; }
         }
-
-        public bool CanAddSongToPlaylist
-        {
-            get { return this.accessMode == Management.AccessMode.Administrator || this.RemainingPlaylistTimeout <= TimeSpan.Zero; }
-        }
-
-        public IObservable<bool> CanChangeTime { get; private set; }
-
-        public IObservable<bool> CanChangeVolume { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the next song in the playlist can be played.
@@ -123,8 +94,6 @@ namespace Espera.Core.Management
         /// </value>
         public IObservable<bool> CanPlayPreviousSong { get; private set; }
 
-        public IObservable<bool> CanSwitchPlaylist { get; private set; }
-
         public Playlist CurrentPlaylist { get; private set; }
 
         public IObservable<Playlist> CurrentPlaylistChanged
@@ -138,28 +107,19 @@ namespace Espera.Core.Management
         public TimeSpan CurrentTime
         {
             get { return this.audioPlayer.CurrentTime; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                this.audioPlayer.CurrentTime = value;
-            }
         }
 
         public IObservable<TimeSpan> CurrentTimeChanged { get; private set; }
 
         /// <summary>
-        /// Gets a value indicating whether the administrator is created.
-        /// </summary>
-        /// <value>
-        /// 	<c>true</c> if the administrator is created; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsAdministratorCreated { get; private set; }
-
-        /// <summary>
         /// Gets the song that is currently loaded.
         /// </summary>
         public IObservable<Song> LoadedSong { get; private set; }
+
+        public ILocalAccessControl LocalAccessControl
+        {
+            get { return this.accessControl; }
+        }
 
         public IObservable<AudioPlayerState> PlaybackState { get; private set; }
 
@@ -171,25 +131,19 @@ namespace Espera.Core.Management
             get { return this.publicPlaylistWrapper; }
         }
 
-        public TimeSpan PlaylistTimeout
-        {
-            get { return this.settings.PlaylistTimeout; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                this.settings.PlaylistTimeout = value;
-            }
-        }
-
         public TimeSpan RemainingPlaylistTimeout
         {
             get
             {
-                return this.lastSongAddTime + this.PlaylistTimeout <= DateTime.Now
+                return this.lastSongAddTime + this.settings.PlaylistTimeout <= DateTime.Now
                            ? TimeSpan.Zero
-                           : this.lastSongAddTime - DateTime.Now + this.PlaylistTimeout;
+                           : this.lastSongAddTime - DateTime.Now + this.settings.PlaylistTimeout;
             }
+        }
+
+        public IRemoteAccessControl RemoteAccessControl
+        {
+            get { return this.accessControl; }
         }
 
         /// <summary>
@@ -231,17 +185,6 @@ namespace Espera.Core.Management
             get { return this.songsUpdated.AsObservable(); }
         }
 
-        public bool StreamHighestYoutubeQuality
-        {
-            get { return this.settings.StreamHighestYoutubeQuality; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                this.settings.StreamHighestYoutubeQuality = value;
-            }
-        }
-
         /// <summary>
         /// Gets the duration of the current song.
         /// </summary>
@@ -250,39 +193,6 @@ namespace Espera.Core.Management
         public float Volume
         {
             get { return this.settings.Volume; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                this.settings.Volume = value;
-
-                this.audioPlayer.Volume = value;
-            }
-        }
-
-        public string YoutubeDownloadPath
-        {
-            get { return this.settings.YoutubeDownloadPath; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                if (!this.fileSystem.Directory.Exists(value))
-                    throw new ArgumentException("Directory doesn't exist.");
-
-                this.settings.YoutubeDownloadPath = value;
-            }
-        }
-
-        public YoutubeStreamingQuality YoutubeStreamingQuality
-        {
-            get { return this.settings.YoutubeStreamingQuality; }
-            set
-            {
-                this.ThrowIfNotAdmin();
-
-                this.settings.YoutubeStreamingQuality = value;
-            }
         }
 
         /// <summary>
@@ -290,10 +200,12 @@ namespace Espera.Core.Management
         /// </summary>
         /// <param name="name">The name of the playlist, It is required that no other playlist has this name.</param>
         /// <exception cref="InvalidOperationException">A playlist with the specified name already exists.</exception>
-        public void AddAndSwitchToPlaylist(string name)
+        public void AddAndSwitchToPlaylist(string name, Guid accessToken)
         {
-            this.AddPlaylist(name);
-            this.SwitchToPlaylist(this.GetPlaylistByName(name));
+            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylistSwitching);
+
+            this.AddPlaylist(name, accessToken);
+            this.SwitchToPlaylist(this.GetPlaylistByName(name), accessToken);
         }
 
         /// <summary>
@@ -301,13 +213,15 @@ namespace Espera.Core.Management
         /// </summary>
         /// <param name="name">The name of the playlist. It is required that no other playlist has this name.</param>
         /// <exception cref="InvalidOperationException">A playlist with the specified name already exists.</exception>
-        public void AddPlaylist(string name)
+        public void AddPlaylist(string name, Guid accessToken)
         {
             if (name == null)
                 Throw.ArgumentNullException(() => name);
 
             if (this.GetPlaylistByName(name) != null)
                 throw new InvalidOperationException("A playlist with this name already exists.");
+
+            this.accessControl.VerifyAccess(accessToken);
 
             this.playlists.Add(new Playlist(name));
         }
@@ -317,12 +231,12 @@ namespace Espera.Core.Management
         /// This method is only available in administrator mode.
         /// </summary>
         /// <param name="songList">The songs to add to the end of the playlist.</param>
-        public void AddSongsToPlaylist(IEnumerable<Song> songList)
+        public void AddSongsToPlaylist(IEnumerable<Song> songList, Guid accessToken)
         {
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
 
-            this.ThrowIfNotAdmin();
+            this.accessControl.VerifyAccess(accessToken);
 
             this.CurrentPlaylist.AddSongs(songList.ToList()); // Copy the sequence to a list, so that the enumeration doesn't gets modified
         }
@@ -342,9 +256,9 @@ namespace Espera.Core.Management
             this.lastSongAddTime = DateTime.Now;
         }
 
-        public void ChangeSongSourcePath(string path)
+        public void ChangeSongSourcePath(string path, Guid accessToken)
         {
-            this.ThrowIfNotAdmin();
+            this.accessControl.VerifyAccess(accessToken);
 
             if (!this.fileSystem.Directory.Exists(path))
                 throw new ArgumentException("Directory does't exist.");
@@ -353,66 +267,13 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Logs the administrator with the specified password in.
-        /// </summary>
-        /// <param name="adminPassword">The administrator password.</param>
-        public void ChangeToAdmin(string adminPassword)
-        {
-            if (adminPassword == null)
-                Throw.ArgumentNullException(() => adminPassword);
-
-            if (this.password != adminPassword)
-                throw new WrongPasswordException("The password is incorrect.");
-
-            this.Log().Info("Changing to administrator mode.");
-
-            this.accessMode = Management.AccessMode.Administrator;
-            this.accessModeSubject.OnNext(Management.AccessMode.Administrator);
-        }
-
-        /// <summary>
-        /// Changes the access mode to party mode.
-        /// </summary>
-        public void ChangeToParty()
-        {
-            if (!this.IsAdministratorCreated)
-                throw new InvalidOperationException("Administrator is not created.");
-
-            this.Log().Info("Changing to party mode.");
-
-            this.accessMode = Management.AccessMode.Party;
-            this.accessModeSubject.OnNext(Management.AccessMode.Party);
-        }
-
-        /// <summary>
         /// Continues the currently loaded song.
         /// </summary>
-        public async Task ContinueSongAsync()
+        public async Task ContinueSongAsync(Guid accessToken)
         {
-            this.ThrowIfNotAdmin();
+            this.accessControl.VerifyAccess(accessToken);
 
             await this.audioPlayer.PlayAsync();
-        }
-
-        /// <summary>
-        /// Creates the administrator with the specified password.
-        /// </summary>
-        /// <param name="adminPassword">The administrator password.</param>
-        public void CreateAdmin(string adminPassword)
-        {
-            if (adminPassword == null)
-                Throw.ArgumentNullException(() => adminPassword);
-
-            if (String.IsNullOrWhiteSpace(adminPassword))
-                Throw.ArgumentException("Password cannot consist only of whitespaces.", () => adminPassword);
-
-            if (this.IsAdministratorCreated)
-                throw new InvalidOperationException("The administrator is already created.");
-
-            this.Log().Info("Creating administrator.");
-
-            this.password = adminPassword;
-            this.IsAdministratorCreated = true;
         }
 
         public void Dispose()
@@ -460,18 +321,19 @@ namespace Espera.Core.Management
         /// <summary>
         /// Pauses the currently loaded song.
         /// </summary>
-        public async Task PauseSongAsync()
+        public async Task PauseSongAsync(Guid accessToken)
         {
-            if (this.settings.LockPlayPause && this.accessMode == Management.AccessMode.Party)
-                throw new InvalidOperationException("Not allowed to play when in party mode.");
+            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlayPause);
 
             await this.audioPlayer.PauseAsync();
         }
 
-        public async Task PlayInstantlyAsync(IEnumerable<Song> songList)
+        public async Task PlayInstantlyAsync(IEnumerable<Song> songList, Guid accessToken)
         {
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
+
+            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlayPause);
 
             if (this.instantPlaylist != null)
             {
@@ -483,17 +345,17 @@ namespace Espera.Core.Management
             this.instantPlaylist.AddSongs(songList.ToList());
 
             this.playlists.Add(this.instantPlaylist);
-            this.SwitchToPlaylist(this.instantPlaylist);
+            this.SwitchToPlaylist(this.instantPlaylist, accessToken);
 
-            await this.PlaySongAsync(0);
+            await this.PlaySongAsync(0, accessToken);
         }
 
         /// <summary>
         /// Plays the next song in the playlist.
         /// </summary>
-        public async Task PlayNextSongAsync()
+        public async Task PlayNextSongAsync(Guid accessToken)
         {
-            this.ThrowIfNotAdmin();
+            this.accessControl.VerifyAccess(accessToken);
 
             await this.InternPlayNextSongAsync();
         }
@@ -501,27 +363,26 @@ namespace Espera.Core.Management
         /// <summary>
         /// Plays the previous song in the playlist.
         /// </summary>
-        public async Task PlayPreviousSongAsync()
+        public async Task PlayPreviousSongAsync(Guid accessToken)
         {
-            this.ThrowIfNotAdmin();
+            this.accessControl.VerifyAccess(accessToken, await this.CurrentPlaylist.CanPlayPreviousSong.FirstAsync());
 
-            if (!await this.CurrentPlaylist.CanPlayPreviousSong.FirstAsync() || !this.CurrentPlaylist.CurrentSongIndex.Value.HasValue)
-                throw new InvalidOperationException("The previous song couldn't be played.");
+            if (!this.CurrentPlaylist.CurrentSongIndex.Value.HasValue)
+                throw new InvalidOperationException("The previous song can't be played as there is no current playlist index.");
 
-            await this.PlaySongAsync(this.CurrentPlaylist.CurrentSongIndex.Value.Value - 1);
+            await this.PlaySongAsync(this.CurrentPlaylist.CurrentSongIndex.Value.Value - 1, accessToken);
         }
 
         /// <summary>
         /// Plays the song with the specified index in the playlist.
         /// </summary>
         /// <param name="playlistIndex">The index of the song in the playlist.</param>
-        public async Task PlaySongAsync(int playlistIndex)
+        public async Task PlaySongAsync(int playlistIndex, Guid accessToken)
         {
             if (playlistIndex < 0)
                 Throw.ArgumentOutOfRangeException(() => playlistIndex, 0);
 
-            if (this.settings.LockPlayPause && this.accessMode == Management.AccessMode.Party)
-                throw new InvalidOperationException("Not allowed to play when in party mode.");
+            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlayPause);
 
             await this.InternPlaySongAsync(playlistIndex);
         }
@@ -530,13 +391,12 @@ namespace Espera.Core.Management
         /// Removes the songs with the specified indexes from the playlist.
         /// </summary>
         /// <param name="indexes">The indexes of the songs to remove from the playlist.</param>
-        public void RemoveFromPlaylist(IEnumerable<int> indexes)
+        public void RemoveFromPlaylist(IEnumerable<int> indexes, Guid accessToken)
         {
             if (indexes == null)
                 Throw.ArgumentNullException(() => indexes);
 
-            if (this.settings.LockPlaylistRemoval && this.accessMode == Management.AccessMode.Party)
-                throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
+            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylistRemoval);
 
             this.RemoveFromPlaylist(this.CurrentPlaylist, indexes);
         }
@@ -545,10 +405,12 @@ namespace Espera.Core.Management
         /// Removes the specified songs from the playlist.
         /// </summary>
         /// <param name="songList">The songs to remove.</param>
-        public void RemoveFromPlaylist(IEnumerable<Song> songList)
+        public void RemoveFromPlaylist(IEnumerable<Song> songList, Guid accessToken)
         {
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
+
+            this.accessControl.VerifyAccess(accessToken);
 
             this.RemoveFromPlaylist(this.CurrentPlaylist, songList);
         }
@@ -557,10 +419,12 @@ namespace Espera.Core.Management
         /// Removes the playlist with the specified name from the library.
         /// </summary>
         /// <param name="playlist">The playlist to remove.</param>
-        public void RemovePlaylist(Playlist playlist)
+        public void RemovePlaylist(Playlist playlist, Guid accessToken)
         {
             if (playlist == null)
                 Throw.ArgumentNullException(() => playlist);
+
+            this.accessControl.VerifyAccess(accessToken);
 
             this.playlists.Remove(playlist);
         }
@@ -589,18 +453,32 @@ namespace Espera.Core.Management
             this.libraryWriter.Write(casted, this.playlists.Where(playlist => !playlist.IsTemporary), this.songSourcePath.FirstAsync().Wait());
         }
 
+        public void SetCurrentTime(TimeSpan currentTime, Guid accessToken)
+        {
+            this.accessControl.VerifyAccess(accessToken);
+
+            this.audioPlayer.CurrentTime = currentTime;
+        }
+
+        public void SetVolume(float volume, Guid accessToken)
+        {
+            this.accessControl.VerifyAccess(accessToken);
+
+            this.settings.Volume = volume;
+            this.audioPlayer.Volume = volume;
+        }
+
         public void ShufflePlaylist()
         {
             this.CurrentPlaylist.Shuffle();
         }
 
-        public void SwitchToPlaylist(Playlist playlist)
+        public void SwitchToPlaylist(Playlist playlist, Guid accessToken)
         {
             if (playlist == null)
                 Throw.ArgumentNullException(() => playlist);
 
-            if (!this.CanSwitchPlaylist.FirstAsync().Wait())
-                throw new InvalidOperationException("Not allowed to switch playlist.");
+            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylistSwitching);
 
             this.CurrentPlaylist = playlist;
             this.currentPlaylistChanged.OnNext(playlist);
@@ -791,12 +669,6 @@ namespace Espera.Core.Management
             });
 
             this.RemoveFromLibrary(removable);
-        }
-
-        private void ThrowIfNotAdmin()
-        {
-            if (this.accessMode != Management.AccessMode.Administrator)
-                throw new InvalidOperationException("Not in administrator mode.");
         }
 
         private async Task UpdateSongsAsync(string path)

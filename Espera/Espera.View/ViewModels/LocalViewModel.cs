@@ -1,5 +1,6 @@
 ﻿using Espera.Core;
 using Espera.Core.Management;
+using Espera.Core.Settings;
 using Rareform.Validation;
 using ReactiveUI;
 using System;
@@ -24,8 +25,8 @@ namespace Espera.View.ViewModels
         private ILookup<string, Song> filteredSongs;
         private ArtistViewModel selectedArtist;
 
-        public LocalViewModel(Library library, ViewSettings viewSettings)
-            : base(library)
+        public LocalViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, Guid accessToken)
+            : base(library, accessToken)
         {
             if (viewSettings == null)
                 Throw.ArgumentNullException(() => viewSettings);
@@ -63,12 +64,14 @@ namespace Espera.View.ViewModels
             this.WhenAnyValue(x => x.SelectedArtist)
                 .Subscribe(_ => this.UpdateSelectableSongs());
 
-            this.playNowCommand = new ReactiveCommand();
+            this.playNowCommand = this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
+                .Select(x => x == AccessPermission.Admin || !coreSettings.LockPlayPause)
+                .ToCommand();
             this.PlayNowCommand.RegisterAsyncTask(_ =>
             {
                 int songIndex = this.SelectableSongs.TakeWhile(x => x.Model != this.SelectedSongs.First().Model).Count();
 
-                return this.Library.PlayInstantlyAsync(this.SelectableSongs.Skip(songIndex).Select(x => x.Model));
+                return this.Library.PlayInstantlyAsync(this.SelectableSongs.Skip(songIndex).Select(x => x.Model), accessToken);
             });
         }
 
