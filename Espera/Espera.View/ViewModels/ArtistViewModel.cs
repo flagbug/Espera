@@ -29,12 +29,12 @@ namespace Espera.View.ViewModels
 
             this.cover = this.artworkKeys
                 .Merge()
-                 .Where(x => x != null)
-                 .Distinct() // Ignore duplicate artworks
-                 .ObserveOn(RxApp.TaskpoolScheduler)
-                 .Select(key => LoadArtworkAsync(key).Result)
-                 .FirstOrDefaultAsync(pic => pic != null)
-                 .ToProperty(this, x => x.Cover);
+                .Where(x => x != null)
+                .Distinct() // Ignore duplicate artworks
+                .ObserveOn(RxApp.TaskpoolScheduler)
+                .Select(key => LoadArtworkAsync(key).Result)
+                .FirstOrDefaultAsync(pic => pic != null)
+                .ToProperty(this, x => x.Cover);
 
             this.UpdateArtwork(artworkKeys);
 
