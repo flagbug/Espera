@@ -68,6 +68,15 @@
                 <Setter Property="FontFamily" Value="{DynamicResource ContentFontFamily}" />
                 <Setter Property="Opacity" Value="0.6" />
             </Style>
+            <Style x:Key="VirtualisedListView" BasedOn="{StaticResource VirtualisedMetroListView}" TargetType="{x:Type ListView}">
+                <Setter Property="VirtualizingPanel.IsVirtualizingWhenGrouping"
+                    Value="True" />
+                <Style.Triggers>
+                    <Trigger Property="IsGrouping" Value="true">
+                        <Setter Property="ScrollViewer.CanContentScroll" Value="true" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
     <Window.InputBindings>
@@ -307,13 +316,20 @@
                 </Grid.RowDefinitions>
                 <TabControl Grid.Row="0">
                     <TabItem Header="local" IsSelected="{Binding Path=IsLocal}">
+                        <TabItem.Resources>
+                            <CollectionViewSource x:Key="SongsCollectionViewSource" Source="{Binding LocalViewModel.SelectableSongs}">
+                                <CollectionViewSource.GroupDescriptions>
+                                    <PropertyGroupDescription PropertyName="Artist" />
+                                    <PropertyGroupDescription PropertyName="Album" />
+                                </CollectionViewSource.GroupDescriptions>
+                            </CollectionViewSource>
+                        </TabItem.Resources>
                         <ListView ContextMenuOpening="SongListContextMenuOpening"
                                   DataContext="{Binding Path=LocalViewModel}"
-                                  ItemsSource="{Binding Path=SelectableSongs}"
-                                  ScrollViewer.CanContentScroll="True"
+                                  ItemsSource="{Binding Source={StaticResource SongsCollectionViewSource}}"
                                   SelectionChanged="SongListSelectionChanged">
                             <ListView.Style>
-                                <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="{x:Type ListView}">
+                                <Style BasedOn="{StaticResource VirtualisedListView}" TargetType="{x:Type ListView}">
                                     <Setter Property="SelectionMode" Value="Extended" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Path=IsAdmin}" Value="False">
@@ -337,6 +353,15 @@
                                     <EventSetter Event="KeyUp" Handler="SongKeyPressed" />
                                 </Style>
                             </ListView.ItemContainerStyle>
+                            <ListView.GroupStyle>
+                                <GroupStyle>
+                                    <GroupStyle.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Foreground="{DynamicResource AccentColorBrush}" FontSize="16" Text="{Binding Path=Name}" Margin="10, 0, 0, 5" />
+                                        </DataTemplate>
+                                    </GroupStyle.HeaderTemplate>
+                                </GroupStyle>
+                            </ListView.GroupStyle>
                             <ListView.View>
                                 <GridView>
                                     <GridViewColumn Width="{Binding Path=TitleColumnWidth, Mode=TwoWay}">
@@ -344,7 +369,7 @@
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="{Binding Path=Title}" TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Foreground="White" Text="{Binding Path=Title}" TextTrimming="CharacterEllipsis" />
                                                 </StackPanel>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
@@ -353,23 +378,7 @@
                                         <GridViewColumnHeader Click="SortLocalSongDuration" Content="Duration" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Duration, StringFormat=mm\\:ss}" TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=ArtistColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Click="SortLocalSongArtist" Content="Artist" />
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Artist}" TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=AlbumColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Click="SortLocalSongAlbum" Content="Album" />
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Album}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Foreground="White" Text="{Binding Path=Duration, StringFormat=mm\\:ss}" TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
@@ -377,7 +386,7 @@
                                         <GridViewColumnHeader Click="SortLocalSongGenre" Content="Genre" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Genre}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Foreground="White" Text="{Binding Path=Genre}" TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
