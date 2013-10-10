@@ -1,5 +1,4 @@
-﻿using Espera.Core;
-using Espera.View.ViewModels;
+﻿using Espera.View.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +12,7 @@ namespace Espera.View.Tests
         public void AllArtistViewModelIsSortedFirst()
         {
             var allArtists = new ArtistViewModel("All Artists");
-            var otherArtist = new ArtistViewModel(new[] { new LocalSongViewModel(new LocalSong("test", TimeSpan.Zero) { Artist = "Aaa" }) });
+            var otherArtist = new ArtistViewModel("Aaa", Enumerable.Empty<IObservable<string>>());
 
             var list = new List<ArtistViewModel> { otherArtist, allArtists };
             list.Sort();
@@ -25,12 +24,12 @@ namespace Espera.View.Tests
         [Fact]
         public void CertainPrefixesAreSortedCorrectly()
         {
-            var aPrefixBig = new ArtistViewModel(new[] { new LocalSongViewModel(new LocalSong("test", TimeSpan.Zero) { Artist = "A b" }) });
-            var aPrefixSmall = new ArtistViewModel(new[] { new LocalSongViewModel(new LocalSong("test", TimeSpan.Zero) { Artist = "a c" }) });
-            var thePrefixBig = new ArtistViewModel(new[] { new LocalSongViewModel(new LocalSong("test", TimeSpan.Zero) { Artist = "The d" }) });
-            var thePrefixSmall = new ArtistViewModel(new[] { new LocalSongViewModel(new LocalSong("test", TimeSpan.Zero) { Artist = "the e" }) });
-            var firstArtist = new ArtistViewModel(new[] { new LocalSongViewModel(new LocalSong("test", TimeSpan.Zero) { Artist = "Aa" }) });
-            var lastArtist = new ArtistViewModel(new[] { new LocalSongViewModel(new LocalSong("test", TimeSpan.Zero) { Artist = "Zz" }) });
+            var aPrefixBig = new ArtistViewModel("A b", Enumerable.Empty<IObservable<string>>());
+            var aPrefixSmall = new ArtistViewModel("a c", Enumerable.Empty<IObservable<string>>());
+            var thePrefixBig = new ArtistViewModel("The d", Enumerable.Empty<IObservable<string>>());
+            var thePrefixSmall = new ArtistViewModel("the e", Enumerable.Empty<IObservable<string>>());
+            var firstArtist = new ArtistViewModel("Aa", Enumerable.Empty<IObservable<string>>());
+            var lastArtist = new ArtistViewModel("Zz", Enumerable.Empty<IObservable<string>>());
 
             var correctList = new List<ArtistViewModel> { firstArtist, aPrefixBig, aPrefixSmall, thePrefixBig, thePrefixSmall, lastArtist };
 
