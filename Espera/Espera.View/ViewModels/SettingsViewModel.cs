@@ -26,7 +26,6 @@ namespace Espera.View.ViewModels
         private string creationPassword;
         private bool isWrongPassword;
         private string loginPassword;
-        private double scaling;
         private bool showLogin;
         private bool showSettings;
 
