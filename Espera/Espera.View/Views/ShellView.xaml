@@ -369,7 +369,7 @@
                             <ListView.View>
                                 <GridView>
                                     <GridViewColumn Width="{Binding Path=TitleColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Click="SortLocalSongTitle" Content="Title" />
+                                        <GridViewColumnHeader Content="Title" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal">
@@ -379,7 +379,7 @@
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
                                     <GridViewColumn Width="{Binding Path=DurationColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Click="SortLocalSongDuration" Content="Duration" />
+                                        <GridViewColumnHeader Content="Duration" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Foreground="White" Text="{Binding Path=Duration, StringFormat=mm\\:ss}" TextTrimming="CharacterEllipsis" />
@@ -387,7 +387,7 @@
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
                                     <GridViewColumn Width="{Binding Path=GenreColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Click="SortLocalSongGenre" Content="Genre" />
+                                        <GridViewColumnHeader Content="Genre" />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Foreground="White" Text="{Binding Path=Genre}" TextTrimming="CharacterEllipsis" />

@@ -46,7 +46,7 @@ namespace Espera.View.ViewModels
                 x => x.IsAllArtists || this.filteredSongs.Contains(x.Name), (x, y) => x.CompareTo(y), this.artistUpdateSignal);
 
             // We need a default sorting order
-            this.OrderByArtist();
+            this.ApplyOrder(SortHelpers.GetOrderByArtist<LocalSongViewModel>, ref this.artistOrder);
 
             this.SelectedArtist = this.allArtistsViewModel;
 
@@ -125,30 +125,6 @@ namespace Espera.View.ViewModels
             set { this.viewSettings.LocalTitleColumnWidth = value; }
         }
 
-        public void OrderByAlbum()
-        {
-            this.ApplyOrder(SortHelpers.GetOrderByAlbum<LocalSongViewModel>, ref this.albumOrder);
-        }
-
-        public void OrderByArtist()
-        {
-            this.ApplyOrder(SortHelpers.GetOrderByArtist<LocalSongViewModel>, ref this.artistOrder);
-        }
-
-        public void OrderByDuration()
-        {
-            this.ApplyOrder(SortHelpers.GetOrderByDuration<LocalSongViewModel>, ref this.durationOrder);
-        }
-
-        public void OrderByGenre()
-        {
-            this.ApplyOrder(SortHelpers.GetOrderByGenre<LocalSongViewModel>, ref this.genreOrder);
-        }
-
-        public void OrderByTitle()
-        {
-            this.ApplyOrder(SortHelpers.GetOrderByTitle<LocalSongViewModel>, ref this.titleOrder);
-        }
 
         private void UpdateArtists()
         {
