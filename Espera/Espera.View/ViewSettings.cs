@@ -105,6 +105,12 @@ namespace Espera.View
             set { this.SetOrCreate(value); }
         }
 
+        public double Scaling
+        {
+            get { return this.GetOrCreate(1.0); }
+            set { this.SetOrCreate(value); }
+        }
+
         public string SongSourceHeight
         {
             get { return this.GetOrCreate("*"); }

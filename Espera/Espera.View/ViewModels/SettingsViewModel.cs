@@ -234,8 +234,12 @@ namespace Espera.View.ViewModels
 
         public double Scaling
         {
-            get { return this.scaling; }
-            set { this.RaiseAndSetIfChanged(ref this.scaling, value); }
+            get { return this.viewSettings.Scaling; }
+            set
+            {
+                this.viewSettings.Scaling = value;
+                this.RaisePropertyChanged();
+            }
         }
 
         public bool ShowLogin
