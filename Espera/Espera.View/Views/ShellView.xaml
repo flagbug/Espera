@@ -73,6 +73,8 @@
                     Value="True" />
                 <Setter Property="ScrollViewer.IsDeferredScrollingEnabled"
                     Value="False" />
+                <Setter Property="VirtualizingPanel.IsContainerVirtualizable"
+                    Value="True" />
                 <Style.Triggers>
                     <Trigger Property="IsGrouping" Value="true">
                         <Setter Property="ScrollViewer.CanContentScroll" Value="true" />
