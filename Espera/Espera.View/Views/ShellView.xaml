@@ -71,6 +71,8 @@
             <Style x:Key="VirtualisedListView" BasedOn="{StaticResource VirtualisedMetroListView}" TargetType="{x:Type ListView}">
                 <Setter Property="VirtualizingPanel.IsVirtualizingWhenGrouping"
                     Value="True" />
+                <Setter Property="ScrollViewer.IsDeferredScrollingEnabled"
+                    Value="False" />
                 <Style.Triggers>
                     <Trigger Property="IsGrouping" Value="true">
                         <Setter Property="ScrollViewer.CanContentScroll" Value="true" />
