@@ -76,17 +76,6 @@ namespace Espera.View.ViewModels
             });
         }
 
-        public int AlbumColumnWidth
-        {
-            get { return this.viewSettings.LocalAlbumColumnWidth; }
-            set { this.viewSettings.LocalAlbumColumnWidth = value; }
-        }
-
-        public int ArtistColumnWidth
-        {
-            get { return this.viewSettings.LocalArtistColumnWidth; }
-            set { this.viewSettings.LocalArtistColumnWidth = value; }
-        }
 
         public IReactiveDerivedList<ArtistViewModel> Artists { get; private set; }
 
@@ -100,12 +89,6 @@ namespace Espera.View.ViewModels
         {
             get { return this.viewSettings.LocalGenreColumnWidth; }
             set { this.viewSettings.LocalGenreColumnWidth = value; }
-        }
-
-        public int PathColumnWidth
-        {
-            get { return this.viewSettings.LocalPathColumnWidth; }
-            set { this.viewSettings.LocalPathColumnWidth = value; }
         }
 
         public override IReactiveCommand PlayNowCommand
