@@ -122,14 +122,21 @@ namespace Espera.View.ViewModels
 
             catch (KeyNotFoundException ex)
             {
-                this.Log().Warn("Could not find key of album cover. This reeks like a threading problem: {0}", ex.Message);
+                this.Log().WarnException("Could not find key of album cover. This reeks like a threading problem", ex);
 
                 return null;
             }
 
             catch (NotSupportedException ex)
             {
-                this.Log().Info("Unable to load artist cover: {0}", ex.Message);
+                this.Log().InfoException("Unable to load artist cover", ex);
+
+                return null;
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().InfoException("Akavache threw an error on artist cover loading", ex);
 
                 return null;
             }
