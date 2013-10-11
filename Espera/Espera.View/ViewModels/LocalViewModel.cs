@@ -20,13 +20,9 @@ namespace Espera.View.ViewModels
         private readonly IReactiveCommand playNowCommand;
         private readonly SemaphoreSlim updateSemaphore;
         private readonly ViewSettings viewSettings;
-        private SortOrder albumOrder;
         private SortOrder artistOrder;
-        private SortOrder durationOrder;
         private ILookup<string, LocalSongViewModel> filteredSongs;
-        private SortOrder genreOrder;
         private ArtistViewModel selectedArtist;
-        private SortOrder titleOrder;
 
         public LocalViewModel(Library library, ViewSettings viewSettings)
             : base(library)
