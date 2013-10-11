@@ -42,22 +42,9 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.isPlaying, value); }
         }
 
-        public string Source
+        public bool IsYoutube
         {
-            get
-            {
-                if (this.Model is LocalSong)
-                {
-                    return "Local";
-                }
-
-                if (this.Model is YoutubeSong)
-                {
-                    return "YouTube";
-                }
-
-                throw new InvalidOperationException();
-            }
+            get { return this.Model is YoutubeSong; }
         }
 
         public void Dispose()

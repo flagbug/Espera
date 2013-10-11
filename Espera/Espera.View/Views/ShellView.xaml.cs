@@ -80,7 +80,7 @@ namespace Espera.View.Views
 
         private void PlaylistContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            if (((ListView)sender).Items.IsEmpty)
+            if (((ListBox)sender).Items.IsEmpty)
             {
                 e.Handled = true;
             }
@@ -142,7 +142,7 @@ namespace Espera.View.Views
 
         private void PlaylistSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            this.shellViewModel.SelectedPlaylistEntries = ((ListView)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
+            this.shellViewModel.SelectedPlaylistEntries = ((ListBox)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
         }
 
         private void SearchTextBoxKeyUp(object sender, KeyEventArgs e)

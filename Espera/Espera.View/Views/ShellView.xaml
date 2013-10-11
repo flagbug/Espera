@@ -313,12 +313,11 @@
                 </Grid>
             </Grid>
             <Grid Grid.Column="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="{Binding Path=SongSourceHeight, Mode=TwoWay}" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="{Binding Path=PlaylistHeight, Mode=TwoWay}" />
-                </Grid.RowDefinitions>
-                <TabControl Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="300" />
+                </Grid.ColumnDefinitions>
+                <TabControl Grid.Column="0">
                     <TabItem Header="local" IsSelected="{Binding Path=IsLocal}">
                         <TabItem.Resources>
                             <CollectionViewSource x:Key="SongsCollectionViewSource" Source="{Binding LocalViewModel.SelectableSongs}">
@@ -561,13 +560,16 @@
                         </Grid>
                     </TabItem>
                 </TabControl>
-                <GridSplitter Grid.Row="1"
-                              Height="3"
-                              HorizontalAlignment="Stretch"
-                              Background="Transparent"
-                              Foreground="Transparent"
-                              IsTabStop="False" />
-                <Grid Grid.Row="2">
+                <Grid Grid.Column="1" Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Style="{StaticResource PlaylistsHeaderStyle}" Text="playlists" />
+                    <!--
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
@@ -584,9 +586,6 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0"
-                                       Style="{StaticResource PlaylistsHeaderStyle}"
-                                       Text="playlists" />
                             <Grid Grid.Row="1"
                                   Height="30"
                                   Margin="0, 5, 0, 0"
@@ -697,94 +696,139 @@
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
-                        </Grid>
-                        <ListView Grid.Column="1"
-                                  Margin="5, 0, 0, 0"
-                                  ContextMenuOpening="PlaylistContextMenuOpening"
-                                  FocusVisualStyle="{x:Null}"
-                                  ItemsSource="{Binding Path=CurrentPlaylist.Songs}"
-                                  KeyUp="PlaylistKeyUp"
-                                  ScrollViewer.CanContentScroll="True"
-                                  SelectionChanged="PlaylistSelectionChanged">
-                            <ListView.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Command="{Binding Path=PlayOverrideCommand}" Header="Play" />
-                                    <MenuItem Command="{Binding Path=RemoveSelectedPlaylistEntriesCommand}" Header="Remove" />
-                                </ContextMenu>
-                            </ListView.ContextMenu>
-                            <ListView.ItemContainerStyle>
-                                <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
-                                    <EventSetter Event="MouseDoubleClick" Handler="PlaylistDoubleClick" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
-                            <ListView.View>
-                                <GridView>
-                                    <GridViewColumn Width="35">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Grid>
-                                                    <Image Width="25"
-                                                           Height="25"
-                                                           Source="/Espera;component/Images/CurrentSongIcon.png"
-                                                           Visibility="{Binding Path=IsPlaying,
-                                                                                Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                                    <Image Width="25"
-                                                           Height="25"
-                                                           Source="/Espera;component/Images/CorruptedSong.png"
-                                                           ToolTip="Song is corrupted. Cannot play!"
-                                                           Visibility="{Binding Path=IsCorrupted,
-                                                                                Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                                </Grid>
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=PlaylistTitleColumnWidth, Mode=TwoWay}" Header="Title">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Title}" TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=PlaylistDurationColumnWidth, Mode=TwoWay}" Header="Duration">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Duration, StringFormat=mm\\:ss}" TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=PlaylistArtistColumnWidth, Mode=TwoWay}" Header="Artist">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Artist}" TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=PlaylistAlbumColumnWidth, Mode=TwoWay}" Header="Album">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Album}" TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=PlaylistGenreColumnWidth, Mode=TwoWay}" Header="Genre">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Genre}" TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=PlaylistSourceColumnWidth, Mode=TwoWay}" Header="Source">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Path=Source}" TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
-                    </Grid>
-                    <StackPanel Grid.Row="1"
+                        </Grid>-->
+                    <ComboBox Grid.Row="1" ItemsSource="{Binding Path=Playlists}" SelectedItem="{Binding Path=CurrentPlaylist}" IsEnabled="{Binding Path=CanSwitchPlaylist}">
+                        <ComboBox.Style>
+                            <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+                                <Setter Property="BorderBrush" Value="Transparent" />
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                        </ComboBox.Style>
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="5">
+                                    <Grid>
+                                        <TextBox Height="25"
+                                            MinHeight="25"
+                                            Margin="0, 0, 5, 0"
+                                            VerticalAlignment="Center"
+                                            VerticalContentAlignment="Center"
+                                            GotFocus="PlaylistNameTextBoxGotFocus"
+                                            KeyUp="PlaylistNameTextBoxKeyUp"
+                                            LostFocus="PlaylistNameTextBoxLostFocus"
+                                            Padding="0" FontSize="16"
+                                            Text="{Binding Path=Name,
+                                                        ValidatesOnDataErrors=True,
+                                                        UpdateSourceTrigger=PropertyChanged}">
+                                            <TextBox.Style>
+                                                <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="{x:Type TextBox}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=EditName}" Value="False">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Path=EditName}" Value="True">
+                                                            <Setter Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={x:Static RelativeSource.Self}}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBox.Style>
+                                        </TextBox>
+                                        <TextBlock Text="{Binding Path=Name}" FontSize="16">
+                                            <TextBlock.Style>
+                                                <Style TargetType="{x:Type TextBlock}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=EditName}" Value="True">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" Margin="0, 5, 0, 0">
+                                        <TextBlock Style="{StaticResource ArtistInfoStyle}" Text="{Binding Path=SongCount}" />
+                                        <TextBlock>
+                                            <TextBlock.Style>
+                                                <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
+                                                    <Setter Property="Text" Value=" Songs" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=SongCount}" Value="1">
+                                                            <Setter Property="Text" Value=" Song" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <ListBox Grid.Row="2"  ContextMenuOpening="PlaylistContextMenuOpening"
+                        Focusable="False"
+                        ItemsSource="{Binding Path=CurrentPlaylist.Songs}"
+                        KeyUp="PlaylistKeyUp"
+                        SelectionChanged="PlaylistSelectionChanged"
+                        ScrollViewer.CanContentScroll="True"
+                        ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                        VirtualizingStackPanel.IsVirtualizing =" True"
+                        VirtualizingStackPanel.VirtualizationMode = "Recycling"
+                        VirtualizingPanel.IsContainerVirtualizable="True"
+                        Margin="0, 10, 0, 0">
+                        <ListBox.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding Path=PlayOverrideCommand}" Header="Play" />
+                                <MenuItem Command="{Binding Path=RemoveSelectedPlaylistEntriesCommand}" Header="Remove" />
+                            </ContextMenu>
+                        </ListBox.ContextMenu>
+                        <ListBox.ItemContainerStyle>
+                            <Style BasedOn="{StaticResource {x:Type ListBoxItem}}" TargetType="{x:Type ListBoxItem}">
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                <EventSetter Event="MouseDoubleClick" Handler="PlaylistDoubleClick" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="5, 10, 10, 10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="25" />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid Grid.Column="0">
+                                        <Image Width="25"
+                                            Height="25"
+                                            Source="/Espera;component/Images/CurrentSongIcon.png"
+                                            Visibility="{Binding Path=IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                        <Image Width="25"
+                                            Height="25"
+                                            Source="/Espera;component/Images/CorruptedSong.png"
+                                            ToolTip="Song is corrupted. Cannot play!"
+                                            Visibility="{Binding Path=IsCorrupted, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    </Grid>
+                                    <StackPanel Grid.Column="1" Margin="5, 0, 0, 0" Width="175">
+                                        <TextBlock Text="{Binding Path=Title}" FontSize="14" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Margin="0, 5, 0, 0" TextTrimming="CharacterEllipsis">
+                                            <TextBlock.Style>
+                                                <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=IsYoutube}" Value="True">
+                                                            <Setter Property="Text" Value="YouTube" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Path=IsYoutube}" Value="False">
+                                                            <Setter Property="Text" Value="{Binding Path=Artist}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="2" Text="{Binding Path=Duration, StringFormat=mm\\:ss}" HorizontalAlignment="Right" VerticalAlignment="Top" Style="{StaticResource ArtistInfoStyle}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <StackPanel Grid.Row="3"
                                 HorizontalAlignment="Center"
                                 Orientation="Horizontal">
                         <TextBlock Text="{Binding Path=CurrentPlaylist.SongsRemaining}" />
@@ -804,7 +848,7 @@
                         <TextBlock Text="{Binding Path=CurrentPlaylist.TimeRemaining.TotalMinutes, FallbackValue=0, StringFormat=\{0:0.0\}}" />
                         <TextBlock Text=" minutes play time" />
                     </StackPanel>
-                    <StackPanel Grid.Row="2"
+                    <StackPanel Grid.Row="4"
                                 Margin="0, 5, 0, 0"
                                 HorizontalAlignment="Center"
                                 Orientation="Horizontal"
