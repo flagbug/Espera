@@ -569,201 +569,127 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" Style="{StaticResource PlaylistsHeaderStyle}" Text="playlists" />
-                    <!--
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="5, 0, 0, 0">
+                    <Grid Grid.Row="1" Margin="0, 5, 0, 0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <Grid Grid.Column="0" Width="175">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-                            <Grid Grid.Row="1"
-                                  Height="30"
-                                  Margin="0, 5, 0, 0"
-                                  HorizontalAlignment="Stretch">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <Button Grid.Column="0"
-                                        Width="30"
-                                        Command="{Binding Path=AddPlaylistCommand}"
-                                        Padding="0"
-                                        ToolTip="Add playlist">
-                                    <Image Source="/Espera;component/Images/NewPlaylist.png" />
-                                </Button>
-                                <Button Grid.Column="1"
-                                        Width="30"
-                                        Command="{Binding Path=RemovePlaylistCommand}"
-                                        IsEnabled="{Binding Path=CanSwitchPlaylist}"
-                                        Padding="0"
-                                        ToolTip="Remove playlist">
-                                    <Image Source="/Espera;component/Images/Remove.png" />
-                                </Button>
-                                <Button Grid.Column="2"
-                                        Width="30"
-                                        Command="{Binding Path=EditPlaylistNameCommand}"
-                                        Padding="0"
-                                        ToolTip="Edit playlist name">
-                                    <Image Source="/Espera;component/Images/EditPlaylistName.png" />
-                                </Button>
-                                <Button Grid.Column="3"
-                                        Width="30"
-                                        Command="{Binding Path=ShufflePlaylistCommand}"
-                                        IsEnabled="{Binding Path=CanSwitchPlaylist}"
-                                        Padding="0"
-                                        ToolTip="Shuffle playlist">
-                                    <Image Source="/Espera;component/Images/ShufflePlaylist.png" />
-                                </Button>
-                            </Grid>
-                            <ListBox Grid.Row="2"
-                                     Margin="0, 5, 0, 0"
-                                     FocusVisualStyle="{x:Null}"
-                                     IsEnabled="{Binding Path=CanSwitchPlaylist}"
-                                     ItemsSource="{Binding Path=Playlists}"
-                                     SelectedItem="{Binding Path=CurrentPlaylist}">
-                                <ListBox.InputBindings>
-                                    <KeyBinding Key="Delete" Command="{Binding Path=RemovePlaylistCommand}" />
-                                </ListBox.InputBindings>
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Margin="0, 5, 0, 5" Orientation="Vertical">
-                                            <Grid>
-                                                <TextBox Height="25"
-                                                         MinHeight="25"
-                                                         Margin="0, 0, 5, 0"
-                                                         VerticalAlignment="Center"
-                                                         VerticalContentAlignment="Center"
-                                                         GotFocus="PlaylistNameTextBoxGotFocus"
-                                                         KeyUp="PlaylistNameTextBoxKeyUp"
-                                                         LostFocus="PlaylistNameTextBoxLostFocus"
-                                                         Padding="0"
-                                                         Text="{Binding Path=Name,
-                                                                        ValidatesOnDataErrors=True,
-                                                                        UpdateSourceTrigger=PropertyChanged}">
-                                                    <TextBox.Style>
-                                                        <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="{x:Type TextBox}">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Path=EditName}" Value="False">
-                                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Path=EditName}" Value="True">
-                                                                    <Setter Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={x:Static RelativeSource.Self}}" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBox.Style>
-                                                </TextBox>
-                                                <TextBlock Text="{Binding Path=Name}">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="{x:Type TextBlock}">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Path=EditName}" Value="True">
-                                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                            </Grid>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Style="{StaticResource ArtistInfoStyle}" Text="{Binding Path=SongCount}" />
-                                                <TextBlock>
-                                                    <TextBlock.Style>
-                                                        <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
-                                                            <Setter Property="Text" Value=" Songs" />
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Path=SongCount}" Value="1">
-                                                                    <Setter Property="Text" Value=" Song" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </Grid>-->
-                    <ComboBox Grid.Row="1" ItemsSource="{Binding Path=Playlists}" SelectedItem="{Binding Path=CurrentPlaylist}" IsEnabled="{Binding Path=CanSwitchPlaylist}">
-                        <ComboBox.Style>
-                            <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
-                                <Setter Property="BorderBrush" Value="Transparent" />
-                                <Setter Property="Background" Value="Transparent" />
-                            </Style>
-                        </ComboBox.Style>
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="5">
-                                    <Grid>
-                                        <TextBox Height="25"
-                                            MinHeight="25"
-                                            Margin="0, 0, 5, 0"
-                                            VerticalAlignment="Center"
-                                            VerticalContentAlignment="Center"
-                                            GotFocus="PlaylistNameTextBoxGotFocus"
-                                            KeyUp="PlaylistNameTextBoxKeyUp"
-                                            LostFocus="PlaylistNameTextBoxLostFocus"
-                                            Padding="0" FontSize="16"
-                                            Text="{Binding Path=Name,
+                        <ComboBox Grid.Column="0" ItemsSource="{Binding Path=Playlists}" SelectedItem="{Binding Path=CurrentPlaylist}" IsEnabled="{Binding Path=CanSwitchPlaylist}">
+                            <ComboBox.Style>
+                                <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+                                    <Setter Property="BorderBrush" Value="Transparent" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                </Style>
+                            </ComboBox.Style>
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="5">
+                                        <Grid>
+                                            <TextBox
+                                                Margin="0, 0, 5, 0"
+                                                VerticalAlignment="Center"
+                                                VerticalContentAlignment="Center"
+                                                GotFocus="PlaylistNameTextBoxGotFocus"
+                                                KeyUp="PlaylistNameTextBoxKeyUp"
+                                                LostFocus="PlaylistNameTextBoxLostFocus"
+                                                Padding="0" FontSize="16"
+                                                Text="{Binding Path=Name,
                                                         ValidatesOnDataErrors=True,
                                                         UpdateSourceTrigger=PropertyChanged}">
-                                            <TextBox.Style>
-                                                <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="{x:Type TextBox}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Path=EditName}" Value="False">
-                                                            <Setter Property="Visibility" Value="Collapsed" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Path=EditName}" Value="True">
-                                                            <Setter Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={x:Static RelativeSource.Self}}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBox.Style>
-                                        </TextBox>
-                                        <TextBlock Text="{Binding Path=Name}" FontSize="16">
-                                            <TextBlock.Style>
-                                                <Style TargetType="{x:Type TextBlock}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Path=EditName}" Value="True">
-                                                            <Setter Property="Visibility" Value="Collapsed" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </Grid>
-                                    <StackPanel Orientation="Horizontal" Margin="0, 5, 0, 0">
-                                        <TextBlock Style="{StaticResource ArtistInfoStyle}" Text="{Binding Path=SongCount}" />
-                                        <TextBlock>
-                                            <TextBlock.Style>
-                                                <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
-                                                    <Setter Property="Text" Value=" Songs" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Path=SongCount}" Value="1">
-                                                            <Setter Property="Text" Value=" Song" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
+                                                <TextBox.Style>
+                                                    <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="{x:Type TextBox}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Path=EditName}" Value="False">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Path=EditName}" Value="True">
+                                                                <Setter Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={x:Static RelativeSource.Self}}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBox.Style>
+                                            </TextBox>
+                                            <TextBlock Text="{Binding Path=Name}" FontSize="16">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="{x:Type TextBlock}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Path=EditName}" Value="True">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
+                                        <StackPanel Orientation="Horizontal" Margin="0, 5, 0, 0">
+                                            <TextBlock Style="{StaticResource ArtistInfoStyle}" Text="{Binding Path=SongCount}" />
+                                            <TextBlock>
+                                                <TextBlock.Style>
+                                                    <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
+                                                        <Setter Property="Text" Value=" Songs" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Path=SongCount}" Value="1">
+                                                                <Setter Property="Text" Value=" Song" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
                                     </StackPanel>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Grid Grid.Column="1" Margin="5, 0, 0, 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.Resources>
+                                <Style x:Key="PlaylistButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                    <Setter Property="Width" Value="25" />
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="BorderBrush" Value="Transparent" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                </Style>
+                            </Grid.Resources>
+                            <Button Grid.Column="0"
+                                    Grid.Row="0"
+                                    Command="{Binding Path=AddPlaylistCommand}"
+                                    ToolTip="Add playlist"
+                                    Style="{StaticResource PlaylistButtonStyle}">
+                                <Image Source="/Espera;component/Images/NewPlaylist.png" />
+                            </Button>
+                            <Button Grid.Column="1"
+                                    Grid.Row="0"
+                                    Command="{Binding Path=RemovePlaylistCommand}"
+                                    IsEnabled="{Binding Path=CanSwitchPlaylist}"
+                                    ToolTip="Remove playlist"
+                                    Style="{StaticResource PlaylistButtonStyle}">
+                                <Image Source="/Espera;component/Images/Remove.png" />
+                            </Button>
+                            <Button Grid.Column="0"
+                                    Grid.Row="1"
+                                    Command="{Binding Path=EditPlaylistNameCommand}"
+                                    ToolTip="Edit playlist name"
+                                    Style="{StaticResource PlaylistButtonStyle}">
+                                <Image Source="/Espera;component/Images/EditPlaylistName.png" />
+                            </Button>
+                            <Button Grid.Column="1"
+                                    Grid.Row="1"
+                                    Command="{Binding Path=ShufflePlaylistCommand}"
+                                    IsEnabled="{Binding Path=CanSwitchPlaylist}"
+                                    ToolTip="Shuffle playlist"
+                                    Style="{StaticResource PlaylistButtonStyle}">
+                                <Image Source="/Espera;component/Images/ShufflePlaylist.png" />
+                            </Button>
+                        </Grid>
+                    </Grid>
                     <ListBox Grid.Row="2"  ContextMenuOpening="PlaylistContextMenuOpening"
                         Focusable="False"
                         ItemsSource="{Binding Path=CurrentPlaylist.Songs}"
