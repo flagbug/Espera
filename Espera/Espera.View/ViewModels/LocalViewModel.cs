@@ -21,7 +21,7 @@ namespace Espera.View.ViewModels
         private readonly SemaphoreSlim updateSemaphore;
         private readonly ViewSettings viewSettings;
         private SortOrder artistOrder;
-        private ILookup<string, LocalSongViewModel> filteredSongs;
+        private ILookup<string, Song> filteredSongs;
         private ArtistViewModel selectedArtist;
 
         public LocalViewModel(Library library, ViewSettings viewSettings)
@@ -141,7 +141,6 @@ namespace Espera.View.ViewModels
             this.updateSemaphore.Wait();
 
             this.filteredSongs = this.Library.Songs.FilterSongs(this.SearchText)
-                .Select(song => new LocalSongViewModel(song))
                 .ToLookup(x => x.Artist, StringComparer.InvariantCultureIgnoreCase);
 
             var newArtists = new HashSet<string>(this.filteredSongs.Select(x => x.Key));
@@ -156,6 +155,7 @@ namespace Espera.View.ViewModels
                 .AsParallel()
                 .Where(group => this.SelectedArtist.IsAllArtists || group.Key.Equals(this.SelectedArtist.Name, StringComparison.InvariantCultureIgnoreCase))
                 .SelectMany(x => x)
+                .Select(song => new LocalSongViewModel(song))
                 .OrderBy(this.SongOrderFunc)
                 .ToList();
 
