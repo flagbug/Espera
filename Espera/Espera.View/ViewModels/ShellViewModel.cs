@@ -10,7 +10,6 @@ using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Timers;
-using System.Windows;
 
 namespace Espera.View.ViewModels
 {
@@ -351,49 +350,7 @@ namespace Espera.View.ViewModels
         /// </summary>
         public IReactiveCommand PlayCommand { get; private set; }
 
-        public int PlaylistAlbumColumnWidth
-        {
-            get { return this.ViewSettings.PlaylistAlbumColumnWidth; }
-            set { this.ViewSettings.PlaylistAlbumColumnWidth = value; }
-        }
-
-        public int PlaylistArtistColumnWidth
-        {
-            get { return this.ViewSettings.PlaylistArtistColumnWidth; }
-            set { this.ViewSettings.PlaylistArtistColumnWidth = value; }
-        }
-
-        public int PlaylistDurationColumnWidth
-        {
-            get { return this.ViewSettings.PlaylistDurationColumnWidth; }
-            set { this.ViewSettings.PlaylistDurationColumnWidth = value; }
-        }
-
-        public int PlaylistGenreColumnWidth
-        {
-            get { return this.ViewSettings.PlaylistGenreColumnWidth; }
-            set { this.ViewSettings.PlaylistGenreColumnWidth = value; }
-        }
-
-        public GridLength PlaylistHeight
-        {
-            get { return (GridLength)new GridLengthConverter().ConvertFromString(this.ViewSettings.PlaylistHeight); }
-            set { this.ViewSettings.PlaylistHeight = new GridLengthConverter().ConvertToString(value); }
-        }
-
         public IReactiveDerivedList<PlaylistViewModel> Playlists { get; private set; }
-
-        public int PlaylistSourceColumnWidth
-        {
-            get { return this.ViewSettings.PlaylistSourceColumnWidth; }
-            set { this.ViewSettings.PlaylistSourceColumnWidth = value; }
-        }
-
-        public int PlaylistTitleColumnWidth
-        {
-            get { return this.ViewSettings.PlaylistTitleColumnWidth; }
-            set { this.ViewSettings.PlaylistTitleColumnWidth = value; }
-        }
 
         /// <summary>
         /// Overrides the currently played song.
@@ -436,12 +393,6 @@ namespace Espera.View.ViewModels
         }
 
         public IReactiveCommand ShufflePlaylistCommand { get; private set; }
-
-        public GridLength SongSourceHeight
-        {
-            get { return (GridLength)new GridLengthConverter().ConvertFromString(this.ViewSettings.SongSourceHeight); }
-            set { this.ViewSettings.SongSourceHeight = new GridLengthConverter().ConvertToString(value); }
-        }
 
         public int TotalSeconds
         {

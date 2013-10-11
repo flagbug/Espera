@@ -45,57 +45,9 @@ namespace Espera.View
             set { this.SetOrCreate(value); }
         }
 
-        public int PlaylistAlbumColumnWidth
-        {
-            get { return this.GetOrCreate(100); }
-            set { this.SetOrCreate(value); }
-        }
-
-        public int PlaylistArtistColumnWidth
-        {
-            get { return this.GetOrCreate(100); }
-            set { this.SetOrCreate(value); }
-        }
-
-        public int PlaylistDurationColumnWidth
-        {
-            get { return this.GetOrCreate(100); }
-            set { this.SetOrCreate(value); }
-        }
-
-        public int PlaylistGenreColumnWidth
-        {
-            get { return this.GetOrCreate(100); }
-            set { this.SetOrCreate(value); }
-        }
-
-        public string PlaylistHeight
-        {
-            get { return this.GetOrCreate("*"); }
-            set { this.SetOrCreate(value); }
-        }
-
-        public int PlaylistSourceColumnWidth
-        {
-            get { return this.GetOrCreate(100); }
-            set { this.SetOrCreate(value); }
-        }
-
-        public int PlaylistTitleColumnWidth
-        {
-            get { return this.GetOrCreate(100); }
-            set { this.SetOrCreate(value); }
-        }
-
         public double Scaling
         {
             get { return this.GetOrCreate(1.0); }
-            set { this.SetOrCreate(value); }
-        }
-
-        public string SongSourceHeight
-        {
-            get { return this.GetOrCreate("*"); }
             set { this.SetOrCreate(value); }
         }
 
