@@ -206,7 +206,7 @@
                         ToolTip="Mute">
                     <Image Source="/Espera;component/Images/Mute.png" />
                 </Button>
-                <Slider Width="200"
+                <Slider Width="200" VerticalAlignment="Center"
                         IsEnabled="{Binding Path=CanChangeVolume}"
                         IsMoveToPointEnabled="True"
                         Maximum="1"
@@ -218,7 +218,7 @@
                     <Image Source="/Espera;component/Images/Unmute.png" />
                 </Button>
             </StackPanel>
-            <Slider Grid.Column="2"
+            <Slider Grid.Column="2" VerticalAlignment="Center"
                     Margin="5, 0, 0, 0"
                     IsEnabled="{Binding Path=CanChangeTime}"
                     IsMoveToPointEnabled="True"
