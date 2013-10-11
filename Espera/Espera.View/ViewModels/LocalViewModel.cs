@@ -76,7 +76,6 @@ namespace Espera.View.ViewModels
             });
         }
 
-
         public IReactiveDerivedList<ArtistViewModel> Artists { get; private set; }
 
         public int DurationColumnWidth
@@ -107,7 +106,6 @@ namespace Espera.View.ViewModels
             get { return this.viewSettings.LocalTitleColumnWidth; }
             set { this.viewSettings.LocalTitleColumnWidth = value; }
         }
-
 
         private void UpdateArtists()
         {
