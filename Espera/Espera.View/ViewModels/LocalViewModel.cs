@@ -148,7 +148,13 @@ namespace Espera.View.ViewModels
                 .Select(song => new LocalSongViewModel(song))
                 .ToLookup(x => x.Artist, StringComparer.InvariantCultureIgnoreCase);
 
-            this.artistUpdateSignal.OnNext(Unit.Default);
+            var newArtists = new HashSet<string>(this.filteredSongs.Select(x => x.Key));
+            var oldArtists = new HashSet<string>(this.Artists.Where(x => !x.IsAllArtists).Select(x => x.Name));
+
+            if (!newArtists.SetEquals(oldArtists))
+            {
+                this.artistUpdateSignal.OnNext(Unit.Default);
+            }
 
             this.SelectableSongs = this.filteredSongs
                 .AsParallel()
