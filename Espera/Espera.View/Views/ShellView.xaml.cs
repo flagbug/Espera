@@ -80,7 +80,7 @@ namespace Espera.View.Views
 
         private void PlaylistContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            if (((ListView)sender).Items.IsEmpty)
+            if (((ListBox)sender).Items.IsEmpty)
             {
                 e.Handled = true;
             }
@@ -142,7 +142,7 @@ namespace Espera.View.Views
 
         private void PlaylistSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            this.shellViewModel.SelectedPlaylistEntries = ((ListView)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
+            this.shellViewModel.SelectedPlaylistEntries = ((ListBox)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
         }
 
         private void SearchTextBoxKeyUp(object sender, KeyEventArgs e)
@@ -189,31 +189,6 @@ namespace Espera.View.Views
         private void SongListSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             this.shellViewModel.CurrentSongSource.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModelBase>();
-        }
-
-        private void SortLocalSongAlbum(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.LocalViewModel.OrderByAlbum();
-        }
-
-        private void SortLocalSongArtist(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.LocalViewModel.OrderByArtist();
-        }
-
-        private void SortLocalSongDuration(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.LocalViewModel.OrderByDuration();
-        }
-
-        private void SortLocalSongGenre(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.LocalViewModel.OrderByGenre();
-        }
-
-        private void SortLocalSongTitle(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.LocalViewModel.OrderByTitle();
         }
 
         private void SortYoutubeSongDuration(object sender, RoutedEventArgs e)
