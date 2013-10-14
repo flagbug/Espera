@@ -12,7 +12,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void DowngradeLocalAccessThrowsInvalidOperationExceptionIfLocalPasswordIsNotSet()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
+            var settings = new CoreSettings();
 
             var accessControl = new AccessControl(settings);
 
@@ -23,8 +23,10 @@ namespace Espera.Core.Tests
         [Fact]
         public void LockedRemoteControlGivesGuestRightsByDefault()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
-            settings.LockRemoteControl = true;
+            var settings = new CoreSettings
+            {
+                LockRemoteControl = true
+            };
 
             var accessControl = new AccessControl(settings);
 
@@ -36,8 +38,10 @@ namespace Espera.Core.Tests
         [Fact]
         public void ObserveAccessPermissionSmokeTest()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
-            settings.LockRemoteControl = false;
+            var settings = new CoreSettings
+            {
+                LockRemoteControl = false
+            };
 
             var accessControl = new AccessControl(settings);
 
@@ -59,8 +63,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void ObserveAccessPermissionThrowsArgumentExceptionIfGuidIsGarbage()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
-            settings.LockRemoteControl = false;
+            var settings = new CoreSettings { LockRemoteControl = false };
 
             var accessControl = new AccessControl(settings);
 
@@ -70,8 +73,10 @@ namespace Espera.Core.Tests
         [Fact]
         public void RemoteControlLockUpdatesAccessPermission()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
-            settings.LockRemoteControl = false;
+            var settings = new CoreSettings
+            {
+                LockRemoteControl = false
+            };
 
             var accessControl = new AccessControl(settings);
 
@@ -89,7 +94,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void SetLocalPasswordThrowsAccessExceptionOnGuestToken()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
+            var settings = new CoreSettings();
 
             var accessControl = new AccessControl(settings);
 
@@ -104,7 +109,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void SetLocalPasswordValidatesPassword()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
+            var settings = new CoreSettings();
 
             var accessControl = new AccessControl(settings);
 
@@ -118,7 +123,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void SetLocalPasswordWithRemoteTokenThrowsArgumentException()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
+            var settings = new CoreSettings();
             var accessControl = new AccessControl(settings);
 
             Guid token = accessControl.RegisterRemoteAccessToken();
@@ -129,7 +134,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void UnknownAccessTokenThrowsArgumentException()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
+            var settings = new CoreSettings();
 
             var accessControl = new AccessControl(settings);
 
@@ -139,8 +144,10 @@ namespace Espera.Core.Tests
         [Fact]
         public void UnlockedRemoteControlGivesAdminRightsByDefault()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
-            settings.LockRemoteControl = false;
+            var settings = new CoreSettings
+            {
+                LockRemoteControl = false
+            };
 
             var accessControl = new AccessControl(settings);
 
@@ -152,7 +159,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void UpgradeLocalAccessThrowsArgumentExceptionOnBogusAccessToken()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
+            var settings = new CoreSettings();
             var accessControl = new AccessControl(settings);
 
             Guid token = accessControl.RegisterLocalAccessToken();
@@ -164,7 +171,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void UpgradeLocalAccessThrowsWrongPasswordExceptionOnWrongPassword()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
+            var settings = new CoreSettings();
             var accessControl = new AccessControl(settings);
 
             Guid token = accessControl.RegisterLocalAccessToken();
@@ -176,7 +183,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void UpgradeLocalAccessUpgradesToAdmin()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
+            var settings = new CoreSettings();
             var accessControl = new AccessControl(settings);
 
             Guid token = accessControl.RegisterLocalAccessToken();
@@ -190,7 +197,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void UpgradeLocalAccessWithRemoteAccessTokenThrowsArgumentException()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
+            var settings = new CoreSettings();
             var accessControl = new AccessControl(settings);
 
             Guid token = accessControl.RegisterRemoteAccessToken();
@@ -201,8 +208,10 @@ namespace Espera.Core.Tests
         [Fact]
         public void UpgradeRemoteAccessThrowsWrongPasswordExceptionOnWrongPassword()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
-            settings.RemoteControlPassword = "password123";
+            var settings = new CoreSettings
+            {
+                RemoteControlPassword = "password123"
+            };
 
             var accessControl = new AccessControl(settings);
 
@@ -214,9 +223,11 @@ namespace Espera.Core.Tests
         [Fact]
         public void UpgradeRemoteAccessUpgradesToAdmin()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
-            settings.LockRemoteControl = true;
-            settings.RemoteControlPassword = "password123";
+            var settings = new CoreSettings
+            {
+                LockRemoteControl = true,
+                RemoteControlPassword = "password123"
+            };
 
             var accessControl = new AccessControl(settings);
 
@@ -230,8 +241,10 @@ namespace Espera.Core.Tests
         [Fact]
         public void UpgradeRemoteAccessWithBogusAccessTokenThrowsArgumentException()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
-            settings.RemoteControlPassword = "password123";
+            var settings = new CoreSettings
+            {
+                RemoteControlPassword = "password123"
+            };
 
             var accessControl = new AccessControl(settings);
 
@@ -241,8 +254,10 @@ namespace Espera.Core.Tests
         [Fact]
         public void UpgradeRemoteAccessWithLocalAccessTokenThrowsArgumentException()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
-            settings.RemoteControlPassword = "password123";
+            var settings = new CoreSettings
+            {
+                RemoteControlPassword = "password123"
+            };
 
             var accessControl = new AccessControl(settings);
 
@@ -254,7 +269,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void VerifyLocalAccessSmokeTest()
         {
-            CoreSettings settings = Helpers.SetupCoreSettings();
+            var settings = new CoreSettings();
 
             var accessControl = new AccessControl(settings);
 

@@ -1,5 +1,6 @@
 ﻿using Espera.Core.Audio;
 using Espera.Core.Management;
+using Espera.Core.Settings;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -194,8 +195,10 @@ namespace Espera.Core.Tests
         [Fact]
         public async Task PauseSongThrowsAccessExceptionIfIsNotAdministratorAndPausingIsLocked()
         {
-            var settings = Helpers.SetupCoreSettings();
-            settings.LockPlayPause = true;
+            var settings = new CoreSettings
+            {
+                LockPlayPause = true
+            };
 
             using (Library library = Helpers.CreateLibrary(settings))
             {
@@ -208,10 +211,12 @@ namespace Espera.Core.Tests
         [Fact]
         public async Task PlayInstantlyAsyncValidatesRemoteAccess()
         {
-            var settings = Helpers.SetupCoreSettings();
-            settings.EnableRemoteControl = true;
-            settings.LockRemoteControl = true;
-            settings.RemoteControlPassword = "password";
+            var settings = new CoreSettings
+            {
+                EnableRemoteControl = true,
+                LockRemoteControl = true,
+                RemoteControlPassword = "password"
+            };
 
             Song[] songs = Helpers.SetupSongMocks(3);
 
@@ -387,8 +392,10 @@ namespace Espera.Core.Tests
         [Fact]
         public async Task PlaySongThrowsAccessExceptionIfUserIsNotAdministratorAndLockPlayPauseIsTrue()
         {
-            var settings = Helpers.SetupCoreSettings();
-            settings.LockPlayPause = true;
+            var settings = new CoreSettings
+            {
+                LockPlayPause = true
+            };
 
             using (Library library = Helpers.CreateLibrary(settings))
             {
@@ -412,8 +419,10 @@ namespace Espera.Core.Tests
         {
             var songMock = new Mock<Song>("TestPath", TimeSpan.Zero);
 
-            var settings = Helpers.SetupCoreSettings();
-            settings.LockPlaylistRemoval = true;
+            var settings = new CoreSettings
+            {
+                LockPlaylistRemoval = true
+            };
 
             using (Library library = Helpers.CreateLibraryWithPlaylist(settings: settings))
             {
@@ -625,8 +634,10 @@ namespace Espera.Core.Tests
         [Fact]
         public void SwitchToPlaylistThrowsAccessExceptionIfPartyModeAndLockPlaylistSwitchingIsTrue()
         {
-            var settings = Helpers.SetupCoreSettings();
-            settings.LockPlaylistSwitching = true;
+            var settings = new CoreSettings
+            {
+                LockPlaylistSwitching = true
+            };
 
             using (Library library = Helpers.CreateLibraryWithPlaylist("Playlist 1", settings))
             {

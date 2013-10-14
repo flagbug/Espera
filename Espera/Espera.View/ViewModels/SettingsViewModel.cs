@@ -29,6 +29,7 @@ namespace Espera.View.ViewModels
         private bool isWrongPassword;
         private string loginPassword;
         private int port;
+        private string remoteControlPassword;
         private bool showLogin;
         private bool showSettings;
 

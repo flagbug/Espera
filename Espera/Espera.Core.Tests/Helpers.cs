@@ -1,5 +1,4 @@
-﻿using Akavache;
-using Espera.Core.Audio;
+﻿using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Moq;
@@ -7,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -63,7 +61,7 @@ namespace Espera.Core.Tests
                 new Mock<IRemovableDriveWatcher>().Object,
                 new Mock<ILibraryReader>().Object,
                 writer ?? new Mock<ILibraryWriter>().Object,
-                settings ?? SetupCoreSettings(),
+                settings ?? new CoreSettings(),
                 fileSystem ?? new MockFileSystem());
 
             IAudioPlayerCallback c = library.AudioPlayerCallback;
@@ -133,12 +131,6 @@ namespace Espera.Core.Tests
                 "    </Playlist>" +
                 "  </Playlists>" +
                 "</Root>";
-        }
-
-        public static CoreSettings SetupCoreSettings()
-        {
-            var blobCache = new TestBlobCache(Scheduler.Immediate);
-            return new CoreSettings(blobCache, blobCache);
         }
 
         public static Song SetupSongMock(string name = "Song", bool callBase = false, TimeSpan duration = new TimeSpan())
