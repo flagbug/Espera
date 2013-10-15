@@ -21,6 +21,7 @@ namespace Espera.Services
         private readonly Library library;
         private readonly int port;
         private bool dispose;
+        private ReactiveListener listener;
 
         public MobileApi(int port, Library library)
         {
@@ -38,6 +39,7 @@ namespace Espera.Services
         public void Dispose()
         {
             this.dispose = true;
+            this.listener.Dispose();
 
             foreach (MobileClient client in clients)
             {
@@ -76,23 +78,24 @@ namespace Espera.Services
 
         public void StartClientDiscovery()
         {
-            var listener = new ReactiveListener(this.port);
-            listener.Connections.Subscribe(socket =>
-            {
-                var mobileClient = new MobileClient(socket, this.library);
+            this.listener = new ReactiveListener(this.port);
+            listener.Connections.Where(x => !this.dispose)
+                .Subscribe(socket =>
+                {
+                    var mobileClient = new MobileClient(socket, this.library);
 
-                mobileClient.Disconnected.FirstAsync()
-                    .Subscribe(x =>
-                    {
-                        mobileClient.Dispose();
+                    mobileClient.Disconnected.FirstAsync()
+                        .Subscribe(x =>
+                        {
+                            mobileClient.Dispose();
 
-                        this.clients.Remove(mobileClient);
-                    });
+                            this.clients.Remove(mobileClient);
+                        });
 
-                mobileClient.ListenAsync();
+                    mobileClient.ListenAsync();
 
-                this.clients.Add(mobileClient);
-            });
+                    this.clients.Add(mobileClient);
+                });
 
             listener.Start();
         }
