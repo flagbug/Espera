@@ -47,7 +47,7 @@
     </Reference>
     <Reference Include="ReactiveSockets, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ReactiveSockets.0.2.2\lib\net40\ReactiveSockets.dll</HintPath>
+      <HintPath>..\packages\ReactiveSockets.0.2.3\lib\net40\ReactiveSockets.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveUI, Version=5.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
