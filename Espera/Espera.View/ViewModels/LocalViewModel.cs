@@ -18,6 +18,7 @@ namespace Espera.View.ViewModels
         private readonly Subject<Unit> artistUpdateSignal;
         private readonly object gate;
         private readonly IReactiveCommand playNowCommand;
+        private readonly ObservableAsPropertyHelper<bool> showAddSongsHelperMessage;
         private readonly ViewSettings viewSettings;
         private SortOrder artistOrder;
         private ILookup<string, Song> filteredSongs;
@@ -70,6 +71,10 @@ namespace Espera.View.ViewModels
 
                 return this.Library.PlayInstantlyAsync(this.SelectableSongs.Skip(songIndex).Select(x => x.Model));
             });
+
+            this.showAddSongsHelperMessage = this.WhenAnyValue(x => x.SelectableSongs, x => x.SearchText,
+                    (x1, x2) => !x1.Any() && String.IsNullOrEmpty(x2))
+                .ToProperty(this, x => x.ShowAddSongsHelperMessage);
         }
 
         public IReactiveDerivedList<ArtistViewModel> Artists { get; private set; }
@@ -95,6 +100,11 @@ namespace Espera.View.ViewModels
         {
             get { return this.selectedArtist; }
             set { this.RaiseAndSetIfChanged(ref this.selectedArtist, value); }
+        }
+
+        public bool ShowAddSongsHelperMessage
+        {
+            get { return this.showAddSongsHelperMessage.Value; }
         }
 
         public int TitleColumnWidth
