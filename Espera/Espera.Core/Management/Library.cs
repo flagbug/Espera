@@ -452,7 +452,7 @@ namespace Espera.Core.Management
             this.driveWatcher.Initialize();
 
             IObservable<Unit> update = this.settings.WhenAnyValue(x => x.SongSourceUpdateInterval)
-                .Select(Observable.Interval)
+                .Select(x => Observable.Interval(x, RxApp.TaskpoolScheduler))
                 .Switch()
                 .Select(_ => Unit.Default)
                 .Merge(this.driveWatcher.DriveRemoved)
@@ -837,7 +837,7 @@ namespace Espera.Core.Management
 
             var artworkLookup = new HashSet<string>(this.Songs.Cast<LocalSong>().Select(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null));
 
-            var songFinder = new LocalSongFinder(path);
+            var songFinder = new LocalSongFinder(path, this.fileSystem);
 
             this.currentSongFinderSubscription = songFinder.GetSongs()
                 .SubscribeOn(RxApp.TaskpoolScheduler)
