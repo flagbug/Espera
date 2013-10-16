@@ -11,7 +11,6 @@ using System.Collections.Specialized;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Security.Cryptography;
@@ -26,8 +25,10 @@ namespace Espera.Core.Management
         private readonly Subject<Playlist> currentPlaylistChanged;
         private readonly IRemovableDriveWatcher driveWatcher;
         private readonly IFileSystem fileSystem;
+        private readonly BehaviorSubject<bool> isUpdating;
         private readonly ILibraryReader libraryReader;
         private readonly ILibraryWriter libraryWriter;
+        private readonly Subject<Unit> manualUpdateTrigger;
         private readonly ObservableCollection<Playlist> playlists;
         private readonly ReadOnlyObservableCollection<Playlist> publicPlaylistWrapper;
         private readonly CoreSettings settings;
@@ -64,6 +65,8 @@ namespace Espera.Core.Management
             this.songSourcePath = new BehaviorSubject<string>(null);
             this.songsUpdated = new Subject<Unit>();
             this.audioPlayer = new AudioPlayer();
+            this.manualUpdateTrigger = new Subject<Unit>();
+            this.isUpdating = new BehaviorSubject<bool>(false);
 
             this.LoadedSong = this.audioPlayer.LoadedSong;
             this.TotalTime = this.audioPlayer.TotalTime;
@@ -155,6 +158,15 @@ namespace Espera.Core.Management
         /// 	<c>true</c> if the administrator is created; otherwise, <c>false</c>.
         /// </value>
         public bool IsAdministratorCreated { get; private set; }
+
+        /// <summary>
+        /// Gets an observable that reports whether the library is currently
+        /// looking for new songs at the song source or removing songs that don't exist anymore.
+        /// </summary>
+        public IObservable<bool> IsUpdating
+        {
+            get { return this.isUpdating.DistinctUntilChanged(); }
+        }
 
         /// <summary>
         /// Gets the song that is currently loaded.
@@ -444,6 +456,7 @@ namespace Espera.Core.Management
                 .Switch()
                 .Select(_ => Unit.Default)
                 .Merge(this.driveWatcher.DriveRemoved)
+                .Merge(this.manualUpdateTrigger)
                 .StartWith(Unit.Default);
 
             update.CombineLatest(this.songSourcePath, (_, path) => path)
@@ -605,6 +618,14 @@ namespace Espera.Core.Management
 
             this.CurrentPlaylist = playlist;
             this.currentPlaylistChanged.OnNext(playlist);
+        }
+
+        /// <summary>
+        /// Triggers an update of the library, so it searches the library part for new songs.
+        /// </summary>
+        public void UpdateNow()
+        {
+            this.manualUpdateTrigger.OnNext(Unit.Default);
         }
 
         private async Task HandleSongCorruptionAsync()
@@ -808,6 +829,8 @@ namespace Espera.Core.Management
                 this.currentSongFinderSubscription = null;
             }
 
+            this.isUpdating.OnNext(true);
+
             await this.RemoveMissingSongsAsync(path);
 
             this.songsUpdated.OnNext(Unit.Default);
@@ -817,7 +840,7 @@ namespace Espera.Core.Management
             var songFinder = new LocalSongFinder(path);
 
             this.currentSongFinderSubscription = songFinder.GetSongs()
-                .SubscribeOn(TaskPoolScheduler.Default)
+                .SubscribeOn(RxApp.TaskpoolScheduler)
                 .Subscribe(t =>
                 {
                     LocalSong song = t.Item1;
@@ -856,7 +879,7 @@ namespace Espera.Core.Management
 
                         this.songsUpdated.OnNext(Unit.Default);
                     }
-                });
+                }, () => this.isUpdating.OnNext(false));
         }
     }
 }

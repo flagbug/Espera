@@ -93,6 +93,11 @@ namespace Espera.View.ViewModels
             this.ChangeAccentColorCommand = new ReactiveCommand();
             this.ChangeAccentColorCommand.Subscribe(p => this.viewSettings.AccentColor = (string)p);
 
+            this.UpdateLibraryCommand = this.library.IsUpdating
+                .Select(x => !x)
+                .ToCommand();
+            this.UpdateLibraryCommand.Subscribe(x => this.library.UpdateNow());
+
             this.librarySource = this.library.SongSourcePath.ToProperty(this, x => x.LibrarySource);
         }
 
@@ -274,6 +279,8 @@ namespace Espera.View.ViewModels
                 this.RaisePropertyChanged();
             }
         }
+
+        public ReactiveCommand UpdateLibraryCommand { get; private set; }
 
         public string Version
         {

@@ -181,6 +181,9 @@
                                 Minimum="1"
                                 Value="{Binding Path=SongSourceUpdateInterval}" />
                         <TextBlock Margin="5, 0, 0, 0" Text="{Binding Path=SongSourceUpdateInterval, StringFormat=\{0\} Minutes}" />
+                        <Button Margin="5, 0, 0, 0"
+                                Command="{Binding Path=UpdateLibraryCommand}"
+                                Content="Update Now" />
                     </StackPanel>
                 </StackPanel>
             </TabItem>
