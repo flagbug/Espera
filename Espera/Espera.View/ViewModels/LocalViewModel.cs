@@ -8,7 +8,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
 
 namespace Espera.View.ViewModels
 {
@@ -17,8 +16,8 @@ namespace Espera.View.ViewModels
         private readonly ReactiveList<ArtistViewModel> allArtists;
         private readonly ArtistViewModel allArtistsViewModel;
         private readonly Subject<Unit> artistUpdateSignal;
+        private readonly object gate;
         private readonly IReactiveCommand playNowCommand;
-        private readonly SemaphoreSlim updateSemaphore;
         private readonly ViewSettings viewSettings;
         private SortOrder artistOrder;
         private ILookup<string, Song> filteredSongs;
@@ -32,8 +31,8 @@ namespace Espera.View.ViewModels
 
             this.viewSettings = viewSettings;
 
-            this.updateSemaphore = new SemaphoreSlim(1, 1);
             this.artistUpdateSignal = new Subject<Unit>();
+            this.gate = new object();
 
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
             this.allArtists = new ReactiveList<ArtistViewModel> { this.allArtistsViewModel };
@@ -52,8 +51,9 @@ namespace Espera.View.ViewModels
                 .Select(_ => Unit.Default)
                 .Merge(this.WhenAny(x => x.SearchText, _ => Unit.Default)
                     .Do(_ => this.SelectedArtist = this.allArtistsViewModel))
-                .SubscribeOn(RxApp.MainThreadScheduler)
+                .SubscribeOn(RxApp.TaskpoolScheduler)
                 .ObserveOn(RxApp.MainThreadScheduler)
+                .Synchronize(this.gate)
                 .Subscribe(_ =>
                 {
                     this.UpdateSelectableSongs();
@@ -61,6 +61,7 @@ namespace Espera.View.ViewModels
                 });
 
             this.WhenAnyValue(x => x.SelectedArtist)
+                .Synchronize(this.gate)
                 .Subscribe(_ => this.UpdateSelectableSongs());
 
             this.playNowCommand = new ReactiveCommand();
@@ -136,15 +137,11 @@ namespace Espera.View.ViewModels
 
         private void UpdateSelectableSongs()
         {
-            // Restrict this method to one thread at a time, so that updates from the library,
-            // which are on a different thread, don't interfere
-            this.updateSemaphore.Wait();
-
             this.filteredSongs = this.Library.Songs.FilterSongs(this.SearchText)
                 .ToLookup(x => x.Artist, StringComparer.InvariantCultureIgnoreCase);
 
             var newArtists = new HashSet<string>(this.filteredSongs.Select(x => x.Key));
-            var oldArtists = new HashSet<string>(this.Artists.Where(x => !x.IsAllArtists).Select(x => x.Name));
+            var oldArtists = this.Artists.Where(x => !x.IsAllArtists).Select(x => x.Name);
 
             if (!newArtists.SetEquals(oldArtists))
             {
@@ -158,8 +155,6 @@ namespace Espera.View.ViewModels
                 .Select(song => new LocalSongViewModel(song))
                 .OrderBy(this.SongOrderFunc)
                 .ToList();
-
-            this.updateSemaphore.Release();
         }
     }
 }
