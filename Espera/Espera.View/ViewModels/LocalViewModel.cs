@@ -46,14 +46,13 @@ namespace Espera.View.ViewModels
             this.SelectedArtist = this.allArtistsViewModel;
 
             this.Library.SongsUpdated
-                .Buffer(TimeSpan.FromSeconds(1))
+                .Buffer(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
                 .Where(x => x.Any())
                 .Select(_ => Unit.Default)
                 .Merge(this.WhenAny(x => x.SearchText, _ => Unit.Default)
                     .Do(_ => this.SelectedArtist = this.allArtistsViewModel))
-                .SubscribeOn(RxApp.TaskpoolScheduler)
-                .ObserveOn(RxApp.MainThreadScheduler)
                 .Synchronize(this.gate)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ =>
                 {
                     this.UpdateSelectableSongs();
@@ -148,13 +147,19 @@ namespace Espera.View.ViewModels
                 this.artistUpdateSignal.OnNext(Unit.Default);
             }
 
-            this.SelectableSongs = this.filteredSongs
+            var selectableSongs = this.filteredSongs
                 .AsParallel()
                 .Where(group => this.SelectedArtist.IsAllArtists || group.Key.Equals(this.SelectedArtist.Name, StringComparison.InvariantCultureIgnoreCase))
                 .SelectMany(x => x)
                 .Select(song => new LocalSongViewModel(song))
                 .OrderBy(this.SongOrderFunc)
                 .ToList();
+
+            // Ignore redundant song updates.
+            if (!selectableSongs.SequenceEqual(this.SelectableSongs))
+            {
+                this.SelectableSongs = selectableSongs;
+            }
         }
     }
 }

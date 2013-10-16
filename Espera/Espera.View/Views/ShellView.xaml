@@ -268,7 +268,8 @@
                          DataContext="{Binding Path=LocalViewModel}"
                          FocusVisualStyle="{x:Null}"
                          ItemsSource="{Binding Path=Artists}"
-                         SelectedItem="{Binding Path=SelectedArtist}">
+                         SelectedItem="{Binding Path=SelectedArtist}"
+                         Style="{StaticResource VirtualisedMetroListBox}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Margin="0, 3, 0, 3" Orientation="Horizontal">
