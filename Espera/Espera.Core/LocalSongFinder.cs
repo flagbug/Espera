@@ -1,10 +1,13 @@
 ﻿using Rareform.Validation;
 using ReactiveUI;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using TagLib;
 using File = TagLib.File;
 
@@ -37,10 +40,11 @@ namespace Espera.Core
         /// </summary>
         public IObservable<Tuple<LocalSong, byte[]>> GetSongsAsync()
         {
-            return this.ScanDirectoryForValidPathsAsync(this.directoryPath)
-                .SelectMany(x => Observable.Start(() => this.ProcessFile(x), RxApp.TaskpoolScheduler)
-                    .Catch(Observable.Empty<Tuple<LocalSong, byte[]>>()))
-                .Where(t => t != null);
+            return this.ScanDirectoryForValidPaths(this.directoryPath)
+                .Select(this.ProcessFile)
+                .Where(t => t != null)
+                .ToObservable(Scheduler.Immediate)
+                .SubscribeOn(RxApp.TaskpoolScheduler);
         }
 
         private static Tuple<LocalSong, byte[]> CreateSong(Tag tag, TimeSpan duration, string filePath)
@@ -80,19 +84,29 @@ namespace Espera.Core
             }
         }
 
-        private IObservable<string> ScanDirectoryForValidPathsAsync(string rootPath)
+        private IEnumerable<string> ScanDirectoryForValidPaths(string rootPath)
         {
-            IObservable<string> files = Observable.Start(() => this.fileSystem.Directory.GetFiles(rootPath).ToObservable(), RxApp.TaskpoolScheduler)
-                    .Catch(Observable.Empty<IObservable<string>>())
-                .Merge()
-                .Where(x => AllowedExtensions.Contains(Path.GetExtension(x).ToLowerInvariant()));
+            IEnumerable<string> files = Enumerable.Empty<string>();
 
-            IObservable<string> subFolderFiles = Observable.Start(() => this.fileSystem.Directory.GetDirectories(rootPath).ToObservable(), RxApp.TaskpoolScheduler)
-                    .Catch(Observable.Empty<IObservable<string>>())
-                .Merge()
-                .SelectMany(ScanDirectoryForValidPathsAsync);
+            try
+            {
+                files = this.fileSystem.Directory.GetFiles(rootPath)
+                     .Where(x => AllowedExtensions.Contains(Path.GetExtension(x).ToLowerInvariant())); ;
+            }
 
-            return files.Concat(subFolderFiles);
+            catch (Exception)
+            { }
+
+            IEnumerable<string> directories = Enumerable.Empty<string>();
+
+            try
+            {
+                directories = this.fileSystem.Directory.GetDirectories(rootPath);
+            }
+            catch (Exception)
+            { }
+
+            return files.Concat(directories.SelectMany(ScanDirectoryForValidPaths));
         }
 
         private class TagLibFileAbstraction : File.IFileAbstraction, IDisposable
