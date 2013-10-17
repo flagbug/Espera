@@ -35,12 +35,12 @@ namespace Espera.Core
         /// This method scans the directory, specified in the constructor,
         /// and returns an observable with a tuple that contains the song and the data of the artwork.
         /// </summary>
-        public IObservable<Tuple<LocalSong, byte[]>> GetSongs()
+        public IObservable<Tuple<LocalSong, byte[]>> GetSongsAsync()
         {
-            return this.ScanDirectoryForValidPaths(this.directoryPath)
-                .Select(this.ProcessFile)
-                .Where(t => t != null)
-                .SubscribeOn(RxApp.TaskpoolScheduler);
+            return this.ScanDirectoryForValidPathsAsync(this.directoryPath)
+                .SelectMany(x => Observable.Start(() => this.ProcessFile(x), RxApp.TaskpoolScheduler)
+                    .Catch(Observable.Empty<Tuple<LocalSong, byte[]>>()))
+                .Where(t => t != null);
         }
 
         private static Tuple<LocalSong, byte[]> CreateSong(Tag tag, TimeSpan duration, string filePath)
@@ -66,48 +66,33 @@ namespace Espera.Core
 
         private Tuple<LocalSong, byte[]> ProcessFile(string filePath)
         {
-            try
+            using (var fileAbstraction = new TagLibFileAbstraction(filePath, this.fileSystem))
             {
-                using (var fileAbstraction = new TagLibFileAbstraction(filePath, this.fileSystem))
+                using (var file = File.Create(fileAbstraction))
                 {
-                    using (var file = File.Create(fileAbstraction))
+                    if (file != null && file.Tag != null)
                     {
-                        if (file != null && file.Tag != null)
-                        {
-                            return CreateSong(file.Tag, file.Properties.Duration, file.Name);
-                        }
-
-                        return null;
+                        return CreateSong(file.Tag, file.Properties.Duration, file.Name);
                     }
+
+                    return null;
                 }
-            }
-
-            catch (CorruptFileException)
-            {
-                return null;
-            }
-
-            catch (IOException)
-            {
-                return null;
             }
         }
 
-        private IObservable<string> ScanDirectoryForValidPaths(string rootPath)
+        private IObservable<string> ScanDirectoryForValidPathsAsync(string rootPath)
         {
-            return Observable.Create<string>(o =>
-            {
-                string[] files = this.fileSystem.Directory.GetFiles(rootPath);
+            IObservable<string> files = Observable.Start(() => this.fileSystem.Directory.GetFiles(rootPath).ToObservable(), RxApp.TaskpoolScheduler)
+                    .Catch(Observable.Empty<IObservable<string>>())
+                .Merge()
+                .Where(x => AllowedExtensions.Contains(Path.GetExtension(x).ToLowerInvariant()));
 
-                foreach (string file in files.Where(x => AllowedExtensions.Contains(Path.GetExtension(x).ToLowerInvariant())))
-                {
-                    o.OnNext(file);
-                }
+            IObservable<string> subFolderFiles = Observable.Start(() => this.fileSystem.Directory.GetDirectories(rootPath).ToObservable(), RxApp.TaskpoolScheduler)
+                    .Catch(Observable.Empty<IObservable<string>>())
+                .Merge()
+                .SelectMany(ScanDirectoryForValidPathsAsync);
 
-                string[] directories = this.fileSystem.Directory.GetDirectories(rootPath);
-
-                return directories.ToObservable().SelectMany(ScanDirectoryForValidPaths).Subscribe(o.OnNext);
-            });
+            return files.Concat(subFolderFiles);
         }
 
         private class TagLibFileAbstraction : File.IFileAbstraction, IDisposable

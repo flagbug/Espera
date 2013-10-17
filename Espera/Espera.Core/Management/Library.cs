@@ -839,7 +839,7 @@ namespace Espera.Core.Management
 
             var songFinder = new LocalSongFinder(path, this.fileSystem);
 
-            this.currentSongFinderSubscription = songFinder.GetSongs()
+            this.currentSongFinderSubscription = songFinder.GetSongsAsync()
                 .SubscribeOn(RxApp.TaskpoolScheduler)
                 .Subscribe(t =>
                 {

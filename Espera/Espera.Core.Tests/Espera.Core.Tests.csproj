@@ -118,6 +118,7 @@
     <Compile Include="LibraryReaderTest.cs" />
     <Compile Include="LibraryTest.cs" />
     <Compile Include="LibraryWriterTest.cs" />
+    <Compile Include="LocalSongFinderTest.cs" />
     <Compile Include="PlaylistTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SongTest.cs" />
