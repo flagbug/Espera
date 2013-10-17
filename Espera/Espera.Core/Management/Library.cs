@@ -14,6 +14,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Espera.Core.Management
@@ -32,7 +33,7 @@ namespace Espera.Core.Management
         private readonly ObservableCollection<Playlist> playlists;
         private readonly ReadOnlyObservableCollection<Playlist> publicPlaylistWrapper;
         private readonly CoreSettings settings;
-        private readonly object songLock;
+        private readonly ReaderWriterLockSlim songLock;
         private readonly HashSet<Song> songs;
         private readonly BehaviorSubject<string> songSourcePath;
         private readonly Subject<Unit> songStarted;
@@ -52,7 +53,7 @@ namespace Espera.Core.Management
             this.settings = settings;
             this.fileSystem = fileSystem;
 
-            this.songLock = new object();
+            this.songLock = new ReaderWriterLockSlim();
             this.songs = new HashSet<Song>();
             this.playlists = new ObservableCollection<Playlist>();
             this.publicPlaylistWrapper = new ReadOnlyObservableCollection<Playlist>(this.playlists);
@@ -211,12 +212,11 @@ namespace Espera.Core.Management
         {
             get
             {
-                IEnumerable<Song> tempSongs;
+                this.songLock.EnterReadLock();
 
-                lock (songLock)
-                {
-                    tempSongs = this.songs.ToList();
-                }
+                IEnumerable<Song> tempSongs = this.songs.ToList();
+
+                this.songLock.ExitReadLock();
 
                 return tempSongs;
             }
@@ -581,12 +581,11 @@ namespace Espera.Core.Management
 
         public void Save()
         {
-            HashSet<LocalSong> casted;
+            this.songLock.EnterReadLock();
 
-            lock (this.songLock)
-            {
-                casted = new HashSet<LocalSong>(this.songs.Cast<LocalSong>());
-            }
+            var casted = new HashSet<LocalSong>(this.songs.Cast<LocalSong>());
+
+            this.songLock.ExitReadLock();
 
             // Clean up the songs that aren't in the library anymore
             // This happens when the user adds a song from a removable device to the playlist
@@ -762,13 +761,14 @@ namespace Espera.Core.Management
 
             this.playlists.ForEach(playlist => this.RemoveFromPlaylist(playlist, enumerable));
 
-            lock (this.songLock)
+            this.songLock.EnterWriteLock();
+
+            foreach (LocalSong song in enumerable)
             {
-                foreach (LocalSong song in enumerable)
-                {
-                    this.songs.Remove(song);
-                }
+                this.songs.Remove(song);
             }
+
+            this.songLock.ExitWriteLock();
         }
 
         private void RemoveFromPlaylist(Playlist playlist, IEnumerable<int> indexes)
@@ -790,12 +790,7 @@ namespace Espera.Core.Management
 
         private async Task RemoveMissingSongsAsync(string currentPath)
         {
-            List<Song> currentSongs;
-
-            lock (this.songLock)
-            {
-                currentSongs = this.songs.ToList();
-            }
+            List<Song> currentSongs = this.Songs.ToList();
 
             List<Song> notInAnySongSource = currentSongs
                 .Where(song => !song.OriginalPath.StartsWith(currentPath))
@@ -840,17 +835,16 @@ namespace Espera.Core.Management
             var songFinder = new LocalSongFinder(path, this.fileSystem);
 
             this.currentSongFinderSubscription = songFinder.GetSongsAsync()
-                .SubscribeOn(RxApp.TaskpoolScheduler)
+                .ObserveOn(RxApp.TaskpoolScheduler)
                 .Subscribe(t =>
                 {
                     LocalSong song = t.Item1;
 
-                    bool added;
+                    this.songLock.EnterWriteLock();
 
-                    lock (this.songLock)
-                    {
-                        added = this.songs.Add(song);
-                    }
+                    bool added = this.songs.Add(song);
+
+                    this.songLock.ExitWriteLock();
 
                     if (added)
                     {
