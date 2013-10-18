@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace Espera.View.ViewModels
 {
-    internal class SettingsViewModel : ReactiveObject
+    public class SettingsViewModel : ReactiveObject
     {
         private readonly ObservableAsPropertyHelper<bool> canCreateAdmin;
         private readonly ObservableAsPropertyHelper<bool> canLogin;
@@ -95,6 +95,7 @@ namespace Espera.View.ViewModels
 
             this.UpdateLibraryCommand = this.library.IsUpdating
                 .Select(x => !x)
+                .CombineLatest(this.library.SongSourcePath.Select(x => !String.IsNullOrEmpty(x)), (x1, x2) => x1 && x2)
                 .ToCommand();
             this.UpdateLibraryCommand.Subscribe(x => this.library.UpdateNow());
 

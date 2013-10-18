@@ -6,13 +6,14 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace Espera.Core.Tests
 {
-    internal static class Helpers
+    public static class Helpers
     {
         public static readonly LocalSong LocalSong1 = new LocalSong("C:/Music/Path1/Song1.mp3", TimeSpan.FromTicks(1), "artwork-7e316d0e701df0505fa72e2b89467910")
         {
@@ -55,7 +56,12 @@ namespace Espera.Core.Tests
             return CreateLibrary(null, writer);
         }
 
-        public static Library CreateLibrary(CoreSettings settings = null, ILibraryWriter writer = null, MockFileSystem fileSystem = null)
+        public static Library CreateLibrary(IFileSystem fileSystem)
+        {
+            return CreateLibrary(null, null, fileSystem);
+        }
+
+        public static Library CreateLibrary(CoreSettings settings = null, ILibraryWriter writer = null, IFileSystem fileSystem = null)
         {
             var library = new Library(
                 new Mock<IRemovableDriveWatcher>().Object,
