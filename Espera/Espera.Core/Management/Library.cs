@@ -449,6 +449,11 @@ namespace Espera.Core.Management
 
         public void Initialize()
         {
+            if (this.libraryReader.LibraryExists)
+            {
+                this.Load();
+            }
+
             this.driveWatcher.Initialize();
 
             IObservable<Unit> update = this.settings.WhenAnyValue(x => x.SongSourceUpdateInterval)
@@ -463,11 +468,6 @@ namespace Espera.Core.Management
                 .Where(path => !String.IsNullOrEmpty(path))
                 .Do(_ => this.Log().Info("Triggering library update."))
                 .Subscribe(path => this.UpdateSongsAsync(path));
-
-            if (this.libraryReader.LibraryExists)
-            {
-                this.Load();
-            }
         }
 
         /// <summary>
