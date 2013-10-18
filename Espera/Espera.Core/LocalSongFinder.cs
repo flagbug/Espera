@@ -70,17 +70,25 @@ namespace Espera.Core
 
         private Tuple<LocalSong, byte[]> ProcessFile(string filePath)
         {
-            using (var fileAbstraction = new TagLibFileAbstraction(filePath, this.fileSystem))
+            try
             {
-                using (var file = File.Create(fileAbstraction))
+                using (var fileAbstraction = new TagLibFileAbstraction(filePath, this.fileSystem))
                 {
-                    if (file != null && file.Tag != null)
+                    using (var file = File.Create(fileAbstraction))
                     {
-                        return CreateSong(file.Tag, file.Properties.Duration, file.Name);
-                    }
+                        if (file != null && file.Tag != null)
+                        {
+                            return CreateSong(file.Tag, file.Properties.Duration, file.Name);
+                        }
 
-                    return null;
+                        return null;
+                    }
                 }
+            }
+
+            catch (Exception)
+            {
+                return null;
             }
         }
 
