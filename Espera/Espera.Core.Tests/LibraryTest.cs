@@ -3,6 +3,7 @@ using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Moq;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -279,6 +280,25 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public async Task ChangeSongSourcePathTriggersUpdate()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.Directory.CreateDirectory("C://Test");
+
+            using (var library = Helpers.CreateLibrary(fileSystem))
+            {
+                library.Initialize();
+
+                var updated = library.IsUpdating.FirstAsync(x => x).PublishLast();
+                updated.Connect();
+
+                library.ChangeSongSourcePath("C://Test");
+
+                await updated.Timeout(TimeSpan.FromSeconds(5));
+            }
+        }
+
+        [Fact]
         public async Task ChangeToAdminChangesAccessModeToAdministratorIfPasswordIsCorrect()
         {
             using (Library library = Helpers.CreateLibrary())
@@ -443,6 +463,29 @@ namespace Espera.Core.Tests
                 library.Initialize();
 
                 Assert.Equal(1, await first.Timeout(TimeSpan.FromSeconds(5)));
+            }
+        }
+
+        [Fact]
+        public async Task IsUpdatingSmokeTest()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.Directory.CreateDirectory("C://Test");
+
+            using (var library = Helpers.CreateLibrary(fileSystem))
+            {
+                library.ChangeSongSourcePath("C://Test");
+
+                var isUpdating = library.IsUpdating.CreateCollection();
+
+                var last = library.IsUpdating.Where(x => !x).ElementAt(1).PublishLast();
+                last.Connect();
+
+                library.Initialize();
+
+                await last.Timeout(TimeSpan.FromSeconds(5));
+
+                Assert.Equal(new[] { false, true, false }, isUpdating);
             }
         }
 
@@ -904,10 +947,15 @@ namespace Espera.Core.Tests
             {
                 library.Initialize();
 
-                var updated = library.IsUpdating.FirstAsync(x => x).PublishLast();
-                updated.Connect();
+                var firstUpdateFinished = library.IsUpdating.Where(x => !x).ElementAt(1).PublishLast();
+                firstUpdateFinished.Connect();
 
                 library.ChangeSongSourcePath("C://Test");
+
+                await firstUpdateFinished.Timeout(TimeSpan.FromSeconds(5));
+
+                var updated = library.IsUpdating.FirstAsync(x => x).PublishLast();
+                updated.Connect();
 
                 library.UpdateNow();
 
