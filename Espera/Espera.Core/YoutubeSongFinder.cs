@@ -3,7 +3,8 @@ using Google.GData.YouTube;
 using Google.YouTube;
 using Rareform.Validation;
 using System;
-using System.Reactive.Linq;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Espera.Core
 {
@@ -22,7 +23,7 @@ namespace Espera.Core
             this.searchString = searchString;
         }
 
-        public IObservable<YoutubeSong> GetSongs()
+        public async Task<IReadOnlyList<YoutubeSong>> GetSongsAsync()
         {
             var query = new YouTubeQuery(YouTubeQuery.DefaultVideoUri)
             {
@@ -31,43 +32,33 @@ namespace Espera.Core
                 SafeSearch = YouTubeQuery.SafeSearchValues.None
             };
 
+            // NB: I have no idea where this API blocks exactly
             var settings = new YouTubeRequestSettings("Espera", ApiKey);
             var request = new YouTubeRequest(settings);
-            Feed<Video> feed = request.Get<Video>(query);
+            Feed<Video> feed = await Task.Run(() => request.Get<Video>(query));
 
-            return Observable.Create<YoutubeSong>(o =>
+            var songs = new List<YoutubeSong>();
+
+            foreach (Video video in await Task.Run(() => feed.Entries))
             {
-                try
+                var duration = TimeSpan.FromSeconds(Int32.Parse(video.YouTubeEntry.Duration.Seconds));
+                string url = video.WatchPage.OriginalString
+                    .Replace("&feature=youtube_gdata_player", String.Empty) // Unnecessary long url
+                    .Replace("https://", "http://"); // Secure connections are not always easy to handle when streaming
+
+                var song = new YoutubeSong(url, duration)
                 {
-                    foreach (Video video in feed.Entries)
-                    {
-                        var duration = TimeSpan.FromSeconds(Int32.Parse(video.YouTubeEntry.Duration.Seconds));
-                        string url = video.WatchPage.OriginalString
-                            .Replace("&feature=youtube_gdata_player", String.Empty) // Unnecessary long url
-                            .Replace("https://", "http://"); // Secure connections are not always easy to handle when streaming
+                    Title = video.Title,
+                    Description = video.Description,
+                    Rating = video.RatingAverage >= 1 ? video.RatingAverage : (double?)null,
+                    ThumbnailSource = new Uri(video.Thumbnails[0].Url),
+                    Views = video.ViewCount
+                };
 
-                        var song = new YoutubeSong(url, duration)
-                        {
-                            Title = video.Title,
-                            Description = video.Description,
-                            Rating = video.RatingAverage >= 1 ? video.RatingAverage : (double?)null,
-                            ThumbnailSource = new Uri(video.Thumbnails[0].Url),
-                            Views = video.ViewCount
-                        };
+                songs.Add(song);
+            }
 
-                        o.OnNext(song);
-                    }
-                }
-
-                catch (GDataRequestException ex)
-                {
-                    o.OnError(ex);
-                }
-
-                o.OnCompleted();
-
-                return () => { };
-            });
+            return songs;
         }
     }
 }

@@ -308,7 +308,10 @@
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
                         <Grid Grid.Row="0">
-                            <Controls:ProgressRing Margin="0, 35, 0, 0" IsActive="True" />
+                            <Controls:ProgressRing Margin="0, 35, 0, 0" IsActive="True"
+                                Visibility="{Binding RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor},
+                                    Path=DataContext.YoutubeViewModel.IsSearching,
+                                    Converter={StaticResource BooleanToVisibilityConverter}}" />
                             <Image Grid.Row="0"
                                    Source="{Binding Path=Thumbnail}"
                                    Visibility="{Binding Path=HasThumbnail,

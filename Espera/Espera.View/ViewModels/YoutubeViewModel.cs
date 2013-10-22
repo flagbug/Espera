@@ -7,12 +7,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Threading.Tasks;
 
 namespace Espera.View.ViewModels
 {
     internal sealed class YoutubeViewModel : SongSourceViewModel<YoutubeSongViewModel>
     {
+        private readonly Subject<Unit> connectionError;
         private readonly CoreSettings coreSettings;
         private readonly ObservableAsPropertyHelper<bool> isNetworkUnavailable;
         private readonly IReactiveCommand playNowCommand;
@@ -36,6 +40,8 @@ namespace Espera.View.ViewModels
             this.viewSettings = viewSettings;
             this.coreSettings = coreSettings;
 
+            this.connectionError = new Subject<Unit>();
+
             this.playNowCommand = new ReactiveCommand();
             this.playNowCommand.RegisterAsyncTask(_ => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model)));
 
@@ -48,14 +54,15 @@ namespace Espera.View.ViewModels
                 h => NetworkChange.NetworkAvailabilityChanged += h,
                 h => NetworkChange.NetworkAvailabilityChanged -= h)
                 .Select(x => !x.EventArgs.IsAvailable)
-                .Do(_ => this.StartSearch())
+                .Do(_ => this.StartSearchAsync())
+                .Merge(this.connectionError.Select(x => true))
                 .ToProperty(this, x => x.IsNetworkUnavailable, !NetworkInterface.GetIsNetworkAvailable());
 
             // We need a default sorting order
             this.OrderByTitle();
 
             // Create a default list
-            this.StartSearch();
+            this.StartSearchAsync();
         }
 
         public int DurationColumnWidth
@@ -129,32 +136,29 @@ namespace Espera.View.ViewModels
             this.ApplyOrder(SortHelpers.GetOrderByViews, ref this.viewsOrder);
         }
 
-        public void StartSearch()
+        public async Task StartSearchAsync()
         {
             this.IsSearching = true;
 
-            this.UpdateSelectableSongs();
-        }
-
-        private void UpdateSelectableSongs()
-        {
             var finder = new YoutubeSongFinder(this.SearchText);
 
-            var songs = new List<YoutubeSongViewModel>();
+            try
+            {
+                IReadOnlyList<YoutubeSong> songs = await finder.GetSongsAsync();
 
-            finder.GetSongs()
-                .Select(song => new YoutubeSongViewModel(song, () => this.coreSettings.YoutubeDownloadPath))
-                .SubscribeOn(RxApp.TaskpoolScheduler)
-                .Subscribe(song => songs.Add(song), () =>
-                {
-                    this.IsSearching = false;
+                this.SelectableSongs = songs.Select(x => new YoutubeSongViewModel(x, () => this.coreSettings.YoutubeDownloadPath)).ToList();
 
-                    this.SelectableSongs = songs
-                        .OrderBy(this.SongOrderFunc)
-                        .ToList();
+                this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
+            }
+            catch (Exception)
+            {
+                this.connectionError.OnNext(Unit.Default);
+            }
 
-                    this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
-                });
+            finally
+            {
+                this.IsSearching = false;
+            }
         }
     }
 }

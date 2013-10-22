@@ -145,11 +145,11 @@ namespace Espera.View.Views
             this.shellViewModel.SelectedPlaylistEntries = ((ListBox)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
         }
 
-        private void SearchTextBoxKeyUp(object sender, KeyEventArgs e)
+        private async void SearchTextBoxKeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                this.shellViewModel.YoutubeViewModel.StartSearch();
+                await this.shellViewModel.YoutubeViewModel.StartSearchAsync();
             }
 
             e.Handled = true;
