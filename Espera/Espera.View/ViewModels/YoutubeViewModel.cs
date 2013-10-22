@@ -6,7 +6,6 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -14,13 +13,14 @@ using System.Threading.Tasks;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class YoutubeViewModel : SongSourceViewModel<YoutubeSongViewModel>
+    public sealed class YoutubeViewModel : SongSourceViewModel<YoutubeSongViewModel>
     {
         private readonly Subject<Unit> connectionError;
         private readonly CoreSettings coreSettings;
         private readonly ObservableAsPropertyHelper<bool> isNetworkUnavailable;
         private readonly IReactiveCommand playNowCommand;
         private readonly ObservableAsPropertyHelper<YoutubeSongViewModel> selectedSong;
+        private readonly IYoutubeSongFinder songFinder;
         private readonly ViewSettings viewSettings;
         private SortOrder durationOrder;
         private bool isSearching;
@@ -28,7 +28,7 @@ namespace Espera.View.ViewModels
         private SortOrder titleOrder;
         private SortOrder viewsOrder;
 
-        public YoutubeViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings)
+        public YoutubeViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, INetworkStatus networkstatus = null, IYoutubeSongFinder songFinder = null)
             : base(library)
         {
             if (viewSettings == null)
@@ -39,6 +39,7 @@ namespace Espera.View.ViewModels
 
             this.viewSettings = viewSettings;
             this.coreSettings = coreSettings;
+            this.songFinder = songFinder ?? new YoutubeSongFinder();
 
             this.connectionError = new Subject<Unit>();
 
@@ -50,19 +51,16 @@ namespace Espera.View.ViewModels
                 .Select(x => x == null ? null : (YoutubeSongViewModel)x)
                 .ToProperty(this, x => x.SelectedSong);
 
-            this.isNetworkUnavailable = Observable.FromEventPattern<NetworkAvailabilityChangedEventHandler, NetworkAvailabilityEventArgs>(
-                h => NetworkChange.NetworkAvailabilityChanged += h,
-                h => NetworkChange.NetworkAvailabilityChanged -= h)
-                .Select(x => !x.EventArgs.IsAvailable)
-                .Do(_ => this.StartSearchAsync())
+            var status = (networkstatus ?? new NetworkStatus());
+            this.isNetworkUnavailable = status.IsAvailable
+                .Select(x => !x)
                 .Merge(this.connectionError.Select(x => true))
-                .ToProperty(this, x => x.IsNetworkUnavailable, !NetworkInterface.GetIsNetworkAvailable());
+                .ToProperty(this, x => x.IsNetworkUnavailable);
 
             // We need a default sorting order
             this.OrderByTitle();
 
-            // Create a default list
-            this.StartSearchAsync();
+            status.IsAvailable.Where(x => x).Subscribe(async x => await this.StartSearchAsync());
         }
 
         public int DurationColumnWidth
@@ -140,16 +138,15 @@ namespace Espera.View.ViewModels
         {
             this.IsSearching = true;
 
-            var finder = new YoutubeSongFinder(this.SearchText);
-
             try
             {
-                IReadOnlyList<YoutubeSong> songs = await finder.GetSongsAsync();
+                IReadOnlyList<YoutubeSong> songs = await this.songFinder.GetSongsAsync(this.SearchText);
 
                 this.SelectableSongs = songs.Select(x => new YoutubeSongViewModel(x, () => this.coreSettings.YoutubeDownloadPath)).ToList();
 
                 this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
             }
+
             catch (Exception)
             {
                 this.connectionError.OnNext(Unit.Default);

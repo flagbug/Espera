@@ -16,7 +16,7 @@ using YoutubeExtractor;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class YoutubeSongViewModel : SongViewModelBase
+    public sealed class YoutubeSongViewModel : SongViewModelBase
     {
         private readonly ObservableAsPropertyHelper<bool> hasThumbnail;
         private readonly ObservableAsPropertyHelper<bool> isDownloading;

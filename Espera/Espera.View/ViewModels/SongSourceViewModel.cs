@@ -9,7 +9,7 @@ using System.Reactive.Subjects;
 
 namespace Espera.View.ViewModels
 {
-    internal abstract class SongSourceViewModel<T> : ReactiveObject, ISongSourceViewModel
+    public abstract class SongSourceViewModel<T> : ReactiveObject, ISongSourceViewModel
         where T : SongViewModelBase
     {
         private readonly ObservableAsPropertyHelper<bool> isAdmin;

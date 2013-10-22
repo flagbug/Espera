@@ -1,34 +1,23 @@
 ﻿using Google.GData.Client;
 using Google.GData.YouTube;
 using Google.YouTube;
-using Rareform.Validation;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Espera.Core
 {
-    public sealed class YoutubeSongFinder
+    public sealed class YoutubeSongFinder : IYoutubeSongFinder
     {
         private const string ApiKey =
             "AI39si5_zcffmO_ErRSZ9xUkfy_XxPZLWuxTOzI_1RH9HhXDI-GaaQ-j6MONkl2JiF01yBDgBFPbC8-mn6U9Qo4Ek50nKcqH5g";
 
-        private readonly string searchString;
-
-        public YoutubeSongFinder(string searchString)
-        {
-            if (searchString == null)
-                Throw.ArgumentNullException(() => searchString);
-
-            this.searchString = searchString;
-        }
-
-        public async Task<IReadOnlyList<YoutubeSong>> GetSongsAsync()
+        public async Task<IReadOnlyList<YoutubeSong>> GetSongsAsync(string searchTerm)
         {
             var query = new YouTubeQuery(YouTubeQuery.DefaultVideoUri)
             {
                 OrderBy = "relevance",
-                Query = searchString,
+                Query = searchTerm,
                 SafeSearch = YouTubeQuery.SafeSearchValues.None
             };
 

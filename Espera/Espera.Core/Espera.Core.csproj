@@ -113,6 +113,7 @@
     <Compile Include="Audio\SongPreparationException.cs" />
     <Compile Include="Audio\IAudioPlayerCallback.cs" />
     <Compile Include="Audio\SongLoadException.cs" />
+    <Compile Include="IYoutubeSongFinder.cs" />
     <Compile Include="Management\AccessMode.cs" />
     <Compile Include="Audio\AudioPlayerState.cs" />
     <Compile Include="Audio\AudioPlayer.cs" />
