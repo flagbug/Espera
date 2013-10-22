@@ -23,6 +23,7 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<int> currentSeconds;
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
         private readonly ObservableAsPropertyHelper<TimeSpan> currentTime;
+        private readonly ObservableAsPropertyHelper<bool> displayTimeoutWarning;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly ObservableAsPropertyHelper<bool> isPlaying;
         private readonly Library library;
@@ -30,7 +31,6 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
         private readonly ObservableAsPropertyHelper<int> totalSeconds;
         private readonly ObservableAsPropertyHelper<TimeSpan> totalTime;
-        private bool displayTimeoutWarning;
         private bool isLocal;
         private bool isYoutube;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
@@ -85,10 +85,11 @@ namespace Espera.View.ViewModels
                 (x1, x2) => x1 ? (ISongSourceViewModel)this.LocalViewModel : this.YoutubeViewModel)
                 .ToProperty(this, x => x.CurrentSongSource, null, ImmediateScheduler.Instance);
 
-            this.currentSongSource
+            this.displayTimeoutWarning = this.currentSongSource
                 .Select(x => x.TimeoutWarning)
                 .Switch()
-                .Subscribe(_ => this.TriggerTimeoutWarning());
+                .SelectMany(x => new[] { true, false }.ToObservable())
+                .ToProperty(this, x => x.DisplayTimeoutWarning);
 
             this.isAdmin = isAdminObservable
                 .ToProperty(this, x => x.IsAdmin);
@@ -295,8 +296,7 @@ namespace Espera.View.ViewModels
 
         public bool DisplayTimeoutWarning
         {
-            get { return this.displayTimeoutWarning; }
-            set { this.RaiseAndSetIfChanged(ref this.displayTimeoutWarning, value); }
+            get { return this.displayTimeoutWarning.Value; }
         }
 
         public IReactiveCommand EditPlaylistNameCommand { get; private set; }
@@ -466,12 +466,6 @@ namespace Espera.View.ViewModels
                 });
 
             return newName;
-        }
-
-        private void TriggerTimeoutWarning()
-        {
-            this.DisplayTimeoutWarning = true;
-            this.DisplayTimeoutWarning = false;
         }
 
         private void UpdateRemainingPlaylistTimeout()
