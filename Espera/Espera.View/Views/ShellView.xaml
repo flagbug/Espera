@@ -206,6 +206,7 @@
                     <Image Source="/Espera;component/Images/Mute.png" />
                 </Button>
                 <Slider Width="200"
+                        VerticalAlignment="Center"
                         IsEnabled="{Binding Path=CanChangeVolume}"
                         IsMoveToPointEnabled="True"
                         Maximum="1"
