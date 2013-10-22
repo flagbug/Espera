@@ -13,6 +13,9 @@
              mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/FlatSlider.xaml" />
+            </ResourceDictionary.MergedDictionaries>
             <Style x:Key="ColorPickerButtonStyle" TargetType="{x:Type Button}">
                 <Setter Property="Template">
                     <Setter.Value>
@@ -96,6 +99,7 @@
                                     VerticalAlignment="Center"
                                     Maximum="2"
                                     Minimum="0.5"
+                                    Style="{StaticResource FlatSlider}"
                                     Value="{Binding Path=Scaling}" />
                             <TextBox Width="30"
                                      Margin="10, 0, 0, 0"
@@ -176,6 +180,7 @@
                     <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
                         <TextBlock Text="Update interval" VerticalAlignment="Center" />
                         <Slider Width="200"
+                                Style="{StaticResource FlatSlider}"
                                 VerticalAlignment="Center"
                                 Margin="5, 0, 0, 0"
                                 Maximum="60"

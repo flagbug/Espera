@@ -35,6 +35,7 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/FlatSlider.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <Style x:Key="VolumeButtonStyle" TargetType="{x:Type Button}">
@@ -150,7 +151,6 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal">
                 <Button Width="30" Padding="0">
@@ -206,6 +206,7 @@
                     <Image Source="/Espera;component/Images/Mute.png" />
                 </Button>
                 <Slider Width="200"
+                        Style="{StaticResource FlatSlider}"
                         VerticalAlignment="Center"
                         IsEnabled="{Binding Path=CanChangeVolume}"
                         IsMoveToPointEnabled="True"
@@ -220,6 +221,8 @@
             </StackPanel>
             <Slider Grid.Column="2"
                     Margin="5, 0, 0, 0"
+                    Width="Auto"
+                    Style="{StaticResource FlatSlider}"
                     VerticalAlignment="Center"
                     IsEnabled="{Binding Path=CanChangeTime}"
                     IsMoveToPointEnabled="True"
@@ -232,8 +235,12 @@
                 <TextBlock VerticalAlignment="Center" Text="/" />
                 <TextBlock VerticalAlignment="Center" Text="{Binding Path=TotalTime, StringFormat=mm\\:ss}" />
             </StackPanel>
-            <TextBox Grid.Column="4"
-                     Width="150"
+            <Grid Grid.Column="4" Width="300">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0"
                      Margin="10, 0, 0, 0"
                      VerticalAlignment="Center"
                      VerticalContentAlignment="Center"
@@ -243,14 +250,15 @@
                      Style="{DynamicResource SearchMetroTextBox}"
                      Text="{Binding Path=CurrentSongSource.SearchText,
                                     UpdateSourceTrigger=PropertyChanged}" />
-            <ToggleButton Grid.Column="5"
+                <ToggleButton Grid.Column="1"
                           Width="30"
                           Margin="5, 0, 0, 0"
                           IsChecked="{Binding Path=ShowVideoPlayer}"
                           Padding="0"
                           ToolTip="YouTube video player">
-                <Image Source="/Espera;component/Images/VideoPlayer.png" />
-            </ToggleButton>
+                    <Image Source="/Espera;component/Images/VideoPlayer.png" />
+                </ToggleButton>
+            </Grid>
         </Grid>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
