@@ -332,8 +332,8 @@
                         <TabItem.Resources>
                             <CollectionViewSource x:Key="SongsCollectionViewSource" Source="{Binding LocalViewModel.SelectableSongs}">
                                 <CollectionViewSource.GroupDescriptions>
-                                    <PropertyGroupDescription PropertyName="Artist" />
-                                    <PropertyGroupDescription PropertyName="Album" />
+                                    <PropertyGroupDescription PropertyName="Artist" StringComparison="InvariantCultureIgnoreCase" />
+                                    <PropertyGroupDescription PropertyName="Album" StringComparison="InvariantCultureIgnoreCase" />
                                 </CollectionViewSource.GroupDescriptions>
                             </CollectionViewSource>
                         </TabItem.Resources>
