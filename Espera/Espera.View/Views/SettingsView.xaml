@@ -65,11 +65,11 @@
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Top">
                             <StackPanel Orientation="Horizontal">
-                                <Button Background="#FF1C739D"
+                                <Button Background="#CC119EDA"
                                         Command="{Binding Path=ChangeAccentColorCommand}"
                                         CommandParameter="Blue"
                                         Style="{StaticResource ColorPickerButtonStyle}" />
-                                <Button Background="#CC48CB00"
+                                <Button Background="#CC60A917"
                                         Command="{Binding Path=ChangeAccentColorCommand}"
                                         CommandParameter="Green"
                                         Style="{StaticResource ColorPickerButtonStyle}" />
@@ -79,13 +79,13 @@
                                         Command="{Binding Path=ChangeAccentColorCommand}"
                                         CommandParameter="Purple"
                                         Style="{StaticResource ColorPickerButtonStyle}" />
-                                <Button Background="#CCCB0000"
+                                <Button Background="#CCE51400"
                                         Command="{Binding Path=ChangeAccentColorCommand}"
                                         CommandParameter="Red"
                                         Style="{StaticResource ColorPickerButtonStyle}" />
                             </StackPanel>
                             <Button HorizontalAlignment="Left"
-                                    Background="#FFDE872A"
+                                    Background="#CCFA6800"
                                     Command="{Binding Path=ChangeAccentColorCommand}"
                                     CommandParameter="Orange"
                                     Style="{StaticResource ColorPickerButtonStyle}" />
