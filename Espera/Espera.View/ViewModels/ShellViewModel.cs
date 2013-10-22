@@ -3,13 +3,14 @@ using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Rareform.Extensions;
+using ReactiveMarrow;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Timers;
 
 namespace Espera.View.ViewModels
 {
@@ -24,10 +25,10 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
         private readonly ObservableAsPropertyHelper<TimeSpan> currentTime;
         private readonly ObservableAsPropertyHelper<bool> displayTimeoutWarning;
+        private readonly CompositeDisposable disposable;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly ObservableAsPropertyHelper<bool> isPlaying;
         private readonly Library library;
-        private readonly Timer playlistTimeoutUpdateTimer;
         private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
         private readonly ObservableAsPropertyHelper<int> totalSeconds;
         private readonly ObservableAsPropertyHelper<TimeSpan> totalTime;
@@ -41,6 +42,8 @@ namespace Espera.View.ViewModels
             this.library = library;
             this.ViewSettings = viewSettings;
             this.coreSettings = coreSettings;
+
+            this.disposable = new CompositeDisposable();
 
             this.library.Initialize();
 
@@ -77,9 +80,10 @@ namespace Espera.View.ViewModels
             this.LocalViewModel = new LocalViewModel(this.library, this.ViewSettings);
             this.YoutubeViewModel = new YoutubeViewModel(this.library, this.ViewSettings, this.coreSettings);
 
-            this.playlistTimeoutUpdateTimer = new Timer(333);
-            this.playlistTimeoutUpdateTimer.Elapsed += (sender, e) => this.UpdateRemainingPlaylistTimeout();
-            this.playlistTimeoutUpdateTimer.Start();
+            Observable.Interval(TimeSpan.FromMilliseconds(300), RxApp.TaskpoolScheduler)
+                .Where(_ => this.RemainingPlaylistTimeout > TimeSpan.Zero)
+                .Subscribe(x => this.RaisePropertyChanged("RemainingPlaylistTimeout"))
+                .DisposeWith(this.disposable);
 
             this.currentSongSource = this.WhenAnyValue(x => x.IsLocal, x => x.IsYoutube,
                 (x1, x2) => x1 ? (ISongSourceViewModel)this.LocalViewModel : this.YoutubeViewModel)
@@ -433,7 +437,7 @@ namespace Espera.View.ViewModels
             this.library.Save();
             this.library.Dispose();
 
-            this.playlistTimeoutUpdateTimer.Dispose();
+            this.disposable.Dispose();
         }
 
         private void AddPlaylist()
@@ -466,14 +470,6 @@ namespace Espera.View.ViewModels
                 });
 
             return newName;
-        }
-
-        private void UpdateRemainingPlaylistTimeout()
-        {
-            if (this.RemainingPlaylistTimeout > TimeSpan.Zero)
-            {
-                this.RaisePropertyChanged("RemainingPlaylistTimeout");
-            }
         }
     }
 }
