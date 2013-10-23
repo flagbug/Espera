@@ -198,32 +198,7 @@ namespace Espera.View.ViewModels
             this.EditPlaylistNameCommand.Subscribe(x => this.CurrentPlaylist.EditName = true);
 
             this.RemovePlaylistCommand = new ReactiveCommand(this.WhenAnyValue(x => x.CurrentEditedPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 != null || x2 != null));
-            this.RemovePlaylistCommand.Subscribe(x =>
-            {
-                int index = this.Playlists.TakeWhile(p => p != this.CurrentPlaylist).Count();
-
-                this.library.RemovePlaylist(this.CurrentPlaylist.Model);
-
-                if (!this.library.Playlists.Any())
-                {
-                    this.AddPlaylist();
-                }
-
-                if (this.Playlists.Count > index)
-                {
-                    this.CurrentPlaylist = this.Playlists[index];
-                }
-
-                else if (this.Playlists.Count >= 1)
-                {
-                    this.CurrentPlaylist = this.Playlists[index - 1];
-                }
-
-                else
-                {
-                    this.CurrentPlaylist = this.Playlists[0];
-                }
-            });
+            this.RemovePlaylistCommand.Subscribe(x => this.RemoveCurrentPlaylist());
 
             this.RemoveSelectedPlaylistEntriesCommand = new ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .CombineLatest(this.isAdmin, this.coreSettings.WhenAnyValue(x => x.LockPlaylistRemoval),
@@ -470,6 +445,33 @@ namespace Espera.View.ViewModels
                 });
 
             return newName;
+        }
+
+        private void RemoveCurrentPlaylist()
+        {
+            int index = this.Playlists.TakeWhile(p => p != this.CurrentPlaylist).Count();
+
+            this.library.RemovePlaylist(this.CurrentPlaylist.Model);
+
+            if (!this.library.Playlists.Any())
+            {
+                this.AddPlaylist();
+            }
+
+            if (this.Playlists.Count > index)
+            {
+                this.CurrentPlaylist = this.Playlists[index];
+            }
+
+            else if (this.Playlists.Count >= 1)
+            {
+                this.CurrentPlaylist = this.Playlists[index - 1];
+            }
+
+            else
+            {
+                this.CurrentPlaylist = this.Playlists[0];
+            }
         }
     }
 }
