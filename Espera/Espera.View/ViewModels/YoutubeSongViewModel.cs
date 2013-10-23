@@ -25,6 +25,7 @@ namespace Espera.View.ViewModels
         private double downloadProgress;
         private bool isContextMenuOpen;
         private bool isLoadingContextMenu;
+        private bool isLoadingThumbnail;
         private ImageSource thumbnail;
         private IEnumerable<VideoInfo> videosToDownload;
 
@@ -106,6 +107,12 @@ namespace Espera.View.ViewModels
             private set { this.RaiseAndSetIfChanged(ref this.isLoadingContextMenu, value); }
         }
 
+        public bool IsLoadingThumbnail
+        {
+            get { return this.isLoadingThumbnail; }
+            private set { this.RaiseAndSetIfChanged(ref this.isLoadingThumbnail, value); }
+        }
+
         public IReactiveCommand OpenPathCommand { get; private set; }
 
         public double? Rating
@@ -183,6 +190,8 @@ namespace Espera.View.ViewModels
 
         private async Task GetThumbnailAsync()
         {
+            this.IsLoadingThumbnail = true;
+
             using (var webClient = new WebClient())
             {
                 try
@@ -211,6 +220,11 @@ namespace Espera.View.ViewModels
 
                 catch (WebException)
                 { } // We can't load the thumbnail, ignore it
+
+                finally
+                {
+                    this.IsLoadingThumbnail = false;
+                }
             }
         }
     }

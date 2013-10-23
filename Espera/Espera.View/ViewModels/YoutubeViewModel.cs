@@ -47,8 +47,7 @@ namespace Espera.View.ViewModels
             this.playNowCommand.RegisterAsyncTask(_ => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model)));
 
             this.selectedSong = this.WhenAnyValue(x => x.SelectedSongs)
-                .Select(x => x == null ? null : this.SelectedSongs.FirstOrDefault())
-                .Select(x => x == null ? null : (YoutubeSongViewModel)x)
+                .Select(x => x == null ? null : (YoutubeSongViewModel)this.SelectedSongs.FirstOrDefault())
                 .ToProperty(this, x => x.SelectedSong);
 
             var status = (networkstatus ?? new NetworkStatus());
@@ -137,6 +136,7 @@ namespace Espera.View.ViewModels
         public async Task StartSearchAsync()
         {
             this.IsSearching = true;
+            this.SelectedSongs = null;
 
             try
             {

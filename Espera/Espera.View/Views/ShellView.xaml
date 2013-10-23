@@ -301,28 +301,23 @@
                 <TextBlock Grid.Row="0"
                            Style="{StaticResource VideoInfoHeaderStyle}"
                            Text="video info" />
-                <Grid Grid.Row="1" DataContext="{Binding Path=YoutubeViewModel}">
-                    <Grid Margin="5" DataContext="{Binding Path=SelectedSongs/}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <Grid Grid.Row="0">
-                            <Controls:ProgressRing Margin="0, 35, 0, 0" IsActive="True"
-                                Visibility="{Binding RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor},
-                                    Path=DataContext.YoutubeViewModel.IsSearching,
+                <Grid Grid.Row="1" Margin="5" DataContext="{Binding Path=YoutubeViewModel.SelectedSong}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Controls:ProgressRing Margin="0, 35, 0, 0" IsActive="{Binding Path=IsLoadingThumbnail}" />
+                        <Image Grid.Row="0"
+                               Source="{Binding Path=Thumbnail}"
+                               Visibility="{Binding Path=HasThumbnail,
                                     Converter={StaticResource BooleanToVisibilityConverter}}" />
-                            <Image Grid.Row="0"
-                                   Source="{Binding Path=Thumbnail}"
-                                   Visibility="{Binding Path=HasThumbnail,
-                                                        Converter={StaticResource BooleanToVisibilityConverter}}" />
-                        </Grid>
-                        <ScrollViewer Grid.Row="1"
-                                      Margin="0, 10, 0, 0 "
-                                      VerticalScrollBarVisibility="Auto">
-                            <TextBlock Text="{Binding Path=Description}" TextWrapping="Wrap" />
-                        </ScrollViewer>
                     </Grid>
+                    <ScrollViewer Grid.Row="1"
+                                  Margin="0, 10, 0, 0"
+                                  VerticalScrollBarVisibility="Auto">
+                        <TextBlock Text="{Binding Path=Description}" TextWrapping="Wrap" />
+                    </ScrollViewer>
                 </Grid>
             </Grid>
             <Grid Grid.Column="1">
