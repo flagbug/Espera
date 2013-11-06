@@ -127,8 +127,8 @@
                              IsOpen="{Binding Path=ShowVideoPlayer}"
                              Position="Right">
                 <MediaElement x:Name="videoPlayer"
-                              Width="{Binding RelativeSource={RelativeSource AncestorType=Controls:MetroWindow},
-                                              Path=Width}"
+                              Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Controls:MetroWindow},
+                                              Path=ActualWidth}"
                               LoadedBehavior="Manual"
                               MediaEnded="VideoPlayerMediaEnded" />
             </Controls:Flyout>
