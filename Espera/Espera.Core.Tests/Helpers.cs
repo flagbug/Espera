@@ -5,7 +5,9 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -52,14 +54,22 @@ namespace Espera.Core.Tests
 
         public static Library CreateLibrary(ILibraryWriter writer)
         {
-            return CreateLibrary(null, writer);
+            return CreateLibrary(null, null, writer);
         }
 
-        public static Library CreateLibrary(CoreSettings settings = null, ILibraryWriter writer = null, MockFileSystem fileSystem = null)
+        public static Library CreateLibrary(IFileSystem fileSystem)
         {
+            return CreateLibrary(null, null, null, fileSystem);
+        }
+
+        public static Library CreateLibrary(CoreSettings settings = null, ILibraryReader reader = null, ILibraryWriter writer = null, IFileSystem fileSystem = null)
+        {
+            var driveWatcherMock = new Mock<IRemovableDriveWatcher>();
+            driveWatcherMock.SetupGet(x => x.DriveRemoved).Returns(Observable.Never<Unit>());
+
             var library = new Library(
-                new Mock<IRemovableDriveWatcher>().Object,
-                new Mock<ILibraryReader>().Object,
+                driveWatcherMock.Object,
+                reader ?? new Mock<ILibraryReader>().Object,
                 writer ?? new Mock<ILibraryWriter>().Object,
                 settings ?? new CoreSettings(),
                 fileSystem ?? new MockFileSystem());

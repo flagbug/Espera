@@ -4,13 +4,14 @@ using Espera.Core.Management;
 using Espera.Core.Settings;
 using Espera.Services;
 using Rareform.Extensions;
+using ReactiveMarrow;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Timer = System.Timers.Timer;
 
 namespace Espera.View.ViewModels
 {
@@ -25,14 +26,14 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<int> currentSeconds;
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
         private readonly ObservableAsPropertyHelper<TimeSpan> currentTime;
+        private readonly ObservableAsPropertyHelper<bool> displayTimeoutWarning;
+        private readonly CompositeDisposable disposable;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly ObservableAsPropertyHelper<bool> isPlaying;
         private readonly Library library;
-        private readonly Timer playlistTimeoutUpdateTimer;
         private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
         private readonly ObservableAsPropertyHelper<int> totalSeconds;
         private readonly ObservableAsPropertyHelper<TimeSpan> totalTime;
-        private bool displayTimeoutWarning;
         private bool isLocal;
         private bool isYoutube;
         private MobileApi mobileApi;
@@ -44,6 +45,8 @@ namespace Espera.View.ViewModels
             this.library = library;
             this.ViewSettings = viewSettings;
             this.coreSettings = coreSettings;
+
+            this.disposable = new CompositeDisposable();
 
             this.library.Initialize();
             this.accessToken = this.library.LocalAccessControl.RegisterLocalAccessToken();
@@ -79,20 +82,20 @@ namespace Espera.View.ViewModels
 
             this.LocalViewModel = new LocalViewModel(this.library, this.ViewSettings, this.coreSettings, accessToken);
 
-            this.YoutubeViewModel = new YoutubeViewModel(this.library, this.ViewSettings, this.coreSettings, accessToken);
-
-            this.playlistTimeoutUpdateTimer = new Timer(333);
-            this.playlistTimeoutUpdateTimer.Elapsed += (sender, e) => this.UpdateRemainingPlaylistTimeout();
-            this.playlistTimeoutUpdateTimer.Start();
+            Observable.Interval(TimeSpan.FromMilliseconds(300), RxApp.TaskpoolScheduler)
+                .Where(_ => this.RemainingPlaylistTimeout > TimeSpan.Zero)
+                .Subscribe(x => this.RaisePropertyChanged("RemainingPlaylistTimeout"))
+                .DisposeWith(this.disposable);
 
             this.currentSongSource = this.WhenAnyValue(x => x.IsLocal, x => x.IsYoutube,
                 (x1, x2) => x1 ? (ISongSourceViewModel)this.LocalViewModel : this.YoutubeViewModel)
                 .ToProperty(this, x => x.CurrentSongSource, null, ImmediateScheduler.Instance);
 
-            this.currentSongSource
+            this.displayTimeoutWarning = this.currentSongSource
                 .Select(x => x.TimeoutWarning)
                 .Switch()
-                .Subscribe(_ => this.TriggerTimeoutWarning());
+                .SelectMany(x => new[] { true, false }.ToObservable())
+                .ToProperty(this, x => x.DisplayTimeoutWarning);
 
             this.isAdmin = isAdminObservable
                 .ToProperty(this, x => x.IsAdmin);
@@ -197,32 +200,7 @@ namespace Espera.View.ViewModels
             this.EditPlaylistNameCommand.Subscribe(x => this.CurrentPlaylist.EditName = true);
 
             this.RemovePlaylistCommand = new ReactiveCommand(this.WhenAnyValue(x => x.CurrentEditedPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 != null || x2 != null));
-            this.RemovePlaylistCommand.Subscribe(x =>
-            {
-                int index = this.Playlists.TakeWhile(p => p != this.CurrentPlaylist).Count();
-
-                this.library.RemovePlaylist(this.CurrentPlaylist.Model, this.accessToken);
-
-                if (!this.library.Playlists.Any())
-                {
-                    this.AddPlaylist();
-                }
-
-                if (this.Playlists.Count > index)
-                {
-                    this.CurrentPlaylist = this.Playlists[index];
-                }
-
-                else if (this.Playlists.Count >= 1)
-                {
-                    this.CurrentPlaylist = this.Playlists[index - 1];
-                }
-
-                else
-                {
-                    this.CurrentPlaylist = this.Playlists[0];
-                }
-            });
+            this.RemovePlaylistCommand.Subscribe(x => this.RemoveCurrentPlaylist());
 
             this.RemoveSelectedPlaylistEntriesCommand = new ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .CombineLatest(this.isAdmin, this.coreSettings.WhenAnyValue(x => x.LockPlaylistRemoval),
@@ -319,8 +297,7 @@ namespace Espera.View.ViewModels
 
         public bool DisplayTimeoutWarning
         {
-            get { return this.displayTimeoutWarning; }
-            set { this.RaiseAndSetIfChanged(ref this.displayTimeoutWarning, value); }
+            get { return this.displayTimeoutWarning.Value; }
         }
 
         public IReactiveCommand EditPlaylistNameCommand { get; private set; }
@@ -460,7 +437,7 @@ namespace Espera.View.ViewModels
             this.library.Save();
             this.library.Dispose();
 
-            this.playlistTimeoutUpdateTimer.Dispose();
+            this.disposable.Dispose();
         }
 
         private void AddPlaylist()
@@ -501,17 +478,30 @@ namespace Espera.View.ViewModels
             return newName;
         }
 
-        private void TriggerTimeoutWarning()
+        private void RemoveCurrentPlaylist()
         {
-            this.DisplayTimeoutWarning = true;
-            this.DisplayTimeoutWarning = false;
-        }
+            int index = this.Playlists.TakeWhile(p => p != this.CurrentPlaylist).Count();
 
-        private void UpdateRemainingPlaylistTimeout()
-        {
-            if (this.RemainingPlaylistTimeout > TimeSpan.Zero)
+            this.library.RemovePlaylist(this.CurrentPlaylist.Model);
+
+            if (!this.library.Playlists.Any())
             {
-                this.RaisePropertyChanged("RemainingPlaylistTimeout");
+                this.AddPlaylist();
+            }
+
+            if (this.Playlists.Count > index)
+            {
+                this.CurrentPlaylist = this.Playlists[index];
+            }
+
+            else if (this.Playlists.Count >= 1)
+            {
+                this.CurrentPlaylist = this.Playlists[index - 1];
+            }
+
+            else
+            {
+                this.CurrentPlaylist = this.Playlists[0];
             }
         }
     }

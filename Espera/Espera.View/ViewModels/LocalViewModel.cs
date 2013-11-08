@@ -9,7 +9,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
 
 namespace Espera.View.ViewModels
 {
@@ -18,8 +17,9 @@ namespace Espera.View.ViewModels
         private readonly ReactiveList<ArtistViewModel> allArtists;
         private readonly ArtistViewModel allArtistsViewModel;
         private readonly Subject<Unit> artistUpdateSignal;
+        private readonly object gate;
         private readonly IReactiveCommand playNowCommand;
-        private readonly SemaphoreSlim updateSemaphore;
+        private readonly ObservableAsPropertyHelper<bool> showAddSongsHelperMessage;
         private readonly ViewSettings viewSettings;
         private SortOrder artistOrder;
         private ILookup<string, Song> filteredSongs;
@@ -33,8 +33,8 @@ namespace Espera.View.ViewModels
 
             this.viewSettings = viewSettings;
 
-            this.updateSemaphore = new SemaphoreSlim(1, 1);
             this.artistUpdateSignal = new Subject<Unit>();
+            this.gate = new object();
 
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
             this.allArtists = new ReactiveList<ArtistViewModel> { this.allArtistsViewModel };
@@ -48,12 +48,12 @@ namespace Espera.View.ViewModels
             this.SelectedArtist = this.allArtistsViewModel;
 
             this.Library.SongsUpdated
-                .Buffer(TimeSpan.FromSeconds(1))
+                .Buffer(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
                 .Where(x => x.Any())
                 .Select(_ => Unit.Default)
                 .Merge(this.WhenAny(x => x.SearchText, _ => Unit.Default)
                     .Do(_ => this.SelectedArtist = this.allArtistsViewModel))
-                .SubscribeOn(RxApp.MainThreadScheduler)
+                .Synchronize(this.gate)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ =>
                 {
@@ -62,6 +62,7 @@ namespace Espera.View.ViewModels
                 });
 
             this.WhenAnyValue(x => x.SelectedArtist)
+                .Synchronize(this.gate)
                 .Subscribe(_ => this.UpdateSelectableSongs());
 
             this.playNowCommand = this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
@@ -73,6 +74,10 @@ namespace Espera.View.ViewModels
 
                 return this.Library.PlayInstantlyAsync(this.SelectableSongs.Skip(songIndex).Select(x => x.Model), accessToken);
             });
+
+            this.showAddSongsHelperMessage = this.WhenAnyValue(x => x.SelectableSongs, x => x.SearchText,
+                    (x1, x2) => !x1.Any() && String.IsNullOrEmpty(x2))
+                .ToProperty(this, x => x.ShowAddSongsHelperMessage);
         }
 
         public IReactiveDerivedList<ArtistViewModel> Artists { get; private set; }
@@ -98,6 +103,11 @@ namespace Espera.View.ViewModels
         {
             get { return this.selectedArtist; }
             set { this.RaiseAndSetIfChanged(ref this.selectedArtist, value); }
+        }
+
+        public bool ShowAddSongsHelperMessage
+        {
+            get { return this.showAddSongsHelperMessage.Value; }
         }
 
         public int TitleColumnWidth
@@ -139,22 +149,18 @@ namespace Espera.View.ViewModels
 
         private void UpdateSelectableSongs()
         {
-            // Restrict this method to one thread at a time, so that updates from the library,
-            // which are on a different thread, don't interfere
-            this.updateSemaphore.Wait();
-
             this.filteredSongs = this.Library.Songs.FilterSongs(this.SearchText)
                 .ToLookup(x => x.Artist, StringComparer.InvariantCultureIgnoreCase);
 
             var newArtists = new HashSet<string>(this.filteredSongs.Select(x => x.Key));
-            var oldArtists = new HashSet<string>(this.Artists.Where(x => !x.IsAllArtists).Select(x => x.Name));
+            var oldArtists = this.Artists.Where(x => !x.IsAllArtists).Select(x => x.Name);
 
             if (!newArtists.SetEquals(oldArtists))
             {
                 this.artistUpdateSignal.OnNext(Unit.Default);
             }
 
-            this.SelectableSongs = this.filteredSongs
+            var selectableSongs = this.filteredSongs
                 .AsParallel()
                 .Where(group => this.SelectedArtist.IsAllArtists || group.Key.Equals(this.SelectedArtist.Name, StringComparison.InvariantCultureIgnoreCase))
                 .SelectMany(x => x)
@@ -162,7 +168,11 @@ namespace Espera.View.ViewModels
                 .OrderBy(this.SongOrderFunc)
                 .ToList();
 
-            this.updateSemaphore.Release();
+            // Ignore redundant song updates.
+            if (!selectableSongs.SequenceEqual(this.SelectableSongs))
+            {
+                this.SelectableSongs = selectableSongs;
+            }
         }
     }
 }

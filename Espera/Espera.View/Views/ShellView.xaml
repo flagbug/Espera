@@ -31,10 +31,11 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colours.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/FlatSlider.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <Style x:Key="VolumeButtonStyle" TargetType="{x:Type Button}">
@@ -126,8 +127,8 @@
                              IsOpen="{Binding Path=ShowVideoPlayer}"
                              Position="Right">
                 <MediaElement x:Name="videoPlayer"
-                              Width="{Binding RelativeSource={RelativeSource AncestorType=Controls:MetroWindow},
-                                              Path=Width}"
+                              Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Controls:MetroWindow},
+                                              Path=ActualWidth}"
                               LoadedBehavior="Manual"
                               MediaEnded="VideoPlayerMediaEnded" />
             </Controls:Flyout>
@@ -147,7 +148,6 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -206,6 +206,8 @@
                     <Image Source="/Espera;component/Images/Mute.png" />
                 </Button>
                 <Slider Width="200"
+                        Style="{StaticResource FlatSlider}"
+                        VerticalAlignment="Center"
                         IsEnabled="{Binding Path=CanChangeVolume}"
                         IsMoveToPointEnabled="True"
                         Maximum="1"
@@ -219,6 +221,8 @@
             </StackPanel>
             <Slider Grid.Column="2"
                     Margin="5, 0, 0, 0"
+                    Width="Auto"
+                    Style="{StaticResource FlatSlider}"
                     VerticalAlignment="Center"
                     IsEnabled="{Binding Path=CanChangeTime}"
                     IsMoveToPointEnabled="True"
@@ -231,8 +235,12 @@
                 <TextBlock VerticalAlignment="Center" Text="/" />
                 <TextBlock VerticalAlignment="Center" Text="{Binding Path=TotalTime, StringFormat=mm\\:ss}" />
             </StackPanel>
-            <TextBox Grid.Column="4"
-                     Width="150"
+            <Grid Grid.Column="4" Width="300">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0"
                      Margin="10, 0, 0, 0"
                      VerticalAlignment="Center"
                      VerticalContentAlignment="Center"
@@ -242,14 +250,15 @@
                      Style="{DynamicResource SearchMetroTextBox}"
                      Text="{Binding Path=CurrentSongSource.SearchText,
                                     UpdateSourceTrigger=PropertyChanged}" />
-            <ToggleButton Grid.Column="5"
+                <ToggleButton Grid.Column="1"
                           Width="30"
                           Margin="5, 0, 0, 0"
                           IsChecked="{Binding Path=ShowVideoPlayer}"
                           Padding="0"
                           ToolTip="YouTube video player">
-                <Image Source="/Espera;component/Images/VideoPlayer.png" />
-            </ToggleButton>
+                    <Image Source="/Espera;component/Images/VideoPlayer.png" />
+                </ToggleButton>
+            </Grid>
         </Grid>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
@@ -268,7 +277,8 @@
                          DataContext="{Binding Path=LocalViewModel}"
                          FocusVisualStyle="{x:Null}"
                          ItemsSource="{Binding Path=Artists}"
-                         SelectedItem="{Binding Path=SelectedArtist}">
+                         SelectedItem="{Binding Path=SelectedArtist}"
+                         Style="{StaticResource VirtualisedMetroListBox}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Margin="0, 3, 0, 3" Orientation="Horizontal">
@@ -291,25 +301,23 @@
                 <TextBlock Grid.Row="0"
                            Style="{StaticResource VideoInfoHeaderStyle}"
                            Text="video info" />
-                <Grid Grid.Row="1" DataContext="{Binding Path=YoutubeViewModel}">
-                    <Grid Margin="5" DataContext="{Binding Path=SelectedSongs/}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <Grid Grid.Row="0">
-                            <Controls:ProgressRing Margin="0, 35, 0, 0" IsActive="True" />
-                            <Image Grid.Row="0"
-                                   Source="{Binding Path=Thumbnail}"
-                                   Visibility="{Binding Path=HasThumbnail,
-                                                        Converter={StaticResource BooleanToVisibilityConverter}}" />
-                        </Grid>
-                        <ScrollViewer Grid.Row="1"
-                                      Margin="0, 10, 0, 0 "
-                                      VerticalScrollBarVisibility="Auto">
-                            <TextBlock Text="{Binding Path=Description}" TextWrapping="Wrap" />
-                        </ScrollViewer>
+                <Grid Grid.Row="1" Margin="5" DataContext="{Binding Path=YoutubeViewModel.SelectedSong}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Controls:ProgressRing Margin="0, 35, 0, 0" IsActive="{Binding Path=IsLoadingThumbnail}" />
+                        <Image Grid.Row="0"
+                               Source="{Binding Path=Thumbnail}"
+                               Visibility="{Binding Path=HasThumbnail,
+                                    Converter={StaticResource BooleanToVisibilityConverter}}" />
                     </Grid>
+                    <ScrollViewer Grid.Row="1"
+                                  Margin="0, 10, 0, 0"
+                                  VerticalScrollBarVisibility="Auto">
+                        <TextBlock Text="{Binding Path=Description}" TextWrapping="Wrap" />
+                    </ScrollViewer>
                 </Grid>
             </Grid>
             <Grid Grid.Column="1">
@@ -322,90 +330,99 @@
                         <TabItem.Resources>
                             <CollectionViewSource x:Key="SongsCollectionViewSource" Source="{Binding LocalViewModel.SelectableSongs}">
                                 <CollectionViewSource.GroupDescriptions>
-                                    <PropertyGroupDescription PropertyName="Artist" />
-                                    <PropertyGroupDescription PropertyName="Album" />
+                                    <PropertyGroupDescription PropertyName="Artist" StringComparison="InvariantCultureIgnoreCase" />
+                                    <PropertyGroupDescription PropertyName="Album" StringComparison="InvariantCultureIgnoreCase" />
                                 </CollectionViewSource.GroupDescriptions>
                             </CollectionViewSource>
                         </TabItem.Resources>
-                        <ListView ContextMenuOpening="SongListContextMenuOpening"
-                                  DataContext="{Binding Path=LocalViewModel}"
-                                  ItemsSource="{Binding Source={StaticResource SongsCollectionViewSource}}"
-                                  SelectionChanged="SongListSelectionChanged">
-                            <ListView.Style>
-                                <Style BasedOn="{StaticResource VirtualisedListView}" TargetType="{x:Type ListView}">
-                                    <Setter Property="SelectionMode" Value="Extended" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=IsAdmin}" Value="False">
-                                            <Setter Property="SelectionMode" Value="Single" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </ListView.Style>
-                            <ListView.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Command="{Binding Path=PlayNowCommand}"
-                                              Header="Play Now"
-                                              Visibility="{Binding Path=IsAdmin,
-                                                                   Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                    <MenuItem Command="{Binding Path=AddToPlaylistCommand}" Header="Add to playlist" />
-                                </ContextMenu>
-                            </ListView.ContextMenu>
-                            <ListView.ItemContainerStyle>
-                                <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
-                                    <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick" />
-                                    <EventSetter Event="KeyUp" Handler="SongKeyPressed" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
-                            <ListView.GroupStyle>
-                                <GroupStyle>
-                                    <GroupStyle.HeaderTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Margin="10, 0, 0, 5"
-                                                       FontSize="16"
-                                                       Foreground="{DynamicResource AccentColorBrush}"
-                                                       Text="{Binding Path=Name}" />
-                                        </DataTemplate>
-                                    </GroupStyle.HeaderTemplate>
-                                </GroupStyle>
-                            </ListView.GroupStyle>
-                            <ListView.View>
-                                <GridView>
-                                    <GridViewColumn Width="{Binding Path=TitleColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Content="Title" />
-                                        <GridViewColumn.CellTemplate>
+                        <Grid>
+                            <ListView ContextMenuOpening="SongListContextMenuOpening"
+                                      DataContext="{Binding Path=LocalViewModel}"
+                                      ItemsSource="{Binding Source={StaticResource SongsCollectionViewSource}}"
+                                      SelectionChanged="SongListSelectionChanged">
+                                <ListView.Style>
+                                    <Style BasedOn="{StaticResource VirtualisedListView}" TargetType="{x:Type ListView}">
+                                        <Setter Property="SelectionMode" Value="Extended" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=IsAdmin}" Value="False">
+                                                <Setter Property="SelectionMode" Value="Single" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListView.Style>
+                                <ListView.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Command="{Binding Path=PlayNowCommand}"
+                                                  Header="Play Now"
+                                                  Visibility="{Binding Path=IsAdmin,
+                                                                       Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                        <MenuItem Command="{Binding Path=AddToPlaylistCommand}" Header="Add to playlist" />
+                                    </ContextMenu>
+                                </ListView.ContextMenu>
+                                <ListView.ItemContainerStyle>
+                                    <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
+                                        <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick" />
+                                        <EventSetter Event="KeyUp" Handler="SongKeyPressed" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.GroupStyle>
+                                    <GroupStyle>
+                                        <GroupStyle.HeaderTemplate>
                                             <DataTemplate>
-                                                <StackPanel Orientation="Horizontal">
+                                                <TextBlock Margin="10, 0, 0, 5"
+                                                           FontSize="16"
+                                                           Foreground="{DynamicResource AccentColorBrush}"
+                                                           Text="{Binding Path=Name}" />
+                                            </DataTemplate>
+                                        </GroupStyle.HeaderTemplate>
+                                    </GroupStyle>
+                                </ListView.GroupStyle>
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn Width="{Binding Path=TitleColumnWidth, Mode=TwoWay}">
+                                            <GridViewColumnHeader Content="Title" />
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Foreground="White"
+                                                                   Text="{Binding Path=Title}"
+                                                                   TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Width="{Binding Path=DurationColumnWidth, Mode=TwoWay}">
+                                            <GridViewColumnHeader Content="Duration" />
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
                                                     <TextBlock Foreground="White"
-                                                               Text="{Binding Path=Title}"
+                                                               Text="{Binding Path=Duration,
+                                                                              StringFormat=mm\\:ss}"
                                                                TextTrimming="CharacterEllipsis" />
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=DurationColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Content="Duration" />
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Foreground="White"
-                                                           Text="{Binding Path=Duration,
-                                                                          StringFormat=mm\\:ss}"
-                                                           TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Width="{Binding Path=GenreColumnWidth, Mode=TwoWay}">
-                                        <GridViewColumnHeader Content="Genre" />
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Foreground="White"
-                                                           Text="{Binding Path=Genre}"
-                                                           TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Width="{Binding Path=GenreColumnWidth, Mode=TwoWay}">
+                                            <GridViewColumnHeader Content="Genre" />
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Foreground="White"
+                                                               Text="{Binding Path=Genre}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                            <TextBlock HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontSize="22"
+                                       Text="Add songs to the library by going to Settings -&gt; Library -&gt; Change Library Path"
+                                       TextWrapping="Wrap"
+                                       Visibility="{Binding Path=LocalViewModel.ShowAddSongsHelperMessage,
+                                                            Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        </Grid>
                     </TabItem>
                     <TabItem Header="youtube" IsSelected="{Binding Path=IsYoutube}">
                         <Grid DataContext="{Binding Path=YoutubeViewModel}">

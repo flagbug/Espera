@@ -1,10 +1,15 @@
-﻿using Rareform.IO;
-using Rareform.Validation;
+﻿using Rareform.Validation;
+using ReactiveUI;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using TagLib;
+using File = TagLib.File;
 
 namespace Espera.Core
 {
@@ -15,23 +20,31 @@ namespace Espera.Core
     {
         private static readonly string[] AllowedExtensions = { ".mp3", ".wav", ".m4a", ".aac" };
         private readonly string directoryPath;
+        private readonly IFileSystem fileSystem;
 
-        public LocalSongFinder(string directoryPath)
+        public LocalSongFinder(string directoryPath, IFileSystem fileSystem)
         {
             if (directoryPath == null)
                 Throw.ArgumentNullException(() => directoryPath);
 
+            if (fileSystem == null)
+                throw new ArgumentNullException("fileSystem");
+
             this.directoryPath = directoryPath;
+            this.fileSystem = fileSystem;
         }
 
         /// <summary>
-        /// This method scans the directory, specified in the constructor, and returns an observable with a tuple that contains the song and the data of the artwork.
+        /// This method scans the directory, specified in the constructor,
+        /// and returns an observable with a tuple that contains the song and the data of the artwork.
         /// </summary>
-        public IObservable<Tuple<LocalSong, byte[]>> GetSongs()
+        public IObservable<Tuple<LocalSong, byte[]>> GetSongsAsync()
         {
-            return this.ScanDirectoryForValidPaths()
+            return this.ScanDirectoryForValidPaths(this.directoryPath)
                 .Select(this.ProcessFile)
-                .Where(t => t != null);
+                .Where(t => t != null)
+                .ToObservable(Scheduler.Immediate)
+                .SubscribeOn(RxApp.TaskpoolScheduler);
         }
 
         private static Tuple<LocalSong, byte[]> CreateSong(Tag tag, TimeSpan duration, string filePath)
@@ -59,51 +72,84 @@ namespace Espera.Core
         {
             try
             {
-                using (var file = TagLib.File.Create(filePath))
+                using (var fileAbstraction = new TagLibFileAbstraction(filePath, this.fileSystem))
                 {
-                    if (file != null && file.Tag != null)
+                    using (var file = File.Create(fileAbstraction))
                     {
-                        return CreateSong(file.Tag, file.Properties.Duration, file.Name);
-                    }
+                        if (file != null && file.Tag != null)
+                        {
+                            return CreateSong(file.Tag, file.Properties.Duration, file.Name);
+                        }
 
-                    return null;
+                        return null;
+                    }
                 }
             }
 
-            catch (CorruptFileException)
-            {
-                return null;
-            }
-
-            catch (IOException)
+            catch (Exception)
             {
                 return null;
             }
         }
 
-        private IObservable<string> ScanDirectoryForValidPaths()
+        private IEnumerable<string> ScanDirectoryForValidPaths(string rootPath)
         {
-            return Observable.Create<string>(o =>
+            IEnumerable<string> files = Enumerable.Empty<string>();
+
+            try
             {
-                var scanner = new DirectoryScanner(this.directoryPath);
+                files = this.fileSystem.Directory.GetFiles(rootPath)
+                     .Where(x => AllowedExtensions.Contains(Path.GetExtension(x).ToLowerInvariant())); ;
+            }
 
-                IDisposable sub = Observable.FromEventPattern<FileEventArgs>(
-                    handler => scanner.FileFound += handler,
-                    handler => scanner.FileFound -= handler)
-                .Select(x => x.EventArgs.File)
-                .Where(file => AllowedExtensions.Contains(file.Extension.ToLowerInvariant()))
-                .Subscribe(file => o.OnNext(file.FullName));
+            catch (Exception)
+            { }
 
-                scanner.Finished += (sender, args) =>
-                {
-                    sub.Dispose();
-                    o.OnCompleted();
-                };
+            IEnumerable<string> directories = Enumerable.Empty<string>();
 
-                scanner.Start();
+            try
+            {
+                directories = this.fileSystem.Directory.GetDirectories(rootPath);
+            }
+            catch (Exception)
+            { }
 
-                return scanner.Stop;
-            });
+            return files.Concat(directories.SelectMany(ScanDirectoryForValidPaths));
+        }
+
+        private class TagLibFileAbstraction : File.IFileAbstraction, IDisposable
+        {
+            public TagLibFileAbstraction(string path, IFileSystem fileSystem)
+            {
+                if (path == null)
+                    throw new ArgumentNullException("path");
+
+                if (fileSystem == null)
+                    throw new ArgumentNullException("fileSystem");
+
+                this.Name = path;
+
+                Stream stream = fileSystem.File.Open(path, FileMode.Open, FileAccess.ReadWrite);
+
+                this.ReadStream = stream;
+                this.WriteStream = stream;
+            }
+
+            public string Name { get; private set; }
+
+            public Stream ReadStream { get; private set; }
+
+            public Stream WriteStream { get; private set; }
+
+            public void CloseStream(Stream stream)
+            {
+                stream.Close();
+            }
+
+            public void Dispose()
+            {
+                this.ReadStream.Dispose();
+            }
         }
     }
 }

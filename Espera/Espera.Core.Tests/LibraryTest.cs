@@ -2,11 +2,16 @@
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Moq;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -103,7 +108,7 @@ namespace Espera.Core.Tests
             var fileSystem = new MockFileSystem();
             fileSystem.Directory.CreateDirectory("C://Test");
 
-            using (Library library = Helpers.CreateLibrary(fileSystem: fileSystem))
+            using (Library library = Helpers.CreateLibrary(fileSystem))
             {
                 library.ChangeSongSourcePath("C://Test", library.LocalAccessControl.RegisterLocalAccessToken());
                 Assert.Equal("C://Test", await library.SongSourcePath.FirstAsync());
@@ -116,6 +121,66 @@ namespace Espera.Core.Tests
             using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentException>(() => library.ChangeSongSourcePath("C://Test", library.LocalAccessControl.RegisterLocalAccessToken()));
+            }
+        }
+
+        [Fact]
+        public async Task ChangeSongSourcePathTriggersUpdate()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.Directory.CreateDirectory("C://Test");
+
+            using (var library = Helpers.CreateLibrary(fileSystem))
+            {
+                library.Initialize();
+
+                var updated = library.IsUpdating.FirstAsync(x => x).PublishLast();
+                updated.Connect();
+
+                library.ChangeSongSourcePath("C://Test");
+
+                await updated.Timeout(TimeSpan.FromSeconds(5));
+            }
+        }
+
+        [Fact]
+        public async Task ChangeToAdminChangesAccessModeToAdministratorIfPasswordIsCorrect()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                library.CreateAdmin("TestPassword");
+                library.ChangeToAdmin("TestPassword");
+
+                Assert.Equal(AccessMode.Administrator, await library.AccessMode.FirstAsync());
+            }
+        }
+
+        [Fact]
+        public void ChangeToAdminThrowsArgumentNullExceptionIfPasswordIsNull_()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                Assert.Throws<ArgumentNullException>(() => library.ChangeToAdmin(null));
+            }
+        }
+
+        [Fact]
+        public void ChangeToAdminThrowsWrongPasswordExceptionPasswordIsIncorrect()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                library.CreateAdmin("TestPassword");
+
+                Assert.Throws<WrongPasswordException>(() => library.ChangeToAdmin("WrongPassword"));
+            }
+        }
+
+        [Fact]
+        public void ChangeToPartyThrowsInvalidOperationExceptionIfAdministratorIsNotCreated()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                Assert.Throws<InvalidOperationException>(() => library.ChangeToParty());
             }
         }
 
@@ -167,6 +232,58 @@ namespace Espera.Core.Tests
             using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentNullException>(() => library.GetPlaylistByName(null));
+            }
+        }
+
+        [Fact]
+        public async Task InitializeFiresInitalUpdateAfterLibraryLoad()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.Directory.CreateDirectory("C://Test");
+
+            var readerFired = new Subject<int>();
+            var reader = new Mock<ILibraryReader>();
+            reader.SetupGet(x => x.LibraryExists).Returns(true);
+            reader.Setup(x => x.ReadPlaylists()).Returns(new List<Playlist>());
+            reader.Setup(x => x.ReadSongSourcePath()).Returns(String.Empty);
+            reader.Setup(x => x.ReadSongs()).Callback(() => readerFired.OnNext(1)).Returns(new List<LocalSong>()).Verifiable();
+
+            using (var library = Helpers.CreateLibrary(null, reader.Object, null, fileSystem))
+            {
+                library.ChangeSongSourcePath("C://Test");
+
+                var isUpdating = library.IsUpdating.FirstAsync(x => x).Select(x => 2).PublishLast();
+                isUpdating.Connect();
+
+                var first = readerFired.Amb(isUpdating).FirstAsync().PublishLast();
+                first.Connect();
+
+                library.Initialize();
+
+                Assert.Equal(1, await first.Timeout(TimeSpan.FromSeconds(5)));
+            }
+        }
+
+        [Fact]
+        public async Task IsUpdatingSmokeTest()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.Directory.CreateDirectory("C://Test");
+
+            using (var library = Helpers.CreateLibrary(fileSystem))
+            {
+                library.ChangeSongSourcePath("C://Test");
+
+                var isUpdating = library.IsUpdating.CreateCollection();
+
+                var last = library.IsUpdating.Where(x => !x).ElementAt(1).PublishLast();
+                last.Connect();
+
+                library.Initialize();
+
+                await last.Timeout(TimeSpan.FromSeconds(5));
+
+                Assert.Equal(new[] { false, true, false }, isUpdating);
             }
         }
 
@@ -650,11 +767,49 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public void SwitchToPlaylistThrowsArgumentNullExceptionIfPlaylistIsNull()
+        public async Task UpdateNowTriggersUpdate()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.Directory.CreateDirectory("C://Test");
+
+            using (var library = Helpers.CreateLibrary(fileSystem))
+            {
+                library.Initialize();
+
+                var firstUpdateFinished = library.IsUpdating.Where(x => !x).ElementAt(1).PublishLast();
+                firstUpdateFinished.Connect();
+
+                library.ChangeSongSourcePath("C://Test");
+
+                await firstUpdateFinished.Timeout(TimeSpan.FromSeconds(5));
+
+                var updated = library.IsUpdating.FirstAsync(x => x).PublishLast();
+                updated.Connect();
+
+                library.UpdateNow();
+
+                await updated.Timeout(TimeSpan.FromSeconds(5));
+            }
+        }
+
+        [Fact]
+        public void YoutubeDownloadPathSetterThrowsArgumentExceptionIfDirectoryDoesntExist()
         {
             using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentNullException>(() => library.SwitchToPlaylist(null, library.LocalAccessControl.RegisterLocalAccessToken()));
+            }
+        }
+
+        [Fact]
+        public void YoutubeDownloadPathSmokeTest()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.Directory.CreateDirectory("C://Test");
+
+            using (Library library = Helpers.CreateLibrary(fileSystem))
+            {
+                library.YoutubeDownloadPath = "C://Test";
             }
         }
     }
