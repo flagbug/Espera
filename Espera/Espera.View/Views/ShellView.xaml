@@ -6,6 +6,7 @@
                       xmlns:Views="clr-namespace:Espera.View.Views"
                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                      xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                       Title="Espera"
                       Width="800"
                       Height="600"
@@ -339,7 +340,13 @@
                             <ListView ContextMenuOpening="SongListContextMenuOpening"
                                       DataContext="{Binding Path=LocalViewModel}"
                                       ItemsSource="{Binding Source={StaticResource SongsCollectionViewSource}}"
-                                      SelectionChanged="SongListSelectionChanged">
+                                      x:Name="LocalSongs">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectionChanged">
+                                        <i:InvokeCommandAction Command="{Binding Path=SelectionChangedCommand}"
+                                                               CommandParameter="{Binding ElementName=LocalSongs, Path=SelectedItems}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
                                 <ListView.Style>
                                     <Style BasedOn="{StaticResource VirtualisedListView}" TargetType="{x:Type ListView}">
                                         <Setter Property="SelectionMode" Value="Extended" />
@@ -429,7 +436,13 @@
                             <ListView ContextMenuOpening="SongListContextMenuOpening"
                                       IsSynchronizedWithCurrentItem="True"
                                       ItemsSource="{Binding Path=SelectableSongs}"
-                                      SelectionChanged="SongListSelectionChanged">
+                                      x:Name="YoutubeSongs">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectionChanged">
+                                        <i:InvokeCommandAction Command="{Binding Path=SelectionChangedCommand}"
+                                                               CommandParameter="{Binding ElementName=YoutubeSongs, Path=SelectedItems}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
                                 <ListView.Style>
                                     <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="{x:Type ListView}">
                                         <Setter Property="SelectionMode" Value="Extended" />

@@ -186,11 +186,6 @@ namespace Espera.View.Views
             }
         }
 
-        private void SongListSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            this.shellViewModel.CurrentSongSource.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModelBase>();
-        }
-
         private void SortYoutubeSongDuration(object sender, RoutedEventArgs e)
         {
             this.shellViewModel.YoutubeViewModel.OrderByDuration();

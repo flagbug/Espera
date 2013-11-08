@@ -1,6 +1,7 @@
 ﻿using Espera.Core.Management;
 using ReactiveUI;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
@@ -50,6 +51,11 @@ namespace Espera.View.ViewModels
                 }
             });
 
+            this.SelectionChangedCommand = new ReactiveCommand();
+            this.SelectionChangedCommand.Where(x => x != null)
+                .Select(x => ((IEnumerable)x).Cast<T>())
+                .Subscribe(x => this.SelectedSongs = x);
+
             this.isAdmin = this.Library.AccessMode
                 .Select(x => x == AccessMode.Administrator)
                 .ToProperty(this, x => x.IsAdmin);
@@ -81,6 +87,8 @@ namespace Espera.View.ViewModels
             get { return this.selectedSongs; }
             set { this.RaiseAndSetIfChanged(ref this.selectedSongs, value); }
         }
+
+        public ReactiveCommand SelectionChangedCommand { get; set; }
 
         public IObservable<Unit> TimeoutWarning
         {
