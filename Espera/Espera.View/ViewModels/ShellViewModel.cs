@@ -482,7 +482,7 @@ namespace Espera.View.ViewModels
         {
             int index = this.Playlists.TakeWhile(p => p != this.CurrentPlaylist).Count();
 
-            this.library.RemovePlaylist(this.CurrentPlaylist.Model);
+            this.library.RemovePlaylist(this.CurrentPlaylist.Model, this.accessToken);
 
             if (!this.library.Playlists.Any())
             {

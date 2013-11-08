@@ -116,7 +116,6 @@
     <Compile Include="Management\AccessControl.cs" />
     <Compile Include="Management\AccessException.cs" />
     <Compile Include="IYoutubeSongFinder.cs" />
-    <Compile Include="Management\AccessMode.cs" />
     <Compile Include="Audio\AudioPlayerState.cs" />
     <Compile Include="Audio\AudioPlayer.cs" />
     <Compile Include="Management\AccessPermission.cs" />

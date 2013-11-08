@@ -667,7 +667,7 @@ namespace Espera.Core.Management
 
         private async Task RemoveMissingSongsAsync(string currentPath)
         {
-            List<Song> currentSongs = this.Songs.ToList();
+            List<LocalSong> currentSongs = this.Songs.ToList();
 
             List<LocalSong> notInAnySongSource = currentSongs
                 .Where(song => !song.OriginalPath.StartsWith(currentPath))

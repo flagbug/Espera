@@ -28,7 +28,7 @@ namespace Espera.View.ViewModels
         private SortOrder titleOrder;
         private SortOrder viewsOrder;
 
-        public YoutubeViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, Guid accessToken)
+        public YoutubeViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, Guid accessToken, INetworkStatus networkstatus = null, IYoutubeSongFinder songFinder = null)
             : base(library, accessToken)
         {
             if (viewSettings == null)
