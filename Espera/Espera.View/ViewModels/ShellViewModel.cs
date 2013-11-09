@@ -81,6 +81,7 @@ namespace Espera.View.ViewModels
             this.SettingsViewModel = new SettingsViewModel(this.library, this.ViewSettings, this.coreSettings, windowManager, this.accessToken);
 
             this.LocalViewModel = new LocalViewModel(this.library, this.ViewSettings, this.coreSettings, accessToken);
+            this.YoutubeViewModel = new YoutubeViewModel(this.library, this.ViewSettings, this.coreSettings, accessToken);
 
             Observable.Interval(TimeSpan.FromMilliseconds(300), RxApp.TaskpoolScheduler)
                 .Where(_ => this.RemainingPlaylistTimeout > TimeSpan.Zero)
