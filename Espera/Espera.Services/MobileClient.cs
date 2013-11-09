@@ -62,7 +62,8 @@ namespace Espera.Services
                 {"post-pause-song", this.PostPauseSong},
                 {"post-play-next-song", this.PostPlayNextSong},
                 {"post-play-previous-song", this.PostPlayPreviousSong},
-                {"get-playback-state", this.GetPlaybackState}
+                {"get-playback-state", this.GetPlaybackState},
+                {"post-remove-playlist-song", this.PostRemovePlaylistSong}
             };
 
             this.Disconnected = Observable.FromEventPattern(h => this.socket.Disconnected += h, h => this.socket.Disconnected -= h)
@@ -355,6 +356,22 @@ namespace Espera.Services
             }
 
             return CreateResponse(200, "Ok");
+        }
+
+        private Task<JObject> PostRemovePlaylistSong(JToken parameters)
+        {
+            Guid songGuid = Guid.Parse(parameters["entryGuid"].ToString());
+
+            PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
+
+            if (entry != null)
+            {
+                this.library.RemoveFromPlaylist(new[] { entry.Index }, this.accessToken);
+
+                return Task.FromResult(CreateResponse(200, "Ok"));
+            }
+
+            return Task.FromResult(CreateResponse(400, "Guid not found"));
         }
 
         private async Task PushPlaybackState(AudioPlayerState state)
