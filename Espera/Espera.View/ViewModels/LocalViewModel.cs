@@ -173,6 +173,11 @@ namespace Espera.View.ViewModels
             {
                 this.SelectableSongs = selectableSongs;
             }
+
+            if (this.SelectedSongs == null)
+            {
+                this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
+            }
         }
     }
 }
