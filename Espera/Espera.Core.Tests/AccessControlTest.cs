@@ -36,27 +36,6 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public void LockRemoteControlOnlyUpdatesRemoteAccessPermissions()
-        {
-            var settings = new CoreSettings
-            {
-                LockRemoteControl = false
-            };
-
-            var accessControl = new AccessControl(settings);
-
-            Guid localToken = accessControl.RegisterLocalAccessToken();
-
-            Guid remoteToken = accessControl.RegisterRemoteAccessToken();
-            var remotePermissions = accessControl.ObserveAccessPermission(remoteToken).CreateCollection();
-
-            settings.LockRemoteControl = true;
-
-            Assert.Equal(AccessPermission.Admin, accessControl.ObserveAccessPermission(localToken).FirstAsync().Wait());
-            Assert.Equal(new[] { AccessPermission.Admin, AccessPermission.Guest }, remotePermissions);
-        }
-
-        [Fact]
         public void ObserveAccessPermissionSmokeTest()
         {
             var settings = new CoreSettings
@@ -66,15 +45,13 @@ namespace Espera.Core.Tests
 
             var accessControl = new AccessControl(settings);
 
-            Guid token = accessControl.RegisterRemoteAccessToken();
+            Guid token = accessControl.RegisterLocalAccessToken();
 
-            var conn = accessControl.ObserveAccessPermission(token).Replay();
-            conn.Connect();
+            var permissions = accessControl.ObserveAccessPermission(token).CreateCollection();
 
-            settings.LockRemoteControl = true;
-            settings.LockRemoteControl = false;
-
-            var permissions = conn.CreateCollection();
+            accessControl.SetLocalPassword(token, "password");
+            accessControl.DowngradeLocalAccess(token);
+            accessControl.UpgradeLocalAccess(token, "password");
 
             Assert.Equal(new[] { AccessPermission.Admin, AccessPermission.Guest, AccessPermission.Admin }, permissions);
         }
@@ -87,27 +64,6 @@ namespace Espera.Core.Tests
             var accessControl = new AccessControl(settings);
 
             Assert.Throws<ArgumentException>(() => accessControl.ObserveAccessPermission(Guid.NewGuid()));
-        }
-
-        [Fact]
-        public void RemoteControlLockUpdatesAccessPermission()
-        {
-            var settings = new CoreSettings
-            {
-                LockRemoteControl = false
-            };
-
-            var accessControl = new AccessControl(settings);
-
-            Guid token1 = accessControl.RegisterRemoteAccessToken();
-            Guid token2 = accessControl.RegisterRemoteAccessToken();
-
-            accessControl.VerifyAccess(token1);
-            accessControl.VerifyAccess(token2);
-
-            settings.LockRemoteControl = true;
-            Assert.Throws<AccessException>(() => accessControl.VerifyAccess(token1));
-            Assert.Throws<AccessException>(() => accessControl.VerifyAccess(token2));
         }
 
         [Fact]
@@ -148,6 +104,28 @@ namespace Espera.Core.Tests
             Guid token = accessControl.RegisterRemoteAccessToken();
 
             Assert.Throws<ArgumentException>(() => accessControl.SetLocalPassword(token, "password123"));
+        }
+
+        [Fact]
+        public void SetRemoteControlPasswordOnlyUpdatesRemoteAccessPermissions()
+        {
+            var settings = new CoreSettings
+            {
+                LockRemoteControl = true,
+                RemoteControlPassword = null
+            };
+
+            var accessControl = new AccessControl(settings);
+
+            Guid localToken = accessControl.RegisterLocalAccessToken();
+
+            Guid remoteToken = accessControl.RegisterRemoteAccessToken();
+            var remotePermissions = accessControl.ObserveAccessPermission(remoteToken).CreateCollection();
+
+            accessControl.SetRemotePassword(localToken, "password");
+
+            Assert.Equal(AccessPermission.Admin, accessControl.ObserveAccessPermission(localToken).FirstAsync().Wait());
+            Assert.Equal(new[] { AccessPermission.Admin, AccessPermission.Guest }, remotePermissions);
         }
 
         [Fact]

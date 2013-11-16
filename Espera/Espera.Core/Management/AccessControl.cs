@@ -18,7 +18,6 @@ namespace Espera.Core.Management
         private readonly HashSet<AccessEndPoint> endPoints;
 
         private string localPassword;
-        private string remotePassword;
 
         public AccessControl(CoreSettings coreSettings)
         {
@@ -29,9 +28,6 @@ namespace Espera.Core.Management
 
             this.endPoints = new HashSet<AccessEndPoint>();
             this.endPointLock = new ReaderWriterLockSlim();
-
-            this.coreSettings.WhenAnyValue(x => x.LockRemoteControl)
-                .Subscribe(x => this.UpdateRemoteAccessPermissions(x ? AccessPermission.Guest : AccessPermission.Admin));
         }
 
         public void DowngradeLocalAccess(Guid accessToken)
@@ -62,7 +58,7 @@ namespace Espera.Core.Management
         {
             this.Log().Info("Creating remote access token");
 
-            return this.RegisterToken(AccessType.Remote, this.coreSettings.LockRemoteControl ? AccessPermission.Guest : AccessPermission.Admin);
+            return this.RegisterToken(AccessType.Remote, this.GetDefaultRemoteAccessPermission());
         }
 
         public void SetLocalPassword(Guid accessToken, string password)
@@ -98,7 +94,9 @@ namespace Espera.Core.Management
             if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentException("Password is invalid");
 
-            this.remotePassword = password;
+            this.coreSettings.RemoteControlPassword = password;
+
+            this.UpdateRemoteAccessPermissions(AccessPermission.Guest);
         }
 
         public void UpgradeLocalAccess(Guid accessToken, string password)
@@ -142,6 +140,12 @@ namespace Espera.Core.Management
 
             if (endPoint.AccessType == AccessType.Remote || endPoint.AccessType == AccessType.Local && localRestrictionCombinator)
                 throw new AccessException();
+        }
+
+        private AccessPermission GetDefaultRemoteAccessPermission()
+        {
+            return this.coreSettings.LockRemoteControl && !String.IsNullOrWhiteSpace(this.coreSettings.RemoteControlPassword) ?
+                AccessPermission.Guest : AccessPermission.Admin;
         }
 
         private Guid RegisterToken(AccessType accessType, AccessPermission permission)

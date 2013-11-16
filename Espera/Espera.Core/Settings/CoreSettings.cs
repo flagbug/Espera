@@ -1,4 +1,5 @@
 ﻿using Akavache;
+using Espera.Core.Management;
 using System;
 
 namespace Espera.Core.Settings
@@ -69,6 +70,9 @@ namespace Espera.Core.Settings
             set { this.SetOrCreate(value); }
         }
 
+        /// <summary>
+        /// Set this property through the <see cref="AccessControl"/> class.
+        /// </summary>
         public string RemoteControlPassword
         {
             get { return this.GetOrCreateSecure((string)null); }

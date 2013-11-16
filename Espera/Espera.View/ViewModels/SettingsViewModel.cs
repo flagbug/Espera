@@ -120,7 +120,8 @@ namespace Espera.View.ViewModels
             this.ChangeRemoteControlPasswordCommand = this.WhenAnyValue(x => x.RemoteControlPassword)
                 .Select(x => !String.IsNullOrWhiteSpace(x))
                 .ToCommand();
-            this.ChangePortCommand.Subscribe(x => this.coreSettings.RemoteControlPassword = this.RemoteControlPassword);
+            this.ChangeRemoteControlPasswordCommand.Subscribe(x =>
+                this.library.RemoteAccessControl.SetRemotePassword(this.accessToken, this.RemoteControlPassword));
         }
 
         public static IEnumerable<YoutubeStreamingQuality> YoutubeStreamingQualities
