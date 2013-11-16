@@ -5,11 +5,8 @@ using Moq;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -137,50 +134,11 @@ namespace Espera.Core.Tests
                 var updated = library.IsUpdating.FirstAsync(x => x).PublishLast();
                 updated.Connect();
 
-                library.ChangeSongSourcePath("C://Test");
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                library.ChangeSongSourcePath("C://Test", token);
 
                 await updated.Timeout(TimeSpan.FromSeconds(5));
-            }
-        }
-
-        [Fact]
-        public async Task ChangeToAdminChangesAccessModeToAdministratorIfPasswordIsCorrect()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.CreateAdmin("TestPassword");
-                library.ChangeToAdmin("TestPassword");
-
-                Assert.Equal(AccessMode.Administrator, await library.AccessMode.FirstAsync());
-            }
-        }
-
-        [Fact]
-        public void ChangeToAdminThrowsArgumentNullExceptionIfPasswordIsNull_()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentNullException>(() => library.ChangeToAdmin(null));
-            }
-        }
-
-        [Fact]
-        public void ChangeToAdminThrowsWrongPasswordExceptionPasswordIsIncorrect()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.CreateAdmin("TestPassword");
-
-                Assert.Throws<WrongPasswordException>(() => library.ChangeToAdmin("WrongPassword"));
-            }
-        }
-
-        [Fact]
-        public void ChangeToPartyThrowsInvalidOperationExceptionIfAdministratorIsNotCreated()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<InvalidOperationException>(() => library.ChangeToParty());
             }
         }
 
@@ -250,7 +208,9 @@ namespace Espera.Core.Tests
 
             using (var library = Helpers.CreateLibrary(null, reader.Object, null, fileSystem))
             {
-                library.ChangeSongSourcePath("C://Test");
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                library.ChangeSongSourcePath("C://Test", token);
 
                 var isUpdating = library.IsUpdating.FirstAsync(x => x).Select(x => 2).PublishLast();
                 isUpdating.Connect();
@@ -272,7 +232,9 @@ namespace Espera.Core.Tests
 
             using (var library = Helpers.CreateLibrary(fileSystem))
             {
-                library.ChangeSongSourcePath("C://Test");
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                library.ChangeSongSourcePath("C://Test", token);
 
                 var isUpdating = library.IsUpdating.CreateCollection();
 
@@ -779,7 +741,9 @@ namespace Espera.Core.Tests
                 var firstUpdateFinished = library.IsUpdating.Where(x => !x).ElementAt(1).PublishLast();
                 firstUpdateFinished.Connect();
 
-                library.ChangeSongSourcePath("C://Test");
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                library.ChangeSongSourcePath("C://Test", token);
 
                 await firstUpdateFinished.Timeout(TimeSpan.FromSeconds(5));
 
@@ -798,18 +762,6 @@ namespace Espera.Core.Tests
             using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentNullException>(() => library.SwitchToPlaylist(null, library.LocalAccessControl.RegisterLocalAccessToken()));
-            }
-        }
-
-        [Fact]
-        public void YoutubeDownloadPathSmokeTest()
-        {
-            var fileSystem = new MockFileSystem();
-            fileSystem.Directory.CreateDirectory("C://Test");
-
-            using (Library library = Helpers.CreateLibrary(fileSystem))
-            {
-                library.YoutubeDownloadPath = "C://Test";
             }
         }
     }
