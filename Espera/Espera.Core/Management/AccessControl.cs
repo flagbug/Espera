@@ -18,6 +18,7 @@ namespace Espera.Core.Management
         private readonly HashSet<AccessEndPoint> endPoints;
 
         private string localPassword;
+        private string remotePassword;
 
         public AccessControl(CoreSettings coreSettings)
         {
@@ -54,14 +55,14 @@ namespace Espera.Core.Management
         {
             this.Log().Info("Creating local access token.");
 
-            return this.RegisterDefaultToken(AccessType.Local, AccessPermission.Admin);
+            return this.RegisterToken(AccessType.Local, AccessPermission.Admin);
         }
 
         public Guid RegisterRemoteAccessToken()
         {
             this.Log().Info("Creating remote access token");
 
-            return this.RegisterDefaultToken(AccessType.Remote, this.coreSettings.LockRemoteControl ? AccessPermission.Guest : AccessPermission.Admin);
+            return this.RegisterToken(AccessType.Remote, this.coreSettings.LockRemoteControl ? AccessPermission.Guest : AccessPermission.Admin);
         }
 
         public void SetLocalPassword(Guid accessToken, string password)
@@ -80,6 +81,24 @@ namespace Espera.Core.Management
                 throw new ArgumentException("Password is invalid");
 
             this.localPassword = password;
+        }
+
+        public void SetRemotePassword(Guid accessToken, string password)
+        {
+            AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
+
+            if (endPoint.AccessType == AccessType.Remote)
+                throw new ArgumentException("Access token is a remote token!");
+
+            this.VerifyAccess(accessToken);
+
+            if (password == null)
+                throw new ArgumentNullException("password");
+
+            if (string.IsNullOrWhiteSpace(password))
+                throw new ArgumentException("Password is invalid");
+
+            this.remotePassword = password;
         }
 
         public void UpgradeLocalAccess(Guid accessToken, string password)
@@ -125,7 +144,7 @@ namespace Espera.Core.Management
                 throw new AccessException();
         }
 
-        private Guid RegisterDefaultToken(AccessType accessType, AccessPermission permission)
+        private Guid RegisterToken(AccessType accessType, AccessPermission permission)
         {
             var token = Guid.NewGuid();
 
@@ -184,7 +203,7 @@ namespace Espera.Core.Management
 
             public override int GetHashCode()
             {
-                return new { A = this.AccessToken }.GetHashCode();
+                return new { A = this.AccessToken, B = this.AccessType }.GetHashCode();
             }
 
             public void SetAccessPermission(AccessPermission permission)
