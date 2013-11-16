@@ -36,6 +36,27 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public void LockRemoteControlOnlyUpdatesRemoteAccessPermissions()
+        {
+            var settings = new CoreSettings
+            {
+                LockRemoteControl = false
+            };
+
+            var accessControl = new AccessControl(settings);
+
+            Guid localToken = accessControl.RegisterLocalAccessToken();
+
+            Guid remoteToken = accessControl.RegisterRemoteAccessToken();
+            var remotePermissions = accessControl.ObserveAccessPermission(remoteToken).CreateCollection();
+
+            settings.LockRemoteControl = true;
+
+            Assert.Equal(AccessPermission.Admin, accessControl.ObserveAccessPermission(localToken).FirstAsync().Wait());
+            Assert.Equal(new[] { AccessPermission.Admin, AccessPermission.Guest }, remotePermissions);
+        }
+
+        [Fact]
         public void ObserveAccessPermissionSmokeTest()
         {
             var settings = new CoreSettings

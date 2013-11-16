@@ -158,7 +158,10 @@ namespace Espera.Core.Management
         private void UpdateRemoteAccessPermissions(AccessPermission permission)
         {
             this.endPointLock.EnterReadLock();
-            this.endPoints.ForEach(x => x.SetAccessPermission(permission));
+
+            this.endPoints.Where(x => x.AccessType == AccessType.Remote)
+                .ForEach(x => x.SetAccessPermission(permission));
+
             this.endPointLock.ExitReadLock();
         }
 
