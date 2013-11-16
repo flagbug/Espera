@@ -76,9 +76,7 @@ namespace Espera.Core.Tests
 
             var permissions = conn.CreateCollection();
 
-            Assert.Equal(AccessPermission.Admin, permissions[0]);
-            Assert.Equal(AccessPermission.Guest, permissions[1]);
-            Assert.Equal(AccessPermission.Admin, permissions[2]);
+            Assert.Equal(new[] { AccessPermission.Admin, AccessPermission.Guest, AccessPermission.Admin }, permissions);
         }
 
         [Fact]
