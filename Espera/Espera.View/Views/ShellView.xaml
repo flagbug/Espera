@@ -271,9 +271,14 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0"
-                           Style="{StaticResource ArtistsHeaderStyle}"
-                           Text="artists" />
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource ArtistsHeaderStyle}"
+                               Text="artists" />
+                    <Controls:ProgressRing Margin="20, 15, 0, 0"
+                                           Width="35"
+                                           Height="35"
+                                           IsActive="{Binding Path=LocalViewModel.IsUpdating, Mode=OneWay}" />
+                </StackPanel>
                 <ListBox Grid.Row="1"
                          DataContext="{Binding Path=LocalViewModel}"
                          FocusVisualStyle="{x:Null}"

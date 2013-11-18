@@ -17,6 +17,7 @@ namespace Espera.View.ViewModels
         private readonly ArtistViewModel allArtistsViewModel;
         private readonly Subject<Unit> artistUpdateSignal;
         private readonly object gate;
+        private readonly ObservableAsPropertyHelper<bool> isUpdating;
         private readonly IReactiveCommand playNowCommand;
         private readonly ObservableAsPropertyHelper<bool> showAddSongsHelperMessage;
         private readonly ViewSettings viewSettings;
@@ -75,6 +76,8 @@ namespace Espera.View.ViewModels
             this.showAddSongsHelperMessage = this.WhenAnyValue(x => x.SelectableSongs, x => x.SearchText,
                     (x1, x2) => !x1.Any() && String.IsNullOrEmpty(x2))
                 .ToProperty(this, x => x.ShowAddSongsHelperMessage);
+
+            this.isUpdating = this.Library.IsUpdating.ToProperty(this, x => x.IsUpdating);
         }
 
         public IReactiveDerivedList<ArtistViewModel> Artists { get; private set; }
@@ -89,6 +92,11 @@ namespace Espera.View.ViewModels
         {
             get { return this.viewSettings.LocalGenreColumnWidth; }
             set { this.viewSettings.LocalGenreColumnWidth = value; }
+        }
+
+        public bool IsUpdating
+        {
+            get { return this.isUpdating.Value; }
         }
 
         public override IReactiveCommand PlayNowCommand
