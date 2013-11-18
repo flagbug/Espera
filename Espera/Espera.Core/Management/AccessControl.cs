@@ -11,6 +11,9 @@ using System.Threading;
 
 namespace Espera.Core.Management
 {
+    /// <summary>
+    /// Provides methods to manage access privileges for the local and remote (mobile) users.
+    /// </summary>
     internal class AccessControl : IEnableLogger, ILocalAccessControl, IRemoteAccessControl
     {
         private readonly CoreSettings coreSettings;
@@ -47,6 +50,9 @@ namespace Espera.Core.Management
             return endPoint.AccessPermission;
         }
 
+        /// <summary>
+        /// Registers a new local access token with default admin rights.
+        /// </summary>
         public Guid RegisterLocalAccessToken()
         {
             this.Log().Info("Creating local access token.");
@@ -54,6 +60,9 @@ namespace Espera.Core.Management
             return this.RegisterToken(AccessType.Local, AccessPermission.Admin);
         }
 
+        /// <summary>
+        /// Registers a new remote access token which's default reights depend on the <see cref="CoreSettings.LockRemoteControl"/> setting.
+        /// </summary>
         public Guid RegisterRemoteAccessToken()
         {
             this.Log().Info("Creating remote access token");
