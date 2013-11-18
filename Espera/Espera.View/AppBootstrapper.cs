@@ -5,6 +5,9 @@ using Espera.Core.Settings;
 using Espera.View.ViewModels;
 using Microsoft.WindowsAPICodePack.Shell;
 using Ninject;
+using NLog.Config;
+using ReactiveUI;
+using ReactiveUI.NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,17 +18,19 @@ using System.Windows.Threading;
 
 namespace Espera.View
 {
-    internal class AppBootstrapper : Bootstrapper<ShellViewModel>
+    internal class AppBootstrapper : Bootstrapper<ShellViewModel>, IEnableLogger
     {
         private static readonly string DirectoryPath;
-        private static readonly string FilePath;
+        private static readonly string LibraryFilePath;
+        private static readonly string LogFilePath;
         private readonly WindowManager windowManager;
         private IKernel kernel;
 
         static AppBootstrapper()
         {
             DirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\");
-            FilePath = Path.Combine(DirectoryPath, "Library.xml");
+            LibraryFilePath = Path.Combine(DirectoryPath, "Library.xml");
+            LogFilePath = Path.Combine(DirectoryPath, "Log.txt");
             BlobCache.ApplicationName = "Espera";
         }
 
@@ -37,8 +42,8 @@ namespace Espera.View
         protected override void Configure()
         {
             this.kernel = new StandardKernel();
-            this.kernel.Bind<ILibraryReader>().To<LibraryFileReader>().WithConstructorArgument("sourcePath", FilePath);
-            this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", FilePath);
+            this.kernel.Bind<ILibraryReader>().To<LibraryFileReader>().WithConstructorArgument("sourcePath", LibraryFilePath);
+            this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", LibraryFilePath);
             this.kernel.Bind<ViewSettings>().To<ViewSettings>().InSingletonScope().WithConstructorArgument("blobCache", BlobCache.LocalMachine);
             this.kernel.Bind<CoreSettings>().To<CoreSettings>().InSingletonScope().WithConstructorArgument("blobCache", BlobCache.LocalMachine)
                 .OnActivation(x =>
@@ -50,6 +55,9 @@ namespace Espera.View
                 });
             this.kernel.Bind<IFileSystem>().To<FileSystem>();
             this.kernel.Bind<IWindowManager>().To<WindowManager>();
+
+            SimpleConfigurator.ConfigureForFileLogging(LogFilePath);
+            RxApp.MutableResolver.RegisterConstant(new NLogLogger(NLog.LogManager.GetCurrentClassLogger()), typeof(ILogger));
         }
 
         protected override IEnumerable<object> GetAllInstances(Type serviceType)
@@ -71,6 +79,8 @@ namespace Espera.View
 
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
+            this.Log().Info("Espera is starting...");
+
             Directory.CreateDirectory(DirectoryPath);
 
             base.OnStartup(sender, e);
