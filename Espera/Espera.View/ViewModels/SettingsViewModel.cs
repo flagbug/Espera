@@ -139,6 +139,16 @@ namespace Espera.View.ViewModels
             get { return "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=K5AWR8EDG9QJY"; }
         }
 
+        public bool EnableAutomaticLibraryUpdates
+        {
+            get { return this.coreSettings.EnableAutomaticLibraryUpdates; }
+            set
+            {
+                this.coreSettings.EnableAutomaticLibraryUpdates = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
         public bool EnablePlaylistTimeout
         {
             get { return this.coreSettings.EnablePlaylistTimeout; }
