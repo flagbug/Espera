@@ -24,7 +24,6 @@ namespace Espera.Core.Management
         private readonly BehaviorSubject<AccessMode> accessModeSubject;
         private readonly AudioPlayer audioPlayer;
         private readonly Subject<Playlist> currentPlaylistChanged;
-        private readonly IRemovableDriveWatcher driveWatcher;
         private readonly IFileSystem fileSystem;
         private readonly BehaviorSubject<bool> isUpdating;
         private readonly ILibraryReader libraryReader;
@@ -45,9 +44,8 @@ namespace Espera.Core.Management
         private DateTime lastSongAddTime;
         private string password;
 
-        public Library(IRemovableDriveWatcher driveWatcher, ILibraryReader libraryReader, ILibraryWriter libraryWriter, CoreSettings settings, IFileSystem fileSystem)
+        public Library(ILibraryReader libraryReader, ILibraryWriter libraryWriter, CoreSettings settings, IFileSystem fileSystem)
         {
-            this.driveWatcher = driveWatcher;
             this.libraryReader = libraryReader;
             this.libraryWriter = libraryWriter;
             this.settings = settings;
@@ -431,8 +429,6 @@ namespace Espera.Core.Management
         {
             this.audioPlayer.Dispose();
 
-            this.driveWatcher.Dispose();
-
             if (this.currentSongFinderSubscription != null)
             {
                 this.currentSongFinderSubscription.Dispose();
@@ -454,13 +450,10 @@ namespace Espera.Core.Management
                 this.Load();
             }
 
-            this.driveWatcher.Initialize();
-
             IObservable<Unit> update = this.settings.WhenAnyValue(x => x.SongSourceUpdateInterval)
                 .Select(x => Observable.Interval(x, RxApp.TaskpoolScheduler))
                 .Switch()
                 .Select(_ => Unit.Default)
-                .Merge(this.driveWatcher.DriveRemoved)
                 .Merge(this.manualUpdateTrigger)
                 .StartWith(Unit.Default);
 

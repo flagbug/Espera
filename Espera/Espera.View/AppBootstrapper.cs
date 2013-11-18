@@ -37,7 +37,6 @@ namespace Espera.View
         protected override void Configure()
         {
             this.kernel = new StandardKernel();
-            this.kernel.Bind<IRemovableDriveWatcher>().To<RemovableDriveWatcher>();
             this.kernel.Bind<ILibraryReader>().To<LibraryFileReader>().WithConstructorArgument("sourcePath", FilePath);
             this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", FilePath);
             this.kernel.Bind<ViewSettings>().To<ViewSettings>().InSingletonScope().WithConstructorArgument("blobCache", BlobCache.LocalMachine);
