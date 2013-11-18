@@ -94,11 +94,12 @@
                                     Style="{StaticResource ColorPickerButtonStyle}" />
                         </StackPanel>
                         <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="scaling" />
-                        <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource SettingsTextStyle}" Text="Use this option whenever you have Espera displayed on a TV or any other big screen" />
+                        <StackPanel Orientation="Horizontal" Margin="0, 5, 0, 0">
                             <Slider Width="200"
                                     VerticalAlignment="Center"
                                     Maximum="2"
-                                    Minimum="0.5"
+                                    Minimum="1"
                                     Style="{StaticResource FlatSlider}"
                                     Value="{Binding Path=Scaling}" />
                             <TextBox Width="30"
