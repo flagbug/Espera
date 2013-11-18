@@ -75,6 +75,8 @@ namespace Espera.View
             this.kernel.Dispose();
 
             BlobCache.Shutdown().Wait();
+
+            NLog.LogManager.Shutdown();
         }
 
         protected override void OnStartup(object sender, StartupEventArgs e)
@@ -90,6 +92,8 @@ namespace Espera.View
         {
             if (Debugger.IsAttached)
                 return;
+
+            this.Log().FatalException("An unhandled exception occurred, opening the crash report", e.Exception);
 
             this.Application.MainWindow.Hide();
 
