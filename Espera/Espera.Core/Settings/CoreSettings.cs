@@ -10,6 +10,12 @@ namespace Espera.Core.Settings
             : base("__CoreSettings__", BlobCache.LocalMachine, BlobCache.Secure)
         { }
 
+        public bool EnableAutomaticLibraryUpdates
+        {
+            get { return this.GetOrCreate(true); }
+            set { this.SetOrCreate(value); }
+        }
+
         public bool EnablePlaylistTimeout
         {
             get { return this.GetOrCreate(true); }

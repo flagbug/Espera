@@ -1,10 +1,13 @@
 ﻿using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
+using Microsoft.Reactive.Testing;
 using Moq;
 using ReactiveUI;
+using ReactiveUI.Testing;
 using System;
 using System.Collections.Generic;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Reactive.Linq;
@@ -173,6 +176,30 @@ namespace Espera.Core.Tests
 
                 await Helpers.ThrowsAsync<AccessException>(async () => await library.ContinueSongAsync(token));
             }
+        }
+
+        [Fact]
+        public void DisabledAutomaticUpdatesDoesntTriggerUpdate()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            fileSystem.Setup(x => x.Directory.GetFiles(It.IsAny<string>())).Verifiable();
+
+            var settings = new CoreSettings
+            {
+                EnableAutomaticLibraryUpdates = false
+            };
+
+            using (Library library = Helpers.CreateLibrary(settings, null, null, fileSystem.Object))
+            {
+                (new TestScheduler()).With(scheduler =>
+                {
+                    library.Initialize();
+
+                    scheduler.AdvanceByMs(settings.SongSourceUpdateInterval.TotalMilliseconds);
+                });
+            }
+
+            fileSystem.Verify(x => x.Directory.GetFiles(It.IsAny<string>()), Times.Never);
         }
 
         [Fact]

@@ -120,7 +120,6 @@
     <Compile Include="Audio\AudioPlayer.cs" />
     <Compile Include="Management\AccessPermission.cs" />
     <Compile Include="Management\AccessType.cs" />
-    <Compile Include="Management\IDriveWatcher.cs" />
     <Compile Include="Management\ILibraryReader.cs" />
     <Compile Include="Management\ILibraryWriter.cs" />
     <Compile Include="Management\ILocalAccessControl.cs" />

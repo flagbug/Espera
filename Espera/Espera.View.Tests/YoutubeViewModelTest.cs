@@ -1,5 +1,4 @@
-﻿using Akavache;
-using Espera.Core;
+﻿using Espera.Core;
 using Espera.Core.Settings;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
@@ -31,7 +30,8 @@ namespace Espera.View.Tests
 
             using (var library = Helpers.CreateLibrary())
             {
-                var vm = new YoutubeViewModel(library, new ViewSettings(new TestBlobCache()), new CoreSettings(new TestBlobCache()), networkStatus.Object, songFinder.Object);
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus.Object, songFinder.Object);
 
                 isAvailable.OnNext(true);
 
@@ -55,7 +55,8 @@ namespace Espera.View.Tests
 
             using (var library = Helpers.CreateLibrary())
             {
-                var vm = new YoutubeViewModel(library, new ViewSettings(new TestBlobCache()), new CoreSettings(new TestBlobCache()), networkStatus.Object, songFinder.Object);
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus.Object, songFinder.Object);
 
                 Assert.Equal(songs, vm.SelectableSongs.Select(x => x.Model).ToList());
                 Assert.Equal(songs.First(), vm.SelectableSongs.First().Model);
@@ -75,7 +76,8 @@ namespace Espera.View.Tests
 
             using (var library = Helpers.CreateLibrary())
             {
-                var vm = new YoutubeViewModel(library, new ViewSettings(new TestBlobCache()), new CoreSettings(new TestBlobCache()), networkStatus.Object, songFinder.Object);
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus.Object, songFinder.Object);
 
                 var isNetworkUnavailable = vm.WhenAnyValue(x => x.IsNetworkUnavailable).CreateCollection();
 
@@ -96,7 +98,8 @@ namespace Espera.View.Tests
 
             using (var library = Helpers.CreateLibrary())
             {
-                var vm = new YoutubeViewModel(library, new ViewSettings(new TestBlobCache()), new CoreSettings(new TestBlobCache()), networkStatus.Object, songFinder.Object);
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus.Object, songFinder.Object);
 
                 var isSearching = vm.WhenAnyValue(x => x.IsSearching).CreateCollection();
 
@@ -118,7 +121,8 @@ namespace Espera.View.Tests
 
             using (var library = Helpers.CreateLibrary())
             {
-                var vm = new YoutubeViewModel(library, new ViewSettings(new TestBlobCache()), new CoreSettings(new TestBlobCache()), networkStatus.Object, songFinder.Object);
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus.Object, songFinder.Object);
 
                 var isNetworkUnavailable = vm.WhenAnyValue(x => x.IsNetworkUnavailable).CreateCollection();
 

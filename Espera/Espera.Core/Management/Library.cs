@@ -315,6 +315,7 @@ namespace Espera.Core.Management
                 .Select(x => Observable.Interval(x, RxApp.TaskpoolScheduler))
                 .Switch()
                 .Select(_ => Unit.Default)
+                .Where(_ => this.settings.EnableAutomaticLibraryUpdates)
                 .Merge(this.manualUpdateTrigger)
                 .StartWith(Unit.Default);
 
