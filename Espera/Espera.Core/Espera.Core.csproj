@@ -135,7 +135,6 @@
     <Compile Include="Management\Playlist.cs" />
     <Compile Include="LocalSong.cs" />
     <Compile Include="Audio\PlaybackException.cs" />
-    <Compile Include="Management\RemovableDriveWatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReactiveHelpers.cs" />
     <Compile Include="Settings\CoreSettings.cs" />

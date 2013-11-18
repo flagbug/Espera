@@ -5,27 +5,37 @@ using Espera.Core.Settings;
 using Espera.View.ViewModels;
 using Microsoft.WindowsAPICodePack.Shell;
 using Ninject;
+using NLog.Config;
+using NLog.Targets;
+using ReactiveUI;
+using ReactiveUI.NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Abstractions;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
 
 namespace Espera.View
 {
-    internal class AppBootstrapper : Bootstrapper<ShellViewModel>
+    internal class AppBootstrapper : Bootstrapper<ShellViewModel>, IEnableLogger
     {
         private static readonly string DirectoryPath;
-        private static readonly string FilePath;
+        private static readonly string LibraryFilePath;
+        private static readonly string LogFilePath;
+        private static readonly string Version;
         private readonly WindowManager windowManager;
         private IKernel kernel;
 
         static AppBootstrapper()
         {
             DirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\");
-            FilePath = Path.Combine(DirectoryPath, "Library.xml");
+            LibraryFilePath = Path.Combine(DirectoryPath, "Library.xml");
+            LogFilePath = Path.Combine(DirectoryPath, "Log.txt");
+            Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             BlobCache.ApplicationName = "Espera";
         }
 
@@ -37,9 +47,8 @@ namespace Espera.View
         protected override void Configure()
         {
             this.kernel = new StandardKernel();
-            this.kernel.Bind<IRemovableDriveWatcher>().To<RemovableDriveWatcher>();
-            this.kernel.Bind<ILibraryReader>().To<LibraryFileReader>().WithConstructorArgument("sourcePath", FilePath);
-            this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", FilePath);
+            this.kernel.Bind<ILibraryReader>().To<LibraryFileReader>().WithConstructorArgument("sourcePath", LibraryFilePath);
+            this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", LibraryFilePath);
             this.kernel.Bind<ViewSettings>().To<ViewSettings>().InSingletonScope();
             this.kernel.Bind<CoreSettings>().To<CoreSettings>().InSingletonScope()
                 .OnActivation(x =>
@@ -51,6 +60,8 @@ namespace Espera.View
                 });
             this.kernel.Bind<IFileSystem>().To<FileSystem>();
             this.kernel.Bind<IWindowManager>().To<WindowManager>();
+
+            this.ConfigureLogging();
         }
 
         protected override IEnumerable<object> GetAllInstances(Type serviceType)
@@ -68,10 +79,22 @@ namespace Espera.View
             this.kernel.Dispose();
 
             BlobCache.Shutdown().Wait();
+
+            NLog.LogManager.Shutdown();
         }
 
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
+            this.Log().Info("Espera is starting...");
+            this.Log().Info("******************************");
+            this.Log().Info("**                          **");
+            this.Log().Info("**          Espera          **");
+            this.Log().Info("**                          **");
+            this.Log().Info("******************************");
+            this.Log().Info("Application version: " + Version);
+            this.Log().Info("OS Version: " + Environment.OSVersion.VersionString);
+            this.Log().Info("Current culture: " + CultureInfo.CurrentCulture.Name);
+
             Directory.CreateDirectory(DirectoryPath);
 
             base.OnStartup(sender, e);
@@ -82,6 +105,8 @@ namespace Espera.View
             if (Debugger.IsAttached)
                 return;
 
+            this.Log().FatalException("An unhandled exception occurred, opening the crash report", e.Exception);
+
             this.Application.MainWindow.Hide();
 
             this.windowManager.ShowDialog(new CrashViewModel(e.Exception));
@@ -89,6 +114,22 @@ namespace Espera.View
             e.Handled = true;
 
             Application.Current.Shutdown();
+        }
+
+        private void ConfigureLogging()
+        {
+            var logConfig = new LoggingConfiguration();
+
+            var target = new FileTarget
+            {
+                FileName = LogFilePath,
+                Layout = @"${longdate}|${logger}|${level}|${message} ${exception:format=ToString,StackTrace}"
+            };
+
+            logConfig.LoggingRules.Add(new LoggingRule("*", NLog.LogLevel.Info, target));
+            NLog.LogManager.Configuration = logConfig;
+
+            RxApp.MutableResolver.RegisterConstant(new NLogLogger(NLog.LogManager.GetCurrentClassLogger()), typeof(ILogger));
         }
     }
 }

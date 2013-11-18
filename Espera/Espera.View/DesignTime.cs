@@ -18,8 +18,8 @@ namespace Espera.View
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\");
                 string filePath = Path.Combine(directoryPath, "Library.xml");
 
-                library = new Library(new RemovableDriveWatcher(), new LibraryFileReader(filePath),
-                                      new LibraryFileWriter(filePath), new CoreSettings(), new MockFileSystem());
+                library = new Library(new LibraryFileReader(filePath), new LibraryFileWriter(filePath),
+                    new CoreSettings(BlobCache.InMemory), new MockFileSystem());
             }
 
             return library;
