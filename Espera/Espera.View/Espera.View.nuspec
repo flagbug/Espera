@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>Espera.View</id>
-    <title>A human-friendly name for Espera.View goes here</title>
+    <id>Espera</id>
+    <title>Espera</title>
     <version>$version$-beta</version>
-    <authors>Your Name Here</authors>
+    <authors>Dennis Daume</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>A description of Espera.View goes here </description>
-    <tags>tags that describe what Espera.View does</tags>
+    <description>Espera music player</description>
+    <tags>espera music player party</tags>
   </metadata>
 </package>
