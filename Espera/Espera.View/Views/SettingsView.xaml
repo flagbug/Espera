@@ -242,8 +242,16 @@
                     <Controls:ToggleSwitch Header="Lock remote control with password" IsChecked="{Binding Path=LockRemoteControl}" />
                     <StackPanel IsEnabled="{Binding Path=LockRemoteControl}" Margin="15, 0, 0, 0" Orientation="Horizontal">
                         <TextBlock Text="Password" VerticalAlignment="Center" />
-                        <PasswordBox Margin="10, 0, 0, 0" Width="100" />
-                        <Button Margin="10, 0, 0, 0" Content="Change password" />
+                        <PasswordBox Margin="10, 0, 0, 0"
+                                     Width="200"
+                                     Name="RemotePasswordBox"
+                                     VerticalContentAlignment="Center"
+                                     Controls:TextboxHelper.Watermark="Enter a password"
+                                     PasswordChanged="RemotePasswordChanged"
+                                     x:FieldModifier="private" />
+                        <Button Margin="10, 0, 0, 0"
+                                Content="Change password"
+                                Command="{Binding Path=ChangeRemoteControlPasswordCommand}" />
                     </StackPanel>
                 </StackPanel>
             </TabItem>
