@@ -159,9 +159,22 @@ namespace Espera.View
 
                 if (releases.Any())
                 {
+                    this.Log().Info("Found {0} updates.", releases.Count);
+                    this.Log().Info("Downloading updates...");
+
                     await updateManager.DownloadReleases(releases);
 
+                    this.Log().Info("Updates downloaded.");
+                    this.Log().Info("Applying updates...");
+
                     await updateManager.ApplyReleases(updateInfo);
+
+                    this.Log().Info("Updates applied.");
+                }
+
+                else
+                {
+                    this.Log().Info("No updates found.");
                 }
             }
         }
