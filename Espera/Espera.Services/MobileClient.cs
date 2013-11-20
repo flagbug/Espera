@@ -63,7 +63,9 @@ namespace Espera.Services
                 {"post-play-next-song", this.PostPlayNextSong},
                 {"post-play-previous-song", this.PostPlayPreviousSong},
                 {"get-playback-state", this.GetPlaybackState},
-                {"post-remove-playlist-song", this.PostRemovePlaylistSong}
+                {"post-remove-playlist-song", this.PostRemovePlaylistSong},
+                {"get-access-permission", this.GetAccessPermission},
+                {"post-administrator-password", this.PostAdministratorPassword}
             };
 
             this.Disconnected = Observable.FromEventPattern(h => this.socket.Disconnected += h, h => this.socket.Disconnected -= h)
@@ -136,6 +138,11 @@ namespace Espera.Services
             this.library.PlaybackState.Skip(1)
                 .Subscribe(x => this.PushPlaybackState(x))
                 .DisposeWith(this.disposable);
+
+            this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken)
+                .Skip(1)
+                .Subscribe(x => this.PushAccessPermission(x))
+                .DisposeWith(this.disposable);
         }
 
         private static JObject CreatePush(string action, JToken content)
@@ -167,6 +174,18 @@ namespace Espera.Services
             return response;
         }
 
+        private async Task<JObject> GetAccessPermission(JToken arg)
+        {
+            AccessPermission permission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken).FirstAsync();
+
+            var content = new JObject
+            {
+                {"accessPermission", permission.ToString()}
+            };
+
+            return CreateResponse(200, "Ok", content);
+        }
+
         private Task<JObject> GetCurrentPlaylist(JToken dontCare)
         {
             Playlist playlist = this.library.CurrentPlaylist;
@@ -193,6 +212,23 @@ namespace Espera.Services
             };
 
             return CreateResponse(200, "Ok", content);
+        }
+
+        private Task<JObject> PostAdministratorPassword(JToken parameters)
+        {
+            string password = parameters["password"].ToString();
+
+            try
+            {
+                this.library.RemoteAccessControl.UpgradeRemoteAccess(this.accessToken, password);
+            }
+
+            catch (WrongPasswordException)
+            {
+                return Task.FromResult(CreateResponse(401, "Wrong password"));
+            }
+
+            return Task.FromResult(CreateResponse(200, "Ok"));
         }
 
         private async Task<JObject> PostContinueSong(JToken content)
@@ -372,6 +408,18 @@ namespace Espera.Services
             }
 
             return Task.FromResult(CreateResponse(400, "Guid not found"));
+        }
+
+        private async Task PushAccessPermission(AccessPermission accessPermission)
+        {
+            var content = new JObject
+            {
+                {"accessPermission", accessPermission.ToString()}
+            };
+
+            JObject message = CreatePush("update-access-permission", content);
+
+            await this.SendMessage(message);
         }
 
         private async Task PushPlaybackState(AudioPlayerState state)
