@@ -423,7 +423,7 @@ namespace Espera.Core.Tests
         public void DisabledAutomaticUpdatesDoesntTriggerUpdate()
         {
             var fileSystem = new Mock<IFileSystem>();
-            fileSystem.Setup(x => x.Directory.GetFiles(It.IsAny<string>())).Verifiable();
+            fileSystem.Setup(x => x.Directory.GetFiles(It.IsAny<string>()));
 
             var settings = new CoreSettings(new TestBlobCache())
             {
@@ -472,7 +472,7 @@ namespace Espera.Core.Tests
             reader.SetupGet(x => x.LibraryExists).Returns(true);
             reader.Setup(x => x.ReadPlaylists()).Returns(new List<Playlist>());
             reader.Setup(x => x.ReadSongSourcePath()).Returns(String.Empty);
-            reader.Setup(x => x.ReadSongs()).Callback(() => readerFired.OnNext(1)).Returns(new List<LocalSong>()).Verifiable();
+            reader.Setup(x => x.ReadSongs()).Callback(() => readerFired.OnNext(1)).Returns(new List<LocalSong>());
 
             using (var library = Helpers.CreateLibrary(null, reader.Object, null, fileSystem))
             {
