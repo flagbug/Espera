@@ -1,9 +1,10 @@
 ﻿using Akavache;
 using System;
+using Lager;
 
 namespace Espera.Core.Settings
 {
-    public class CoreSettings : Settings
+    public class CoreSettings : SettingsStorage
     {
         public CoreSettings(IBlobCache blobCache)
             : base("__CoreSettings__", blobCache)

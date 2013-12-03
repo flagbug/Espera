@@ -31,13 +31,13 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Akavache, Version=3.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Akavache, Version=3.1.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\akavache.3.1.1\lib\net45\Akavache.dll</HintPath>
+      <HintPath>..\packages\akavache.3.1.2\lib\net45\Akavache.dll</HintPath>
     </Reference>
-    <Reference Include="Akavache.Portable, Version=3.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Akavache.Portable, Version=3.1.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\akavache.portable.3.1.1\lib\net45\Akavache.Portable.dll</HintPath>
+      <HintPath>..\packages\akavache.portable.3.1.2\lib\net45\Akavache.Portable.dll</HintPath>
     </Reference>
     <Reference Include="Google.GData.Client, Version=2.2.0.0, Culture=neutral, PublicKeyToken=04a59ca9b0273830, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -50,6 +50,9 @@
     <Reference Include="Google.GData.YouTube, Version=2.2.0.0, Culture=neutral, PublicKeyToken=af04a32718ae8833, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Google.GData.YouTube.2.2.0.0\lib\Google.GData.YouTube.dll</HintPath>
+    </Reference>
+    <Reference Include="Lager">
+      <HintPath>..\packages\Lager.0.1.0\lib\net45\Lager.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -132,7 +135,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReactiveHelpers.cs" />
     <Compile Include="Settings\CoreSettings.cs" />
-    <Compile Include="Settings\Settings.cs" />
     <Compile Include="Song.cs" />
     <Compile Include="LocalSongFinder.cs" />
     <Compile Include="TagSanitizer.cs" />
