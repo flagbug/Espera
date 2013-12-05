@@ -1,14 +1,14 @@
 ﻿using Akavache;
 using Espera.Core.Management;
-using System;
 using Lager;
+using System;
 
 namespace Espera.Core.Settings
 {
     public class CoreSettings : SettingsStorage
     {
         public CoreSettings()
-            : base("__CoreSettings__", BlobCache.LocalMachine, BlobCache.Secure)
+            : base("__CoreSettings__", BlobCache.LocalMachine)
         { }
 
         public bool EnableAutomaticLibraryUpdates
@@ -82,8 +82,8 @@ namespace Espera.Core.Settings
         /// </summary>
         public string RemoteControlPassword
         {
-            get { return this.GetOrCreateSecure((string)null); }
-            set { this.SetOrCreateSecure(value); }
+            get { return this.GetOrCreate((string)null); }
+            set { this.SetOrCreate(value); }
         }
 
         public TimeSpan SongSourceUpdateInterval
