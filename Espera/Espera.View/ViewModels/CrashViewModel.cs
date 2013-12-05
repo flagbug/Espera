@@ -2,6 +2,7 @@
 using ReactiveUI;
 using System;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Reflection;
 
 namespace Espera.View.ViewModels
@@ -9,32 +10,22 @@ namespace Espera.View.ViewModels
     internal class CrashViewModel : ReactiveObject
     {
         private readonly Exception exception;
+        private readonly ObservableAsPropertyHelper<bool?> sendingSucceeded;
         private readonly string version;
-        private bool? sendingSucceeded;
 
         public CrashViewModel(Exception exception)
         {
             this.exception = exception;
             this.version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-            this.SubmitCrashReport = new ReactiveCommand(
-                this.WhenAnyValue(x => x.SendingSucceeded)
-                .Select(x => x == null || !x.Value));
+            this.SubmitCrashReport = this.WhenAnyValue(x => x.SendingSucceeded)
+                .Select(x => x == null || !x.Value)
+                .ToCommand();
 
-            this.SubmitCrashReport.Subscribe(x =>
-            {
-                try
-                {
-                    FogBugzService.SubmitReport(this.ReportContent);
-
-                    this.SendingSucceeded = true;
-                }
-
-                catch (Exception)
-                {
-                    this.SendingSucceeded = false;
-                }
-            });
+            this.sendingSucceeded = this.SubmitCrashReport.RegisterAsync(x =>
+                FogBugzService.SubmitReport(this.ReportContent).ToObservable().Select(_ => true).Catch(Observable.Return(false)))
+                .Select(x => new bool?(x))
+                .ToProperty(this, x => x.SendingSucceeded);
         }
 
         public string ReportContent
@@ -44,8 +35,7 @@ namespace Espera.View.ViewModels
 
         public bool? SendingSucceeded
         {
-            get { return this.sendingSucceeded; }
-            private set { this.RaiseAndSetIfChanged(ref this.sendingSucceeded, value); }
+            get { return this.sendingSucceeded == null ? null : this.sendingSucceeded.Value; }
         }
 
         public IReactiveCommand SubmitCrashReport { get; private set; }

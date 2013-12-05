@@ -25,8 +25,7 @@ namespace Espera.View.Tests
 
             var songFinder = new Mock<IYoutubeSongFinder>();
             songFinder.Setup(x => x.GetSongsAsync(It.IsAny<string>()))
-                .Returns(Task.FromResult((IReadOnlyList<YoutubeSong>)new List<YoutubeSong>()))
-                .Verifiable();
+                .Returns(Task.FromResult((IReadOnlyList<YoutubeSong>)new List<YoutubeSong>()));
 
             using (var library = Helpers.CreateLibrary())
             {
