@@ -7,6 +7,7 @@
                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                       xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                      xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
                       Title="Espera"
                       Width="800"
                       Height="600"
@@ -82,6 +83,25 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
+            <dialogs:SimpleDialog x:Key="Changelog" 
+                                  x:Name="Changelog"
+                                  Height="500"
+                                  Title="Espera has been updated!">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="Whats New" />
+                <Button Grid.Row="1" 
+                        Height="35"
+                        Width="80"
+                        Style="{DynamicResource AccentedDialogSquareButton}"
+                        Content="Ok"
+                        Click="CloseChangelog"
+                        HorizontalAlignment="Right" />
+                </Grid>
+            </dialogs:SimpleDialog>
         </ResourceDictionary>
     </Window.Resources>
     <Window.InputBindings>

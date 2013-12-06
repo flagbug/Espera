@@ -2,6 +2,7 @@ using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.View.ViewModels;
 using MahApps.Metro;
+using MahApps.Metro.Controls.Dialogs;
 using ReactiveUI;
 using System;
 using System.ComponentModel;
@@ -32,6 +33,13 @@ namespace Espera.View.Views
                 this.WireDataContext();
                 this.WirePlayer();
                 this.WireScreenStateUpdater();
+            };
+
+            this.Loaded += async (sender, args) =>
+            {
+                var dialog = (SimpleDialog)this.Resources["Changelog"];
+
+                await this.ShowMetroDialogAsync(dialog);
             };
         }
 
@@ -250,6 +258,13 @@ namespace Espera.View.Views
                     this.Topmost = this.IgnoreTaskbarOnMaximize;
                 }
             });
+        }
+
+        private async void CloseChangelog(object sender, RoutedEventArgs e)
+        {
+            var dialog = (SimpleDialog)this.Resources["Changelog"];
+
+            await this.HideMetroDialogAsync(dialog);
         }
     }
 }
