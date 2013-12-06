@@ -37,15 +37,25 @@ namespace Espera.View.Views
 
             this.Loaded += async (sender, args) =>
             {
-                var dialog = (SimpleDialog)this.Resources["Changelog"];
+                if (((ShellViewModel)this.DataContext).UpdateViewModel.IsUpdated)
+                {
+                    var dialog = (SimpleDialog)this.Resources["Changelog"];
 
-                await this.ShowMetroDialogAsync(dialog);
+                    await this.ShowMetroDialogAsync(dialog);
+                }
             };
         }
 
         private void ChangeColor(string color)
         {
             ThemeManager.ChangeTheme(this, ThemeManager.DefaultAccents.First(accent => accent.Name == color), Theme.Dark);
+        }
+
+        private async void CloseChangelog(object sender, RoutedEventArgs e)
+        {
+            var dialog = (SimpleDialog)this.Resources["Changelog"];
+
+            await this.HideMetroDialogAsync(dialog);
         }
 
         private void LoginButtonClick(object sender, RoutedEventArgs e)
@@ -258,13 +268,6 @@ namespace Espera.View.Views
                     this.Topmost = this.IgnoreTaskbarOnMaximize;
                 }
             });
-        }
-
-        private async void CloseChangelog(object sender, RoutedEventArgs e)
-        {
-            var dialog = (SimpleDialog)this.Resources["Changelog"];
-
-            await this.HideMetroDialogAsync(dialog);
         }
     }
 }

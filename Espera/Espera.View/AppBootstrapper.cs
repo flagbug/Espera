@@ -170,6 +170,10 @@ namespace Espera.View
                     await updateManager.ApplyReleases(updateInfo);
 
                     this.Log().Info("Updates applied.");
+
+                    var settings = this.kernel.Get<ViewSettings>();
+
+                    settings.IsUpdated = true;
                 }
 
                 else

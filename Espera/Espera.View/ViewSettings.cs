@@ -21,6 +21,12 @@ namespace Espera.View
             set { this.SetOrCreate(value); }
         }
 
+        public bool IsUpdated
+        {
+            get { return this.GetOrCreate(false); }
+            set { this.SetOrCreate(value); }
+        }
+
         public int LocalDurationColumnWidth
         {
             get { return this.GetOrCreate(100); }

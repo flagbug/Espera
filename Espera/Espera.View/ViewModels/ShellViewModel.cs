@@ -44,6 +44,7 @@ namespace Espera.View.ViewModels
             this.coreSettings = coreSettings;
 
             this.disposable = new CompositeDisposable();
+            this.UpdateViewModel = new UpdateViewModel(viewSettings);
 
             this.library.Initialize();
 
@@ -392,6 +393,8 @@ namespace Espera.View.ViewModels
         /// Occurs when the view should update the screen state to maximized state or restore it to normal state
         /// </summary>
         public IObservable<AccessMode> UpdateScreenState { get; private set; }
+
+        public UpdateViewModel UpdateViewModel { get; private set; }
 
         public ViewSettings ViewSettings { get; private set; }
 
