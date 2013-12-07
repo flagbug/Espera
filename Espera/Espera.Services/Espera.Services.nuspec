@@ -1,16 +1,12 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>Espera</id>
-    <title>Espera</title>
+    <id>Espera.Services</id>
+    <title>Espera.Services</title>
     <version>$version$</version>
     <authors>Dennis Daume</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Espera music player</description>
     <tags>espera music player party</tags>
-    <dependencies>
-      <dependency id="Espera.Core" version="[$version$]" />
-      <dependency id="Espera.Services" version="[$version$]" />
-    </dependencies>
   </metadata>
 </package>
