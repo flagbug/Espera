@@ -291,6 +291,17 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public UpdateChannel UpdateChannel
+        {
+            get { return this.viewSettings.UpdateChannel; }
+            set { this.viewSettings.UpdateChannel = value; }
+        }
+
+        public IEnumerable<UpdateChannel> UpdateChannelValues
+        {
+            get { return Enum.GetValues(typeof(UpdateChannel)).Cast<UpdateChannel>(); }
+        }
+
         public ReactiveCommand UpdateLibraryCommand { get; private set; }
 
         public string Version

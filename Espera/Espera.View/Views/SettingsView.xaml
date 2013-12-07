@@ -256,6 +256,12 @@
                             <Run Foreground="#FF00B7C0" Text="Donate :)" />
                         </Hyperlink>
                     </TextBlock>
+                    <TextBlock Text="Update channel" Margin="0, 20, 0, 0" />
+                    <ComboBox SelectedItem="{Binding Path=UpdateChannel}"
+                              ItemsSource="{Binding Path=UpdateChannelValues}"
+                              Width="200"
+                              Margin="0, 5, 0, 0"
+                              HorizontalAlignment="Left" />
                 </StackPanel>
             </TabItem>
         </TabControl>
