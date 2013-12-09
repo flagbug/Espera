@@ -15,6 +15,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -65,7 +66,8 @@ namespace Espera.Services
                 {"get-playback-state", this.GetPlaybackState},
                 {"post-remove-playlist-song", this.PostRemovePlaylistSong},
                 {"get-access-permission", this.GetAccessPermission},
-                {"post-administrator-password", this.PostAdministratorPassword}
+                {"post-administrator-password", this.PostAdministratorPassword},
+                {"get-server-version", GetServerVersion}
             };
 
             this.Disconnected = Observable.FromEventPattern(h => this.socket.Disconnected += h, h => this.socket.Disconnected -= h)
@@ -172,6 +174,18 @@ namespace Espera.Services
             }
 
             return response;
+        }
+
+        private static Task<JObject> GetServerVersion(JToken dontCare)
+        {
+            Version version = Assembly.GetExecutingAssembly().GetName().Version;
+
+            var response = new JObject
+            {
+                {"version", version.ToString()}
+            };
+
+            return Task.FromResult(CreateResponse(200, "Ok", response));
         }
 
         private async Task<JObject> GetAccessPermission(JToken arg)
