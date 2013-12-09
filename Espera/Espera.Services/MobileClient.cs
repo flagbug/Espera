@@ -25,7 +25,7 @@ namespace Espera.Services
     /// <summary>
     /// Represents one mobile endpoint and handles the interaction.
     /// </summary>
-    public class MobileClient : IDisposable
+    public class MobileClient : IDisposable, IEnableLogger
     {
         private readonly Guid accessToken;
         private readonly Subject<Unit> disconnected;
@@ -47,6 +47,8 @@ namespace Espera.Services
             this.library = library;
 
             this.accessToken = this.library.RemoteAccessControl.RegisterRemoteAccessToken();
+
+            this.Log().Info("Registering new mobile client with access token {0}", this.accessToken);
 
             this.disposable = new CompositeDisposable();
             this.gate = new SemaphoreSlim(1, 1);
@@ -98,6 +100,12 @@ namespace Espera.Services
 
             messages.ObserveOn(RxApp.MainThreadScheduler).Subscribe(async request =>
             {
+                if(request["action"] == null)
+                {
+                    this.Log().Warn("Mobile client with access token {0} sent a request without specifiying an action!", this.accessToken);
+                    return;
+                }
+
                 string requestAction = request["action"].ToString();
 
                 Func<JToken, Task<JObject>> action;
@@ -113,8 +121,10 @@ namespace Espera.Services
                         await this.SendMessage(response);
                     }
 
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        this.Log().ErrorException(string.Format(
+                            "Mobile client with access token {0} sent a request that caused an exception", this.accessToken), ex);
                         if (Debugger.IsAttached)
                         {
                             Debugger.Break();

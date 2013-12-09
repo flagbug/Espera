@@ -9,13 +9,14 @@ using System.Net.Sockets;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ReactiveUI;
 
 namespace Espera.Services
 {
     /// <summary>
     /// Provides methods for connecting mobile endpoints with the application.
     /// </summary>
-    public class MobileApi : IDisposable
+    public class MobileApi : IDisposable, IEnableLogger
     {
         private readonly List<MobileClient> clients;
         private readonly Library library;
@@ -38,6 +39,8 @@ namespace Espera.Services
 
         public void Dispose()
         {
+            this.Log().Info("Stopping to listen for incoming connections on port {0}", this.port);
+
             this.dispose = true;
             this.listener.Dispose();
 
@@ -97,6 +100,7 @@ namespace Espera.Services
                     this.clients.Add(mobileClient);
                 });
 
+            this.Log().Info("Starting to listen for incoming connections on port {0}", this.port);
             listener.Start();
         }
     }
