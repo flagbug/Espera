@@ -227,7 +227,7 @@ namespace Espera.View.ViewModels
                     this.mobileApi.StartClientDiscovery();
                 });
 
-            this.coreSettings.WhenAnyValue(x => x.EnablePlaylistTimeout)
+            this.coreSettings.WhenAnyValue(x => x.EnableRemoteControl)
                 .Where(x => !x && this.mobileApi != null)
                 .Subscribe(x => this.mobileApi.Dispose());
         }
