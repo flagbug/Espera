@@ -439,6 +439,11 @@ namespace Espera.View.ViewModels
             this.library.Dispose();
 
             this.disposable.Dispose();
+
+            if(this.mobileApi != null)
+            {
+                this.mobileApi.Dispose();
+            }
         }
 
         private void AddPlaylist()
