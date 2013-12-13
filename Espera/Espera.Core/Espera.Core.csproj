@@ -34,11 +34,7 @@
   <ItemGroup>
     <Reference Include="Akavache, Version=3.1.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\akavache.3.1.2\lib\net45\Akavache.dll</HintPath>
-    </Reference>
-    <Reference Include="Akavache.Portable, Version=3.1.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\akavache.portable.3.1.2\lib\net45\Akavache.Portable.dll</HintPath>
+      <HintPath>..\packages\akavache.3.2.0\lib\net45\Akavache.dll</HintPath>
     </Reference>
     <Reference Include="Google.GData.Client, Version=2.2.0.0, Culture=neutral, PublicKeyToken=04a59ca9b0273830, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -52,8 +48,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Google.GData.YouTube.2.2.0.0\lib\Google.GData.YouTube.dll</HintPath>
     </Reference>
-    <Reference Include="Lager">
-      <HintPath>..\packages\Lager.0.1.0\lib\net45\Lager.dll</HintPath>
+    <Reference Include="Lager, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Lager.0.2.0\lib\portable-net45+wp80+win+MonoAndroid10+MonoTouch10\Lager.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -71,9 +68,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\ReactiveMarrow.0.3.1-alpha\lib\ReactiveMarrow.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=5.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-core.5.2.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
+      <HintPath>..\packages\reactiveui-core.5.3.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
+    </Reference>
+    <Reference Include="Splat">
+      <HintPath>..\packages\Splat.1.0.0\lib\Net45\Splat.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

@@ -101,9 +101,6 @@
             </dialogs:SimpleDialog>
         </ResourceDictionary>
     </Window.Resources>
-    <Window.InputBindings>
-        <KeyBinding Key="Space" Command="{Binding PauseContinueCommand}" />
-    </Window.InputBindings>
     <Controls:MetroWindow.WindowCommands>
         <Controls:WindowCommands>
             <Button Command="{Binding Path=ShowSettingsCommand}" Content="settings" />

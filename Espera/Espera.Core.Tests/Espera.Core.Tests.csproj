@@ -35,14 +35,11 @@
   <ItemGroup>
     <Reference Include="Akavache, Version=3.1.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\akavache.3.1.2\lib\net45\Akavache.dll</HintPath>
+      <HintPath>..\packages\akavache.3.2.0\lib\net45\Akavache.dll</HintPath>
     </Reference>
-    <Reference Include="Akavache.Portable, Version=3.1.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Lager, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\akavache.portable.3.1.2\lib\net45\Akavache.Portable.dll</HintPath>
-    </Reference>
-    <Reference Include="Lager">
-      <HintPath>..\packages\Lager.0.1.0\lib\net45\Lager.dll</HintPath>
+      <HintPath>..\packages\Lager.0.2.0\lib\portable-net45+wp80+win+MonoAndroid10+MonoTouch10\Lager.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Reactive.Testing">
       <HintPath>..\packages\Rx-Testing.2.1.30214.0\lib\Net45-Full\Microsoft.Reactive.Testing.dll</HintPath>
@@ -58,21 +55,24 @@
     <Reference Include="ReactiveMarrow">
       <HintPath>..\Espera.Core\bin\Debug\ReactiveMarrow.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=5.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-core.5.2.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
+      <HintPath>..\packages\reactiveui-core.5.3.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Blend, Version=5.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI.Blend, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-platforms.5.2.0\lib\net45\ReactiveUI.Blend.dll</HintPath>
+      <HintPath>..\packages\reactiveui-platforms.5.3.0\lib\net45\ReactiveUI.Blend.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Testing, Version=5.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI.Testing, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-testing.5.2.0\lib\net45\ReactiveUI.Testing.dll</HintPath>
+      <HintPath>..\packages\reactiveui-testing.5.3.0\lib\net45\ReactiveUI.Testing.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Xaml, Version=5.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI.Xaml, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-platforms.5.2.0\lib\net45\ReactiveUI.Xaml.dll</HintPath>
+      <HintPath>..\packages\reactiveui-platforms.5.3.0\lib\net45\ReactiveUI.Xaml.dll</HintPath>
+    </Reference>
+    <Reference Include="Splat">
+      <HintPath>..\packages\Splat.1.0.0\lib\Net45\Splat.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">

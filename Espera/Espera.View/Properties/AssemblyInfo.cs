@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 
-[assembly: AssemblyTitle("Espera.View")]
+[assembly: AssemblyTitle("Espera")]
 [assembly: ComVisible(false)]
 
 //In order to begin building localizable applications, set
