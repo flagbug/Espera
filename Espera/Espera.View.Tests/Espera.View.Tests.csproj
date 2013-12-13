@@ -58,17 +58,17 @@
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=5.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-core.5.2.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
+      <HintPath>..\packages\reactiveui-core.5.3.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Blend, Version=5.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI.Blend, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-platforms.5.2.0\lib\net45\ReactiveUI.Blend.dll</HintPath>
+      <HintPath>..\packages\reactiveui-platforms.5.3.0\lib\net45\ReactiveUI.Blend.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Xaml, Version=5.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI.Xaml, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-platforms.5.2.0\lib\net45\ReactiveUI.Xaml.dll</HintPath>
+      <HintPath>..\packages\reactiveui-platforms.5.3.0\lib\net45\ReactiveUI.Xaml.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.IO.Abstractions, Version=1.4.0.68, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
