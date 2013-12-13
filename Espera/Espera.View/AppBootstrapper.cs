@@ -144,6 +144,7 @@ namespace Espera.View
             var settings = this.kernel.Get<ViewSettings>();
 #if DEBUG
             string updateUrl = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..", "Releases");
+            updateUrl = Path.GetFullPath(updateUrl);
 #else
             string updateUrl = null;
 
@@ -158,8 +159,6 @@ namespace Espera.View
                     break;
             }
 #endif
-
-            updateUrl = Path.GetFullPath(updateUrl);
 
             using (var updateManager = new UpdateManager(updateUrl, "Espera", FrameworkVersion.Net45))
             {
