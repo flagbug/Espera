@@ -1,5 +1,4 @@
 ﻿using Akavache;
-using MoreLinq;
 using ReactiveUI;
 using Splat;
 using System;
@@ -86,7 +85,10 @@ namespace Espera.View.ViewModels
 
         public void UpdateArtwork(IEnumerable<IObservable<string>> keys)
         {
-            keys.ForEach(x => this.artworkKeys.OnNext(x));
+            foreach (IObservable<string> key in keys)
+            {
+                this.artworkKeys.OnNext(key);
+            }
         }
 
         /// <example>
