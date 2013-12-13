@@ -94,8 +94,6 @@
       <HintPath>..\packages\MahApps.Metro.0.12.0.7-ALPHA\lib\net45\MahApps.Metro.dll</HintPath>
     </Reference>
     <Reference Include="Lager">
-      <HintPath>..\packages\Lager.0.1.0\lib\net45\Lager.dll</HintPath>
-    <Reference Include="Lager, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Lager.0.2.0\lib\portable-net45+wp80+win+MonoAndroid10+MonoTouch10\Lager.dll</HintPath>
     </Reference>
@@ -152,16 +150,15 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\reactiveui-nlog.5.3.0\lib\net45\ReactiveUI.NLog.dll</HintPath>
     </Reference>
+    <Reference Include="ReactiveUI.Xaml, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\reactiveui-platforms.5.3.0\lib\net45\ReactiveUI.Xaml.dll</HintPath>
+    </Reference>
     <Reference Include="Shimmer.Client">
       <HintPath>..\packages\Shimmer.Client.0.7.4\lib\net40\Shimmer.Client.dll</HintPath>
     </Reference>
     <Reference Include="Shimmer.Core">
       <HintPath>..\packages\Shimmer.Core.0.7.4\lib\net40\Shimmer.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Splat, Version=0.3.2.0, Culture=neutral, processorArchitecture=MSIL">
-    <Reference Include="ReactiveUI.Xaml, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-platforms.5.3.0\lib\net45\ReactiveUI.Xaml.dll</HintPath>
     </Reference>
     <Reference Include="Splat, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
