@@ -1,38 +1,29 @@
 ﻿using Espera.Services;
 using ReactiveUI;
-using System;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Reflection;
 
 namespace Espera.View.ViewModels
 {
     internal class BugReportViewModel : ReactiveObject
     {
+        private readonly ObservableAsPropertyHelper<bool?> sendingSucceeded;
         private readonly string version;
         private string message;
-        private bool? sendingSucceeded;
 
         public BugReportViewModel()
         {
             this.version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-            IObservable<bool> canSubmitBugReport = this.WhenAnyValue(x => x.Message, x => x.SendingSucceeded,
-                (message, succeeded) => !string.IsNullOrWhiteSpace(message) && (succeeded == null || !succeeded.Value));
+            this.SubmitBugReport = this.WhenAnyValue(x => x.Message, x => x.SendingSucceeded,
+                (message, succeeded) => !string.IsNullOrWhiteSpace(message) && (succeeded == null || !succeeded.Value))
+                .ToCommand();
 
-            this.SubmitBugReport = new ReactiveCommand(canSubmitBugReport);
-            this.SubmitBugReport.Subscribe(x =>
-            {
-                try
-                {
-                    FogBugzService.SubmitReport("Version " + this.version + "\n\n" + this.Message);
-
-                    this.SendingSucceeded = true;
-                }
-
-                catch (Exception)
-                {
-                    this.SendingSucceeded = false;
-                }
-            });
+            this.sendingSucceeded = this.SubmitBugReport.RegisterAsync(x =>
+                FogBugzService.SubmitReport("Version " + this.version + "\n\n" + this.Message).ToObservable()
+                .Select(_ => true).Catch(Observable.Return(false))).Select(x => new bool?(x))
+                .ToProperty(this, x => x.SendingSucceeded);
         }
 
         public string Message
@@ -43,8 +34,7 @@ namespace Espera.View.ViewModels
 
         public bool? SendingSucceeded
         {
-            get { return this.sendingSucceeded; }
-            private set { this.RaiseAndSetIfChanged(ref this.sendingSucceeded, value); }
+            get { return this.sendingSucceeded == null ? null : this.sendingSucceeded.Value; }
         }
 
         public IReactiveCommand SubmitBugReport { get; private set; }

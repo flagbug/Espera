@@ -2,13 +2,14 @@
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace Espera.Services
 {
     public static class FogBugzService
     {
-        public static void SubmitReport(string message)
+        public static async Task SubmitReport(string message)
         {
             if (message == null)
                 Throw.ArgumentNullException(() => message);
@@ -35,10 +36,10 @@ namespace Espera.Services
 
             using (Stream os = request.GetRequestStream())
             {
-                os.Write(bytes, 0, bytes.Length);
+                await os.WriteAsync(bytes, 0, bytes.Length);
             }
 
-            using (request.GetResponse())
+            using (await request.GetResponseAsync())
             { }
         }
     }

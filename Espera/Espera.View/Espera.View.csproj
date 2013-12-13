@@ -79,13 +79,13 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Akavache, Version=3.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Akavache, Version=3.1.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\akavache.3.1.1\lib\net45\Akavache.dll</HintPath>
+      <HintPath>..\packages\akavache.3.1.2\lib\net45\Akavache.dll</HintPath>
     </Reference>
-    <Reference Include="Akavache.Portable, Version=3.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Akavache.Portable, Version=3.1.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\akavache.portable.3.1.1\lib\net45\Akavache.Portable.dll</HintPath>
+      <HintPath>..\packages\akavache.portable.3.1.2\lib\net45\Akavache.Portable.dll</HintPath>
     </Reference>
     <Reference Include="Caliburn.Micro, Version=1.5.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -95,6 +95,10 @@
       <HintPath>..\packages\Shimmer.Core.0.7.4\lib\net40\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="MahApps.Metro, Version=0.12.0.7, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Lager">
+      <HintPath>..\packages\Lager.0.1.0\lib\net45\Lager.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro, Version=0.11.2.24, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\MahApps.Metro.0.12.0.7-ALPHA\lib\net45\MahApps.Metro.dll</HintPath>
     </Reference>
