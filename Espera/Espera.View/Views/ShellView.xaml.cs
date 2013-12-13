@@ -7,6 +7,7 @@ using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -32,6 +33,9 @@ namespace Espera.View.Views
                 this.WireDataContext();
                 this.WirePlayer();
                 this.WireScreenStateUpdater();
+
+                this.Events().KeyUp.Where(x => x.Key == Key.Space)
+                    .InvokeCommand(this.shellViewModel, x => x.PauseContinueCommand);
             };
         }
 
