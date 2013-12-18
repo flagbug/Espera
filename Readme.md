@@ -2,7 +2,9 @@
 <a href="http://flattr.com/thing/1092917/Espera" target="_blank">
 <img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" />
 </a>
+
 Bitcoin: 1PHaQ2Qg6rR3Qo2FfLqjG6se529dQTCEAD
+
 ## Overview
 
 **This is the development branch of the soon to be released version 2.0 of Espera**
