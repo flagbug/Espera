@@ -206,6 +206,18 @@ namespace Espera.View.ViewModels
                         selectedPlaylistEntries != null && selectedPlaylistEntries.Any() && (isAdmin || lockPlaylistRemoval)));
             this.RemoveSelectedPlaylistEntriesCommand.Subscribe(x => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index)));
 
+            this.MovePlaylistSongUp = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
+                .Select(x => x != null && x.Count() == 1 && x.First().Index > 0)
+                .CombineLatest(this.isAdmin, (hasElements, isAdmin) => hasElements && isAdmin)
+                .ToCommand();
+            this.MovePlaylistSongUp.Subscribe(_ => this.library.MovePlaylistSongUp(this.SelectedPlaylistEntries.First().Index));
+
+            this.MovePlaylistSongDown = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
+                .Select(x => x != null && x.Count() == 1 && x.First().Index < x.Count())
+                .CombineLatest(this.isAdmin, (hasElements, isAdmin) => hasElements && isAdmin)
+                .ToCommand();
+            this.MovePlaylistSongDown.Subscribe(_ => this.library.MovePlaylistSongDown(this.SelectedPlaylistEntries.First().Index));
+
             this.IsLocal = true;
         }
 
@@ -303,6 +315,10 @@ namespace Espera.View.ViewModels
         }
 
         public LocalViewModel LocalViewModel { get; private set; }
+
+        public ReactiveCommand MovePlaylistSongDown { get; private set; }
+
+        public ReactiveCommand MovePlaylistSongUp { get; private set; }
 
         /// <summary>
         /// Sets the volume to the lowest possible value.

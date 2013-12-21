@@ -464,6 +464,16 @@ namespace Espera.Core.Management
                 .Subscribe(path => this.UpdateSongsAsync(path));
         }
 
+        public void MovePlaylistSongDown(int songIndex)
+        {
+            this.CurrentPlaylist.MoveSongDown(songIndex);
+        }
+
+        public void MovePlaylistSongUp(int songIndex)
+        {
+            this.CurrentPlaylist.MoveSongUp(songIndex);
+        }
+
         /// <summary>
         /// Pauses the currently loaded song.
         /// </summary>
