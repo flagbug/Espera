@@ -852,9 +852,25 @@ namespace Espera.Core.Management
 
                     bool added = this.songs.Add(song);
 
-                    this.songLock.ExitWriteLock();
+                    // Inverse the if, as this condition happens way more often and
+                    // we want to release the lock as soon as possible
+                    // We also keep the write lock open so we can be sure we find
+                    // the song and it isn't removed in the meanwhile
+                    if (!added)
+                    {
+                        Song existing = this.songs.First(x => x.OriginalPath == song.OriginalPath);
 
-                    if (added)
+                        bool changed = existing.UpdateMetadataFrom(song);
+
+                        this.songLock.ExitWriteLock();
+
+                        if (changed)
+                        {
+                            this.songsUpdated.OnNext(Unit.Default);
+                        }
+                    }
+
+                    else
                     {
                         byte[] artworkData = t.Item2;
 

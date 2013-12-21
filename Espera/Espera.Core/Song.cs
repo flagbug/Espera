@@ -80,6 +80,53 @@ namespace Espera.Core
             return String.Format("Title: {0}, Artist: {1}, Path: {2}", this.Title, this.Artist, this.OriginalPath);
         }
 
+        public bool UpdateMetadataFrom(Song song)
+        {
+            if (this.OriginalPath != song.OriginalPath)
+                Throw.ArgumentException("The original path of both songs must be the same", () => song);
+
+            // NB: Wow this is dumb
+            bool changed = false;
+
+            if (this.Album != song.Album)
+            {
+                this.Album = song.Album;
+                changed = true;
+            }
+
+            if (this.Artist != song.Artist)
+            {
+                this.Artist = song.Artist;
+                changed = true;
+            }
+
+            if (this.Duration != song.Duration)
+            {
+                this.Duration = song.Duration;
+                changed = true;
+            }
+
+            if (this.Genre != song.Genre)
+            {
+                this.Genre = song.Genre;
+                changed = true;
+            }
+
+            if (this.Title != song.Title)
+            {
+                this.Title = song.Title;
+                changed = true;
+            }
+
+            if (this.TrackNumber != song.TrackNumber)
+            {
+                this.TrackNumber = song.TrackNumber;
+                changed = true;
+            }
+
+            return changed;
+        }
+
         /// <summary>
         /// Prepares the song for playback.
         /// </summary>
