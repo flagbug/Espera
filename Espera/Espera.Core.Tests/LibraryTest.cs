@@ -215,49 +215,6 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async Task CanSwitchPlaylistIsFalseIfIsNotAdministratorAndLockPlaylistSwitchingIsTrue()
-        {
-            var settings = new CoreSettings(BlobCache.InMemory)
-            {
-                LockPlaylistSwitching = true
-            };
-
-            using (Library library = Helpers.CreateLibrary(settings))
-            {
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.False(await library.CanSwitchPlaylist.FirstAsync());
-            }
-        }
-
-        [Fact]
-        public async Task CanSwitchPlaylistIsTrueIfIsNotAdministratorAndLockPlaylistSwitchingIsFalse()
-        {
-            var settings = new CoreSettings(BlobCache.InMemory)
-            {
-                LockPlaylistSwitching = false
-            };
-
-            using (Library library = Helpers.CreateLibrary(settings))
-            {
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.True(await library.CanSwitchPlaylist.FirstAsync());
-            }
-        }
-
-        [Fact]
-        public async Task CanSwitchPlaylistIsTrueIsAdministrator()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.True(await library.CanSwitchPlaylist.FirstAsync());
-            }
-        }
-
-        [Fact]
         public async Task ChangeSongSourcePathSmokeTest()
         {
             var fileSystem = new MockFileSystem();
@@ -785,13 +742,13 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public void RemoveFromPlaylistThrowsInvalidOperationExceptionIfAccessModeIsPartyAndLockPlaylistRemovalIsTrue()
+        public void RemoveFromPlaylistThrowsInvalidOperationExceptionIfAccessModeIsPartyAndLockPlaylistIsTrue()
         {
             var songMock = new Mock<Song>("TestPath", TimeSpan.Zero);
 
             var settings = new CoreSettings(BlobCache.InMemory)
             {
-                LockPlaylistRemoval = true
+                LockPlaylist = true
             };
 
             using (Library library = Helpers.CreateLibraryWithPlaylist(settings: settings))
@@ -943,11 +900,11 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public void SwitchToPlaylistThrowsInvalidOperationExceptionIfPartyModeAndLockPlaylistSwitchingIsTrue()
+        public void SwitchToPlaylistThrowsInvalidOperationExceptionIfPartyModeAndLockPlaylistIsTrue()
         {
             var settings = new CoreSettings(BlobCache.InMemory)
             {
-                LockPlaylistSwitching = true
+                LockPlaylist = true
             };
 
             using (Library library = Helpers.CreateLibraryWithPlaylist("Playlist 1", settings))

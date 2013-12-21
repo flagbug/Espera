@@ -1,6 +1,6 @@
 ﻿using Akavache;
-using System;
 using Lager;
+using System;
 
 namespace Espera.Core.Settings
 {
@@ -22,13 +22,7 @@ namespace Espera.Core.Settings
             set { this.SetOrCreate(value); }
         }
 
-        public bool LockPlaylistRemoval
-        {
-            get { return this.GetOrCreate(true); }
-            set { this.SetOrCreate(value); }
-        }
-
-        public bool LockPlaylistSwitching
+        public bool LockPlaylist
         {
             get { return this.GetOrCreate(true); }
             set { this.SetOrCreate(value); }

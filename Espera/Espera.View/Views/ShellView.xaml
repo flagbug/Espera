@@ -619,7 +619,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <ComboBox Grid.Column="0"
-                                  IsEnabled="{Binding Path=CanSwitchPlaylist}"
+                                  IsEnabled="{Binding Path=CanAlterPlaylist}"
                                   ItemsSource="{Binding Path=Playlists}"
                                   SelectedItem="{Binding Path=CurrentPlaylist}">
                             <ComboBox.Style>
@@ -717,7 +717,6 @@
                             <Button Grid.Row="0"
                                     Grid.Column="1"
                                     Command="{Binding Path=RemovePlaylistCommand}"
-                                    IsEnabled="{Binding Path=CanSwitchPlaylist}"
                                     Style="{StaticResource PlaylistButtonStyle}"
                                     ToolTip="Remove playlist">
                                 <Image Source="/Espera;component/Images/Remove.png" />
@@ -732,7 +731,6 @@
                             <Button Grid.Row="1"
                                     Grid.Column="1"
                                     Command="{Binding Path=ShufflePlaylistCommand}"
-                                    IsEnabled="{Binding Path=CanSwitchPlaylist}"
                                     Style="{StaticResource PlaylistButtonStyle}"
                                     ToolTip="Shuffle playlist">
                                 <Image Source="/Espera;component/Images/ShufflePlaylist.png" />

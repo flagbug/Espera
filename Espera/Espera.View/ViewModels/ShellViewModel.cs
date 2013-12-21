@@ -16,10 +16,10 @@ namespace Espera.View.ViewModels
 {
     internal class ShellViewModel : ReactiveObject, IDisposable
     {
+        private readonly ObservableAsPropertyHelper<bool> canAlterPlaylist;
         private readonly ObservableAsPropertyHelper<bool> canChangeTime;
         private readonly ObservableAsPropertyHelper<bool> canChangeVolume;
         private readonly ObservableAsPropertyHelper<bool> canModifyWindow;
-        private readonly ObservableAsPropertyHelper<bool> canSwitchPlaylist;
         private readonly CoreSettings coreSettings;
         private readonly ObservableAsPropertyHelper<int> currentSeconds;
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
@@ -52,7 +52,9 @@ namespace Espera.View.ViewModels
 
             this.canChangeTime = this.library.CanChangeTime.ToProperty(this, x => x.CanChangeTime);
             this.canChangeVolume = this.library.CanChangeVolume.ToProperty(this, x => x.CanChangeVolume);
-            this.canSwitchPlaylist = this.library.CanSwitchPlaylist.ToProperty(this, x => x.CanSwitchPlaylist);
+            this.canAlterPlaylist = this.library.AccessMode.CombineLatest(this.coreSettings.WhenAnyValue(x => x.LockPlaylist),
+                (accessMode, lockPlaylist) => accessMode == AccessMode.Administrator || !lockPlaylist)
+                .ToProperty(this, x => x.CanAlterPlaylist);
 
             IObservable<bool> isAdminObservable = this.library.AccessMode
                 .Select(x => x == AccessMode.Administrator);
@@ -130,7 +132,7 @@ namespace Espera.View.ViewModels
                 .Select(x => (int)x.TotalSeconds)
                 .ToProperty(this, x => x.TotalSeconds);
 
-            this.AddPlaylistCommand = new ReactiveCommand(this.WhenAnyValue(x => x.CanSwitchPlaylist));
+            this.AddPlaylistCommand = new ReactiveCommand(this.canAlterPlaylist);
             this.AddPlaylistCommand.Subscribe(x => this.AddPlaylist());
 
             this.Playlists = this.library.Playlists.CreateDerivedCollection(this.CreatePlaylistViewModel);
@@ -139,7 +141,7 @@ namespace Espera.View.ViewModels
             this.ShowSettingsCommand = new ReactiveCommand();
             this.ShowSettingsCommand.Subscribe(x => this.SettingsViewModel.HandleSettings());
 
-            this.ShufflePlaylistCommand = new ReactiveCommand();
+            this.ShufflePlaylistCommand = new ReactiveCommand(this.canAlterPlaylist);
             this.ShufflePlaylistCommand.Subscribe(x => this.library.ShufflePlaylist());
 
             this.PlayCommand = new ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
@@ -192,29 +194,31 @@ namespace Espera.View.ViewModels
                 }
             });
 
-            IObservable<bool> canEditPlaylist = this
-                .WhenAnyValue(x => x.CanSwitchPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 && !x2.Model.IsTemporary);
-            this.EditPlaylistNameCommand = new ReactiveCommand(canEditPlaylist);
+            this.EditPlaylistNameCommand = this.canAlterPlaylist.CombineLatest(this.WhenAnyValue(x => x.CurrentPlaylist),
+                (x1, x2) => x1 && !x2.Model.IsTemporary)
+                .ToCommand();
             this.EditPlaylistNameCommand.Subscribe(x => this.CurrentPlaylist.EditName = true);
 
-            this.RemovePlaylistCommand = new ReactiveCommand(this.WhenAnyValue(x => x.CurrentEditedPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 != null || x2 != null));
+            this.RemovePlaylistCommand = this.WhenAnyValue(x => x.CurrentEditedPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 != null || x2 != null)
+                .CombineLatest(this.canAlterPlaylist, (hasPlaylist, canAlterPlaylist) => hasPlaylist && canAlterPlaylist)
+                .ToCommand();
             this.RemovePlaylistCommand.Subscribe(x => this.RemoveCurrentPlaylist());
 
-            this.RemoveSelectedPlaylistEntriesCommand = new ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
-                .CombineLatest(this.isAdmin, this.coreSettings.WhenAnyValue(x => x.LockPlaylistRemoval),
-                    (selectedPlaylistEntries, isAdmin, lockPlaylistRemoval) =>
-                        selectedPlaylistEntries != null && selectedPlaylistEntries.Any() && (isAdmin || lockPlaylistRemoval)));
+            this.RemoveSelectedPlaylistEntriesCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
+                .CombineLatest(this.canAlterPlaylist, (selectedPlaylistEntries, canAlterPlaylist) =>
+                        selectedPlaylistEntries != null && selectedPlaylistEntries.Any() && canAlterPlaylist)
+                .ToCommand();
             this.RemoveSelectedPlaylistEntriesCommand.Subscribe(x => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index)));
 
             this.MovePlaylistSongUp = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .Select(x => x != null && x.Count() == 1 && x.First().Index > 0)
-                .CombineLatest(this.isAdmin, (hasElements, isAdmin) => hasElements && isAdmin)
+                .CombineLatest(this.canAlterPlaylist, (canMoveUp, canAlterPlaylist) => canMoveUp && canAlterPlaylist)
                 .ToCommand();
             this.MovePlaylistSongUp.Subscribe(_ => this.library.MovePlaylistSongUp(this.SelectedPlaylistEntries.First().Index));
 
             this.MovePlaylistSongDown = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .Select(x => x != null && x.Count() == 1 && x.First().Index < x.Count())
-                .CombineLatest(this.isAdmin, (hasElements, isAdmin) => hasElements && isAdmin)
+                .CombineLatest(this.canAlterPlaylist, (canMoveDown, canAlterPlaylist) => canMoveDown && canAlterPlaylist)
                 .ToCommand();
             this.MovePlaylistSongDown.Subscribe(_ => this.library.MovePlaylistSongDown(this.SelectedPlaylistEntries.First().Index));
 
@@ -226,6 +230,11 @@ namespace Espera.View.ViewModels
         public IAudioPlayerCallback AudioPlayerCallback
         {
             get { return this.library.AudioPlayerCallback; }
+        }
+
+        public bool CanAlterPlaylist
+        {
+            get { return this.canAlterPlaylist.Value; }
         }
 
         public bool CanChangeTime
@@ -244,11 +253,6 @@ namespace Espera.View.ViewModels
         public bool CanModifyWindow
         {
             get { return this.canModifyWindow.Value; }
-        }
-
-        public bool CanSwitchPlaylist
-        {
-            get { return this.canSwitchPlaylist.Value; }
         }
 
         public PlaylistViewModel CurrentEditedPlaylist

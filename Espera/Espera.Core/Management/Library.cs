@@ -82,9 +82,6 @@ namespace Espera.Core.Management
 
             this.CanChangeVolume = this.AccessMode.CombineLatest(this.settings.WhenAnyValue(x => x.LockVolume),
                 (accessMode, lockVolume) => accessMode == Management.AccessMode.Administrator || !lockVolume);
-
-            this.CanSwitchPlaylist = this.AccessMode.CombineLatest(this.settings.WhenAnyValue(x => x.LockPlaylistSwitching),
-                (accessMode, lockPlaylistSwitching) => accessMode == Management.AccessMode.Administrator || !lockPlaylistSwitching);
         }
 
         /// <summary>
@@ -124,8 +121,6 @@ namespace Espera.Core.Management
         /// true if the previous song in the playlist can be played; otherwise, false.
         /// </value>
         public IObservable<bool> CanPlayPreviousSong { get; private set; }
-
-        public IObservable<bool> CanSwitchPlaylist { get; private set; }
 
         public Playlist CurrentPlaylist { get; private set; }
 
@@ -466,11 +461,17 @@ namespace Espera.Core.Management
 
         public void MovePlaylistSongDown(int songIndex)
         {
+            if (this.settings.LockPlaylist && this.accessMode == Management.AccessMode.Party)
+                throw new InvalidOperationException("Not allowed to alter the playlist when in party mode.");
+
             this.CurrentPlaylist.MoveSongDown(songIndex);
         }
 
         public void MovePlaylistSongUp(int songIndex)
         {
+            if (this.settings.LockPlaylist && this.accessMode == Management.AccessMode.Party)
+                throw new InvalidOperationException("Not allowed to alter the playlist when in party mode.");
+
             this.CurrentPlaylist.MoveSongUp(songIndex);
         }
 
@@ -553,7 +554,7 @@ namespace Espera.Core.Management
             if (indexes == null)
                 Throw.ArgumentNullException(() => indexes);
 
-            if (this.settings.LockPlaylistRemoval && this.accessMode == Management.AccessMode.Party)
+            if (this.settings.LockPlaylist && this.accessMode == Management.AccessMode.Party)
                 throw new InvalidOperationException("Not allowed to remove songs when in party mode.");
 
             this.RemoveFromPlaylist(this.CurrentPlaylist, indexes);
@@ -608,6 +609,9 @@ namespace Espera.Core.Management
 
         public void ShufflePlaylist()
         {
+            if (this.settings.LockPlaylist && this.accessMode == Management.AccessMode.Party)
+                throw new InvalidOperationException("Not allowed to shuffle the playlist when in party mode.");
+
             this.CurrentPlaylist.Shuffle();
         }
 
@@ -616,8 +620,8 @@ namespace Espera.Core.Management
             if (playlist == null)
                 Throw.ArgumentNullException(() => playlist);
 
-            if (!this.CanSwitchPlaylist.FirstAsync().Wait())
-                throw new InvalidOperationException("Not allowed to switch playlist.");
+            if (this.settings.LockPlaylist && this.accessMode == Management.AccessMode.Party)
+                throw new InvalidOperationException("Not allowed to alter the playlist when in party mode.");
 
             this.CurrentPlaylist = playlist;
             this.currentPlaylistChanged.OnNext(playlist);
