@@ -7,7 +7,6 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using TagLib;
 using File = TagLib.File;
 
@@ -52,7 +51,7 @@ namespace Espera.Core
             var song = new LocalSong(filePath, duration)
             {
                 Album = PrepareTag(tag.Album, String.Empty),
-                Artist = PrepareTag(tag.FirstPerformer, "Unknown Artist"), //HACK: In the future retrieve the string for an unkown artist from the view if we want to localize it
+                Artist = PrepareTag(tag.FirstPerformer ?? tag.FirstAlbumArtist, "Unknown Artist"), //HACK: In the future retrieve the string for an unkown artist from the view if we want to localize it
                 Genre = PrepareTag(tag.FirstGenre, String.Empty),
                 Title = PrepareTag(tag.Title, Path.GetFileNameWithoutExtension(filePath)),
                 TrackNumber = (int)tag.Track
@@ -99,7 +98,7 @@ namespace Espera.Core
             try
             {
                 files = this.fileSystem.Directory.GetFiles(rootPath)
-                     .Where(x => AllowedExtensions.Contains(Path.GetExtension(x).ToLowerInvariant())); ;
+                     .Where(x => AllowedExtensions.Contains(Path.GetExtension(x).ToLowerInvariant()));
             }
 
             catch (Exception)
