@@ -82,6 +82,9 @@ namespace Espera.Core
 
         public bool UpdateMetadataFrom(Song song)
         {
+            if (song == null)
+                Throw.ArgumentNullException(() => song);
+
             if (this.OriginalPath != song.OriginalPath)
                 Throw.ArgumentException("The original path of both songs must be the same", () => song);
 
