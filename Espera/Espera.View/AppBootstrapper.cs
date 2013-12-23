@@ -97,6 +97,13 @@ namespace Espera.View
 
             Directory.CreateDirectory(DirectoryPath);
 
+            this.Log().Info("Initializing Lager settings storages...");
+
+            this.kernel.Get<CoreSettings>().InitializeAsync().Wait();
+            this.kernel.Get<ViewSettings>().InitializeAsync().Wait();
+
+            this.Log().Info("Settings storages initialized.");
+
             base.OnStartup(sender, e);
         }
 
