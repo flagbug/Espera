@@ -53,20 +53,21 @@ namespace Espera.View.ViewModels
 
             this.library.CurrentPlaylistChanged.Subscribe(x => this.RaisePropertyChanged("CurrentPlaylist"));
 
-            this.canChangeTime = this.CreatePermissionObservable(() => this.coreSettings.LockTime).ToProperty(this, x => x.CanChangeTime);
-            this.canChangeVolume = this.CreatePermissionObservable(() => this.coreSettings.LockVolume).ToProperty(this, x => x.CanChangeVolume);
-            this.canAlterPlaylist = this.CreatePermissionObservable(() => this.coreSettings.LockPlaylist).ToProperty(this, x => x.CanAlterPlaylist);
+            this.canChangeTime = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockTime))
+                .ToProperty(this, x => x.CanChangeTime);
+            this.canChangeVolume = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockVolume))
+                .ToProperty(this, x => x.CanChangeVolume);
+            this.canAlterPlaylist = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlaylist))
+                .ToProperty(this, x => x.CanAlterPlaylist);
 
             this.isAdmin = this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken)
                 .Select(x => x == AccessPermission.Admin)
                 .ToProperty(this, x => x.IsAdmin);
 
-            this.NextSongCommand = new ReactiveCommand(this.WhenAnyValue(x => x.IsAdmin)
-                .CombineLatest(this.library.CanPlayNextSong, (b, b1) => b && b1));
+            this.NextSongCommand = new ReactiveCommand(this.HasAccess(this.library.CanPlayNextSong));
             this.NextSongCommand.RegisterAsyncTask(_ => this.library.PlayNextSongAsync(this.accessToken));
 
-            this.PreviousSongCommand = new ReactiveCommand(this.WhenAnyValue(x => x.IsAdmin)
-                .CombineLatest(this.library.CanPlayPreviousSong, (b, b1) => b && b1));
+            this.PreviousSongCommand = new ReactiveCommand(this.HasAccess(this.library.CanPlayPreviousSong));
             this.PreviousSongCommand.RegisterAsyncTask(_ => this.library.PlayPreviousSongAsync(this.accessToken));
 
             if (!this.library.Playlists.Any())
@@ -103,14 +104,13 @@ namespace Espera.View.ViewModels
                 .CombineLatest(this.WhenAnyValue(x => x.SettingsViewModel.EnablePlaylistTimeout), (isAdmin, enableTimeout) => !isAdmin && enableTimeout)
                 .ToProperty(this, x => x.ShowPlaylistTimeout);
 
-            this.MuteCommand = new ReactiveCommand(this.isAdmin);
+            this.MuteCommand = new ReactiveCommand(this.WhenAnyValue(x => x.IsAdmin));
             this.MuteCommand.Subscribe(x => this.Volume = 0);
 
-            this.UnMuteCommand = new ReactiveCommand(this.isAdmin);
+            this.UnMuteCommand = new ReactiveCommand(this.WhenAnyValue(x => x.IsAdmin));
             this.UnMuteCommand.Subscribe(x => this.Volume = 1);
 
-            this.canModifyWindow = this.WhenAnyValue(x => x.IsAdmin)
-                .Select(isAdmin => isAdmin || !this.ViewSettings.LockWindow)
+            this.canModifyWindow = this.HasAccess(this.ViewSettings.WhenAnyValue(x => x.LockWindow))
                 .ToProperty(this, x => x.CanModifyWindow);
 
             this.isPlaying = this.library.PlaybackState
@@ -168,13 +168,15 @@ namespace Espera.View.ViewModels
                 }
             });
 
-            this.PlayOverrideCommand = new ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
-                .CombineLatest(this.isAdmin, this.coreSettings.WhenAnyValue(x => x.LockPlayPause), (selectedPlaylistEntries, isAdmin, lockPlayPause) =>
-                    (isAdmin || !lockPlayPause) && (selectedPlaylistEntries != null && selectedPlaylistEntries.Count() == 1)));
+            this.PlayOverrideCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
+                .CombineLatest(this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause)), (selectedPlaylistEntries, hasAccess) =>
+                    hasAccess && (selectedPlaylistEntries != null && selectedPlaylistEntries.Count() == 1))
+                .ToCommand();
             this.PlayOverrideCommand.RegisterAsyncTask(_ => this.library.PlaySongAsync(this.SelectedPlaylistEntries.First().Index, this.accessToken));
 
-            this.PauseCommand = new ReactiveCommand(this.isAdmin.CombineLatest(this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.isPlaying,
-                (isAdmin, lockPlayPause, isPlaying) => (isAdmin || !lockPlayPause) && isPlaying));
+            this.PauseCommand = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
+                .CombineLatest(this.isPlaying, (hasAccess, isPlaying) => hasAccess && isPlaying)
+                .ToCommand();
             this.PauseCommand.RegisterAsyncTask(_ => this.library.PauseSongAsync(this.accessToken));
 
             this.PauseContinueCommand = new ReactiveCommand(this
@@ -470,12 +472,6 @@ namespace Espera.View.ViewModels
             this.CurrentPlaylist.EditName = true;
         }
 
-        private IObservable<bool> CreatePermissionObservable(Func<bool> combinator)
-        {
-            return this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken)
-                .Select(x => x == AccessPermission.Admin || !combinator());
-        }
-
         private PlaylistViewModel CreatePlaylistViewModel(Playlist playlist)
         {
             return new PlaylistViewModel(playlist, name => this.Playlists.Count(p => p.Name == name) == 1);
@@ -498,6 +494,22 @@ namespace Espera.View.ViewModels
                 });
 
             return newName;
+        }
+
+        /// <summary>
+        /// Creates a boolean observable that returns whether the user has the permission to do an administrator action.
+        /// </summary>
+        /// <param name="combinator">An additional combinator that returns whether the action is restricted in guest mode.</param>
+        /// <remarks>
+        /// The user has admin access => Always returns true
+        /// The user has guest access and combinator is true => Returns false
+        /// The user has guest access and combinator is false => Returns true
+        /// </remarks>
+        private IObservable<bool> HasAccess(IObservable<bool> combinator)
+        {
+            return this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken)
+                .Select(x => x == AccessPermission.Admin)
+                .CombineLatest(combinator, (admin, c) => admin || !c);
         }
 
         private void RemoveCurrentPlaylist()
