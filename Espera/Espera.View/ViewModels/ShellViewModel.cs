@@ -211,17 +211,17 @@ namespace Espera.View.ViewModels
                 .ToCommand();
             this.RemoveSelectedPlaylistEntriesCommand.Subscribe(x => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index), this.accessToken));
 
-            this.MovePlaylistSongUp = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
+            this.MovePlaylistSongUpCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .Select(x => x != null && x.Count() == 1 && x.First().Index > 0)
                 .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveUp, canAlterPlaylist) => canMoveUp && canAlterPlaylist)
                 .ToCommand();
-            this.MovePlaylistSongUp.Subscribe(_ => this.library.MovePlaylistSongUp(this.SelectedPlaylistEntries.First().Index, this.accessToken));
+            this.MovePlaylistSongUpCommand.Subscribe(_ => this.library.MovePlaylistSongUp(this.SelectedPlaylistEntries.First().Index, this.accessToken));
 
-            this.MovePlaylistSongDown = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
+            this.MovePlaylistSongDownCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .Select(x => x != null && x.Count() == 1 && x.First().Index < this.CurrentPlaylist.SongCount - 1)
                 .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveDown, canAlterPlaylist) => canMoveDown && canAlterPlaylist)
                 .ToCommand();
-            this.MovePlaylistSongDown.Subscribe(_ => this.library.MovePlaylistSongDown(this.SelectedPlaylistEntries.First().Index, this.accessToken));
+            this.MovePlaylistSongDownCommand.Subscribe(_ => this.library.MovePlaylistSongDown(this.SelectedPlaylistEntries.First().Index, this.accessToken));
 
             this.IsLocal = true;
 
@@ -341,9 +341,9 @@ namespace Espera.View.ViewModels
 
         public LocalViewModel LocalViewModel { get; private set; }
 
-        public ReactiveCommand MovePlaylistSongDown { get; private set; }
+        public ReactiveCommand MovePlaylistSongDownCommand { get; private set; }
 
-        public ReactiveCommand MovePlaylistSongUp { get; private set; }
+        public ReactiveCommand MovePlaylistSongUpCommand { get; private set; }
 
         /// <summary>
         /// Sets the volume to the lowest possible value.
