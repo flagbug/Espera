@@ -57,14 +57,15 @@ namespace Espera.View.ViewModels
             this.canChangeVolume = this.CreatePermissionObservable(() => this.coreSettings.LockVolume).ToProperty(this, x => x.CanChangeVolume);
             this.canAlterPlaylist = this.CreatePermissionObservable(() => this.coreSettings.LockPlaylist).ToProperty(this, x => x.CanAlterPlaylist);
 
-            IObservable<bool> isAdminObservable = this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken)
-                .Select(x => x == AccessPermission.Admin);
+            this.isAdmin = this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken)
+                .Select(x => x == AccessPermission.Admin)
+                .ToProperty(this, x => x.IsAdmin);
 
-            this.NextSongCommand = new ReactiveCommand(isAdminObservable
+            this.NextSongCommand = new ReactiveCommand(this.WhenAnyValue(x => x.IsAdmin)
                 .CombineLatest(this.library.CanPlayNextSong, (b, b1) => b && b1));
             this.NextSongCommand.RegisterAsyncTask(_ => this.library.PlayNextSongAsync(this.accessToken));
 
-            this.PreviousSongCommand = new ReactiveCommand(isAdminObservable
+            this.PreviousSongCommand = new ReactiveCommand(this.WhenAnyValue(x => x.IsAdmin)
                 .CombineLatest(this.library.CanPlayPreviousSong, (b, b1) => b && b1));
             this.PreviousSongCommand.RegisterAsyncTask(_ => this.library.PlayPreviousSongAsync(this.accessToken));
 
@@ -98,10 +99,7 @@ namespace Espera.View.ViewModels
                 .SelectMany(x => new[] { true, false }.ToObservable())
                 .ToProperty(this, x => x.DisplayTimeoutWarning);
 
-            this.isAdmin = isAdminObservable
-                .ToProperty(this, x => x.IsAdmin);
-
-            this.showPlaylistTimeout = isAdminObservable
+            this.showPlaylistTimeout = this.WhenAnyValue(x => x.IsAdmin)
                 .CombineLatest(this.WhenAnyValue(x => x.SettingsViewModel.EnablePlaylistTimeout), (isAdmin, enableTimeout) => !isAdmin && enableTimeout)
                 .ToProperty(this, x => x.ShowPlaylistTimeout);
 
@@ -111,7 +109,7 @@ namespace Espera.View.ViewModels
             this.UnMuteCommand = new ReactiveCommand(this.isAdmin);
             this.UnMuteCommand.Subscribe(x => this.Volume = 1);
 
-            this.canModifyWindow = isAdminObservable
+            this.canModifyWindow = this.WhenAnyValue(x => x.IsAdmin)
                 .Select(isAdmin => isAdmin || !this.ViewSettings.LockWindow)
                 .ToProperty(this, x => x.CanModifyWindow);
 
@@ -146,7 +144,7 @@ namespace Espera.View.ViewModels
             this.ShufflePlaylistCommand.Subscribe(x => this.library.ShufflePlaylist(this.accessToken));
 
             this.PlayCommand = new ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
-                .CombineLatest(isAdminObservable, this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.library.LoadedSong, this.library.PlaybackState,
+                .CombineLatest(this.WhenAnyValue(x => x.IsAdmin), this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.library.LoadedSong, this.library.PlaybackState,
                     (selectedPlaylistEntries, isAdmin, lockPlayPause, loadedSong, playBackState) =>
 
                         // The admin can always play, but if we are in party mode, we have to check whether it is allowed to play
