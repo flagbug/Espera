@@ -15,7 +15,11 @@ namespace Espera.Core.Management
 
             this.Index = index;
             this.Song = song;
+
+            this.Guid = Guid.NewGuid();
         }
+
+        public Guid Guid { get; private set; }
 
         public int Index { get; internal set; }
 

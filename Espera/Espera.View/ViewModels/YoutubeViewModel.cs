@@ -28,8 +28,8 @@ namespace Espera.View.ViewModels
         private SortOrder titleOrder;
         private SortOrder viewsOrder;
 
-        public YoutubeViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, INetworkStatus networkstatus = null, IYoutubeSongFinder songFinder = null)
-            : base(library)
+        public YoutubeViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, Guid accessToken, INetworkStatus networkstatus = null, IYoutubeSongFinder songFinder = null)
+            : base(library, accessToken)
         {
             if (viewSettings == null)
                 Throw.ArgumentNullException(() => viewSettings);
@@ -42,9 +42,10 @@ namespace Espera.View.ViewModels
             this.songFinder = songFinder ?? new YoutubeSongFinder();
 
             this.connectionError = new Subject<Unit>();
-
-            this.playNowCommand = new ReactiveCommand();
-            this.playNowCommand.RegisterAsyncTask(_ => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model)));
+            this.playNowCommand = this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
+                .Select(x => x == AccessPermission.Admin || !this.coreSettings.LockPlayPause)
+                .ToCommand();
+            this.playNowCommand.RegisterAsyncTask(_ => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model), accessToken));
 
             this.selectedSong = this.WhenAnyValue(x => x.SelectedSongs)
                 .Select(x => x == null ? null : (YoutubeSongViewModel)this.SelectedSongs.FirstOrDefault())

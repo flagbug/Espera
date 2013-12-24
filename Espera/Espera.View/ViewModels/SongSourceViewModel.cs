@@ -20,7 +20,7 @@ namespace Espera.View.ViewModels
         private IEnumerable<T> selectableSongs;
         private IEnumerable<SongViewModelBase> selectedSongs;
 
-        protected SongSourceViewModel(Library library)
+        protected SongSourceViewModel(Library library, Guid accessToken)
         {
             this.library = library;
 
@@ -28,11 +28,14 @@ namespace Espera.View.ViewModels
             this.selectableSongs = Enumerable.Empty<T>();
             this.timeoutWarning = new Subject<Unit>();
 
-            IObservable<bool> canAddToPlaylist = this.WhenAnyValue(x => x.SelectedSongs, x => x != null && x.Any());
-            this.AddToPlaylistCommand = new ReactiveCommand(canAddToPlaylist);
+            IConnectableObservable<bool> canAddToPlaylist = this.WhenAnyValue(x => x.SelectedSongs, x => x != null && x.Any())
+                .Publish(true);
+            canAddToPlaylist.Connect();
+
+            this.AddToPlaylistCommand = new ReactiveCommand();
             this.AddToPlaylistCommand.Subscribe(p =>
             {
-                if (!this.Library.CanAddSongToPlaylist)
+                if (!canAddToPlaylist.FirstAsync().Wait())
                 {
                     // Trigger the animation
                     this.timeoutWarning.OnNext(Unit.Default);
@@ -42,7 +45,7 @@ namespace Espera.View.ViewModels
 
                 if (this.IsAdmin)
                 {
-                    this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model));
+                    this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model), accessToken);
                 }
 
                 else
@@ -55,10 +58,11 @@ namespace Espera.View.ViewModels
             this.SelectionChangedCommand.Where(x => x != null)
                 .Select(x => ((IEnumerable)x).Cast<T>())
                 .Subscribe(x => this.SelectedSongs = x);
-
-            this.isAdmin = this.Library.AccessMode
-                .Select(x => x == AccessMode.Administrator)
+            
+            this.isAdmin = this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
+                .Select(x => x == AccessPermission.Admin)
                 .ToProperty(this, x => x.IsAdmin);
+
         }
 
         public IReactiveCommand AddToPlaylistCommand { get; private set; }

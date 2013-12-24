@@ -1,5 +1,4 @@
-﻿using Akavache;
-using Espera.Core.Audio;
+﻿using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Moq;
@@ -10,6 +9,7 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace Espera.Core.Tests
 {
@@ -66,7 +66,7 @@ namespace Espera.Core.Tests
             var library = new Library(
                 reader ?? new Mock<ILibraryReader>().Object,
                 writer ?? new Mock<ILibraryWriter>().Object,
-                settings ?? new CoreSettings(BlobCache.InMemory),
+                settings ?? new CoreSettings(),
                 fileSystem ?? new MockFileSystem());
 
             IAudioPlayerCallback c = library.AudioPlayerCallback;
@@ -85,7 +85,7 @@ namespace Espera.Core.Tests
         public static Library CreateLibraryWithPlaylist(string playlistName = "Playlist", CoreSettings settings = null)
         {
             var library = CreateLibrary(settings);
-            library.AddAndSwitchToPlaylist(playlistName);
+            library.AddAndSwitchToPlaylist(playlistName, library.LocalAccessControl.RegisterLocalAccessToken());
 
             return library;
         }
@@ -163,6 +163,21 @@ namespace Espera.Core.Tests
 
                 return reader.ReadToEnd();
             }
+        }
+
+        public async static Task<T> ThrowsAsync<T>(Func<Task> testCode) where T : Exception
+        {
+            try
+            {
+                await testCode();
+                Assert.Throws<T>(() => { }); // Use xUnit's default behavior.
+            }
+            catch (T exception)
+            {
+                return exception;
+            }
+
+            return null;
         }
 
         public static Stream ToStream(this string s)

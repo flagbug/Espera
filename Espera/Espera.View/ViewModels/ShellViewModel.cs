@@ -2,6 +2,7 @@
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
+using Espera.Services;
 using Rareform.Extensions;
 using ReactiveMarrow;
 using ReactiveUI;
@@ -16,6 +17,7 @@ namespace Espera.View.ViewModels
 {
     internal class ShellViewModel : ReactiveObject, IDisposable
     {
+        private readonly Guid accessToken;
         private readonly ObservableAsPropertyHelper<bool> canAlterPlaylist;
         private readonly ObservableAsPropertyHelper<bool> canChangeTime;
         private readonly ObservableAsPropertyHelper<bool> canChangeVolume;
@@ -34,6 +36,7 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<TimeSpan> totalTime;
         private bool isLocal;
         private bool isYoutube;
+        private MobileApi mobileApi;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
         private bool showVideoPlayer;
 
@@ -46,41 +49,39 @@ namespace Espera.View.ViewModels
             this.disposable = new CompositeDisposable();
 
             this.library.Initialize();
+            this.accessToken = this.library.LocalAccessControl.RegisterLocalAccessToken();
 
             this.library.CurrentPlaylistChanged.Subscribe(x => this.RaisePropertyChanged("CurrentPlaylist"));
-            this.UpdateScreenState = this.library.AccessMode;
 
-            this.canChangeTime = this.library.CanChangeTime.ToProperty(this, x => x.CanChangeTime);
-            this.canChangeVolume = this.library.CanChangeVolume.ToProperty(this, x => x.CanChangeVolume);
-            this.canAlterPlaylist = this.library.AccessMode.CombineLatest(this.coreSettings.WhenAnyValue(x => x.LockPlaylist),
-                (accessMode, lockPlaylist) => accessMode == AccessMode.Administrator || !lockPlaylist)
-                .ToProperty(this, x => x.CanAlterPlaylist);
+            this.canChangeTime = this.CreatePermissionObservable(() => this.coreSettings.LockTime).ToProperty(this, x => x.CanChangeTime);
+            this.canChangeVolume = this.CreatePermissionObservable(() => this.coreSettings.LockVolume).ToProperty(this, x => x.CanChangeVolume);
+            this.canAlterPlaylist = this.CreatePermissionObservable(() => this.coreSettings.LockPlaylist).ToProperty(this, x => x.CanAlterPlaylist);
 
-            IObservable<bool> isAdminObservable = this.library.AccessMode
-                .Select(x => x == AccessMode.Administrator);
+            IObservable<bool> isAdminObservable = this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken)
+                .Select(x => x == AccessPermission.Admin);
 
             this.NextSongCommand = new ReactiveCommand(isAdminObservable
                 .CombineLatest(this.library.CanPlayNextSong, (b, b1) => b && b1));
-            this.NextSongCommand.RegisterAsyncTask(_ => this.library.PlayNextSongAsync());
+            this.NextSongCommand.RegisterAsyncTask(_ => this.library.PlayNextSongAsync(this.accessToken));
 
             this.PreviousSongCommand = new ReactiveCommand(isAdminObservable
                 .CombineLatest(this.library.CanPlayPreviousSong, (b, b1) => b && b1));
-            this.PreviousSongCommand.RegisterAsyncTask(_ => this.library.PlayPreviousSongAsync());
+            this.PreviousSongCommand.RegisterAsyncTask(_ => this.library.PlayPreviousSongAsync(this.accessToken));
 
             if (!this.library.Playlists.Any())
             {
-                this.library.AddAndSwitchToPlaylist(this.GetNewPlaylistName());
+                this.library.AddAndSwitchToPlaylist(this.GetNewPlaylistName(), this.accessToken);
             }
 
             else
             {
-                this.library.SwitchToPlaylist(this.library.Playlists.First());
+                this.library.SwitchToPlaylist(this.library.Playlists.First(), this.accessToken);
             }
 
-            this.SettingsViewModel = new SettingsViewModel(this.library, this.ViewSettings, this.coreSettings, windowManager);
+            this.SettingsViewModel = new SettingsViewModel(this.library, this.ViewSettings, this.coreSettings, windowManager, this.accessToken);
 
-            this.LocalViewModel = new LocalViewModel(this.library, this.ViewSettings);
-            this.YoutubeViewModel = new YoutubeViewModel(this.library, this.ViewSettings, this.coreSettings);
+            this.LocalViewModel = new LocalViewModel(this.library, this.ViewSettings, this.coreSettings, accessToken);
+            this.YoutubeViewModel = new YoutubeViewModel(this.library, this.ViewSettings, this.coreSettings, accessToken);
 
             Observable.Interval(TimeSpan.FromMilliseconds(300), RxApp.TaskpoolScheduler)
                 .Where(_ => this.RemainingPlaylistTimeout > TimeSpan.Zero)
@@ -142,7 +143,7 @@ namespace Espera.View.ViewModels
             this.ShowSettingsCommand.Subscribe(x => this.SettingsViewModel.HandleSettings());
 
             this.ShufflePlaylistCommand = new ReactiveCommand(this.canAlterPlaylist);
-            this.ShufflePlaylistCommand.Subscribe(x => this.library.ShufflePlaylist());
+            this.ShufflePlaylistCommand.Subscribe(x => this.library.ShufflePlaylist(this.accessToken));
 
             this.PlayCommand = new ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .CombineLatest(isAdminObservable, this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.library.LoadedSong, this.library.PlaybackState,
@@ -160,23 +161,23 @@ namespace Espera.View.ViewModels
             {
                 if (await this.library.PlaybackState.FirstAsync() == AudioPlayerState.Paused || await this.library.LoadedSong.FirstAsync() != null)
                 {
-                    await this.library.ContinueSongAsync();
+                    await this.library.ContinueSongAsync(this.accessToken);
                 }
 
                 else
                 {
-                    await this.library.PlaySongAsync(this.SelectedPlaylistEntries.First().Index);
+                    await this.library.PlaySongAsync(this.SelectedPlaylistEntries.First().Index, this.accessToken);
                 }
             });
 
             this.PlayOverrideCommand = new ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .CombineLatest(this.isAdmin, this.coreSettings.WhenAnyValue(x => x.LockPlayPause), (selectedPlaylistEntries, isAdmin, lockPlayPause) =>
                     (isAdmin || !lockPlayPause) && (selectedPlaylistEntries != null && selectedPlaylistEntries.Count() == 1)));
-            this.PlayOverrideCommand.RegisterAsyncTask(_ => this.library.PlaySongAsync(this.SelectedPlaylistEntries.First().Index));
+            this.PlayOverrideCommand.RegisterAsyncTask(_ => this.library.PlaySongAsync(this.SelectedPlaylistEntries.First().Index, this.accessToken));
 
             this.PauseCommand = new ReactiveCommand(this.isAdmin.CombineLatest(this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.isPlaying,
                 (isAdmin, lockPlayPause, isPlaying) => (isAdmin || !lockPlayPause) && isPlaying));
-            this.PauseCommand.RegisterAsyncTask(_ => this.library.PauseSongAsync());
+            this.PauseCommand.RegisterAsyncTask(_ => this.library.PauseSongAsync(this.accessToken));
 
             this.PauseContinueCommand = new ReactiveCommand(this
                 .WhenAnyValue(x => x.IsPlaying)
@@ -208,21 +209,41 @@ namespace Espera.View.ViewModels
                 .CombineLatest(this.canAlterPlaylist, (selectedPlaylistEntries, canAlterPlaylist) =>
                         selectedPlaylistEntries != null && selectedPlaylistEntries.Any() && canAlterPlaylist)
                 .ToCommand();
-            this.RemoveSelectedPlaylistEntriesCommand.Subscribe(x => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index)));
+            this.RemoveSelectedPlaylistEntriesCommand.Subscribe(x => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index), this.accessToken));
 
             this.MovePlaylistSongUp = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .Select(x => x != null && x.Count() == 1 && x.First().Index > 0)
                 .CombineLatest(this.canAlterPlaylist, (canMoveUp, canAlterPlaylist) => canMoveUp && canAlterPlaylist)
                 .ToCommand();
-            this.MovePlaylistSongUp.Subscribe(_ => this.library.MovePlaylistSongUp(this.SelectedPlaylistEntries.First().Index));
+            this.MovePlaylistSongUp.Subscribe(_ => this.library.MovePlaylistSongUp(this.SelectedPlaylistEntries.First().Index, this.accessToken));
 
             this.MovePlaylistSongDown = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .Select(x => x != null && x.Count() == 1 && x.First().Index < x.Count())
                 .CombineLatest(this.canAlterPlaylist, (canMoveDown, canAlterPlaylist) => canMoveDown && canAlterPlaylist)
                 .ToCommand();
-            this.MovePlaylistSongDown.Subscribe(_ => this.library.MovePlaylistSongDown(this.SelectedPlaylistEntries.First().Index));
+            this.MovePlaylistSongDown.Subscribe(_ => this.library.MovePlaylistSongDown(this.SelectedPlaylistEntries.First().Index, this.accessToken));
 
             this.IsLocal = true;
+
+            this.coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged()
+                .CombineLatest(this.coreSettings.WhenAnyValue(x => x.EnableRemoteControl), Tuple.Create)
+                .Where(x => x.Item2)
+                .Select(x => x.Item1)
+                .Subscribe(x =>
+                {
+                    if (this.mobileApi != null)
+                    {
+                        this.mobileApi.Dispose();
+                    }
+
+                    this.mobileApi = new MobileApi(x, this.library);
+                    this.mobileApi.SendBroadcastAsync();
+                    this.mobileApi.StartClientDiscovery();
+                });
+
+            this.coreSettings.WhenAnyValue(x => x.EnableRemoteControl)
+                .Where(x => !x && this.mobileApi != null)
+                .Subscribe(x => this.mobileApi.Dispose());
         }
 
         public IReactiveCommand AddPlaylistCommand { get; private set; }
@@ -267,7 +288,7 @@ namespace Espera.View.ViewModels
             {
                 if (value != null) // There always has to be a playlist selected
                 {
-                    this.library.SwitchToPlaylist(value.Model);
+                    this.library.SwitchToPlaylist(value.Model, this.accessToken);
                     this.RaisePropertyChanged();
                 }
             }
@@ -276,7 +297,7 @@ namespace Espera.View.ViewModels
         public int CurrentSeconds
         {
             get { return this.currentSeconds.Value; }
-            set { this.library.CurrentTime = TimeSpan.FromSeconds(value); }
+            set { this.library.SetCurrentTime(TimeSpan.FromSeconds(value), this.accessToken); }
         }
 
         public ISongSourceViewModel CurrentSongSource
@@ -411,7 +432,10 @@ namespace Espera.View.ViewModels
         /// <summary>
         /// Occurs when the view should update the screen state to maximized state or restore it to normal state
         /// </summary>
-        public IObservable<AccessMode> UpdateScreenState { get; private set; }
+        public IObservable<AccessPermission> UpdateScreenState
+        {
+            get { return this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken); }
+        }
 
         public ViewSettings ViewSettings { get; private set; }
 
@@ -420,7 +444,7 @@ namespace Espera.View.ViewModels
             get { return this.library.Volume; }
             set
             {
-                this.library.Volume = (float)value;
+                this.library.SetVolume((float)value, this.accessToken);
                 this.RaisePropertyChanged();
             }
         }
@@ -433,14 +457,25 @@ namespace Espera.View.ViewModels
             this.library.Dispose();
 
             this.disposable.Dispose();
+
+            if (this.mobileApi != null)
+            {
+                this.mobileApi.Dispose();
+            }
         }
 
         private void AddPlaylist()
         {
-            this.library.AddAndSwitchToPlaylist(this.GetNewPlaylistName());
+            this.library.AddAndSwitchToPlaylist(this.GetNewPlaylistName(), this.accessToken);
 
             this.CurrentPlaylist = this.Playlists.Last();
             this.CurrentPlaylist.EditName = true;
+        }
+
+        private IObservable<bool> CreatePermissionObservable(Func<bool> combinator)
+        {
+            return this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken)
+                .Select(x => x == AccessPermission.Admin || !combinator());
         }
 
         private PlaylistViewModel CreatePlaylistViewModel(Playlist playlist)
@@ -471,7 +506,7 @@ namespace Espera.View.ViewModels
         {
             int index = this.Playlists.TakeWhile(p => p != this.CurrentPlaylist).Count();
 
-            this.library.RemovePlaylist(this.CurrentPlaylist.Model);
+            this.library.RemovePlaylist(this.CurrentPlaylist.Model, this.accessToken);
 
             if (!this.library.Playlists.Any())
             {

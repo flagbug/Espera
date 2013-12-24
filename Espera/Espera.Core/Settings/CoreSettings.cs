@@ -1,4 +1,5 @@
 ﻿using Akavache;
+using Espera.Core.Management;
 using Lager;
 using System;
 
@@ -6,8 +7,8 @@ namespace Espera.Core.Settings
 {
     public class CoreSettings : SettingsStorage
     {
-        public CoreSettings(IBlobCache blobCache)
-            : base("__CoreSettings__", blobCache)
+        public CoreSettings()
+            : base("__CoreSettings__", BlobCache.LocalMachine)
         { }
 
         public bool EnableAutomaticLibraryUpdates
@@ -22,6 +23,12 @@ namespace Espera.Core.Settings
             set { this.SetOrCreate(value); }
         }
 
+        public bool EnableRemoteControl
+        {
+            get { return this.GetOrCreate(true); }
+            set { this.SetOrCreate(value); }
+        }
+
         public bool LockPlaylist
         {
             get { return this.GetOrCreate(true); }
@@ -31,6 +38,12 @@ namespace Espera.Core.Settings
         public bool LockPlayPause
         {
             get { return this.GetOrCreate(true); }
+            set { this.SetOrCreate(value); }
+        }
+
+        public bool LockRemoteControl
+        {
+            get { return this.GetOrCreate(false); }
             set { this.SetOrCreate(value); }
         }
 
@@ -49,6 +62,21 @@ namespace Espera.Core.Settings
         public TimeSpan PlaylistTimeout
         {
             get { return this.GetOrCreate(TimeSpan.FromSeconds(30)); }
+            set { this.SetOrCreate(value); }
+        }
+
+        public int Port
+        {
+            get { return this.GetOrCreate(49587); }
+            set { this.SetOrCreate(value); }
+        }
+
+        /// <summary>
+        /// Set this property through the <see cref="AccessControl"/> class.
+        /// </summary>
+        public string RemoteControlPassword
+        {
+            get { return this.GetOrCreate((string)null); }
             set { this.SetOrCreate(value); }
         }
 
