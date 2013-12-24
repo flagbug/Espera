@@ -218,7 +218,7 @@ namespace Espera.View.ViewModels
             this.MovePlaylistSongUp.Subscribe(_ => this.library.MovePlaylistSongUp(this.SelectedPlaylistEntries.First().Index, this.accessToken));
 
             this.MovePlaylistSongDown = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
-                .Select(x => x != null && x.Count() == 1 && x.First().Index < x.Count())
+                .Select(x => x != null && x.Count() == 1 && x.First().Index < this.CurrentPlaylist.SongCount - 1)
                 .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveDown, canAlterPlaylist) => canMoveDown && canAlterPlaylist)
                 .ToCommand();
             this.MovePlaylistSongDown.Subscribe(_ => this.library.MovePlaylistSongDown(this.SelectedPlaylistEntries.First().Index, this.accessToken));
