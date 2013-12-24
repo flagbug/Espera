@@ -743,6 +743,7 @@
                              Focusable="False"
                              ItemsSource="{Binding Path=CurrentPlaylist.Songs}"
                              KeyUp="PlaylistKeyUp"
+                             SelectionMode="Extended"
                              ScrollViewer.CanContentScroll="True"
                              ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                              SelectionChanged="PlaylistSelectionChanged"
