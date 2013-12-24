@@ -117,8 +117,7 @@
                         <Controls:ToggleSwitch Header="Lock play/pause" IsChecked="{Binding Path=LockPlayPause}" />
                         <Controls:ToggleSwitch Header="Lock volume" IsChecked="{Binding Path=LockVolume}" />
                         <Controls:ToggleSwitch Header="Lock time" IsChecked="{Binding Path=LockTime}" />
-                        <Controls:ToggleSwitch Header="Lock playlist switching" IsChecked="{Binding Path=LockPlaylistSwitching}" />
-                        <Controls:ToggleSwitch Header="Lock song removal from playlist" IsChecked="{Binding Path=LockPlaylistRemoval}" />
+                        <Controls:ToggleSwitch Header="Lock playlist" IsChecked="{Binding Path=LockPlaylist}" />
                         <Controls:ToggleSwitch Header="Enable timeout when adding songs to the playlist" IsChecked="{Binding Path=EnablePlaylistTimeout}" />
                         <StackPanel Margin="30, 5, 0, 0"
                                     IsEnabled="{Binding Path=EnablePlaylistTimeout}"

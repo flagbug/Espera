@@ -7,6 +7,7 @@ using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -32,6 +33,9 @@ namespace Espera.View.Views
                 this.WireDataContext();
                 this.WirePlayer();
                 this.WireScreenStateUpdater();
+
+                this.Events().KeyUp.Where(x => x.Key == Key.Space)
+                    .InvokeCommand(this.shellViewModel, x => x.PauseContinueCommand);
             };
         }
 
@@ -102,6 +106,8 @@ namespace Espera.View.Views
                 {
                     this.shellViewModel.RemoveSelectedPlaylistEntriesCommand.Execute(null);
                 }
+
+                e.Handled = true;
             }
 
             else if (e.Key == Key.Enter)
@@ -110,6 +116,8 @@ namespace Espera.View.Views
                 {
                     this.shellViewModel.PlayOverrideCommand.Execute(null);
                 }
+
+                e.Handled = true;
             }
         }
 
@@ -147,7 +155,7 @@ namespace Espera.View.Views
 
         private async void SearchTextBoxKeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            if (e.Key == Key.Enter && this.shellViewModel.IsYoutube)
             {
                 await this.shellViewModel.YoutubeViewModel.StartSearchAsync();
             }
@@ -175,6 +183,8 @@ namespace Espera.View.Views
                 {
                     command.Execute(null);
                 }
+
+                e.Handled = true;
             }
         }
 

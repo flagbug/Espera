@@ -212,7 +212,7 @@ namespace Espera.Core.Management
         /// <exception cref="InvalidOperationException">A playlist with the specified name already exists.</exception>
         public void AddAndSwitchToPlaylist(string name, Guid accessToken)
         {
-            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylistSwitching);
+            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylist);
 
             this.AddPlaylist(name, accessToken);
             this.SwitchToPlaylist(this.GetPlaylistByName(name), accessToken);
@@ -325,6 +325,20 @@ namespace Espera.Core.Management
                 .Subscribe(path => this.UpdateSongsAsync(path));
         }
 
+        public void MovePlaylistSongDown(int songIndex, Guid accessToken)
+        {
+            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylist);
+
+            this.CurrentPlaylist.MoveSongDown(songIndex);
+        }
+
+        public void MovePlaylistSongUp(int songIndex, Guid accessToken)
+        {
+            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylist);
+
+            this.CurrentPlaylist.MoveSongUp(songIndex);
+        }
+
         /// <summary>
         /// Pauses the currently loaded song.
         /// </summary>
@@ -403,7 +417,7 @@ namespace Espera.Core.Management
             if (indexes == null)
                 Throw.ArgumentNullException(() => indexes);
 
-            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylistRemoval);
+            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylist);
 
             this.RemoveFromPlaylist(this.CurrentPlaylist, indexes);
         }
@@ -474,8 +488,10 @@ namespace Espera.Core.Management
             this.audioPlayer.Volume = volume;
         }
 
-        public void ShufflePlaylist()
+        public void ShufflePlaylist(Guid accessToken)
         {
+            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylist);
+
             this.CurrentPlaylist.Shuffle();
         }
 
@@ -484,7 +500,7 @@ namespace Espera.Core.Management
             if (playlist == null)
                 Throw.ArgumentNullException(() => playlist);
 
-            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylistSwitching);
+            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylist);
 
             this.CurrentPlaylist = playlist;
             this.currentPlaylistChanged.OnNext(playlist);
@@ -709,9 +725,25 @@ namespace Espera.Core.Management
 
                     bool added = this.songs.Add(song);
 
-                    this.songLock.ExitWriteLock();
+                    // Inverse the if, as this condition happens way more often and
+                    // we want to release the lock as soon as possible
+                    // We also keep the write lock open so we can be sure we find
+                    // the song and it isn't removed in the meanwhile
+                    if (!added)
+                    {
+                        Song existing = this.songs.First(x => x.OriginalPath == song.OriginalPath);
 
-                    if (added)
+                        bool changed = existing.UpdateMetadataFrom(song);
+
+                        this.songLock.ExitWriteLock();
+
+                        if (changed)
+                        {
+                            this.songsUpdated.OnNext(Unit.Default);
+                        }
+                    }
+
+                    else
                     {
                         byte[] artworkData = t.Item2;
 

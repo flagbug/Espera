@@ -527,7 +527,7 @@ namespace Espera.Core.Tests
 
             var settings = new CoreSettings
             {
-                LockPlaylistRemoval = true
+                LockPlaylist = true
             };
 
             using (Library library = Helpers.CreateLibraryWithPlaylist(settings: settings))
@@ -742,7 +742,7 @@ namespace Espera.Core.Tests
         {
             var settings = new CoreSettings
             {
-                LockPlaylistSwitching = true
+                LockPlaylist = true
             };
 
             using (Library library = Helpers.CreateLibraryWithPlaylist("Playlist 1", settings))
