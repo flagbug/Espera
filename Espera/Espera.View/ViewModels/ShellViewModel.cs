@@ -2,7 +2,6 @@
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
-using Espera.Services;
 using Rareform.Extensions;
 using ReactiveMarrow;
 using ReactiveUI;
@@ -36,7 +35,6 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<TimeSpan> totalTime;
         private bool isLocal;
         private bool isYoutube;
-        private MobileApi mobileApi;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
         private bool showVideoPlayer;
 
@@ -224,26 +222,6 @@ namespace Espera.View.ViewModels
             this.MovePlaylistSongDownCommand.Subscribe(_ => this.library.MovePlaylistSongDown(this.SelectedPlaylistEntries.First().Index, this.accessToken));
 
             this.IsLocal = true;
-
-            this.coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged()
-                .CombineLatest(this.coreSettings.WhenAnyValue(x => x.EnableRemoteControl), Tuple.Create)
-                .Where(x => x.Item2)
-                .Select(x => x.Item1)
-                .Subscribe(x =>
-                {
-                    if (this.mobileApi != null)
-                    {
-                        this.mobileApi.Dispose();
-                    }
-
-                    this.mobileApi = new MobileApi(x, this.library);
-                    this.mobileApi.SendBroadcastAsync();
-                    this.mobileApi.StartClientDiscovery();
-                });
-
-            this.coreSettings.WhenAnyValue(x => x.EnableRemoteControl)
-                .Where(x => !x && this.mobileApi != null)
-                .Subscribe(x => this.mobileApi.Dispose());
         }
 
         public IReactiveCommand AddPlaylistCommand { get; private set; }
@@ -457,11 +435,6 @@ namespace Espera.View.ViewModels
             this.library.Dispose();
 
             this.disposable.Dispose();
-
-            if (this.mobileApi != null)
-            {
-                this.mobileApi.Dispose();
-            }
         }
 
         private void AddPlaylist()
