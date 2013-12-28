@@ -62,6 +62,7 @@ namespace Espera.View
                     }
                 });
             this.kernel.Bind<IFileSystem>().To<FileSystem>();
+            this.kernel.Bind<Library>().To<Library>().InSingletonScope();
             this.kernel.Bind<IWindowManager>().To<WindowManager>();
 
             this.ConfigureLogging();
