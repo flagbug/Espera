@@ -69,7 +69,9 @@ namespace Espera.Services
                 {"post-remove-playlist-song", this.PostRemovePlaylistSong},
                 {"get-access-permission", this.GetAccessPermission},
                 {"post-administrator-password", this.PostAdministratorPassword},
-                {"get-server-version", GetServerVersion}
+                {"get-server-version", GetServerVersion},
+                {"move-playlist-song-up", this.MovePlaylistSongUp},
+                {"move-playlist-song-down", this.MovePlaylistSongDown}
             };
 
             this.Disconnected = Observable.FromEventPattern(h => this.socket.Disconnected += h, h => this.socket.Disconnected -= h)
@@ -100,7 +102,7 @@ namespace Espera.Services
 
             messages.ObserveOn(RxApp.MainThreadScheduler).Subscribe(async request =>
             {
-                if(request["action"] == null)
+                if (request["action"] == null)
                 {
                     this.Log().Warn("Mobile client with access token {0} sent a request without specifiying an action!", this.accessToken);
                     return;
@@ -236,6 +238,66 @@ namespace Espera.Services
             };
 
             return CreateResponse(200, "Ok", content);
+        }
+
+        private Task<JObject> MovePlaylistSongDown(JToken parameters)
+        {
+            Guid songGuid;
+            bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
+
+            if (valid)
+            {
+                PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
+
+                if (entry != null)
+                {
+                    try
+                    {
+                        this.library.MovePlaylistSongDown(entry.Index, this.accessToken);
+                    }
+
+                    catch (AccessException)
+                    {
+                        return Task.FromResult(CreateResponse(401, "Unauthorized"));
+                    }
+
+                    return Task.FromResult(CreateResponse(200, "Moved song down"));
+                }
+
+                return Task.FromResult(CreateResponse(404, "Playlist entry not found"));
+            }
+
+            return Task.FromResult(CreateResponse(400, "Malformed GUID"));
+        }
+
+        private Task<JObject> MovePlaylistSongUp(JToken parameters)
+        {
+            Guid songGuid;
+            bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
+
+            if (valid)
+            {
+                PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
+
+                if (entry != null)
+                {
+                    try
+                    {
+                        this.library.MovePlaylistSongDown(entry.Index, this.accessToken);
+                    }
+
+                    catch (AccessException)
+                    {
+                        return Task.FromResult(CreateResponse(401, "Unauthorized"));
+                    }
+
+                    return Task.FromResult(CreateResponse(200, "Moved song up"));
+                }
+
+                return Task.FromResult(CreateResponse(404, "Playlist entry not found"));
+            }
+
+            return Task.FromResult(CreateResponse(400, "Malformed GUID"));
         }
 
         private Task<JObject> PostAdministratorPassword(JToken parameters)
