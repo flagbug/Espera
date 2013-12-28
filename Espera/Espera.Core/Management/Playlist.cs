@@ -15,7 +15,7 @@ namespace Espera.Core.Management
     /// </summary>
     public sealed class Playlist : IEnumerable<PlaylistEntry>, INotifyCollectionChanged, INotifyPropertyChanged
     {
-        private readonly ReactiveList<PlaylistEntry> playlist;
+        private readonly ReactiveUI.ReactiveList<PlaylistEntry> playlist;
         private string name;
 
         internal Playlist(string name, bool isTemporary = false)
@@ -23,7 +23,7 @@ namespace Espera.Core.Management
             this.Name = name;
             this.IsTemporary = isTemporary;
 
-            this.playlist = new ReactiveList<PlaylistEntry>();
+            this.playlist = new ReactiveUI.ReactiveList<PlaylistEntry>();
 
             this.CurrentSongIndex = new ReactiveProperty<int?>(x => x == null || this.ContainsIndex(x.Value), typeof(ArgumentOutOfRangeException));
 
@@ -158,6 +158,32 @@ namespace Espera.Core.Management
             this.playlist.AddRange(itemsToAdd);
         }
 
+        internal void MoveSongDown(int fromIndex)
+        {
+            if (fromIndex >= this.playlist.Count - 1)
+                Throw.ArgumentOutOfRangeException(() => fromIndex);
+
+            if (fromIndex < 0)
+                Throw.ArgumentOutOfRangeException(() => fromIndex);
+
+            this.playlist.Move(fromIndex, fromIndex + 1);
+
+            this.RebuildIndexes();
+        }
+
+        internal void MoveSongUp(int fromIndex)
+        {
+            if (fromIndex <= 0)
+                Throw.ArgumentOutOfRangeException(() => fromIndex);
+
+            if (fromIndex >= this.playlist.Count)
+                Throw.ArgumentOutOfRangeException(() => fromIndex);
+
+            this.playlist.Move(fromIndex, fromIndex - 1);
+
+            this.RebuildIndexes();
+        }
+
         /// <summary>
         /// Removes the songs with the specified indexes from the <see cref="Playlist"/>.
         /// </summary>
@@ -175,14 +201,25 @@ namespace Espera.Core.Management
                 this.CurrentSongIndex.Value = null;
             }
 
-            this.playlist.RemoveAll(item => indexList.Contains(item.Index));
+            var itemsToRemove = this.playlist.Where(x => indexList.Contains(x.Index)).ToList();
+
+            this.playlist.RemoveAll(itemsToRemove);
 
             this.RebuildIndexes();
         }
 
         internal void Shuffle()
         {
-            this.playlist.Shuffle();
+            using (this.playlist.SuppressChangeNotifications())
+            {
+                var newList = new List<PlaylistEntry>(this.playlist.Count);
+                newList.AddRange(this.playlist.OrderBy(x => Guid.NewGuid()));
+
+                this.playlist.Clear();
+                this.playlist.AddRange(newList);
+            }
+
+            this.playlist.Reset();
 
             this.RebuildIndexes();
         }

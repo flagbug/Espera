@@ -48,9 +48,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Google.GData.YouTube.2.2.0.0\lib\Google.GData.YouTube.dll</HintPath>
     </Reference>
-    <Reference Include="Lager, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Lager, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Lager.0.2.0\lib\portable-net45+wp80+win+MonoAndroid10+MonoTouch10\Lager.dll</HintPath>
+      <HintPath>..\packages\Lager.0.3.0\lib\portable-net45+wp80+win+MonoAndroid10+MonoTouch10\Lager.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -68,18 +68,18 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\ReactiveMarrow.0.3.1-alpha\lib\ReactiveMarrow.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-core.5.3.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
+      <HintPath>..\packages\reactiveui-core.5.4.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
     </Reference>
     <Reference Include="Splat">
       <HintPath>..\packages\Splat.1.0.0\lib\Net45\Splat.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.IO.Abstractions, Version=1.4.0.68, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
+    <Reference Include="System.IO.Abstractions, Version=1.4.0.72, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\System.IO.Abstractions.1.4.0.68\lib\net35\System.IO.Abstractions.dll</HintPath>
+      <HintPath>..\packages\System.IO.Abstractions.1.4.0.72\lib\net35\System.IO.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="System.Net" />
     <Reference Include="System.Reactive.Core, Version=2.1.30214.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -117,12 +117,17 @@
     <Compile Include="Audio\SongPreparationException.cs" />
     <Compile Include="Audio\IAudioPlayerCallback.cs" />
     <Compile Include="Audio\SongLoadException.cs" />
+    <Compile Include="Management\AccessControl.cs" />
+    <Compile Include="Management\AccessException.cs" />
     <Compile Include="IYoutubeSongFinder.cs" />
-    <Compile Include="Management\AccessMode.cs" />
     <Compile Include="Audio\AudioPlayerState.cs" />
     <Compile Include="Audio\AudioPlayer.cs" />
+    <Compile Include="Management\AccessPermission.cs" />
+    <Compile Include="Management\AccessType.cs" />
     <Compile Include="Management\ILibraryReader.cs" />
     <Compile Include="Management\ILibraryWriter.cs" />
+    <Compile Include="Management\ILocalAccessControl.cs" />
+    <Compile Include="Management\IRemoteAccessControl.cs" />
     <Compile Include="Management\LibraryFileReader.cs" />
     <Compile Include="Management\LibraryFileWriter.cs" />
     <Compile Include="Management\PlaylistEntry.cs" />

@@ -636,7 +636,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <ComboBox Grid.Column="0"
-                                  IsEnabled="{Binding Path=CanSwitchPlaylist}"
+                                  IsEnabled="{Binding Path=CanAlterPlaylist}"
                                   ItemsSource="{Binding Path=Playlists}"
                                   SelectedItem="{Binding Path=CurrentPlaylist}">
                             <ComboBox.Style>
@@ -734,7 +734,6 @@
                             <Button Grid.Row="0"
                                     Grid.Column="1"
                                     Command="{Binding Path=RemovePlaylistCommand}"
-                                    IsEnabled="{Binding Path=CanSwitchPlaylist}"
                                     Style="{StaticResource PlaylistButtonStyle}"
                                     ToolTip="Remove playlist">
                                 <Image Source="/Espera;component/Images/Remove.png" />
@@ -749,7 +748,6 @@
                             <Button Grid.Row="1"
                                     Grid.Column="1"
                                     Command="{Binding Path=ShufflePlaylistCommand}"
-                                    IsEnabled="{Binding Path=CanSwitchPlaylist}"
                                     Style="{StaticResource PlaylistButtonStyle}"
                                     ToolTip="Shuffle playlist">
                                 <Image Source="/Espera;component/Images/ShufflePlaylist.png" />
@@ -762,6 +760,7 @@
                              Focusable="False"
                              ItemsSource="{Binding Path=CurrentPlaylist.Songs}"
                              KeyUp="PlaylistKeyUp"
+                             SelectionMode="Extended"
                              ScrollViewer.CanContentScroll="True"
                              ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                              SelectionChanged="PlaylistSelectionChanged"
@@ -772,6 +771,8 @@
                             <ContextMenu>
                                 <MenuItem Command="{Binding Path=PlayOverrideCommand}" Header="Play" />
                                 <MenuItem Command="{Binding Path=RemoveSelectedPlaylistEntriesCommand}" Header="Remove" />
+                                <MenuItem Command="{Binding Path=MovePlaylistSongUpCommand}" Header="Move Up" />
+                                <MenuItem Command="{Binding Path=MovePlaylistSongDownCommand}" Header="Move Down" />
                             </ContextMenu>
                         </ListBox.ContextMenu>
                         <ListBox.ItemContainerStyle>

@@ -2,6 +2,7 @@
 using Caliburn.Micro;
 using Espera.Core.Management;
 using Espera.Core.Settings;
+using Espera.Services;
 using Espera.View.ViewModels;
 using Microsoft.WindowsAPICodePack.Shell;
 using Ninject;
@@ -34,6 +35,7 @@ namespace Espera.View
         private static readonly string Version;
         private readonly WindowManager windowManager;
         private IKernel kernel;
+        private MobileApi mobileApi;
 
         static AppBootstrapper()
         {
@@ -54,8 +56,8 @@ namespace Espera.View
             this.kernel = new StandardKernel();
             this.kernel.Bind<ILibraryReader>().To<LibraryFileReader>().WithConstructorArgument("sourcePath", LibraryFilePath);
             this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", LibraryFilePath);
-            this.kernel.Bind<ViewSettings>().To<ViewSettings>().InSingletonScope().WithConstructorArgument("blobCache", BlobCache.LocalMachine);
-            this.kernel.Bind<CoreSettings>().To<CoreSettings>().InSingletonScope().WithConstructorArgument("blobCache", BlobCache.LocalMachine)
+            this.kernel.Bind<ViewSettings>().To<ViewSettings>().InSingletonScope();
+            this.kernel.Bind<CoreSettings>().To<CoreSettings>().InSingletonScope()
                 .OnActivation(x =>
                 {
                     if (x.YoutubeDownloadPath == String.Empty)
@@ -86,6 +88,11 @@ namespace Espera.View
             BlobCache.Shutdown().Wait();
 
             NLog.LogManager.Shutdown();
+
+            if (this.mobileApi != null)
+            {
+                this.mobileApi.Dispose();
+            }
         }
 
         protected override void OnStartup(object sender, StartupEventArgs e)
@@ -102,6 +109,10 @@ namespace Espera.View
 
             Directory.CreateDirectory(DirectoryPath);
 
+            this.SetupLager();
+
+            this.SetupMobileApi();
+
             this.UpdateSilentlyAsync();
 
             base.OnStartup(sender, e);
@@ -114,7 +125,11 @@ namespace Espera.View
 
             this.Log().FatalException("An unhandled exception occurred, opening the crash report", e.Exception);
 
-            this.Application.MainWindow.Hide();
+            // MainWindow is sometimes null because of reasons
+            if (this.Application.MainWindow != null)
+            {
+                this.Application.MainWindow.Hide();
+            }
 
             this.windowManager.ShowDialog(new CrashViewModel(e.Exception));
 
@@ -137,6 +152,45 @@ namespace Espera.View
             NLog.LogManager.Configuration = logConfig;
 
             RxApp.MutableResolver.RegisterConstant(new NLogLogger(NLog.LogManager.GetCurrentClassLogger()), typeof(ILogger));
+        }
+
+        private void SetupLager()
+        {
+            this.Log().Info("Initializing Lager settings storages...");
+
+            this.kernel.Get<CoreSettings>().InitializeAsync().Wait();
+            this.kernel.Get<ViewSettings>().InitializeAsync().Wait();
+
+            this.Log().Info("Settings storages initialized.");
+        }
+
+        private void SetupMobileApi()
+        {
+            var coreSettings = this.kernel.Get<CoreSettings>();
+            var library = this.kernel.Get<Library>();
+
+            this.Log().Info("Remote control is {0}", coreSettings.EnableRemoteControl ? "enabled" : "disabled");
+            this.Log().Info("Port ist set to {0}", coreSettings.Port);
+
+            coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged()
+                .CombineLatest(coreSettings.WhenAnyValue(x => x.EnableRemoteControl), Tuple.Create)
+                .Where(x => x.Item2)
+                .Select(x => x.Item1)
+                .Subscribe(x =>
+                {
+                    if (this.mobileApi != null)
+                    {
+                        this.mobileApi.Dispose();
+                    }
+
+                    this.mobileApi = new MobileApi(x, library);
+                    this.mobileApi.SendBroadcastAsync();
+                    this.mobileApi.StartClientDiscovery();
+                });
+
+            coreSettings.WhenAnyValue(x => x.EnableRemoteControl)
+                .Where(x => !x && this.mobileApi != null)
+                .Subscribe(x => this.mobileApi.Dispose());
         }
 
         private async Task UpdateSilentlyAsync()

@@ -215,6 +215,50 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public void MoveSongDownSmokeTest()
+        {
+            Song[] songs = Helpers.SetupSongMocks(5);
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(songs);
+
+            playlist.MoveSongDown(0);
+
+            Assert.Equal(songs[0], playlist[1].Song);
+        }
+
+        [Fact]
+        public void MoveSongDownValidatesRange()
+        {
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(5));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSongDown(4));
+            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSongDown(-1));
+        }
+
+        [Fact]
+        public void MoveSongUpSmokeTest()
+        {
+            Song[] songs = Helpers.SetupSongMocks(5);
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(songs);
+
+            playlist.MoveSongUp(4);
+
+            Assert.Equal(songs[4], playlist[3].Song);
+        }
+
+        [Fact]
+        public void MoveSongUpValidatesIndexRange()
+        {
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(5));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSongUp(0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSongUp(5));
+        }
+
+        [Fact]
         public void NameSetterThrowsInvalidOperationExceptionIfIsTemporaryIsTrue()
         {
             var playlist = new Playlist("Playlist", true);

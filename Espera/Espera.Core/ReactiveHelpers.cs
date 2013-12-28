@@ -1,11 +1,12 @@
-﻿using ReactiveMarrow;
+﻿using Rareform.Validation;
+using ReactiveMarrow;
 using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
 namespace Espera.Core
 {
-    internal static class ReactiveHelpers
+    public static class ReactiveHelpers
     {
         /// <summary>
         /// Takes the left observable and combines it with the latest value of the right observable.
@@ -14,6 +15,15 @@ namespace Espera.Core
         /// </summary>
         public static IObservable<TResult> CombineLatestValue<TLeft, TRight, TResult>(this IObservable<TLeft> left, IObservable<TRight> right, Func<TLeft, TRight, TResult> resultSelector)
         {
+            if (left == null)
+                Throw.ArgumentNullException(() => left);
+
+            if (right == null)
+                Throw.ArgumentNullException(() => right);
+
+            if (resultSelector == null)
+                Throw.ArgumentNullException(() => resultSelector);
+
             TRight latest = default(TRight);
             bool initialized = false;
 

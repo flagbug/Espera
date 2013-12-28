@@ -37,17 +37,17 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\akavache.3.2.0\lib\net45\Akavache.dll</HintPath>
     </Reference>
-    <Reference Include="Lager, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Lager, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Lager.0.2.0\lib\portable-net45+wp80+win+MonoAndroid10+MonoTouch10\Lager.dll</HintPath>
+      <HintPath>..\packages\Lager.0.3.0\lib\portable-net45+wp80+win+MonoAndroid10+MonoTouch10\Lager.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Reactive.Testing">
       <HintPath>..\packages\Rx-Testing.2.1.30214.0\lib\Net45-Full\Microsoft.Reactive.Testing.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="Moq, Version=4.1.1309.1617, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
+    <Reference Include="Moq, Version=4.2.1312.1416, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Moq.4.1.1309.1617\lib\net40\Moq.dll</HintPath>
+      <HintPath>..\packages\Moq.4.2.1312.1416\lib\net40\Moq.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.5.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -55,21 +55,21 @@
     <Reference Include="ReactiveMarrow">
       <HintPath>..\Espera.Core\bin\Debug\ReactiveMarrow.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-core.5.3.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
+      <HintPath>..\packages\reactiveui-core.5.4.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Blend, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI.Blend, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-platforms.5.3.0\lib\net45\ReactiveUI.Blend.dll</HintPath>
+      <HintPath>..\packages\reactiveui-platforms.5.4.0\lib\net45\ReactiveUI.Blend.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Testing, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI.Testing, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-testing.5.3.0\lib\net45\ReactiveUI.Testing.dll</HintPath>
+      <HintPath>..\packages\reactiveui-testing.5.4.0\lib\net45\ReactiveUI.Testing.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Xaml, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI.Xaml, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-platforms.5.3.0\lib\net45\ReactiveUI.Xaml.dll</HintPath>
+      <HintPath>..\packages\reactiveui-platforms.5.4.0\lib\net45\ReactiveUI.Xaml.dll</HintPath>
     </Reference>
     <Reference Include="Splat">
       <HintPath>..\packages\Splat.1.0.0\lib\Net45\Splat.dll</HintPath>
@@ -78,9 +78,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.IO.Abstractions, Version=1.4.0.68, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
+    <Reference Include="System.IO.Abstractions, Version=1.4.0.72, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\System.IO.Abstractions.1.4.0.68\lib\net35\System.IO.Abstractions.dll</HintPath>
+      <HintPath>..\packages\System.IO.Abstractions.1.4.0.72\lib\net35\System.IO.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="System.IO.Abstractions.TestingHelpers, Version=1.4.0.68, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -117,6 +117,7 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccessControlTest.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="LibraryReaderTest.cs" />
     <Compile Include="LibraryTest.cs" />

@@ -1,19 +1,12 @@
-﻿using Akavache;
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
-using Espera.View.Views;
 using Moq;
 using ReactiveUI;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.IO.Abstractions.TestingHelpers;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Espera.View.Tests
@@ -27,11 +20,12 @@ namespace Espera.View.Tests
             fileSystem.Directory.CreateDirectory("C://Test");
 
             Library library = Helpers.CreateLibrary(fileSystem);
-            var vm = new SettingsViewModel(library, new ViewSettings(new TestBlobCache()), new CoreSettings(new TestBlobCache()), new Mock<IWindowManager>().Object);
+            Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+            var vm = new SettingsViewModel(library, new ViewSettings(), new CoreSettings(), new Mock<IWindowManager>().Object, token);
 
             var coll = vm.UpdateLibraryCommand.CanExecuteObservable.CreateCollection();
 
-            library.ChangeSongSourcePath("C://Test");
+            library.ChangeSongSourcePath("C://Test", token);
 
             var expected = new[] { false, true };
 

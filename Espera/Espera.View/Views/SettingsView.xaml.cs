@@ -15,6 +15,11 @@ namespace Espera.View.Views
         public SettingsView()
         {
             InitializeComponent();
+
+            this.DataContextChanged += (sender, args) =>
+            {
+                this.RemotePasswordBox.Password = ((SettingsViewModel)this.DataContext).RemoteControlPassword;
+            };
         }
 
         private void AddSongSourceButtonClick(object sender, RoutedEventArgs e)
@@ -56,6 +61,11 @@ namespace Espera.View.Views
         private void CreationPasswordChanged(object sender, RoutedEventArgs e)
         {
             ((SettingsViewModel)this.DataContext).CreationPassword = ((PasswordBox)sender).Password;
+        }
+
+        private void RemotePasswordChanged(object sender, RoutedEventArgs e)
+        {
+            ((SettingsViewModel)this.DataContext).RemoteControlPassword = ((PasswordBox)sender).Password;
         }
     }
 }

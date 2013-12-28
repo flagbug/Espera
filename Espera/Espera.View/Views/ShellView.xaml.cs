@@ -270,7 +270,7 @@ namespace Espera.View.Views
             {
                 if (this.shellViewModel.ViewSettings.LockWindow && this.shellViewModel.ViewSettings.GoFullScreenOnLock)
                 {
-                    this.IgnoreTaskbarOnMaximize = x == AccessMode.Party && this.shellViewModel.ViewSettings.GoFullScreenOnLock;
+                    this.IgnoreTaskbarOnMaximize = x == AccessPermission.Guest && this.shellViewModel.ViewSettings.GoFullScreenOnLock;
 
                     this.WindowState = WindowState.Normal;
                     this.WindowState = WindowState.Maximized;

@@ -39,7 +39,7 @@
                 </Style.Triggers>
             </Style>
             <Style x:Key="SettingsHeaderStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="64" />
+                <Setter Property="FontSize" Value="60" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
                 <!--  For some reason the foreground has to be set manually, otherwise it would be black.  -->
                 <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
@@ -117,8 +117,7 @@
                         <Controls:ToggleSwitch Header="Lock play/pause" IsChecked="{Binding Path=LockPlayPause}" />
                         <Controls:ToggleSwitch Header="Lock volume" IsChecked="{Binding Path=LockVolume}" />
                         <Controls:ToggleSwitch Header="Lock time" IsChecked="{Binding Path=LockTime}" />
-                        <Controls:ToggleSwitch Header="Lock playlist switching" IsChecked="{Binding Path=LockPlaylistSwitching}" />
-                        <Controls:ToggleSwitch Header="Lock song removal from playlist" IsChecked="{Binding Path=LockPlaylistRemoval}" />
+                        <Controls:ToggleSwitch Header="Lock playlist" IsChecked="{Binding Path=LockPlaylist}" />
                         <Controls:ToggleSwitch Header="Enable timeout when adding songs to the playlist" IsChecked="{Binding Path=EnablePlaylistTimeout}" />
                         <StackPanel Margin="30, 5, 0, 0"
                                     IsEnabled="{Binding Path=EnablePlaylistTimeout}"
@@ -198,7 +197,7 @@
                     </StackPanel>
                 </StackPanel>
             </TabItem>
-            <TabItem Header="youtube" RenderTransformOrigin="-0.233,15.955">
+            <TabItem Header="youtube">
                 <StackPanel>
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="streaming" />
                     <Controls:ToggleSwitch Margin="10, 0, 0, 0"
@@ -228,6 +227,30 @@
                                     Click="ChangeYoutubeDownloadPath"
                                     Content="Change download path" />
                         </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="remote control">
+                <StackPanel>
+                    <Controls:ToggleSwitch Header="Enable remote control" IsChecked="{Binding Path=EnableRemoteControl}" />
+                    <StackPanel Margin="15, 0, 0, 0" Orientation="Horizontal" IsEnabled="{Binding Path=EnableRemoteControl}">
+                        <TextBlock Text="Port (49152 - 65535)" VerticalAlignment="Center" />
+                        <TextBox Margin="10, 0, 0, 0" Width="50" Text="{Binding Path=Port, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Margin="10, 0, 0, 0" Content="Change port" Command="{Binding Path=ChangePortCommand}" />
+                    </StackPanel>
+                    <Controls:ToggleSwitch Header="Lock remote control with password" IsChecked="{Binding Path=LockRemoteControl}" />
+                    <StackPanel IsEnabled="{Binding Path=LockRemoteControl}" Margin="15, 0, 0, 0" Orientation="Horizontal">
+                        <TextBlock Text="Password" VerticalAlignment="Center" />
+                        <PasswordBox Margin="10, 0, 0, 0"
+                                     Width="200"
+                                     Name="RemotePasswordBox"
+                                     VerticalContentAlignment="Center"
+                                     Controls:TextboxHelper.Watermark="Enter a password"
+                                     PasswordChanged="RemotePasswordChanged"
+                                     x:FieldModifier="private" />
+                        <Button Margin="10, 0, 0, 0"
+                                Content="Change password"
+                                Command="{Binding Path=ChangeRemoteControlPasswordCommand}" />
                     </StackPanel>
                 </StackPanel>
             </TabItem>

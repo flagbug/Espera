@@ -94,8 +94,9 @@
       <HintPath>..\packages\MahApps.Metro.0.12.0.7-ALPHA\lib\net45\MahApps.Metro.dll</HintPath>
     </Reference>
     <Reference Include="Lager">
+    <Reference Include="Lager, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Lager.0.2.0\lib\portable-net45+wp80+win+MonoAndroid10+MonoTouch10\Lager.dll</HintPath>
+      <HintPath>..\packages\Lager.0.3.0\lib\portable-net45+wp80+win+MonoAndroid10+MonoTouch10\Lager.dll</HintPath>
     </Reference>
     <Reference Include="MarkdownSharp">
       <HintPath>..\packages\MarkdownSharp.1.13.0.0\lib\35\MarkdownSharp.dll</HintPath>
@@ -135,24 +136,25 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\ReactiveMarrow.0.3.1-alpha\lib\ReactiveMarrow.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-core.5.3.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
+      <HintPath>..\packages\reactiveui-core.5.4.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Blend, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI.Blend, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-platforms.5.3.0\lib\net45\ReactiveUI.Blend.dll</HintPath>
+      <HintPath>..\packages\reactiveui-platforms.5.4.0\lib\net45\ReactiveUI.Blend.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Events">
-      <HintPath>..\packages\reactiveui-events.5.3.0\lib\net45\ReactiveUI.Events.dll</HintPath>
-    </Reference>
-    <Reference Include="ReactiveUI.NLog, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI.Events, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-nlog.5.3.0\lib\net45\ReactiveUI.NLog.dll</HintPath>
+      <HintPath>..\packages\reactiveui-events.5.4.0\lib\net45\ReactiveUI.Events.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Xaml, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI.NLog, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-platforms.5.3.0\lib\net45\ReactiveUI.Xaml.dll</HintPath>
+      <HintPath>..\packages\reactiveui-nlog.5.4.0\lib\net45\ReactiveUI.NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="ReactiveUI.Xaml, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\reactiveui-platforms.5.4.0\lib\net45\ReactiveUI.Xaml.dll</HintPath>
     </Reference>
     <Reference Include="Shimmer.Client">
       <HintPath>..\packages\Shimmer.Client.0.7.4\lib\net40\Shimmer.Client.dll</HintPath>
@@ -167,9 +169,9 @@
     <Reference Include="System" />
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.IO.Abstractions, Version=1.4.0.68, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
+    <Reference Include="System.IO.Abstractions, Version=1.4.0.72, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\System.IO.Abstractions.1.4.0.68\lib\net35\System.IO.Abstractions.dll</HintPath>
+      <HintPath>..\packages\System.IO.Abstractions.1.4.0.72\lib\net35\System.IO.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="System.IO.Abstractions.TestingHelpers, Version=1.4.0.68, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
