@@ -93,7 +93,6 @@
     <Reference Include="MahApps.Metro, Version=0.12.0.7, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.0.12.0.7-ALPHA\lib\net45\MahApps.Metro.dll</HintPath>
     </Reference>
-    <Reference Include="Lager">
     <Reference Include="Lager, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Lager.0.3.0\lib\portable-net45+wp80+win+MonoAndroid10+MonoTouch10\Lager.dll</HintPath>
