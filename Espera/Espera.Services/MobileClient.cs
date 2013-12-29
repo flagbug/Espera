@@ -283,7 +283,7 @@ namespace Espera.Services
                 {
                     try
                     {
-                        this.library.MovePlaylistSongDown(entry.Index, this.accessToken);
+                        this.library.MovePlaylistSongUp(entry.Index, this.accessToken);
                     }
 
                     catch (AccessException)
