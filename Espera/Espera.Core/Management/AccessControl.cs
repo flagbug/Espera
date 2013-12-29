@@ -36,6 +36,10 @@ namespace Espera.Core.Management
 
             this.endPoints = new HashSet<AccessEndPoint>();
             this.endPointLock = new ReaderWriterLockSlim();
+
+            this.coreSettings.WhenAnyValue(x => x.LockRemoteControl)
+                .Select(_ => this.IsRemoteAccessReallyLocked() ? AccessPermission.Guest : AccessPermission.Admin)
+                .Subscribe(this.UpdateRemoteAccessPermissions);
         }
 
         public void DowngradeLocalAccess(Guid accessToken)
@@ -158,8 +162,13 @@ namespace Espera.Core.Management
 
         private AccessPermission GetDefaultRemoteAccessPermission()
         {
-            return this.coreSettings.LockRemoteControl && !String.IsNullOrWhiteSpace(this.coreSettings.RemoteControlPassword) ?
+            return this.IsRemoteAccessReallyLocked() ?
                 AccessPermission.Guest : AccessPermission.Admin;
+        }
+
+        private bool IsRemoteAccessReallyLocked()
+        {
+            return this.coreSettings.LockRemoteControl && !String.IsNullOrWhiteSpace(this.coreSettings.RemoteControlPassword);
         }
 
         private Guid RegisterToken(AccessType accessType, AccessPermission permission)
@@ -210,7 +219,7 @@ namespace Espera.Core.Management
 
             public IObservable<AccessPermission> AccessPermission
             {
-                get { return this.accessPermission.AsObservable(); }
+                get { return this.accessPermission.DistinctUntilChanged(); }
             }
 
             public Guid AccessToken { get; private set; }
