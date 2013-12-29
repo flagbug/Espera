@@ -16,7 +16,7 @@ namespace Espera.Core.Management
     /// </summary>
     /// <remarks>
     /// The basic idea is, that each endpoint (be it the local GUI, or a mobile phone) gets an access token
-    /// much like in an web API. This access token can be upgraded by providing the password that the administrator
+    /// similiar to a Web API. This access token can be upgraded by providing the password that the administrator
     /// has specified.
     /// </remarks>
     internal class AccessControl : IEnableLogger, ILocalAccessControl, IRemoteAccessControl
