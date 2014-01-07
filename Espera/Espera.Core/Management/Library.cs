@@ -652,7 +652,10 @@ namespace Espera.Core.Management
                 .GroupBy(x => x)
                 .ToDictionary(x => x.Key, x => x.Count());
 
-            var artworkKeysToDelete = enumerable.GroupBy(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null && artworkKeys[x.Key] == x.Count()).Select(x => x.Key);
+            var artworkKeysToDelete = enumerable
+                .GroupBy(x => x.ArtworkKey.FirstAsync().Wait())
+                .Where(x => x != null && artworkKeys[x.Key] == x.Count())
+                .Select(x => x.Key);
 
             BlobCache.LocalMachine.Invalidate(artworkKeysToDelete);
 
