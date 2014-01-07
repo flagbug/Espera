@@ -27,6 +27,7 @@ namespace Espera.Core.Management
         private readonly AudioPlayer audioPlayer;
         private readonly Subject<Playlist> currentPlaylistChanged;
         private readonly IFileSystem fileSystem;
+        private readonly CompositeDisposable globalSubscriptions;
         private readonly BehaviorSubject<bool> isUpdating;
         private readonly ILibraryReader libraryReader;
         private readonly ILibraryWriter libraryWriter;
@@ -41,7 +42,6 @@ namespace Espera.Core.Management
         private readonly Subject<Unit> songsUpdated;
         private Playlist currentPlayingPlaylist;
         private IDisposable currentSongFinderSubscription;
-        private CompositeDisposable globalSubscriptions;
         private Playlist instantPlaylist;
         private DateTime lastSongAddTime;
 
