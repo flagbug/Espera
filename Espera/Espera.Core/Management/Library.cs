@@ -459,25 +459,7 @@ namespace Espera.Core.Management
 
         public void Save()
         {
-            this.songLock.EnterReadLock();
-
-            var casted = new HashSet<LocalSong>(this.songs);
-
-            this.songLock.ExitReadLock();
-
-            // Clean up the songs that aren't in the library anymore
-            // This happens when the user adds a song from a removable device to the playlist
-            // then removes the device, so the song is removed from the library, but not from the playlist
-            foreach (Playlist playlist in this.playlists)
-            {
-                List<LocalSong> removable = playlist.OfType<LocalSong>().Where(song => !casted.Contains(song)).ToList();
-
-                IEnumerable<int> indexes = playlist.GetIndexes(removable);
-
-                playlist.RemoveSongs(indexes);
-            }
-
-            this.libraryWriter.Write(casted, this.playlists.Where(playlist => !playlist.IsTemporary), this.songSourcePath.FirstAsync().Wait());
+            this.libraryWriter.Write(this.Songs, this.playlists.Where(playlist => !playlist.IsTemporary), this.songSourcePath.FirstAsync().Wait());
         }
 
         public void SetCurrentTime(TimeSpan currentTime, Guid accessToken)
