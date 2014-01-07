@@ -42,7 +42,6 @@ namespace Espera.Core.Management
         private readonly Subject<Unit> songsUpdated;
         private Playlist currentPlayingPlaylist;
         private IDisposable currentSongFinderSubscription;
-        private Playlist instantPlaylist;
         private DateTime lastSongAddTime;
 
         public Library(ILibraryReader libraryReader, ILibraryWriter libraryWriter, CoreSettings settings, IFileSystem fileSystem)
@@ -363,17 +362,19 @@ namespace Espera.Core.Management
 
             this.accessControl.VerifyAccess(accessToken, this.settings.LockPlayPause);
 
-            if (this.instantPlaylist != null)
+            Playlist existingTemporaryPlaylist = this.playlists.FirstOrDefault(x => x.IsTemporary);
+
+            if (existingTemporaryPlaylist != null)
             {
-                this.playlists.Remove(instantPlaylist);
+                this.playlists.Remove(existingTemporaryPlaylist);
             }
 
             string instantPlaylistName = Guid.NewGuid().ToString();
-            this.instantPlaylist = new Playlist(instantPlaylistName, true);
-            this.instantPlaylist.AddSongs(songList.ToList());
+            var temporaryPlaylist = new Playlist(instantPlaylistName, true);
+            temporaryPlaylist.AddSongs(songList.ToList());
 
-            this.playlists.Add(this.instantPlaylist);
-            this.SwitchToPlaylist(this.instantPlaylist, accessToken);
+            this.playlists.Add(temporaryPlaylist);
+            this.SwitchToPlaylist(temporaryPlaylist, accessToken);
 
             await this.PlaySongAsync(0, accessToken);
         }
