@@ -637,7 +637,13 @@ namespace Espera.Core.Management
 
             List<LocalSong> enumerable = songList.ToList();
 
-            foreach (string key in enumerable.Select(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null))
+            // NB: Check if the number of occurences of the artwork key match the number of songs with the same artwork key
+            // so we don't delete artwork keys that still have a corresponding song in the library
+            Dictionary<string, int> artworkKeys = this.Songs.GroupBy(x => x.ArtworkKey.FirstAsync().Wait()).ToDictionary(x => x.Key, x => x.Count());
+
+            var artworkKeysToDelete = enumerable.GroupBy(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null && artworkKeys[x.Key] == x.Count()).Select(x => x.Key);
+
+            foreach (string key in artworkKeysToDelete)
             {
                 BlobCache.LocalMachine.Invalidate(key);
             }
