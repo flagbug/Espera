@@ -454,7 +454,7 @@ namespace Espera.Core.Management
         {
             this.songLock.EnterReadLock();
 
-            var casted = new HashSet<LocalSong>(this.songs.Cast<LocalSong>());
+            var casted = new HashSet<LocalSong>(this.songs);
 
             this.songLock.ExitReadLock();
 
@@ -463,7 +463,7 @@ namespace Espera.Core.Management
             // then removes the device, so the song is removed from the library, but not from the playlist
             foreach (Playlist playlist in this.playlists)
             {
-                List<Song> removable = playlist.OfType<LocalSong>().Where(song => !casted.Contains(song)).Cast<Song>().ToList();
+                List<LocalSong> removable = playlist.OfType<LocalSong>().Where(song => !casted.Contains(song)).ToList();
 
                 IEnumerable<int> indexes = playlist.GetIndexes(removable);
 
