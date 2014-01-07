@@ -68,7 +68,7 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public void AddSongsToPlaylistThrowsAccessExceptionIfInPartyModeAndMultipleSongsAreAdded()
+        public void AddSongsToPlaylistThrowsAccessExceptionWithGuestTokenAndMultipleSongs()
         {
             var songs = new[]
             {
@@ -76,9 +76,12 @@ namespace Espera.Core.Tests
                 new Mock<Song>("TestPath", TimeSpan.Zero).Object
             };
 
-            using (Library library = Helpers.CreateLibrary())
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                library.LocalAccessControl.SetLocalPassword(token, "Password");
+                library.LocalAccessControl.DowngradeLocalAccess(token);
 
                 Assert.Throws<AccessException>(() => library.AddSongsToPlaylist(songs, token));
             }
@@ -168,11 +171,14 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public async Task ContinueSongThrowsAccessExceptionIfIsNotAdmin()
+        public async Task ContinueSongThrowsAccessExceptionWithGuestToken()
         {
             using (Library library = Helpers.CreateLibrary())
             {
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                library.LocalAccessControl.SetLocalPassword(token, "Password");
+                library.LocalAccessControl.DowngradeLocalAccess(token);
 
                 await Helpers.ThrowsAsync<AccessException>(async () => await library.ContinueSongAsync(token));
             }
@@ -309,6 +315,8 @@ namespace Espera.Core.Tests
             using (Library library = Helpers.CreateLibrary(settings))
             {
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                library.LocalAccessControl.SetLocalPassword(token, "Password");
+                library.LocalAccessControl.DowngradeLocalAccess(token);
 
                 await Helpers.ThrowsAsync<AccessException>(async () => await library.PauseSongAsync(token));
             }
@@ -418,6 +426,8 @@ namespace Espera.Core.Tests
             using (Library library = Helpers.CreateLibrary())
             {
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                library.LocalAccessControl.SetLocalPassword(token, "Password");
+                library.LocalAccessControl.DowngradeLocalAccess(token);
 
                 await Helpers.ThrowsAsync<AccessException>(async () => await library.PlayNextSongAsync(token));
             }
@@ -506,6 +516,8 @@ namespace Espera.Core.Tests
             using (Library library = Helpers.CreateLibrary(settings))
             {
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                library.LocalAccessControl.SetLocalPassword(token, "Password");
+                library.LocalAccessControl.DowngradeLocalAccess(token);
 
                 await Helpers.ThrowsAsync<AccessException>(async () => await library.PlaySongAsync(0, token));
             }
@@ -533,8 +545,10 @@ namespace Espera.Core.Tests
             using (Library library = Helpers.CreateLibraryWithPlaylist(settings: settings))
             {
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                library.LocalAccessControl.SetLocalPassword(token, "Password");
+                library.LocalAccessControl.DowngradeLocalAccess(token);
 
-                library.AddSongsToPlaylist(new[] { songMock.Object }, token);
+                library.AddSongToPlaylist(songMock.Object);
 
                 Assert.Throws<AccessException>(() => library.RemoveFromPlaylist(new[] { 0 }, token));
             }
@@ -750,6 +764,9 @@ namespace Espera.Core.Tests
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
                 library.AddPlaylist("Playlist 2", token);
+
+                library.LocalAccessControl.SetLocalPassword(token, "Password");
+                library.LocalAccessControl.DowngradeLocalAccess(token);
 
                 Assert.Throws<AccessException>(() => library.SwitchToPlaylist(library.GetPlaylistByName("Playlist 2"), token));
             }
