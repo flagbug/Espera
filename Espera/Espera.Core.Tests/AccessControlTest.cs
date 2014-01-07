@@ -25,7 +25,8 @@ namespace Espera.Core.Tests
         {
             var settings = new CoreSettings
             {
-                LockRemoteControl = true
+                LockRemoteControl = true,
+                RemoteControlPassword = "Password"
             };
 
             var accessControl = new AccessControl(settings);
