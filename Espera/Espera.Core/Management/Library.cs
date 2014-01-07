@@ -710,7 +710,7 @@ namespace Espera.Core.Management
 
             this.songsUpdated.OnNext(Unit.Default);
 
-            var artworkLookup = new HashSet<string>(this.Songs.Cast<LocalSong>().Select(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null));
+            var artworkLookup = new HashSet<string>(this.Songs.Select(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null));
 
             var songFinder = new LocalSongFinder(path, this.fileSystem);
 
