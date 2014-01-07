@@ -66,6 +66,7 @@ namespace Espera.View
                     }
                 });
             this.kernel.Bind<IFileSystem>().To<FileSystem>();
+            this.kernel.Bind<Library>().To<Library>().InSingletonScope();
             this.kernel.Bind<IWindowManager>().To<WindowManager>();
 
             this.ConfigureLogging();
@@ -170,7 +171,7 @@ namespace Espera.View
             var library = this.kernel.Get<Library>();
 
             this.Log().Info("Remote control is {0}", coreSettings.EnableRemoteControl ? "enabled" : "disabled");
-            this.Log().Info("Port ist set to {0}", coreSettings.Port);
+            this.Log().Info("Port is set to {0}", coreSettings.Port);
 
             coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged()
                 .CombineLatest(coreSettings.WhenAnyValue(x => x.EnableRemoteControl), Tuple.Create)

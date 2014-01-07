@@ -3,14 +3,15 @@ using Espera.Core.Audio;
 using Espera.Core.Settings;
 using Rareform.Extensions;
 using Rareform.Validation;
+using ReactiveMarrow;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Security.Cryptography;
@@ -25,12 +26,12 @@ namespace Espera.Core.Management
         private readonly AudioPlayer audioPlayer;
         private readonly Subject<Playlist> currentPlaylistChanged;
         private readonly IFileSystem fileSystem;
+        private readonly CompositeDisposable globalSubscriptions;
         private readonly BehaviorSubject<bool> isUpdating;
         private readonly ILibraryReader libraryReader;
         private readonly ILibraryWriter libraryWriter;
         private readonly Subject<Unit> manualUpdateTrigger;
-        private readonly ObservableCollection<Playlist> playlists;
-        private readonly ReadOnlyObservableCollection<Playlist> publicPlaylistWrapper;
+        private readonly ReactiveUI.ReactiveList<Playlist> playlists;
         private readonly CoreSettings settings;
         private readonly ReaderWriterLockSlim songLock;
         private readonly HashSet<LocalSong> songs;
@@ -39,7 +40,6 @@ namespace Espera.Core.Management
         private readonly Subject<Unit> songsUpdated;
         private Playlist currentPlayingPlaylist;
         private IDisposable currentSongFinderSubscription;
-        private Playlist instantPlaylist;
         private DateTime lastSongAddTime;
 
         public Library(ILibraryReader libraryReader, ILibraryWriter libraryWriter, CoreSettings settings, IFileSystem fileSystem)
@@ -49,11 +49,11 @@ namespace Espera.Core.Management
             this.settings = settings;
             this.fileSystem = fileSystem;
 
+            this.globalSubscriptions = new CompositeDisposable();
             this.accessControl = new AccessControl(settings);
             this.songLock = new ReaderWriterLockSlim();
             this.songs = new HashSet<LocalSong>();
-            this.playlists = new ObservableCollection<Playlist>();
-            this.publicPlaylistWrapper = new ReadOnlyObservableCollection<Playlist>(this.playlists);
+            this.playlists = new ReactiveUI.ReactiveList<Playlist>();
             this.currentPlaylistChanged = new Subject<Playlist>();
             this.CanPlayNextSong = this.currentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
             this.CanPlayPreviousSong = this.currentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
@@ -137,9 +137,9 @@ namespace Espera.Core.Management
         /// <summary>
         /// Returns an enumeration of playlists that implements <see cref="INotifyCollectionChanged"/>.
         /// </summary>
-        public ReadOnlyObservableCollection<Playlist> Playlists
+        public IReadOnlyReactiveList<Playlist> Playlists
         {
-            get { return this.publicPlaylistWrapper; }
+            get { return this.playlists; }
         }
 
         public TimeSpan RemainingPlaylistTimeout
@@ -294,6 +294,8 @@ namespace Espera.Core.Management
             {
                 this.currentSongFinderSubscription.Dispose();
             }
+
+            this.globalSubscriptions.Dispose();
         }
 
         public Playlist GetPlaylistByName(string playlistName)
@@ -322,7 +324,8 @@ namespace Espera.Core.Management
             update.CombineLatest(this.songSourcePath, (_, path) => path)
                 .Where(path => !String.IsNullOrEmpty(path))
                 .Do(_ => this.Log().Info("Triggering library update."))
-                .Subscribe(path => this.UpdateSongsAsync(path));
+                .Subscribe(path => this.UpdateSongsAsync(path))
+                .DisposeWith(this.globalSubscriptions);
         }
 
         public void MovePlaylistSongDown(int songIndex, Guid accessToken)
@@ -356,17 +359,19 @@ namespace Espera.Core.Management
 
             this.accessControl.VerifyAccess(accessToken, this.settings.LockPlayPause);
 
-            if (this.instantPlaylist != null)
+            Playlist existingTemporaryPlaylist = this.playlists.FirstOrDefault(x => x.IsTemporary);
+
+            if (existingTemporaryPlaylist != null)
             {
-                this.playlists.Remove(instantPlaylist);
+                this.playlists.Remove(existingTemporaryPlaylist);
             }
 
             string instantPlaylistName = Guid.NewGuid().ToString();
-            this.instantPlaylist = new Playlist(instantPlaylistName, true);
-            this.instantPlaylist.AddSongs(songList.ToList());
+            var temporaryPlaylist = new Playlist(instantPlaylistName, true);
+            temporaryPlaylist.AddSongs(songList.ToList());
 
-            this.playlists.Add(this.instantPlaylist);
-            this.SwitchToPlaylist(this.instantPlaylist, accessToken);
+            this.playlists.Add(temporaryPlaylist);
+            this.SwitchToPlaylist(temporaryPlaylist, accessToken);
 
             await this.PlaySongAsync(0, accessToken);
         }
@@ -452,25 +457,7 @@ namespace Espera.Core.Management
 
         public void Save()
         {
-            this.songLock.EnterReadLock();
-
-            var casted = new HashSet<LocalSong>(this.songs.Cast<LocalSong>());
-
-            this.songLock.ExitReadLock();
-
-            // Clean up the songs that aren't in the library anymore
-            // This happens when the user adds a song from a removable device to the playlist
-            // then removes the device, so the song is removed from the library, but not from the playlist
-            foreach (Playlist playlist in this.playlists)
-            {
-                List<Song> removable = playlist.OfType<LocalSong>().Where(song => !casted.Contains(song)).Cast<Song>().ToList();
-
-                IEnumerable<int> indexes = playlist.GetIndexes(removable);
-
-                playlist.RemoveSongs(indexes);
-            }
-
-            this.libraryWriter.Write(casted, this.playlists.Where(playlist => !playlist.IsTemporary), this.songSourcePath.FirstAsync().Wait());
+            this.libraryWriter.Write(this.Songs, this.playlists.Where(playlist => !playlist.IsTemporary), this.songSourcePath.Value);
         }
 
         public void SetCurrentTime(TimeSpan currentTime, Guid accessToken)
@@ -507,7 +494,7 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Triggers an update of the library, so it searches the library part for new songs.
+        /// Triggers an update of the library, so it searches the library path for new songs.
         /// </summary>
         public void UpdateNow()
         {
@@ -630,21 +617,27 @@ namespace Espera.Core.Management
             this.songSourcePath.OnNext(this.libraryReader.ReadSongSourcePath());
         }
 
-        /// <summary>
-        /// Removes the specified songs from the library.
-        /// </summary>
-        /// <param name="songList">The list of the songs to remove from the library.</param>
-        private void RemoveFromLibrary(IEnumerable<Song> songList)
+        private void RemoveFromLibrary(IEnumerable<LocalSong> songList)
         {
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
 
-            List<Song> enumerable = songList.ToList();
+            List<LocalSong> enumerable = songList.ToList();
 
-            foreach (string key in enumerable.Cast<LocalSong>().Select(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null))
-            {
-                BlobCache.LocalMachine.Invalidate(key);
-            }
+            // NB: Check if the number of occurences of the artwork key match the number of songs with the same artwork key
+            // so we don't delete artwork keys that still have a corresponding song in the library
+            Dictionary<string, int> artworkKeys = this.Songs
+                .Select(x => x.ArtworkKey.FirstAsync().Wait())
+                .Where(x => x != null)
+                .GroupBy(x => x)
+                .ToDictionary(x => x.Key, x => x.Count());
+
+            var artworkKeysToDelete = enumerable
+                .GroupBy(x => x.ArtworkKey.FirstAsync().Wait())
+                .Where(x => x != null && artworkKeys[x.Key] == x.Count())
+                .Select(x => x.Key);
+
+            BlobCache.LocalMachine.Invalidate(artworkKeysToDelete);
 
             this.playlists.ForEach(playlist => this.RemoveFromPlaylist(playlist, enumerable));
 
@@ -683,7 +676,7 @@ namespace Espera.Core.Management
                 .Where(song => !song.OriginalPath.StartsWith(currentPath))
                 .ToList();
 
-            HashSet<Song> removable = null;
+            HashSet<LocalSong> removable = null;
 
             await Task.Run(() =>
             {
@@ -691,7 +684,7 @@ namespace Espera.Core.Management
                     .Where(song => !this.fileSystem.File.Exists(song.OriginalPath))
                     .ToList();
 
-                removable = new HashSet<Song>(notInAnySongSource.Concat(nonExistant));
+                removable = new HashSet<LocalSong>(notInAnySongSource.Concat(nonExistant));
             });
 
             this.RemoveFromLibrary(removable);
@@ -711,7 +704,7 @@ namespace Espera.Core.Management
 
             this.songsUpdated.OnNext(Unit.Default);
 
-            var artworkLookup = new HashSet<string>(this.Songs.Cast<LocalSong>().Select(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null));
+            var artworkLookup = new HashSet<string>(this.Songs.Select(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null));
 
             var songFinder = new LocalSongFinder(path, this.fileSystem);
 

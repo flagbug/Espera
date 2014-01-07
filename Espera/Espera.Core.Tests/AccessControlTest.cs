@@ -25,7 +25,8 @@ namespace Espera.Core.Tests
         {
             var settings = new CoreSettings
             {
-                LockRemoteControl = true
+                LockRemoteControl = true,
+                RemoteControlPassword = "Password"
             };
 
             var accessControl = new AccessControl(settings);
@@ -151,6 +152,30 @@ namespace Espera.Core.Tests
             Guid token = accessControl.RegisterRemoteAccessToken();
 
             accessControl.VerifyAccess(token);
+        }
+
+        [Fact]
+        public void UpdatesRemoteAccessWhenLockRemoteSettingChanges()
+        {
+            var settings = new CoreSettings
+            {
+                LockRemoteControl = false
+            };
+
+            var accessControl = new AccessControl(settings);
+
+            Guid remoteToken = accessControl.RegisterRemoteAccessToken();
+            Guid adminToken = accessControl.RegisterLocalAccessToken();
+
+            var permissions = accessControl.ObserveAccessPermission(remoteToken).CreateCollection();
+
+            settings.LockRemoteControl = true;
+            accessControl.SetRemotePassword(adminToken, "password");
+
+            settings.LockRemoteControl = false;
+            settings.LockRemoteControl = true;
+
+            Assert.Equal(new[] { AccessPermission.Admin, AccessPermission.Guest, AccessPermission.Admin, AccessPermission.Guest }, permissions);
         }
 
         [Fact]
