@@ -71,7 +71,9 @@ namespace Espera.Services
                 {"post-administrator-password", this.PostAdministratorPassword},
                 {"get-server-version", GetServerVersion},
                 {"move-playlist-song-up", this.MovePlaylistSongUp},
-                {"move-playlist-song-down", this.MovePlaylistSongDown}
+                {"move-playlist-song-down", this.MovePlaylistSongDown},
+                {"get-volume", this.GetVolume},
+                {"set-volume", this.SetVolume}
             };
 
             this.Disconnected = Observable.FromEventPattern(h => this.socket.Disconnected += h, h => this.socket.Disconnected -= h)
@@ -238,6 +240,18 @@ namespace Espera.Services
             };
 
             return CreateResponse(200, "Ok", content);
+        }
+
+        private Task<JObject> GetVolume(JToken dontCare)
+        {
+            float volume = this.library.Volume;
+
+            var response = new JObject
+            {
+                {"volume", volume}
+            };
+
+            return Task.FromResult(CreateResponse(200, "Ok", response));
         }
 
         private Task<JObject> MovePlaylistSongDown(JToken parameters)
@@ -541,6 +555,18 @@ namespace Espera.Services
             await this.SendMessage(message);
         }
 
+        private async Task PushVolume(float volume)
+        {
+            var content = new JObject
+            {
+                {"volume", volume}
+            };
+
+            JObject message = CreatePush("update-volume", content);
+
+            await this.SendMessage(content);
+        }
+
         private async Task SendMessage(JObject content)
         {
             byte[] message = await MobileHelper.PackMessage(content);
@@ -560,6 +586,26 @@ namespace Espera.Services
             finally
             {
                 this.gate.Release();
+            }
+        }
+
+        private Task<JObject> SetVolume(JToken parameters)
+        {
+            var volume = parameters["volume"].ToObject<float>();
+
+            if (volume < 0 || volume > 1.0)
+                return Task.FromResult(CreateResponse(400, "Volume must be between 0 and 1"));
+
+            try
+            {
+                this.library.SetVolume(volume, this.accessToken);
+
+                return Task.FromResult(CreateResponse(200, "Ok"));
+            }
+
+            catch (AccessException)
+            {
+                return Task.FromResult(CreateResponse(401, "Unauthorized"));
             }
         }
     }
