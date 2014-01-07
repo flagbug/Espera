@@ -57,7 +57,7 @@ namespace Espera.Core.Audio
 
         public Uri Path
         {
-            get { return new Uri(this.loadedSong.FirstAsync().Wait().PlaybackPath); }
+            get { return new Uri(this.loadedSong.Value.PlaybackPath); }
         }
 
         public Action PauseRequest { set; private get; }

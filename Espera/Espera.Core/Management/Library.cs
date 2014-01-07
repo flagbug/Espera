@@ -459,7 +459,7 @@ namespace Espera.Core.Management
 
         public void Save()
         {
-            this.libraryWriter.Write(this.Songs, this.playlists.Where(playlist => !playlist.IsTemporary), this.songSourcePath.FirstAsync().Wait());
+            this.libraryWriter.Write(this.Songs, this.playlists.Where(playlist => !playlist.IsTemporary), this.songSourcePath.Value);
         }
 
         public void SetCurrentTime(TimeSpan currentTime, Guid accessToken)
