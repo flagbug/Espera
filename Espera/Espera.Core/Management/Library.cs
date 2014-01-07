@@ -630,18 +630,14 @@ namespace Espera.Core.Management
             this.songSourcePath.OnNext(this.libraryReader.ReadSongSourcePath());
         }
 
-        /// <summary>
-        /// Removes the specified songs from the library.
-        /// </summary>
-        /// <param name="songList">The list of the songs to remove from the library.</param>
-        private void RemoveFromLibrary(IEnumerable<Song> songList)
+        private void RemoveFromLibrary(IEnumerable<LocalSong> songList)
         {
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
 
-            List<Song> enumerable = songList.ToList();
+            List<LocalSong> enumerable = songList.ToList();
 
-            foreach (string key in enumerable.Cast<LocalSong>().Select(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null))
+            foreach (string key in enumerable.Select(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null))
             {
                 BlobCache.LocalMachine.Invalidate(key);
             }
@@ -683,7 +679,7 @@ namespace Espera.Core.Management
                 .Where(song => !song.OriginalPath.StartsWith(currentPath))
                 .ToList();
 
-            HashSet<Song> removable = null;
+            HashSet<LocalSong> removable = null;
 
             await Task.Run(() =>
             {
@@ -691,7 +687,7 @@ namespace Espera.Core.Management
                     .Where(song => !this.fileSystem.File.Exists(song.OriginalPath))
                     .ToList();
 
-                removable = new HashSet<Song>(notInAnySongSource.Concat(nonExistant));
+                removable = new HashSet<LocalSong>(notInAnySongSource.Concat(nonExistant));
             });
 
             this.RemoveFromLibrary(removable);
