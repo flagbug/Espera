@@ -3,6 +3,7 @@ using Espera.Core.Audio;
 using Espera.Core.Settings;
 using Rareform.Extensions;
 using Rareform.Validation;
+using ReactiveMarrow;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ using System.Collections.Specialized;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Security.Cryptography;
@@ -39,6 +41,7 @@ namespace Espera.Core.Management
         private readonly Subject<Unit> songsUpdated;
         private Playlist currentPlayingPlaylist;
         private IDisposable currentSongFinderSubscription;
+        private CompositeDisposable globalSubscriptions;
         private Playlist instantPlaylist;
         private DateTime lastSongAddTime;
 
@@ -49,6 +52,7 @@ namespace Espera.Core.Management
             this.settings = settings;
             this.fileSystem = fileSystem;
 
+            this.globalSubscriptions = new CompositeDisposable();
             this.accessControl = new AccessControl(settings);
             this.songLock = new ReaderWriterLockSlim();
             this.songs = new HashSet<LocalSong>();
@@ -294,6 +298,8 @@ namespace Espera.Core.Management
             {
                 this.currentSongFinderSubscription.Dispose();
             }
+
+            this.globalSubscriptions.Dispose();
         }
 
         public Playlist GetPlaylistByName(string playlistName)
@@ -322,7 +328,8 @@ namespace Espera.Core.Management
             update.CombineLatest(this.songSourcePath, (_, path) => path)
                 .Where(path => !String.IsNullOrEmpty(path))
                 .Do(_ => this.Log().Info("Triggering library update."))
-                .Subscribe(path => this.UpdateSongsAsync(path));
+                .Subscribe(path => this.UpdateSongsAsync(path))
+                .DisposeWith(this.globalSubscriptions);
         }
 
         public void MovePlaylistSongDown(int songIndex, Guid accessToken)
@@ -639,7 +646,11 @@ namespace Espera.Core.Management
 
             // NB: Check if the number of occurences of the artwork key match the number of songs with the same artwork key
             // so we don't delete artwork keys that still have a corresponding song in the library
-            Dictionary<string, int> artworkKeys = this.Songs.GroupBy(x => x.ArtworkKey.FirstAsync().Wait()).ToDictionary(x => x.Key, x => x.Count());
+            Dictionary<string, int> artworkKeys = this.Songs
+                .Select(x => x.ArtworkKey.FirstAsync().Wait())
+                .Where(x => x != null)
+                .GroupBy(x => x)
+                .ToDictionary(x => x.Key, x => x.Count());
 
             var artworkKeysToDelete = enumerable.GroupBy(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null && artworkKeys[x.Key] == x.Count()).Select(x => x.Key);
 
