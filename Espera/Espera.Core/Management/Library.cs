@@ -496,7 +496,7 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Triggers an update of the library, so it searches the library part for new songs.
+        /// Triggers an update of the library, so it searches the library path for new songs.
         /// </summary>
         public void UpdateNow()
         {
