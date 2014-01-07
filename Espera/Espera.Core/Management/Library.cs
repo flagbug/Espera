@@ -7,7 +7,6 @@ using ReactiveMarrow;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO.Abstractions;
 using System.Linq;
@@ -32,8 +31,7 @@ namespace Espera.Core.Management
         private readonly ILibraryReader libraryReader;
         private readonly ILibraryWriter libraryWriter;
         private readonly Subject<Unit> manualUpdateTrigger;
-        private readonly ObservableCollection<Playlist> playlists;
-        private readonly ReadOnlyObservableCollection<Playlist> publicPlaylistWrapper;
+        private readonly ReactiveUI.ReactiveList<Playlist> playlists;
         private readonly CoreSettings settings;
         private readonly ReaderWriterLockSlim songLock;
         private readonly HashSet<LocalSong> songs;
@@ -55,8 +53,7 @@ namespace Espera.Core.Management
             this.accessControl = new AccessControl(settings);
             this.songLock = new ReaderWriterLockSlim();
             this.songs = new HashSet<LocalSong>();
-            this.playlists = new ObservableCollection<Playlist>();
-            this.publicPlaylistWrapper = new ReadOnlyObservableCollection<Playlist>(this.playlists);
+            this.playlists = new ReactiveUI.ReactiveList<Playlist>();
             this.currentPlaylistChanged = new Subject<Playlist>();
             this.CanPlayNextSong = this.currentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
             this.CanPlayPreviousSong = this.currentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
@@ -140,9 +137,9 @@ namespace Espera.Core.Management
         /// <summary>
         /// Returns an enumeration of playlists that implements <see cref="INotifyCollectionChanged"/>.
         /// </summary>
-        public ReadOnlyObservableCollection<Playlist> Playlists
+        public IReadOnlyReactiveList<Playlist> Playlists
         {
-            get { return this.publicPlaylistWrapper; }
+            get { return this.playlists; }
         }
 
         public TimeSpan RemainingPlaylistTimeout
