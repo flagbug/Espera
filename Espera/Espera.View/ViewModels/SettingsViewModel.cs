@@ -50,8 +50,6 @@ namespace Espera.View.ViewModels
             this.windowManager = windowManager;
             this.accessToken = accessToken;
 
-            this.Scaling = 1;
-
             this.canCreateAdmin = this
                 .WhenAnyValue(x => x.CreationPassword, x => !string.IsNullOrWhiteSpace(x) && !this.isAdminCreated)
                 .ToProperty(this, x => x.CanCreateAdmin);
