@@ -643,10 +643,7 @@ namespace Espera.Core.Management
 
             var artworkKeysToDelete = enumerable.GroupBy(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null && artworkKeys[x.Key] == x.Count()).Select(x => x.Key);
 
-            foreach (string key in artworkKeysToDelete)
-            {
-                BlobCache.LocalMachine.Invalidate(key);
-            }
+            BlobCache.LocalMachine.Invalidate(artworkKeysToDelete);
 
             this.playlists.ForEach(playlist => this.RemoveFromPlaylist(playlist, enumerable));
 
