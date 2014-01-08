@@ -61,6 +61,11 @@ namespace Espera.Core.Tests
             return CreateLibrary(null, null, null, fileSystem);
         }
 
+        public static Library CreateLibrary(ILibraryReader reader, IFileSystem fileSystem)
+        {
+            return CreateLibrary(null, reader, null, fileSystem);
+        }
+
         public static Library CreateLibrary(CoreSettings settings = null, ILibraryReader reader = null, ILibraryWriter writer = null, IFileSystem fileSystem = null)
         {
             var library = new Library(

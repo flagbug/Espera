@@ -657,6 +657,69 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public async Task RemovesMissingSongsFromLibrary()
+        {
+            var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero);
+            var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero);
+
+            var libraryReader = new Mock<ILibraryReader>();
+            libraryReader.SetupGet(x => x.LibraryExists).Returns(true);
+            libraryReader.Setup(x => x.ReadSongSourcePath()).Returns("C://");
+            libraryReader.Setup(x => x.ReadPlaylists()).Returns(new List<Playlist>());
+            libraryReader.Setup(x => x.ReadSongs()).Returns(new[] { existingSong, missingSong });
+
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
+
+            using (Library library = Helpers.CreateLibrary(libraryReader.Object, fileSystem))
+            {
+                var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().PublishLast();
+                updateCompleted.Connect();
+
+                library.Initialize();
+
+                await updateCompleted;
+
+                Assert.Equal(1, library.Songs.Count());
+            }
+        }
+
+        [Fact]
+        public async Task RemovesMissingSongsFromPlaylists()
+        {
+            var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero);
+            var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero);
+
+            var songs = new[] { existingSong, missingSong };
+
+            var playlist1 = new Playlist("Playlist 1");
+            playlist1.AddSongs(songs);
+
+            var playlist2 = new Playlist("Playlist 2");
+            playlist2.AddSongs(songs);
+
+            var libraryReader = new Mock<ILibraryReader>();
+            libraryReader.SetupGet(x => x.LibraryExists).Returns(true);
+            libraryReader.Setup(x => x.ReadSongSourcePath()).Returns("C://");
+            libraryReader.Setup(x => x.ReadPlaylists()).Returns(new[] { playlist1, playlist2 });
+            libraryReader.Setup(x => x.ReadSongs()).Returns(songs);
+
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
+
+            using (Library library = Helpers.CreateLibrary(libraryReader.Object, fileSystem))
+            {
+                var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().PublishLast();
+                updateCompleted.Connect();
+
+                library.Initialize();
+
+                await updateCompleted;
+
+                Assert.Equal(1, library.Playlists[0].Count());
+                Assert.Equal(1, library.Playlists[1].Count());
+            }
+        }
+
+        [Fact]
         public async Task SaveDoesNotSaveTemporaryPlaylist()
         {
             var libraryWriter = new Mock<ILibraryWriter>();
