@@ -658,6 +658,34 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public async Task RemovesArtworkOnlyWithoutReferenceToSong()
+        {
+            var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero, "artwork-abcdefg");
+            var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero, "artwork-abcdefg");
+            await BlobCache.LocalMachine.Insert("artwork-abcdefg", new byte[] { 0, 1 });
+
+            var libraryReader = new Mock<ILibraryReader>();
+            libraryReader.SetupGet(x => x.LibraryExists).Returns(true);
+            libraryReader.Setup(x => x.ReadSongSourcePath()).Returns("C://");
+            libraryReader.Setup(x => x.ReadPlaylists()).Returns(new List<Playlist>());
+            libraryReader.Setup(x => x.ReadSongs()).Returns(new[] { existingSong, missingSong });
+
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
+
+            using (Library library = Helpers.CreateLibrary(libraryReader.Object, fileSystem))
+            {
+                var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().PublishLast();
+                updateCompleted.Connect();
+
+                library.Initialize();
+
+                await updateCompleted;
+
+                Assert.NotNull(BlobCache.LocalMachine.GetAllKeys().FirstOrDefault(x => x == "artwork-abcdefg"));
+            }
+        }
+
+        [Fact]
         public async Task RemovesArtworkWhenSongIsMissing()
         {
             var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero, "artwork-abcdefg");
