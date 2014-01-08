@@ -1,4 +1,5 @@
-﻿using Espera.Core.Audio;
+﻿using Akavache;
+using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Microsoft.Reactive.Testing;
@@ -653,6 +654,31 @@ namespace Espera.Core.Tests
             using (Library library = Helpers.CreateLibrary())
             {
                 Assert.Throws<ArgumentNullException>(() => library.RemovePlaylist(null, library.LocalAccessControl.RegisterLocalAccessToken()));
+            }
+        }
+
+        [Fact]
+        public async Task RemovesArtworkWhenSongIsMissing()
+        {
+            var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero, "artwork-abcdefg");
+            await BlobCache.LocalMachine.Insert("artwork-abcdefg", new byte[] { 0, 1 });
+
+            var libraryReader = new Mock<ILibraryReader>();
+            libraryReader.SetupGet(x => x.LibraryExists).Returns(true);
+            libraryReader.Setup(x => x.ReadSongSourcePath()).Returns("C://");
+            libraryReader.Setup(x => x.ReadPlaylists()).Returns(new List<Playlist>());
+            libraryReader.Setup(x => x.ReadSongs()).Returns(new[] { missingSong });
+
+            using (Library library = Helpers.CreateLibrary(libraryReader.Object))
+            {
+                var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().PublishLast();
+                updateCompleted.Connect();
+
+                library.Initialize();
+
+                await updateCompleted;
+
+                Assert.Null(BlobCache.LocalMachine.GetAllKeys().FirstOrDefault(x => x == "artwork-abcdefg"));
             }
         }
 

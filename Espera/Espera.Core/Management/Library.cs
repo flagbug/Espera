@@ -637,7 +637,7 @@ namespace Espera.Core.Management
                 .Where(x => x != null && artworkKeys[x.Key] == x.Count())
                 .Select(x => x.Key);
 
-            BlobCache.LocalMachine.Invalidate(artworkKeysToDelete);
+            BlobCache.LocalMachine.Invalidate(artworkKeysToDelete).Subscribe();
 
             this.playlists.ForEach(playlist => this.RemoveFromPlaylist(playlist, enumerable));
 
