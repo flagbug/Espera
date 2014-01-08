@@ -61,15 +61,13 @@ namespace Espera.Core.Tests
             return CreateLibrary(null, null, null, fileSystem);
         }
 
-        public static Library CreateLibrary(CoreSettings settings = null, ILibraryReader reader = null, ILibraryWriter writer = null,
-            IFileSystem fileSystem = null, ILocalSongFinder localSongFinder = null)
+        public static Library CreateLibrary(CoreSettings settings = null, ILibraryReader reader = null, ILibraryWriter writer = null, IFileSystem fileSystem = null)
         {
             var library = new Library(
                 reader ?? new Mock<ILibraryReader>().Object,
                 writer ?? new Mock<ILibraryWriter>().Object,
                 settings ?? new CoreSettings(),
-                fileSystem ?? new MockFileSystem(),
-                x => localSongFinder ?? SetupDefaultLocalSongFinder());
+                fileSystem ?? new MockFileSystem());
 
             IAudioPlayerCallback c = library.AudioPlayerCallback;
             c.GetTime = () => TimeSpan.Zero;
@@ -204,14 +202,6 @@ namespace Espera.Core.Tests
             playlist.AddSongs(songs);
 
             return playlist;
-        }
-
-        private static ILocalSongFinder SetupDefaultLocalSongFinder()
-        {
-            var localSongFinder = new Mock<ILocalSongFinder>();
-            localSongFinder.Setup(x => x.GetSongsAsync()).Returns(Observable.Empty<Tuple<LocalSong, byte[]>>());
-
-            return localSongFinder.Object;
         }
     }
 }

@@ -30,7 +30,6 @@ namespace Espera.Core.Management
         private readonly BehaviorSubject<bool> isUpdating;
         private readonly ILibraryReader libraryReader;
         private readonly ILibraryWriter libraryWriter;
-        private readonly Func<string, ILocalSongFinder> localSongFinderFunc;
         private readonly Subject<Unit> manualUpdateTrigger;
         private readonly ReactiveUI.ReactiveList<Playlist> playlists;
         private readonly CoreSettings settings;
@@ -43,14 +42,12 @@ namespace Espera.Core.Management
         private IDisposable currentSongFinderSubscription;
         private DateTime lastSongAddTime;
 
-        public Library(ILibraryReader libraryReader, ILibraryWriter libraryWriter, CoreSettings settings,
-            IFileSystem fileSystem, Func<string, ILocalSongFinder> localSongFinderFunc = null)
+        public Library(ILibraryReader libraryReader, ILibraryWriter libraryWriter, CoreSettings settings, IFileSystem fileSystem)
         {
             this.libraryReader = libraryReader;
             this.libraryWriter = libraryWriter;
             this.settings = settings;
             this.fileSystem = fileSystem;
-            this.localSongFinderFunc = localSongFinderFunc ?? (x => new LocalSongFinder(x));
 
             this.globalSubscriptions = new CompositeDisposable();
             this.accessControl = new AccessControl(settings);
@@ -709,7 +706,7 @@ namespace Espera.Core.Management
 
             var artworkLookup = new HashSet<string>(this.Songs.Select(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null));
 
-            ILocalSongFinder songFinder = this.localSongFinderFunc(path);
+            var songFinder = new LocalSongFinder(path, this.fileSystem);
 
             this.currentSongFinderSubscription = songFinder.GetSongsAsync()
                 .ObserveOn(RxApp.TaskpoolScheduler)
