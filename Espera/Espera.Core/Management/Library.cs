@@ -718,7 +718,7 @@ namespace Espera.Core.Management
 
                     bool added = this.songs.Add(song);
 
-                    // Inverse the if, as this condition happens way more often and
+                    // Inverse the condition, as this case happens way more often and
                     // we want to release the lock as soon as possible
                     // We also keep the write lock open so we can be sure we find
                     // the song and it isn't removed in the meanwhile
