@@ -691,6 +691,11 @@ namespace Espera.Core.Management
             });
 
             this.RemoveFromLibrary(removable);
+
+            if (removable.Any())
+            {
+                this.songsUpdated.OnNext(Unit.Default);
+            }
         }
 
         private async Task UpdateSongsAsync(string path)
@@ -704,8 +709,6 @@ namespace Espera.Core.Management
             this.isUpdating.OnNext(true);
 
             await this.RemoveMissingSongsAsync(path);
-
-            this.songsUpdated.OnNext(Unit.Default);
 
             var artworkLookup = new HashSet<string>(this.Songs.Select(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null));
 
