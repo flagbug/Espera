@@ -139,7 +139,7 @@ namespace Espera.View.ViewModels
             {
                 ArtistViewModel model = this.allArtists.FirstOrDefault(x => x.Name.Equals(songs.Key, StringComparison.InvariantCultureIgnoreCase));
 
-                List<IObservable<string>> artworkKeys = songs.Cast<LocalSong>()
+                List<IObservable<string>> artworkKeys = songs
                     .Select(x => x.ArtworkKey)
                     .ToList();
 
