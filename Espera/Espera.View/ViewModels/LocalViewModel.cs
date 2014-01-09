@@ -12,7 +12,7 @@ using System.Reactive.Subjects;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class LocalViewModel : SongSourceViewModel<LocalSongViewModel>
+    public sealed class LocalViewModel : SongSourceViewModel<LocalSongViewModel>
     {
         private readonly ReactiveList<ArtistViewModel> allArtists;
         private readonly ArtistViewModel allArtistsViewModel;
