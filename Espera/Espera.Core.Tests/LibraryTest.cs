@@ -210,6 +210,36 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public async Task ExternalTagChangesArePropagated()
+        {
+            var song = new LocalSong("C://Song.mp3", TimeSpan.Zero) { Title = "A" };
+            var updatedSong = new LocalSong("C://Song.mp3", TimeSpan.Zero) { Title = "B" };
+
+            var libraryReader = new Mock<ILibraryReader>();
+            libraryReader.SetupGet(x => x.LibraryExists).Returns(true);
+            libraryReader.Setup(x => x.ReadSongSourcePath()).Returns("C://");
+            libraryReader.Setup(x => x.ReadPlaylists()).Returns(new List<Playlist>());
+            libraryReader.Setup(x => x.ReadSongs()).Returns(new[] { song });
+
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { song.OriginalPath, new MockFileData("DontCare") } });
+
+            var songFinder = new Mock<ILocalSongFinder>();
+            songFinder.Setup(x => x.GetSongsAsync()).Returns(Observable.Return(Tuple.Create(updatedSong, (byte[])null)));
+
+            using (Library library = Helpers.CreateLibrary(libraryReader.Object, fileSystem, songFinder.Object))
+            {
+                var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().PublishLast();
+                updateCompleted.Connect();
+
+                library.Initialize();
+
+                await updateCompleted;
+
+                Assert.Equal("B", library.Songs[0].Title);
+            }
+        }
+
+        [Fact]
         public void GetPlaylistByNameReturnsNullIfPlaylistDoesNotExist()
         {
             using (Library library = Helpers.CreateLibrary())
