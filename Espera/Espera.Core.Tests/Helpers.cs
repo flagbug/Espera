@@ -51,6 +51,16 @@ namespace Espera.Core.Tests
             Playlist2.AddSongs(new[] { (Song)LocalSong1, YoutubeSong1 });
         }
 
+        public static async Task AwaitInitializationAndUpdate(this Library library)
+        {
+            var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().PublishLast();
+            updateCompleted.Connect();
+
+            library.Initialize();
+
+            await updateCompleted;
+        }
+
         public static Library CreateLibrary(ILibraryWriter writer)
         {
             return CreateLibrary(null, null, writer);

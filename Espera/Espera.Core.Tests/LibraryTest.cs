@@ -228,12 +228,7 @@ namespace Espera.Core.Tests
 
             using (Library library = Helpers.CreateLibrary(libraryReader.Object, fileSystem, songFinder.Object))
             {
-                var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().PublishLast();
-                updateCompleted.Connect();
-
-                library.Initialize();
-
-                await updateCompleted;
+                await library.AwaitInitializationAndUpdate();
 
                 Assert.Equal("B", library.Songs[0].Title);
             }
@@ -704,12 +699,7 @@ namespace Espera.Core.Tests
 
             using (Library library = Helpers.CreateLibrary(libraryReader.Object, fileSystem))
             {
-                var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().PublishLast();
-                updateCompleted.Connect();
-
-                library.Initialize();
-
-                await updateCompleted;
+                await library.AwaitInitializationAndUpdate();
 
                 Assert.NotNull(BlobCache.LocalMachine.GetAllKeys().FirstOrDefault(x => x == "artwork-abcdefg"));
             }
@@ -729,12 +719,7 @@ namespace Espera.Core.Tests
 
             using (Library library = Helpers.CreateLibrary(libraryReader.Object))
             {
-                var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().PublishLast();
-                updateCompleted.Connect();
-
-                library.Initialize();
-
-                await updateCompleted;
+                await library.AwaitInitializationAndUpdate();
 
                 Assert.Null(BlobCache.LocalMachine.GetAllKeys().FirstOrDefault(x => x == "artwork-abcdefg"));
             }
@@ -756,12 +741,7 @@ namespace Espera.Core.Tests
 
             using (Library library = Helpers.CreateLibrary(libraryReader.Object, fileSystem))
             {
-                var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().PublishLast();
-                updateCompleted.Connect();
-
-                library.Initialize();
-
-                await updateCompleted;
+                await library.AwaitInitializationAndUpdate();
 
                 Assert.Equal(1, library.Songs.Count());
             }
@@ -791,12 +771,7 @@ namespace Espera.Core.Tests
 
             using (Library library = Helpers.CreateLibrary(libraryReader.Object, fileSystem))
             {
-                var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().PublishLast();
-                updateCompleted.Connect();
-
-                library.Initialize();
-
-                await updateCompleted;
+                await library.AwaitInitializationAndUpdate();
 
                 Assert.Equal(1, library.Playlists[0].Count());
                 Assert.Equal(1, library.Playlists[1].Count());
