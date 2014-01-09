@@ -160,13 +160,13 @@ namespace Espera.Core.Management
         /// <summary>
         /// Gets all songs that are currently in the library.
         /// </summary>
-        public IEnumerable<LocalSong> Songs
+        public IReadOnlyList<LocalSong> Songs
         {
             get
             {
                 this.songLock.EnterReadLock();
 
-                IEnumerable<LocalSong> tempSongs = this.songs.ToList();
+                List<LocalSong> tempSongs = this.songs.ToList();
 
                 this.songLock.ExitReadLock();
 
