@@ -738,6 +738,8 @@ namespace Espera.Core.Management
 
                     else
                     {
+                        this.songLock.ExitWriteLock();
+
                         byte[] artworkData = t.Item2;
 
                         if (artworkData != null)
