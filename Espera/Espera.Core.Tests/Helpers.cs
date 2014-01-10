@@ -76,6 +76,11 @@ namespace Espera.Core.Tests
             return CreateLibrary(null, reader, null, fileSystem);
         }
 
+        public static Library CreateLibrary(IFileSystem fileSystem, ILocalSongFinder localSongFinder)
+        {
+            return CreateLibrary(null, null, null, fileSystem, localSongFinder);
+        }
+
         public static Library CreateLibrary(ILibraryReader reader, IFileSystem fileSystem, ILocalSongFinder localSongFinder)
         {
             return CreateLibrary(null, reader, null, fileSystem, localSongFinder);
