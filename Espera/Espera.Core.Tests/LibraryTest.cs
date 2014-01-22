@@ -779,6 +779,28 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public async Task RemovesMissingSongWithoutArtworkFromLibraryWhenOtherArtworksArePresent()
+        {
+            var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero, "artwork-abcdefg");
+            var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero);
+
+            var libraryReader = new Mock<ILibraryReader>();
+            libraryReader.SetupGet(x => x.LibraryExists).Returns(true);
+            libraryReader.Setup(x => x.ReadSongSourcePath()).Returns("C://");
+            libraryReader.Setup(x => x.ReadPlaylists()).Returns(new List<Playlist>());
+            libraryReader.Setup(x => x.ReadSongs()).Returns(new[] { existingSong, missingSong });
+
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
+
+            using (Library library = Helpers.CreateLibrary(libraryReader.Object, fileSystem))
+            {
+                await library.AwaitInitializationAndUpdate();
+
+                Assert.Equal(1, library.Songs.Count());
+            }
+        }
+
+        [Fact]
         public async Task SaveDoesNotSaveTemporaryPlaylist()
         {
             var libraryWriter = new Mock<ILibraryWriter>();
