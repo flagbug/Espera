@@ -38,8 +38,8 @@ namespace Espera.Core
             return Observable.Create<TResult>(o =>
             {
                 left.Where(_ => initialized)
-                    .Subscribe(x => o.OnNext(resultSelector(x, latest)),
-                        o.OnError, o.OnCompleted)
+                    .Select(x => resultSelector(x, latest))
+                    .Subscribe(o)
                     .DisposeWith(disp);
 
                 return disp;
