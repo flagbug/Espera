@@ -14,6 +14,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,7 +38,6 @@ namespace Espera.Core.Management
         private readonly ReaderWriterLockSlim songLock;
         private readonly HashSet<LocalSong> songs;
         private readonly BehaviorSubject<string> songSourcePath;
-        private readonly Subject<Unit> songStarted;
         private readonly Subject<Unit> songsUpdated;
         private Playlist currentPlayingPlaylist;
         private IDisposable currentSongFinderSubscription;
@@ -60,7 +60,6 @@ namespace Espera.Core.Management
             this.currentPlaylistChanged = new Subject<Playlist>();
             this.CanPlayNextSong = this.currentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
             this.CanPlayPreviousSong = this.currentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
-            this.songStarted = new Subject<Unit>();
             this.songSourcePath = new BehaviorSubject<string>(null);
             this.songsUpdated = new Subject<Unit>();
             this.audioPlayer = new AudioPlayer();
@@ -73,7 +72,8 @@ namespace Espera.Core.Management
 
             this.audioPlayer.PlaybackState.Where(p => p == AudioPlayerState.Finished)
                 .CombineLatestValue(this.CanPlayNextSong, (state, canPlayNextSong) => canPlayNextSong)
-                .Subscribe(canPlayNextSong => this.HandleSongFinishAsync(canPlayNextSong));
+                .SelectMany(x => this.HandleSongFinishAsync(x).ToObservable())
+                .Subscribe();
 
             this.CurrentTimeChanged = this.audioPlayer.CurrentTimeChanged;
         }
@@ -183,14 +183,6 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Occurs when a song has started the playback.
-        /// </summary>
-        public IObservable<Unit> SongStarted
-        {
-            get { return this.songStarted.AsObservable(); }
-        }
-
-        /// <summary>
         /// Occurs when a song has been added to the library.
         /// </summary>
         public IObservable<Unit> SongsUpdated
@@ -291,8 +283,6 @@ namespace Espera.Core.Management
 
         public void Dispose()
         {
-            this.audioPlayer.Dispose();
-
             if (this.currentSongFinderSubscription != null)
             {
                 this.currentSongFinderSubscription.Dispose();
@@ -594,11 +584,7 @@ namespace Espera.Core.Management
                 song.IsCorrupted.Value = true;
 
                 this.HandleSongCorruptionAsync();
-
-                return;
             }
-
-            this.songStarted.OnNext(Unit.Default);
         }
 
         private void Load()

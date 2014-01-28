@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace Espera.Core.Audio
 {
@@ -8,19 +9,19 @@ namespace Espera.Core.Audio
 
         Func<float> GetVolume { set; }
 
-        Action LoadRequest { set; }
+        Func<Task> LoadRequest { set; }
 
         Uri Path { get; }
 
-        Action PauseRequest { set; }
+        Func<Task> PauseRequest { set; }
 
-        Action PlayRequest { set; }
+        Func<Task> PlayRequest { set; }
 
         Action<TimeSpan> SetTime { set; }
 
         Action<float> SetVolume { set; }
 
-        Action StopRequest { set; }
+        Func<Task> StopRequest { set; }
 
         void Finished();
     }

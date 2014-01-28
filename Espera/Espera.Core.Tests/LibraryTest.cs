@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -107,6 +108,38 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public async Task CanPlayAWholeBunchOfSongs()
+        {
+            var song = new LocalSong("C://", TimeSpan.Zero);
+            var awaitSubject = new AsyncSubject<Unit>();
+            int invocationCount = 0;
+
+            using (Library library = Helpers.CreateLibraryWithPlaylist())
+            {
+                library.AudioPlayerCallback.PlayRequest = () =>
+                {
+                    invocationCount++;
+
+                    if (invocationCount == 5000)
+                    {
+                        awaitSubject.OnNext(Unit.Default);
+                        awaitSubject.OnCompleted();
+                    }
+
+                    return Task.Run(() => library.AudioPlayerCallback.Finished());
+                };
+
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                await library.PlayInstantlyAsync(Enumerable.Repeat(song, 5000), token);
+
+                await awaitSubject.Timeout(TimeSpan.FromSeconds(10));
+            }
+
+            Assert.Equal(5000, invocationCount);
+        }
+
+        [Fact]
         public async Task ChangeSongSourcePathSmokeTest()
         {
             var fileSystem = new MockFileSystem();
@@ -157,7 +190,11 @@ namespace Espera.Core.Tests
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
                 bool called = false;
-                library.AudioPlayerCallback.PlayRequest = () => called = true;
+                library.AudioPlayerCallback.PlayRequest = () =>
+                {
+                    called = true;
+                    return Task.Delay(0);
+                };
 
                 Mock<Song> song = Helpers.CreateSongMock();
 
@@ -314,7 +351,11 @@ namespace Espera.Core.Tests
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
                 bool called = false;
-                library.AudioPlayerCallback.PauseRequest = () => called = true;
+                library.AudioPlayerCallback.PauseRequest = () =>
+                {
+                    called = true;
+                    return Task.Delay(0);
+                };
 
                 Mock<Song> song = Helpers.CreateSongMock();
 
@@ -379,7 +420,7 @@ namespace Espera.Core.Tests
         {
             using (Library library = Helpers.CreateLibrary())
             {
-                var conn = library.SongStarted
+                var conn = library.PlaybackState.Where(x => x == AudioPlayerState.Playing)
                     .Take(2)
                     .PublishLast();
                 conn.Connect();
@@ -396,7 +437,11 @@ namespace Espera.Core.Tests
             using (Library library = Helpers.CreateLibrary())
             {
                 int called = 0;
-                library.AudioPlayerCallback.PlayRequest = () => called++;
+                library.AudioPlayerCallback.PlayRequest = () =>
+                {
+                    called++;
+                    return Task.Delay(0);
+                };
                 Mock<Song> song = Helpers.CreateSongMock();
 
                 await library.PlayInstantlyAsync(new[] { song.Object }, library.LocalAccessControl.RegisterLocalAccessToken());
@@ -432,6 +477,8 @@ namespace Espera.Core.Tests
                                 handle.Signal();
                                 break;
                         }
+
+                        return Task.Delay(0);
                     };
 
                     Song[] songs = Helpers.SetupSongMocks(2);
@@ -509,25 +556,14 @@ namespace Espera.Core.Tests
 
                 library.AddSongsToPlaylist(Helpers.SetupSongMocks(2), token);
 
-                var handle = new ManualResetEvent(false);
-                int played = 0;
-
-                library.SongStarted.Subscribe(x =>
-                {
-                    played++;
-
-                    if (played == 2)
-                    {
-                        handle.Set();
-                    }
-                });
+                var conn = library.PlaybackState.Where(x => x == AudioPlayerState.Playing)
+                    .Take(2)
+                    .PublishLast();
+                conn.Connect();
 
                 await library.PlaySongAsync(0, token);
 
-                if (!handle.WaitOne(5000))
-                {
-                    Assert.True(false, "Timeout");
-                }
+                await conn.Timeout(TimeSpan.FromSeconds(5));
             }
         }
 
@@ -647,7 +683,11 @@ namespace Espera.Core.Tests
             {
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                library.AudioPlayerCallback.StopRequest = () => finishedFired = true;
+                library.AudioPlayerCallback.StopRequest = () =>
+                {
+                    finishedFired = true;
+                    return Task.Delay(0);
+                };
                 library.AddSongsToPlaylist(Helpers.SetupSongMocks(1), token);
 
                 await library.PlaySongAsync(0, token);
@@ -863,6 +903,8 @@ namespace Espera.Core.Tests
                     }
 
                     played++;
+
+                    return Task.Delay(0);
                 };
 
                 library.AddSongsToPlaylist(Helpers.SetupSongMocks(2), token);

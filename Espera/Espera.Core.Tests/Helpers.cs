@@ -99,12 +99,12 @@ namespace Espera.Core.Tests
             IAudioPlayerCallback c = library.AudioPlayerCallback;
             c.GetTime = () => TimeSpan.Zero;
             c.GetVolume = () => 1.0f;
-            c.LoadRequest = () => { };
-            c.PauseRequest = () => { };
-            c.PlayRequest = c.Finished;
+            c.LoadRequest = () => Task.Delay(0);
+            c.PauseRequest = () => Task.Delay(0);
+            c.PlayRequest = () => Task.Run(() => c.Finished());
             c.SetTime = x => { };
             c.SetVolume = x => { };
-            c.StopRequest = () => { };
+            c.StopRequest = () => Task.Delay(0);
 
             return library;
         }
