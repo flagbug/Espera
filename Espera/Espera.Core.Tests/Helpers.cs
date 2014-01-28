@@ -101,7 +101,12 @@ namespace Espera.Core.Tests
             c.GetVolume = () => 1.0f;
             c.LoadRequest = () => Task.Delay(0);
             c.PauseRequest = () => Task.Delay(0);
-            c.PlayRequest = () => Task.Run(() => c.Finished());
+            c.PlayRequest = () =>
+            {
+                Task.Run(() => library.AudioPlayerCallback.Finished());
+
+                return Task.Delay(0);
+            };
             c.SetTime = x => { };
             c.SetVolume = x => { };
             c.StopRequest = () => Task.Delay(0);

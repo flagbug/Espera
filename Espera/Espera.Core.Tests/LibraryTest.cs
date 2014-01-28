@@ -113,6 +113,7 @@ namespace Espera.Core.Tests
             var song = new LocalSong("C://", TimeSpan.Zero);
             var awaitSubject = new AsyncSubject<Unit>();
             int invocationCount = 0;
+            var finishSubject = new Subject<Unit>();
 
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
@@ -120,23 +121,25 @@ namespace Espera.Core.Tests
                 {
                     invocationCount++;
 
-                    if (invocationCount == 5000)
+                    if (invocationCount == 100)
                     {
                         awaitSubject.OnNext(Unit.Default);
                         awaitSubject.OnCompleted();
                     }
 
-                    return Task.Run(() => library.AudioPlayerCallback.Finished());
+                    Task.Run(() => library.AudioPlayerCallback.Finished());
+
+                    return Task.Delay(0);
                 };
 
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                await library.PlayInstantlyAsync(Enumerable.Repeat(song, 5000), token);
+                await library.PlayInstantlyAsync(Enumerable.Repeat(song, 100).ToList(), token);
 
-                await awaitSubject.Timeout(TimeSpan.FromSeconds(10));
+                await awaitSubject.Timeout(TimeSpan.FromSeconds(5));
             }
 
-            Assert.Equal(5000, invocationCount);
+            Assert.Equal(100, invocationCount);
         }
 
         [Fact]
@@ -555,6 +558,8 @@ namespace Espera.Core.Tests
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
                 library.AddSongsToPlaylist(Helpers.SetupSongMocks(2), token);
+
+                var coll = library.PlaybackState.CreateCollection();
 
                 var conn = library.PlaybackState.Where(x => x == AudioPlayerState.Playing)
                     .Take(2)

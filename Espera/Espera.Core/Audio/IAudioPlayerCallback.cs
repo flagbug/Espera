@@ -23,6 +23,6 @@ namespace Espera.Core.Audio
 
         Func<Task> StopRequest { set; }
 
-        void Finished();
+        Task Finished();
     }
 }
