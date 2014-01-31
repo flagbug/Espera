@@ -3,6 +3,7 @@ using ReactiveUI;
 using Splat;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -110,13 +111,32 @@ namespace Espera.View.ViewModels
             return artistName;
         }
 
+        private static async Task SaveImageToBlobCache(string key, IBitmap bitmap)
+        {
+            using (var ms = new MemoryStream())
+            {
+                await bitmap.Save(CompressedBitmapFormat.Jpeg, 1, ms);
+
+                // NB: We don't want to wait on the disk, just fire-and-forget
+                BlobCache.LocalMachine.Insert(key, ms.ToArray()).Subscribe();
+            }
+        }
+
         private async Task<BitmapSource> LoadArtworkAsync(string key)
         {
             try
             {
                 await Gate.WaitAsync();
 
-                IBitmap img = await BlobCache.LocalMachine.LoadImage(key, 35, 35)
+                int size = 50;
+                string sizeAffix = string.Format("-{0}x{0}", size);
+
+                // If we don't have the small version of an artwork, resize, save and return it.
+                // This saves us a bunch of memory at the next startup, because BitmapImage has
+                // some kind of memory leak, so the not-resized image hangs around in memory forever
+                IBitmap img = await BlobCache.LocalMachine.LoadImage(key + sizeAffix)
+                    .Catch(BlobCache.LocalMachine.LoadImage(key, size, size)
+                    .Do(x => SaveImageToBlobCache(key + sizeAffix, x))) //NB: We have the resized image already, so don't wait on this
                     .Finally(() => Gate.Release());
 
                 return img.ToNative();
