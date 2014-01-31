@@ -332,5 +332,92 @@ namespace Espera.Core.Tests
 
             Assert.Equal(newIndex, playlist.CurrentSongIndex.Value);
         }
+
+        [Fact]
+        public void VoteForChecksIndexBounds()
+        {
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(1));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.VoteFor(-1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.VoteFor(2));
+        }
+
+        [Fact]
+        public void VoteForIncreasesVoteCount()
+        {
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(1));
+
+            playlist.VoteFor(0);
+
+            Assert.Equal(1, playlist[0].Votes);
+        }
+
+        [Fact]
+        public void VoteForIsFirstInFirstOut()
+        {
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(5));
+
+            playlist.VoteFor(4);
+
+            PlaylistEntry entry1 = playlist[4];
+            playlist.VoteFor(4);
+
+            Assert.Equal(1, entry1.Index);
+
+            PlaylistEntry entry2 = playlist[4];
+            playlist.VoteFor(4);
+
+            Assert.Equal(2, entry2.Index);
+        }
+
+        [Fact]
+        public void VoteForSmokeTest()
+        {
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(4));
+            List<PlaylistEntry> snapShot = playlist.ToList();
+            var expectedOrder = new[] { snapShot[3], snapShot[2], snapShot[0], snapShot[1] };
+
+            playlist.VoteFor(3);
+            playlist.VoteFor(0);
+
+            playlist.VoteFor(3);
+            playlist.VoteFor(2);
+
+            Assert.Equal(expectedOrder, playlist);
+        }
+
+        [Fact]
+        public void VotesForLeavesEntryInSamePlaceIfNextEntryHasSameVoteCount()
+        {
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(2));
+            List<PlaylistEntry> snapshot = playlist.ToList();
+
+            playlist.VoteFor(0);
+            playlist.VoteFor(1);
+
+            Assert.Equal(snapshot, playlist);
+        }
+
+        [Fact]
+        public void VotesRespectCurrentSongIndex()
+        {
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(5));
+            List<PlaylistEntry> entries = playlist.ToList();
+            var expectedOrder = new[] { entries[0], entries[1], entries[3], entries[4], entries[2] };
+
+            playlist.CurrentSongIndex.Value = 1;
+
+            playlist.VoteFor(4);
+            playlist.VoteFor(4);
+            playlist.VoteFor(3);
+
+            Assert.Equal(playlist, expectedOrder);
+        }
     }
 }

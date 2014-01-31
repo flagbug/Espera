@@ -224,6 +224,29 @@ namespace Espera.Core.Management
             this.RebuildIndexes();
         }
 
+        internal void VoteFor(int index)
+        {
+            if (index < 0)
+                Throw.ArgumentOutOfRangeException(() => index, 0);
+
+            if (index > this.playlist.Count)
+                Throw.ArgumentOutOfRangeException(() => index, this.playlist.Count);
+
+            this[index].Vote();
+
+            if (this.playlist.Count == 1)
+                return;
+
+            var targetEntry = this.Skip(this.CurrentSongIndex.Value.HasValue ?
+                    this.CurrentSongIndex.Value.Value + 1 : 0)
+                .SkipWhile(x => x.Votes >= this[index].Votes)
+                .First();
+
+            this.playlist.Move(index, targetEntry.Index);
+
+            this.RebuildIndexes();
+        }
+
         private void RebuildIndexes()
         {
             int index = 0;

@@ -25,9 +25,22 @@ namespace Espera.Core.Management
 
         public Song Song { get; private set; }
 
+        public int Votes { get; private set; }
+
         public int CompareTo(PlaylistEntry other)
         {
             return this.Index.CompareTo(other.Index);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("Index = {0}, Votes = {1}, Guid = {2}",
+                this.Index, this.Votes, this.Guid.ToString().Substring(0, 8));
+        }
+
+        internal void Vote()
+        {
+            Votes++;
         }
     }
 }

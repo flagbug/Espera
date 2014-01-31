@@ -494,6 +494,12 @@ namespace Espera.Core.Management
             this.manualUpdateTrigger.OnNext(Unit.Default);
         }
 
+        public void VoteForPlaylistEntry(int index, Guid accessToken)
+        {
+            if (index < 0)
+                Throw.ArgumentOutOfRangeException(() => index, 0);
+        }
+
         private async Task HandleSongCorruptionAsync()
         {
             if (!await this.CurrentPlaylist.CanPlayNextSong.FirstAsync())
