@@ -8,9 +8,11 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace Espera.View.ViewModels
 {
@@ -209,17 +211,28 @@ namespace Espera.View.ViewModels
                 .ToCommand();
             this.RemoveSelectedPlaylistEntriesCommand.Subscribe(x => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index), this.accessToken));
 
+            var reevaluateSelectedPlaylistEntry = new Subject<Unit>();
             this.MovePlaylistSongUpCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
+                .Merge(reevaluateSelectedPlaylistEntry.Select(_ => this.SelectedPlaylistEntries))
                 .Select(x => x != null && x.Count() == 1 && x.First().Index > 0)
                 .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveUp, canAlterPlaylist) => canMoveUp && canAlterPlaylist)
                 .ToCommand();
-            this.MovePlaylistSongUpCommand.Subscribe(_ => this.library.MovePlaylistSongUp(this.SelectedPlaylistEntries.First().Index, this.accessToken));
+            this.MovePlaylistSongUpCommand.Subscribe(_ =>
+            {
+                this.library.MovePlaylistSongUp(this.SelectedPlaylistEntries.First().Index, this.accessToken);
+                reevaluateSelectedPlaylistEntry.OnNext(Unit.Default);
+            });
 
             this.MovePlaylistSongDownCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
+                .Merge(reevaluateSelectedPlaylistEntry.Select(_ => this.SelectedPlaylistEntries))
                 .Select(x => x != null && x.Count() == 1 && x.First().Index < this.CurrentPlaylist.SongCount - 1)
                 .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveDown, canAlterPlaylist) => canMoveDown && canAlterPlaylist)
                 .ToCommand();
-            this.MovePlaylistSongDownCommand.Subscribe(_ => this.library.MovePlaylistSongDown(this.SelectedPlaylistEntries.First().Index, this.accessToken));
+            this.MovePlaylistSongDownCommand.Subscribe(_ =>
+            {
+                this.library.MovePlaylistSongDown(this.SelectedPlaylistEntries.First().Index, this.accessToken);
+                reevaluateSelectedPlaylistEntry.OnNext(Unit.Default);
+            });
 
             this.IsLocal = true;
         }
