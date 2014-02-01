@@ -64,10 +64,14 @@ namespace Espera.View.ViewModels
                 .Select(x => x == AccessPermission.Admin)
                 .ToProperty(this, x => x.IsAdmin);
 
-            this.NextSongCommand = new ReactiveCommand(this.HasAccess(this.library.CanPlayNextSong));
+            this.NextSongCommand = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
+                .CombineLatest(this.library.CanPlayNextSong, (x1, x2) => x1 && x2)
+                .ToCommand();
             this.NextSongCommand.RegisterAsyncTask(_ => this.library.PlayNextSongAsync(this.accessToken));
 
-            this.PreviousSongCommand = new ReactiveCommand(this.HasAccess(this.library.CanPlayPreviousSong));
+            this.PreviousSongCommand = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
+                .CombineLatest(this.library.CanPlayPreviousSong, (x1, x2) => x1 && x2)
+                .ToCommand();
             this.PreviousSongCommand.RegisterAsyncTask(_ => this.library.PlayPreviousSongAsync(this.accessToken));
 
             if (!this.library.Playlists.Any())
