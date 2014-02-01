@@ -73,7 +73,8 @@ namespace Espera.Services
                 {"move-playlist-song-up", this.MovePlaylistSongUp},
                 {"move-playlist-song-down", this.MovePlaylistSongDown},
                 {"get-volume", this.GetVolume},
-                {"set-volume", this.SetVolume}
+                {"set-volume", this.SetVolume},
+                {"vote-for-song", this.VoteForSong}
             };
 
             this.Disconnected = Observable.FromEventPattern(h => this.socket.Disconnected += h, h => this.socket.Disconnected -= h)
@@ -595,6 +596,36 @@ namespace Espera.Services
             {
                 return Task.FromResult(CreateResponse(401, "Unauthorized"));
             }
+        }
+
+        private Task<JObject> VoteForSong(JToken parameters)
+        {
+            Guid songGuid;
+            bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
+
+            if (valid)
+            {
+                PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
+
+                if (entry != null)
+                {
+                    try
+                    {
+                        this.library.VoteForPlaylistEntry(entry.Index, this.accessToken);
+                    }
+
+                    catch (AccessException)
+                    {
+                        return Task.FromResult(CreateResponse(401, "Unauthorized"));
+                    }
+
+                    return Task.FromResult(CreateResponse(200, "Vote successful"));
+                }
+
+                return Task.FromResult(CreateResponse(404, "Playlist entry not found"));
+            }
+
+            return Task.FromResult(CreateResponse(400, "Malformed GUID"));
         }
     }
 }

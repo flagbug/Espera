@@ -496,8 +496,9 @@ namespace Espera.Core.Management
 
         public void VoteForPlaylistEntry(int index, Guid accessToken)
         {
-            if (index < 0)
-                Throw.ArgumentOutOfRangeException(() => index, 0);
+            this.accessControl.VerifyAccess(accessToken);
+
+            this.CurrentPlaylist.VoteFor(index);
         }
 
         private async Task HandleSongCorruptionAsync()

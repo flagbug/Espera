@@ -1,6 +1,7 @@
 ﻿using Espera.Core.Management;
 using Rareform.Validation;
 using ReactiveSockets;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,6 @@ using System.Net.Sockets;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ReactiveUI;
 
 namespace Espera.Services
 {
@@ -85,6 +85,8 @@ namespace Espera.Services
             listener.Connections.Where(x => !this.dispose)
                 .Subscribe(socket =>
                 {
+                    this.Log().Info("New client detected");
+
                     var mobileClient = new MobileClient(socket, this.library);
 
                     mobileClient.Disconnected.FirstAsync()
