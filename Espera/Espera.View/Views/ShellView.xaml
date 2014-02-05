@@ -803,12 +803,14 @@
                                             </TextBlock.Style>
                                         </TextBlock>
                                     </StackPanel>
-                                    <TextBlock Grid.Column="2"
-                                               HorizontalAlignment="Right"
-                                               VerticalAlignment="Top"
-                                               Style="{StaticResource ArtistInfoStyle}"
+                                    <StackPanel Grid.Column="2" HorizontalAlignment="Right">
+                                        <TextBlock Style="{StaticResource ArtistInfoStyle}"
                                                Text="{Binding Path=Duration,
                                                               StringFormat=mm\\:ss}" />
+                                        <TextBlock Margin="0, 5, 0, 0"
+                                               Style="{StaticResource ArtistInfoStyle}"
+                                               Text="{Binding Path=Votes, StringFormat=\{0\} Votes}" />
+                                    </StackPanel>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
