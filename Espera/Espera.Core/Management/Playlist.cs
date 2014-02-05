@@ -254,7 +254,7 @@ namespace Espera.Core.Management
 
             this[index].Vote();
 
-            if (this.playlist.Count == 1)
+            if (this.playlist.Count == 1 || (this.CurrentSongIndex.Value.HasValue && index == this.CurrentSongIndex.Value + 1))
                 return;
 
             var targetEntry = this.Skip(this.CurrentSongIndex.Value.HasValue ?

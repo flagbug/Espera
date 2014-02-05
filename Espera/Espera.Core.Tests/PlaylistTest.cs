@@ -344,6 +344,19 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public void VoteForEntryBeforeCurrentSongWorks()
+        {
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(2));
+
+            playlist.CurrentSongIndex.Value = 0;
+
+            playlist.VoteFor(1);
+
+            Assert.Equal(1, playlist[1].Votes);
+        }
+
+        [Fact]
         public void VoteForIncreasesVoteCount()
         {
             var playlist = new Playlist("Playlist");
