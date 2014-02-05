@@ -259,7 +259,7 @@ namespace Espera.Core.Management
 
             var targetEntry = this.Skip(this.CurrentSongIndex.Value.HasValue ?
                     this.CurrentSongIndex.Value.Value + 1 : 0)
-                .SkipWhile(x => x.Votes >= this[index].Votes)
+                .SkipWhile(x => x.Votes >= this[index].Votes && x != this[index])
                 .First();
 
             var recordedChanges = this.playlist.Changed.Replay();

@@ -357,6 +357,18 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public void VoteForFirstEntryLeavesItInFirstPlace()
+        {
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(2));
+            List<PlaylistEntry> snapshot = playlist.ToList();
+
+            playlist.VoteFor(0);
+
+            Assert.Equal(snapshot, playlist);
+        }
+
+        [Fact]
         public void VoteForIncreasesVoteCount()
         {
             var playlist = new Playlist("Playlist");
@@ -387,6 +399,19 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public void VoteForLeavesEntryInSamePlaceIfNextEntryHasSameVoteCount()
+        {
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(2));
+            List<PlaylistEntry> snapshot = playlist.ToList();
+
+            playlist.VoteFor(0);
+            playlist.VoteFor(1);
+
+            Assert.Equal(snapshot, playlist);
+        }
+
+        [Fact]
         public void VoteForSmokeTest()
         {
             var playlist = new Playlist("Playlist");
@@ -401,19 +426,6 @@ namespace Espera.Core.Tests
             playlist.VoteFor(2);
 
             Assert.Equal(expectedOrder, playlist);
-        }
-
-        [Fact]
-        public void VotesForLeavesEntryInSamePlaceIfNextEntryHasSameVoteCount()
-        {
-            var playlist = new Playlist("Playlist");
-            playlist.AddSongs(Helpers.SetupSongMocks(2));
-            List<PlaylistEntry> snapshot = playlist.ToList();
-
-            playlist.VoteFor(0);
-            playlist.VoteFor(1);
-
-            Assert.Equal(snapshot, playlist);
         }
 
         [Fact]
