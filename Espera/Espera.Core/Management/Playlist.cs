@@ -278,10 +278,7 @@ namespace Espera.Core.Management
             if (this.CollectionChanged == null)
                 return;
 
-            args.Subscribe(x =>
-            {
-                this.CollectionChanged(this, x);
-            });
+            args.Subscribe(x => this.CollectionChanged(this, x));
         }
 
         private void RebuildIndexes()
