@@ -141,6 +141,7 @@ namespace Espera.Services
             }).DisposeWith(this.disposable);
 
             this.library.CurrentPlaylistChanged.Merge(this.library.CurrentPlaylistChanged
+                    .StartWith(this.library.CurrentPlaylist)
                     .Select(x => x.Changed().Select(y => x))
                     .Switch())
                 .Subscribe(x => this.PushPlaylist(x))
