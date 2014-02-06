@@ -26,6 +26,10 @@ namespace Espera.Core.Management
             this.playlist = new ReactiveUI.ReactiveList<PlaylistEntry>();
 
             this.CurrentSongIndex = new ReactiveProperty<int?>(x => x == null || this.ContainsIndex(x.Value), typeof(ArgumentOutOfRangeException));
+            this.CurrentSongIndex.Where(x => x != null).Subscribe(x =>
+            {
+                this.ResetVotesBeforeIndex(x.Value);
+            });
 
             var canPlayNextSong = this.CurrentSongIndex
                 .CombineLatest(this.Changed(), (i, args) => i.HasValue && this.ContainsIndex(i.Value + 1))
@@ -252,6 +256,9 @@ namespace Espera.Core.Management
             if (index > this.playlist.Count)
                 Throw.ArgumentOutOfRangeException(() => index, this.playlist.Count);
 
+            if (this.CurrentSongIndex.Value.HasValue && index <= this.CurrentSongIndex.Value)
+                throw new InvalidOperationException("Index can't be less or equal the current song index");
+
             this[index].Vote();
 
             if (this.playlist.Count == 1 || (this.CurrentSongIndex.Value.HasValue && index == this.CurrentSongIndex.Value + 1))
@@ -301,6 +308,14 @@ namespace Espera.Core.Management
             if (migrateIndex.HasValue)
             {
                 this.CurrentSongIndex.Value = migrateIndex;
+            }
+        }
+
+        private void ResetVotesBeforeIndex(int index)
+        {
+            for (int i = 0; i < index; i++)
+            {
+                this[i].ResetVotes();
             }
         }
     }

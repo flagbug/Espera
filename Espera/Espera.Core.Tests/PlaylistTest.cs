@@ -412,6 +412,28 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public void VoteForOnIndexThatEqualsCurrentSongIndexThrowsInvalidOperationException()
+        {
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(3));
+
+            playlist.CurrentSongIndex.Value = 1;
+
+            Assert.Throws<InvalidOperationException>(() => playlist.VoteFor(1));
+        }
+
+        [Fact]
+        public void VoteForOnIndexThatIsLessThanCurrentSongIndexThrowsInvalidOperationException()
+        {
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(3));
+
+            playlist.CurrentSongIndex.Value = 1;
+
+            Assert.Throws<InvalidOperationException>(() => playlist.VoteFor(0));
+        }
+
+        [Fact]
         public void VoteForSmokeTest()
         {
             var playlist = new Playlist("Playlist");
@@ -426,6 +448,45 @@ namespace Espera.Core.Tests
             playlist.VoteFor(2);
 
             Assert.Equal(expectedOrder, playlist);
+        }
+
+        [Fact]
+        public void VotesAfterCurrentSongIndexDontResetWhenCurrentSongIndexAdvances()
+        {
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(3));
+
+            playlist.VoteFor(0);
+            playlist.VoteFor(1);
+            playlist.VoteFor(2);
+
+            playlist.CurrentSongIndex.Value = 1;
+
+            Assert.Equal(1, playlist[1].Votes);
+            Assert.Equal(1, playlist[2].Votes);
+        }
+
+        [Fact]
+        public void VotesResetWhenCurrentSongIndexAdvances()
+        {
+            var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(3));
+
+            playlist.VoteFor(0);
+
+            playlist.CurrentSongIndex.Value = 0;
+
+            Assert.Equal(1, playlist[0].Votes);
+
+            playlist.CurrentSongIndex.Value = 1;
+
+            Assert.Equal(0, playlist[0].Votes);
+
+            playlist.VoteFor(2);
+
+            playlist.CurrentSongIndex.Value = 2;
+
+            Assert.Equal(0, playlist[1].Votes);
         }
 
         [Fact]

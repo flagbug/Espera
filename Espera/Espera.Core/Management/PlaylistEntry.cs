@@ -55,9 +55,14 @@ namespace Espera.Core.Management
                 this.Index, this.Votes, this.Guid.ToString().Substring(0, 8));
         }
 
+        internal void ResetVotes()
+        {
+            this.Votes = 0;
+        }
+
         internal void Vote()
         {
-            Votes++;
+            this.Votes++;
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
