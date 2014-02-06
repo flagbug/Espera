@@ -108,6 +108,7 @@ namespace Espera.Services
                 if (request["action"] == null)
                 {
                     this.Log().Warn("Mobile client with access token {0} sent a request without specifiying an action!", this.accessToken);
+                    await this.SendMessage(CreateResponse(400, "Bas request"));
                     return;
                 }
 
@@ -117,6 +118,7 @@ namespace Espera.Services
 
                 if (this.messageActionMap.TryGetValue(requestAction, out action))
                 {
+                    bool isFatalRequest = false;
                     try
                     {
                         JObject response = await action(request["parameters"]);
@@ -135,7 +137,13 @@ namespace Espera.Services
                             Debugger.Break();
                         }
 
-                        // Don't crash the listener if we receive a bogus message that we can't handle
+                        isFatalRequest = true;
+                    }
+
+                    if (isFatalRequest)
+                    {
+                        // Client what are you doing? Client stahp!
+                        await this.SendMessage(CreateResponse(500, "Fatal server error"));
                     }
                 }
             }).DisposeWith(this.disposable);
