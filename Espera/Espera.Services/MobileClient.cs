@@ -606,12 +606,17 @@ namespace Espera.Services
 
             if (valid)
             {
-                PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
+                Playlist playlist = this.library.CurrentPlaylist;
+
+                PlaylistEntry entry = playlist.FirstOrDefault(x => x.Guid == songGuid);
 
                 if (entry != null)
                 {
                     try
                     {
+                        if (playlist.CurrentSongIndex.Value.HasValue && entry.Index <= playlist.CurrentSongIndex.Value)
+                            return Task.FromResult(CreateResponse(404, "Vote rejected"));
+
                         this.library.VoteForPlaylistEntry(entry.Index, this.accessToken);
                     }
 
