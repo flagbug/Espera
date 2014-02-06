@@ -148,17 +148,16 @@ namespace Espera.Services
                 }
             }).DisposeWith(this.disposable);
 
-            this.library.CurrentPlaylistChanged.Merge(this.library.CurrentPlaylistChanged
+            this.library.CurrentPlaylistChanged
+                .Merge(this.library.CurrentPlaylistChanged
                     .StartWith(this.library.CurrentPlaylist)
                     .Select(x => x.Changed().Select(y => x))
                     .Switch())
+                .Merge(this.library.CurrentPlaylistChanged
+                    .StartWith(this.library.CurrentPlaylist)
+                    .Select(x => x.CurrentSongIndex.Skip(1).Select(y => x))
+                    .Switch())
                 .Subscribe(x => this.PushPlaylist(x))
-                .DisposeWith(this.disposable);
-
-            this.library.CurrentPlaylistChanged.StartWith(this.library.CurrentPlaylist)
-                .Select(x => x.CurrentSongIndex.Skip(1))
-                .Switch()
-                .Subscribe(x => this.PushPlaylistIndex(x))
                 .DisposeWith(this.disposable);
 
             this.library.PlaybackState.Skip(1)
