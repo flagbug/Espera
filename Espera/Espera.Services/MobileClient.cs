@@ -261,29 +261,29 @@ namespace Espera.Services
             Guid songGuid;
             bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
 
-            if (valid)
+            if (!valid)
             {
-                PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
+                return Task.FromResult(CreateResponse(400, "Malformed GUID"));
+            }
 
-                if (entry != null)
-                {
-                    try
-                    {
-                        this.library.MovePlaylistSongDown(entry.Index, this.accessToken);
-                    }
+            PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
 
-                    catch (AccessException)
-                    {
-                        return Task.FromResult(CreateResponse(401, "Unauthorized"));
-                    }
-
-                    return Task.FromResult(CreateResponse(200, "Moved song down"));
-                }
-
+            if (entry == null)
+            {
                 return Task.FromResult(CreateResponse(404, "Playlist entry not found"));
             }
 
-            return Task.FromResult(CreateResponse(400, "Malformed GUID"));
+            try
+            {
+                this.library.MovePlaylistSongDown(entry.Index, this.accessToken);
+            }
+
+            catch (AccessException)
+            {
+                return Task.FromResult(CreateResponse(401, "Unauthorized"));
+            }
+
+            return Task.FromResult(CreateResponse(200, "Moved song down"));
         }
 
         private Task<JObject> MovePlaylistSongUp(JToken parameters)
@@ -291,29 +291,29 @@ namespace Espera.Services
             Guid songGuid;
             bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
 
-            if (valid)
+            if (!valid)
             {
-                PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
+                return Task.FromResult(CreateResponse(400, "Malformed GUID"));
+            }
 
-                if (entry != null)
-                {
-                    try
-                    {
-                        this.library.MovePlaylistSongUp(entry.Index, this.accessToken);
-                    }
+            PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
 
-                    catch (AccessException)
-                    {
-                        return Task.FromResult(CreateResponse(401, "Unauthorized"));
-                    }
-
-                    return Task.FromResult(CreateResponse(200, "Moved song up"));
-                }
-
+            if (entry == null)
+            {
                 return Task.FromResult(CreateResponse(404, "Playlist entry not found"));
             }
 
-            return Task.FromResult(CreateResponse(400, "Malformed GUID"));
+            try
+            {
+                this.library.MovePlaylistSongUp(entry.Index, this.accessToken);
+            }
+
+            catch (AccessException)
+            {
+                return Task.FromResult(CreateResponse(401, "Unauthorized"));
+            }
+
+            return Task.FromResult(CreateResponse(200, "Moved song up"));
         }
 
         private Task<JObject> PostAdministratorPassword(JToken parameters)
@@ -397,22 +397,22 @@ namespace Espera.Services
             .Where(x => x != null)
             .ToList();
 
-            if (guids.Count == songs.Count)
+            if (guids.Count != songs.Count)
             {
-                try
-                {
-                    await this.library.PlayInstantlyAsync(songs, this.accessToken);
-                }
-
-                catch (AccessException)
-                {
-                    return CreateResponse(401, "Unauthorized");
-                }
-
-                return CreateResponse(200, "Ok");
+                return CreateResponse(404, "One or more songs could not be found");
             }
 
-            return CreateResponse(404, "One or more songs could not be found");
+            try
+            {
+                await this.library.PlayInstantlyAsync(songs, this.accessToken);
+            }
+
+            catch (AccessException)
+            {
+                return CreateResponse(401, "Unauthorized");
+            }
+
+            return CreateResponse(200, "Ok");
         }
 
         private Task<JObject> PostPlaylistSong(JToken parameters)
@@ -420,20 +420,21 @@ namespace Espera.Services
             Guid songGuid;
             bool valid = Guid.TryParse(parameters["songGuid"].ToString(), out songGuid);
 
-            if (valid)
+            if (!valid)
             {
-                LocalSong song = this.library.Songs.FirstOrDefault(x => x.Guid == songGuid);
+                return Task.FromResult(CreateResponse(400, "Malformed GUID"));
+            }
 
-                if (song != null)
-                {
-                    this.library.AddSongToPlaylist(song);
-                    return Task.FromResult(CreateResponse(200, "Song added to playlist"));
-                }
+            LocalSong song = this.library.Songs.FirstOrDefault(x => x.Guid == songGuid);
 
+            if (song == null)
+            {
                 return Task.FromResult(CreateResponse(404, "Song not found"));
             }
 
-            return Task.FromResult(CreateResponse(400, "Malformed GUID"));
+            this.library.AddSongToPlaylist(song);
+
+            return Task.FromResult(CreateResponse(200, "Song added to playlist"));
         }
 
         private async Task<JObject> PostPlayNextSong(JToken dontCare)
@@ -456,29 +457,29 @@ namespace Espera.Services
             Guid songGuid;
             bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
 
-            if (valid)
+            if (!valid)
             {
-                PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
+                return CreateResponse(400, "Malformed GUID");
+            }
 
-                if (entry != null)
-                {
-                    try
-                    {
-                        await this.library.PlaySongAsync(entry.Index, this.accessToken);
-                    }
+            PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
 
-                    catch (AccessException)
-                    {
-                        return CreateResponse(401, "Unauthorized");
-                    }
-
-                    return CreateResponse(200, "Playing song");
-                }
-
+            if (entry == null)
+            {
                 return CreateResponse(404, "Playlist entry not found");
             }
 
-            return CreateResponse(400, "Malformed GUID");
+            try
+            {
+                await this.library.PlaySongAsync(entry.Index, this.accessToken);
+            }
+
+            catch (AccessException)
+            {
+                return CreateResponse(401, "Unauthorized");
+            }
+
+            return CreateResponse(200, "Playing song");
         }
 
         private async Task<JObject> PostPlayPreviousSong(JToken dontCare)
@@ -502,14 +503,14 @@ namespace Espera.Services
 
             PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
 
-            if (entry != null)
+            if (entry == null)
             {
-                this.library.RemoveFromPlaylist(new[] { entry.Index }, this.accessToken);
-
-                return Task.FromResult(CreateResponse(200, "Ok"));
+                return Task.FromResult(CreateResponse(400, "Guid not found"));
             }
 
-            return Task.FromResult(CreateResponse(400, "Guid not found"));
+            this.library.RemoveFromPlaylist(new[] { entry.Index }, this.accessToken);
+
+            return Task.FromResult(CreateResponse(200, "Ok"));
         }
 
         private async Task PushAccessPermission(AccessPermission accessPermission)
@@ -589,14 +590,14 @@ namespace Espera.Services
             try
             {
                 this.library.SetVolume(volume, this.accessToken);
-
-                return Task.FromResult(CreateResponse(200, "Ok"));
             }
 
             catch (AccessException)
             {
                 return Task.FromResult(CreateResponse(401, "Unauthorized"));
             }
+
+            return Task.FromResult(CreateResponse(200, "Ok"));
         }
 
         private Task<JObject> VoteForSong(JToken parameters)
@@ -604,34 +605,35 @@ namespace Espera.Services
             Guid songGuid;
             bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
 
-            if (valid)
+            if (!valid)
             {
-                Playlist playlist = this.library.CurrentPlaylist;
+                return Task.FromResult(CreateResponse(400, "Malformed GUID"));
+            }
 
-                PlaylistEntry entry = playlist.FirstOrDefault(x => x.Guid == songGuid);
+            Playlist playlist = this.library.CurrentPlaylist;
+            PlaylistEntry entry = playlist.FirstOrDefault(x => x.Guid == songGuid);
 
-                if (entry != null)
-                {
-                    try
-                    {
-                        if (playlist.CurrentSongIndex.Value.HasValue && entry.Index <= playlist.CurrentSongIndex.Value)
-                            return Task.FromResult(CreateResponse(404, "Vote rejected"));
-
-                        this.library.VoteForPlaylistEntry(entry.Index, this.accessToken);
-                    }
-
-                    catch (AccessException)
-                    {
-                        return Task.FromResult(CreateResponse(401, "Unauthorized"));
-                    }
-
-                    return Task.FromResult(CreateResponse(200, "Vote successful"));
-                }
-
+            if (entry == null)
+            {
                 return Task.FromResult(CreateResponse(404, "Playlist entry not found"));
             }
 
-            return Task.FromResult(CreateResponse(400, "Malformed GUID"));
+            if (playlist.CurrentSongIndex.Value.HasValue && entry.Index <= playlist.CurrentSongIndex.Value)
+            {
+                return Task.FromResult(CreateResponse(404, "Vote rejected"));
+            }
+
+            try
+            {
+                this.library.VoteForPlaylistEntry(entry.Index, this.accessToken);
+            }
+
+            catch (AccessException)
+            {
+                return Task.FromResult(CreateResponse(401, "Unauthorized"));
+            }
+
+            return Task.FromResult(CreateResponse(200, "Vote successful"));
         }
     }
 }
