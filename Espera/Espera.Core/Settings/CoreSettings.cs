@@ -59,6 +59,12 @@ namespace Espera.Core.Settings
             set { this.SetOrCreate(value); }
         }
 
+        public int MaxVoteCount
+        {
+            get { return this.GetOrCreate(2); }
+            set { this.SetOrCreate(value); }
+        }
+
         public TimeSpan PlaylistTimeout
         {
             get { return this.GetOrCreate(TimeSpan.FromSeconds(30)); }

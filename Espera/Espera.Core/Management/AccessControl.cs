@@ -60,6 +60,18 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
+        /// Gets the remaining votes for a given access token.
+        /// Returns the current value immediately and then any changes to the remaining votes.
+        /// </summary>
+        public IObservable<int> ObserveRemainingVotes(Guid accessToken)
+        {
+            AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
+
+            return endPoint.EntryCountObservable
+                .CombineLatest(this.coreSettings.WhenAnyValue(x => x.MaxVoteCount), (x1, x2) => x2 - x1);
+        }
+
+        /// <summary>
         /// Registers a new local access token with default admin rights.
         /// </summary>
         public Guid RegisterLocalAccessToken()
@@ -77,6 +89,30 @@ namespace Espera.Core.Management
             this.Log().Info("Creating remote access token");
 
             return this.RegisterToken(AccessType.Remote, this.GetDefaultRemoteAccessPermission());
+        }
+
+        /// <summary>
+        /// Registers a vote for the given access token and decrements the count of the remaing votes.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// There are no votes left for the given access token, or a the same entry is registered twice.
+        /// </exception>
+        public void RegisterVote(Guid accessToken, PlaylistEntry entry)
+        {
+            if (entry == null)
+                throw new ArgumentNullException("entry");
+
+            AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
+
+            if (endPoint.EntryCount == this.coreSettings.MaxVoteCount)
+            {
+                throw new InvalidOperationException("No votes left");
+            }
+
+            if (!endPoint.RegisterEntry(entry))
+            {
+                throw new InvalidOperationException("Entry already registered");
+            }
         }
 
         public void SetLocalPassword(Guid accessToken, string password)
@@ -115,6 +151,30 @@ namespace Espera.Core.Management
             this.coreSettings.RemoteControlPassword = password;
 
             this.UpdateRemoteAccessPermissions(AccessPermission.Guest);
+        }
+
+        /// <summary>
+        /// Unregisters a vote for the given access token and increments the count of the remaining votes.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// There are no votes registered, or the given entry isn't registered.
+        /// </exception>
+        public void UnregisterVote(Guid accessToken, PlaylistEntry entry)
+        {
+            if (entry == null)
+                throw new ArgumentNullException("entry");
+
+            AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
+
+            if (endPoint.EntryCount == 0)
+            {
+                throw new InvalidOperationException("No entries registered");
+            }
+
+            if (!endPoint.UnregisterEntry(entry))
+            {
+                throw new InvalidOperationException("Entry not found");
+            }
         }
 
         public void UpgradeLocalAccess(Guid accessToken, string password)
@@ -160,6 +220,17 @@ namespace Espera.Core.Management
                 throw new AccessException();
         }
 
+        private AccessEndPoint FindEndPoint(Guid token)
+        {
+            this.endPointLock.EnterReadLock();
+
+            AccessEndPoint endPoint = this.endPoints.FirstOrDefault(x => x.AccessToken == token);
+
+            this.endPointLock.ExitReadLock();
+
+            return endPoint;
+        }
+
         private AccessPermission GetDefaultRemoteAccessPermission()
         {
             return this.IsRemoteAccessReallyLocked() ?
@@ -194,11 +265,7 @@ namespace Espera.Core.Management
 
         private AccessEndPoint VerifyAccessToken(Guid token)
         {
-            this.endPointLock.EnterReadLock();
-
-            AccessEndPoint endPoint = this.endPoints.FirstOrDefault(x => x.AccessToken == token);
-
-            this.endPointLock.ExitReadLock();
+            AccessEndPoint endPoint = this.FindEndPoint(token);
 
             if (endPoint == null)
                 throw new ArgumentException("EndPoint with the gived access token was not found.");
@@ -209,12 +276,17 @@ namespace Espera.Core.Management
         private class AccessEndPoint : IEquatable<AccessEndPoint>
         {
             private readonly BehaviorSubject<AccessPermission> accessPermission;
+            private readonly BehaviorSubject<int> entryCount;
+            private readonly HashSet<PlaylistEntry> registredEntries;
 
             public AccessEndPoint(Guid accessToken, AccessType accessType, AccessPermission accessPermission)
             {
                 this.AccessToken = accessToken;
                 this.AccessType = accessType;
                 this.accessPermission = new BehaviorSubject<AccessPermission>(accessPermission);
+
+                this.registredEntries = new HashSet<PlaylistEntry>();
+                this.entryCount = new BehaviorSubject<int>(0);
             }
 
             public IObservable<AccessPermission> AccessPermission
@@ -226,6 +298,16 @@ namespace Espera.Core.Management
 
             public AccessType AccessType { get; private set; }
 
+            public int EntryCount
+            {
+                get { return this.registredEntries.Count; }
+            }
+
+            public IObservable<int> EntryCountObservable
+            {
+                get { return this.entryCount; }
+            }
+
             public bool Equals(AccessEndPoint other)
             {
                 return this.AccessToken == other.AccessToken;
@@ -236,9 +318,31 @@ namespace Espera.Core.Management
                 return new { A = this.AccessToken, B = this.AccessType }.GetHashCode();
             }
 
+            public bool RegisterEntry(PlaylistEntry entry)
+            {
+                if (this.registredEntries.Add(entry))
+                {
+                    this.entryCount.OnNext(this.registredEntries.Count);
+                    return true;
+                }
+
+                return false;
+            }
+
             public void SetAccessPermission(AccessPermission permission)
             {
                 this.accessPermission.OnNext(permission);
+            }
+
+            public bool UnregisterEntry(PlaylistEntry entry)
+            {
+                if (this.registredEntries.Remove(entry))
+                {
+                    this.entryCount.OnNext(this.registredEntries.Count);
+                    return true;
+                }
+
+                return false;
             }
         }
     }
