@@ -614,14 +614,14 @@ namespace Espera.Services
             return Task.FromResult(CreateResponse(200, "Ok"));
         }
 
-        private Task<JObject> VoteForSong(JToken parameters)
+        private async Task<JObject> VoteForSong(JToken parameters)
         {
             Guid songGuid;
             bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
 
             if (!valid)
             {
-                return Task.FromResult(CreateResponse(400, "Malformed GUID"));
+                return CreateResponse(400, "Malformed GUID");
             }
 
             Playlist playlist = this.library.CurrentPlaylist;
@@ -629,12 +629,17 @@ namespace Espera.Services
 
             if (entry == null)
             {
-                return Task.FromResult(CreateResponse(404, "Playlist entry not found"));
+                return CreateResponse(404, "Playlist entry not found");
+            }
+
+            if (await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync() > 0)
+            {
+                return CreateResponse(403, "Not enough votes left");
             }
 
             if (playlist.CurrentSongIndex.Value.HasValue && entry.Index <= playlist.CurrentSongIndex.Value)
             {
-                return Task.FromResult(CreateResponse(404, "Vote rejected"));
+                return CreateResponse(403, "Vote rejected");
             }
 
             try
@@ -644,10 +649,10 @@ namespace Espera.Services
 
             catch (AccessException)
             {
-                return Task.FromResult(CreateResponse(401, "Unauthorized"));
+                return CreateResponse(401, "Unauthorized");
             }
 
-            return Task.FromResult(CreateResponse(200, "Vote successful"));
+            return CreateResponse(200, "Vote successful");
         }
     }
 }
