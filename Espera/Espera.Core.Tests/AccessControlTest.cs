@@ -22,6 +22,20 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public void IsVoteRegisteredSmokeTest()
+        {
+            var settings = new CoreSettings();
+            var accessControl = new AccessControl(settings);
+            Guid token = accessControl.RegisterRemoteAccessToken();
+
+            var entry = new PlaylistEntry(0, Helpers.SetupSongMock());
+            accessControl.RegisterVote(token, entry);
+
+            Assert.True(accessControl.IsVoteRegistered(token, entry));
+            Assert.False(accessControl.IsVoteRegistered(token, new PlaylistEntry(0, Helpers.SetupSongMock())));
+        }
+
+        [Fact]
         public void LockedRemoteControlGivesGuestRightsByDefault()
         {
             var settings = new CoreSettings

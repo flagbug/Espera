@@ -52,6 +52,19 @@ namespace Espera.Core.Management
             endPoint.SetAccessPermission(AccessPermission.Guest);
         }
 
+        /// <summary>
+        /// Returns whether a vote for the given access token and entry is already registered.
+        /// </summary>
+        public bool IsVoteRegistered(Guid accessToken, PlaylistEntry entry)
+        {
+            if (entry == null)
+                throw new ArgumentNullException("entry");
+
+            AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
+
+            return endPoint.IsRegistered(entry);
+        }
+
         public IObservable<AccessPermission> ObserveAccessPermission(Guid accessToken)
         {
             AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
@@ -292,6 +305,11 @@ namespace Espera.Core.Management
             public override int GetHashCode()
             {
                 return new { A = this.AccessToken, B = this.AccessType }.GetHashCode();
+            }
+
+            public bool IsRegistered(PlaylistEntry entry)
+            {
+                return this.registredEntries.Contains(entry);
             }
 
             public bool RegisterEntry(PlaylistEntry entry)
