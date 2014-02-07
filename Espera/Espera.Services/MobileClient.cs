@@ -637,7 +637,7 @@ namespace Espera.Services
                 return CreateResponse(400, "Vote already registered");
             }
 
-            if (await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync() > 0)
+            if (await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync() == 0)
             {
                 return CreateResponse(403, "Not enough votes left");
             }
