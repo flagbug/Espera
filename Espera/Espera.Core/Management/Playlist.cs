@@ -248,7 +248,7 @@ namespace Espera.Core.Management
             this.OnCollectionChanged(Observable.Return(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)));
         }
 
-        internal void VoteFor(int index)
+        internal PlaylistEntry VoteFor(int index)
         {
             if (index < 0)
                 Throw.ArgumentOutOfRangeException(() => index, 0);
@@ -259,10 +259,11 @@ namespace Espera.Core.Management
             if (this.CurrentSongIndex.Value.HasValue && index <= this.CurrentSongIndex.Value)
                 throw new InvalidOperationException("Index can't be less or equal the current song index");
 
-            this[index].Vote();
+            PlaylistEntry entry = this[index];
+            entry.Vote();
 
             if (this.playlist.Count == 1 || (this.CurrentSongIndex.Value.HasValue && index == this.CurrentSongIndex.Value + 1))
-                return;
+                return entry;
 
             var targetEntry = this.Skip(this.CurrentSongIndex.Value.HasValue ?
                     this.CurrentSongIndex.Value.Value + 1 : 0)
@@ -278,6 +279,8 @@ namespace Espera.Core.Management
             }
 
             this.OnCollectionChanged(recordedChanges);
+
+            return entry;
         }
 
         private void OnCollectionChanged(IObservable<NotifyCollectionChangedEventArgs> args)
