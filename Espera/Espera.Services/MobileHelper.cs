@@ -53,7 +53,7 @@ namespace Espera.Services
             return length.Concat(contentBytes).ToArray();
         }
 
-        public static JObject SerializePlaylist(Playlist playlist)
+        public static JObject SerializePlaylist(Playlist playlist, int remainingVotes)
         {
             return JObject.FromObject(new
             {
@@ -65,7 +65,8 @@ namespace Espera.Services
                     title = x.Song.Title,
                     source = x.Song is LocalSong ? "local" : "youtube",
                     guid = x.Guid
-                })
+                }),
+                remainingVotes
             });
         }
 

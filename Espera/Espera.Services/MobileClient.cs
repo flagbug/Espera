@@ -157,7 +157,8 @@ namespace Espera.Services
                     .StartWith(this.library.CurrentPlaylist)
                     .Select(x => x.CurrentSongIndex.Skip(1).Select(y => x))
                     .Switch())
-                .Subscribe(x => this.PushPlaylist(x))
+                .CombineLatest(this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken), Tuple.Create)
+                .Subscribe(x => this.PushPlaylist(x.Item1, x.Item2))
                 .DisposeWith(this.disposable);
 
             this.library.PlaybackState.Skip(1)
@@ -167,6 +168,11 @@ namespace Espera.Services
             this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken)
                 .Skip(1)
                 .Subscribe(x => this.PushAccessPermission(x))
+                .DisposeWith(this.disposable);
+
+            this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken)
+                .Skip(1)
+                .Subscribe(x => this.PushRemainingVotes(x))
                 .DisposeWith(this.disposable);
         }
 
@@ -223,13 +229,13 @@ namespace Espera.Services
             return CreateResponse(200, "Ok", content);
         }
 
-        private Task<JObject> GetCurrentPlaylist(JToken dontCare)
+        private async Task<JObject> GetCurrentPlaylist(JToken dontCare)
         {
             Playlist playlist = this.library.CurrentPlaylist;
+            int remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
+            JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes);
 
-            JObject content = MobileHelper.SerializePlaylist(playlist);
-
-            return Task.FromResult(CreateResponse(200, "Ok", content));
+            return CreateResponse(200, "Ok", content);
         }
 
         private Task<JObject> GetLibraryContent(JToken dontCare)
@@ -544,23 +550,24 @@ namespace Espera.Services
             await this.SendMessage(message);
         }
 
-        private async Task PushPlaylist(Playlist playlist)
+        private async Task PushPlaylist(Playlist playlist, int remainingVotes)
         {
-            JObject content = MobileHelper.SerializePlaylist(playlist);
+            JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes);
 
             JObject message = CreatePush("update-current-playlist", content);
 
             await this.SendMessage(message);
         }
 
-        private async Task PushPlaylistIndex(int? index)
+        private async Task PushRemainingVotes(int remainingVotes)
         {
             var content = JObject.FromObject(new
             {
                 index
+                remainingVotes
             });
 
-            JObject message = CreatePush("update-current-index", content);
+            JObject message = CreatePush("update-remaining-votes", content);
 
             await this.SendMessage(message);
         }
