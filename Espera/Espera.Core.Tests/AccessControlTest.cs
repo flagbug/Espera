@@ -28,7 +28,7 @@ namespace Espera.Core.Tests
             var accessControl = new AccessControl(settings);
             Guid token = accessControl.RegisterRemoteAccessToken();
 
-            var entry = new PlaylistEntry(0, Helpers.SetupSongMock());
+            var entry = SetupVotedEntry();
             accessControl.RegisterVote(token, entry);
 
             Assert.True(accessControl.IsVoteRegistered(token, entry));
@@ -91,8 +91,8 @@ namespace Espera.Core.Tests
 
             var votes = accessControl.ObserveRemainingVotes(token).CreateCollection();
 
-            accessControl.RegisterVote(token, new PlaylistEntry(0, Helpers.SetupSongMock()));
-            accessControl.RegisterVote(token, new PlaylistEntry(0, Helpers.SetupSongMock()));
+            accessControl.RegisterVote(token, SetupVotedEntry());
+            accessControl.RegisterVote(token, SetupVotedEntry());
 
             Assert.Equal(new[] { 2, 1, 0 }, votes);
         }
@@ -128,13 +128,14 @@ namespace Espera.Core.Tests
         [Fact]
         public void RegisterVoteForSameEntryThrowsInvalidOperationException()
         {
-            var settings = new CoreSettings();
+            var settings = new CoreSettings { MaxVoteCount = 2 };
             var accessControl = new AccessControl(settings);
             Guid token = accessControl.RegisterRemoteAccessToken();
 
-            var entry = new PlaylistEntry(0, Helpers.SetupSongMock());
+            var entry = SetupVotedEntry();
 
             accessControl.RegisterVote(token, entry);
+            entry.Vote();
             Assert.Throws<InvalidOperationException>(() => accessControl.RegisterVote(token, entry));
         }
 
@@ -145,7 +146,7 @@ namespace Espera.Core.Tests
             var accessControl = new AccessControl(settings);
             Guid token = accessControl.RegisterRemoteAccessToken();
 
-            accessControl.RegisterVote(token, new PlaylistEntry(0, Helpers.SetupSongMock()));
+            accessControl.RegisterVote(token, SetupVotedEntry());
 
             Assert.Equal(settings.MaxVoteCount - 1, await accessControl.ObserveRemainingVotes(token).FirstAsync());
         }
@@ -396,6 +397,14 @@ namespace Espera.Core.Tests
             accessControl.DowngradeLocalAccess(token);
 
             Assert.Throws<AccessException>(() => accessControl.VerifyAccess(token));
+        }
+
+        private static PlaylistEntry SetupVotedEntry()
+        {
+            var entry = new PlaylistEntry(0, Helpers.SetupSongMock());
+            entry.Vote();
+
+            return entry;
         }
     }
 }
