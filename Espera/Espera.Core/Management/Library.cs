@@ -499,6 +499,8 @@ namespace Espera.Core.Management
             this.accessControl.VerifyAccess(accessToken);
 
             this.CurrentPlaylist.VoteFor(index);
+
+            this.accessControl.RegisterVote(accessToken, this.CurrentPlaylist[index]);
         }
 
         private async Task HandleSongCorruptionAsync()

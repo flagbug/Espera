@@ -153,30 +153,6 @@ namespace Espera.Core.Management
             this.UpdateRemoteAccessPermissions(AccessPermission.Guest);
         }
 
-        /// <summary>
-        /// Unregisters a vote for the given access token and increments the count of the remaining votes.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// There are no votes registered, or the given entry isn't registered.
-        /// </exception>
-        public void UnregisterVote(Guid accessToken, PlaylistEntry entry)
-        {
-            if (entry == null)
-                throw new ArgumentNullException("entry");
-
-            AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
-
-            if (endPoint.EntryCount == 0)
-            {
-                throw new InvalidOperationException("No entries registered");
-            }
-
-            if (!endPoint.UnregisterEntry(entry))
-            {
-                throw new InvalidOperationException("Entry not found");
-            }
-        }
-
         public void UpgradeLocalAccess(Guid accessToken, string password)
         {
             AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
@@ -323,6 +299,14 @@ namespace Espera.Core.Management
                 if (this.registredEntries.Add(entry))
                 {
                     this.entryCount.OnNext(this.registredEntries.Count);
+                    entry.WhenAnyValue(x => x.Votes)
+                        .FirstAsync(x => x == 0)
+                        .Subscribe(x =>
+                        {
+                            this.registredEntries.Remove(entry);
+                            this.entryCount.OnNext(this.registredEntries.Count);
+                        });
+
                     return true;
                 }
 
@@ -332,17 +316,6 @@ namespace Espera.Core.Management
             public void SetAccessPermission(AccessPermission permission)
             {
                 this.accessPermission.OnNext(permission);
-            }
-
-            public bool UnregisterEntry(PlaylistEntry entry)
-            {
-                if (this.registredEntries.Remove(entry))
-                {
-                    this.entryCount.OnNext(this.registredEntries.Count);
-                    return true;
-                }
-
-                return false;
             }
         }
     }

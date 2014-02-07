@@ -94,6 +94,24 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public void RegisteredVoteUnregistersAutomaticallyWhenEntryvoteCountIsReset()
+        {
+            var settings = new CoreSettings { MaxVoteCount = 2 };
+            var accessControl = new AccessControl(settings);
+            Guid token = accessControl.RegisterRemoteAccessToken();
+
+            var entry = new PlaylistEntry(0, Helpers.SetupSongMock());
+            entry.Vote();
+
+            var votes = accessControl.ObserveRemainingVotes(token).CreateCollection();
+            accessControl.RegisterVote(token, entry);
+
+            entry.ResetVotes();
+
+            Assert.Equal(new[] { 2, 1, 2 }, votes);
+        }
+
+        [Fact]
         public void RegisterVoteForSameEntryThrowsInvalidOperationException()
         {
             var settings = new CoreSettings();
@@ -213,47 +231,6 @@ namespace Espera.Core.Tests
             Guid token = accessControl.RegisterRemoteAccessToken();
 
             accessControl.VerifyAccess(token);
-        }
-
-        [Fact]
-        public async Task UnregisterVoteSmokeTest()
-        {
-            var settings = new CoreSettings { MaxVoteCount = 2 };
-            var accessControl = new AccessControl(settings);
-            Guid token = accessControl.RegisterRemoteAccessToken();
-
-            var entry1 = new PlaylistEntry(0, Helpers.SetupSongMock());
-            var entry2 = new PlaylistEntry(0, Helpers.SetupSongMock());
-
-            accessControl.RegisterVote(token, entry1);
-            accessControl.RegisterVote(token, entry2);
-
-            accessControl.UnregisterVote(token, entry1);
-            accessControl.UnregisterVote(token, entry2);
-
-            Assert.Equal(settings.MaxVoteCount, await accessControl.ObserveRemainingVotes(token).FirstAsync());
-        }
-
-        [Fact]
-        public void UnregisterVoteWithNotRegisteredEntryThrowsInvalidOperationException()
-        {
-            var settings = new CoreSettings { MaxVoteCount = 2 };
-            var accessControl = new AccessControl(settings);
-            Guid token = accessControl.RegisterRemoteAccessToken();
-
-            accessControl.RegisterVote(token, new PlaylistEntry(0, Helpers.SetupSongMock()));
-
-            Assert.Throws<InvalidOperationException>(() => accessControl.UnregisterVote(token, new PlaylistEntry(0, Helpers.SetupSongMock())));
-        }
-
-        [Fact]
-        public void UnregisterVoteWithNoVotesRegisteredThrowsInvalidOperationException()
-        {
-            var settings = new CoreSettings { MaxVoteCount = 2 };
-            var accessControl = new AccessControl(settings);
-            Guid token = accessControl.RegisterRemoteAccessToken();
-
-            Assert.Throws<InvalidOperationException>(() => accessControl.UnregisterVote(token, new PlaylistEntry(0, Helpers.SetupSongMock())));
         }
 
         [Fact]
