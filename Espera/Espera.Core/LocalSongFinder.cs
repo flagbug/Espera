@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using TagLib;
 using File = TagLib.File;
@@ -39,8 +38,7 @@ namespace Espera.Core
             return this.ScanDirectoryForValidPaths(this.directoryPath)
                 .Select(this.ProcessFile)
                 .Where(t => t != null)
-                .ToObservable(Scheduler.Immediate)
-                .SubscribeOn(RxApp.TaskpoolScheduler);
+                .ToObservable(RxApp.TaskpoolScheduler);
         }
 
         private static Tuple<LocalSong, byte[]> CreateSong(Tag tag, TimeSpan duration, string filePath)
