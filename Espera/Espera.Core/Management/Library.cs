@@ -737,7 +737,6 @@ namespace Espera.Core.Management
                         if (artworkData != null)
                         {
                             byte[] hash = MD5.Create().ComputeHash(artworkData);
-
                             string artworkKey = "artwork-" + BitConverter.ToString(hash).Replace("-", "").ToLower();
 
                             if (artworkLookup.Add(artworkKey))
