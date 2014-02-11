@@ -98,11 +98,11 @@ namespace Espera.View.ViewModels
         /// </example>
         private static string RemoveArtistPrefixes(string artistName, IEnumerable<string> prefixes)
         {
-            foreach (string s in prefixes)
+            foreach (string prefix in prefixes)
             {
-                int lengthWithSpace = s.Length + 1;
+                int lengthWithSpace = prefix.Length + 1;
 
-                if (artistName.Length >= lengthWithSpace && artistName.Substring(0, lengthWithSpace).Equals(s + " ", StringComparison.InvariantCultureIgnoreCase))
+                if (artistName.Length >= lengthWithSpace && artistName.Substring(0, lengthWithSpace).Equals(prefix + " ", StringComparison.InvariantCultureIgnoreCase))
                 {
                     return artistName.Substring(lengthWithSpace);
                 }
