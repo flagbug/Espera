@@ -563,7 +563,6 @@ namespace Espera.Services
         {
             var content = JObject.FromObject(new
             {
-                index
                 remainingVotes
             });
 
