@@ -163,24 +163,24 @@ namespace Espera.Services
 
         private static JObject CreatePush(string action, JToken content)
         {
-            var payload = new JObject
+            var payload = JObject.FromObject(new
             {
-                {"action", action},
-                {"type", "push"},
-                {"content", content}
-            };
+                action,
+                type = "push",
+                content
+            });
 
             return payload;
         }
 
         private static JObject CreateResponse(int status, string message, JToken content = null)
         {
-            var response = new JObject
+            var response = JObject.FromObject(new
             {
-                {"status", status},
-                {"message", message},
-                {"type", "response"},
-            };
+                status,
+                message,
+                type = "response"
+            });
 
             if (content != null)
             {
@@ -194,22 +194,22 @@ namespace Espera.Services
         {
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
 
-            var response = new JObject
+            var response = JObject.FromObject(new
             {
-                {"version", version.ToString()}
-            };
+                version
+            });
 
             return Task.FromResult(CreateResponse(200, "Ok", response));
         }
 
         private async Task<JObject> GetAccessPermission(JToken arg)
         {
-            AccessPermission permission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken).FirstAsync();
+            AccessPermission accessPermission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken).FirstAsync();
 
-            var content = new JObject
+            var content = JObject.FromObject(new
             {
-                {"accessPermission", permission.ToString()}
-            };
+                accessPermission
+            });
 
             return CreateResponse(200, "Ok", content);
         }
@@ -234,10 +234,10 @@ namespace Espera.Services
         {
             AudioPlayerState state = await this.library.PlaybackState.FirstAsync();
 
-            var content = new JObject
+            var content = JObject.FromObject(new
             {
-                {"state", state.ToString()}
-            };
+                state
+            });
 
             return CreateResponse(200, "Ok", content);
         }
@@ -246,10 +246,10 @@ namespace Espera.Services
         {
             float volume = this.library.Volume;
 
-            var response = new JObject
+            var response = JObject.FromObject(new
             {
-                {"volume", volume}
-            };
+                volume
+            });
 
             return Task.FromResult(CreateResponse(200, "Ok", response));
         }
@@ -512,10 +512,10 @@ namespace Espera.Services
 
         private async Task PushAccessPermission(AccessPermission accessPermission)
         {
-            var content = new JObject
+            var content = JObject.FromObject(new
             {
-                {"accessPermission", accessPermission.ToString()}
-            };
+                accessPermission
+            });
 
             JObject message = CreatePush("update-access-permission", content);
 
@@ -524,10 +524,10 @@ namespace Espera.Services
 
         private async Task PushPlaybackState(AudioPlayerState state)
         {
-            var content = new JObject
+            var content = JObject.FromObject(new
             {
-                {"state", state.ToString()}
-            };
+                state
+            });
 
             JObject message = CreatePush("update-playback-state", content);
 
@@ -545,26 +545,14 @@ namespace Espera.Services
 
         private async Task PushPlaylistIndex(int? index)
         {
-            var content = new JObject
+            var content = JObject.FromObject(new
             {
-                { "index", index }
-            };
+                index
+            });
 
             JObject message = CreatePush("update-current-index", content);
 
             await this.SendMessage(message);
-        }
-
-        private async Task PushVolume(float volume)
-        {
-            var content = new JObject
-            {
-                {"volume", volume}
-            };
-
-            JObject message = CreatePush("update-volume", content);
-
-            await this.SendMessage(content);
         }
 
         private async Task SendMessage(JObject content)

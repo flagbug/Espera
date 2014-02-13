@@ -73,16 +73,15 @@ namespace Espera.Services
         {
             return JObject.FromObject(new
             {
-                songs = songs
-                    .Select(s => new
-                    {
-                        album = s.Album,
-                        artist = s.Artist,
-                        duration = s.Duration.TotalSeconds,
-                        genre = s.Genre,
-                        title = s.Title,
-                        guid = s.Guid
-                    })
+                songs = songs.Select(s => new
+                {
+                    album = s.Album,
+                    artist = s.Artist,
+                    duration = s.Duration.TotalSeconds,
+                    genre = s.Genre,
+                    title = s.Title,
+                    guid = s.Guid
+                })
             });
         }
     }
