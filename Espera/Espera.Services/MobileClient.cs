@@ -100,7 +100,7 @@ namespace Espera.Services
                     if (request["action"] == null)
                     {
                         this.Log().Warn("Mobile client with access token {0} sent a request without specifiying an action!", this.accessToken);
-                        await this.SendMessage(CreateResponse(400, "Bas request"));
+                        await this.SendMessage(CreateResponse(400, "Bad request"));
                         return;
                     }
 
