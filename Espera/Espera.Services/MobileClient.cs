@@ -94,6 +94,7 @@ namespace Espera.Services
         {
             Observable.Defer(() => this.socket.ReadNextMessage().ToObservable())
                 .Repeat()
+                .TakeWhile(x => x != null)
                 .Subscribe(async request =>
                 {
                     if (request["action"] == null)
@@ -137,7 +138,8 @@ namespace Espera.Services
                             await this.SendMessage(CreateResponse(500, "Fatal server error"));
                         }
                     }
-                }, ex => this.disconnected.OnNext(Unit.Default)).DisposeWith(this.disposable);
+                }, ex => this.disconnected.OnNext(Unit.Default), () => this.disconnected.OnNext(Unit.Default))
+                .DisposeWith(this.disposable);
 
             this.library.CurrentPlaylistChanged
                 .Merge(this.library.CurrentPlaylistChanged

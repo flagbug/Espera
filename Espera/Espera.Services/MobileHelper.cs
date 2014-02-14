@@ -54,27 +54,28 @@ namespace Espera.Services
             return length.Concat(contentBytes).ToArray();
         }
 
-        public static async Task<byte[]> ReadAsync(this TcpClient client, int length)
-        {
-            int count = 0;
-            var buffer = new byte[length];
-
-            do
-            {
-                int read = await client.GetStream().ReadAsync(buffer, count, length - count);
-                count += read;
-            }
-            while (count < length);
-
-            return buffer;
-        }
-
+        /// <summary>
+        /// Reads the next message for the Espera protocol from the TCP client.
+        /// </summary>
+        /// <returns>The uncompressed, deserialized message in JSON, or null, if the underlying client has closed the connection.</returns>
         public static async Task<JObject> ReadNextMessage(this TcpClient client)
         {
             byte[] messageLength = await client.ReadAsync(4);
+
+            if (messageLength.Length == 0)
+            {
+                return null;
+            }
+
             int realMessageLength = BitConverter.ToInt32(messageLength, 0);
 
             byte[] messageContent = await client.ReadAsync(realMessageLength);
+
+            if (messageLength.Length == 0)
+            {
+                return null;
+            }
+
             byte[] decompressed = await DecompressDataAsync(messageContent);
             string decoded = Encoding.UTF8.GetString(decompressed);
 
@@ -114,6 +115,28 @@ namespace Espera.Services
                     guid = s.Guid
                 })
             });
+        }
+
+        private static async Task<byte[]> ReadAsync(this TcpClient client, int length)
+        {
+            if (length <= 0)
+                throw new ArgumentOutOfRangeException("length", "Length must be greater than 0");
+
+            int count = 0;
+            var buffer = new byte[length];
+
+            do
+            {
+                int read = await client.GetStream().ReadAsync(buffer, count, length - count);
+                count += read;
+
+                // The client has closed the connection
+                if (read == 0)
+                    return new byte[0];
+            }
+            while (count < length);
+
+            return buffer;
         }
     }
 }
