@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -51,6 +52,35 @@ namespace Espera.Services
             byte[] length = BitConverter.GetBytes(contentBytes.Length); // We have a fixed size of 4 bytes
 
             return length.Concat(contentBytes).ToArray();
+        }
+
+        public static async Task<byte[]> ReadAsync(this TcpClient client, int length)
+        {
+            int count = 0;
+            var buffer = new byte[length];
+
+            do
+            {
+                int read = await client.GetStream().ReadAsync(buffer, count, length - count);
+                count += read;
+            }
+            while (count < length);
+
+            return buffer;
+        }
+
+        public static async Task<JObject> ReadNextMessage(this TcpClient client)
+        {
+            byte[] messageLength = await client.ReadAsync(4);
+            int realMessageLength = BitConverter.ToInt32(messageLength, 0);
+
+            byte[] messageContent = await client.ReadAsync(realMessageLength);
+            byte[] decompressed = await DecompressDataAsync(messageContent);
+            string decoded = Encoding.UTF8.GetString(decompressed);
+
+            JObject jsonMessage = JObject.Parse(decoded);
+
+            return jsonMessage;
         }
 
         public static JObject SerializePlaylist(Playlist playlist, int remainingVotes)

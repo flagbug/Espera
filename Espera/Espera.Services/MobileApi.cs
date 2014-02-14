@@ -1,6 +1,5 @@
 ﻿using Espera.Core.Management;
 using Rareform.Validation;
-using ReactiveSockets;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -8,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,7 +22,7 @@ namespace Espera.Services
         private readonly Library library;
         private readonly int port;
         private bool dispose;
-        private ReactiveListener listener;
+        private TcpListener listener;
 
         public MobileApi(int port, Library library)
         {
@@ -42,7 +42,7 @@ namespace Espera.Services
             this.Log().Info("Stopping to listen for incoming connections on port {0}", this.port);
 
             this.dispose = true;
-            this.listener.Dispose();
+            this.listener.Stop();
 
             foreach (MobileClient client in clients)
             {
@@ -81,8 +81,13 @@ namespace Espera.Services
 
         public void StartClientDiscovery()
         {
-            this.listener = new ReactiveListener(this.port);
-            listener.Connections.Where(x => !this.dispose)
+            this.listener = new TcpListener(new IPEndPoint(IPAddress.Any, this.port));
+            listener.Start();
+            this.Log().Info("Starting to listen for incoming connections on port {0}", this.port);
+
+            Observable.Defer(() => this.listener.AcceptTcpClientAsync().ToObservable())
+                .Repeat()
+                .Where(x => !this.dispose)
                 .Subscribe(socket =>
                 {
                     this.Log().Info("New client detected");
@@ -101,9 +106,6 @@ namespace Espera.Services
 
                     this.clients.Add(mobileClient);
                 });
-
-            this.Log().Info("Starting to listen for incoming connections on port {0}", this.port);
-            listener.Start();
         }
     }
 }

@@ -4,19 +4,18 @@ using Espera.Core.Management;
 using Newtonsoft.Json.Linq;
 using Rareform.Validation;
 using ReactiveMarrow;
-using ReactiveSockets;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Sockets;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,9 +32,9 @@ namespace Espera.Services
         private readonly SemaphoreSlim gate;
         private readonly Library library;
         private readonly Dictionary<string, Func<JToken, Task<JObject>>> messageActionMap;
-        private readonly IReactiveSocket socket;
+        private readonly TcpClient socket;
 
-        public MobileClient(IReactiveSocket socket, Library library)
+        public MobileClient(TcpClient socket, Library library)
         {
             if (socket == null)
                 Throw.ArgumentNullException(() => socket);
@@ -76,18 +75,16 @@ namespace Espera.Services
                 {"set-volume", this.SetVolume},
                 {"vote-for-song", this.VoteForSong}
             };
-
-            this.Disconnected = Observable.FromEventPattern(h => this.socket.Disconnected += h, h => this.socket.Disconnected -= h)
-                .Select(_ => Unit.Default)
-                .Merge(this.disconnected)
-                .FirstAsync();
         }
 
-        public IObservable<Unit> Disconnected { get; private set; }
+        public IObservable<Unit> Disconnected
+        {
+            get { return this.disconnected.AsObservable(); }
+        }
 
         public void Dispose()
         {
-            this.socket.Dispose();
+            this.socket.Close();
             this.gate.Dispose();
             this.disconnected.Dispose();
             this.disposable.Dispose();
@@ -95,58 +92,52 @@ namespace Espera.Services
 
         public void ListenAsync()
         {
-            IObservable<JObject> messages =
-                socket.Receiver.Buffer(4)
-                    .Select(length => BitConverter.ToInt32(length.ToArray(), 0))
-                    .Select(length => this.socket.Receiver.Take(length).ToEnumerable().ToArray())
-                    .SelectMany(body => MobileHelper.DecompressDataAsync(body).ToObservable())
-                    .Select(body => Encoding.UTF8.GetString(body))
-                    .Select(JObject.Parse);
-
-            messages.ObserveOn(RxApp.MainThreadScheduler).Subscribe(async request =>
-            {
-                if (request["action"] == null)
+            Observable.Defer(() => this.socket.ReadNextMessage().ToObservable())
+                .Repeat()
+                .Subscribe(async request =>
                 {
-                    this.Log().Warn("Mobile client with access token {0} sent a request without specifiying an action!", this.accessToken);
-                    await this.SendMessage(CreateResponse(400, "Bas request"));
-                    return;
-                }
-
-                string requestAction = request["action"].ToString();
-
-                Func<JToken, Task<JObject>> action;
-
-                if (this.messageActionMap.TryGetValue(requestAction, out action))
-                {
-                    bool isFatalRequest = false;
-                    try
+                    if (request["action"] == null)
                     {
-                        JObject response = await action(request["parameters"]);
-
-                        response.Add("id", request["id"]);
-
-                        await this.SendMessage(response);
+                        this.Log().Warn("Mobile client with access token {0} sent a request without specifiying an action!", this.accessToken);
+                        await this.SendMessage(CreateResponse(400, "Bas request"));
+                        return;
                     }
 
-                    catch (Exception ex)
+                    string requestAction = request["action"].ToString();
+
+                    Func<JToken, Task<JObject>> action;
+
+                    if (this.messageActionMap.TryGetValue(requestAction, out action))
                     {
-                        this.Log().ErrorException(string.Format(
-                            "Mobile client with access token {0} sent a request that caused an exception", this.accessToken), ex);
-                        if (Debugger.IsAttached)
+                        bool isFatalRequest = false;
+                        try
                         {
-                            Debugger.Break();
+                            JObject response = await action(request["parameters"]);
+
+                            response.Add("id", request["id"]);
+
+                            await this.SendMessage(response);
                         }
 
-                        isFatalRequest = true;
-                    }
+                        catch (Exception ex)
+                        {
+                            this.Log().ErrorException(string.Format(
+                                "Mobile client with access token {0} sent a request that caused an exception", this.accessToken), ex);
+                            if (Debugger.IsAttached)
+                            {
+                                Debugger.Break();
+                            }
 
-                    if (isFatalRequest)
-                    {
-                        // Client what are you doing? Client stahp!
-                        await this.SendMessage(CreateResponse(500, "Fatal server error"));
+                            isFatalRequest = true;
+                        }
+
+                        if (isFatalRequest)
+                        {
+                            // Client what are you doing? Client stahp!
+                            await this.SendMessage(CreateResponse(500, "Fatal server error"));
+                        }
                     }
-                }
-            }).DisposeWith(this.disposable);
+                }, ex => this.disconnected.OnNext(Unit.Default)).DisposeWith(this.disposable);
 
             this.library.CurrentPlaylistChanged
                 .Merge(this.library.CurrentPlaylistChanged
@@ -579,7 +570,7 @@ namespace Espera.Services
 
             try
             {
-                await this.socket.SendAsync(message);
+                await this.socket.GetStream().WriteAsync(message, 0, message.Length);
             }
 
             catch (Exception)
