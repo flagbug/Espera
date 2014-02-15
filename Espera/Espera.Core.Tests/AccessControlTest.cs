@@ -3,6 +3,7 @@ using Espera.Core.Settings;
 using ReactiveUI;
 using System;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Espera.Core.Tests
@@ -18,6 +19,20 @@ namespace Espera.Core.Tests
 
             Guid token = accessControl.RegisterLocalAccessToken();
             Assert.Throws<InvalidOperationException>(() => accessControl.DowngradeLocalAccess(token));
+        }
+
+        [Fact]
+        public void IsVoteRegisteredSmokeTest()
+        {
+            var settings = new CoreSettings();
+            var accessControl = new AccessControl(settings);
+            Guid token = accessControl.RegisterRemoteAccessToken();
+
+            var entry = SetupVotedEntry();
+            accessControl.RegisterVote(token, entry);
+
+            Assert.True(accessControl.IsVoteRegistered(token, entry));
+            Assert.False(accessControl.IsVoteRegistered(token, new PlaylistEntry(0, Helpers.SetupSongMock())));
         }
 
         [Fact]
@@ -65,6 +80,85 @@ namespace Espera.Core.Tests
             var accessControl = new AccessControl(settings);
 
             Assert.Throws<ArgumentException>(() => accessControl.ObserveAccessPermission(Guid.NewGuid()));
+        }
+
+        [Fact]
+        public void ObserveRemainingVoteSmokeTest()
+        {
+            var settings = new CoreSettings();
+            var accessControl = new AccessControl(settings);
+            Guid token = accessControl.RegisterRemoteAccessToken();
+
+            var votes = accessControl.ObserveRemainingVotes(token).CreateCollection();
+
+            accessControl.RegisterVote(token, SetupVotedEntry());
+            accessControl.RegisterVote(token, SetupVotedEntry());
+
+            Assert.Equal(new[] { 2, 1, 0 }, votes);
+        }
+
+        [Fact]
+        public async Task ObserveRemainingVotesReturnsCurrentValueImmediately()
+        {
+            var settings = new CoreSettings();
+            var accessControl = new AccessControl(settings);
+            Guid token = accessControl.RegisterRemoteAccessToken();
+
+            Assert.Equal(settings.MaxVoteCount, await accessControl.ObserveRemainingVotes(token).FirstAsync());
+        }
+
+        [Fact]
+        public void RegisteredVoteUnregistersAutomaticallyWhenEntryvoteCountIsReset()
+        {
+            var settings = new CoreSettings { MaxVoteCount = 2 };
+            var accessControl = new AccessControl(settings);
+            Guid token = accessControl.RegisterRemoteAccessToken();
+
+            var entry = new PlaylistEntry(0, Helpers.SetupSongMock());
+            entry.Vote();
+
+            var votes = accessControl.ObserveRemainingVotes(token).CreateCollection();
+            accessControl.RegisterVote(token, entry);
+
+            entry.ResetVotes();
+
+            Assert.Equal(new[] { 2, 1, 2 }, votes);
+        }
+
+        [Fact]
+        public void RegisterVoteForSameEntryThrowsInvalidOperationException()
+        {
+            var settings = new CoreSettings { MaxVoteCount = 2 };
+            var accessControl = new AccessControl(settings);
+            Guid token = accessControl.RegisterRemoteAccessToken();
+
+            var entry = SetupVotedEntry();
+
+            accessControl.RegisterVote(token, entry);
+            entry.Vote();
+            Assert.Throws<InvalidOperationException>(() => accessControl.RegisterVote(token, entry));
+        }
+
+        [Fact]
+        public async Task RegisterVoteSmokeTest()
+        {
+            var settings = new CoreSettings { MaxVoteCount = 2 };
+            var accessControl = new AccessControl(settings);
+            Guid token = accessControl.RegisterRemoteAccessToken();
+
+            accessControl.RegisterVote(token, SetupVotedEntry());
+
+            Assert.Equal(settings.MaxVoteCount - 1, await accessControl.ObserveRemainingVotes(token).FirstAsync());
+        }
+
+        [Fact]
+        public void RegisterVoteWithoutVotesLeftThrowsInvalidOperationException()
+        {
+            var settings = new CoreSettings { MaxVoteCount = 0 };
+            var accessControl = new AccessControl(settings);
+            Guid token = accessControl.RegisterRemoteAccessToken();
+
+            Assert.Throws<InvalidOperationException>(() => accessControl.RegisterVote(token, new PlaylistEntry(0, Helpers.SetupSongMock())));
         }
 
         [Fact]
@@ -303,6 +397,14 @@ namespace Espera.Core.Tests
             accessControl.DowngradeLocalAccess(token);
 
             Assert.Throws<AccessException>(() => accessControl.VerifyAccess(token));
+        }
+
+        private static PlaylistEntry SetupVotedEntry()
+        {
+            var entry = new PlaylistEntry(0, Helpers.SetupSongMock());
+            entry.Vote();
+
+            return entry;
         }
     }
 }

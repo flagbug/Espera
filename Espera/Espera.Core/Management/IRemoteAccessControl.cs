@@ -4,9 +4,15 @@ namespace Espera.Core.Management
 {
     public interface IRemoteAccessControl
     {
+        bool IsVoteRegistered(Guid accessToken, PlaylistEntry entry);
+
         IObservable<AccessPermission> ObserveAccessPermission(Guid accessToken);
 
+        IObservable<int> ObserveRemainingVotes(Guid accessToken);
+
         Guid RegisterRemoteAccessToken();
+
+        void RegisterVote(Guid accessToken, PlaylistEntry entry);
 
         void SetRemotePassword(Guid accessToken, string password);
 

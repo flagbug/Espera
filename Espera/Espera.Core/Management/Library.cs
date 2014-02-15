@@ -494,6 +494,15 @@ namespace Espera.Core.Management
             this.manualUpdateTrigger.OnNext(Unit.Default);
         }
 
+        public void VoteForPlaylistEntry(int index, Guid accessToken)
+        {
+            this.accessControl.VerifyAccess(accessToken);
+
+            PlaylistEntry entry = this.CurrentPlaylist.VoteFor(index);
+
+            this.accessControl.RegisterVote(accessToken, entry);
+        }
+
         private async Task HandleSongCorruptionAsync()
         {
             if (!await this.CurrentPlaylist.CanPlayNextSong.FirstAsync())
