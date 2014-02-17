@@ -229,7 +229,7 @@ namespace Espera.View.ViewModels
 
             this.MovePlaylistSongDownCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .Merge(reEvaluateSelectedPlaylistEntry.Select(_ => this.SelectedPlaylistEntries))
-                .Select(x => x != null && x.Count() == 1 && x.First().Index < this.CurrentPlaylist.SongCount - 1)
+                .Select(x => x != null && x.Count() == 1 && x.First().Index < this.CurrentPlaylist.Songs.Count - 1)
                 .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveDown, canAlterPlaylist) => canMoveDown && canAlterPlaylist)
                 .ToCommand();
             this.MovePlaylistSongDownCommand.Subscribe(_ =>

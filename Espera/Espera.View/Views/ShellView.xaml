@@ -666,13 +666,13 @@
                                             </TextBlock>
                                         </Grid>
                                         <StackPanel Margin="0, 5, 0, 0" Orientation="Horizontal">
-                                            <TextBlock Style="{StaticResource ArtistInfoStyle}" Text="{Binding Path=SongCount}" />
+                                            <TextBlock Style="{StaticResource ArtistInfoStyle}" Text="{Binding Path=Songs.Count}" />
                                             <TextBlock>
                                                 <TextBlock.Style>
                                                     <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
                                                         <Setter Property="Text" Value=" Songs" />
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Path=SongCount}" Value="1">
+                                                            <DataTrigger Binding="{Binding Path=Songs.Count}" Value="1">
                                                                 <Setter Property="Text" Value=" Song" />
                                                             </DataTrigger>
                                                         </Style.Triggers>

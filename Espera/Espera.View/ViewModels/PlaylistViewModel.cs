@@ -19,7 +19,6 @@ namespace Espera.View.ViewModels
         private readonly IReactiveDerivedList<PlaylistEntryViewModel> entries;
         private readonly Playlist playlist;
         private readonly Func<string, bool> renameRequest;
-        private readonly ObservableAsPropertyHelper<int> songCount;
         private readonly ObservableAsPropertyHelper<int> songsRemaining;
         private readonly ObservableAsPropertyHelper<TimeSpan?> timeRemaining;
         private bool editName;
@@ -40,12 +39,7 @@ namespace Espera.View.ViewModels
             this.entries = playlist
                 .CreateDerivedCollection(entry => new PlaylistEntryViewModel(entry))
                 .DisposeWith(this.disposable);
-            this.entries.ItemsRemoved.Subscribe(x => x.Dispose());
-
-            this.songCount = this.entries.Changed
-                .Select(_ => this.entries.Count)
-                .ToProperty(this, x => x.SongCount, this.entries.Count)
-                .DisposeWith(this.disposable);
+            this.entries.ItemsRemoved.Subscribe(x => x.Dispose()).DisposeWith(this.disposable);
 
             IObservable<int?> currentSongUpdated = this.playlist.CurrentSongIndex.Do(this.UpdateCurrentSong);
             IObservable<IEnumerable<PlaylistEntryViewModel>> remainingSongs = this.entries.Changed
@@ -110,11 +104,6 @@ namespace Espera.View.ViewModels
                     this.RaisePropertyChanged();
                 }
             }
-        }
-
-        public int SongCount
-        {
-            get { return this.songCount.Value; }
         }
 
         public IReadOnlyReactiveCollection<PlaylistEntryViewModel> Songs
