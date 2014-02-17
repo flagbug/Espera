@@ -55,6 +55,7 @@ namespace Espera.Services
 
             this.messageActionMap = new Dictionary<string, Func<JToken, Task<JObject>>>
             {
+                {"get-connection-info", this.GetConnectionInfo},
                 {"get-library-content", this.GetLibraryContent},
                 {"post-playlist-song", this.PostPlaylistSong},
                 {"post-play-instantly", this.PostPlayInstantly},
@@ -66,9 +67,6 @@ namespace Espera.Services
                 {"post-play-previous-song", this.PostPlayPreviousSong},
                 {"get-playback-state", this.GetPlaybackState},
                 {"post-remove-playlist-song", this.PostRemovePlaylistSong},
-                {"get-access-permission", this.GetAccessPermission},
-                {"post-administrator-password", this.PostAdministratorPassword},
-                {"get-server-version", GetServerVersion},
                 {"move-playlist-song-up", this.MovePlaylistSongUp},
                 {"move-playlist-song-down", this.MovePlaylistSongDown},
                 {"get-volume", this.GetVolume},
@@ -198,28 +196,33 @@ namespace Espera.Services
             return response;
         }
 
-        private static Task<JObject> GetServerVersion(JToken dontCare)
+        private async Task<JObject> GetConnectionInfo(JToken parameters)
         {
-            Version version = Assembly.GetExecutingAssembly().GetName().Version;
+            string password = parameters["password"].Value<string>();
+
+            if (password != null)
+            {
+                try
+                {
+                    this.library.RemoteAccessControl.UpgradeRemoteAccess(this.accessToken, password);
+                }
+
+                catch (WrongPasswordException)
+                {
+                    return CreateResponse(401, "Password is incorrect");
+                }
+            }
+
+            Version serverVersion = Assembly.GetExecutingAssembly().GetName().Version;
+            AccessPermission accessPermission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken).FirstAsync();
 
             var response = JObject.FromObject(new
             {
-                version
-            });
-
-            return Task.FromResult(CreateResponse(200, "Ok", response));
-        }
-
-        private async Task<JObject> GetAccessPermission(JToken arg)
-        {
-            AccessPermission accessPermission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken).FirstAsync();
-
-            var content = JObject.FromObject(new
-            {
+                serverVersion,
                 accessPermission
             });
 
-            return CreateResponse(200, "Ok", content);
+            return CreateResponse(200, "Ok", response);
         }
 
         private async Task<JObject> GetCurrentPlaylist(JToken dontCare)
@@ -320,23 +323,6 @@ namespace Espera.Services
             }
 
             return Task.FromResult(CreateResponse(200, "Moved song up"));
-        }
-
-        private Task<JObject> PostAdministratorPassword(JToken parameters)
-        {
-            string password = parameters["password"].ToString();
-
-            try
-            {
-                this.library.RemoteAccessControl.UpgradeRemoteAccess(this.accessToken, password);
-            }
-
-            catch (WrongPasswordException)
-            {
-                return Task.FromResult(CreateResponse(401, "Wrong password"));
-            }
-
-            return Task.FromResult(CreateResponse(200, "Ok"));
         }
 
         private async Task<JObject> PostContinueSong(JToken content)
