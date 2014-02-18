@@ -93,6 +93,10 @@ namespace Espera.Services
             Observable.Defer(() => this.socket.ReadNextMessage().ToObservable())
                 .Repeat()
                 .TakeWhile(x => x != null)
+                // If we don't do this, the application will throw up whenever
+                // we are manipulating a collection that is surfaced to the UI
+                // Yes, this is astoundingly stupid
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(async request =>
                 {
                     if (request["action"] == null)
