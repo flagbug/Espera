@@ -223,7 +223,7 @@ namespace Espera.Services
             var response = JObject.FromObject(new
             {
                 serverVersion,
-                accessPermission
+                accessPermission,
             });
 
             return CreateResponse(200, "Ok", response);
@@ -232,7 +232,7 @@ namespace Espera.Services
         private async Task<JObject> GetCurrentPlaylist(JToken dontCare)
         {
             Playlist playlist = this.library.CurrentPlaylist;
-            int remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
+            int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
             JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes);
 
             return CreateResponse(200, "Ok", content);
@@ -533,7 +533,7 @@ namespace Espera.Services
             await this.SendMessage(message);
         }
 
-        private async Task PushPlaylist(Playlist playlist, int remainingVotes)
+        private async Task PushPlaylist(Playlist playlist, int? remainingVotes)
         {
             JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes);
 
@@ -542,7 +542,7 @@ namespace Espera.Services
             await this.SendMessage(message);
         }
 
-        private async Task PushRemainingVotes(int remainingVotes)
+        private async Task PushRemainingVotes(int? remainingVotes)
         {
             var content = JObject.FromObject(new
             {
@@ -598,6 +598,18 @@ namespace Espera.Services
 
         private async Task<JObject> VoteForSong(JToken parameters)
         {
+            int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
+
+            if (remainingVotes == null)
+            {
+                return CreateResponse(403, "Voting isn't supported");
+            }
+
+            if (remainingVotes == 0)
+            {
+                return CreateResponse(403, "Not enough votes left");
+            }
+
             Guid songGuid;
             bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
 
@@ -617,11 +629,6 @@ namespace Espera.Services
             if (this.library.RemoteAccessControl.IsVoteRegistered(this.accessToken, entry))
             {
                 return CreateResponse(400, "Vote already registered");
-            }
-
-            if (await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync() == 0)
-            {
-                return CreateResponse(403, "Not enough votes left");
             }
 
             if (playlist.CurrentSongIndex.Value.HasValue && entry.Index <= playlist.CurrentSongIndex.Value)

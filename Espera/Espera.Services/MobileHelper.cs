@@ -84,7 +84,7 @@ namespace Espera.Services
             return jsonMessage;
         }
 
-        public static JObject SerializePlaylist(Playlist playlist, int remainingVotes)
+        public static JObject SerializePlaylist(Playlist playlist, int? remainingVotes)
         {
             return JObject.FromObject(new
             {

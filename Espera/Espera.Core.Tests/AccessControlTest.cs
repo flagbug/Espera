@@ -152,6 +152,17 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public void RegisterVoteThrowsInvalidOperationExceptionIfVotingIsDisabled()
+        {
+            var settings = new CoreSettings { EnableVotingSystem = false };
+
+            var accessControl = new AccessControl(settings);
+            Guid token = accessControl.RegisterRemoteAccessToken();
+
+            Assert.Throws<InvalidOperationException>(() => accessControl.RegisterVote(token, SetupVotedEntry()));
+        }
+
+        [Fact]
         public void RegisterVoteWithoutVotesLeftThrowsInvalidOperationException()
         {
             var settings = new CoreSettings { MaxVoteCount = 0 };

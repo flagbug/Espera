@@ -193,6 +193,12 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public bool EnableVotingSystem
+        {
+            get { return this.coreSettings.EnableVotingSystem; }
+            set { this.coreSettings.EnableVotingSystem = value; }
+        }
+
         public bool GoFullScreenOnLock
         {
             get { return this.viewSettings.GoFullScreenOnLock; }

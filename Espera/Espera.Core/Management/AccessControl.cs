@@ -74,14 +74,17 @@ namespace Espera.Core.Management
 
         /// <summary>
         /// Gets the remaining votes for a given access token.
-        /// Returns the current value immediately and then any changes to the remaining votes.
+        /// Returns the current value immediately and then any changes to the remaining votes,
+        /// or <c>null</c>, if voting isn't supported.
         /// </summary>
-        public IObservable<int> ObserveRemainingVotes(Guid accessToken)
+        public IObservable<int?> ObserveRemainingVotes(Guid accessToken)
         {
             AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
 
-            return endPoint.EntryCountObservable
-                .CombineLatest(this.coreSettings.WhenAnyValue(x => x.MaxVoteCount), (x1, x2) => x2 - x1);
+            return endPoint.EntryCountObservable.CombineLatest(
+                    this.coreSettings.WhenAnyValue(x => x.MaxVoteCount),
+                    this.coreSettings.WhenAnyValue(x => x.EnableVotingSystem),
+                (entryCount, maxVoteCount, enableVoting) => enableVoting ? maxVoteCount - entryCount : (int?)null);
         }
 
         /// <summary>
@@ -112,6 +115,9 @@ namespace Espera.Core.Management
         /// </exception>
         public void RegisterVote(Guid accessToken, PlaylistEntry entry)
         {
+            if (!this.coreSettings.EnableVotingSystem)
+                throw new InvalidOperationException("Voting isn't enabled.");
+
             if (entry == null)
                 throw new ArgumentNullException("entry");
 

@@ -29,6 +29,12 @@ namespace Espera.Core.Settings
             set { this.SetOrCreate(value); }
         }
 
+        public bool EnableVotingSystem
+        {
+            get { return this.GetOrCreate(true); }
+            set { this.SetOrCreate(value); }
+        }
+
         public bool LockPlaylist
         {
             get { return this.GetOrCreate(true); }

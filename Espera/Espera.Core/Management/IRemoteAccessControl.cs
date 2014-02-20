@@ -8,7 +8,7 @@ namespace Espera.Core.Management
 
         IObservable<AccessPermission> ObserveAccessPermission(Guid accessToken);
 
-        IObservable<int> ObserveRemainingVotes(Guid accessToken);
+        IObservable<int?> ObserveRemainingVotes(Guid accessToken);
 
         Guid RegisterRemoteAccessToken();
 

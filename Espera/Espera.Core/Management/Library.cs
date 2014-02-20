@@ -496,6 +496,9 @@ namespace Espera.Core.Management
 
         public void VoteForPlaylistEntry(int index, Guid accessToken)
         {
+            if (!this.settings.EnableVotingSystem)
+                throw new InvalidOperationException("Voting isn't enabled.");
+
             this.accessControl.VerifyAccess(accessToken);
 
             PlaylistEntry entry = this.CurrentPlaylist.VoteFor(index);
