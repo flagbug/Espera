@@ -90,7 +90,7 @@ namespace Espera.Services
 
         public void ListenAsync()
         {
-            Observable.Defer(() => this.socket.ReadNextMessage().ToObservable())
+            Observable.Defer(() => this.socket.ReadNextMessageAsync().ToObservable())
                 .Repeat()
                 .TakeWhile(x => x != null)
                 // If we don't do this, the application will throw up whenever
@@ -99,14 +99,14 @@ namespace Espera.Services
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(async request =>
                 {
-                    if (request["action"] == null)
+                    string requestAction = request["action"].Value<string>();
+
+                    if (requestAction == null)
                     {
                         this.Log().Warn("Mobile client with access token {0} sent a request without specifiying an action!", this.accessToken);
                         await this.SendMessage(CreateResponse(400, "Bad request"));
                         return;
                     }
-
-                    string requestAction = request["action"].ToString();
 
                     Func<JToken, Task<JObject>> action;
 
@@ -556,7 +556,7 @@ namespace Espera.Services
 
         private async Task SendMessage(JObject content)
         {
-            byte[] message = await MobileHelper.PackMessage(content);
+            byte[] message = await MobileHelper.PackMessageAsync(content);
 
             await this.gate.WaitAsync();
 
