@@ -67,15 +67,19 @@ namespace Espera.Services
                     byte[] address = ipAddress.GetAddressBytes();
                     byte[] message = Encoding.Unicode.GetBytes("espera-server-discovery");
 
-                    foreach (int i in Enumerable.Range(1, 254).Where(x => x != address[3]).ToList()) // Save to a list before we change the last address byte
+                    // Start one single task here, instead of creating over 200 tasks for sending
+                    await Task.Run(() =>
                     {
-                        address[3] = (byte)i;
+                        foreach (int i in Enumerable.Range(1, 254).Where(x => x != address[3]).ToList()) // Save to a list before we change the last address byte
+                        {
+                            address[3] = (byte)i;
 
-                        await client.SendAsync(message, message.Length, new IPEndPoint(new IPAddress(address), this.port));
-                    }
+                            client.Send(message, message.Length, new IPEndPoint(new IPAddress(address), this.port));
+                        }
+                    });
                 }
 
-                await Task.Delay(5000);
+                await Task.Delay(1000);
             }
         }
 
