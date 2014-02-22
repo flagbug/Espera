@@ -3,6 +3,8 @@ using Espera.Core.Settings;
 using ReactiveUI;
 using System;
 using System.Globalization;
+using System.IO;
+using System.IO.Compression;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -84,7 +86,9 @@ namespace Espera.Core
 
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-            await this.client.Device.RecordCrashAsync(message, Environment.OSVersion.VersionString, "Desktop", this.user, null, version);
+            string logId = await this.SendLogFileAsync();
+
+            await this.client.Device.RecordCrashAsync(message, Environment.OSVersion.VersionString, "Desktop", this.user, null, version, metadata: logId);
 
             return true;
         }
@@ -98,7 +102,10 @@ namespace Espera.Core
 
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-            await this.client.Device.RecordCrashAsync(exception.Message, Environment.OSVersion.VersionString, "Desktop", this.user, exception.StackTrace, version);
+            string logId = await this.SendLogFileAsync();
+
+            await this.client.Device.RecordCrashAsync(exception.Message, Environment.OSVersion.VersionString,
+                "Desktop", this.user, exception.StackTrace, version, metadata: logId);
 
             return true;
         }
@@ -149,6 +156,65 @@ namespace Espera.Core
             using (finished.Connect())
             {
                 await finished;
+            }
+        }
+
+        private async Task<Stream> GetCompressedLogFileStreamAsync()
+        {
+            string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\Log.txt");
+
+            try
+            {
+                using (FileStream stream = await Task.Run(() => File.OpenRead(logPath)))
+                {
+                    // Buddy doesn't like empty streams
+                    if (stream.Length == 0)
+                        return null;
+
+                    using (var inputStream = new MemoryStream())
+                    {
+                        await stream.CopyToAsync(inputStream);
+
+                        var compressedStream = new MemoryStream();
+
+                        using (var compressionStream = new GZipStream(compressedStream, CompressionMode.Compress, true))
+                        {
+                            inputStream.Position = 0;
+                            await inputStream.CopyToAsync(compressionStream);
+                        }
+                        compressedStream.Position = 0;
+                        return compressedStream;
+                    }
+                }
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Couldn't compress log file", ex);
+                return null;
+            }
+        }
+
+        private async Task<string> SendLogFileAsync()
+        {
+            Stream logFileSteam = await this.GetCompressedLogFileStreamAsync();
+
+            if (logFileSteam == null)
+                return null;
+
+            using (logFileSteam)
+            {
+                try
+                {
+                    Blob blob = await this.user.Blobs.AddAsync("Crash report log", "application/zip", String.Empty, 0, 0, logFileSteam);
+                    return blob.BlobID.ToString(CultureInfo.InvariantCulture);
+                }
+
+                catch (Exception ex)
+                {
+                    this.Log().ErrorException("Couldn't send log file", ex);
+                    return null;
+                }
             }
         }
     }
