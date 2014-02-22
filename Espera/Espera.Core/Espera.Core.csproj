@@ -35,6 +35,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\akavache.3.2.0\lib\net45\Akavache.dll</HintPath>
     </Reference>
+    <Reference Include="Buddy">
+      <HintPath>..\packages\BuddyPlatformSdk.1.5.1.5\lib\net45\Buddy.dll</HintPath>
+    </Reference>
     <Reference Include="Google.GData.Client, Version=2.2.0.0, Culture=neutral, PublicKeyToken=04a59ca9b0273830, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Google.GData.Client.2.2.0.0\lib\Google.GData.Client.dll</HintPath>
@@ -114,6 +117,7 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Analytics.cs" />
     <Compile Include="Audio\SongPreparationException.cs" />
     <Compile Include="Audio\IAudioPlayerCallback.cs" />
     <Compile Include="Audio\SongLoadException.cs" />
