@@ -46,11 +46,18 @@ namespace Espera.Core
                     string throwAwayToken = Guid.NewGuid().ToString(); // A token that we immediately throw away because we don't need it
                     this.user = await this.client.CreateUserAsync(throwAwayToken, throwAwayToken);
                     settings.AnalyticsToken = this.user.Token;
+
+                    string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                    await this.client.Device.RecordInformationAsync(Environment.OSVersion.VersionString, "Desktop", this.user, version);
+
+                    this.Log().Info("Created new analytics user");
                 }
 
                 else
                 {
                     this.user = await this.client.LoginAsync(settings.AnalyticsToken);
+
+                    this.Log().Info("Logged into the analytics provider");
                 }
 
                 this.isAuthenticated = true;
@@ -111,6 +118,24 @@ namespace Espera.Core
             catch (Exception ex)
             {
                 this.Log().InfoException("Could not log library size", ex);
+            }
+        }
+
+        public async Task RecordMobileUsage()
+        {
+            await this.AwaitAuthenticationAsync();
+
+            if (!this.isAuthenticated)
+                return;
+
+            try
+            {
+                await this.user.Metadata.SetAsync("uses-mobile", "true");
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().InfoException("Could not log mobile usage", ex);
             }
         }
 
