@@ -51,18 +51,20 @@ namespace Espera.Core
                 {
                     this.user = await this.client.LoginAsync(settings.AnalyticsToken);
                 }
+
+                this.isAuthenticated = true;
             }
 
             // Don't care which exception is thrown, if something bad happens the analytics are unusable
             catch (Exception ex)
             {
                 this.Log().ErrorException("Couldn't login to the analytics server", ex);
-                this.isAuthenticating.OnNext(false);
-                return;
             }
 
-            this.isAuthenticated = true;
-            this.isAuthenticating.OnNext(false);
+            finally
+            {
+                this.isAuthenticating.OnNext(false);
+            }
         }
 
         public async Task<bool> RecordBugReportAsync(string message)
