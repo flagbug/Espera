@@ -98,6 +98,8 @@ namespace Espera.Core
 
         public async Task RecordLibrarySizeAsync(int songCount)
         {
+            await this.AwaitAuthenticationAsync();
+
             if (!this.isAuthenticated)
                 return;
 
