@@ -2,6 +2,7 @@
 using Espera.Core.Settings;
 using ReactiveUI;
 using System;
+using System.Globalization;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -93,6 +94,22 @@ namespace Espera.Core
             await this.client.Device.RecordCrashAsync(exception.Message, Environment.OSVersion.VersionString, "Desktop", this.user, exception.StackTrace, version);
 
             return true;
+        }
+
+        public async Task RecordLibrarySizeAsync(int songCount)
+        {
+            if (!this.isAuthenticated)
+                return;
+
+            try
+            {
+                await this.user.Metadata.SetAsync("library-size", songCount.ToString(CultureInfo.InvariantCulture));
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().InfoException("Could not log library size", ex);
+            }
         }
 
         private async Task AwaitAuthenticationAsync()
