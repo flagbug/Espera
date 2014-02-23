@@ -140,33 +140,6 @@ namespace Espera.Services
                     }
                 }, ex => this.disconnected.OnNext(Unit.Default), () => this.disconnected.OnNext(Unit.Default))
                 .DisposeWith(this.disposable);
-
-            this.library.CurrentPlaylistChanged
-                .Merge(this.library.CurrentPlaylistChanged
-                    .StartWith(this.library.CurrentPlaylist)
-                    .Select(x => x.Changed().Select(y => x))
-                    .Switch())
-                .Merge(this.library.CurrentPlaylistChanged
-                    .StartWith(this.library.CurrentPlaylist)
-                    .Select(x => x.CurrentSongIndex.Skip(1).Select(y => x))
-                    .Switch())
-                .CombineLatest(this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken), Tuple.Create)
-                .Subscribe(x => this.PushPlaylist(x.Item1, x.Item2))
-                .DisposeWith(this.disposable);
-
-            this.library.PlaybackState.Skip(1)
-                .Subscribe(x => this.PushPlaybackState(x))
-                .DisposeWith(this.disposable);
-
-            this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken)
-                .Skip(1)
-                .Subscribe(x => this.PushAccessPermission(x))
-                .DisposeWith(this.disposable);
-
-            this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken)
-                .Skip(1)
-                .Subscribe(x => this.PushRemainingVotes(x))
-                .DisposeWith(this.disposable);
         }
 
         private static JObject CreatePush(string action, JToken content)
@@ -200,7 +173,7 @@ namespace Espera.Services
 
         private async Task<JObject> GetConnectionInfo(JToken parameters)
         {
-            Guid deviceId = parameters["deviceId"].ToObject<Guid>();
+            Guid deviceId = Guid.Parse(parameters["deviceId"].ToString());
 
             this.accessToken = this.library.RemoteAccessControl.RegisterRemoteAccessToken(deviceId);
 
@@ -227,6 +200,8 @@ namespace Espera.Services
                 serverVersion,
                 accessPermission,
             });
+
+            this.SetupPushNotifications();
 
             return CreateResponse(200, "Ok", response);
         }
@@ -576,6 +551,36 @@ namespace Espera.Services
             {
                 this.gate.Release();
             }
+        }
+
+        private void SetupPushNotifications()
+        {
+            this.library.CurrentPlaylistChanged
+                .Merge(this.library.CurrentPlaylistChanged
+                    .StartWith(this.library.CurrentPlaylist)
+                    .Select(x => x.Changed().Select(y => x))
+                    .Switch())
+                .Merge(this.library.CurrentPlaylistChanged
+                    .StartWith(this.library.CurrentPlaylist)
+                    .Select(x => x.CurrentSongIndex.Skip(1).Select(y => x))
+                    .Switch())
+                .CombineLatest(this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken), Tuple.Create)
+                .Subscribe(x => this.PushPlaylist(x.Item1, x.Item2))
+                .DisposeWith(this.disposable);
+
+            this.library.PlaybackState.Skip(1)
+                .Subscribe(x => this.PushPlaybackState(x))
+                .DisposeWith(this.disposable);
+
+            this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken)
+                .Skip(1)
+                .Subscribe(x => this.PushAccessPermission(x))
+                .DisposeWith(this.disposable);
+
+            this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken)
+                .Skip(1)
+                .Subscribe(x => this.PushRemainingVotes(x))
+                .DisposeWith(this.disposable);
         }
 
         private Task<JObject> SetVolume(JToken parameters)
