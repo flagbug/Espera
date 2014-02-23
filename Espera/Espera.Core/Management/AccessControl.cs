@@ -100,11 +100,20 @@ namespace Espera.Core.Management
         /// <summary>
         /// Registers a new remote access token which's default reights depend on the <see cref="CoreSettings.LockRemoteControl"/> setting.
         /// </summary>
-        public Guid RegisterRemoteAccessToken()
+        public Guid RegisterRemoteAccessToken(Guid deviceId)
         {
             this.Log().Info("Creating remote access token");
 
-            return this.RegisterToken(AccessType.Remote, this.GetDefaultRemoteAccessPermission());
+            this.endPointLock.EnterReadLock();
+
+            AccessEndPoint endPoint = this.endPoints.FirstOrDefault(x => x.DeviceId == deviceId);
+
+            this.endPointLock.ExitReadLock();
+
+            if (endPoint != null)
+                return endPoint.AccessToken;
+
+            return this.RegisterToken(AccessType.Remote, this.GetDefaultRemoteAccessPermission(), deviceId);
         }
 
         /// <summary>
@@ -237,12 +246,12 @@ namespace Espera.Core.Management
             return this.coreSettings.LockRemoteControl && !String.IsNullOrWhiteSpace(this.coreSettings.RemoteControlPassword);
         }
 
-        private Guid RegisterToken(AccessType accessType, AccessPermission permission)
+        private Guid RegisterToken(AccessType accessType, AccessPermission permission, Guid? deviceId = null)
         {
             var token = Guid.NewGuid();
 
             this.endPointLock.EnterWriteLock();
-            this.endPoints.Add(new AccessEndPoint(token, accessType, permission));
+            this.endPoints.Add(new AccessEndPoint(token, accessType, permission, deviceId));
             this.endPointLock.ExitWriteLock();
 
             return token;
@@ -274,11 +283,12 @@ namespace Espera.Core.Management
             private readonly BehaviorSubject<int> entryCount;
             private readonly HashSet<PlaylistEntry> registredEntries;
 
-            public AccessEndPoint(Guid accessToken, AccessType accessType, AccessPermission accessPermission)
+            public AccessEndPoint(Guid accessToken, AccessType accessType, AccessPermission accessPermission, Guid? deviceId = null)
             {
                 this.AccessToken = accessToken;
                 this.AccessType = accessType;
                 this.accessPermission = new BehaviorSubject<AccessPermission>(accessPermission);
+                this.DeviceId = deviceId;
 
                 this.registredEntries = new HashSet<PlaylistEntry>();
                 this.entryCount = new BehaviorSubject<int>(0);
@@ -292,6 +302,8 @@ namespace Espera.Core.Management
             public Guid AccessToken { get; private set; }
 
             public AccessType AccessType { get; private set; }
+
+            public Guid? DeviceId { get; private set; }
 
             public int EntryCount
             {

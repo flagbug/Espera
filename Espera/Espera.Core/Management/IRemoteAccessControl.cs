@@ -10,7 +10,7 @@ namespace Espera.Core.Management
 
         IObservable<int?> ObserveRemainingVotes(Guid accessToken);
 
-        Guid RegisterRemoteAccessToken();
+        Guid RegisterRemoteAccessToken(Guid deviceId);
 
         void RegisterVote(Guid accessToken, PlaylistEntry entry);
 

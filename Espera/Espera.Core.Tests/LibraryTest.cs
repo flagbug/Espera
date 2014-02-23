@@ -406,7 +406,7 @@ namespace Espera.Core.Tests
 
             using (Library library = Helpers.CreateLibrary(settings))
             {
-                Guid token = library.RemoteAccessControl.RegisterRemoteAccessToken();
+                Guid token = library.RemoteAccessControl.RegisterRemoteAccessToken(new Guid());
 
                 await Helpers.ThrowsAsync<AccessException>(async () => await library.PlayInstantlyAsync(songs, token));
 

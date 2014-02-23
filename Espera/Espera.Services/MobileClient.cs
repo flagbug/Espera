@@ -26,13 +26,13 @@ namespace Espera.Services
     /// </summary>
     public class MobileClient : IDisposable, IEnableLogger
     {
-        private readonly Guid accessToken;
         private readonly Subject<Unit> disconnected;
         private readonly CompositeDisposable disposable;
         private readonly SemaphoreSlim gate;
         private readonly Library library;
         private readonly Dictionary<string, Func<JToken, Task<JObject>>> messageActionMap;
         private readonly TcpClient socket;
+        private Guid accessToken;
 
         public MobileClient(TcpClient socket, Library library)
         {
@@ -44,8 +44,6 @@ namespace Espera.Services
 
             this.socket = socket;
             this.library = library;
-
-            this.accessToken = this.library.RemoteAccessControl.RegisterRemoteAccessToken();
 
             this.Log().Info("Registering new mobile client with access token {0}", this.accessToken);
 
@@ -202,6 +200,10 @@ namespace Espera.Services
 
         private async Task<JObject> GetConnectionInfo(JToken parameters)
         {
+            Guid deviceId = parameters["deviceId"].ToObject<Guid>();
+
+            this.accessToken = this.library.RemoteAccessControl.RegisterRemoteAccessToken(deviceId);
+
             string password = parameters["password"].Value<string>();
 
             if (password != null)
