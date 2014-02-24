@@ -1,15 +1,15 @@
 ﻿using Espera.Core.Management;
 using Rareform.Validation;
-using ReactiveSockets;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
-using ReactiveUI;
 
 namespace Espera.Services
 {
@@ -22,7 +22,7 @@ namespace Espera.Services
         private readonly Library library;
         private readonly int port;
         private bool dispose;
-        private ReactiveListener listener;
+        private TcpListener listener;
 
         public MobileApi(int port, Library library)
         {
@@ -42,7 +42,7 @@ namespace Espera.Services
             this.Log().Info("Stopping to listen for incoming connections on port {0}", this.port);
 
             this.dispose = true;
-            this.listener.Dispose();
+            this.listener.Stop();
 
             foreach (MobileClient client in clients)
             {
@@ -67,24 +67,35 @@ namespace Espera.Services
                     byte[] address = ipAddress.GetAddressBytes();
                     byte[] message = Encoding.Unicode.GetBytes("espera-server-discovery");
 
-                    foreach (int i in Enumerable.Range(1, 254).Where(x => x != address[3]).ToList()) // Save to a list before we change the last address byte
+                    // Start one single task here, instead of creating over 200 tasks for sending
+                    await Task.Run(() =>
                     {
-                        address[3] = (byte)i;
+                        foreach (int i in Enumerable.Range(1, 254).Where(x => x != address[3]).ToList()) // Save to a list before we change the last address byte
+                        {
+                            address[3] = (byte)i;
 
-                        await client.SendAsync(message, message.Length, new IPEndPoint(new IPAddress(address), this.port));
-                    }
+                            client.Send(message, message.Length, new IPEndPoint(new IPAddress(address), this.port));
+                        }
+                    });
                 }
 
-                await Task.Delay(5000);
+                await Task.Delay(1000);
             }
         }
 
         public void StartClientDiscovery()
         {
-            this.listener = new ReactiveListener(this.port);
-            listener.Connections.Where(x => !this.dispose)
+            this.listener = new TcpListener(new IPEndPoint(IPAddress.Any, this.port));
+            listener.Start();
+            this.Log().Info("Starting to listen for incoming connections on port {0}", this.port);
+
+            Observable.Defer(() => this.listener.AcceptTcpClientAsync().ToObservable())
+                .Repeat()
+                .Where(x => !this.dispose)
                 .Subscribe(socket =>
                 {
+                    this.Log().Info("New client detected");
+
                     var mobileClient = new MobileClient(socket, this.library);
 
                     mobileClient.Disconnected.FirstAsync()
@@ -99,9 +110,6 @@ namespace Espera.Services
 
                     this.clients.Add(mobileClient);
                 });
-
-            this.Log().Info("Starting to listen for incoming connections on port {0}", this.port);
-            listener.Start();
         }
     }
 }

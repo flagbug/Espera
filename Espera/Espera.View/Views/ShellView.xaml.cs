@@ -253,15 +253,15 @@ namespace Espera.View.Views
         {
             IAudioPlayerCallback callback = this.shellViewModel.AudioPlayerCallback;
             callback.GetTime = () => this.Dispatcher.Invoke(() => this.videoPlayer.Position);
-            callback.SetTime = time => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Position = time));
+            callback.SetTime = time => this.Dispatcher.Invoke(() => this.videoPlayer.Position = time);
 
             callback.GetVolume = () => this.Dispatcher.Invoke(() => (float)this.videoPlayer.Volume);
-            callback.SetVolume = volume => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Volume = volume));
+            callback.SetVolume = volume => this.Dispatcher.Invoke(() => this.videoPlayer.Volume = volume);
 
-            callback.LoadRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Source = callback.Path));
-            callback.PauseRequest = () => this.Dispatcher.Invoke(() => this.videoPlayer.Pause());
-            callback.PlayRequest = () => this.Dispatcher.Invoke(() => this.videoPlayer.Play());
-            callback.StopRequest = () => this.Dispatcher.Invoke(() => this.videoPlayer.Stop());
+            callback.LoadRequest = () => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Source = callback.Path).Task;
+            callback.PauseRequest = () => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Pause()).Task;
+            callback.PlayRequest = () => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Play()).Task;
+            callback.StopRequest = () => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Stop()).Task;
         }
 
         private void WireScreenStateUpdater()

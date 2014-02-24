@@ -54,6 +54,7 @@ namespace Espera.View
         protected override void Configure()
         {
             this.kernel = new StandardKernel();
+            this.kernel.Settings.AllowNullInjection = true;
             this.kernel.Bind<ILibraryReader>().To<LibraryFileReader>().WithConstructorArgument("sourcePath", LibraryFilePath);
             this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", LibraryFilePath);
             this.kernel.Bind<ViewSettings>().To<ViewSettings>().InSingletonScope();

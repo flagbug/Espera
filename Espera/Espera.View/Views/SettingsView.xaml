@@ -252,6 +252,7 @@
                                 Content="Change password"
                                 Command="{Binding Path=ChangeRemoteControlPasswordCommand}" />
                     </StackPanel>
+                    <Controls:ToggleSwitch Header="Enable voting system" IsChecked="{Binding Path=EnableVotingSystem}" />
                 </StackPanel>
             </TabItem>
             <TabItem Header="about">

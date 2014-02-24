@@ -12,6 +12,7 @@ namespace Espera.View.ViewModels
         private readonly CompositeDisposable disposable;
         private readonly PlaylistEntry entry;
         private readonly ObservableAsPropertyHelper<bool> isCorrupted;
+        private readonly ObservableAsPropertyHelper<int> votes;
         private bool isPlaying;
 
         public PlaylistEntryViewModel(PlaylistEntry entry)
@@ -23,6 +24,10 @@ namespace Espera.View.ViewModels
 
             this.isCorrupted = this.Model.IsCorrupted
                 .ToProperty(this, x => x.IsCorrupted)
+                .DisposeWith(disposable);
+
+            this.votes = this.entry.WhenAnyValue(x => x.Votes)
+                .ToProperty(this, x => x.Votes)
                 .DisposeWith(disposable);
         }
 
@@ -45,6 +50,11 @@ namespace Espera.View.ViewModels
         public bool IsYoutube
         {
             get { return this.Model is YoutubeSong; }
+        }
+
+        public int Votes
+        {
+            get { return this.votes.Value; }
         }
 
         public void Dispose()

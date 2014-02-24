@@ -1,21 +1,27 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Espera.Core.Audio
 {
     /// <summary>
-    /// An <see cref="AudioPlayer"/> that streams songs from YouTube.
+    /// This class implements the basic audio player behavior.
+    /// The actual playback implementation is defined by the setters of
+    /// <see cref="IAudioPlayerCallback"/> (in this case a media element)
     /// </summary>
     public sealed class AudioPlayer : IAudioPlayerCallback
     {
         private readonly Subject<TimeSpan> currentTimeChangedFromOuter;
+        private readonly SemaphoreSlim gate;
         private readonly BehaviorSubject<Song> loadedSong;
         private readonly BehaviorSubject<AudioPlayerState> playbackState;
 
         internal AudioPlayer()
         {
+            this.gate = new SemaphoreSlim(1, 1);
+
             this.playbackState = new BehaviorSubject<AudioPlayerState>(AudioPlayerState.None);
             this.PlaybackState = this.playbackState.DistinctUntilChanged();
 
@@ -27,7 +33,7 @@ namespace Espera.Core.Audio
             this.CurrentTimeChanged = Observable.Interval(TimeSpan.FromMilliseconds(300))
                 .CombineLatest(this.PlaybackState, (l, state) => state)
                 .Where(x => x == AudioPlayerState.Playing)
-                .Select(x => this.CurrentTime)
+                .Select(_ => this.CurrentTime)
                 .Merge(this.currentTimeChangedFromOuter)
                 .DistinctUntilChanged(x => x.TotalSeconds);
         }
@@ -53,30 +59,24 @@ namespace Espera.Core.Audio
             get { return this.loadedSong.AsObservable(); }
         }
 
-        public Action LoadRequest { set; private get; }
+        public Func<Task> LoadRequest { set; private get; }
 
         public Uri Path
         {
             get { return new Uri(this.loadedSong.Value.PlaybackPath); }
         }
 
-        public Action PauseRequest { set; private get; }
+        public Func<Task> PauseRequest { set; private get; }
 
-        /// <summary>
-        /// Gets the current playback state.
-        /// </summary>
-        /// <value>
-        /// The current playback state.
-        /// </value>
         public IObservable<AudioPlayerState> PlaybackState { get; private set; }
 
-        public Action PlayRequest { set; private get; }
+        public Func<Task> PlayRequest { set; private get; }
 
         public Action<TimeSpan> SetTime { set; private get; }
 
         public Action<float> SetVolume { set; private get; }
 
-        public Action StopRequest { set; private get; }
+        public Func<Task> StopRequest { set; private get; }
 
         public IObservable<TimeSpan> TotalTime { get; private set; }
 
@@ -86,16 +86,20 @@ namespace Espera.Core.Audio
             set { this.SetVolume(value); }
         }
 
-        public void Dispose()
+        public async Task Finished()
         {
-            this.StopRequest();
+            await this.gate.WaitAsync();
+
+            await this.SetPlaybackStateAsync(AudioPlayerState.Finished);
+
+            this.gate.Release();
         }
 
-        public void Finished()
-        {
-            this.playbackState.OnNext(AudioPlayerState.Finished);
-        }
-
+        /// <summary>
+        /// Loads the specified song asynchronously into the audio player.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="song"/> is <c>null</c></exception>
+        /// <exception cref="SongLoadException">An error occured while loading the song.</exception>
         internal async Task LoadAsync(Song song)
         {
             if (song == null)
@@ -105,7 +109,7 @@ namespace Espera.Core.Audio
 
             try
             {
-                await Task.Run(this.LoadRequest);
+                await this.LoadRequest();
             }
 
             catch (Exception ex)
@@ -116,16 +120,26 @@ namespace Espera.Core.Audio
 
         internal async Task PauseAsync()
         {
-            await Task.Run(this.PauseRequest);
+            await this.gate.WaitAsync();
 
-            this.playbackState.OnNext(AudioPlayerState.Paused);
+            await this.PauseRequest();
+            await this.SetPlaybackStateAsync(AudioPlayerState.Paused);
+
+            this.gate.Release();
         }
 
+        /// <summary>
+        /// Plays the loaded song asynchronously and sets the <see cref="PlaybackState"/> to <see cref="AudioPlayerState.Playing"/>
+        /// </summary>
+        /// <exception cref="PlaybackException">An error occured while playing the song.</exception>
         internal async Task PlayAsync()
         {
+            await this.gate.WaitAsync();
+
             try
             {
-                await Task.Run(this.PlayRequest);
+                await this.PlayRequest();
+                await this.SetPlaybackStateAsync(AudioPlayerState.Playing);
             }
 
             catch (Exception ex)
@@ -133,14 +147,34 @@ namespace Espera.Core.Audio
                 throw new PlaybackException("Could not play song", ex);
             }
 
-            this.playbackState.OnNext(AudioPlayerState.Playing);
+            finally
+            {
+                this.gate.Release();
+            }
         }
 
         internal async Task StopAsync()
         {
-            await Task.Run(this.StopRequest);
+            await this.gate.WaitAsync();
 
-            this.playbackState.OnNext(AudioPlayerState.Stopped);
+            await this.StopRequest();
+            await this.SetPlaybackStateAsync(AudioPlayerState.Stopped);
+
+            this.gate.Release();
+        }
+
+        private async Task SetPlaybackStateAsync(AudioPlayerState state)
+        {
+            var connection = this.playbackState.FirstAsync(x => x == state)
+                .PublishLast();
+
+            using (connection.Connect())
+            {
+                // This is a poor man's trampoline
+                Task.Run(() => this.playbackState.OnNext(state));
+
+                await connection;
+            }
         }
     }
 }

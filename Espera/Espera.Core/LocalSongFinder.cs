@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using TagLib;
 using File = TagLib.File;
@@ -15,22 +14,19 @@ namespace Espera.Core
     /// <summary>
     /// Encapsulates a recursive call through the local filesystem that reads the tags of all WAV and MP3 files and returns them.
     /// </summary>
-    internal sealed class LocalSongFinder
+    internal sealed class LocalSongFinder : ILocalSongFinder
     {
         private static readonly string[] AllowedExtensions = { ".mp3", ".wav", ".m4a", ".aac" };
         private readonly string directoryPath;
         private readonly IFileSystem fileSystem;
 
-        public LocalSongFinder(string directoryPath, IFileSystem fileSystem)
+        public LocalSongFinder(string directoryPath, IFileSystem fileSystem = null)
         {
             if (directoryPath == null)
                 Throw.ArgumentNullException(() => directoryPath);
 
-            if (fileSystem == null)
-                throw new ArgumentNullException("fileSystem");
-
             this.directoryPath = directoryPath;
-            this.fileSystem = fileSystem;
+            this.fileSystem = fileSystem ?? new FileSystem();
         }
 
         /// <summary>
@@ -42,8 +38,7 @@ namespace Espera.Core
             return this.ScanDirectoryForValidPaths(this.directoryPath)
                 .Select(this.ProcessFile)
                 .Where(t => t != null)
-                .ToObservable(Scheduler.Immediate)
-                .SubscribeOn(RxApp.TaskpoolScheduler);
+                .ToObservable(RxApp.TaskpoolScheduler);
         }
 
         private static Tuple<LocalSong, byte[]> CreateSong(Tag tag, TimeSpan duration, string filePath)

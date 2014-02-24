@@ -686,13 +686,13 @@
                                             </TextBlock>
                                         </Grid>
                                         <StackPanel Margin="0, 5, 0, 0" Orientation="Horizontal">
-                                            <TextBlock Style="{StaticResource ArtistInfoStyle}" Text="{Binding Path=SongCount}" />
+                                            <TextBlock Style="{StaticResource ArtistInfoStyle}" Text="{Binding Path=Songs.Count}" />
                                             <TextBlock>
                                                 <TextBlock.Style>
                                                     <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
                                                         <Setter Property="Text" Value=" Songs" />
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Path=SongCount}" Value="1">
+                                                            <DataTrigger Binding="{Binding Path=Songs.Count}" Value="1">
                                                                 <Setter Property="Text" Value=" Song" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
@@ -787,7 +787,6 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="25" />
                                         <ColumnDefinition />
-                                        <ColumnDefinition />
                                     </Grid.ColumnDefinitions>
                                     <Grid Grid.Column="0">
                                         <Image Width="25"
@@ -802,33 +801,40 @@
                                                Visibility="{Binding Path=IsCorrupted,
                                                                     Converter={StaticResource BooleanToVisibilityConverter}}" />
                                     </Grid>
-                                    <StackPanel Grid.Column="1"
-                                                Width="175"
-                                                Margin="5, 0, 0, 0">
-                                        <TextBlock FontSize="14"
-                                                   Text="{Binding Path=Title}"
-                                                   TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Margin="0, 5, 0, 0" TextTrimming="CharacterEllipsis">
-                                            <TextBlock.Style>
-                                                <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Path=IsYoutube}" Value="True">
-                                                            <Setter Property="Text" Value="YouTube" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Path=IsYoutube}" Value="False">
-                                                            <Setter Property="Text" Value="{Binding Path=Artist}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
+                                    <StackPanel Grid.Column="1" Margin="5, 0, 0, 0">
+                                        <Grid VerticalAlignment="Top">
+                                            <TextBlock FontSize="14"
+                                                       MaxWidth="175"
+                                                       HorizontalAlignment="Left"
+                                                       Text="{Binding Path=Title}"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Style="{StaticResource ArtistInfoStyle}"
+                                                       HorizontalAlignment="Right"
+                                                       Text="{Binding Path=Duration,
+                                                                      StringFormat=mm\\:ss}" />
+                                        </Grid>
+                                        <Grid VerticalAlignment="Bottom" Margin="0, 5, 0, 0">
+                                            <TextBlock TextTrimming="CharacterEllipsis"
+                                                       MaxWidth="175"
+                                                       HorizontalAlignment="Left">
+                                                <TextBlock.Style>
+                                                    <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Path=IsYoutube}" Value="True">
+                                                                <Setter Property="Text" Value="YouTube" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Path=IsYoutube}" Value="False">
+                                                                <Setter Property="Text" Value="{Binding Path=Artist}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock Style="{StaticResource ArtistInfoStyle}"
+                                                       HorizontalAlignment="Right"
+                                                       Text="{Binding Path=Votes, StringFormat=\{0\} Votes}" />
+                                        </Grid>
                                     </StackPanel>
-                                    <TextBlock Grid.Column="2"
-                                               HorizontalAlignment="Right"
-                                               VerticalAlignment="Top"
-                                               Style="{StaticResource ArtistInfoStyle}"
-                                               Text="{Binding Path=Duration,
-                                                              StringFormat=mm\\:ss}" />
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>

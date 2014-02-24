@@ -8,9 +8,11 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace Espera.View.ViewModels
 {
@@ -63,10 +65,14 @@ namespace Espera.View.ViewModels
                 .Select(x => x == AccessPermission.Admin)
                 .ToProperty(this, x => x.IsAdmin);
 
-            this.NextSongCommand = new ReactiveCommand(this.HasAccess(this.library.CanPlayNextSong));
+            this.NextSongCommand = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
+                .CombineLatest(this.library.CanPlayNextSong, (x1, x2) => x1 && x2)
+                .ToCommand();
             this.NextSongCommand.RegisterAsyncTask(_ => this.library.PlayNextSongAsync(this.accessToken));
 
-            this.PreviousSongCommand = new ReactiveCommand(this.HasAccess(this.library.CanPlayPreviousSong));
+            this.PreviousSongCommand = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
+                .CombineLatest(this.library.CanPlayPreviousSong, (x1, x2) => x1 && x2)
+                .ToCommand();
             this.PreviousSongCommand.RegisterAsyncTask(_ => this.library.PlayPreviousSongAsync(this.accessToken));
 
             if (!this.library.Playlists.Any())
@@ -194,33 +200,44 @@ namespace Espera.View.ViewModels
                 }
             });
 
-            this.EditPlaylistNameCommand = this.WhenAnyValue(x => x.CanAlterPlaylist).CombineLatest(this.WhenAnyValue(x => x.CurrentPlaylist),
-                (x1, x2) => x1 && !x2.Model.IsTemporary)
+            this.EditPlaylistNameCommand = this.WhenAnyValue(x => x.CanAlterPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 && !x2.Model.IsTemporary)
                 .ToCommand();
             this.EditPlaylistNameCommand.Subscribe(x => this.CurrentPlaylist.EditName = true);
 
-            this.RemovePlaylistCommand = this.WhenAnyValue(x => x.CurrentEditedPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 != null || x2 != null)
-                .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (hasPlaylist, canAlterPlaylist) => hasPlaylist && canAlterPlaylist)
+            this.RemovePlaylistCommand = this.WhenAnyValue(x => x.CurrentEditedPlaylist, x => x.CurrentPlaylist, x => x.CanAlterPlaylist,
+                    (currentEditedPlaylist, currentPlaylist, canAlterPlaylist) => (currentEditedPlaylist != null || currentPlaylist != null) && canAlterPlaylist)
                 .ToCommand();
             this.RemovePlaylistCommand.Subscribe(x => this.RemoveCurrentPlaylist());
 
-            this.RemoveSelectedPlaylistEntriesCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
-                .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (selectedPlaylistEntries, canAlterPlaylist) =>
-                    selectedPlaylistEntries != null && selectedPlaylistEntries.Any() && canAlterPlaylist)
+            this.RemoveSelectedPlaylistEntriesCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries, x => x.CanAlterPlaylist,
+                    (selectedPlaylistEntries, canAlterPlaylist) => selectedPlaylistEntries != null && selectedPlaylistEntries.Any() && canAlterPlaylist)
                 .ToCommand();
             this.RemoveSelectedPlaylistEntriesCommand.Subscribe(x => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index), this.accessToken));
 
+            // We re-evaluate the selected entries after each up or down move here,
+            // because WPF doesn't send us proper updates about the selection
+            var reEvaluateSelectedPlaylistEntry = new Subject<Unit>();
             this.MovePlaylistSongUpCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
+                .Merge(reEvaluateSelectedPlaylistEntry.Select(_ => this.SelectedPlaylistEntries))
                 .Select(x => x != null && x.Count() == 1 && x.First().Index > 0)
                 .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveUp, canAlterPlaylist) => canMoveUp && canAlterPlaylist)
                 .ToCommand();
-            this.MovePlaylistSongUpCommand.Subscribe(_ => this.library.MovePlaylistSongUp(this.SelectedPlaylistEntries.First().Index, this.accessToken));
+            this.MovePlaylistSongUpCommand.Subscribe(_ =>
+            {
+                this.library.MovePlaylistSongUp(this.SelectedPlaylistEntries.First().Index, this.accessToken);
+                reEvaluateSelectedPlaylistEntry.OnNext(Unit.Default);
+            });
 
             this.MovePlaylistSongDownCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
-                .Select(x => x != null && x.Count() == 1 && x.First().Index < this.CurrentPlaylist.SongCount - 1)
+                .Merge(reEvaluateSelectedPlaylistEntry.Select(_ => this.SelectedPlaylistEntries))
+                .Select(x => x != null && x.Count() == 1 && x.First().Index < this.CurrentPlaylist.Songs.Count - 1)
                 .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveDown, canAlterPlaylist) => canMoveDown && canAlterPlaylist)
                 .ToCommand();
-            this.MovePlaylistSongDownCommand.Subscribe(_ => this.library.MovePlaylistSongDown(this.SelectedPlaylistEntries.First().Index, this.accessToken));
+            this.MovePlaylistSongDownCommand.Subscribe(_ =>
+            {
+                this.library.MovePlaylistSongDown(this.SelectedPlaylistEntries.First().Index, this.accessToken);
+                reEvaluateSelectedPlaylistEntry.OnNext(Unit.Default);
+            });
 
             this.IsLocal = true;
         }

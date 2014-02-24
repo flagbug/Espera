@@ -12,7 +12,7 @@ using System.Reactive.Subjects;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class LocalViewModel : SongSourceViewModel<LocalSongViewModel>
+    public sealed class LocalViewModel : SongSourceViewModel<LocalSongViewModel>
     {
         private readonly ReactiveList<ArtistViewModel> allArtists;
         private readonly ArtistViewModel allArtistsViewModel;
@@ -76,8 +76,11 @@ namespace Espera.View.ViewModels
                 return this.Library.PlayInstantlyAsync(this.SelectableSongs.Skip(songIndex).Select(x => x.Model), accessToken);
             });
 
-            this.showAddSongsHelperMessage = this.WhenAnyValue(x => x.SelectableSongs, x => x.SearchText,
-                    (x1, x2) => !x1.Any() && String.IsNullOrEmpty(x2))
+            this.showAddSongsHelperMessage = this.Library.SongsUpdated
+                .StartWith(Unit.Default)
+                .Select(_ => this.Library.Songs.Count == 0)
+                .TakeWhile(x => x)
+                .Concat(Observable.Return(false))
                 .ToProperty(this, x => x.ShowAddSongsHelperMessage);
 
             this.isUpdating = this.Library.IsUpdating.ToProperty(this, x => x.IsUpdating);
@@ -139,7 +142,7 @@ namespace Espera.View.ViewModels
             {
                 ArtistViewModel model = this.allArtists.FirstOrDefault(x => x.Name.Equals(songs.Key, StringComparison.InvariantCultureIgnoreCase));
 
-                List<IObservable<string>> artworkKeys = songs.Cast<LocalSong>()
+                List<IObservable<string>> artworkKeys = songs
                     .Select(x => x.ArtworkKey)
                     .ToList();
 
