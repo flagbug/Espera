@@ -159,7 +159,7 @@ namespace Espera.Services
             var message = new NetworkMessage
             {
                 MessageType = NetworkMessageType.Push,
-                Payload = new JObject(new PushInfo
+                Payload = JObject.FromObject(new PushInfo
                 {
                     Content = content,
                     PushAction = action
@@ -208,15 +208,18 @@ namespace Espera.Services
             Version serverVersion = Assembly.GetExecutingAssembly().GetName().Version;
             AccessPermission accessPermission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken).FirstAsync();
 
-            var response = JObject.FromObject(new
+            // This is stupid
+            NetworkAccessPermission permission = accessPermission == AccessPermission.Admin ? NetworkAccessPermission.Admin : NetworkAccessPermission.Guest;
+
+            var connectionInfo = new ConnectionInfo
             {
-                serverVersion,
-                accessPermission,
-            });
+                AccessPermission = permission,
+                ServerVersion = serverVersion
+            };
 
             this.SetupPushNotifications();
 
-            return CreateResponse(ResponseStatus.Success, null, response);
+            return CreateResponse(ResponseStatus.Success, null, JObject.FromObject(connectionInfo));
         }
 
         private async Task<ResponseInfo> GetCurrentPlaylist(JToken dontCare)
@@ -239,7 +242,12 @@ namespace Espera.Services
         {
             AudioPlayerState state = await this.library.PlaybackState.FirstAsync();
 
-            return CreateResponse(ResponseStatus.Success, null, new JObject(state));
+            var content = JObject.FromObject(new
+            {
+                state
+            });
+
+            return CreateResponse(ResponseStatus.Success, null, content);
         }
 
         private Task<ResponseInfo> GetVolume(JToken dontCare)
@@ -496,14 +504,24 @@ namespace Espera.Services
 
         private async Task PushAccessPermission(AccessPermission accessPermission)
         {
-            NetworkMessage message = CreatePush("update-access-permission", new JObject(accessPermission));
+            var content = JObject.FromObject(new
+            {
+                accessPermission
+            });
+
+            NetworkMessage message = CreatePush("update-access-permission", content);
 
             await this.SendMessage(message);
         }
 
         private async Task PushPlaybackState(AudioPlayerState state)
         {
-            NetworkMessage message = CreatePush("update-playback-state", new JObject(state));
+            var content = JObject.FromObject(new
+            {
+                state
+            });
+
+            NetworkMessage message = CreatePush("update-playback-state", content);
 
             await this.SendMessage(message);
         }

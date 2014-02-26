@@ -24,11 +24,11 @@ namespace Espera.Services
                         Source = x.Song is LocalSong ? NetworkSongSource.Local : NetworkSongSource.Youtube,
                         Guid = x.Guid
                     }
-                ).ToList(),
+                ).ToList().AsReadOnly(),
                 RemainingVotes = remainingVotes
             };
 
-            return new JObject(networkPlaylist);
+            return JObject.FromObject(networkPlaylist);
         }
 
         public static JObject SerializeSongs(IEnumerable<LocalSong> songs)
@@ -44,7 +44,12 @@ namespace Espera.Services
                     Guid = x.Guid
                 });
 
-            return new JObject(networkSongs);
+            var serialized = JObject.FromObject(new
+            {
+                songs = networkSongs
+            });
+
+            return JObject.FromObject(serialized);
         }
     }
 }
