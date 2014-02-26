@@ -64,7 +64,6 @@ namespace Espera.Services
                 {"post-pause-song", this.PostPauseSong},
                 {"post-play-next-song", this.PostPlayNextSong},
                 {"post-play-previous-song", this.PostPlayPreviousSong},
-                {"get-playback-state", this.GetPlaybackState},
                 {"post-remove-playlist-song", this.PostRemovePlaylistSong},
                 {"move-playlist-song-up", this.MovePlaylistSongUp},
                 {"move-playlist-song-down", this.MovePlaylistSongDown},
@@ -226,7 +225,9 @@ namespace Espera.Services
         {
             Playlist playlist = this.library.CurrentPlaylist;
             int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
-            JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes);
+            AudioPlayerState playbackState = await this.library.PlaybackState.FirstAsync();
+
+            JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes, playbackState);
 
             return CreateResponse(ResponseStatus.Success, null, content);
         }
@@ -236,18 +237,6 @@ namespace Espera.Services
             JObject content = MobileHelper.SerializeSongs(this.library.Songs);
 
             return Task.FromResult(CreateResponse(ResponseStatus.Success, null, content));
-        }
-
-        private async Task<ResponseInfo> GetPlaybackState(JToken dontCare)
-        {
-            AudioPlayerState state = await this.library.PlaybackState.FirstAsync();
-
-            var content = JObject.FromObject(new
-            {
-                state
-            });
-
-            return CreateResponse(ResponseStatus.Success, null, content);
         }
 
         private Task<ResponseInfo> GetVolume(JToken dontCare)
@@ -526,9 +515,9 @@ namespace Espera.Services
             await this.SendMessage(message);
         }
 
-        private async Task PushPlaylist(Playlist playlist, int? remainingVotes)
+        private async Task PushPlaylist(Playlist playlist, int? remainingVotes, AudioPlayerState state)
         {
-            JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes);
+            JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes, state);
 
             NetworkMessage message = CreatePush("update-current-playlist", content);
 
@@ -580,8 +569,9 @@ namespace Espera.Services
                     .StartWith(this.library.CurrentPlaylist)
                     .Select(x => x.CurrentSongIndex.Skip(1).Select(y => x))
                     .Switch())
-                .CombineLatest(this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken), Tuple.Create)
-                .Subscribe(x => this.PushPlaylist(x.Item1, x.Item2))
+                .CombineLatest(this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken),
+                    this.library.PlaybackState, Tuple.Create)
+                .Subscribe(x => this.PushPlaylist(x.Item1, x.Item2, x.Item3))
                 .DisposeWith(this.disposable);
 
             this.library.PlaybackState.Skip(1)

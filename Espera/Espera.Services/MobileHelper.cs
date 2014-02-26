@@ -1,7 +1,9 @@
 ﻿using Espera.Core;
+using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Network;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,7 +11,7 @@ namespace Espera.Services
 {
     public static class MobileHelper
     {
-        public static JObject SerializePlaylist(Playlist playlist, int? remainingVotes)
+        public static JObject SerializePlaylist(Playlist playlist, int? remainingVotes, AudioPlayerState playbackState)
         {
             var networkPlaylist = new NetworkPlaylist
             {
@@ -25,7 +27,8 @@ namespace Espera.Services
                         Guid = x.Guid
                     }
                 ).ToList().AsReadOnly(),
-                RemainingVotes = remainingVotes
+                RemainingVotes = remainingVotes,
+                PlaybackState = (NetworkPlaybackState)Enum.ToObject(typeof(NetworkPlaybackState), (int)playbackState)
             };
 
             return JObject.FromObject(networkPlaylist);
