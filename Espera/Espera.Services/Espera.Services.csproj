@@ -90,6 +90,10 @@
       <Project>{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}</Project>
       <Name>Espera.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Espera.Network\Espera.Network\Espera.Network.csproj">
+      <Project>{4cbd2b72-34e1-4d9c-8348-3b90bf25d4c5}</Project>
+      <Name>Espera.Network</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
