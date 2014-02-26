@@ -768,7 +768,16 @@ namespace Espera.Core.Management
 
                         this.songsUpdated.OnNext(Unit.Default);
                     }
-                }, () => this.isUpdating.OnNext(false));
+                }, () =>
+                {
+                    this.songLock.EnterReadLock();
+                    int songCount = this.songs.Count;
+                    this.songLock.ExitReadLock();
+
+                    Analytics.Instance.RecordLibrarySizeAsync(songCount);
+
+                    this.isUpdating.OnNext(false);
+                });
         }
     }
 }

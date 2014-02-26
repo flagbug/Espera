@@ -11,6 +11,12 @@ namespace Espera.Core.Settings
             : base("__CoreSettings__", BlobCache.LocalMachine)
         { }
 
+        public string AnalyticsToken
+        {
+            get { return this.GetOrCreate((string)null); }
+            set { this.SetOrCreate(value); }
+        }
+
         public bool EnableAutomaticLibraryUpdates
         {
             get { return this.GetOrCreate(true); }

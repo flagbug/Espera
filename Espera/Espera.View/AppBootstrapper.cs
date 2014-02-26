@@ -1,5 +1,6 @@
 ﻿using Akavache;
 using Caliburn.Micro;
+using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Espera.Services;
@@ -18,6 +19,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Reactive.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -107,6 +109,8 @@ namespace Espera.View
 
             Directory.CreateDirectory(DirectoryPath);
 
+            this.SetupAnalyticsClient();
+
             this.SetupLager();
 
             this.SetupMobileApi();
@@ -141,13 +145,21 @@ namespace Espera.View
             var target = new FileTarget
             {
                 FileName = LogFilePath,
-                Layout = @"${longdate}|${logger}|${level}|${message} ${exception:format=ToString,StackTrace}"
+                Layout = @"${longdate}|${logger}|${level}|${message} ${exception:format=ToString,StackTrace}",
+                ArchiveAboveSize = 1024 * 1024 * 2, // 2 MB
+                ArchiveNumbering = ArchiveNumberingMode.Sequence
             };
 
             logConfig.LoggingRules.Add(new LoggingRule("*", NLog.LogLevel.Info, target));
             NLog.LogManager.Configuration = logConfig;
 
             RxApp.MutableResolver.RegisterConstant(new NLogLogger(NLog.LogManager.GetCurrentClassLogger()), typeof(ILogger));
+        }
+
+        private async Task SetupAnalyticsClient()
+        {
+            var coreSettings = this.kernel.Get<CoreSettings>();
+            await Analytics.Instance.InitializeAsync(coreSettings);
         }
 
         private void SetupLager()
