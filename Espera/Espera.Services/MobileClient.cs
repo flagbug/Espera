@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -28,26 +29,33 @@ namespace Espera.Services
     {
         private readonly Subject<Unit> disconnected;
         private readonly CompositeDisposable disposable;
+        private readonly TcpClient fileSocket;
+        private readonly ConcurrentBag<Guid> fileTransfers;
         private readonly SemaphoreSlim gate;
         private readonly Library library;
         private readonly Dictionary<string, Func<JToken, Task<ResponseInfo>>> messageActionMap;
         private readonly TcpClient socket;
         private Guid accessToken;
 
-        public MobileClient(TcpClient socket, Library library)
+        public MobileClient(TcpClient socket, TcpClient fileSocket, Library library)
         {
             if (socket == null)
+                Throw.ArgumentNullException(() => socket);
+
+            if (fileSocket == null)
                 Throw.ArgumentNullException(() => socket);
 
             if (library == null)
                 Throw.ArgumentNullException(() => library);
 
             this.socket = socket;
+            this.fileSocket = fileSocket;
             this.library = library;
 
             this.disposable = new CompositeDisposable();
             this.gate = new SemaphoreSlim(1, 1);
             this.disconnected = new Subject<Unit>();
+            this.fileTransfers = new ConcurrentBag<Guid>();
 
             this.messageActionMap = new Dictionary<string, Func<JToken, Task<ResponseInfo>>>
             {
@@ -66,7 +74,8 @@ namespace Espera.Services
                 {"move-playlist-song-down", this.MovePlaylistSongDown},
                 {"get-volume", this.GetVolume},
                 {"set-volume", this.SetVolume},
-                {"vote-for-song", this.VoteForSong}
+                {"vote-for-song", this.VoteForSong},
+                {"queue-remote-song", this.QueueRemoteSong}
             };
         }
 
@@ -148,6 +157,14 @@ namespace Espera.Services
                     }
                 }, ex => this.disconnected.OnNext(Unit.Default), () => this.disconnected.OnNext(Unit.Default))
                 .DisposeWith(this.disposable);
+
+            Observable.Defer(() => this.fileSocket.GetStream().ReadNextFileTransferMessageAsync().ToObservable())
+                .Repeat()
+                .Retry()
+                .TakeWhile(x => x != null)
+                .Subscribe(message =>
+                {
+                }).DisposeWith(this.disposable);
         }
 
         private static NetworkMessage CreatePush(string action, JObject content)
@@ -534,9 +551,22 @@ namespace Espera.Services
             await this.SendMessage(message);
         }
 
+        private Task<ResponseInfo> QueueRemoteSong(JToken parameters)
+        {
+            var transferInfo = parameters.ToObject<FileTransferInfo>();
+
+            this.fileTransfers.Add(transferInfo.TransferId);
+
+            return Task.FromResult(CreateResponse(ResponseStatus.Success));
+        }
+
         private async Task SendMessage(NetworkMessage content)
         {
-            byte[] message = await NetworkHelpers.PackMessageAsync(content);
+            byte[] message;
+            using (MeasureHelper.Measure())
+            {
+                message = await NetworkHelpers.PackMessageAsync(content);
+            }
 
             await this.gate.WaitAsync();
 

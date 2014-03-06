@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Espera.Core.Analytics;
 using Espera.Core.Management;
 using Rareform.Validation;
+using ReactiveMarrow;
 using ReactiveUI;
 
 namespace Espera.Services
@@ -22,13 +23,14 @@ namespace Espera.Services
     public class MobileApi : IDisposable, IEnableLogger
     {
         private readonly object clientListGate;
-        private readonly ReactiveList<MobileClient> clients;
+        private readonly ReactiveUI.ReactiveList<MobileClient> clients;
         private readonly BehaviorSubject<bool> isPortOccupied;
         private readonly Library library;
+        private readonly CompositeDisposable listenerSubscriptions;
         private readonly int port;
         private bool dispose;
-        private TcpListener listener;
-        private IDisposable listenerSubscription;
+        private TcpListener fileListener;
+        private TcpListener messageListener;
 
         public MobileApi(int port, Library library)
         {
@@ -40,9 +42,10 @@ namespace Espera.Services
 
             this.port = port;
             this.library = library;
-            this.clients = new ReactiveList<MobileClient>();
+            this.clients = new ReactiveUI.ReactiveList<MobileClient>();
             this.clientListGate = new object();
             this.isPortOccupied = new BehaviorSubject<bool>(false);
+            this.listenerSubscriptions = new CompositeDisposable();
         }
 
         public IObservable<int> ConnectedClients
@@ -57,15 +60,12 @@ namespace Espera.Services
 
         public void Dispose()
         {
-            this.Log().Info("Stopping to listen for incoming connections on port {0}", this.port);
-
-            if (this.listenerSubscription != null)
-            {
-                this.listenerSubscription.Dispose();
-            }
+            this.Log().Info("Stopping to listen for incoming connections on port {0} and {1}", this.port, this.port + 1);
 
             this.dispose = true;
-            this.listener.Stop();
+            this.listenerSubscriptions.Dispose();
+            this.messageListener.Stop();
+            this.fileListener.Stop();
 
             lock (this.clientListGate)
             {
@@ -141,13 +141,13 @@ namespace Espera.Services
 
         public void StartClientDiscovery()
         {
-            this.listener = new TcpListener(new IPEndPoint(IPAddress.Any, this.port));
-            this.Log().Info("Starting to listen for incoming connections on port {0}", this.port);
-
             try
             {
-                listener.Start();
+                this.fileListener = new TcpListener(new IPEndPoint(IPAddress.Any, this.port + 1));
+                this.fileListener.Start();
+                this.Log().Info("Starting to listen for incoming file transfer connections on port {0}", this.port + 1);
             }
+
             catch (SocketException ex)
             {
                 this.Log().ErrorException(string.Format("Port {0} is already taken", this.port), ex);
@@ -155,15 +155,38 @@ namespace Espera.Services
                 return;
             }
 
-            this.listenerSubscription = Observable.Defer(() => this.listener.AcceptTcpClientAsync().ToObservable())
+            try
+            {
+                this.messageListener = new TcpListener(new IPEndPoint(IPAddress.Any, this.port));
+                this.messageListener.Start();
+                this.Log().Info("Starting to listen for incoming message connections on port {0}", this.port);
+            }
+            catch (SocketException ex)
+            {
+                this.fileListener.Stop();
+
+                this.Log().ErrorException(string.Format("Port {0} is already taken", this.port), ex);
+                this.isPortOccupied.OnNext(true);
+                return;
+            }
+
+            var fileTransferClients = Observable.Defer(() => this.fileListener.AcceptTcpClientAsync().ToObservable())
                 .Repeat()
-                .Subscribe(socket =>
+                .Replay();
+
+            Observable.Defer(() => this.messageListener.AcceptTcpClientAsync().ToObservable())
+                .Repeat()
+                .Subscribe(async socket =>
                 {
                     this.Log().Info("New client detected");
 
                     AnalyticsClient.Instance.RecordMobileUsage();
 
-                    var mobileClient = new MobileClient(socket, this.library);
+                    // Wait on the corresponding endpoint for file transfers
+                    TcpClient fileTransferClient = await fileTransferClients.FirstAsync(x =>
+                        ((IPEndPoint)x.Client.RemoteEndPoint).Address.Equals(((IPEndPoint)socket.Client.RemoteEndPoint).Address));
+
+                    var mobileClient = new MobileClient(socket, fileTransferClient, this.library);
 
                     mobileClient.Disconnected.FirstAsync()
                         .Subscribe(x =>
@@ -182,7 +205,9 @@ namespace Espera.Services
                     {
                         this.clients.Add(mobileClient);
                     }
-                });
+                }).DisposeWith(this.listenerSubscriptions);
+
+            fileTransferClients.Connect().DisposeWith(this.listenerSubscriptions);
         }
     }
 }
