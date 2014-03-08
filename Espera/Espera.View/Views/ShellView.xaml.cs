@@ -38,6 +38,7 @@ namespace Espera.View.Views
                     .InvokeCommand(this.shellViewModel, x => x.PauseContinueCommand);
 
                 this.shellViewModel.WhenAnyObservable(x => x.CurrentPlaylist.CurrentPlayingEntry)
+                    .ObserveOn(RxApp.MainThreadScheduler)
                     .Subscribe(x => this.PlaylistListBox.ScrollIntoView(x));
             };
         }
