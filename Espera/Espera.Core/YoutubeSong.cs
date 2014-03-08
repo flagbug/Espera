@@ -19,11 +19,11 @@ namespace Espera.Core
             };
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="YoutubeSong"/> class.
+        /// Initializes a new instance of the <see cref="YoutubeSong" /> class.
         /// </summary>
         /// <param name="path">The path of the song.</param>
         /// <param name="duration">The duration of the song.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="path"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="path" /> is null.</exception>
         public YoutubeSong(string path, TimeSpan duration)
             : base(path, duration)
         { }
@@ -36,9 +36,7 @@ namespace Espera.Core
         /// <summary>
         /// Gets or sets the average rating.
         /// </summary>
-        /// <value>
-        /// The average rating. <c>null</c>, if the rating is unknown.
-        /// </value>
+        /// <value>The average rating. <c>null</c>, if the rating is unknown.</value>
         public double? Rating { get; set; }
 
         /// <summary>
@@ -148,7 +146,7 @@ namespace Espera.Core
             IEnumerable<VideoInfo> videoInfos = await Task.Run(() => DownloadUrlResolver.GetDownloadUrls(youtubeLink));
 
             IEnumerable<VideoInfo> filtered = videoInfos
-                .Where(info => info.VideoType == VideoType.Mp4 && !info.Is3D);
+                .Where(info => info.VideoType == VideoType.Mp4 && !info.Is3D && info.AdaptiveType == AdaptiveType.None);
 
             return GetVideoByStreamingQuality(filtered, qualitySetting);
         }
