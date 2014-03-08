@@ -25,10 +25,13 @@ namespace Espera.View.ViewModels
         private string saveName;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PlaylistViewModel"/> class.
+        /// Initializes a new instance of the <see cref="PlaylistViewModel" /> class.
         /// </summary>
         /// <param name="playlist">The playlist info.</param>
-        /// <param name="renameRequest">A function that requests the rename of the playlist. Return true, if the rename is granted, otherwise false.</param>
+        /// <param name="renameRequest">
+        /// A function that requests the rename of the playlist. Return true, if the rename is
+        /// granted, otherwise false.
+        /// </param>
         public PlaylistViewModel(Playlist playlist, Func<string, bool> renameRequest)
         {
             this.playlist = playlist;
@@ -56,7 +59,11 @@ namespace Espera.View.ViewModels
                 .Select(x => x.Any() ? x.Select(entry => entry.Duration).Aggregate((t1, t2) => t1 + t2) : (TimeSpan?)null)
                 .ToProperty(this, x => x.TimeRemaining)
                 .DisposeWith(this.disposable);
+
+            this.CurrentPlayingEntry = this.Model.CurrentSongIndex.Select(x => x != null ? this.entries[x.Value] : null);
         }
+
+        public IObservable<PlaylistEntryViewModel> CurrentPlayingEntry { get; private set; }
 
         public bool EditName
         {
