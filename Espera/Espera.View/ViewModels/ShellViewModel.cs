@@ -27,7 +27,7 @@ namespace Espera.View.ViewModels
         private readonly CoreSettings coreSettings;
         private readonly ObservableAsPropertyHelper<int> currentSeconds;
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
-        private readonly ObservableAsPropertyHelper<TimeSpan> currentTime;
+        private readonly ObservableAsPropertyHelper<string> currentTime;
         private readonly ObservableAsPropertyHelper<bool> displayTimeoutWarning;
         private readonly CompositeDisposable disposable;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
@@ -36,7 +36,7 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
         private readonly ObservableAsPropertyHelper<bool> showVotes;
         private readonly ObservableAsPropertyHelper<int> totalSeconds;
-        private readonly ObservableAsPropertyHelper<TimeSpan> totalTime;
+        private readonly ObservableAsPropertyHelper<string> totalTime;
         private bool isLocal;
         private bool isYoutube;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
@@ -128,6 +128,8 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.IsPlaying);
 
             this.currentTime = this.library.CurrentTimeChanged
+                .StartWith(TimeSpan.Zero)
+                .Select(x => x.FormatAdaptive())
                 .ToProperty(this, x => x.CurrentTime);
 
             this.currentSeconds = this.library.CurrentTimeChanged
@@ -135,6 +137,7 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.CurrentSeconds);
 
             this.totalTime = this.library.TotalTime
+                .Select(x => x.FormatAdaptive())
                 .ToProperty(this, x => x.TotalTime);
 
             this.totalSeconds = this.library.TotalTime
@@ -307,7 +310,7 @@ namespace Espera.View.ViewModels
             get { return this.currentSongSource.Value; }
         }
 
-        public TimeSpan CurrentTime
+        public string CurrentTime
         {
             get { return this.currentTime.Value; }
         }
@@ -426,7 +429,7 @@ namespace Espera.View.ViewModels
             get { return this.totalSeconds.Value; }
         }
 
-        public TimeSpan TotalTime
+        public string TotalTime
         {
             get { return this.totalTime.Value; }
         }
