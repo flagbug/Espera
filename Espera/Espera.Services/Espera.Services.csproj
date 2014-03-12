@@ -79,6 +79,7 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="MobileApi.cs" />
+    <Compile Include="MobileApiInfo.cs" />
     <Compile Include="MobileClient.cs" />
     <Compile Include="MobileHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

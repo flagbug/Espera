@@ -813,6 +813,8 @@
                                             </TextBlock>
                                             <TextBlock Style="{StaticResource ArtistInfoStyle}"
                                                        HorizontalAlignment="Right"
+                                                       Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Controls:MetroWindow}},
+                                                           Path=DataContext.ShowVotes, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                        Text="{Binding Path=Votes, StringFormat=\{0\} Votes}" />
                                         </Grid>
                                     </StackPanel>

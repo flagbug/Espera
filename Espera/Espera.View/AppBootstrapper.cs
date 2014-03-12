@@ -18,6 +18,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Abstractions;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
@@ -180,21 +181,32 @@ namespace Espera.View
             this.Log().Info("Remote control is {0}", coreSettings.EnableRemoteControl ? "enabled" : "disabled");
             this.Log().Info("Port is set to {0}", coreSettings.Port);
 
-            coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged()
+            IObservable<MobileApi> apiChanged = coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged()
                 .CombineLatest(coreSettings.WhenAnyValue(x => x.EnableRemoteControl), Tuple.Create)
                 .Where(x => x.Item2)
                 .Select(x => x.Item1)
-                .Subscribe(x =>
+                .Do(_ =>
                 {
                     if (this.mobileApi != null)
                     {
                         this.mobileApi.Dispose();
                     }
+                })
+                .Select(x => new MobileApi(x, library)).Publish(null).RefCount().Where(x => x != null);
 
-                    this.mobileApi = new MobileApi(x, library);
-                    this.mobileApi.SendBroadcastAsync();
-                    this.mobileApi.StartClientDiscovery();
-                });
+            apiChanged.Subscribe(x =>
+            {
+                this.mobileApi = x;
+                x.SendBroadcastAsync();
+                x.StartClientDiscovery();
+            });
+
+            IConnectableObservable<int> connectedClients = apiChanged.Select(x => x.ConnectedClients).Switch().Publish(0);
+            connectedClients.Connect();
+
+            var apiStats = new MobileApiInfo(connectedClients);
+
+            this.kernel.Bind<MobileApiInfo>().ToConstant(apiStats);
 
             coreSettings.WhenAnyValue(x => x.EnableRemoteControl)
                 .Where(x => !x && this.mobileApi != null)
