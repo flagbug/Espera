@@ -78,14 +78,22 @@ namespace Espera.Core
             }
         }
 
-        public async Task<bool> RecordBugReportAsync(string message, string email)
+        /// <summary>
+        /// Submits a bug report with the specified message an an optional email address
+        /// </summary>
+        /// <param name="message">The bug report message.</param>
+        /// <param name="email">
+        /// The optional email address. Pass null if no email should be sent.
+        /// </param>
+        /// <returns>A task that returns wether the report was successfully sent or not.</returns>
+        public async Task<bool> RecordBugReportAsync(string message, string email = null)
         {
             await this.AwaitAuthenticationAsync();
 
             if (!this.isAuthenticated)
                 return false;
 
-            if (!String.IsNullOrWhiteSpace(email))
+            if (email != null)
             {
                 await UpdateUserEmailAsync(this.user, email);
             }

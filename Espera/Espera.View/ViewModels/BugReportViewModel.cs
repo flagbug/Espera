@@ -1,5 +1,6 @@
 ﻿using Espera.Core;
 using ReactiveUI;
+using System;
 using System.Reactive.Linq;
 
 namespace Espera.View.ViewModels
@@ -16,7 +17,7 @@ namespace Espera.View.ViewModels
                 .ToCommand();
 
             this.sendingSucceeded = this.SubmitBugReport
-                .RegisterAsyncTask(x => Analytics.Instance.RecordBugReportAsync(this.Message, this.Email))
+                .RegisterAsyncTask(x => Analytics.Instance.RecordBugReportAsync(this.Message, String.IsNullOrWhiteSpace(this.Email) ? null : this.Email))
                 .Select(x => new bool?(x))
                 .ToProperty(this, x => x.SendingSucceeded);
         }
