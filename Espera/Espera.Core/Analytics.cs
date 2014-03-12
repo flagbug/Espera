@@ -78,12 +78,17 @@ namespace Espera.Core
             }
         }
 
-        public async Task<bool> RecordBugReportAsync(string message)
+        public async Task<bool> RecordBugReportAsync(string message, string email)
         {
             await this.AwaitAuthenticationAsync();
 
             if (!this.isAuthenticated)
                 return false;
+
+            if (!String.IsNullOrWhiteSpace(email))
+            {
+                await UpdateUserEmailAsync(this.user, email);
+            }
 
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
@@ -94,12 +99,17 @@ namespace Espera.Core
             return true;
         }
 
-        public async Task<bool> RecordCrashAsync(Exception exception)
+        public async Task<bool> RecordCrashAsync(Exception exception, string email)
         {
             await this.AwaitAuthenticationAsync();
 
             if (!this.isAuthenticated)
                 return false;
+
+            if (!String.IsNullOrWhiteSpace(email))
+            {
+                await UpdateUserEmailAsync(this.user, email);
+            }
 
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
@@ -145,6 +155,12 @@ namespace Espera.Core
             {
                 this.Log().InfoException("Could not log mobile usage", ex);
             }
+        }
+
+        private static async Task UpdateUserEmailAsync(AuthenticatedUser user, string email)
+        {
+            await user.UpdateAsync(user.Email, String.Empty, user.Gender, user.Age, email, // email is the only field we change here
+                user.Status, user.LocationFuzzing, user.CelebrityMode, user.ApplicationTag);
         }
 
         private async Task AwaitAuthenticationAsync()

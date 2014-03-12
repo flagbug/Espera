@@ -16,10 +16,12 @@ namespace Espera.View.ViewModels
                 .ToCommand();
 
             this.sendingSucceeded = this.SubmitBugReport
-                .RegisterAsyncTask(x => Analytics.Instance.RecordBugReportAsync(this.Message))
+                .RegisterAsyncTask(x => Analytics.Instance.RecordBugReportAsync(this.Message, this.Email))
                 .Select(x => new bool?(x))
                 .ToProperty(this, x => x.SendingSucceeded);
         }
+
+        public string Email { get; set; }
 
         public string Message
         {
