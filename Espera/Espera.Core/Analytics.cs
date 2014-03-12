@@ -99,17 +99,12 @@ namespace Espera.Core
             return true;
         }
 
-        public async Task<bool> RecordCrashAsync(Exception exception, string email)
+        public async Task<bool> RecordCrashAsync(Exception exception)
         {
             await this.AwaitAuthenticationAsync();
 
             if (!this.isAuthenticated)
                 return false;
-
-            if (!String.IsNullOrWhiteSpace(email))
-            {
-                await UpdateUserEmailAsync(this.user, email);
-            }
 
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
