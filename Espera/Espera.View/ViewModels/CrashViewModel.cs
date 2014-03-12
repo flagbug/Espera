@@ -1,4 +1,4 @@
-﻿using Espera.Core;
+﻿using Espera.Core.Analytics;
 using ReactiveUI;
 using System;
 using System.Reactive.Linq;
@@ -16,7 +16,7 @@ namespace Espera.View.ViewModels
                 .ToCommand();
 
             this.sendingSucceeded = this.SubmitCrashReport
-                .RegisterAsyncTask(x => Analytics.Instance.RecordCrashAsync(exception))
+                .RegisterAsyncTask(x => AnalyticsClient.Instance.RecordCrashAsync(exception))
                 .Select(x => new bool?(x))
                 .ToProperty(this, x => x.SendingSucceeded);
         }

@@ -1,6 +1,6 @@
 ﻿using Akavache;
 using Caliburn.Micro;
-using Espera.Core;
+using Espera.Core.Analytics;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Espera.Services;
@@ -160,7 +160,7 @@ namespace Espera.View
         private async Task SetupAnalyticsClient()
         {
             var coreSettings = this.kernel.Get<CoreSettings>();
-            await Analytics.Instance.InitializeAsync(coreSettings);
+            await AnalyticsClient.Instance.InitializeAsync(coreSettings);
         }
 
         private void SetupLager()

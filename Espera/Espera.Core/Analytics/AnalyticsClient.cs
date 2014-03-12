@@ -1,4 +1,4 @@
-﻿using Buddy;
+using Buddy;
 using Espera.Core.Settings;
 using ReactiveUI;
 using System;
@@ -11,27 +11,27 @@ using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Espera.Core
+namespace Espera.Core.Analytics
 {
-    public class Analytics : IEnableLogger
+    public class AnalyticsClient : IEnableLogger
     {
-        private static readonly Lazy<Analytics> instance;
+        private static readonly Lazy<AnalyticsClient> instance;
         private readonly BehaviorSubject<bool> isAuthenticating;
         private BuddyClient client;
         private bool isAuthenticated;
         private AuthenticatedUser user;
 
-        static Analytics()
+        static AnalyticsClient()
         {
-            instance = new Lazy<Analytics>(() => new Analytics());
+            instance = new Lazy<AnalyticsClient>(() => new AnalyticsClient());
         }
 
-        public Analytics()
+        public AnalyticsClient()
         {
             this.isAuthenticating = new BehaviorSubject<bool>(false);
         }
 
-        public static Analytics Instance
+        public static AnalyticsClient Instance
         {
             get { return instance.Value; }
         }

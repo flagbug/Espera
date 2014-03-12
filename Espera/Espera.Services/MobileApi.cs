@@ -1,4 +1,4 @@
-﻿using Espera.Core;
+﻿using Espera.Core.Analytics;
 using Espera.Core.Management;
 using Rareform.Validation;
 using ReactiveUI;
@@ -109,7 +109,7 @@ namespace Espera.Services
                 {
                     this.Log().Info("New client detected");
 
-                    Analytics.Instance.RecordMobileUsage();
+                    AnalyticsClient.Instance.RecordMobileUsage();
 
                     var mobileClient = new MobileClient(socket, this.library);
 

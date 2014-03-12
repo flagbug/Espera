@@ -42,6 +42,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.Network", "Espera.Network\Espera.Network\Espera.Network.csproj", "{4CBD2B72-34E1-4D9C-8348-3B90BF25D4C5}"
 EndProject
 Global
+	GlobalSection(CodealikeProperties) = postSolution
+		SolutionGuid = 00000000-0000-0000-0000-000000000000
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
