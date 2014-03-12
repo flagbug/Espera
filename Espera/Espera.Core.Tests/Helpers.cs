@@ -8,6 +8,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -53,8 +54,7 @@ namespace Espera.Core.Tests
 
         public static async Task AwaitInitializationAndUpdate(this Library library)
         {
-            var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().PublishLast();
-            updateCompleted.Connect();
+            var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().ToTask();
 
             library.Initialize();
 

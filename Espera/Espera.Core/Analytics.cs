@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -151,12 +152,9 @@ namespace Espera.Core
             if (this.isAuthenticated)
                 return;
 
-            var finished = this.isAuthenticating.FirstAsync(x => !x).PublishLast();
+            var finished = this.isAuthenticating.FirstAsync(x => !x).ToTask();
 
-            using (finished.Connect())
-            {
-                await finished;
-            }
+            await finished;
         }
 
         private async Task<Stream> GetCompressedLogFileStreamAsync()
