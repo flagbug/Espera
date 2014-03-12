@@ -28,6 +28,8 @@
         <TextBlock Style="{StaticResource DescriptionHeaderStyle}" Text="Report a bug" />
         <TextBlock Style="{StaticResource DescriptionHeaderStyle2}" Text="You can send a bug report to help improving Espera" />
         <TextBox Height="225"
+                 TextWrapping="Wrap"
+                 AcceptsReturn="True"
                  Margin="0, 15, 0, 0"
                  Controls:TextboxHelper.Watermark="Please enter a detailed description of the bug you encountered."
                  Text="{Binding Path=Message,
