@@ -13,6 +13,12 @@ using System.Threading.Tasks;
 
 namespace Espera.Core.Analytics
 {
+    /// <summary>
+    /// Provides methods to measure data or report crashes/bugs. Every method either doesn't throw
+    /// an exception if it fails or returns a <c>bool</c>, so they can be "fire-and-forget" methods.
+    /// This also affects the authentication, meaning that if the initial authentication to the
+    /// analytics provider fails, calls to the analytics methods will return immediately.
+    /// </summary>
     public class AnalyticsClient : IEnableLogger
     {
         private static readonly Lazy<AnalyticsClient> instance;
@@ -79,13 +85,14 @@ namespace Espera.Core.Analytics
         }
 
         /// <summary>
-        /// Submits a bug report with the specified message an an optional email address
+        /// Submits a bug report with the specified message an an optional email address. Also
+        /// uploads the log file located in the application data folder.
         /// </summary>
         /// <param name="message">The bug report message.</param>
         /// <param name="email">
         /// The optional email address. Pass null if no email should be sent.
         /// </param>
-        /// <returns>A task that returns wether the report was successfully sent or not.</returns>
+        /// <returns>A task that returns whether the report was successfully sent or not.</returns>
         public async Task<bool> RecordBugReportAsync(string message, string email = null)
         {
             await this.AwaitAuthenticationAsync();
@@ -107,6 +114,12 @@ namespace Espera.Core.Analytics
             return true;
         }
 
+        /// <summary>
+        /// Submits a crash report with the specified exception. Also uploads the log file located
+        /// in the application data folder.
+        /// </summary>
+        /// <param name="exception">The exception that caused the application to crash.</param>
+        /// <returns>A task that returns whether the report was successfully sent or not.</returns>
         public async Task<bool> RecordCrashAsync(Exception exception)
         {
             await this.AwaitAuthenticationAsync();
