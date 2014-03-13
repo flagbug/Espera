@@ -37,6 +37,10 @@ namespace Espera.View.Views
 
                 this.Events().KeyUp.Where(x => x.Key == Key.Space)
                     .InvokeCommand(this.shellViewModel, x => x.PauseContinueCommand);
+
+                this.shellViewModel.WhenAnyObservable(x => x.CurrentPlaylist.CurrentPlayingEntry)
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .Subscribe(x => this.PlaylistListBox.ScrollIntoView(x));
             };
 
             this.Loaded += async (sender, args) =>

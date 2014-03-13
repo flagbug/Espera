@@ -246,9 +246,9 @@
             <StackPanel Grid.Column="3"
                         Margin="5, 0, 0, 0"
                         Orientation="Horizontal">
-                <TextBlock VerticalAlignment="Center" Text="{Binding Path=CurrentTime, StringFormat=mm\\:ss}" />
+                <TextBlock VerticalAlignment="Center" Text="{Binding Path=CurrentTime}" />
                 <TextBlock VerticalAlignment="Center" Text="/" />
-                <TextBlock VerticalAlignment="Center" Text="{Binding Path=TotalTime, StringFormat=mm\\:ss}" />
+                <TextBlock VerticalAlignment="Center" Text="{Binding Path=TotalTime}" />
             </StackPanel>
             <Grid Grid.Column="4" Width="300">
                 <Grid.ColumnDefinitions>
@@ -422,8 +422,7 @@
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock Foreground="White"
-                                                               Text="{Binding Path=Duration,
-                                                                              StringFormat=mm\\:ss}"
+                                                               Text="{Binding Path=FormattedDuration}"
                                                                TextTrimming="CharacterEllipsis" />
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
@@ -574,7 +573,7 @@
                                             <GridViewColumnHeader Click="SortYoutubeSongDuration" Content="Duration" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding Path=Duration, StringFormat=mm\\:ss}" TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{Binding Path=FormattedDuration}" TextTrimming="CharacterEllipsis" />
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
@@ -754,7 +753,8 @@
                             </Button>
                         </Grid>
                     </Grid>
-                    <ListBox Grid.Row="2"
+                    <ListBox x:Name="PlaylistListBox"
+                             Grid.Row="2"
                              Margin="0, 10, 0, 0"
                              ContextMenuOpening="PlaylistContextMenuOpening"
                              Focusable="False"
@@ -810,8 +810,7 @@
                                                        TextTrimming="CharacterEllipsis" />
                                             <TextBlock Style="{StaticResource ArtistInfoStyle}"
                                                        HorizontalAlignment="Right"
-                                                       Text="{Binding Path=Duration,
-                                                                      StringFormat=mm\\:ss}" />
+                                                       Text="{Binding Path=FormattedDuration}" />
                                         </Grid>
                                         <Grid VerticalAlignment="Bottom" Margin="0, 5, 0, 0">
                                             <TextBlock TextTrimming="CharacterEllipsis"
@@ -832,6 +831,8 @@
                                             </TextBlock>
                                             <TextBlock Style="{StaticResource ArtistInfoStyle}"
                                                        HorizontalAlignment="Right"
+                                                       Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Controls:MetroWindow}},
+                                                           Path=DataContext.ShowVotes, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                        Text="{Binding Path=Votes, StringFormat=\{0\} Votes}" />
                                         </Grid>
                                     </StackPanel>

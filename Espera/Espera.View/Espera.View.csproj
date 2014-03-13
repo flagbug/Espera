@@ -83,6 +83,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\akavache.3.2.0\lib\net45\Akavache.dll</HintPath>
     </Reference>
+    <Reference Include="Buddy, Version=1.5.1.5, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BuddyPlatformSdk.1.5.1.5\lib\net45\Buddy.dll</HintPath>
+    </Reference>
     <Reference Include="Caliburn.Micro, Version=1.5.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Caliburn.Micro.1.5.2\lib\net45\Caliburn.Micro.dll</HintPath>
@@ -219,9 +223,9 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="YoutubeExtractor, Version=0.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="YoutubeExtractor, Version=0.8.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\YoutubeExtractor.0.7.0\lib\net35\YoutubeExtractor.dll</HintPath>
+      <HintPath>..\packages\YoutubeExtractor.0.8.1\lib\net35\YoutubeExtractor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -239,6 +243,7 @@
     <Compile Include="SortHelpers.cs" />
     <Compile Include="SortOrder.cs" />
     <Compile Include="UpdateChannel.cs" />
+    <Compile Include="TimeSpanHelper.cs" />
     <Compile Include="ViewModels\ArtistViewModel.cs" />
     <Compile Include="ViewModels\DesignTimeSettingsViewModel.cs" />
     <Compile Include="ViewModels\BugReportViewModel.cs" />

@@ -1,30 +1,28 @@
-﻿using Espera.Services;
+﻿using Espera.Core.Analytics;
 using ReactiveUI;
+using System;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Reflection;
 
 namespace Espera.View.ViewModels
 {
     internal class BugReportViewModel : ReactiveObject
     {
         private readonly ObservableAsPropertyHelper<bool?> sendingSucceeded;
-        private readonly string version;
         private string message;
 
         public BugReportViewModel()
         {
-            this.version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
             this.SubmitBugReport = this.WhenAnyValue(x => x.Message, x => x.SendingSucceeded,
                 (message, succeeded) => !string.IsNullOrWhiteSpace(message) && (succeeded == null || !succeeded.Value))
                 .ToCommand();
 
-            this.sendingSucceeded = this.SubmitBugReport.RegisterAsync(x =>
-                FogBugzService.SubmitReport("Version " + this.version + "\n\n" + this.Message).ToObservable()
-                .Select(_ => true).Catch(Observable.Return(false))).Select(x => new bool?(x))
+            this.sendingSucceeded = this.SubmitBugReport
+                .RegisterAsyncTask(x => AnalyticsClient.Instance.RecordBugReportAsync(this.Message, String.IsNullOrWhiteSpace(this.Email) ? null : this.Email))
+                .Select(x => new bool?(x))
                 .ToProperty(this, x => x.SendingSucceeded);
         }
+
+        public string Email { get; set; }
 
         public string Message
         {

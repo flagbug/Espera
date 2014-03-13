@@ -1,4 +1,5 @@
-﻿using Espera.Core.Management;
+﻿using Espera.Core.Analytics;
+using Espera.Core.Management;
 using Rareform.Validation;
 using ReactiveUI;
 using System;
@@ -18,7 +19,8 @@ namespace Espera.Services
     /// </summary>
     public class MobileApi : IDisposable, IEnableLogger
     {
-        private readonly List<MobileClient> clients;
+        private readonly object clientListGate;
+        private readonly ReactiveList<MobileClient> clients;
         private readonly Library library;
         private readonly int port;
         private bool dispose;
@@ -34,7 +36,13 @@ namespace Espera.Services
 
             this.port = port;
             this.library = library;
-            this.clients = new List<MobileClient>();
+            this.clients = new ReactiveList<MobileClient>();
+            this.clientListGate = new object();
+        }
+
+        public IObservable<int> ConnectedClients
+        {
+            get { return this.clients.CountChanged; }
         }
 
         public void Dispose()
@@ -44,9 +52,14 @@ namespace Espera.Services
             this.dispose = true;
             this.listener.Stop();
 
-            foreach (MobileClient client in clients)
+            lock (this.clientListGate)
             {
-                client.Dispose();
+                foreach (MobileClient client in clients)
+                {
+                    client.Dispose();
+                }
+
+                this.clients.Clear();
             }
         }
 
@@ -60,8 +73,8 @@ namespace Espera.Services
             {
                 IEnumerable<IPAddress> localSubnets = addresses.Where(x => x.AddressFamily == AddressFamily.InterNetwork);
 
-                // Get all intern networks and fire our discovery message on the last byte up and down
-                // This is the only way to ensure that the clients can discover the server reliably
+                // Get all intern networks and fire our discovery message on the last byte up and
+                // down This is the only way to ensure that the clients can discover the server reliably
                 foreach (IPAddress ipAddress in localSubnets)
                 {
                     byte[] address = ipAddress.GetAddressBytes();
@@ -96,6 +109,8 @@ namespace Espera.Services
                 {
                     this.Log().Info("New client detected");
 
+                    AnalyticsClient.Instance.RecordMobileUsage();
+
                     var mobileClient = new MobileClient(socket, this.library);
 
                     mobileClient.Disconnected.FirstAsync()
@@ -103,12 +118,18 @@ namespace Espera.Services
                         {
                             mobileClient.Dispose();
 
-                            this.clients.Remove(mobileClient);
+                            lock (this.clientListGate)
+                            {
+                                this.clients.Remove(mobileClient);
+                            }
                         });
 
                     mobileClient.ListenAsync();
 
-                    this.clients.Add(mobileClient);
+                    lock (this.clientListGate)
+                    {
+                        this.clients.Add(mobileClient);
+                    }
                 });
         }
     }

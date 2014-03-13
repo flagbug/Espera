@@ -30,6 +30,11 @@ namespace Espera.View.ViewModels
             get { return this.Model.Duration; }
         }
 
+        public string FormattedDuration
+        {
+            get { return this.Duration.FormatAdaptive(); }
+        }
+
         public string Genre
         {
             get { return this.Model.Genre; }

@@ -2,6 +2,7 @@
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
+using Espera.Services;
 using Rareform.Extensions;
 using ReactiveMarrow;
 using ReactiveUI;
@@ -26,21 +27,22 @@ namespace Espera.View.ViewModels
         private readonly CoreSettings coreSettings;
         private readonly ObservableAsPropertyHelper<int> currentSeconds;
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
-        private readonly ObservableAsPropertyHelper<TimeSpan> currentTime;
+        private readonly ObservableAsPropertyHelper<string> currentTime;
         private readonly ObservableAsPropertyHelper<bool> displayTimeoutWarning;
         private readonly CompositeDisposable disposable;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly ObservableAsPropertyHelper<bool> isPlaying;
         private readonly Library library;
         private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
+        private readonly ObservableAsPropertyHelper<bool> showVotes;
         private readonly ObservableAsPropertyHelper<int> totalSeconds;
-        private readonly ObservableAsPropertyHelper<TimeSpan> totalTime;
+        private readonly ObservableAsPropertyHelper<string> totalTime;
         private bool isLocal;
         private bool isYoutube;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
         private bool showVideoPlayer;
 
-        public ShellViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, IWindowManager windowManager)
+        public ShellViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, IWindowManager windowManager, MobileApiInfo mobileApiInfo)
         {
             this.library = library;
             this.ViewSettings = viewSettings;
@@ -60,6 +62,10 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.CanChangeVolume);
             this.canAlterPlaylist = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlaylist))
                 .ToProperty(this, x => x.CanAlterPlaylist);
+
+            this.showVotes = this.coreSettings.WhenAnyValue(x => x.EnableVotingSystem)
+                .CombineLatest(mobileApiInfo.ConnectedClientCount, (enableVoting, connectedClients) => enableVoting && connectedClients > 0)
+                .ToProperty(this, x => x.ShowVotes);
 
             this.isAdmin = this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken)
                 .Select(x => x == AccessPermission.Admin)
@@ -123,6 +129,8 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.IsPlaying);
 
             this.currentTime = this.library.CurrentTimeChanged
+                .StartWith(TimeSpan.Zero)
+                .Select(x => x.FormatAdaptive())
                 .ToProperty(this, x => x.CurrentTime);
 
             this.currentSeconds = this.library.CurrentTimeChanged
@@ -130,6 +138,7 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.CurrentSeconds);
 
             this.totalTime = this.library.TotalTime
+                .Select(x => x.FormatAdaptive())
                 .ToProperty(this, x => x.TotalTime);
 
             this.totalSeconds = this.library.TotalTime
@@ -152,7 +161,8 @@ namespace Espera.View.ViewModels
                 .CombineLatest(this.WhenAnyValue(x => x.IsAdmin), this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.library.LoadedSong, this.library.PlaybackState,
                     (selectedPlaylistEntries, isAdmin, lockPlayPause, loadedSong, playBackState) =>
 
-                        // The admin can always play, but if we are in party mode, we have to check whether it is allowed to play
+                        // The admin can always play, but if we are in party mode, we have to check
+                        // whether it is allowed to play
                         (isAdmin || !lockPlayPause) &&
 
                         // If exactly one song is selected, the command can be executed
@@ -214,8 +224,8 @@ namespace Espera.View.ViewModels
                 .ToCommand();
             this.RemoveSelectedPlaylistEntriesCommand.Subscribe(x => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index), this.accessToken));
 
-            // We re-evaluate the selected entries after each up or down move here,
-            // because WPF doesn't send us proper updates about the selection
+            // We re-evaluate the selected entries after each up or down move here, because WPF
+            // doesn't send us proper updates about the selection
             var reEvaluateSelectedPlaylistEntry = new Subject<Unit>();
             this.MovePlaylistSongUpCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .Merge(reEvaluateSelectedPlaylistEntry.Select(_ => this.SelectedPlaylistEntries))
@@ -301,7 +311,7 @@ namespace Espera.View.ViewModels
             get { return this.currentSongSource.Value; }
         }
 
-        public TimeSpan CurrentTime
+        public string CurrentTime
         {
             get { return this.currentTime.Value; }
         }
@@ -408,6 +418,11 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.showVideoPlayer, value); }
         }
 
+        public bool ShowVotes
+        {
+            get { return this.showVotes.Value; }
+        }
+
         public IReactiveCommand ShufflePlaylistCommand { get; private set; }
 
         public int TotalSeconds
@@ -415,7 +430,7 @@ namespace Espera.View.ViewModels
             get { return this.totalSeconds.Value; }
         }
 
-        public TimeSpan TotalTime
+        public string TotalTime
         {
             get { return this.totalTime.Value; }
         }
@@ -426,7 +441,8 @@ namespace Espera.View.ViewModels
         public IReactiveCommand UnMuteCommand { get; private set; }
 
         /// <summary>
-        /// Occurs when the view should update the screen state to maximized state or restore it to normal state
+        /// Occurs when the view should update the screen state to maximized state or restore it to
+        /// normal state
         /// </summary>
         public IObservable<AccessPermission> UpdateScreenState
         {
@@ -490,13 +506,16 @@ namespace Espera.View.ViewModels
         }
 
         /// <summary>
-        /// Creates a boolean observable that returns whether the user has the permission to do an administrator action.
+        /// Creates a boolean observable that returns whether the user has the permission to do an
+        /// administrator action.
         /// </summary>
-        /// <param name="combinator">An additional combinator that returns whether the action is restricted in guest mode.</param>
+        /// <param name="combinator">
+        /// An additional combinator that returns whether the action is restricted in guest mode.
+        /// </param>
         /// <remarks>
-        /// The user has admin access => Always returns true
-        /// The user has guest access and combinator is true => Returns false
-        /// The user has guest access and combinator is false => Returns true
+        /// The user has admin access =&gt; Always returns true The user has guest access and
+        /// combinator is true =&gt; Returns false The user has guest access and combinator is false
+        /// = &gt; Returns true
         /// </remarks>
         private IObservable<bool> HasAccess(IObservable<bool> combinator)
         {

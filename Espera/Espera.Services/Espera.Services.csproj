@@ -35,6 +35,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Buddy">
+      <HintPath>..\packages\BuddyPlatformSdk.1.5.1.5\lib\net45\Buddy.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -76,8 +79,8 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="FogBugzService.cs" />
     <Compile Include="MobileApi.cs" />
+    <Compile Include="MobileApiInfo.cs" />
     <Compile Include="MobileClient.cs" />
     <Compile Include="MobileHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -91,6 +94,10 @@
     <ProjectReference Include="..\Espera.Core\Espera.Core.csproj">
       <Project>{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}</Project>
       <Name>Espera.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Espera.Network\Espera.Network\Espera.Network.csproj">
+      <Project>{4cbd2b72-34e1-4d9c-8348-3b90bf25d4c5}</Project>
+      <Name>Espera.Network</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

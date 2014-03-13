@@ -1,4 +1,5 @@
 ﻿using Akavache;
+using Espera.Core.Analytics;
 using Espera.Core.Audio;
 using Espera.Core.Settings;
 using Rareform.Extensions;
@@ -86,17 +87,13 @@ namespace Espera.Core.Management
         /// <summary>
         /// Gets a value indicating whether the next song in the playlist can be played.
         /// </summary>
-        /// <value>
-        /// true if the next song in the playlist can be played; otherwise, false.
-        /// </value>
+        /// <value>true if the next song in the playlist can be played; otherwise, false.</value>
         public IObservable<bool> CanPlayNextSong { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the previous song in the playlist can be played.
         /// </summary>
-        /// <value>
-        /// true if the previous song in the playlist can be played; otherwise, false.
-        /// </value>
+        /// <value>true if the previous song in the playlist can be played; otherwise, false.</value>
         public IObservable<bool> CanPlayPreviousSong { get; private set; }
 
         public Playlist CurrentPlaylist { get; private set; }
@@ -117,8 +114,8 @@ namespace Espera.Core.Management
         public IObservable<TimeSpan> CurrentTimeChanged { get; private set; }
 
         /// <summary>
-        /// Gets an observable that reports whether the library is currently
-        /// looking for new songs at the song source or removing songs that don't exist anymore.
+        /// Gets an observable that reports whether the library is currently looking for new songs
+        /// at the song source or removing songs that don't exist anymore.
         /// </summary>
         public IObservable<bool> IsUpdating
         {
@@ -138,7 +135,7 @@ namespace Espera.Core.Management
         public IObservable<AudioPlayerState> PlaybackState { get; private set; }
 
         /// <summary>
-        /// Returns an enumeration of playlists that implements <see cref="INotifyCollectionChanged"/>.
+        /// Returns an enumeration of playlists that implements <see cref="INotifyCollectionChanged" />.
         /// </summary>
         public IReadOnlyReactiveList<Playlist> Playlists
         {
@@ -203,8 +200,12 @@ namespace Espera.Core.Management
         /// <summary>
         /// Adds a new playlist to the library and immediately sets it as the current playlist.
         /// </summary>
-        /// <param name="name">The name of the playlist, It is required that no other playlist has this name.</param>
-        /// <exception cref="InvalidOperationException">A playlist with the specified name already exists.</exception>
+        /// <param name="name">
+        /// The name of the playlist, It is required that no other playlist has this name.
+        /// </param>
+        /// <exception cref="InvalidOperationException">
+        /// A playlist with the specified name already exists.
+        /// </exception>
         public void AddAndSwitchToPlaylist(string name, Guid accessToken)
         {
             this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylist);
@@ -216,8 +217,12 @@ namespace Espera.Core.Management
         /// <summary>
         /// Adds a new playlist with the specified name to the library.
         /// </summary>
-        /// <param name="name">The name of the playlist. It is required that no other playlist has this name.</param>
-        /// <exception cref="InvalidOperationException">A playlist with the specified name already exists.</exception>
+        /// <param name="name">
+        /// The name of the playlist. It is required that no other playlist has this name.
+        /// </param>
+        /// <exception cref="InvalidOperationException">
+        /// A playlist with the specified name already exists.
+        /// </exception>
         public void AddPlaylist(string name, Guid accessToken)
         {
             if (name == null)
@@ -232,8 +237,8 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Adds the specified song to the end of the playlist.
-        /// This method is only available in administrator mode.
+        /// Adds the specified song to the end of the playlist. This method is only available in
+        /// administrator mode.
         /// </summary>
         /// <param name="songList">The songs to add to the end of the playlist.</param>
         public void AddSongsToPlaylist(IEnumerable<Song> songList, Guid accessToken)
@@ -247,8 +252,8 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Adds the song to the end of the playlist.
-        /// This method throws an exception, if there is an outstanding timeout.
+        /// Adds the song to the end of the playlist. This method throws an exception, if there is
+        /// an outstanding timeout.
         /// </summary>
         /// <param name="song">The song to add to the end of the playlist.</param>
         public void AddSongToPlaylist(Song song)
@@ -625,7 +630,8 @@ namespace Espera.Core.Management
 
             List<LocalSong> enumerable = songList.ToList();
 
-            // NB: Check if the number of occurences of the artwork key match the number of songs with the same artwork key
+            // NB: Check if the number of occurences of the artwork key match the number of songs
+            //     with the same artwork key
             // so we don't delete artwork keys that still have a corresponding song in the library
             Dictionary<string, int> artworkKeys = this.Songs
                 .Select(x => x.ArtworkKey.FirstAsync().Wait())
@@ -722,10 +728,9 @@ namespace Espera.Core.Management
 
                     bool added = this.songs.Add(song);
 
-                    // Inverse the condition, as this case happens way more often and
-                    // we want to release the lock as soon as possible
-                    // We also keep the write lock open so we can be sure we find
-                    // the song and it isn't removed in the meanwhile
+                    // Inverse the condition, as this case happens way more often and we want to
+                    // release the lock as soon as possible We also keep the write lock open so we
+                    // can be sure we find the song and it isn't removed in the meanwhile
                     if (!added)
                     {
                         Song existing = this.songs.First(x => x.OriginalPath == song.OriginalPath);
@@ -768,7 +773,16 @@ namespace Espera.Core.Management
 
                         this.songsUpdated.OnNext(Unit.Default);
                     }
-                }, () => this.isUpdating.OnNext(false));
+                }, () =>
+                {
+                    this.songLock.EnterReadLock();
+                    int songCount = this.songs.Count;
+                    this.songLock.ExitReadLock();
+
+                    AnalyticsClient.Instance.RecordLibrarySizeAsync(songCount);
+
+                    this.isUpdating.OnNext(false);
+                });
         }
     }
 }

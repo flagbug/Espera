@@ -1,5 +1,6 @@
 ﻿using Akavache;
 using Caliburn.Micro;
+using Espera.Core.Analytics;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Espera.Services;
@@ -20,6 +21,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
@@ -111,6 +113,8 @@ namespace Espera.View
 
             Directory.CreateDirectory(DirectoryPath);
 
+            this.SetupAnalyticsClient();
+
             this.SetupLager();
 
             this.SetupMobileApi();
@@ -147,13 +151,21 @@ namespace Espera.View
             var target = new FileTarget
             {
                 FileName = LogFilePath,
-                Layout = @"${longdate}|${logger}|${level}|${message} ${exception:format=ToString,StackTrace}"
+                Layout = @"${longdate}|${logger}|${level}|${message} ${exception:format=ToString,StackTrace}",
+                ArchiveAboveSize = 1024 * 1024 * 2, // 2 MB
+                ArchiveNumbering = ArchiveNumberingMode.Sequence
             };
 
             logConfig.LoggingRules.Add(new LoggingRule("*", NLog.LogLevel.Info, target));
             NLog.LogManager.Configuration = logConfig;
 
             RxApp.MutableResolver.RegisterConstant(new NLogLogger(NLog.LogManager.GetCurrentClassLogger()), typeof(ILogger));
+        }
+
+        private async Task SetupAnalyticsClient()
+        {
+            var coreSettings = this.kernel.Get<CoreSettings>();
+            await AnalyticsClient.Instance.InitializeAsync(coreSettings);
         }
 
         private void SetupLager()
@@ -174,21 +186,32 @@ namespace Espera.View
             this.Log().Info("Remote control is {0}", coreSettings.EnableRemoteControl ? "enabled" : "disabled");
             this.Log().Info("Port is set to {0}", coreSettings.Port);
 
-            coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged()
+            IObservable<MobileApi> apiChanged = coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged()
                 .CombineLatest(coreSettings.WhenAnyValue(x => x.EnableRemoteControl), Tuple.Create)
                 .Where(x => x.Item2)
                 .Select(x => x.Item1)
-                .Subscribe(x =>
+                .Do(_ =>
                 {
                     if (this.mobileApi != null)
                     {
                         this.mobileApi.Dispose();
                     }
+                })
+                .Select(x => new MobileApi(x, library)).Publish(null).RefCount().Where(x => x != null);
 
-                    this.mobileApi = new MobileApi(x, library);
-                    this.mobileApi.SendBroadcastAsync();
-                    this.mobileApi.StartClientDiscovery();
-                });
+            apiChanged.Subscribe(x =>
+            {
+                this.mobileApi = x;
+                x.SendBroadcastAsync();
+                x.StartClientDiscovery();
+            });
+
+            IConnectableObservable<int> connectedClients = apiChanged.Select(x => x.ConnectedClients).Switch().Publish(0);
+            connectedClients.Connect();
+
+            var apiStats = new MobileApiInfo(connectedClients);
+
+            this.kernel.Bind<MobileApiInfo>().ToConstant(apiStats);
 
             coreSettings.WhenAnyValue(x => x.EnableRemoteControl)
                 .Where(x => !x && this.mobileApi != null)

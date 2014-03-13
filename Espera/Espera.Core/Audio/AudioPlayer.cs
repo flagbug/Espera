@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Espera.Core.Audio
 {
     /// <summary>
-    /// This class implements the basic audio player behavior.
-    /// The actual playback implementation is defined by the setters of
-    /// <see cref="IAudioPlayerCallback"/> (in this case a media element)
+    /// This class implements the basic audio player behavior. The actual playback implementation is
+    /// defined by the setters of <see cref="IAudioPlayerCallback" /> (in this case a media element)
     /// </summary>
     public sealed class AudioPlayer : IAudioPlayerCallback
     {
@@ -98,7 +98,7 @@ namespace Espera.Core.Audio
         /// <summary>
         /// Loads the specified song asynchronously into the audio player.
         /// </summary>
-        /// <exception cref="ArgumentNullException"><paramref name="song"/> is <c>null</c></exception>
+        /// <exception cref="ArgumentNullException"><paramref name="song" /> is <c>null</c></exception>
         /// <exception cref="SongLoadException">An error occured while loading the song.</exception>
         internal async Task LoadAsync(Song song)
         {
@@ -129,7 +129,8 @@ namespace Espera.Core.Audio
         }
 
         /// <summary>
-        /// Plays the loaded song asynchronously and sets the <see cref="PlaybackState"/> to <see cref="AudioPlayerState.Playing"/>
+        /// Plays the loaded song asynchronously and sets the <see cref="PlaybackState" /> to <see
+        /// cref="AudioPlayerState.Playing" />
         /// </summary>
         /// <exception cref="PlaybackException">An error occured while playing the song.</exception>
         internal async Task PlayAsync()
@@ -165,16 +166,12 @@ namespace Espera.Core.Audio
 
         private async Task SetPlaybackStateAsync(AudioPlayerState state)
         {
-            var connection = this.playbackState.FirstAsync(x => x == state)
-                .PublishLast();
+            var connection = this.playbackState.FirstAsync(x => x == state).ToTask();
 
-            using (connection.Connect())
-            {
-                // This is a poor man's trampoline
-                Task.Run(() => this.playbackState.OnNext(state));
+            // This is a poor man's trampoline
+            Task.Run(() => this.playbackState.OnNext(state));
 
-                await connection;
-            }
+            await connection;
         }
     }
 }
