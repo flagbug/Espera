@@ -8,9 +8,10 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Espera music player</description>
     <tags>espera music player party</tags>
-    <dependencies>
-      <dependency id="Espera.Core" version="[$version$]" />
-      <dependency id="Espera.Services" version="[$version$]" />
-    </dependencies>
   </metadata>
+  <files>
+    <file src="bin\Release\*.dll" target="lib\net45\" />
+    <file src="bin\Release\Espera.exe" target="lib\net45\" />
+    <file src="bin\Release\Espera.exe.config" target="lib\net45\" />
+  </files>
 </package>
