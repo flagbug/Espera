@@ -11,12 +11,15 @@ using NLog.Config;
 using NLog.Targets;
 using ReactiveUI;
 using ReactiveUI.NLog;
+using Shimmer.Client;
+using Shimmer.Core;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -116,6 +119,8 @@ namespace Espera.View
 
             this.SetupMobileApi();
 
+            this.UpdateSilentlyAsync();
+
             base.OnStartup(sender, e);
         }
 
@@ -211,6 +216,81 @@ namespace Espera.View
             coreSettings.WhenAnyValue(x => x.EnableRemoteControl)
                 .Where(x => !x && this.mobileApi != null)
                 .Subscribe(x => this.mobileApi.Dispose());
+        }
+
+        private async Task UpdateSilentlyAsync()
+        {
+            var settings = this.kernel.Get<ViewSettings>();
+#if DEBUG
+            string updateUrl = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..", "Releases");
+            updateUrl = Path.GetFullPath(updateUrl);
+#else
+            string updateUrl = null;
+
+            switch (settings.UpdateChannel)
+            {
+                case UpdateChannel.Dev:
+                    updateUrl = "http://espera.s3.amazonaws.com/Releases/Dev";
+                    break;
+
+                case UpdateChannel.Stable:
+                    updateUrl = "http://espera.s3.amazonaws.com/Releases/Stable";
+                    break;
+            }
+#endif
+
+            using (var updateManager = new UpdateManager(updateUrl, "Espera", FrameworkVersion.Net45))
+            {
+                this.Log().Info("Looking for application updates at {0}", updateUrl);
+
+                UpdateInfo updateInfo = await updateManager.CheckForUpdate()
+                    .LoggedCatch(this, Observable.Return<UpdateInfo>(null), "Error while checking for updates: ");
+
+                if (updateInfo == null)
+                    return;
+
+                List<ReleaseEntry> releases = updateInfo.ReleasesToApply.ToList();
+
+                if (releases.Any())
+                {
+                    this.Log().Info("Found {0} updates.", releases.Count);
+                    this.Log().Info("Downloading updates...");
+
+                    try
+                    {
+                        await updateManager.DownloadReleases(releases);
+                    }
+
+                    catch (Exception ex)
+                    {
+                        this.Log().ErrorException("Failed downloading updates.", ex);
+                        return;
+                    }
+
+                    this.Log().Info("Updates downloaded.");
+                    this.Log().Info("Applying updates...");
+
+                    try
+                    {
+                        await updateManager.ApplyReleases(updateInfo);
+                    }
+
+                    catch (Exception ex)
+                    {
+                        this.Log().Fatal("Failed applying updates.", ex);
+                        return;
+                    }
+
+                    this.Log().Info("Updates applied.");
+
+                    settings.IsUpdated = true;
+                }
+
+                else
+                {
+                    this.Log().Info("No updates found.");
+                }
+            }
         }
     }
 }

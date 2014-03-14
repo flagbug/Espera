@@ -49,6 +49,7 @@ namespace Espera.View.ViewModels
             this.coreSettings = coreSettings;
 
             this.disposable = new CompositeDisposable();
+            this.UpdateViewModel = new UpdateViewModel(viewSettings);
 
             this.library.Initialize();
             this.accessToken = this.library.LocalAccessControl.RegisterLocalAccessToken();
@@ -447,6 +448,8 @@ namespace Espera.View.ViewModels
         {
             get { return this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken); }
         }
+
+        public UpdateViewModel UpdateViewModel { get; private set; }
 
         public ViewSettings ViewSettings { get; private set; }
 

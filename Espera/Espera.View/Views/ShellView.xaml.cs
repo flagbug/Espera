@@ -2,6 +2,7 @@ using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.View.ViewModels;
 using MahApps.Metro;
+using MahApps.Metro.Controls.Dialogs;
 using ReactiveUI;
 using System;
 using System.ComponentModel;
@@ -41,11 +42,28 @@ namespace Espera.View.Views
                     .ObserveOn(RxApp.MainThreadScheduler)
                     .Subscribe(x => this.PlaylistListBox.ScrollIntoView(x));
             };
+
+            this.Loaded += async (sender, args) =>
+            {
+                if (((ShellViewModel)this.DataContext).UpdateViewModel.IsUpdated)
+                {
+                    var dialog = (SimpleDialog)this.Resources["Changelog"];
+
+                    await this.ShowMetroDialogAsync(dialog);
+                }
+            };
         }
 
         private void ChangeColor(string color)
         {
             ThemeManager.ChangeTheme(this, ThemeManager.DefaultAccents.First(accent => accent.Name == color), Theme.Dark);
+        }
+
+        private async void CloseChangelog(object sender, RoutedEventArgs e)
+        {
+            var dialog = (SimpleDialog)this.Resources["Changelog"];
+
+            await this.HideMetroDialogAsync(dialog);
         }
 
         private void LoginButtonClick(object sender, RoutedEventArgs e)

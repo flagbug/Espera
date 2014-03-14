@@ -20,10 +20,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{99EB91
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
 		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.Services", "Espera.Services\Espera.Services.csproj", "{CD457EBC-86CC-434B-BB0D-0DB4F93E4A56}"
 	ProjectSection(ProjectDependencies) = postProject
+		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D} = {D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}
 		{4CBD2B72-34E1-4D9C-8348-3B90BF25D4C5} = {4CBD2B72-34E1-4D9C-8348-3B90BF25D4C5}
 	EndProjectSection
 EndProject

@@ -22,6 +22,12 @@ namespace Espera.View
             set { this.SetOrCreate(value); }
         }
 
+        public bool IsUpdated
+        {
+            get { return this.GetOrCreate(false); }
+            set { this.SetOrCreate(value); }
+        }
+
         public int LocalDurationColumnWidth
         {
             get { return this.GetOrCreate(100); }
@@ -49,6 +55,12 @@ namespace Espera.View
         public double Scaling
         {
             get { return this.GetOrCreate(1.0); }
+            set { this.SetOrCreate(value); }
+        }
+
+        public UpdateChannel UpdateChannel
+        {
+            get { return this.GetOrCreate(UpdateChannel.Stable); }
             set { this.SetOrCreate(value); }
         }
 
