@@ -256,12 +256,30 @@ namespace Espera.View
                     this.Log().Info("Found {0} updates.", releases.Count);
                     this.Log().Info("Downloading updates...");
 
-                    await updateManager.DownloadReleases(releases);
+                    try
+                    {
+                        await updateManager.DownloadReleases(releases);
+                    }
+
+                    catch (Exception ex)
+                    {
+                        this.Log().ErrorException("Failed downloading updates.", ex);
+                        return;
+                    }
 
                     this.Log().Info("Updates downloaded.");
                     this.Log().Info("Applying updates...");
 
-                    await updateManager.ApplyReleases(updateInfo);
+                    try
+                    {
+                        await updateManager.ApplyReleases(updateInfo);
+                    }
+
+                    catch (Exception ex)
+                    {
+                        this.Log().Fatal("Failed applying updates.", ex);
+                        return;
+                    }
 
                     this.Log().Info("Updates applied.");
 
