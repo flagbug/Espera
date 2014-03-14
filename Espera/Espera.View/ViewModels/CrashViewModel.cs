@@ -11,6 +11,8 @@ namespace Espera.View.ViewModels
 
         public CrashViewModel(Exception exception)
         {
+            this.ReportContent = exception.ToString();
+
             this.SubmitCrashReport = this.WhenAnyValue(x => x.SendingSucceeded)
                 .Select(x => x == null || !x.Value)
                 .ToCommand();
@@ -20,6 +22,8 @@ namespace Espera.View.ViewModels
                 .Select(x => new bool?(x))
                 .ToProperty(this, x => x.SendingSucceeded);
         }
+
+        public string ReportContent { get; private set; }
 
         public bool? SendingSucceeded
         {
