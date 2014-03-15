@@ -1,5 +1,4 @@
 ﻿using Akavache;
-using Espera.Core.Settings;
 using Lager;
 
 namespace Espera.View
@@ -60,7 +59,7 @@ namespace Espera.View
 
         public UpdateChannel UpdateChannel
         {
-            get { return this.GetOrCreate(UpdateChannel.Stable); }
+            get { return this.GetOrCreate(UpdateChannel.Dev); }
             set { this.SetOrCreate(value); }
         }
 
