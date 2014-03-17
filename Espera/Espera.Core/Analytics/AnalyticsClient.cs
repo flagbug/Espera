@@ -107,9 +107,18 @@ namespace Espera.Core.Analytics
 
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-            string logId = await this.SendLogFileAsync();
+            string logId = await this.SendLogFileAsync() ?? String.Empty;
 
-            await this.client.Device.RecordCrashAsync(message, Environment.OSVersion.VersionString, "Desktop", this.user, null, version, metadata: logId);
+            try
+            {
+                await this.client.Device.RecordCrashAsync(message, Environment.OSVersion.VersionString, "Desktop", this.user, null, version, metadata: logId);
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Couldn't send bug report", ex);
+                return false;
+            }
 
             return true;
         }
@@ -129,10 +138,19 @@ namespace Espera.Core.Analytics
 
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-            string logId = await this.SendLogFileAsync();
+            string logId = await this.SendLogFileAsync() ?? String.Empty;
 
-            await this.client.Device.RecordCrashAsync(exception.Message, Environment.OSVersion.VersionString,
-                "Desktop", this.user, exception.StackTrace, version, metadata: logId);
+            try
+            {
+                await this.client.Device.RecordCrashAsync(exception.Message, Environment.OSVersion.VersionString,
+                    "Desktop", this.user, exception.StackTrace, version, metadata: logId);
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Couldn't send crash report", ex);
+                return false;
+            }
 
             return true;
         }
@@ -146,10 +164,18 @@ namespace Espera.Core.Analytics
 
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-            string logId = await this.SendLogFileAsync();
+            string logId = await this.SendLogFileAsync() ?? String.Empty;
 
-            await this.client.Device.RecordCrashAsync(exception.Message, Environment.OSVersion.VersionString,
-                "Desktop", this.user, exception.StackTrace, version, metadata: logId);
+            try
+            {
+                await this.client.Device.RecordCrashAsync(exception.Message, Environment.OSVersion.VersionString,
+                    "Desktop", this.user, exception.StackTrace, version, metadata: logId);
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Couldn't send error report", ex);
+            }
         }
 
         public async Task RecordLibrarySizeAsync(int songCount)
