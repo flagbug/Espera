@@ -45,11 +45,15 @@ namespace Espera.View.Views
 
             this.Loaded += async (sender, args) =>
             {
-                if (((ShellViewModel)this.DataContext).UpdateViewModel.IsUpdated)
+                var updateViewModel = ((ShellViewModel)this.DataContext).UpdateViewModel;
+
+                if (updateViewModel.IsUpdated)
                 {
                     var dialog = (SimpleDialog)this.Resources["Changelog"];
 
                     await this.ShowMetroDialogAsync(dialog);
+
+                    updateViewModel.ChangelogShown();
                 }
             };
         }
