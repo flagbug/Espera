@@ -1,3 +1,26 @@
+----------------------------------- v2.0.0 Beta 1 -----------------------------------
+
+FEATURES:
+- Espera has been completely rewritten
+- Double clicking a song now starts the playback instantly, 
+  there's no need to create a new playlist beforehand.
+- New songs in the library folder and existing ones are automatically updates 
+  if their metatdata has changed.
+- The YouTube player can now show the video and has support for multiple 
+  quality settings.
+- Added support for AAC playback.
+- Added a completely new update system that applies updates in the background.
+- Album covers are now displayed next to the artist.
+- Added a slider to change the scaling of the application. This is useful when 
+  Espera is displayed on a TV screen.
+- Espera can now be remote-controled via an Android app. The app will soon be 
+  released.
+- Added support for downloadig YouTube videos directly.
+
+CHANGES:
+- Youtube streaming is now enabled by default.
+- Espera now requires .NET 4.5 to be installed.
+
 ----------------------------------- v1.7.6 -----------------------------------
 
 CHANGES:
