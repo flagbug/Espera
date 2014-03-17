@@ -137,6 +137,21 @@ namespace Espera.Core.Analytics
             return true;
         }
 
+        public async Task RecordErrorAsync(Exception exception)
+        {
+            await this.AwaitAuthenticationAsync();
+
+            if (!this.isAuthenticated)
+                return;
+
+            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+            string logId = await this.SendLogFileAsync();
+
+            await this.client.Device.RecordCrashAsync(exception.Message, Environment.OSVersion.VersionString,
+                "Desktop", this.user, exception.StackTrace, version, metadata: logId);
+        }
+
         public async Task RecordLibrarySizeAsync(int songCount)
         {
             await this.AwaitAuthenticationAsync();

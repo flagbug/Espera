@@ -268,6 +268,7 @@ namespace Espera.View
                     }
 
                     this.Log().Info("Updates downloaded.");
+                    this.Log().Info("Updating from v{0} to v{1}", updateInfo.CurrentlyInstalledVersion.Version, releases.Last().Version);
                     this.Log().Info("Applying updates...");
 
                     try
@@ -277,7 +278,8 @@ namespace Espera.View
 
                     catch (Exception ex)
                     {
-                        this.Log().Fatal("Failed applying updates.", ex);
+                        this.Log().Fatal("Failed to apply updates.", ex);
+                        AnalyticsClient.Instance.RecordErrorAsync(ex);
                         return;
                     }
 
