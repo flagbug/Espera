@@ -574,6 +574,8 @@ namespace Espera.Core.Management
             {
                 this.Log().ErrorException("Failed to prepare song", ex);
 
+                AnalyticsClient.Instance.RecordErrorAsync(ex, false);
+
                 this.HandleSongCorruptionAsync();
 
                 return;

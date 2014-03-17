@@ -155,7 +155,7 @@ namespace Espera.Core.Analytics
             return true;
         }
 
-        public async Task RecordErrorAsync(Exception exception)
+        public async Task RecordErrorAsync(Exception exception, bool uploadLogFile = true)
         {
             await this.AwaitAuthenticationAsync();
 
@@ -164,7 +164,7 @@ namespace Espera.Core.Analytics
 
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-            string logId = await this.SendLogFileAsync() ?? String.Empty;
+            string logId = uploadLogFile ? await this.SendLogFileAsync() ?? String.Empty : String.Empty;
 
             try
             {
