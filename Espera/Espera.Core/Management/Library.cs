@@ -570,8 +570,10 @@ namespace Espera.Core.Management
                 await song.PrepareAsync(this.settings.StreamHighestYoutubeQuality ? YoutubeStreamingQuality.High : this.settings.YoutubeStreamingQuality);
             }
 
-            catch (SongPreparationException)
+            catch (SongPreparationException ex)
             {
+                this.Log().ErrorException("Failed to prepare song", ex);
+
                 this.HandleSongCorruptionAsync();
 
                 return;
@@ -582,8 +584,9 @@ namespace Espera.Core.Management
                 await this.audioPlayer.LoadAsync(song);
             }
 
-            catch (SongLoadException)
+            catch (SongLoadException ex)
             {
+                this.Log().ErrorException("Failed to load song", ex);
                 song.IsCorrupted.Value = true;
 
                 this.HandleSongCorruptionAsync();
@@ -596,8 +599,9 @@ namespace Espera.Core.Management
                 await this.audioPlayer.PlayAsync();
             }
 
-            catch (PlaybackException)
+            catch (PlaybackException ex)
             {
+                this.Log().ErrorException("Failed to play song", ex);
                 song.IsCorrupted.Value = true;
 
                 this.HandleSongCorruptionAsync();

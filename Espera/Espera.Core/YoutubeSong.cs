@@ -81,13 +81,13 @@ namespace Espera.Core
             {
                 if (ex is WebException || ex is VideoNotAvailableException || ex is YoutubeParseException)
                 {
-                    throw new SongPreparationException();
+                    throw new SongPreparationException(ex);
                 }
             }
 
             if (video == null)
             {
-                throw new SongPreparationException();
+                throw new SongPreparationException("No suitable video found");
             }
 
             this.PlaybackPath = video.DownloadUrl;
