@@ -1,121 +1,87 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 
 namespace Espera.Core.Management
 {
     internal static class LibraryReader
     {
-        public static IReadOnlyList<Playlist> ReadPlaylists(Stream stream)
+        public static IReadOnlyList<Playlist> ReadPlaylists(JObject json, IReadOnlyList<Song> songCache = null)
         {
-            IEnumerable<Song> songs = ReadSongs(stream);
+            IEnumerable<Song> songs = songCache ?? ReadSongs(json);
 
-            stream.Position = 0;
-
-            var playlists = XDocument.Load(stream)
-                .Descendants("Root")
-                .Descendants("Playlists")
-                .Elements("Playlist")
-                .Select
-                (
-                    playlist =>
-                        new
-                        {
-                            Name = playlist.Attribute("Name").Value,
-                            Entries = playlist
-                                .Descendants("Entries")
-                                .Elements("Entry")
-                                .Select
-                                (
-                                    entry =>
-                                    {
-                                        var type = entry.Attribute("Type").Value == "Local" ? typeof(LocalSong) : typeof(YoutubeSong);
-
-                                        TimeSpan? duration = null;
-                                        string title = null;
-
-                                        if (type == typeof(YoutubeSong))
-                                        {
-                                            duration = TimeSpan.FromTicks(Int64.Parse(entry.Attribute("Duration").Value));
-                                            title = entry.Attribute("Title").Value;
-                                        }
-
-                                        return new
-                                        {
-                                            Path = entry.Attribute("Path").Value,
-                                            Type = type,
-                                            Duration = duration,
-                                            Title = title
-                                        };
-                                    }
-                                )
-                        }
-                );
-
-            return playlists.Select
-            (
-                p =>
+            var playlists = json["playlists"].Select(playlist => new
+            {
+                Name = playlist["name"].ToObject<string>(),
+                Entries = playlist["entries"].Select(entry =>
                 {
-                    var playlist = new Playlist(p.Name);
+                    var type = entry["type"].ToObject<string>() == "Local" ? typeof(LocalSong) : typeof(YoutubeSong);
 
-                    var s = p.Entries
-                        .Select
-                        (
-                            entry =>
-                            {
-                                if (entry.Type == typeof(YoutubeSong))
-                                {
-                                    return new YoutubeSong(entry.Path, entry.Duration.Value)
-                                    {
-                                        Title = entry.Title
-                                    };
-                                }
+                    TimeSpan? duration = null;
+                    string title = null;
 
-                                return songs.First(song => song.OriginalPath == entry.Path);
-                            }
-                        );
+                    if (type == typeof(YoutubeSong))
+                    {
+                        duration = TimeSpan.FromTicks(entry["duration"].ToObject<long>());
+                        title = entry["title"].ToObject<string>();
+                    }
 
-                    playlist.AddSongs(s);
+                    return new
+                    {
+                        Path = entry["path"].ToObject<string>(),
+                        Type = type,
+                        Duration = duration,
+                        Title = title
+                    };
+                })
+            });
 
-                    return playlist;
-                }
-            )
-            .ToList();
-        }
+            return playlists.Select(p =>
+            {
+                var playlist = new Playlist(p.Name);
 
-        public static IReadOnlyList<LocalSong> ReadSongs(Stream stream)
-        {
-            return XDocument.Load(stream)
-                .Descendants("Root")
-                .Descendants("Songs")
-                .Elements("Song")
-                .Select
-                (
-                    song =>
-                        new LocalSong
-                        (
-                            song.Attribute("Path").Value,
-                            TimeSpan.FromTicks(Int64.Parse(song.Attribute("Duration").Value)),
-                            song.Attribute("ArtworkKey").Value == String.Empty ? null : song.Attribute("ArtworkKey").Value
-                        )
+                var s = p.Entries.Select(entry =>
+                {
+                    if (entry.Type == typeof(YoutubeSong))
+                    {
+                        return new YoutubeSong(entry.Path, entry.Duration.Value)
                         {
-                            Album = song.Attribute("Album").Value,
-                            Artist = song.Attribute("Artist").Value,
-                            Genre = song.Attribute("Genre").Value,
-                            Title = song.Attribute("Title").Value,
-                            TrackNumber = Int32.Parse(song.Attribute("TrackNumber").Value)
-                        }
-                )
-                .ToList();
+                            Title = entry.Title
+                        };
+                    }
+
+                    return songs.First(song => song.OriginalPath == entry.Path);
+                });
+
+                playlist.AddSongs(s);
+
+                return playlist;
+            }).ToList();
         }
 
-        public static string ReadSongSourcePath(Stream stream)
+        public static IReadOnlyList<LocalSong> ReadSongs(JObject json)
         {
-            stream.Position = 0;
+            return json["songs"].Select(song =>
+                new LocalSong
+                (
+                    song["path"].ToObject<string>(),
+                    TimeSpan.FromTicks(song["duration"].ToObject<long>()),
+                    song["artworkKey"] == null ? null : song["artworkKey"].ToObject<string>()
+                )
+                {
+                    Album = song["album"].ToObject<string>(),
+                    Artist = song["artist"].ToObject<string>(),
+                    Genre = song["genre"].ToObject<string>(),
+                    Title = song["title"].ToObject<string>(),
+                    TrackNumber = song["trackNumber"].ToObject<int>()
+                }
+            ).ToList();
+        }
 
-            return XDocument.Load(stream).Root.Element("SongSourcePath").Value;
+        public static string ReadSongSourcePath(JObject json)
+        {
+            return json["songSourcePath"] == null ? null : json["songSourcePath"].ToObject<string>();
         }
     }
 }

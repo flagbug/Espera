@@ -637,6 +637,7 @@ namespace Espera.Core.Management
 
             this.songSourcePath.OnNext(this.libraryReader.ReadSongSourcePath());
 
+            this.libraryReader.InvalidateCache();
             stopWatch.Stop();
 
             this.Log().Info("Library load took {0}ms", stopWatch.ElapsedMilliseconds);

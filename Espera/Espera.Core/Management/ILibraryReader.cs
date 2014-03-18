@@ -6,6 +6,8 @@ namespace Espera.Core.Management
     {
         bool LibraryExists { get; }
 
+        void InvalidateCache();
+
         IReadOnlyList<Playlist> ReadPlaylists();
 
         IReadOnlyList<LocalSong> ReadSongs();

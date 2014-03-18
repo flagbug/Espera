@@ -9,6 +9,7 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -144,30 +145,12 @@ namespace Espera.Core.Tests
 
         public static string GenerateSaveFile()
         {
-            return
-                "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
-                "<Root>" +
-                "  <Version>2.0.0</Version>" +
-                "  <SongSourcePath>" + SongSourcePath + "</SongSourcePath>" +
-                "  <Songs>" +
-                "    <Song Album=\"" + LocalSong1.Album + "\" Artist=\"" + LocalSong1.Artist + "\" Duration=\"" + LocalSong1.Duration.Ticks + "\" Genre=\"" + LocalSong1.Genre + "\" Path=\"" + LocalSong1.OriginalPath + "\" Title=\"" + LocalSong1.Title + "\" TrackNumber=\"" + LocalSong1.TrackNumber + "\" ArtworkKey=\"" + (LocalSong1.ArtworkKey.FirstAsync().Wait() ?? String.Empty) + "\" />" +
-                "    <Song Album=\"" + LocalSong2.Album + "\" Artist=\"" + LocalSong2.Artist + "\" Duration=\"" + LocalSong2.Duration.Ticks + "\" Genre=\"" + LocalSong2.Genre + "\" Path=\"" + LocalSong2.OriginalPath + "\" Title=\"" + LocalSong2.Title + "\" TrackNumber=\"" + LocalSong2.TrackNumber + "\" ArtworkKey=\"" + (LocalSong2.ArtworkKey.FirstAsync().Wait() ?? String.Empty) + "\" />" +
-                "  </Songs>" +
-                "  <Playlists>" +
-                "    <Playlist Name=\"" + Playlist1.Name + "\">" +
-                "      <Entries>" +
-                "        <Entry Path=\"" + LocalSong1.OriginalPath + "\" Type=\"Local\" />" +
-                "        <Entry Path=\"" + LocalSong2.OriginalPath + "\" Type=\"Local\" />" +
-                "      </Entries>" +
-                "    </Playlist>" +
-                "    <Playlist Name=\"" + Playlist2.Name + "\">" +
-                "      <Entries>" +
-                "        <Entry Path=\"" + LocalSong1.OriginalPath + "\" Type=\"Local\" />" +
-                "        <Entry Path=\"" + YoutubeSong1.OriginalPath + "\" Title=\"" + YoutubeSong1.Title + "\" Type=\"YouTube\" Duration=\"" + YoutubeSong1.Duration.Ticks + "\" />" +
-                "      </Entries>" +
-                "    </Playlist>" +
-                "  </Playlists>" +
-                "</Root>";
+            using (var stream = new MemoryStream())
+            {
+                LibraryWriter.Write(new[] { LocalSong1, LocalSong2 }, new[] { Playlist1, Playlist2 }, SongSourcePath, stream);
+
+                return Encoding.UTF8.GetString(stream.ToArray());
+            }
         }
 
         public static Song SetupSongMock(string name = "Song", bool callBase = false, TimeSpan duration = new TimeSpan())
