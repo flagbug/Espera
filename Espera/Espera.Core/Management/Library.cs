@@ -9,6 +9,7 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
@@ -455,7 +456,13 @@ namespace Espera.Core.Management
 
         public void Save()
         {
+            var stopWatch = Stopwatch.StartNew();
+
             this.libraryWriter.Write(this.Songs, this.playlists.Where(playlist => !playlist.IsTemporary), this.songSourcePath.Value);
+
+            stopWatch.Stop();
+
+            this.Log().Info("Library save took {0}ms", stopWatch.ElapsedMilliseconds);
         }
 
         public void SetCurrentTime(TimeSpan currentTime, Guid accessToken)
@@ -612,6 +619,8 @@ namespace Espera.Core.Management
 
         private void Load()
         {
+            var stopWatch = Stopwatch.StartNew();
+
             IEnumerable<LocalSong> savedSongs = this.libraryReader.ReadSongs();
 
             foreach (LocalSong song in savedSongs)
@@ -627,6 +636,10 @@ namespace Espera.Core.Management
             }
 
             this.songSourcePath.OnNext(this.libraryReader.ReadSongSourcePath());
+
+            stopWatch.Stop();
+
+            this.Log().Info("Library load took {0}ms", stopWatch.ElapsedMilliseconds);
         }
 
         private void RemoveFromLibrary(IEnumerable<LocalSong> songList)
