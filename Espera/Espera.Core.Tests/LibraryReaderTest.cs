@@ -1,5 +1,5 @@
 ﻿using Espera.Core.Management;
-using System.IO;
+using Newtonsoft.Json.Linq;
 using System.Linq;
 using Xunit;
 
@@ -10,64 +10,64 @@ namespace Espera.Core.Tests
         [Fact]
         public void ReadPlaylistsSmokeTest()
         {
-            using (Stream saveFileStream = Helpers.GenerateSaveFile().ToStream())
-            {
-                Playlist[] playlists = LibraryReader.ReadPlaylists(saveFileStream).ToArray();
+            string json = Helpers.GenerateSaveFile();
+            var jobject = JObject.Parse(json);
 
-                Playlist playlist1 = playlists[0];
-                Song[] songs1 = playlist1.Select(entry => entry.Song).ToArray();
-                Song localSong1 = Helpers.LocalSong1;
-                Song localSong2 = Helpers.LocalSong2;
+            Playlist[] playlists = LibraryReader.ReadPlaylists(jobject).ToArray();
 
-                Assert.Equal("Playlist1", playlist1.Name);
-                Assert.Equal(localSong1.OriginalPath, songs1[0].OriginalPath);
-                Assert.IsType<LocalSong>(songs1[0]);
+            Playlist playlist1 = playlists[0];
+            Song[] songs1 = playlist1.Select(entry => entry.Song).ToArray();
+            Song localSong1 = Helpers.LocalSong1;
+            Song localSong2 = Helpers.LocalSong2;
 
-                Assert.Equal(localSong2.OriginalPath, songs1[1].OriginalPath);
-                Assert.IsType<LocalSong>(songs1[1]);
+            Assert.Equal("Playlist1", playlist1.Name);
+            Assert.Equal(localSong1.OriginalPath, songs1[0].OriginalPath);
+            Assert.IsType<LocalSong>(songs1[0]);
 
-                Playlist playlist2 = playlists[1];
-                Song[] songs2 = playlist2.Select(entry => entry.Song).ToArray();
-                Song youtubeSong1 = Helpers.YoutubeSong1;
+            Assert.Equal(localSong2.OriginalPath, songs1[1].OriginalPath);
+            Assert.IsType<LocalSong>(songs1[1]);
 
-                Assert.Equal("Playlist2", playlist2.Name);
-                AssertSongsAreEqual(songs2[0], Helpers.LocalSong1);
+            Playlist playlist2 = playlists[1];
+            Song[] songs2 = playlist2.Select(entry => entry.Song).ToArray();
+            Song youtubeSong1 = Helpers.YoutubeSong1;
 
-                Assert.Equal(youtubeSong1.OriginalPath, songs2[1].OriginalPath);
-                Assert.Equal(youtubeSong1.Title, songs2[1].Title);
-                Assert.Equal(youtubeSong1.Duration.Ticks, songs2[1].Duration.Ticks);
-                Assert.IsType<YoutubeSong>(songs2[1]);
-            }
+            Assert.Equal("Playlist2", playlist2.Name);
+            AssertSongsAreEqual(songs2[0], Helpers.LocalSong1);
+
+            Assert.Equal(youtubeSong1.OriginalPath, songs2[1].OriginalPath);
+            Assert.Equal(youtubeSong1.Title, songs2[1].Title);
+            Assert.Equal(youtubeSong1.Duration.Ticks, songs2[1].Duration.Ticks);
+            Assert.IsType<YoutubeSong>(songs2[1]);
         }
 
         [Fact]
         public void ReadSongSourcePathSmokeTest()
         {
-            using (Stream saveFileStream = Helpers.GenerateSaveFile().ToStream())
-            {
-                string songSourcePath = LibraryReader.ReadSongSourcePath(saveFileStream);
+            string json = Helpers.GenerateSaveFile();
+            var jobject = JObject.Parse(json);
 
-                Assert.Equal(songSourcePath, Helpers.SongSourcePath);
-            }
+            string songSourcePath = LibraryReader.ReadSongSourcePath(jobject);
+
+            Assert.Equal(songSourcePath, Helpers.SongSourcePath);
         }
 
         [Fact]
         public void ReadSongsSmokeTest()
         {
-            using (Stream saveFileStream = Helpers.GenerateSaveFile().ToStream())
-            {
-                LocalSong[] songs = LibraryReader.ReadSongs(saveFileStream).ToArray();
+            string json = Helpers.GenerateSaveFile();
+            var jobject = JObject.Parse(json);
 
-                Song actualSong1 = songs[0];
-                Song expectedSong1 = Helpers.LocalSong1;
+            LocalSong[] songs = LibraryReader.ReadSongs(jobject).ToArray();
 
-                AssertSongsAreEqual(expectedSong1, actualSong1);
+            Song actualSong1 = songs[0];
+            Song expectedSong1 = Helpers.LocalSong1;
 
-                Song actualSong2 = songs[1];
-                Song expectedSong2 = Helpers.LocalSong2;
+            AssertSongsAreEqual(expectedSong1, actualSong1);
 
-                AssertSongsAreEqual(expectedSong2, actualSong2);
-            }
+            Song actualSong2 = songs[1];
+            Song expectedSong2 = Helpers.LocalSong2;
+
+            AssertSongsAreEqual(expectedSong2, actualSong2);
         }
 
         private static void AssertSongsAreEqual(Song song1, Song song2)

@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Xml.Linq;
 
 namespace Espera.Core.Management
 {
@@ -11,31 +11,41 @@ namespace Espera.Core.Management
     {
         public static void Write(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists, string songSourcePath, Stream targetStream)
         {
-            var document = new XDocument(
-                new XElement("Root",
-                    new XElement("Version", "2.0.0"),
-                    new XElement("SongSourcePath", songSourcePath),
-                    new XElement("Songs", songs.Select(song =>
-                        new XElement("Song",
-                            new XAttribute("Album", song.Album),
-                            new XAttribute("Artist", song.Artist),
-                            new XAttribute("Duration", song.Duration.Ticks),
-                            new XAttribute("Genre", song.Genre),
-                            new XAttribute("Path", song.OriginalPath),
-                            new XAttribute("Title", song.Title),
-                            new XAttribute("TrackNumber", song.TrackNumber),
-                            new XAttribute("ArtworkKey", song.ArtworkKey.FirstAsync().Wait() ?? String.Empty)))),
-                    new XElement("Playlists", playlists.Select(playlist =>
-                        new XElement("Playlist",
-                            new XAttribute("Name", playlist.Name),
-                            new XElement("Entries", playlist.Select(entry =>
-                                new XElement("Entry",
-                                    new XAttribute("Path", entry.Song.OriginalPath),
-                                    entry.Song is YoutubeSong ? new XAttribute("Title", entry.Song.Title) : null,
-                                    new XAttribute("Type", (entry.Song is LocalSong) ? "Local" : "YouTube"),
-                                    entry.Song is YoutubeSong ? new XAttribute("Duration", entry.Song.Duration.Ticks) : null))))))));
+            var json = JObject.FromObject(new
+            {
+                version = "2.0.0",
+                songSourcePath,
+                songs = songs.Select(song => new
+                {
+                    album = song.Album,
+                    artist = song.Artist,
+                    duration = song.Duration.Ticks,
+                    genre = song.Genre,
+                    path = song.OriginalPath,
+                    title = song.Title,
+                    trackNumber = song.TrackNumber,
+                    artworkKey = song.ArtworkKey.FirstAsync().Wait()
+                }),
+                playlists = playlists.Select(playlist => new
+                {
+                    name = playlist.Name,
+                    entries = playlist.Select(entry => new
+                    {
+                        path = entry.Song.OriginalPath,
+                        title = entry.Song is YoutubeSong ? entry.Song.Title : null,
+                        type = entry.Song is YoutubeSong ? "YouTube" : "Local",
+                        duration = entry.Song is YoutubeSong ? new long?(entry.Song.Duration.Ticks) : null
+                    })
+                })
+            }, new JsonSerializer { NullValueHandling = NullValueHandling.Ignore });
 
-            document.Save(targetStream);
+            using (var sw = new StreamWriter(targetStream))
+            using (var jw = new JsonTextWriter(sw))
+            {
+                jw.Formatting = Formatting.Indented;
+
+                json.WriteTo(jw);
+            }
         }
     }
 }

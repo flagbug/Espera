@@ -16,7 +16,7 @@ namespace Espera.View
             {
                 string directoryPath = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\");
-                string filePath = Path.Combine(directoryPath, "Library.xml");
+                string filePath = Path.Combine(directoryPath, "Library.json");
 
                 library = new Library(new LibraryFileReader(filePath), new LibraryFileWriter(filePath),
                     new CoreSettings(), new MockFileSystem());

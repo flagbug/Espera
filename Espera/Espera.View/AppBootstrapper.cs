@@ -42,7 +42,7 @@ namespace Espera.View
         static AppBootstrapper()
         {
             DirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\");
-            LibraryFilePath = Path.Combine(DirectoryPath, "Library.xml");
+            LibraryFilePath = Path.Combine(DirectoryPath, "Library.json");
             LogFilePath = Path.Combine(DirectoryPath, "Log.txt");
             Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             BlobCache.ApplicationName = "Espera";
