@@ -373,7 +373,11 @@ namespace Espera.View.ViewModels
         public string YoutubeDownloadPath
         {
             get { return this.coreSettings.YoutubeDownloadPath; }
-            set { this.coreSettings.YoutubeDownloadPath = value; }
+            set
+            {
+                this.coreSettings.YoutubeDownloadPath = value;
+                this.RaisePropertyChanged();
+            }
         }
 
         public YoutubeStreamingQuality YoutubeStreamingQuality
