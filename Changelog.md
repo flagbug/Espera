@@ -1,7 +1,23 @@
+# v2.0.0 Beta 4
+
+## Changes
+- Changed the library savefile format.
+
+# v2.0.0 Beta 3
+
+## Bugfixes
+- Fixed the changelog dialog appearing at every application startup.
+- Fixed some problems with the error reporting.
+
+# v2.0.0 Beta 2
+
+## Changes
+- The beta now has the "Dev" channel as default update channel.
+
 # v2.0.0 Beta 1
 
 ## Features
-- Espera has been completely rewritten
+- Espera has been completely rewritten.
 - Double clicking a song now starts the playback instantly, 
   there's no need to create a new playlist beforehand.
 - New songs in the library folder and existing ones are automatically updates 
