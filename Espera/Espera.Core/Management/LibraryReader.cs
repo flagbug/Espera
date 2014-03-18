@@ -7,9 +7,9 @@ namespace Espera.Core.Management
 {
     internal static class LibraryReader
     {
-        public static IReadOnlyList<Playlist> ReadPlaylists(JObject json)
+        public static IReadOnlyList<Playlist> ReadPlaylists(JObject json, IReadOnlyList<Song> songCache = null)
         {
-            IEnumerable<Song> songs = ReadSongs(json);
+            IEnumerable<Song> songs = songCache ?? ReadSongs(json);
 
             var playlists = json["playlists"].Select(playlist => new
             {

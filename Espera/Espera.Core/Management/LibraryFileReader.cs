@@ -9,6 +9,7 @@ namespace Espera.Core.Management
     {
         private readonly string sourcePath;
         private JObject cache;
+        private IReadOnlyList<LocalSong> songCache;
 
         public LibraryFileReader(string sourcePath)
         {
@@ -26,20 +27,24 @@ namespace Espera.Core.Management
         public void InvalidateCache()
         {
             this.cache = null;
+            this.songCache = null;
         }
 
         public IReadOnlyList<Playlist> ReadPlaylists()
         {
             this.LoadToCache();
 
-            return LibraryReader.ReadPlaylists(this.cache);
+            return LibraryReader.ReadPlaylists(this.cache, this.songCache);
         }
 
         public IReadOnlyList<LocalSong> ReadSongs()
         {
             this.LoadToCache();
 
-            return LibraryReader.ReadSongs(this.cache);
+            IReadOnlyList<LocalSong> songs = LibraryReader.ReadSongs(this.cache);
+            this.songCache = songs;
+
+            return songs;
         }
 
         public string ReadSongSourcePath()
