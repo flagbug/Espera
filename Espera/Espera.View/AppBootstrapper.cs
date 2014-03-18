@@ -5,7 +5,6 @@ using Espera.Core.Management;
 using Espera.Core.Settings;
 using Espera.Services;
 using Espera.View.ViewModels;
-using Microsoft.WindowsAPICodePack.Shell;
 using Ninject;
 using NLog.Config;
 using NLog.Targets;
@@ -65,7 +64,7 @@ namespace Espera.View
                 {
                     if (x.YoutubeDownloadPath == String.Empty)
                     {
-                        x.YoutubeDownloadPath = KnownFolders.Downloads.Path;
+                        x.YoutubeDownloadPath = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
                     }
                 });
             this.kernel.Bind<IFileSystem>().To<FileSystem>();
