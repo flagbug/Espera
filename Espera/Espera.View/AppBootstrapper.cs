@@ -62,7 +62,8 @@ namespace Espera.View
             this.kernel.Bind<CoreSettings>().To<CoreSettings>().InSingletonScope()
                 .OnActivation(x =>
                 {
-                    if (x.YoutubeDownloadPath == String.Empty)
+                    // If we don't have a path or it doesn't exist anymore, rest it.
+                    if (x.YoutubeDownloadPath == String.Empty || !Directory.Exists(x.YoutubeDownloadPath))
                     {
                         x.YoutubeDownloadPath = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
                     }
