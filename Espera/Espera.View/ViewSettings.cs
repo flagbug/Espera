@@ -57,12 +57,6 @@ namespace Espera.View
             set { this.SetOrCreate(value); }
         }
 
-        public UpdateChannel UpdateChannel
-        {
-            get { return this.GetOrCreate(UpdateChannel.Dev); }
-            set { this.SetOrCreate(value); }
-        }
-
         public int YoutubeDurationColumnWidth
         {
             get { return this.GetOrCreate(100); }

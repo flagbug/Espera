@@ -220,23 +220,11 @@ namespace Espera.View
 
         private async Task UpdateSilentlyAsync()
         {
-            var settings = this.kernel.Get<ViewSettings>();
 #if DEBUG
             string updateUrl = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..", "Releases");
             updateUrl = Path.GetFullPath(updateUrl);
 #else
-            string updateUrl = null;
-
-            switch (settings.UpdateChannel)
-            {
-                case UpdateChannel.Dev:
-                    updateUrl = "http://espera.s3.amazonaws.com/Releases/Dev";
-                    break;
-
-                case UpdateChannel.Stable:
-                    updateUrl = "http://espera.s3.amazonaws.com/Releases/Stable";
-                    break;
-            }
+            string updateUrl = "http://espera.s3.amazonaws.com/Releases/Stable";
 #endif
 
             using (var updateManager = new UpdateManager(updateUrl, "Espera", FrameworkVersion.Net45))
@@ -285,6 +273,7 @@ namespace Espera.View
 
                     this.Log().Info("Updates applied.");
 
+                    var settings = this.kernel.Get<ViewSettings>();
                     settings.IsUpdated = true;
                 }
 
