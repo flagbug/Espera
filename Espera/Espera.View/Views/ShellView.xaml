@@ -80,17 +80,45 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
-            <dialogs:SimpleDialog x:Key="Changelog" 
+            <dialogs:SimpleDialog x:Key="Changelog"
                                   x:Name="Changelog"
-                                  Height="500"
+                                  Height="700"
                                   Title="Espera has been updated!">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Text="Whats New" />
-                <Button Grid.Row="1" 
+                    <TextBlock Grid.Row="0" Text="Whats New" FontSize="30" />
+                    <ScrollViewer Grid.Row="1">
+                        <ItemsControl ItemsSource="{Binding UpdateViewModel.ReleaseEntries}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical" Margin="10, 0, 0, 15">
+                                        <TextBlock Text="{Binding Path=Version}" FontSize="25" />
+                                        <ItemsControl ItemsSource="{Binding Path=Items}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Vertical" Margin="10, 5, 0, 0">
+                                                        <TextBlock Text="{Binding Path=Type}" FontSize="20" />
+                                                        <ItemsControl ItemsSource="{Binding Path=Descriptions}">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding}" Margin="10, 5, 0, 0" FontSize="15" />
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <Button Grid.Row="2"
                         Height="35"
                         Width="80"
                         Style="{DynamicResource AccentedDialogSquareButton}"
