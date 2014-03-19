@@ -1,3 +1,15 @@
+# v2.0.0 Beta 5
+
+## Features
+- The full changelog is now shown after an update.
+
+## Changes
+- Removed the "Dev" update channel.
+- The default YouTube download path has changes to the videos folder.
+
+## Bugfixes
+- Fixed a bug where a YouTube download path change isn't reflected in the UI.
+
 # v2.0.0 Beta 4
 
 ## Changes
