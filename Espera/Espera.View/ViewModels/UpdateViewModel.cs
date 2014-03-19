@@ -19,7 +19,7 @@ namespace Espera.View.ViewModels
 
         public bool IsUpdated
         {
-            get { return true; }// this.settings.IsUpdated; }
+            get { return this.settings.IsUpdated; }
         }
 
         public IEnumerable<ChangelogReleaseEntry> ReleaseEntries
