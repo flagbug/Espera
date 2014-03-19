@@ -21,6 +21,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
@@ -241,6 +242,10 @@ namespace Espera.View
 
                 if (releases.Any())
                 {
+                    Task changelogFetchTask = ChangelogFetcher.FetchAsync().ToObservable()
+                        .SelectMany(x => BlobCache.LocalMachine.InsertObject("changelog", x))
+                        .ToTask();
+
                     this.Log().Info("Found {0} updates.", releases.Count);
                     this.Log().Info("Downloading updates...");
 
@@ -272,6 +277,8 @@ namespace Espera.View
                     }
 
                     this.Log().Info("Updates applied.");
+
+                    await changelogFetchTask;
 
                     var settings = this.kernel.Get<ViewSettings>();
                     settings.IsUpdated = true;

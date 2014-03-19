@@ -229,8 +229,12 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AppBootstrapper.cs" />
+    <Compile Include="Changelog.cs" />
+    <Compile Include="ChangelogEntry.cs" />
+    <Compile Include="ChangelogFetcher.cs" />
     <Compile Include="DesignTime.cs" />
     <Compile Include="INetworkStatus.cs" />
+    <Compile Include="ReleaseEntry.cs" />
     <Compile Include="SearchEngine.cs" />
     <Compile Include="SortHelpers.cs" />
     <Compile Include="SortOrder.cs" />
