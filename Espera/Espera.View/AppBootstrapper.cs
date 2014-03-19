@@ -240,12 +240,12 @@ namespace Espera.View
 
                 List<ReleaseEntry> releases = updateInfo.ReleasesToApply.ToList();
 
-                Task changelogFetchTask = ChangelogFetcher.FetchAsync().ToObservable()
-                    .SelectMany(x => BlobCache.LocalMachine.InsertObject("changelog", x))
-                    .ToTask();
-
                 if (releases.Any())
                 {
+                    Task changelogFetchTask = ChangelogFetcher.FetchAsync().ToObservable()
+                        .SelectMany(x => BlobCache.LocalMachine.InsertObject("changelog", x))
+                        .ToTask();
+
                     this.Log().Info("Found {0} updates.", releases.Count);
                     this.Log().Info("Downloading updates...");
 
