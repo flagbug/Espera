@@ -55,6 +55,10 @@
                 <Setter Property="OnLabel" Value="Yes" />
                 <Setter Property="OffLabel" Value="No" />
             </Style>
+            <Style x:Key="AboutInfoStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="Foreground" Value="White" />
+            </Style>
             <valueConverters:BoolNegationValueConverter x:Key="BoolNegationConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
@@ -258,29 +262,33 @@
             <TabItem Header="about">
                 <StackPanel>
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="espera" />
-                    <TextBlock Margin="0, 10, 0, 0" Text="{Binding Path=Version, StringFormat=Version \{0\}}" />
-                    <TextBlock Text="Author: Dennis Daume" />
-                    <TextBlock>
+                    <TextBlock Margin="0, 10, 0, 0"
+                               Text="{Binding Path=Version, StringFormat=Version \{0\}}"
+                               Style="{StaticResource AboutInfoStyle}" />
+                    <TextBlock Text="Author: Dennis Daume" Style="{StaticResource AboutInfoStyle}" />
+                    <TextBlock Margin="0, 10, 0, 0" Style="{StaticResource AboutInfoStyle}">
                         <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=Homepage}">
                             <Run Foreground="#FF00B7C0" Text="Project Website" />
                         </Hyperlink>
                     </TextBlock>
-                    <TextBlock>
+                    <TextBlock Style="{StaticResource AboutInfoStyle}">
                         <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=ReleaseNotes}">
                             <Run Foreground="#FF00B7C0" Text="Release Notes" />
                         </Hyperlink>
                     </TextBlock>
-                    <TextBlock>
+                    <TextBlock Style="{StaticResource AboutInfoStyle}">
                         <Hyperlink Command="{Binding Path=ReportBugCommand}">
                             <Run Foreground="#FF00B7C0" Text="Report a bug" />
                         </Hyperlink>
                     </TextBlock>
-                    <TextBlock>
+                    <TextBlock Style="{StaticResource AboutInfoStyle}">
                         <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=DonationPage}">
                             <Run Foreground="#FF00B7C0" Text="Donate :)" />
                         </Hyperlink>
                     </TextBlock>
-                    <TextBlock Text="Update channel" Margin="0, 20, 0, 0" />
+                    <TextBlock Text="Update channel"
+                               Margin="0, 20, 0, 0"
+                               Style="{StaticResource AboutInfoStyle}" />
                     <ComboBox SelectedItem="{Binding Path=UpdateChannel}"
                               ItemsSource="{Binding Path=UpdateChannelValues}"
                               Width="200"
