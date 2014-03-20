@@ -173,6 +173,12 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public bool EnableAutomaticReports
+        {
+            get { return this.coreSettings.EnableAutomaticReports; }
+            set { this.coreSettings.EnableAutomaticReports = value; }
+        }
+
         public bool EnablePlaylistTimeout
         {
             get { return this.coreSettings.EnablePlaylistTimeout; }
