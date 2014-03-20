@@ -35,6 +35,11 @@ namespace Espera.View.ViewModels
             get { return this.sendingSucceeded == null ? null : this.sendingSucceeded.Value; }
         }
 
+        public bool SendsAutomatically
+        {
+            get { return AnalyticsClient.Instance.EnableAutomaticReports; }
+        }
+
         public IReactiveCommand SubmitCrashReport { get; private set; }
     }
 }
