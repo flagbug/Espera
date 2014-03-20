@@ -5,7 +5,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 
 namespace Espera.Core.Analytics
@@ -63,19 +62,18 @@ namespace Espera.Core.Analytics
         }
 
         /// <summary>
-        /// Submits a bug report with the specified message an an optional email address. Also
+        /// Submits a bugreport with the specified message an an optional email address. Also
         /// uploads the log file located in the application data folder.
         /// </summary>
-        /// <param name="message">The bug report message.</param>
+        /// <param name="message">The bugreport message.</param>
         /// <param name="email">
         /// The optional email address. Pass null if no email should be sent.
         /// </param>
         /// <returns>A task that returns whether the report was successfully sent or not.</returns>
         public async Task<bool> RecordBugReportAsync(string message, string email = null)
         {
-            await this.AwaitAuthenticationAsync();
-
-            if (!this.isAuthenticated)
+            // Bugreports always have forced authentication as they are reported manually
+            if (!await this.AwaitAuthenticationAsync(true))
                 return false;
 
             if (email != null)
@@ -104,12 +102,14 @@ namespace Espera.Core.Analytics
         /// in the application data folder.
         /// </summary>
         /// <param name="exception">The exception that caused the application to crash.</param>
+        /// <param name="force">
+        /// A value indicating whether to force the crash report or not. Pass true, if the user
+        /// explicitely pressed the button to send the report.
+        /// </param>
         /// <returns>A task that returns whether the report was successfully sent or not.</returns>
-        public async Task<bool> RecordCrashAsync(Exception exception)
+        public async Task<bool> RecordCrashAsync(Exception exception, bool force)
         {
-            await this.AwaitAuthenticationAsync();
-
-            if (!this.isAuthenticated)
+            if (!await this.AwaitAuthenticationAsync(force))
                 return false;
 
             string logId = await this.SendLogFileAsync() ?? String.Empty;
@@ -130,9 +130,7 @@ namespace Espera.Core.Analytics
 
         public async Task RecordErrorAsync(Exception exception, bool uploadLogFile = true)
         {
-            await this.AwaitAuthenticationAsync();
-
-            if (!this.isAuthenticated)
+            if (!await this.AwaitAuthenticationAsync())
                 return;
 
             string logId = uploadLogFile ? await this.SendLogFileAsync() ?? String.Empty : String.Empty;
@@ -150,9 +148,7 @@ namespace Espera.Core.Analytics
 
         public async Task RecordLibrarySizeAsync(int songCount)
         {
-            await this.AwaitAuthenticationAsync();
-
-            if (!this.isAuthenticated)
+            if (!await this.AwaitAuthenticationAsync())
                 return;
 
             try
@@ -168,9 +164,7 @@ namespace Espera.Core.Analytics
 
         public async Task RecordMobileUsage()
         {
-            await this.AwaitAuthenticationAsync();
-
-            if (!this.isAuthenticated)
+            if (!await this.AwaitAuthenticationAsync())
                 return;
 
             try
@@ -222,25 +216,34 @@ namespace Espera.Core.Analytics
             }
         }
 
-        private async Task AwaitAuthenticationAsync(bool force = false)
+        private async Task<bool> AwaitAuthenticationAsync(bool force = false)
         {
+            if (!coreSettings.EnableAutomaticReports && !force)
+                return false;
+
             if (this.isAuthenticated)
             {
                 // We aren't authenticated but the user allows us the send data? Authenticate!
                 if (this.coreSettings.EnableAutomaticReports || force)
                 {
-                    await this.InitializeAsync(this.coreSettings);
+                    try
+                    {
+                        await this.AuthenticateAsync();
+                    }
+
+                    catch (Exception)
+                    {
+                        return false;
+                    }
                 }
 
                 else
                 {
-                    return;
+                    return true;
                 }
             }
 
-            var finished = this.isAuthenticating.FirstAsync(x => !x).ToTask();
-
-            await finished;
+            await this.isAuthenticating.FirstAsync(x => !x);
         }
 
         private async Task<Stream> GetCompressedLogFileStreamAsync()
