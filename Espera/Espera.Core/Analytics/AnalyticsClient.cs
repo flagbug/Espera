@@ -39,6 +39,11 @@ namespace Espera.Core.Analytics
             get { return instance.Value; }
         }
 
+        public bool EnableAutomaticReports
+        {
+            get { return this.coreSettings.EnableAutomaticReports; }
+        }
+
         /// <summary>
         /// Used for unit testing
         /// </summary>
@@ -102,14 +107,10 @@ namespace Espera.Core.Analytics
         /// in the application data folder.
         /// </summary>
         /// <param name="exception">The exception that caused the application to crash.</param>
-        /// <param name="force">
-        /// A value indicating whether to force the crash report or not. Pass true, if the user
-        /// explicitely pressed the button to send the report.
-        /// </param>
         /// <returns>A task that returns whether the report was successfully sent or not.</returns>
-        public async Task<bool> RecordCrashAsync(Exception exception, bool force)
+        public async Task<bool> RecordCrashAsync(Exception exception)
         {
-            if (!await this.AwaitAuthenticationAsync(force))
+            if (!await this.AwaitAuthenticationAsync(true))
                 return false;
 
             string logId = await this.SendLogFileAsync() ?? String.Empty;

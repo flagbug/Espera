@@ -18,9 +18,14 @@ namespace Espera.View.ViewModels
                 .ToCommand();
 
             this.sendingSucceeded = this.SubmitCrashReport
-                .RegisterAsyncTask(x => AnalyticsClient.Instance.RecordCrashAsync(exception, true))
+                .RegisterAsyncTask(x => AnalyticsClient.Instance.RecordCrashAsync(exception))
                 .Select(x => new bool?(x))
                 .ToProperty(this, x => x.SendingSucceeded);
+
+            if (AnalyticsClient.Instance.EnableAutomaticReports)
+            {
+                this.SubmitCrashReport.Execute(null);
+            }
         }
 
         public string ReportContent { get; private set; }

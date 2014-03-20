@@ -91,16 +91,19 @@ namespace Espera.Core.Tests
         public class TheRecordCrashAsyncMethod
         {
             [Fact]
-            public async Task AuthenticatesIfForced()
+            public async Task ForcesAuthentication()
             {
                 var coreSettings = new CoreSettings { EnableAutomaticReports = false };
 
                 var endpoint = Substitute.For<IAnalyticsEndpoint>();
+
                 var client = new AnalyticsClient(endpoint);
 
+                // This won't authenticate because automatic reports are disabled
                 await client.InitializeAsync(coreSettings);
 
-                await client.RecordCrashAsync(new Exception(), true);
+                // This will force an authentication even if automatic reports are disabled
+                await client.RecordCrashAsync(new Exception());
 
                 Assert.True(client.IsAuthenticated);
                 endpoint.ReceivedWithAnyArgs().RecordErrorAsync(null, null);
