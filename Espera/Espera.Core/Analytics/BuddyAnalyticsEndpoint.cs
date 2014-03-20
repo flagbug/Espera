@@ -14,7 +14,7 @@ namespace Espera.Core.Analytics
 
         public BuddyAnalyticsEndpoint()
         {
-            this.client = new BuddyClient("Espera", "EC60C045-B432-44A6-A4E0-15B4BF607105");
+            this.client = new BuddyClient("Espera", "EC60C045-B432-44A6-A4E0-15B4BF607105", autoRecordDeviceInfo: false);
         }
 
         public Task AuthenticateUserAsync(string analyticsToken)
