@@ -18,7 +18,7 @@ namespace Espera.View.ViewModels
                 .ToCommand();
 
             this.sendingSucceeded = this.SubmitCrashReport
-                .RegisterAsyncTask(x => AnalyticsClient.Instance.RecordCrashAsync(exception))
+                .RegisterAsyncTask(x => AnalyticsClient.Instance.RecordCrashAsync(exception, true))
                 .Select(x => new bool?(x))
                 .ToProperty(this, x => x.SendingSucceeded);
         }
