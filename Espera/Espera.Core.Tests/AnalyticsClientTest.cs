@@ -1,6 +1,7 @@
 ﻿using Espera.Core.Analytics;
 using Espera.Core.Settings;
 using NSubstitute;
+using System;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -84,6 +85,25 @@ namespace Espera.Core.Tests
                 await client.InitializeAsync(coreSettings);
 
                 Assert.NotNull(coreSettings.AnalyticsToken);
+            }
+        }
+
+        public class TheRecordCrashAsyncMethod
+        {
+            [Fact]
+            public async Task AuthenticatesIfForced()
+            {
+                var coreSettings = new CoreSettings { EnableAutomaticReports = false };
+
+                var endpoint = Substitute.For<IAnalyticsEndpoint>();
+                var client = new AnalyticsClient(endpoint);
+
+                await client.InitializeAsync(coreSettings);
+
+                await client.RecordCrashAsync(new Exception(), true);
+
+                Assert.True(client.IsAuthenticated);
+                endpoint.ReceivedWithAnyArgs().RecordErrorAsync(null, null);
             }
         }
     }

@@ -221,29 +221,26 @@ namespace Espera.Core.Analytics
             if (!coreSettings.EnableAutomaticReports && !force)
                 return false;
 
-            if (this.isAuthenticated)
+            // We aren't authenticated but the user allows us the send data? Authenticate!
+            if (!this.isAuthenticated && (this.coreSettings.EnableAutomaticReports || force))
             {
-                // We aren't authenticated but the user allows us the send data? Authenticate!
-                if (this.coreSettings.EnableAutomaticReports || force)
+                try
                 {
-                    try
-                    {
-                        await this.AuthenticateAsync();
-                    }
-
-                    catch (Exception)
-                    {
-                        return false;
-                    }
+                    await this.AuthenticateAsync();
                 }
 
-                else
+                catch (Exception)
                 {
-                    return true;
+                    return false;
                 }
             }
 
+            if (this.isAuthenticated)
+                return true;
+
             await this.isAuthenticating.FirstAsync(x => !x);
+
+            return true;
         }
 
         private async Task<Stream> GetCompressedLogFileStreamAsync()
