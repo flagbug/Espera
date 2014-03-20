@@ -81,7 +81,7 @@ namespace Espera.Core.Analytics
             if (!await this.AwaitAuthenticationAsync(true))
                 return false;
 
-            if (email != null)
+            if (!String.IsNullOrWhiteSpace(email))
             {
                 await this.client.UpdateUserEmailAsync(email);
             }
