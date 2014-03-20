@@ -1,14 +1,11 @@
-using Buddy;
 using Espera.Core.Settings;
 using ReactiveUI;
 using System;
-using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Espera.Core.Analytics
@@ -22,18 +19,19 @@ namespace Espera.Core.Analytics
     public class AnalyticsClient : IEnableLogger
     {
         private static readonly Lazy<AnalyticsClient> instance;
+        private readonly IAnalyticsEndpoint client;
         private readonly BehaviorSubject<bool> isAuthenticating;
-        private BuddyClient client;
+        private CoreSettings coreSettings;
         private bool isAuthenticated;
-        private AuthenticatedUser user;
 
         static AnalyticsClient()
         {
             instance = new Lazy<AnalyticsClient>(() => new AnalyticsClient());
         }
 
-        public AnalyticsClient()
+        public AnalyticsClient(IAnalyticsEndpoint analyticsEndpoint = null)
         {
+            this.client = analyticsEndpoint ?? new BuddyAnalyticsEndpoint();
             this.isAuthenticating = new BehaviorSubject<bool>(false);
         }
 
@@ -42,46 +40,26 @@ namespace Espera.Core.Analytics
             get { return instance.Value; }
         }
 
+        /// <summary>
+        /// Used for unit testing
+        /// </summary>
+        internal bool IsAuthenticated
+        {
+            get { return this.isAuthenticated; }
+        }
+
         public async Task InitializeAsync(CoreSettings settings)
         {
-            this.isAuthenticating.OnNext(true);
+            if (settings == null)
+                throw new ArgumentNullException("settings");
 
-            this.client = new BuddyClient("Espera", "EC60C045-B432-44A6-A4E0-15B4BF607105");
+            this.coreSettings = settings;
 
-            try
-            {
-                if (settings.AnalyticsToken == null)
-                {
-                    string throwAwayToken = Guid.NewGuid().ToString(); // A token that we immediately throw away because we don't need it
-                    this.user = await this.client.CreateUserAsync(throwAwayToken, throwAwayToken);
-                    settings.AnalyticsToken = this.user.Token;
+            // If we don't have permission to send things, do nothing
+            if (!this.coreSettings.EnableAutomaticReports)
+                return;
 
-                    string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-                    await this.client.Device.RecordInformationAsync(Environment.OSVersion.VersionString, "Desktop", this.user, version);
-
-                    this.Log().Info("Created new analytics user");
-                }
-
-                else
-                {
-                    this.user = await this.client.LoginAsync(settings.AnalyticsToken);
-
-                    this.Log().Info("Logged into the analytics provider");
-                }
-
-                this.isAuthenticated = true;
-            }
-
-            // Don't care which exception is thrown, if something bad happens the analytics are unusable
-            catch (Exception ex)
-            {
-                this.Log().ErrorException("Couldn't login to the analytics server", ex);
-            }
-
-            finally
-            {
-                this.isAuthenticating.OnNext(false);
-            }
+            await this.AuthenticateAsync();
         }
 
         /// <summary>
@@ -102,16 +80,14 @@ namespace Espera.Core.Analytics
 
             if (email != null)
             {
-                await UpdateUserEmailAsync(this.user, email);
+                await this.client.UpdateUserEmailAsync(email);
             }
-
-            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             string logId = await this.SendLogFileAsync() ?? String.Empty;
 
             try
             {
-                await this.client.Device.RecordCrashAsync(message, Environment.OSVersion.VersionString, "Desktop", this.user, null, version, metadata: logId);
+                await this.client.RecordErrorAsync(message, logId);
             }
 
             catch (Exception ex)
@@ -136,14 +112,11 @@ namespace Espera.Core.Analytics
             if (!this.isAuthenticated)
                 return false;
 
-            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
             string logId = await this.SendLogFileAsync() ?? String.Empty;
 
             try
             {
-                await this.client.Device.RecordCrashAsync(exception.Message, Environment.OSVersion.VersionString,
-                    "Desktop", this.user, exception.StackTrace, version, metadata: logId);
+                await this.client.RecordErrorAsync(exception.Message, logId, exception.StackTrace);
             }
 
             catch (Exception ex)
@@ -162,14 +135,11 @@ namespace Espera.Core.Analytics
             if (!this.isAuthenticated)
                 return;
 
-            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
             string logId = uploadLogFile ? await this.SendLogFileAsync() ?? String.Empty : String.Empty;
 
             try
             {
-                await this.client.Device.RecordCrashAsync(exception.Message, Environment.OSVersion.VersionString,
-                    "Desktop", this.user, exception.StackTrace, version, metadata: logId);
+                await this.client.RecordErrorAsync(exception.Message, logId, exception.StackTrace);
             }
 
             catch (Exception ex)
@@ -187,7 +157,7 @@ namespace Espera.Core.Analytics
 
             try
             {
-                await this.user.Metadata.SetAsync("library-size", songCount.ToString(CultureInfo.InvariantCulture));
+                await this.client.RecordLibrarySizeAsync(songCount);
             }
 
             catch (Exception ex)
@@ -205,7 +175,7 @@ namespace Espera.Core.Analytics
 
             try
             {
-                await this.user.Metadata.SetAsync("uses-mobile", "true");
+                await this.client.RecordMobileUsageAsync();
             }
 
             catch (Exception ex)
@@ -214,16 +184,59 @@ namespace Espera.Core.Analytics
             }
         }
 
-        private static async Task UpdateUserEmailAsync(AuthenticatedUser user, string email)
+        private async Task AuthenticateAsync()
         {
-            await user.UpdateAsync(user.Email, String.Empty, user.Gender, user.Age, email, // email is the only field we change here
-                user.Status, user.LocationFuzzing, user.CelebrityMode, user.ApplicationTag);
+            this.isAuthenticating.OnNext(true);
+
+            try
+            {
+                if (this.coreSettings.AnalyticsToken == null)
+                {
+                    string analyticsToken = await this.client.CreateUserAsync();
+                    this.coreSettings.AnalyticsToken = analyticsToken;
+
+                    await this.client.RecordDeviceInformationAsync();
+
+                    this.Log().Info("Created new analytics user");
+                }
+
+                else
+                {
+                    await this.client.AuthenticateUserAsync(this.coreSettings.AnalyticsToken);
+
+                    this.Log().Info("Logged into the analytics provider");
+                }
+
+                this.isAuthenticated = true;
+            }
+
+            // Don't care which exception is thrown, if something bad happens the analytics are unusable
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Couldn't login to the analytics server", ex);
+            }
+
+            finally
+            {
+                this.isAuthenticating.OnNext(false);
+            }
         }
 
-        private async Task AwaitAuthenticationAsync()
+        private async Task AwaitAuthenticationAsync(bool force = false)
         {
             if (this.isAuthenticated)
-                return;
+            {
+                // We aren't authenticated but the user allows us the send data? Authenticate!
+                if (this.coreSettings.EnableAutomaticReports || force)
+                {
+                    await this.InitializeAsync(this.coreSettings);
+                }
+
+                else
+                {
+                    return;
+                }
+            }
 
             var finished = this.isAuthenticating.FirstAsync(x => !x).ToTask();
 
@@ -277,8 +290,7 @@ namespace Espera.Core.Analytics
             {
                 try
                 {
-                    Blob blob = await this.user.Blobs.AddAsync("Crash report log", "application/zip", String.Empty, 0, 0, logFileSteam);
-                    return blob.BlobID.ToString(CultureInfo.InvariantCulture);
+                    return await this.client.SendCrashLogAsync(logFileSteam);
                 }
 
                 catch (Exception ex)

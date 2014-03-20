@@ -110,6 +110,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccessControlTest.cs" />
+    <Compile Include="AnalyticsClientTest.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="LibraryReaderTest.cs" />
     <Compile Include="LibraryTest.cs" />
