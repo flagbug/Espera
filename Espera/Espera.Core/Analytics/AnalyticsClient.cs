@@ -219,7 +219,7 @@ namespace Espera.Core.Analytics
 
         private async Task<bool> AwaitAuthenticationAsync(bool force = false)
         {
-            if (!coreSettings.EnableAutomaticReports && !force)
+            if (!this.coreSettings.EnableAutomaticReports && !force)
                 return false;
 
             // We aren't authenticated but the user allows us the send data? Authenticate!
@@ -236,12 +236,9 @@ namespace Espera.Core.Analytics
                 }
             }
 
-            if (this.isAuthenticated)
-                return true;
-
             await this.isAuthenticating.FirstAsync(x => !x);
 
-            return true;
+            return this.isAuthenticated;
         }
 
         private async Task<Stream> GetCompressedLogFileStreamAsync()
