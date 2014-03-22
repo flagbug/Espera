@@ -286,6 +286,12 @@
                             <Run Foreground="#FF00B7C0" Text="Donate :)" />
                         </Hyperlink>
                     </TextBlock>
+                    <Controls:ToggleSwitch Margin="0, 20, 0, 0"
+                                           Header="Enable anonymous crash/error/usage reporting"
+                                           IsChecked="{Binding Path=EnableAutomaticReports}" />
+                    <TextBlock Margin="10, 5, 0, 0"
+                               Text="Espera will NEVER collect any personal identifiable information"
+                               FontSize="15" />
                 </StackPanel>
             </TabItem>
         </TabControl>

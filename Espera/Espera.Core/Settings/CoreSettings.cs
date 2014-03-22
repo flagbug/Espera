@@ -23,6 +23,15 @@ namespace Espera.Core.Settings
             set { this.SetOrCreate(value); }
         }
 
+        /// <summary>
+        /// Enables or disables automatic anonymous error and data reporting.
+        /// </summary>
+        public bool EnableAutomaticReports
+        {
+            get { return this.GetOrCreate(true); }
+            set { this.SetOrCreate(value); }
+        }
+
         public bool EnablePlaylistTimeout
         {
             get { return this.GetOrCreate(true); }
@@ -90,7 +99,7 @@ namespace Espera.Core.Settings
         }
 
         /// <summary>
-        /// Set this property through the <see cref="AccessControl"/> class.
+        /// Set this property through the <see cref="AccessControl" /> class.
         /// </summary>
         public string RemoteControlPassword
         {
