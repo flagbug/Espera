@@ -257,6 +257,11 @@
                                 Command="{Binding Path=ChangeRemoteControlPasswordCommand}" />
                     </StackPanel>
                     <Controls:ToggleSwitch Header="Enable voting system" IsChecked="{Binding Path=EnableVotingSystem}" />
+                    <TextBlock Margin="0, 50, 0, 0"
+                               HorizontalAlignment="Center" 
+                               Text="Coming soon for Android" 
+                               Foreground="White"
+                               FontSize="40" />
                 </StackPanel>
             </TabItem>
             <TabItem Header="about">
