@@ -8,6 +8,11 @@ namespace Espera.Core.Analytics
     {
         Task AuthenticateUserAsync(string analyticsToken);
 
+        /// <summary>
+        /// Creates a new user and returns a unique authentication token.
+        /// This method also authenticates the with the returned token.
+        /// </summary>
+        /// <returns>A unique token used for the next authentication.</returns>
         Task<string> CreateUserAsync();
 
         /// <summary>
