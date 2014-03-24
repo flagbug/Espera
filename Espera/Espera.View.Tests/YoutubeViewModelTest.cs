@@ -2,7 +2,7 @@
 using Espera.Core.Settings;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
-using Moq;
+using NSubstitute;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -20,21 +20,21 @@ namespace Espera.View.Tests
         public void AvailableNetworkStartsSongSearch()
         {
             var isAvailable = new BehaviorSubject<bool>(false);
-            var networkStatus = new Mock<INetworkStatus>();
-            networkStatus.SetupGet(x => x.IsAvailable).Returns(isAvailable);
+            var networkStatus = Substitute.For<INetworkStatus>();
+            networkStatus.IsAvailable.Returns(isAvailable);
 
-            var songFinder = new Mock<IYoutubeSongFinder>();
-            songFinder.Setup(x => x.GetSongsAsync(It.IsAny<string>()))
+            var songFinder = Substitute.For<IYoutubeSongFinder>();
+            songFinder.GetSongsAsync(Arg.Any<string>())
                 .Returns(Task.FromResult((IReadOnlyList<YoutubeSong>)new List<YoutubeSong>()));
 
             using (var library = Helpers.CreateLibrary())
             {
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
-                var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus.Object, songFinder.Object);
+                var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus, songFinder);
 
                 isAvailable.OnNext(true);
 
-                songFinder.Verify(x => x.GetSongsAsync(It.IsAny<string>()), Times.Once);
+                songFinder.ReceivedWithAnyArgs(1).GetSongsAsync(null);
             }
         }
 
@@ -46,16 +46,16 @@ namespace Espera.View.Tests
 
             var songs = (IReadOnlyList<YoutubeSong>)new[] { song1, song2 }.ToList();
 
-            var networkStatus = new Mock<INetworkStatus>();
-            networkStatus.SetupGet(x => x.IsAvailable).Returns(Observable.Return(true));
+            var networkStatus = Substitute.For<INetworkStatus>();
+            networkStatus.IsAvailable.Returns(Observable.Return(true));
 
-            var songFinder = new Mock<IYoutubeSongFinder>();
-            songFinder.Setup(x => x.GetSongsAsync(It.IsAny<string>())).Returns(Task.FromResult(songs));
+            var songFinder = Substitute.For<IYoutubeSongFinder>();
+            songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Task.FromResult(songs));
 
             using (var library = Helpers.CreateLibrary())
             {
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
-                var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus.Object, songFinder.Object);
+                var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus, songFinder);
 
                 Assert.Equal(songs, vm.SelectableSongs.Select(x => x.Model).ToList());
                 Assert.Equal(songs.First(), vm.SelectableSongs.First().Model);
@@ -67,16 +67,16 @@ namespace Espera.View.Tests
         public void SongFinderExceptionSetsIsNetworkUnavailableToTrue()
         {
             var isAvailable = new BehaviorSubject<bool>(false);
-            var networkStatus = new Mock<INetworkStatus>();
-            networkStatus.SetupGet(x => x.IsAvailable).Returns(isAvailable);
+            var networkStatus = Substitute.For<INetworkStatus>();
+            networkStatus.IsAvailable.Returns(isAvailable);
 
-            var songFinder = new Mock<IYoutubeSongFinder>();
-            songFinder.Setup(x => x.GetSongsAsync(It.IsAny<string>())).Throws<Exception>();
+            var songFinder = Substitute.For<IYoutubeSongFinder>();
+            songFinder.GetSongsAsync(Arg.Any<string>()).Returns(x => { throw new Exception(); });
 
             using (var library = Helpers.CreateLibrary())
             {
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
-                var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus.Object, songFinder.Object);
+                var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus, songFinder);
 
                 var isNetworkUnavailable = vm.WhenAnyValue(x => x.IsNetworkUnavailable).CreateCollection();
 
@@ -89,16 +89,16 @@ namespace Espera.View.Tests
         [Fact]
         public async Task StartSearchSetsIsSearchingTest()
         {
-            var networkStatus = new Mock<INetworkStatus>();
-            networkStatus.SetupGet(x => x.IsAvailable).Returns(Observable.Return(false));
+            var networkStatus = Substitute.For<INetworkStatus>();
+            networkStatus.IsAvailable.Returns(Observable.Return(false));
 
-            var songFinder = new Mock<IYoutubeSongFinder>();
-            songFinder.Setup(x => x.GetSongsAsync(It.IsAny<string>())).Returns(Task.FromResult((IReadOnlyList<YoutubeSong>)new List<YoutubeSong>()));
+            var songFinder = Substitute.For<IYoutubeSongFinder>();
+            songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Task.FromResult((IReadOnlyList<YoutubeSong>)new List<YoutubeSong>()));
 
             using (var library = Helpers.CreateLibrary())
             {
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
-                var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus.Object, songFinder.Object);
+                var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus, songFinder);
 
                 var isSearching = vm.WhenAnyValue(x => x.IsSearching).CreateCollection();
 
@@ -112,16 +112,16 @@ namespace Espera.View.Tests
         public void UnavailableNetworkSmokeTest()
         {
             var isAvailable = new BehaviorSubject<bool>(false);
-            var networkStatus = new Mock<INetworkStatus>();
-            networkStatus.SetupGet(x => x.IsAvailable).Returns(isAvailable);
+            var networkStatus = Substitute.For<INetworkStatus>();
+            networkStatus.IsAvailable.Returns(isAvailable);
 
-            var songFinder = new Mock<IYoutubeSongFinder>();
-            songFinder.Setup(x => x.GetSongsAsync(It.IsAny<string>())).Returns(Task.FromResult((IReadOnlyList<YoutubeSong>)new List<YoutubeSong>()));
+            var songFinder = Substitute.For<IYoutubeSongFinder>();
+            songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Task.FromResult((IReadOnlyList<YoutubeSong>)new List<YoutubeSong>()));
 
             using (var library = Helpers.CreateLibrary())
             {
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
-                var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus.Object, songFinder.Object);
+                var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus, songFinder);
 
                 var isNetworkUnavailable = vm.WhenAnyValue(x => x.IsNetworkUnavailable).CreateCollection();
 

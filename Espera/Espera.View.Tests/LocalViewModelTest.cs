@@ -3,7 +3,7 @@ using Espera.Core.Management;
 using Espera.Core.Settings;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
-using Moq;
+using NSubstitute;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -69,12 +69,12 @@ namespace Espera.View.Tests
         {
             var song = new LocalSong("C://Song.mp3", TimeSpan.Zero);
 
-            var songFinder = new Mock<ILocalSongFinder>();
-            songFinder.Setup(x => x.GetSongsAsync()).Returns(Observable.Return(Tuple.Create(song, (byte[])null)));
+            var songFinder = Substitute.For<ILocalSongFinder>();
+            songFinder.GetSongsAsync().Returns(Observable.Return(Tuple.Create(song, (byte[])null)));
 
             var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { "C://Song.mp3", new MockFileData("Bla") } });
 
-            using (Library library = Helpers.CreateLibrary(fileSystem, songFinder.Object))
+            using (Library library = Helpers.CreateLibrary(fileSystem, songFinder))
             {
                 Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 

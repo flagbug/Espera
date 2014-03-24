@@ -1,7 +1,7 @@
 ﻿using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
-using Moq;
+using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -91,8 +91,8 @@ namespace Espera.Core.Tests
             IFileSystem fileSystem = null, ILocalSongFinder localSongFinder = null)
         {
             var library = new Library(
-                reader ?? new Mock<ILibraryReader>().Object,
-                writer ?? new Mock<ILibraryWriter>().Object,
+                reader ?? Substitute.For<ILibraryReader>(),
+                writer ?? Substitute.For<ILibraryWriter>(),
                 settings ?? new CoreSettings(),
                 fileSystem ?? new MockFileSystem(),
                 x => localSongFinder ?? SetupDefaultLocalSongFinder());
@@ -123,26 +123,6 @@ namespace Espera.Core.Tests
             return library;
         }
 
-        public static Mock<Song> CreateSongMock(string name = "Song", bool callBase = false, TimeSpan duration = new TimeSpan())
-        {
-            var mock = new Mock<Song>(name, duration) { CallBase = callBase };
-            mock.Setup(x => x.PrepareAsync(It.IsAny<YoutubeStreamingQuality>())).Returns(Task.Delay(0));
-
-            return mock;
-        }
-
-        public static Mock<Song>[] CreateSongMocks(int count, bool callBase)
-        {
-            var songs = new Mock<Song>[count];
-
-            for (int i = 0; i < count; i++)
-            {
-                songs[i] = CreateSongMock("Song" + i, callBase);
-            }
-
-            return songs;
-        }
-
         public static string GenerateSaveFile()
         {
             using (var stream = new MemoryStream())
@@ -155,7 +135,10 @@ namespace Espera.Core.Tests
 
         public static Song SetupSongMock(string name = "Song", bool callBase = false, TimeSpan duration = new TimeSpan())
         {
-            return CreateSongMock(name, callBase, duration).Object;
+            var mock = Substitute.For<Song>(name, duration);
+            mock.PrepareAsync(Arg.Any<YoutubeStreamingQuality>()).Returns(Task.Delay(0));
+
+            return mock;
         }
 
         public static Song[] SetupSongMocks(int count, bool callBase = false)
@@ -221,10 +204,10 @@ namespace Espera.Core.Tests
 
         private static ILocalSongFinder SetupDefaultLocalSongFinder()
         {
-            var localSongFinder = new Mock<ILocalSongFinder>();
-            localSongFinder.Setup(x => x.GetSongsAsync()).Returns(Observable.Empty<Tuple<LocalSong, byte[]>>());
+            var localSongFinder = Substitute.For<ILocalSongFinder>();
+            localSongFinder.GetSongsAsync().Returns(Observable.Empty<Tuple<LocalSong, byte[]>>());
 
-            return localSongFinder.Object;
+            return localSongFinder;
         }
     }
 }

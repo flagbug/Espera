@@ -1,4 +1,4 @@
-﻿using Moq;
+﻿using NSubstitute;
 using System;
 using System.IO.Abstractions;
 using System.Reactive.Linq;
@@ -12,11 +12,11 @@ namespace Espera.Core.Tests
         [Fact]
         public async Task FileSystemExceptionsAreHandledGracefully()
         {
-            var fileSystem = new Mock<IFileSystem>();
-            fileSystem.Setup(x => x.Directory.GetDirectories(It.IsAny<string>())).Throws<Exception>();
-            fileSystem.Setup(x => x.Directory.GetFiles(It.IsAny<string>())).Throws<Exception>();
+            var fileSystem = Substitute.For<IFileSystem>();
+            fileSystem.Directory.GetDirectories(Arg.Any<string>()).Returns(x => { throw new Exception(); });
+            fileSystem.Directory.GetFiles(Arg.Any<string>()).Returns(x => { throw new Exception(); });
 
-            var songFinder = new LocalSongFinder("C:\\", fileSystem.Object);
+            var songFinder = new LocalSongFinder("C:\\", fileSystem);
 
             Assert.True(await songFinder.GetSongsAsync().IsEmpty());
         }
