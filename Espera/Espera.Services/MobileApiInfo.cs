@@ -8,14 +8,20 @@ namespace Espera.Services
     /// </summary>
     public class MobileApiInfo
     {
-        public MobileApiInfo(IObservable<int> connectedClientCount)
+        public MobileApiInfo(IObservable<int> connectedClientCount, IObservable<bool> isPortOccupied)
         {
             if (connectedClientCount == null)
                 throw new ArgumentNullException("connectedClientCount");
 
+            if (isPortOccupied == null)
+                throw new ArgumentNullException("isPortOccupied");
+
             this.ConnectedClientCount = connectedClientCount;
+            this.IsPortOccupied = isPortOccupied;
         }
 
         public IObservable<int> ConnectedClientCount { get; private set; }
+
+        public IObservable<bool> IsPortOccupied { get; private set; }
     }
 }

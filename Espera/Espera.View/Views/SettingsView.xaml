@@ -60,6 +60,7 @@
                 <Setter Property="Foreground" Value="White" />
             </Style>
             <valueConverters:BoolNegationValueConverter x:Key="BoolNegationConverter" />
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -237,10 +238,15 @@
             <TabItem Header="remote control">
                 <StackPanel>
                     <Controls:ToggleSwitch Header="Enable remote control" IsChecked="{Binding Path=EnableRemoteControl}" />
-                    <StackPanel Margin="15, 0, 0, 0" Orientation="Horizontal" IsEnabled="{Binding Path=EnableRemoteControl}">
-                        <TextBlock Text="Port (49152 - 65535)" VerticalAlignment="Center" />
-                        <TextBox Margin="10, 0, 0, 0" Width="50" Text="{Binding Path=Port, UpdateSourceTrigger=PropertyChanged}" />
-                        <Button Margin="10, 0, 0, 0" Content="Change port" Command="{Binding Path=ChangePortCommand}" />
+                    <StackPanel Margin="15, 0, 0, 0" Orientation="Vertical" IsEnabled="{Binding Path=EnableRemoteControl}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Port (49152 - 65535)" VerticalAlignment="Center" />
+                            <TextBox Margin="10, 0, 0, 0" Width="50" Text="{Binding Path=Port, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button Margin="10, 0, 0, 0" Content="Change port" Command="{Binding Path=ChangePortCommand}" />
+                        </StackPanel>
+                        <TextBlock Text="Port is occupied, you may want to choose a different one"
+                                   Visibility="{Binding Path=IsPortOccupied, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                   Foreground="{StaticResource ControlsValidationBrush}" />
                     </StackPanel>
                     <Controls:ToggleSwitch Header="Lock remote control with password" IsChecked="{Binding Path=LockRemoteControl}" />
                     <StackPanel IsEnabled="{Binding Path=LockRemoteControl}" Margin="15, 0, 0, 0" Orientation="Horizontal">
@@ -258,8 +264,8 @@
                     </StackPanel>
                     <Controls:ToggleSwitch Header="Enable voting system" IsChecked="{Binding Path=EnableVotingSystem}" />
                     <TextBlock Margin="0, 50, 0, 0"
-                               HorizontalAlignment="Center" 
-                               Text="Coming soon for Android" 
+                               HorizontalAlignment="Center"
+                               Text="Coming soon for Android"
                                Foreground="White"
                                FontSize="40" />
                 </StackPanel>

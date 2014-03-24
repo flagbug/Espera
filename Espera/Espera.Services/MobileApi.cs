@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,10 +22,12 @@ namespace Espera.Services
     {
         private readonly object clientListGate;
         private readonly ReactiveList<MobileClient> clients;
+        private readonly BehaviorSubject<bool> isPortOccupied;
         private readonly Library library;
         private readonly int port;
         private bool dispose;
         private TcpListener listener;
+        private IDisposable listenerSubscription;
 
         public MobileApi(int port, Library library)
         {
@@ -38,6 +41,7 @@ namespace Espera.Services
             this.library = library;
             this.clients = new ReactiveList<MobileClient>();
             this.clientListGate = new object();
+            this.isPortOccupied = new BehaviorSubject<bool>(false);
         }
 
         public IObservable<int> ConnectedClients
@@ -45,9 +49,19 @@ namespace Espera.Services
             get { return this.clients.CountChanged; }
         }
 
+        public IObservable<bool> IsPortOccupied
+        {
+            get { return this.isPortOccupied; }
+        }
+
         public void Dispose()
         {
             this.Log().Info("Stopping to listen for incoming connections on port {0}", this.port);
+
+            if (this.listenerSubscription != null)
+            {
+                this.listenerSubscription.Dispose();
+            }
 
             this.dispose = true;
             this.listener.Stop();
@@ -99,12 +113,21 @@ namespace Espera.Services
         public void StartClientDiscovery()
         {
             this.listener = new TcpListener(new IPEndPoint(IPAddress.Any, this.port));
-            listener.Start();
             this.Log().Info("Starting to listen for incoming connections on port {0}", this.port);
 
-            Observable.Defer(() => this.listener.AcceptTcpClientAsync().ToObservable())
+            try
+            {
+                listener.Start();
+            }
+            catch (SocketException ex)
+            {
+                this.Log().ErrorException(string.Format("Port {0} is already taken", this.port), ex);
+                this.isPortOccupied.OnNext(true);
+                return;
+            }
+
+            this.listenerSubscription = Observable.Defer(() => this.listener.AcceptTcpClientAsync().ToObservable())
                 .Repeat()
-                .Where(x => !this.dispose)
                 .Subscribe(socket =>
                 {
                     this.Log().Info("New client detected");

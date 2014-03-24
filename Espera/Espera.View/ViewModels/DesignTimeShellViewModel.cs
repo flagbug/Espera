@@ -8,7 +8,8 @@ namespace Espera.View.ViewModels
     internal class DesignTimeShellViewModel : ShellViewModel
     {
         public DesignTimeShellViewModel()
-            : base(DesignTime.LoadLibrary(), new ViewSettings(), new CoreSettings(), new WindowManager(), new MobileApiInfo(Observable.Return(0)))
+            : base(DesignTime.LoadLibrary(), new ViewSettings(), new CoreSettings(), new WindowManager(),
+                new MobileApiInfo(Observable.Return(0), Observable.Return(false)))
         { }
     }
 }

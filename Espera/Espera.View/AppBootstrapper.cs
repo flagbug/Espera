@@ -210,7 +210,10 @@ namespace Espera.View
             IConnectableObservable<int> connectedClients = apiChanged.Select(x => x.ConnectedClients).Switch().Publish(0);
             connectedClients.Connect();
 
-            var apiStats = new MobileApiInfo(connectedClients);
+            IConnectableObservable<bool> isPortOccupied = apiChanged.Select(x => x.IsPortOccupied).Switch().Publish(false);
+            isPortOccupied.Connect();
+
+            var apiStats = new MobileApiInfo(connectedClients, isPortOccupied);
 
             this.kernel.Bind<MobileApiInfo>().ToConstant(apiStats);
 

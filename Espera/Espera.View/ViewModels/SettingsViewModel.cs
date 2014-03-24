@@ -2,6 +2,7 @@
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
+using Espera.Services;
 using Rareform.Validation;
 using ReactiveUI;
 using System;
@@ -20,6 +21,7 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> canCreateAdmin;
         private readonly ObservableAsPropertyHelper<bool> canLogin;
         private readonly CoreSettings coreSettings;
+        private readonly ObservableAsPropertyHelper<bool> isPortOccupied;
         private readonly Library library;
         private readonly ObservableAsPropertyHelper<string> librarySource;
         private readonly ViewSettings viewSettings;
@@ -33,7 +35,7 @@ namespace Espera.View.ViewModels
         private bool showLogin;
         private bool showSettings;
 
-        public SettingsViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, IWindowManager windowManager, Guid accessToken)
+        public SettingsViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, IWindowManager windowManager, Guid accessToken, MobileApiInfo mobileApiInfo)
         {
             if (library == null)
                 Throw.ArgumentNullException(() => library);
@@ -43,6 +45,9 @@ namespace Espera.View.ViewModels
 
             if (coreSettings == null)
                 Throw.ArgumentNullException(() => coreSettings);
+
+            if (mobileApiInfo == null)
+                throw new ArgumentNullException("mobileApiInfo");
 
             this.library = library;
             this.viewSettings = viewSettings;
@@ -120,6 +125,8 @@ namespace Espera.View.ViewModels
                 .ToCommand();
             this.ChangeRemoteControlPasswordCommand.Subscribe(x =>
                 this.library.RemoteAccessControl.SetRemotePassword(this.accessToken, this.RemoteControlPassword));
+
+            this.isPortOccupied = mobileApiInfo.IsPortOccupied.ToProperty(this, x => x.IsPortOccupied);
         }
 
         public static IEnumerable<YoutubeStreamingQuality> YoutubeStreamingQualities
@@ -214,6 +221,11 @@ namespace Espera.View.ViewModels
         public string Homepage
         {
             get { return "http://espera.flagbug.com"; }
+        }
+
+        public bool IsPortOccupied
+        {
+            get { return this.isPortOccupied.Value; }
         }
 
         public bool IsWrongPassword
