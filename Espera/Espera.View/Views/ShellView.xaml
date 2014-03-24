@@ -471,9 +471,11 @@
                             </ListView>
                             <TextBlock HorizontalAlignment="Center"
                                        VerticalAlignment="Center"
-                                       FontSize="22"
+                                       FontSize="16"
+                                       Foreground="{StaticResource GrayBrush3}"
                                        Text="Add songs to the library by going to Settings -&gt; Library -&gt; Change Library Path"
                                        TextWrapping="Wrap"
+                                       TextAlignment="Center"
                                        Visibility="{Binding Path=LocalViewModel.ShowAddSongsHelperMessage,
                                                             Converter={StaticResource BooleanToVisibilityConverter}}" />
                         </Grid>
