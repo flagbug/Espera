@@ -38,6 +38,7 @@ namespace Espera.View
         private readonly WindowManager windowManager;
         private IKernel kernel;
         private MobileApi mobileApi;
+        private IDisposable updateSubscription;
 
         static AppBootstrapper()
         {
@@ -98,6 +99,11 @@ namespace Espera.View
             {
                 this.mobileApi.Dispose();
             }
+
+            if (this.updateSubscription != null)
+            {
+                this.updateSubscription.Dispose();
+            }
         }
 
         protected override void OnStartup(object sender, StartupEventArgs e)
@@ -120,7 +126,9 @@ namespace Espera.View
 
             this.SetupMobileApi();
 
-            this.UpdateSilentlyAsync();
+            this.updateSubscription = Observable.Interval(TimeSpan.FromMinutes(15))
+                .SelectMany(x => this.UpdateSilentlyAsync().ToObservable())
+                .Subscribe();
 
             base.OnStartup(sender, e);
         }
