@@ -2,11 +2,13 @@
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Espera.Core.Tests;
+using Espera.Services;
 using Espera.View.ViewModels;
-using Moq;
+using NSubstitute;
 using ReactiveUI;
 using System;
 using System.IO.Abstractions.TestingHelpers;
+using System.Reactive.Linq;
 using Xunit;
 
 namespace Espera.View.Tests
@@ -21,7 +23,8 @@ namespace Espera.View.Tests
 
             Library library = Helpers.CreateLibrary(fileSystem);
             Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
-            var vm = new SettingsViewModel(library, new ViewSettings(), new CoreSettings(), new Mock<IWindowManager>().Object, token);
+            var vm = new SettingsViewModel(library, new ViewSettings(), new CoreSettings(), Substitute.For<IWindowManager>(), token,
+                new MobileApiInfo(Observable.Return(0), Observable.Return(false)));
 
             var coll = vm.UpdateLibraryCommand.CanExecuteObservable.CreateCollection();
 
