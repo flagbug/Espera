@@ -92,10 +92,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        /// <example>
-        /// With prefixes "A" and "The":
-        /// "A Bar" -> "Bar", "The Foos" -> "Foos"
-        /// </example>
+        /// <example>With prefixes "A" and "The": "A Bar" -&gt; "Bar", "The Foos" -&gt; "Foos"</example>
         private static string RemoveArtistPrefixes(string artistName, IEnumerable<string> prefixes)
         {
             foreach (string prefix in prefixes)
@@ -117,7 +114,7 @@ namespace Espera.View.ViewModels
             {
                 await bitmap.Save(CompressedBitmapFormat.Jpeg, 1, ms);
 
-                // NB: We don't want to wait on the disk, just fire-and-forget
+                // We don't want to wait on the disk, just fire-and-forget
                 BlobCache.LocalMachine.Insert(key, ms.ToArray()).Subscribe();
             }
         }
@@ -132,11 +129,11 @@ namespace Espera.View.ViewModels
                 string sizeAffix = string.Format("-{0}x{0}", size);
 
                 // If we don't have the small version of an artwork, resize, save and return it.
-                // This saves us a bunch of memory at the next startup, because BitmapImage has
-                // some kind of memory leak, so the not-resized image hangs around in memory forever
+                // This saves us a bunch of memory at the next startup, because BitmapImage has some
+                // kind of memory leak, so the not-resized image hangs around in memory forever
                 IBitmap img = await BlobCache.LocalMachine.LoadImage(key + sizeAffix)
                     .Catch(BlobCache.LocalMachine.LoadImage(key, size, size)
-                    .Do(x => SaveImageToBlobCache(key + sizeAffix, x))) //NB: We have the resized image already, so don't wait on this
+                    .Do(x => SaveImageToBlobCache(key + sizeAffix, x))) // We have the resized image already, so don't wait on this
                     .Finally(() => Gate.Release());
 
                 return img.ToNative();

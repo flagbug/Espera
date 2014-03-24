@@ -55,26 +55,25 @@ namespace Espera.Core.Management
         /// <summary>
         /// Gets a value indicating whether the next song in the playlist can be played.
         /// </summary>
-        /// <value>
-        /// true if the next song in the playlist can be played; otherwise, false.
-        /// </value>
+        /// <value>true if the next song in the playlist can be played; otherwise, false.</value>
         public IObservable<bool> CanPlayNextSong { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the previous song in the playlist can be played.
         /// </summary>
-        /// <value>
-        /// true if the previous song in the playlist can be played; otherwise, false.
-        /// </value>
+        /// <value>true if the previous song in the playlist can be played; otherwise, false.</value>
         public IObservable<bool> CanPlayPreviousSong { get; private set; }
 
         /// <summary>
         /// Gets or sets the index of the currently played song in the playlist.
         /// </summary>
         /// <value>
-        /// The index of the currently played song in the playlist. <c>null</c>, if no song is currently played.
+        /// The index of the currently played song in the playlist. <c>null</c>, if no song is
+        /// currently played.
         /// </value>
-        /// <exception cref="ArgumentOutOfRangeException">The value is not in the range of the playlist's indexes.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// The value is not in the range of the playlist's indexes.
+        /// </exception>
         public ReactiveProperty<int?> CurrentSongIndex { get; private set; }
 
         /// <summary>
@@ -155,9 +154,9 @@ namespace Espera.Core.Management
 
             var itemsToAdd = songList.Select(song => new PlaylistEntry(index++, song)).ToList();
 
-            // NB: We don't use the change notification directly, but record them
-            // This allows us to have the correct semantics, even if we rebuild
-            // the indexes after the changes to the list were made
+            // We don't use the change notification directly, but record them for later. This allows
+            // us to have the correct semantics, even if we rebuild the indexes after the changes to
+            // the list were made
             var recordedChanges = this.playlist.Changed.Replay();
             using (recordedChanges.Connect())
             {
@@ -206,7 +205,7 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Removes the songs with the specified indexes from the <see cref="Playlist"/>.
+        /// Removes the songs with the specified indexes from the <see cref="Playlist" />.
         /// </summary>
         /// <param name="indexes">The indexes of the songs to remove.</param>
         internal void RemoveSongs(IEnumerable<int> indexes)

@@ -650,9 +650,9 @@ namespace Espera.Core.Management
 
             List<LocalSong> enumerable = songList.ToList();
 
-            // NB: Check if the number of occurences of the artwork key match the number of songs
-            //     with the same artwork key
-            // so we don't delete artwork keys that still have a corresponding song in the library
+            // Check if the number of occurences of the artwork key match the number of songs with
+            // the same artwork key so we don't delete artwork keys that still have a corresponding
+            // song in the library
             Dictionary<string, int> artworkKeys = this.Songs
                 .Select(x => x.ArtworkKey.FirstAsync().Wait())
                 .Where(x => x != null)
