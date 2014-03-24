@@ -1,3 +1,11 @@
+# v2.0.0 Beta 6
+
+## Features
+- Added an option to disable crash/error/statistics tracking.
+
+## Bugfixes
+- Fixed a bug that caused the application to crash, if the remote control port was already in use.
+
 # v2.0.0 Beta 5
 
 ## Features
