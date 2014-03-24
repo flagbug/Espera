@@ -1,4 +1,4 @@
-﻿using Moq;
+﻿using NSubstitute;
 using System;
 using Xunit;
 
@@ -9,7 +9,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void EqualsNullIsFalse()
         {
-            var song = new Mock<Song>("TestPath", TimeSpan.Zero).Object;
+            var song = Substitute.For<Song>("TestPath", TimeSpan.Zero);
 
             Assert.False(song.Equals(null));
         }
@@ -17,8 +17,8 @@ namespace Espera.Core.Tests
         [Fact]
         public void EqualsSamePathIsTrue()
         {
-            var song1 = new Mock<Song>("TestPath", TimeSpan.Zero).Object;
-            var song2 = new Mock<Song>("TestPath", TimeSpan.Zero).Object;
+            var song1 = Substitute.For<Song>("TestPath", TimeSpan.Zero);
+            var song2 = Substitute.For<Song>("TestPath", TimeSpan.Zero);
 
             Assert.True(song1.Equals(song2));
         }
@@ -26,7 +26,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void EqualsSameReferenceIsTrue()
         {
-            var song = new Mock<Song>("TestPath", TimeSpan.Zero).Object;
+            var song = Substitute.For<Song>("TestPath", TimeSpan.Zero);
 
             Assert.True(song.Equals(song));
         }
@@ -34,8 +34,8 @@ namespace Espera.Core.Tests
         [Fact]
         public void EqualsSongWithDifferentPathIsFalse()
         {
-            var song1 = new Mock<Song>("TestPath", TimeSpan.Zero).Object;
-            var song2 = new Mock<Song>("TestPath1", TimeSpan.Zero).Object;
+            var song1 = Substitute.For<Song>("TestPath", TimeSpan.Zero);
+            var song2 = Substitute.For<Song>("TestPath1", TimeSpan.Zero);
 
             Assert.False(song1.Equals(song2));
         }
@@ -43,8 +43,8 @@ namespace Espera.Core.Tests
         [Fact]
         public void GetHashcodeReturnsEqualHashCodesForEqualObjects()
         {
-            var song1 = new Mock<Song>("TestPath", TimeSpan.Zero) { CallBase = true }.Object;
-            var song2 = new Mock<Song>("TestPath", TimeSpan.Zero) { CallBase = true }.Object;
+            var song1 = Substitute.For<Song>("TestPath", TimeSpan.Zero);
+            var song2 = Substitute.For<Song>("TestPath", TimeSpan.Zero);
 
             Assert.Equal(song1.GetHashCode(), song2.GetHashCode());
         }

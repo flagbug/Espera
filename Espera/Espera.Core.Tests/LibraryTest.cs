@@ -4,6 +4,7 @@ using Espera.Core.Management;
 using Espera.Core.Settings;
 using Microsoft.Reactive.Testing;
 using Moq;
+using NSubstitute;
 using ReactiveUI;
 using ReactiveUI.Testing;
 using System;
@@ -74,8 +75,8 @@ namespace Espera.Core.Tests
         {
             var songs = new[]
             {
-                new Mock<Song>("TestPath", TimeSpan.Zero).Object,
-                new Mock<Song>("TestPath", TimeSpan.Zero).Object
+                Substitute.For<Song>("TestPath", TimeSpan.Zero),
+                Substitute.For<Song>("TestPath", TimeSpan.Zero)
             };
 
             using (Library library = Helpers.CreateLibraryWithPlaylist())
@@ -113,7 +114,6 @@ namespace Espera.Core.Tests
             var song = new LocalSong("C://", TimeSpan.Zero);
             var awaitSubject = new AsyncSubject<Unit>();
             int invocationCount = 0;
-            var finishSubject = new Subject<Unit>();
 
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
@@ -228,15 +228,14 @@ namespace Espera.Core.Tests
         [Fact]
         public void DisabledAutomaticUpdatesDoesntTriggerUpdate()
         {
-            var fileSystem = new Mock<IFileSystem>();
-            fileSystem.Setup(x => x.Directory.GetFiles(It.IsAny<string>()));
+            var fileSystem = Substitute.For<IFileSystem>();
 
             var settings = new CoreSettings
             {
                 EnableAutomaticLibraryUpdates = false
             };
 
-            using (Library library = Helpers.CreateLibrary(settings, null, null, fileSystem.Object))
+            using (Library library = Helpers.CreateLibrary(settings, null, null, fileSystem))
             {
                 (new TestScheduler()).With(scheduler =>
                 {
@@ -246,7 +245,7 @@ namespace Espera.Core.Tests
                 });
             }
 
-            fileSystem.Verify(x => x.Directory.GetFiles(It.IsAny<string>()), Times.Never);
+            fileSystem.Directory.DidNotReceiveWithAnyArgs().GetFiles(null);
         }
 
         [Fact]
@@ -255,18 +254,18 @@ namespace Espera.Core.Tests
             var song = new LocalSong("C://Song.mp3", TimeSpan.Zero) { Title = "A" };
             var updatedSong = new LocalSong("C://Song.mp3", TimeSpan.Zero) { Title = "B" };
 
-            var libraryReader = new Mock<ILibraryReader>();
-            libraryReader.SetupGet(x => x.LibraryExists).Returns(true);
-            libraryReader.Setup(x => x.ReadSongSourcePath()).Returns("C://");
-            libraryReader.Setup(x => x.ReadPlaylists()).Returns(new List<Playlist>());
-            libraryReader.Setup(x => x.ReadSongs()).Returns(new[] { song });
+            var libraryReader = Substitute.For<ILibraryReader>();
+            libraryReader.LibraryExists.Returns(true);
+            libraryReader.ReadSongSourcePath().Returns("C://");
+            libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+            libraryReader.ReadSongs().Returns(new[] { song });
 
             var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { song.OriginalPath, new MockFileData("DontCare") } });
 
-            var songFinder = new Mock<ILocalSongFinder>();
-            songFinder.Setup(x => x.GetSongsAsync()).Returns(Observable.Return(Tuple.Create(updatedSong, (byte[])null)));
+            var songFinder = Substitute.For<ILocalSongFinder>();
+            songFinder.GetSongsAsync().Returns(Observable.Return(Tuple.Create(updatedSong, (byte[])null)));
 
-            using (Library library = Helpers.CreateLibrary(libraryReader.Object, fileSystem, songFinder.Object))
+            using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem, songFinder))
             {
                 await library.AwaitInitializationAndUpdate();
 
@@ -299,13 +298,17 @@ namespace Espera.Core.Tests
             fileSystem.Directory.CreateDirectory("C://Test");
 
             var readerFired = new Subject<int>();
-            var reader = new Mock<ILibraryReader>();
-            reader.SetupGet(x => x.LibraryExists).Returns(true);
-            reader.Setup(x => x.ReadPlaylists()).Returns(new List<Playlist>());
-            reader.Setup(x => x.ReadSongSourcePath()).Returns(String.Empty);
-            reader.Setup(x => x.ReadSongs()).Callback(() => readerFired.OnNext(1)).Returns(new List<LocalSong>());
+            var reader = Substitute.For<ILibraryReader>();
+            reader.LibraryExists.Returns(true);
+            reader.ReadPlaylists().Returns(new List<Playlist>());
+            reader.ReadSongSourcePath().Returns(String.Empty);
+            reader.ReadSongs().Returns(x =>
+            {
+                readerFired.OnNext(1);
+                return new List<LocalSong>();
+            });
 
-            using (var library = Helpers.CreateLibrary(null, reader.Object, null, fileSystem))
+            using (var library = Helpers.CreateLibrary(null, reader, null, fileSystem))
             {
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
@@ -602,7 +605,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void RemoveFromPlaylistAccessExceptionIfAccessModeIsPartyAndLockPlaylistRemovalIsTrue()
         {
-            var songMock = new Mock<Song>("TestPath", TimeSpan.Zero);
+            var songMock = Substitute.For<Song>("TestPath", TimeSpan.Zero);
 
             var settings = new CoreSettings
             {
@@ -615,7 +618,7 @@ namespace Espera.Core.Tests
                 library.LocalAccessControl.SetLocalPassword(token, "Password");
                 library.LocalAccessControl.DowngradeLocalAccess(token);
 
-                library.AddSongToPlaylist(songMock.Object);
+                library.AddSongToPlaylist(songMock);
 
                 Assert.Throws<AccessException>(() => library.RemoveFromPlaylist(new[] { 0 }, token));
             }
@@ -734,15 +737,15 @@ namespace Espera.Core.Tests
             var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero, "artwork-abcdefg");
             await BlobCache.LocalMachine.Insert("artwork-abcdefg", new byte[] { 0, 1 });
 
-            var libraryReader = new Mock<ILibraryReader>();
-            libraryReader.SetupGet(x => x.LibraryExists).Returns(true);
-            libraryReader.Setup(x => x.ReadSongSourcePath()).Returns("C://");
-            libraryReader.Setup(x => x.ReadPlaylists()).Returns(new List<Playlist>());
-            libraryReader.Setup(x => x.ReadSongs()).Returns(new[] { existingSong, missingSong });
+            var libraryReader = Substitute.For<ILibraryReader>();
+            libraryReader.LibraryExists.Returns(true);
+            libraryReader.ReadSongSourcePath().Returns("C://");
+            libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+            libraryReader.ReadSongs().Returns(new[] { existingSong, missingSong });
 
             var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
 
-            using (Library library = Helpers.CreateLibrary(libraryReader.Object, fileSystem))
+            using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
             {
                 await library.AwaitInitializationAndUpdate();
 
@@ -756,13 +759,13 @@ namespace Espera.Core.Tests
             var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero, "artwork-abcdefg");
             await BlobCache.LocalMachine.Insert("artwork-abcdefg", new byte[] { 0, 1 });
 
-            var libraryReader = new Mock<ILibraryReader>();
-            libraryReader.SetupGet(x => x.LibraryExists).Returns(true);
-            libraryReader.Setup(x => x.ReadSongSourcePath()).Returns("C://");
-            libraryReader.Setup(x => x.ReadPlaylists()).Returns(new List<Playlist>());
-            libraryReader.Setup(x => x.ReadSongs()).Returns(new[] { missingSong });
+            var libraryReader = Substitute.For<ILibraryReader>();
+            libraryReader.LibraryExists.Returns(true);
+            libraryReader.ReadSongSourcePath().Returns("C://");
+            libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+            libraryReader.ReadSongs().Returns(new[] { missingSong });
 
-            using (Library library = Helpers.CreateLibrary(libraryReader.Object))
+            using (Library library = Helpers.CreateLibrary(libraryReader))
             {
                 await library.AwaitInitializationAndUpdate();
 
@@ -776,15 +779,15 @@ namespace Espera.Core.Tests
             var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero);
             var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero);
 
-            var libraryReader = new Mock<ILibraryReader>();
-            libraryReader.SetupGet(x => x.LibraryExists).Returns(true);
-            libraryReader.Setup(x => x.ReadSongSourcePath()).Returns("C://");
-            libraryReader.Setup(x => x.ReadPlaylists()).Returns(new List<Playlist>());
-            libraryReader.Setup(x => x.ReadSongs()).Returns(new[] { existingSong, missingSong });
+            var libraryReader = Substitute.For<ILibraryReader>();
+            libraryReader.LibraryExists.Returns(true);
+            libraryReader.ReadSongSourcePath().Returns("C://");
+            libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+            libraryReader.ReadSongs().Returns(new[] { existingSong, missingSong });
 
             var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
 
-            using (Library library = Helpers.CreateLibrary(libraryReader.Object, fileSystem))
+            using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
             {
                 await library.AwaitInitializationAndUpdate();
 
@@ -806,15 +809,15 @@ namespace Espera.Core.Tests
             var playlist2 = new Playlist("Playlist 2");
             playlist2.AddSongs(songs);
 
-            var libraryReader = new Mock<ILibraryReader>();
-            libraryReader.SetupGet(x => x.LibraryExists).Returns(true);
-            libraryReader.Setup(x => x.ReadSongSourcePath()).Returns("C://");
-            libraryReader.Setup(x => x.ReadPlaylists()).Returns(new[] { playlist1, playlist2 });
-            libraryReader.Setup(x => x.ReadSongs()).Returns(songs);
+            var libraryReader = Substitute.For<ILibraryReader>();
+            libraryReader.LibraryExists.Returns(true);
+            libraryReader.ReadSongSourcePath().Returns("C://");
+            libraryReader.ReadPlaylists().Returns(new[] { playlist1, playlist2 });
+            libraryReader.ReadSongs().Returns(songs);
 
             var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
 
-            using (Library library = Helpers.CreateLibrary(libraryReader.Object, fileSystem))
+            using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
             {
                 await library.AwaitInitializationAndUpdate();
 
@@ -829,15 +832,15 @@ namespace Espera.Core.Tests
             var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero, "artwork-abcdefg");
             var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero);
 
-            var libraryReader = new Mock<ILibraryReader>();
-            libraryReader.SetupGet(x => x.LibraryExists).Returns(true);
-            libraryReader.Setup(x => x.ReadSongSourcePath()).Returns("C://");
-            libraryReader.Setup(x => x.ReadPlaylists()).Returns(new List<Playlist>());
-            libraryReader.Setup(x => x.ReadSongs()).Returns(new[] { existingSong, missingSong });
+            var libraryReader = Substitute.For<ILibraryReader>();
+            libraryReader.LibraryExists.Returns(true);
+            libraryReader.ReadSongSourcePath().Returns("C://");
+            libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+            libraryReader.ReadSongs().Returns(new[] { existingSong, missingSong });
 
             var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
 
-            using (Library library = Helpers.CreateLibrary(libraryReader.Object, fileSystem))
+            using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
             {
                 await library.AwaitInitializationAndUpdate();
 
@@ -848,12 +851,9 @@ namespace Espera.Core.Tests
         [Fact]
         public async Task SaveDoesNotSaveTemporaryPlaylist()
         {
-            var libraryWriter = new Mock<ILibraryWriter>();
-            libraryWriter.Setup(x => x.Write(It.IsAny<IEnumerable<LocalSong>>(), It.IsAny<IEnumerable<Playlist>>(), It.IsAny<string>()))
-                .Callback<IEnumerable<LocalSong>, IEnumerable<Playlist>, string>((songs, playlists, songSourcePath) =>
-                    Assert.Equal(1, playlists.Count()));
+            var libraryWriter = Substitute.For<ILibraryWriter>();
 
-            using (Library library = Helpers.CreateLibrary(libraryWriter.Object))
+            using (Library library = Helpers.CreateLibrary(libraryWriter))
             {
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
@@ -864,7 +864,7 @@ namespace Espera.Core.Tests
                 library.Save();
             }
 
-            libraryWriter.Verify(x => x.Write(It.IsAny<IEnumerable<LocalSong>>(), It.IsAny<IEnumerable<Playlist>>(), It.IsAny<string>()), Times.Once());
+            libraryWriter.Received(1).Write(Arg.Any<IEnumerable<LocalSong>>(), Arg.Is<IEnumerable<Playlist>>(x => x.Count() == 1), Arg.Any<string>());
         }
 
         [Fact]
