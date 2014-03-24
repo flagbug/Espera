@@ -5,20 +5,23 @@ namespace Espera.Core.Tests
 {
     public class TagSanitizerTest
     {
-        [Fact]
-        public void SanitizedInvalidXmlCharacter()
+        public class TheSanitizeMethod
         {
-            const string tag = "A\u0018B";
+            [Fact]
+            public void ThrowsArgumentNullExceptionIfTagIsNull()
+            {
+                Assert.Throws<ArgumentNullException>(() => TagSanitizer.Sanitize(null));
+            }
 
-            string sanitized = TagSanitizer.Sanitize(tag);
+            [Fact]
+            public void WithInvalidXmlCharacter()
+            {
+                const string tag = "A\u0018B";
 
-            Assert.Equal("A_B", sanitized);
-        }
+                string sanitized = TagSanitizer.Sanitize(tag);
 
-        [Fact]
-        public void SanitizeThrowsArgumentNullExceptionIfTagIsNull()
-        {
-            Assert.Throws<ArgumentNullException>(() => TagSanitizer.Sanitize(null));
+                Assert.Equal("A_B", sanitized);
+            }
         }
     }
 }

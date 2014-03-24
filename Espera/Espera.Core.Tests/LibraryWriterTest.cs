@@ -7,21 +7,24 @@ namespace Espera.Core.Tests
 {
     public class LibraryWriterTest
     {
-        [Fact]
-        public void WriteSmokeTest()
+        public class TheWriteMethod
         {
-            using (Stream targetStream = new MemoryStream())
+            [Fact]
+            public void SmokeTest()
             {
-                var songs = new[] { Helpers.LocalSong1, Helpers.LocalSong2 };
+                using (Stream targetStream = new MemoryStream())
+                {
+                    var songs = new[] { Helpers.LocalSong1, Helpers.LocalSong2 };
 
-                var playlists = new[] { Helpers.Playlist1, Helpers.Playlist2 };
+                    var playlists = new[] { Helpers.Playlist1, Helpers.Playlist2 };
 
-                LibraryWriter.Write(songs, playlists, Helpers.SongSourcePath, targetStream);
+                    LibraryWriter.Write(songs, playlists, Helpers.SongSourcePath, targetStream);
 
-                string expected = Helpers.GenerateSaveFile();
-                string actual = Helpers.StreamToString(targetStream).Replace("\r\n", String.Empty);
+                    string expected = Helpers.GenerateSaveFile();
+                    string actual = Helpers.StreamToString(targetStream).Replace("\r\n", String.Empty);
 
-                Assert.Equal(expected, actual);
+                    Assert.Equal(expected, actual);
+                }
             }
         }
     }
