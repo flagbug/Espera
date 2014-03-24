@@ -3,7 +3,6 @@ using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Microsoft.Reactive.Testing;
-using Moq;
 using NSubstitute;
 using ReactiveUI;
 using ReactiveUI.Testing;
@@ -199,9 +198,9 @@ namespace Espera.Core.Tests
                     return Task.Delay(0);
                 };
 
-                Mock<Song> song = Helpers.CreateSongMock();
+                Song song = Helpers.SetupSongMock();
 
-                library.AddSongToPlaylist(song.Object);
+                library.AddSongToPlaylist(song);
 
                 await library.PlaySongAsync(0, token);
 
@@ -363,9 +362,9 @@ namespace Espera.Core.Tests
                     return Task.Delay(0);
                 };
 
-                Mock<Song> song = Helpers.CreateSongMock();
+                Song song = Helpers.SetupSongMock();
 
-                library.AddSongToPlaylist(song.Object);
+                library.AddSongToPlaylist(song);
 
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
@@ -448,9 +447,9 @@ namespace Espera.Core.Tests
                     called++;
                     return Task.Delay(0);
                 };
-                Mock<Song> song = Helpers.CreateSongMock();
+                Song song = Helpers.SetupSongMock();
 
-                await library.PlayInstantlyAsync(new[] { song.Object }, library.LocalAccessControl.RegisterLocalAccessToken());
+                await library.PlayInstantlyAsync(new[] { song }, library.LocalAccessControl.RegisterLocalAccessToken());
 
                 Assert.Equal(1, called);
             }
