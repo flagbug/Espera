@@ -1,3 +1,12 @@
+# v2.0.0 Beta 7
+
+## Features
+- Search for updates regularly.
+
+## Bugfixes
+- Fixed some visual bugs.
+- Fixed a bug that caused the application to crash when pressing the "Play" button.
+
 # v2.0.0 Beta 6
 
 ## Features
