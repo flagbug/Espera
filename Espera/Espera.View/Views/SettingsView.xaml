@@ -119,7 +119,14 @@
             <TabItem Header="party mode">
                 <ScrollViewer Padding="0, 0, 10, 10" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <Controls:ToggleSwitch Header="Lock play/pause" IsChecked="{Binding Path=LockPlayPause}" />
+                        <TextBlock Margin="0, 15, 0, 0"
+                                   Style="{StaticResource SettingsTextStyle}" 
+                                   FontSize="18"
+                                   Text="The party mode allows you to lock Espera, so your guests cannot interrupt the playback or change the volume"
+                                   TextWrapping="Wrap" />
+                        <Controls:ToggleSwitch Margin="0, 20, 0, 0" 
+                                               Header="Lock play/pause" 
+                                               IsChecked="{Binding Path=LockPlayPause}" />
                         <Controls:ToggleSwitch Header="Lock volume" IsChecked="{Binding Path=LockVolume}" />
                         <Controls:ToggleSwitch Header="Lock time" IsChecked="{Binding Path=LockTime}" />
                         <Controls:ToggleSwitch Header="Lock playlist" IsChecked="{Binding Path=LockPlaylist}" />
@@ -205,7 +212,7 @@
             <TabItem Header="youtube">
                 <StackPanel>
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="streaming" />
-                    <Controls:ToggleSwitch Margin="10, 0, 0, 0"
+                    <Controls:ToggleSwitch Margin="10, 5, 0, 0"
                                            Header="Always stream highest quality"
                                            IsChecked="{Binding Path=StreamHighestYoutubeQuality}" />
                     <StackPanel Margin="20, 0, 0, 0"
@@ -264,6 +271,7 @@
                     </StackPanel>
                     <Controls:ToggleSwitch Header="Enable voting system" IsChecked="{Binding Path=EnableVotingSystem}" />
                     <TextBlock Margin="0, 50, 0, 0"
+                               Style="{StaticResource SettingsTextStyle}"
                                HorizontalAlignment="Center"
                                Text="Coming soon for Android"
                                Foreground="White"
@@ -301,6 +309,7 @@
                                            Header="Enable anonymous crash/error/usage reporting"
                                            IsChecked="{Binding Path=EnableAutomaticReports}" />
                     <TextBlock Margin="10, 5, 0, 0"
+                               Style="{StaticResource SettingsTextStyle}"
                                Text="Espera will NEVER collect any personal identifiable information"
                                FontSize="15" />
                 </StackPanel>
