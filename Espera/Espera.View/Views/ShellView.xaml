@@ -143,12 +143,12 @@
     <Controls:MetroWindow.Flyouts>
         <Controls:FlyoutsControl>
             <Controls:Flyout Header="settings"
-                             IsOpen="{Binding Path=SettingsViewModel.ShowSettings}"
+                             IsOpen="{Binding Path=SettingsViewModel.ShowSettings, Mode=OneWay}"
                              Position="Right">
                 <Views:SettingsView Width="575" DataContext="{Binding Path=SettingsViewModel}" />
             </Controls:Flyout>
             <Controls:Flyout Header="Login"
-                             IsOpen="{Binding Path=SettingsViewModel.ShowLogin}"
+                             IsOpen="{Binding Path=SettingsViewModel.ShowLogin, Mode=OneWay}"
                              Position="Right">
                 <StackPanel Width="200"
                             Margin="10, 0, 10, 0"
@@ -361,7 +361,7 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
-                        <Controls:ProgressRing Margin="0, 35, 0, 0" IsActive="{Binding Path=IsLoadingThumbnail}" />
+                        <Controls:ProgressRing Margin="0, 35, 0, 0" Visibility="{Binding Path=IsLoadingThumbnail, Converter={StaticResource BooleanToVisibilityConverter}}" />
                         <Image Grid.Row="0"
                                Source="{Binding Path=Thumbnail}"
                                Visibility="{Binding Path=HasThumbnail,
