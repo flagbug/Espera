@@ -194,21 +194,12 @@ namespace Espera.View.ViewModels
                 .ToCommand();
             this.PauseCommand.RegisterAsyncTask(_ => this.library.PauseSongAsync(this.accessToken));
 
-            this.PauseContinueCommand = new ReactiveCommand(this
-                .WhenAnyValue(x => x.IsPlaying)
-                .Select(x => x ? this.PauseCommand.CanExecute(null) : this.PlayCommand.CanExecute(null)));
-            this.PauseContinueCommand.Subscribe(x =>
-            {
-                if (this.IsPlaying)
-                {
-                    this.PauseCommand.Execute(null);
-                }
+            var pauseOrContinueCommand = this.WhenAnyValue(x => x.IsPlaying)
+                .Select(x => x ? this.PauseCommand : this.PlayCommand).Publish(null);
+            pauseOrContinueCommand.Connect();
 
-                else
-                {
-                    this.PlayCommand.Execute(false);
-                }
-            });
+            this.PauseContinueCommand = pauseOrContinueCommand.Select(x => x.CanExecuteObservable).Switch().ToCommand();
+            this.PauseContinueCommand.Subscribe(async _ => (await pauseOrContinueCommand.FirstAsync()).Execute(null));
 
             this.EditPlaylistNameCommand = this.WhenAnyValue(x => x.CanAlterPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 && !x2.Model.IsTemporary)
                 .ToCommand();
@@ -367,7 +358,7 @@ namespace Espera.View.ViewModels
         public IReactiveCommand PauseCommand { get; private set; }
 
         /// <summary>
-        /// A command that decided whether the songs should be paused or continued.
+        /// A command that decides whether the songs should be paused or continued.
         /// </summary>
         public IReactiveCommand PauseContinueCommand { get; private set; }
 
