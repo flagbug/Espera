@@ -27,6 +27,7 @@ namespace Espera.View.ViewModels
         private readonly ViewSettings viewSettings;
         private readonly IWindowManager windowManager;
         private string creationPassword;
+        private ObservableAsPropertyHelper<bool> enableChangelog;
         private bool isAdminCreated;
         private bool isWrongPassword;
         private string loginPassword;
@@ -127,6 +128,9 @@ namespace Espera.View.ViewModels
                 this.library.RemoteAccessControl.SetRemotePassword(this.accessToken, this.RemoteControlPassword));
 
             this.isPortOccupied = mobileApiInfo.IsPortOccupied.ToProperty(this, x => x.IsPortOccupied);
+
+            this.enableChangelog = this.viewSettings.WhenAnyValue(x => x.EnableChangelog)
+                .ToProperty(this, x => x.EnableChangelog);
         }
 
         public static IEnumerable<YoutubeStreamingQuality> YoutubeStreamingQualities
@@ -184,6 +188,12 @@ namespace Espera.View.ViewModels
         {
             get { return this.coreSettings.EnableAutomaticReports; }
             set { this.coreSettings.EnableAutomaticReports = value; }
+        }
+
+        public bool EnableChangelog
+        {
+            get { return this.enableChangelog.Value; }
+            set { this.viewSettings.EnableChangelog = value; }
         }
 
         public bool EnablePlaylistTimeout

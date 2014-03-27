@@ -17,10 +17,10 @@ namespace Espera.View.ViewModels
             this.settings = settings;
         }
 
-        public bool IsUpdated
-        {
-            get { return this.settings.IsUpdated; }
-        }
+        /// <summary>
+        /// Used in the changelog dialog to opt-out of the automatic changelog.
+        /// </summary>
+        public bool DisableChangelog { get; set; }
 
         public IEnumerable<ChangelogReleaseEntry> ReleaseEntries
         {
@@ -32,9 +32,16 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public bool ShowChangelog
+        {
+            get { return this.settings.IsUpdated && this.settings.EnableChangelog; }
+        }
+
         public void ChangelogShown()
         {
             this.settings.IsUpdated = false;
+
+            this.settings.EnableChangelog = !this.DisableChangelog;
         }
     }
 }

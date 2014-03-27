@@ -120,12 +120,12 @@
                 <ScrollViewer Padding="0, 0, 10, 10" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <TextBlock Margin="0, 15, 0, 0"
-                                   Style="{StaticResource SettingsTextStyle}" 
+                                   Style="{StaticResource SettingsTextStyle}"
                                    FontSize="18"
                                    Text="The party mode allows you to lock Espera, so your guests cannot interrupt the playback or change the volume"
                                    TextWrapping="Wrap" />
-                        <Controls:ToggleSwitch Margin="0, 20, 0, 0" 
-                                               Header="Lock play/pause" 
+                        <Controls:ToggleSwitch Margin="0, 20, 0, 0"
+                                               Header="Lock play/pause"
                                                IsChecked="{Binding Path=LockPlayPause}" />
                         <Controls:ToggleSwitch Header="Lock volume" IsChecked="{Binding Path=LockVolume}" />
                         <Controls:ToggleSwitch Header="Lock time" IsChecked="{Binding Path=LockTime}" />
@@ -312,6 +312,9 @@
                                Style="{StaticResource SettingsTextStyle}"
                                Text="Espera will NEVER collect any personal identifiable information"
                                FontSize="15" />
+                    <Controls:ToggleSwitch Margin="0, 30, 0, 0"
+                                           Header="Show the changlog after an update"
+                                           IsChecked="{Binding Path=EnableChangelog}" />
                 </StackPanel>
             </TabItem>
         </TabControl>
