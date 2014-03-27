@@ -1,6 +1,7 @@
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.View.ViewModels;
+using GlobalHotKey;
 using MahApps.Metro;
 using MahApps.Metro.Controls.Dialogs;
 using ReactiveUI;
@@ -21,6 +22,7 @@ namespace Espera.View.Views
 {
     public partial class ShellView
     {
+        private HotKeyManager hotKeyManager;
         private ShellViewModel shellViewModel;
 
         public ShellView()
@@ -34,6 +36,7 @@ namespace Espera.View.Views
                 this.WireDataContext();
                 this.WirePlayer();
                 this.WireScreenStateUpdater();
+                this.RegisterGlobalHotKeys();
 
                 this.Events().KeyUp.Where(x => x.Key == Key.Space)
                     .InvokeCommand(this.shellViewModel, x => x.PauseContinueCommand);
@@ -101,6 +104,7 @@ namespace Espera.View.Views
             if (this.shellViewModel.CanModifyWindow)
             {
                 this.shellViewModel.Dispose();
+                this.hotKeyManager.Dispose();
             }
 
             else
@@ -178,6 +182,23 @@ namespace Espera.View.Views
         private void PlaylistSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             this.shellViewModel.SelectedPlaylistEntries = ((ListBox)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
+        }
+
+        private void RegisterGlobalHotKeys()
+        {
+            this.hotKeyManager = new HotKeyManager();
+            this.hotKeyManager.Register(Key.MediaNextTrack, ModifierKeys.None);
+            this.hotKeyManager.Register(Key.MediaPreviousTrack, ModifierKeys.None);
+            this.hotKeyManager.Register(Key.MediaPlayPause, ModifierKeys.None);
+
+            IObservable<Key> keyPressed = Observable.FromEventPattern<KeyPressedEventArgs>(
+                    h => this.hotKeyManager.KeyPressed += h,
+                    h => this.hotKeyManager.KeyPressed -= h)
+                .Select(x => x.EventArgs.HotKey.Key);
+
+            keyPressed.Where(x => x == Key.MediaNextTrack).InvokeCommand(this.shellViewModel, x => x.NextSongCommand);
+            keyPressed.Where(x => x == Key.MediaPreviousTrack).InvokeCommand(this.shellViewModel, x => x.PreviousSongCommand);
+            keyPressed.Where(x => x == Key.MediaPlayPause).InvokeCommand(this.shellViewModel, x => x.PauseContinueCommand);
         }
 
         private async void SearchTextBoxKeyUp(object sender, KeyEventArgs e)
