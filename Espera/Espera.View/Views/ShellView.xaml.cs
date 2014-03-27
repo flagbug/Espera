@@ -47,13 +47,11 @@ namespace Espera.View.Views
             {
                 var updateViewModel = ((ShellViewModel)this.DataContext).UpdateViewModel;
 
-                if (updateViewModel.IsUpdated)
+                if (updateViewModel.ShowChangelog)
                 {
                     var dialog = (SimpleDialog)this.Resources["Changelog"];
 
                     await this.ShowMetroDialogAsync(dialog);
-
-                    updateViewModel.ChangelogShown();
                 }
             };
         }
@@ -68,6 +66,9 @@ namespace Espera.View.Views
             var dialog = (SimpleDialog)this.Resources["Changelog"];
 
             await this.HideMetroDialogAsync(dialog);
+
+            var updateViewModel = ((ShellViewModel)this.DataContext).UpdateViewModel;
+            updateViewModel.ChangelogShown();
         }
 
         private void LoginButtonClick(object sender, RoutedEventArgs e)

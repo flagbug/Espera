@@ -15,6 +15,12 @@ namespace Espera.View
             set { this.SetOrCreate(value); }
         }
 
+        public bool EnableChangelog
+        {
+            get { return this.GetOrCreate(true); }
+            set { this.SetOrCreate(value); }
+        }
+
         public bool GoFullScreenOnLock
         {
             get { return this.GetOrCreate(true); }
