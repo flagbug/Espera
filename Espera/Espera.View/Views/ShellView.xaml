@@ -361,7 +361,7 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
-                        <Controls:ProgressRing Margin="0, 35, 0, 0" Visibility="{Binding Path=IsLoadingThumbnail, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <Controls:ProgressRing Margin="0, 35, 0, 0" IsActive="{Binding Path=IsLoadingThumbnail}" />
                         <Image Grid.Row="0"
                                Source="{Binding Path=Thumbnail}"
                                Visibility="{Binding Path=HasThumbnail,
