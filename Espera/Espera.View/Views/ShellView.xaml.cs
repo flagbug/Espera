@@ -61,7 +61,9 @@ namespace Espera.View.Views
 
         private void ChangeColor(string color)
         {
-            ThemeManager.ChangeTheme(this, ThemeManager.DefaultAccents.First(accent => accent.Name == color), Theme.Dark);
+            Accent accent = ThemeManager.Accents.First(x => x.Name == color);
+            AppTheme theme = ThemeManager.AppThemes.First(x => x.Name == "BaseDark");
+            ThemeManager.ChangeAppStyle(Application.Current, accent, theme);
         }
 
         private async void CloseChangelog(object sender, RoutedEventArgs e)
