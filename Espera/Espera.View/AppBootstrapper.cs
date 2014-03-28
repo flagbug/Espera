@@ -127,6 +127,7 @@ namespace Espera.View
             this.SetupMobileApi();
 
             this.updateSubscription = Observable.Interval(TimeSpan.FromMinutes(15))
+                .StartWith(0) // Trigger an initial update
                 .SelectMany(x => this.UpdateSilentlyAsync().ToObservable())
                 .Subscribe();
 
