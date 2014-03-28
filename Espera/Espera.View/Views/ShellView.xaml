@@ -18,6 +18,7 @@
                       ShowMaxRestoreButton="{Binding Path=CanModifyWindow}"
                       ShowMinButton="{Binding Path=CanModifyWindow}"
                       WindowState="Maximized"
+                      GlowBrush="{DynamicResource AccentColorBrush}"
                       d:DataContext="{d:DesignInstance ViewModels:DesignTimeShellViewModel,
                                                        IsDesignTimeCreatable=True}"
                       mc:Ignorable="d">
