@@ -13,7 +13,6 @@ using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -463,14 +462,13 @@ namespace Espera.Core.Management
         {
             var stopWatch = Stopwatch.StartNew();
 
+            IReadOnlyList<LocalSong> songsToSave = this.Songs;
+            IReadOnlyList<Playlist> playlistsToSave = this.playlists.Where(playlist => !playlist.IsTemporary).ToList();
+            string pathToSave = this.songSourcePath.Value;
+
             try
             {
-                Observable.Start(() => this.libraryWriter.Write(
-                        this.Songs,
-                        this.playlists.Where(playlist => !playlist.IsTemporary),
-                        this.songSourcePath.Value), Scheduler.Immediate)
-                    .Retry(3)
-                    .Wait();
+                Utility.Retry(() => this.libraryWriter.Write(songsToSave, playlistsToSave, pathToSave));
 
                 stopWatch.Stop();
                 this.Log().Info("Library save took {0}ms", stopWatch.ElapsedMilliseconds);
@@ -639,29 +637,55 @@ namespace Espera.Core.Management
             }
         }
 
+        /// <summary>
+        /// Loads the library with the reader specified in the constructor. This methods retires
+        /// three times, but doesn't throw if the loading failed after that.
+        /// </summary>
         private void Load()
         {
             var stopWatch = Stopwatch.StartNew();
 
-            IEnumerable<LocalSong> savedSongs = this.libraryReader.ReadSongs();
+            IEnumerable<LocalSong> savedSongs = null;
+            IEnumerable<Playlist> savedPlaylists = null;
+            string songsPath = null;
+
+            try
+            {
+                Utility.Retry(() =>
+                {
+                    try
+                    {
+                        savedSongs = this.libraryReader.ReadSongs();
+                        savedPlaylists = this.libraryReader.ReadPlaylists();
+                        songsPath = this.libraryReader.ReadSongSourcePath();
+                    }
+
+                    finally
+                    {
+                        this.libraryReader.InvalidateCache();
+                    }
+                });
+            }
+
+            catch (LibraryReadException ex)
+            {
+                this.Log().FatalException("Failed to load the library file.", ex);
+                return;
+            }
 
             foreach (LocalSong song in savedSongs)
             {
                 this.songs.Add(song);
             }
 
-            IEnumerable<Playlist> savedPlaylists = this.libraryReader.ReadPlaylists();
-
             foreach (Playlist playlist in savedPlaylists)
             {
                 this.playlists.Add(playlist);
             }
 
-            this.songSourcePath.OnNext(this.libraryReader.ReadSongSourcePath());
+            this.songSourcePath.OnNext(songsPath);
 
-            this.libraryReader.InvalidateCache();
             stopWatch.Stop();
-
             this.Log().Info("Library load took {0}ms", stopWatch.ElapsedMilliseconds);
         }
 

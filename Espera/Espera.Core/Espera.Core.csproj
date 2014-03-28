@@ -137,6 +137,7 @@
     <Compile Include="Management\IRemoteAccessControl.cs" />
     <Compile Include="Management\LibraryFileReader.cs" />
     <Compile Include="Management\LibraryFileWriter.cs" />
+    <Compile Include="Management\LibraryReadException.cs" />
     <Compile Include="Management\LibraryWriteException.cs" />
     <Compile Include="Management\PlaylistEntry.cs" />
     <Compile Include="Management\WrongPasswordException.cs" />
@@ -152,6 +153,7 @@
     <Compile Include="Song.cs" />
     <Compile Include="LocalSongFinder.cs" />
     <Compile Include="TagSanitizer.cs" />
+    <Compile Include="Utility.cs" />
     <Compile Include="YoutubeDownloadException.cs" />
     <Compile Include="YoutubeSong.cs" />
     <Compile Include="YoutubeSongFinder.cs" />
