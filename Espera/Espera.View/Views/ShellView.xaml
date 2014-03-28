@@ -145,12 +145,14 @@
         <Controls:FlyoutsControl>
             <Controls:Flyout Header="settings"
                              IsOpen="{Binding Path=SettingsViewModel.ShowSettings}"
-                             Position="Right">
+                             Position="Right"
+                             Theme="Adapt">
                 <Views:SettingsView Width="575" DataContext="{Binding Path=SettingsViewModel}" />
             </Controls:Flyout>
             <Controls:Flyout Header="Login"
                              IsOpen="{Binding Path=SettingsViewModel.ShowLogin, Mode=OneWay}"
-                             Position="Right">
+                             Position="Right"
+                             Theme="Adapt">
                 <StackPanel Width="200"
                             Margin="10, 0, 10, 0"
                             HorizontalAlignment="Stretch"
@@ -175,7 +177,8 @@
             </Controls:Flyout>
             <Controls:Flyout Header="Video"
                              IsOpen="{Binding Path=ShowVideoPlayer}"
-                             Position="Right">
+                             Position="Right"
+                             Theme="Adapt">
                 <MediaElement x:Name="videoPlayer"
                               Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Controls:MetroWindow},
                                               Path=ActualWidth}"
