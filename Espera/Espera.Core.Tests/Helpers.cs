@@ -127,7 +127,7 @@ namespace Espera.Core.Tests
         {
             using (var stream = new MemoryStream())
             {
-                LibraryWriter.Write(new[] { LocalSong1, LocalSong2 }, new[] { Playlist1, Playlist2 }, SongSourcePath, stream);
+                LibrarySerializer.Serialize(new[] { LocalSong1, LocalSong2 }, new[] { Playlist1, Playlist2 }, SongSourcePath, stream);
 
                 return Encoding.UTF8.GetString(stream.ToArray());
             }

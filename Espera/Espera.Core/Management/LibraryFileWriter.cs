@@ -28,7 +28,7 @@ namespace Espera.Core.Management
             {
                 using (FileStream targetStream = File.Create(tempFilePath))
                 {
-                    LibraryWriter.Write(songs, playlists, songSourcePath, targetStream);
+                    LibrarySerializer.Serialize(songs, playlists, songSourcePath, targetStream);
                 }
 
                 File.Delete(this.targetPath);

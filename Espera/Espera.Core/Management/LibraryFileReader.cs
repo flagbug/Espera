@@ -34,14 +34,14 @@ namespace Espera.Core.Management
         {
             this.LoadToCache();
 
-            return LibraryReader.ReadPlaylists(this.cache, this.songCache);
+            return LibraryDeserializer.DeserializePlaylists(this.cache, this.songCache);
         }
 
         public IReadOnlyList<LocalSong> ReadSongs()
         {
             this.LoadToCache();
 
-            IReadOnlyList<LocalSong> songs = LibraryReader.ReadSongs(this.cache);
+            IReadOnlyList<LocalSong> songs = LibraryDeserializer.DeserializeSongs(this.cache);
             this.songCache = songs;
 
             return songs;
@@ -51,7 +51,7 @@ namespace Espera.Core.Management
         {
             this.LoadToCache();
 
-            return LibraryReader.ReadSongSourcePath(this.cache);
+            return LibraryDeserializer.DeserializeSongSourcePath(this.cache);
         }
 
         private void LoadToCache()

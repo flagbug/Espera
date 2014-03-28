@@ -137,11 +137,12 @@
     <Compile Include="Management\IRemoteAccessControl.cs" />
     <Compile Include="Management\LibraryFileReader.cs" />
     <Compile Include="Management\LibraryFileWriter.cs" />
+    <Compile Include="Management\LibraryWriteException.cs" />
     <Compile Include="Management\PlaylistEntry.cs" />
     <Compile Include="Management\WrongPasswordException.cs" />
     <Compile Include="Management\Library.cs" />
-    <Compile Include="Management\LibraryReader.cs" />
-    <Compile Include="Management\LibraryWriter.cs" />
+    <Compile Include="Management\LibraryDeserializer.cs" />
+    <Compile Include="Management\LibrarySerializer.cs" />
     <Compile Include="Management\Playlist.cs" />
     <Compile Include="LocalSong.cs" />
     <Compile Include="Audio\PlaybackException.cs" />

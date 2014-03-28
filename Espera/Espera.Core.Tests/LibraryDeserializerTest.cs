@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Espera.Core.Tests
 {
-    public class LibraryReaderTest
+    public class LibraryDeserializerTest
     {
         private static void AssertSongsAreEqual(Song song1, Song song2)
         {
@@ -26,7 +26,7 @@ namespace Espera.Core.Tests
                 string json = Helpers.GenerateSaveFile();
                 var jobject = JObject.Parse(json);
 
-                Playlist[] playlists = LibraryReader.ReadPlaylists(jobject).ToArray();
+                Playlist[] playlists = LibraryDeserializer.DeserializePlaylists(jobject).ToArray();
 
                 Playlist playlist1 = playlists[0];
                 Song[] songs1 = playlist1.Select(entry => entry.Song).ToArray();
@@ -62,7 +62,7 @@ namespace Espera.Core.Tests
                 string json = Helpers.GenerateSaveFile();
                 var jobject = JObject.Parse(json);
 
-                LocalSong[] songs = LibraryReader.ReadSongs(jobject).ToArray();
+                LocalSong[] songs = LibraryDeserializer.DeserializeSongs(jobject).ToArray();
 
                 Song actualSong1 = songs[0];
                 Song expectedSong1 = Helpers.LocalSong1;
@@ -84,7 +84,7 @@ namespace Espera.Core.Tests
                 string json = Helpers.GenerateSaveFile();
                 var jobject = JObject.Parse(json);
 
-                string songSourcePath = LibraryReader.ReadSongSourcePath(jobject);
+                string songSourcePath = LibraryDeserializer.DeserializeSongSourcePath(jobject);
 
                 Assert.Equal(songSourcePath, Helpers.SongSourcePath);
             }

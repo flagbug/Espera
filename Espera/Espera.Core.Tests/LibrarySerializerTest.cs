@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Espera.Core.Tests
 {
-    public class LibraryWriterTest
+    public class LibrarySerializerTest
     {
         public class TheWriteMethod
         {
@@ -18,7 +18,7 @@ namespace Espera.Core.Tests
 
                     var playlists = new[] { Helpers.Playlist1, Helpers.Playlist2 };
 
-                    LibraryWriter.Write(songs, playlists, Helpers.SongSourcePath, targetStream);
+                    LibrarySerializer.Serialize(songs, playlists, Helpers.SongSourcePath, targetStream);
 
                     string expected = Helpers.GenerateSaveFile();
                     string actual = Helpers.StreamToString(targetStream).Replace("\r\n", String.Empty);

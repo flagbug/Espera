@@ -5,11 +5,11 @@ using System.Linq;
 
 namespace Espera.Core.Management
 {
-    internal static class LibraryReader
+    internal static class LibraryDeserializer
     {
-        public static IReadOnlyList<Playlist> ReadPlaylists(JObject json, IReadOnlyList<Song> songCache = null)
+        public static IReadOnlyList<Playlist> DeserializePlaylists(JObject json, IReadOnlyList<Song> songCache = null)
         {
-            IEnumerable<Song> songs = songCache ?? ReadSongs(json);
+            IEnumerable<Song> songs = songCache ?? DeserializeSongs(json);
 
             var playlists = json["playlists"].Select(playlist => new
             {
@@ -60,7 +60,7 @@ namespace Espera.Core.Management
             }).ToList();
         }
 
-        public static IReadOnlyList<LocalSong> ReadSongs(JObject json)
+        public static IReadOnlyList<LocalSong> DeserializeSongs(JObject json)
         {
             return json["songs"].Select(song =>
                 new LocalSong
@@ -79,7 +79,7 @@ namespace Espera.Core.Management
             ).ToList();
         }
 
-        public static string ReadSongSourcePath(JObject json)
+        public static string DeserializeSongSourcePath(JObject json)
         {
             return json["songSourcePath"] == null ? null : json["songSourcePath"].ToObject<string>();
         }
