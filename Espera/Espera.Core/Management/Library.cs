@@ -454,15 +454,31 @@ namespace Espera.Core.Management
             this.playlists.Remove(playlist);
         }
 
+        /// <summary>
+        /// Saves the library to the writer that was specified in the constructor. This method
+        /// doesn't throw, even if there was an error when writing the library.
+        /// </summary>
         public void Save()
         {
             var stopWatch = Stopwatch.StartNew();
 
-            this.libraryWriter.Write(this.Songs, this.playlists.Where(playlist => !playlist.IsTemporary), this.songSourcePath.Value);
+            try
+            {
+                this.libraryWriter.Write(this.Songs, this.playlists.Where(playlist => !playlist.IsTemporary), this.songSourcePath.Value);
 
-            stopWatch.Stop();
+                stopWatch.Stop();
+                this.Log().Info("Library save took {0}ms", stopWatch.ElapsedMilliseconds);
+            }
 
-            this.Log().Info("Library save took {0}ms", stopWatch.ElapsedMilliseconds);
+            catch (LibraryWriteException ex)
+            {
+                this.Log().FatalException("Couldn't write the library file", ex);
+            }
+
+            finally
+            {
+                stopWatch.Stop();
+            }
         }
 
         public void SetCurrentTime(TimeSpan currentTime, Guid accessToken)
