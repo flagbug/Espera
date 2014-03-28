@@ -20,7 +20,7 @@ using TextBox = System.Windows.Controls.TextBox;
 
 namespace Espera.View.Views
 {
-    public partial class ShellView
+    public partial class ShellView : IEnableLogger
     {
         private HotKeyManager hotKeyManager;
         private ShellViewModel shellViewModel;
@@ -36,7 +36,18 @@ namespace Espera.View.Views
                 this.WireDataContext();
                 this.WirePlayer();
                 this.WireScreenStateUpdater();
-                this.RegisterGlobalHotKeys();
+
+                try
+                {
+                    this.RegisterGlobalHotKeys();
+                }
+
+                catch (Win32Exception ex)
+                {
+                    this.Log().ErrorException("Couldn't register hotkeys. " +
+                                              "There is probably another instance of Espera running " +
+                                              "or another application that requested the global hooks", ex);
+                }
 
                 this.Events().KeyUp.Where(x => x.Key == Key.Space)
                     .InvokeCommand(this.shellViewModel, x => x.PauseContinueCommand);
