@@ -444,8 +444,7 @@
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Foreground="White"
-                                                                   Text="{Binding Path=Title}"
+                                                        <TextBlock Text="{Binding Path=Title}"
                                                                    TextTrimming="CharacterEllipsis" />
                                                     </StackPanel>
                                                 </DataTemplate>
@@ -455,8 +454,7 @@
                                             <GridViewColumnHeader Content="Duration" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Foreground="White"
-                                                               Text="{Binding Path=FormattedDuration}"
+                                                    <TextBlock Text="{Binding Path=FormattedDuration}"
                                                                TextTrimming="CharacterEllipsis" />
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
@@ -465,8 +463,7 @@
                                             <GridViewColumnHeader Content="Genre" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Foreground="White"
-                                                               Text="{Binding Path=Genre}"
+                                                    <TextBlock Text="{Binding Path=Genre}"
                                                                TextTrimming="CharacterEllipsis" />
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
@@ -633,7 +630,7 @@
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock>
-                                                        <Hyperlink Command="{Binding Path=OpenPathCommand}" Foreground="White">
+                                                        <Hyperlink Command="{Binding Path=OpenPathCommand}">
                                                             <TextBlock Text="{Binding Path=Path}" TextTrimming="CharacterEllipsis" />
                                                         </Hyperlink>
                                                     </TextBlock>

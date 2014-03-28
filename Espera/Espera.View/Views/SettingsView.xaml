@@ -41,13 +41,10 @@
             <Style x:Key="SettingsHeaderStyle" TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="60" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
-                <!--  For some reason the foreground has to be set manually, otherwise it would be black.  -->
-                <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
             </Style>
             <Style x:Key="SettingsTextStyle" TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="14" />
                 <Setter Property="FontFamily" Value="{DynamicResource ContentFontFamily}" />
-                <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
                 <Setter Property="Opacity" Value="0.6" />
             </Style>
             <Style BasedOn="{StaticResource {x:Type Controls:ToggleSwitch}}" TargetType="{x:Type Controls:ToggleSwitch}">
@@ -57,7 +54,6 @@
             </Style>
             <Style x:Key="AboutInfoStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
                 <Setter Property="FontSize" Value="15" />
-                <Setter Property="Foreground" Value="White" />
             </Style>
             <valueConverters:BoolNegationValueConverter x:Key="BoolNegationConverter" />
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
@@ -274,7 +270,6 @@
                                Style="{StaticResource SettingsTextStyle}"
                                HorizontalAlignment="Center"
                                Text="Coming soon for Android"
-                               Foreground="White"
                                FontSize="40" />
                 </StackPanel>
             </TabItem>
