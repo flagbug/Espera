@@ -15,6 +15,12 @@ namespace Espera.View
             set { this.SetOrCreate(value); }
         }
 
+        public string AppTheme
+        {
+            get { return this.GetOrCreate("BaseDark"); }
+            set { this.SetOrCreate(value); }
+        }
+
         public bool EnableChangelog
         {
             get { return this.GetOrCreate(true); }

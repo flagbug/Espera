@@ -16,19 +16,22 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/FlatSlider.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <Style x:Key="ColorPickerButtonStyle" TargetType="{x:Type Button}">
+            <Style x:Key="AccentPickerButtonStyle" TargetType="{x:Type Button}">
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border Width="150"
-                                    Height="150"
-                                    Margin="0, 0, 20, 20"
+                            <Border BorderThickness="{TemplateBinding BorderThickness}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
                                     Background="{TemplateBinding Background}">
                                 <ContentPresenter />
                             </Border>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
+                <Setter Property="Width" Value="100" />
+                <Setter Property="Height" Value="100" />
+                <Setter Property="Margin" Value="0, 0, 20, 20" />
+                <Setter Property="BorderThickness" Value="0" />
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
                         <Setter Property="Opacity" Value="0.8" />
@@ -37,6 +40,10 @@
                         <Setter Property="Opacity" Value="0.6" />
                     </Trigger>
                 </Style.Triggers>
+            </Style>
+            <Style x:Key="ThemePickerButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource AccentPickerButtonStyle}">
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="{DynamicResource AccentColorBrush}" />
             </Style>
             <Style x:Key="SettingsHeaderStyle" TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="60" />
@@ -72,27 +79,41 @@
                                 <Button Background="#CC119EDA"
                                         Command="{Binding Path=ChangeAccentColorCommand}"
                                         CommandParameter="Blue"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
                                 <Button Background="#CC60A917"
                                         Command="{Binding Path=ChangeAccentColorCommand}"
                                         CommandParameter="Green"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Button Background="#CCB400FF"
                                         Command="{Binding Path=ChangeAccentColorCommand}"
                                         CommandParameter="Purple"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
                                 <Button Background="#CCE51400"
                                         Command="{Binding Path=ChangeAccentColorCommand}"
                                         CommandParameter="Red"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
                             </StackPanel>
                             <Button HorizontalAlignment="Left"
                                     Background="#CCFA6800"
                                     Command="{Binding Path=ChangeAccentColorCommand}"
                                     CommandParameter="Orange"
-                                    Style="{StaticResource ColorPickerButtonStyle}" />
+                                    Style="{StaticResource AccentPickerButtonStyle}" />
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="theme" />
+                        <StackPanel Margin="0, 10, 0, 0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Orientation="Horizontal">
+                            <Button Background="#FF252525"
+                                    Command="{Binding Path=ChangeAppThemeCommand}"
+                                    CommandParameter="BaseDark"
+                                    Style="{StaticResource ThemePickerButtonStyle}" />
+                            <Button Background="#FFFFFFFF"
+                                    Command="{Binding Path=ChangeAppThemeCommand}"
+                                    CommandParameter="BaseLight"
+                                    Style="{StaticResource ThemePickerButtonStyle}" />
                         </StackPanel>
                         <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="scaling" />
                         <TextBlock Style="{StaticResource SettingsTextStyle}" Text="Use this option whenever you have Espera displayed on a TV or any other big screen" />
