@@ -73,7 +73,7 @@ namespace Espera.View.Views
         private static void ChangeAccent(string accentName)
         {
             Accent accent = ThemeManager.Accents.First(x => x.Name == accentName);
-            AppTheme theme = ThemeManager.AppThemes.First(x => x.Name == "BaseLight");
+            AppTheme theme = ThemeManager.DetectAppStyle(Application.Current).Item1;
             ThemeManager.ChangeAppStyle(Application.Current, accent, theme);
         }
 
