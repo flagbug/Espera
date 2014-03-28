@@ -135,11 +135,11 @@
             </dialogs:SimpleDialog>
         </ResourceDictionary>
     </Window.Resources>
-    <Controls:MetroWindow.WindowCommands>
+    <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
             <Button Command="{Binding Path=ShowSettingsCommand}" Content="settings" />
         </Controls:WindowCommands>
-    </Controls:MetroWindow.WindowCommands>
+    </Controls:MetroWindow.RightWindowCommands>
     <Controls:MetroWindow.Flyouts>
         <Controls:FlyoutsControl>
             <Controls:Flyout Header="settings"
