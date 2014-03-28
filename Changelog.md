@@ -1,3 +1,16 @@
+# v2.0.0 Beta 8
+
+## Features
+- Added media key bindings, for playing, pausing as well as playing the next and previous song. 
+  They also work even if Espera isn't focused.
+- Added an option to disable the automatic display of the changelog when Espera is updated.
+
+## Bugfixes
+- Fixed various issues with YouTube.
+- Fixed some UI quirks.
+- Fixed an issue where pressing the space bar multiple times wouldn't pause or continue a song anymore.
+- Fixed Espera not looking for an update at startup.
+
 # v2.0.0 Beta 7
 
 ## Features
