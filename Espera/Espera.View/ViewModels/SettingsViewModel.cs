@@ -350,7 +350,7 @@ namespace Espera.View.ViewModels
         public bool ShowSettings
         {
             get { return this.showSettings; }
-            private set { this.RaiseAndSetIfChanged(ref this.showSettings, value); }
+            set { this.RaiseAndSetIfChanged(ref this.showSettings, value); }
         }
 
         public int SongSourceUpdateInterval
