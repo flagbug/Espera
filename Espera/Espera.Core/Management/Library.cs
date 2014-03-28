@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -464,7 +465,12 @@ namespace Espera.Core.Management
 
             try
             {
-                this.libraryWriter.Write(this.Songs, this.playlists.Where(playlist => !playlist.IsTemporary), this.songSourcePath.Value);
+                Observable.Start(() => this.libraryWriter.Write(
+                        this.Songs,
+                        this.playlists.Where(playlist => !playlist.IsTemporary),
+                        this.songSourcePath.Value), Scheduler.Immediate)
+                    .Retry(3)
+                    .Wait();
 
                 stopWatch.Stop();
                 this.Log().Info("Library save took {0}ms", stopWatch.ElapsedMilliseconds);
