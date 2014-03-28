@@ -35,6 +35,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/FlatSlider.xaml" />
+                <ResourceDictionary Source="/Resources/Icons.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <Style x:Key="VolumeButtonStyle" TargetType="{x:Type Button}">
@@ -144,12 +145,14 @@
         <Controls:FlyoutsControl>
             <Controls:Flyout Header="settings"
                              IsOpen="{Binding Path=SettingsViewModel.ShowSettings}"
-                             Position="Right">
+                             Position="Right"
+                             Theme="Adapt">
                 <Views:SettingsView Width="575" DataContext="{Binding Path=SettingsViewModel}" />
             </Controls:Flyout>
             <Controls:Flyout Header="Login"
                              IsOpen="{Binding Path=SettingsViewModel.ShowLogin, Mode=OneWay}"
-                             Position="Right">
+                             Position="Right"
+                             Theme="Adapt">
                 <StackPanel Width="200"
                             Margin="10, 0, 10, 0"
                             HorizontalAlignment="Stretch"
@@ -174,7 +177,8 @@
             </Controls:Flyout>
             <Controls:Flyout Header="Video"
                              IsOpen="{Binding Path=ShowVideoPlayer}"
-                             Position="Right">
+                             Position="Right"
+                             Theme="Adapt">
                 <MediaElement x:Name="videoPlayer"
                               Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Controls:MetroWindow},
                                               Path=ActualWidth}"
@@ -217,32 +221,50 @@
                             </Style.Triggers>
                         </Style>
                     </Button.Style>
-                    <Image>
-                        <Image.Style>
-                            <Style TargetType="{x:Type Image}">
+                    <Rectangle Width="12" Height="12">
+                        <Rectangle.Style>
+                            <Style TargetType="{x:Type Rectangle}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Path=IsPlaying}" Value="True">
-                                        <Setter Property="Source" Value="/Espera;component/Images/Pause.png" />
+                                        <Setter Property="Fill">
+                                            <Setter.Value>
+                                                <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_pause}" />
+                                            </Setter.Value>
+                                        </Setter>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding Path=IsPlaying}" Value="False">
-                                        <Setter Property="Source" Value="/Espera;component/Images/Play.png" />
+                                        <Setter Property="Fill">
+                                            <Setter.Value>
+                                                <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_play}" />
+                                            </Setter.Value>
+                                        </Setter>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </Image.Style>
-                    </Image>
+                        </Rectangle.Style>
+                    </Rectangle>
                 </Button>
                 <Button Margin="5, 0, 0, 0"
                         Command="{Binding Path=PreviousSongCommand}"
+                        Width="30"
                         Padding="0"
                         ToolTip="Previous song">
-                    <Image Source="/Espera;component/Images/Previous.png" />
+                    <Rectangle Width="12" Height="12">
+                        <Rectangle.Fill>
+                            <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_chevron_left}" />
+                        </Rectangle.Fill>
+                    </Rectangle>
                 </Button>
                 <Button Margin="5, 0, 0, 0"
                         Command="{Binding Path=NextSongCommand}"
+                        Width="30"
                         Padding="0"
                         ToolTip="Next song">
-                    <Image Source="/Espera;component/Images/Next.png" />
+                    <Rectangle Width="12" Height="12">
+                        <Rectangle.Fill>
+                            <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_chevron_right}" />
+                        </Rectangle.Fill>
+                    </Rectangle>
                 </Button>
             </StackPanel>
             <StackPanel Grid.Column="1"
@@ -252,7 +274,11 @@
                         Command="{Binding Path=MuteCommand}"
                         Style="{StaticResource VolumeButtonStyle}"
                         ToolTip="Mute">
-                    <Image Source="/Espera;component/Images/Mute.png" />
+                    <Rectangle Width="12" Height="12">
+                        <Rectangle.Fill>
+                            <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_sound_mute}" />
+                        </Rectangle.Fill>
+                    </Rectangle>
                 </Button>
                 <Slider Width="200"
                         Style="{StaticResource FlatSlider}"
@@ -265,7 +291,11 @@
                         Command="{Binding Path=UnMuteCommand}"
                         Style="{StaticResource VolumeButtonStyle}"
                         ToolTip="Unmute">
-                    <Image Source="/Espera;component/Images/Unmute.png" />
+                    <Rectangle Width="12" Height="12">
+                        <Rectangle.Fill>
+                            <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_sound_3}" />
+                        </Rectangle.Fill>
+                    </Rectangle>
                 </Button>
             </StackPanel>
             <Slider Grid.Column="2"
@@ -305,7 +335,11 @@
                           IsChecked="{Binding Path=ShowVideoPlayer}"
                           Padding="0"
                           ToolTip="YouTube video player">
-                    <Image Source="/Espera;component/Images/VideoPlayer.png" />
+                    <Rectangle Width="12" Height="12">
+                        <Rectangle.Fill>
+                            <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_film}" />
+                        </Rectangle.Fill>
+                    </Rectangle>
                 </ToggleButton>
             </Grid>
         </Grid>
@@ -761,28 +795,44 @@
                                     Command="{Binding Path=AddPlaylistCommand}"
                                     Style="{StaticResource PlaylistButtonStyle}"
                                     ToolTip="Add playlist">
-                                <Image Source="/Espera;component/Images/NewPlaylist.png" />
+                                <Rectangle Width="15" Height="15">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_add}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
                             </Button>
                             <Button Grid.Row="0"
                                     Grid.Column="1"
                                     Command="{Binding Path=RemovePlaylistCommand}"
                                     Style="{StaticResource PlaylistButtonStyle}"
                                     ToolTip="Remove playlist">
-                                <Image Source="/Espera;component/Images/Remove.png" />
+                                <Rectangle Width="15" Height="15">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_delete}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
                             </Button>
                             <Button Grid.Row="1"
                                     Grid.Column="0"
                                     Command="{Binding Path=EditPlaylistNameCommand}"
                                     Style="{StaticResource PlaylistButtonStyle}"
                                     ToolTip="Edit playlist name">
-                                <Image Source="/Espera;component/Images/EditPlaylistName.png" />
+                                <Rectangle Width="15" Height="15">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_edit}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
                             </Button>
                             <Button Grid.Row="1"
                                     Grid.Column="1"
                                     Command="{Binding Path=ShufflePlaylistCommand}"
                                     Style="{StaticResource PlaylistButtonStyle}"
                                     ToolTip="Shuffle playlist">
-                                <Image Source="/Espera;component/Images/ShufflePlaylist.png" />
+                                <Rectangle Width="15" Height="15">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_shuffle}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
                             </Button>
                         </Grid>
                     </Grid>
@@ -822,17 +872,21 @@
                                         <ColumnDefinition />
                                     </Grid.ColumnDefinitions>
                                     <Grid Grid.Column="0">
-                                        <Image Width="25"
-                                               Height="25"
-                                               Source="/Espera;component/Images/CurrentSongIcon.png"
-                                               Visibility="{Binding Path=IsPlaying,
-                                                                    Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                        <Image Width="25"
-                                               Height="25"
-                                               Source="/Espera;component/Images/CorruptedSong.png"
-                                               ToolTip="Song is corrupted. Cannot play!"
-                                               Visibility="{Binding Path=IsCorrupted,
-                                                                    Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                        <Rectangle Width="15"
+                                                   Height="15"
+                                                   Visibility="{Binding Path=IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Rectangle.Fill>
+                                                <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_sound_3}" />
+                                            </Rectangle.Fill>
+                                        </Rectangle>
+                                        <Rectangle Width="15"
+                                                   Height="15"
+                                                   ToolTip="Song is corrupted. Cannot play!"
+                                                   Visibility="{Binding Path=IsCorrupted, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Rectangle.Fill>
+                                                <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_close}" />
+                                            </Rectangle.Fill>
+                                        </Rectangle>
                                     </Grid>
                                     <StackPanel Grid.Column="1" Margin="5, 0, 0, 0">
                                         <Grid VerticalAlignment="Top">

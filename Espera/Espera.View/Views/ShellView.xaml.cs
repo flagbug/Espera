@@ -59,11 +59,16 @@ namespace Espera.View.Views
             };
         }
 
-        private void ChangeColor(string color)
+        private static void ChangeAccent(string accentName)
         {
-            Accent accent = ThemeManager.Accents.First(x => x.Name == color);
-            AppTheme theme = ThemeManager.AppThemes.First(x => x.Name == "BaseDark");
+            Accent accent = ThemeManager.Accents.First(x => x.Name == accentName);
+            AppTheme theme = ThemeManager.AppThemes.First(x => x.Name == "BaseLight");
             ThemeManager.ChangeAppStyle(Application.Current, accent, theme);
+        }
+
+        private static void ChangeAppTheme(string themeName)
+        {
+            ThemeManager.ChangeAppTheme(Application.Current, themeName);
         }
 
         private async void CloseChangelog(object sender, RoutedEventArgs e)
@@ -275,10 +280,11 @@ namespace Espera.View.Views
         {
             this.shellViewModel = (ShellViewModel)this.DataContext;
 
-            this.ChangeColor(this.shellViewModel.ViewSettings.AccentColor);
-
             this.shellViewModel.ViewSettings.WhenAnyValue(x => x.AccentColor)
-                .Subscribe(this.ChangeColor);
+                .Subscribe(ChangeAccent);
+
+            this.shellViewModel.ViewSettings.WhenAnyValue(x => x.AppTheme)
+                .Subscribe(ChangeAppTheme);
         }
 
         private void WirePlayer()

@@ -276,6 +276,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Page Include="Resources\Icons.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\SettingsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -310,20 +314,10 @@
     <None Include="Espera.View_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <AppDesigner Include="Properties\" />
+    <Resource Include="Resources\Entypo.ttf" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\Add.png" />
     <Resource Include="Images\ApplicationIcon.png" />
-    <Resource Include="Images\Mute.png" />
-    <Resource Include="Images\Next.png" />
-    <Resource Include="Images\Pause.png" />
-    <Resource Include="Images\Play.png" />
-    <Resource Include="Images\Previous.png" />
-    <Resource Include="Images\Settings.png" />
-    <Resource Include="Images\Unmute.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\CurrentSongIcon.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
@@ -351,24 +345,6 @@
     <Resource Include="ApplicationIcon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\NewPlaylist.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\EditPlaylistName.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\Remove.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\ShufflePlaylist.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\CorruptedSong.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\VideoPlayer.png" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Espera.Core\Espera.Core.csproj">
       <Project>{d4ad0e4a-fecb-4ca9-9258-6bd1f22fac0d}</Project>
       <Name>Espera.Core</Name>
@@ -382,6 +358,9 @@
     <None Include="Espera.View.nuspec">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Entypo-license.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

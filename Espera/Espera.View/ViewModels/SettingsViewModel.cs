@@ -104,7 +104,10 @@ namespace Espera.View.ViewModels
             this.ReportBugCommand.Subscribe(p => this.windowManager.ShowWindow(new BugReportViewModel()));
 
             this.ChangeAccentColorCommand = new ReactiveCommand();
-            this.ChangeAccentColorCommand.Subscribe(p => this.viewSettings.AccentColor = (string)p);
+            this.ChangeAccentColorCommand.Subscribe(x => this.viewSettings.AccentColor = (string)x);
+
+            this.ChangeAppThemeCommand = new ReactiveCommand();
+            this.ChangeAppThemeCommand.Subscribe(x => this.viewSettings.AppTheme = (string)x);
 
             this.UpdateLibraryCommand = this.library.IsUpdating
                 .Select(x => !x)
@@ -154,6 +157,8 @@ namespace Espera.View.ViewModels
         }
 
         public IReactiveCommand ChangeAccentColorCommand { get; private set; }
+
+        public ReactiveCommand ChangeAppThemeCommand { get; private set; }
 
         public ReactiveCommand ChangePortCommand { get; private set; }
 
