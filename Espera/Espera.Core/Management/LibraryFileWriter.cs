@@ -19,9 +19,9 @@ namespace Espera.Core.Management
 
         public void Write(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists, string songSourcePath)
         {
-            // Create a temporary file, write the library it, then delete the original library file
-            // and rename our new one. This ensures that there is a minimum possibility of things
-            // going wrong, for example if the process is killed mid-writing.
+            // Create a temporary file, write the library to it, then delete the original library
+            // file and rename the new one. This ensures that there is a minimum possibility of
+            // things going wrong, for example if the process is killed mid-writing.
             string tempFilePath = Path.Combine(Path.GetDirectoryName(this.targetPath), Guid.NewGuid().ToString());
 
             using (FileStream targetStream = File.Create(tempFilePath))
