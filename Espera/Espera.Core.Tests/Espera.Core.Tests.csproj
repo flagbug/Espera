@@ -111,9 +111,9 @@
     <Compile Include="AccessControlTest.cs" />
     <Compile Include="AnalyticsClientTest.cs" />
     <Compile Include="Helpers.cs" />
-    <Compile Include="LibraryReaderTest.cs" />
+    <Compile Include="LibraryDeserializerTest.cs" />
     <Compile Include="LibraryTest.cs" />
-    <Compile Include="LibraryWriterTest.cs" />
+    <Compile Include="LibrarySerializerTest.cs" />
     <Compile Include="LocalSongFinderTest.cs" />
     <Compile Include="PlaylistTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

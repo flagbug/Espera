@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,26 +33,67 @@ namespace Espera.Core.Management
 
         public IReadOnlyList<Playlist> ReadPlaylists()
         {
-            this.LoadToCache();
+            try
+            {
+                this.LoadToCache();
 
-            return LibraryReader.ReadPlaylists(this.cache, this.songCache);
+                return LibraryDeserializer.DeserializePlaylists(this.cache, this.songCache);
+            }
+
+            catch (Exception ex)
+            {
+                if (ex is JsonException || ex is IOException)
+                {
+                    throw new LibraryReadException("Failed to read playlists.", ex);
+                }
+
+                throw;
+            }
         }
 
         public IReadOnlyList<LocalSong> ReadSongs()
         {
-            this.LoadToCache();
+            IReadOnlyList<LocalSong> songs;
 
-            IReadOnlyList<LocalSong> songs = LibraryReader.ReadSongs(this.cache);
+            try
+            {
+                this.LoadToCache();
+
+                songs = LibraryDeserializer.DeserializeSongs(this.cache);
+            }
+
+            catch (Exception ex)
+            {
+                if (ex is JsonException || ex is IOException)
+                {
+                    throw new LibraryReadException("Failed to read songs.", ex);
+                }
+
+                throw;
+            }
+
             this.songCache = songs;
-
             return songs;
         }
 
         public string ReadSongSourcePath()
         {
-            this.LoadToCache();
+            try
+            {
+                this.LoadToCache();
 
-            return LibraryReader.ReadSongSourcePath(this.cache);
+                return LibraryDeserializer.DeserializeSongSourcePath(this.cache);
+            }
+
+            catch (Exception ex)
+            {
+                if (ex is JsonException || ex is IOException)
+                {
+                    throw new LibraryReadException("Failed to read song source path.", ex);
+                }
+
+                throw;
+            }
         }
 
         private void LoadToCache()

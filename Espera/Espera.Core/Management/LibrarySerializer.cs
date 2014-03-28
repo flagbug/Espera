@@ -7,9 +7,9 @@ using System.Reactive.Linq;
 
 namespace Espera.Core.Management
 {
-    internal static class LibraryWriter
+    internal static class LibrarySerializer
     {
-        public static void Write(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists, string songSourcePath, Stream targetStream)
+        public static void Serialize(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists, string songSourcePath, Stream targetStream)
         {
             var json = JObject.FromObject(new
             {
