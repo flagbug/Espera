@@ -314,7 +314,6 @@
     <None Include="Espera.View_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <AppDesigner Include="Properties\" />
-    <Resource Include="Resources\Entypo.ttf" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\ApplicationIcon.png" />
@@ -358,9 +357,6 @@
     <None Include="Espera.View.nuspec">
       <SubType>Designer</SubType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Entypo-license.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

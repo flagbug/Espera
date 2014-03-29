@@ -229,14 +229,14 @@
                                     <DataTrigger Binding="{Binding Path=IsPlaying}" Value="True">
                                         <Setter Property="Fill">
                                             <Setter.Value>
-                                                <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_pause}" />
+                                                <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_control_pause}" />
                                             </Setter.Value>
                                         </Setter>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding Path=IsPlaying}" Value="False">
                                         <Setter Property="Fill">
                                             <Setter.Value>
-                                                <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_play}" />
+                                                <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_control_play}" />
                                             </Setter.Value>
                                         </Setter>
                                     </DataTrigger>
@@ -338,7 +338,7 @@
                           ToolTip="YouTube video player">
                     <Rectangle Width="12" Height="12">
                         <Rectangle.Fill>
-                            <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_film}" />
+                            <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_youtube_play}" />
                         </Rectangle.Fill>
                     </Rectangle>
                 </ToggleButton>
