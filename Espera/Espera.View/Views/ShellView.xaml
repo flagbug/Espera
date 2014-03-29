@@ -215,35 +215,31 @@
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding Path=IsPlaying}" Value="True">
                                     <Setter Property="ToolTip" Value="Pause" />
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <Rectangle Width="12" Height="12">
+                                                <Rectangle.Fill>
+                                                    <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_control_pause}" />
+                                                </Rectangle.Fill>
+                                            </Rectangle>
+                                        </Setter.Value>
+                                    </Setter>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Path=IsPlaying}" Value="False">
                                     <Setter Property="ToolTip" Value="Play" />
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <Rectangle Width="12" Height="12">
+                                                <Rectangle.Fill>
+                                                    <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_control_play}" />
+                                                </Rectangle.Fill>
+                                            </Rectangle>
+                                        </Setter.Value>
+                                    </Setter>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Button.Style>
-                    <Rectangle Width="12" Height="12">
-                        <Rectangle.Style>
-                            <Style TargetType="{x:Type Rectangle}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=IsPlaying}" Value="True">
-                                        <Setter Property="Fill">
-                                            <Setter.Value>
-                                                <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_control_pause}" />
-                                            </Setter.Value>
-                                        </Setter>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Path=IsPlaying}" Value="False">
-                                        <Setter Property="Fill">
-                                            <Setter.Value>
-                                                <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_control_play}" />
-                                            </Setter.Value>
-                                        </Setter>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Rectangle.Style>
-                    </Rectangle>
                 </Button>
                 <Button Margin="5, 0, 0, 0"
                         Command="{Binding Path=PreviousSongCommand}"
