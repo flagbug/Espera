@@ -349,7 +349,7 @@ namespace Espera.View.ViewModels
         public bool ShowLogin
         {
             get { return this.showLogin; }
-            private set { this.RaiseAndSetIfChanged(ref this.showLogin, value); }
+            set { this.RaiseAndSetIfChanged(ref this.showLogin, value); }
         }
 
         public bool ShowSettings

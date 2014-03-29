@@ -151,7 +151,7 @@
                 <Views:SettingsView Width="575" DataContext="{Binding Path=SettingsViewModel}" />
             </Controls:Flyout>
             <Controls:Flyout Header="Login"
-                             IsOpen="{Binding Path=SettingsViewModel.ShowLogin, Mode=OneWay}"
+                             IsOpen="{Binding Path=SettingsViewModel.ShowLogin}"
                              Position="Right"
                              Theme="Adapt">
                 <StackPanel Width="200"
