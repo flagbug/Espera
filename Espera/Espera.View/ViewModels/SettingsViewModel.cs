@@ -235,7 +235,7 @@ namespace Espera.View.ViewModels
 
         public string Homepage
         {
-            get { return "http://espera.flagbug.com"; }
+            get { return "http://getespera.com"; }
         }
 
         public bool IsPortOccupied
