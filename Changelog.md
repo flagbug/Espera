@@ -1,3 +1,13 @@
+# v2.0.0 Beta 9
+
+## Features
+- Added a light theme. It it selectable in the appearance settings menu.
+
+## Bugfixes
+- Fixed some possibilities of library corruption.
+- Fixed the application crashing when another application also registers global hooks to the media keys.
+- Fixed a bug that caused the settings menu to be unopenable when in party mode.
+
 # v2.0.0 Beta 8
 
 ## Features
