@@ -28,9 +28,9 @@
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
-                <Setter Property="Width" Value="100" />
-                <Setter Property="Height" Value="100" />
-                <Setter Property="Margin" Value="0, 0, 20, 20" />
+                <Setter Property="Width" Value="90" />
+                <Setter Property="Height" Value="90" />
+                <Setter Property="Margin" Value="0, 0, 15, 15" />
                 <Setter Property="BorderThickness" Value="0" />
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
@@ -76,30 +76,110 @@
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Top">
                             <StackPanel Orientation="Horizontal">
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC00ABA9"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Teal"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC1BA1E2"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Cyan"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
                                 <Button Background="#CC119EDA"
                                         Command="{Binding Path=ChangeAccentColorCommand}"
                                         CommandParameter="Blue"
                                         Style="{StaticResource AccentPickerButtonStyle}" />
-                                <Button Background="#CC60A917"
+                                <Button Background="#CC0050EF"
                                         Command="{Binding Path=ChangeAccentColorCommand}"
-                                        CommandParameter="Green"
+                                        CommandParameter="Cobalt"
                                         Style="{StaticResource AccentPickerButtonStyle}" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Button Background="#CCB400FF"
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC6459DF"
                                         Command="{Binding Path=ChangeAccentColorCommand}"
                                         CommandParameter="Purple"
                                         Style="{StaticResource AccentPickerButtonStyle}" />
-                                <Button Background="#CCE51400"
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC6A00FF"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Indigo"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCAA00FF"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Violet"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCD80073"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Magenta"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCF472D0"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Pink"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCA20025"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Crimson"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCFEDE06"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Yellow"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button Background="#CCF0A30A"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Amber"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCFA6800"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Orange"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC76608A"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Mauve"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCE51400"
                                         Command="{Binding Path=ChangeAccentColorCommand}"
                                         CommandParameter="Red"
                                         Style="{StaticResource AccentPickerButtonStyle}" />
                             </StackPanel>
-                            <Button HorizontalAlignment="Left"
-                                    Background="#CCFA6800"
-                                    Command="{Binding Path=ChangeAccentColorCommand}"
-                                    CommandParameter="Orange"
-                                    Style="{StaticResource AccentPickerButtonStyle}" />
+                            <StackPanel Orientation="Horizontal">
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCA4C400"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Lime"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC008A00"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Emerald"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC60A917"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Green"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC6D8764"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Olive"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC647687"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Steel"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                            </StackPanel>
                         </StackPanel>
                         <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="theme" />
                         <StackPanel Margin="0, 10, 0, 0"
