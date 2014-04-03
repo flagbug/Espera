@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Espera.Core
+﻿namespace Espera.Core
 {
     /// <summary>
     /// This class contains the used keys for Akavache
@@ -12,7 +6,7 @@ namespace Espera.Core
     public static class BlobCacheKeys
     {
         /// <summary>
-        /// This is the key prefix for song artworks. After the hyphe, the MD5 hash of the artwork
+        /// This is the key prefix for song artworks. After the hyphen, the MD5 hash of the artwork
         /// is attached.
         /// </summary>
         public const string Artwork = "artwork-";
