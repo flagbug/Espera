@@ -124,6 +124,7 @@
     <Compile Include="Audio\SongPreparationException.cs" />
     <Compile Include="Audio\IAudioPlayerCallback.cs" />
     <Compile Include="Audio\SongLoadException.cs" />
+    <Compile Include="BlobCacheKeys.cs" />
     <Compile Include="ILocalSongFinder.cs" />
     <Compile Include="Management\AccessControl.cs" />
     <Compile Include="Management\AccessException.cs" />

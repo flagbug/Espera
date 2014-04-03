@@ -1,4 +1,5 @@
 ﻿using Akavache;
+using Espera.Core;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
@@ -26,7 +27,7 @@ namespace Espera.View.ViewModels
         {
             get
             {
-                return BlobCache.LocalMachine.GetObjectAsync<Changelog>("changelog")
+                return BlobCache.LocalMachine.GetObjectAsync<Changelog>(BlobCacheKeys.Changelog)
                     .Select(x => x.Releases)
                     .Wait();
             }

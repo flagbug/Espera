@@ -1,5 +1,6 @@
 ﻿using Akavache;
 using Caliburn.Micro;
+using Espera.Core;
 using Espera.Core.Analytics;
 using Espera.Core.Management;
 using Espera.Core.Settings;
@@ -255,7 +256,7 @@ namespace Espera.View
                 if (releases.Any())
                 {
                     Task changelogFetchTask = ChangelogFetcher.FetchAsync().ToObservable()
-                        .SelectMany(x => BlobCache.LocalMachine.InsertObject("changelog", x))
+                        .SelectMany(x => BlobCache.LocalMachine.InsertObject(BlobCacheKeys.Changelog, x))
                         .ToTask();
 
                     this.Log().Info("Found {0} updates.", releases.Count);
