@@ -7,6 +7,7 @@ using Rareform.Validation;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Concurrency;
@@ -15,19 +16,19 @@ using System.Reflection;
 
 namespace Espera.View.ViewModels
 {
-    public class SettingsViewModel : ReactiveObject
+    public class SettingsViewModel : ReactiveObject, IEnableLogger
     {
         private readonly Guid accessToken;
         private readonly ObservableAsPropertyHelper<bool> canCreateAdmin;
         private readonly ObservableAsPropertyHelper<bool> canLogin;
         private readonly CoreSettings coreSettings;
+        private readonly ObservableAsPropertyHelper<bool> enableChangelog;
         private readonly ObservableAsPropertyHelper<bool> isPortOccupied;
         private readonly Library library;
         private readonly ObservableAsPropertyHelper<string> librarySource;
         private readonly ViewSettings viewSettings;
         private readonly IWindowManager windowManager;
         private string creationPassword;
-        private ObservableAsPropertyHelper<bool> enableChangelog;
         private bool isAdminCreated;
         private bool isWrongPassword;
         private string loginPassword;
@@ -98,7 +99,18 @@ namespace Espera.View.ViewModels
             });
 
             this.OpenLinkCommand = new ReactiveCommand();
-            this.OpenLinkCommand.Subscribe(p => Process.Start((string)p));
+            this.OpenLinkCommand.Cast<string>().Subscribe(x =>
+            {
+                try
+                {
+                    Process.Start(x);
+                }
+
+                catch (Win32Exception ex)
+                {
+                    this.Log().ErrorException(string.Format("Could not open link {0}", x), ex);
+                }
+            });
 
             this.ReportBugCommand = new ReactiveCommand();
             this.ReportBugCommand.Subscribe(p => this.windowManager.ShowWindow(new BugReportViewModel()));
@@ -423,7 +435,6 @@ namespace Espera.View.ViewModels
             {
                 this.ShowLogin = true;
             }
-
             else
             {
                 this.ShowSettings = true;
