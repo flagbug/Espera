@@ -16,7 +16,7 @@ using System.Reflection;
 
 namespace Espera.View.ViewModels
 {
-    public class SettingsViewModel : ReactiveObject, IEnableLogger
+    public class SettingsViewModel : ReactiveObject
     {
         private readonly Guid accessToken;
         private readonly ObservableAsPropertyHelper<bool> canCreateAdmin;
