@@ -435,6 +435,7 @@ namespace Espera.View.ViewModels
             {
                 this.ShowLogin = true;
             }
+
             else
             {
                 this.ShowSettings = true;
