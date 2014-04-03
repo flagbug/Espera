@@ -56,30 +56,28 @@
     <Reference Include="NSubstitute">
       <HintPath>..\packages\NSubstitute.1.7.2.0\lib\NET45\NSubstitute.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI, Version=5.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-core.5.4.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
+      <HintPath>..\packages\reactiveui-core.5.5.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Blend, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-platforms.5.4.0\lib\net45\ReactiveUI.Blend.dll</HintPath>
+    <Reference Include="ReactiveUI.Blend">
+      <HintPath>..\packages\reactiveui-platforms.5.5.0\lib\net45\ReactiveUI.Blend.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Xaml, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-platforms.5.4.0\lib\net45\ReactiveUI.Xaml.dll</HintPath>
+    <Reference Include="ReactiveUI.Xaml">
+      <HintPath>..\packages\reactiveui-platforms.5.5.0\lib\net45\ReactiveUI.Xaml.dll</HintPath>
     </Reference>
     <Reference Include="Splat, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Splat.1.0.0\lib\Net45\Splat.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.IO.Abstractions, Version=1.4.0.73, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
+    <Reference Include="System.IO.Abstractions, Version=1.4.0.83, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\System.IO.Abstractions.1.4.0.73\lib\net35\System.IO.Abstractions.dll</HintPath>
+      <HintPath>..\packages\System.IO.Abstractions.1.4.0.83\lib\net35\System.IO.Abstractions.dll</HintPath>
     </Reference>
-    <Reference Include="System.IO.Abstractions.TestingHelpers, Version=1.4.0.73, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
+    <Reference Include="System.IO.Abstractions.TestingHelpers, Version=1.4.0.83, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\System.IO.Abstractions.TestingHelpers.1.4.0.73\lib\net35\System.IO.Abstractions.TestingHelpers.dll</HintPath>
+      <HintPath>..\packages\System.IO.Abstractions.TestingHelpers.1.4.0.83\lib\net35\System.IO.Abstractions.TestingHelpers.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.Core, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

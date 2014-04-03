@@ -121,9 +121,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Ninject, Version=3.0.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+    <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Ninject.3.0.1.10\lib\net45-full\Ninject.dll</HintPath>
+      <HintPath>..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
     </Reference>
     <Reference Include="NLog, Version=2.0.1.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -144,25 +144,22 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\ReactiveMarrow.0.3.1-alpha\lib\ReactiveMarrow.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI, Version=5.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-core.5.4.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
+      <HintPath>..\packages\reactiveui-core.5.5.0\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Blend, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-platforms.5.4.0\lib\net45\ReactiveUI.Blend.dll</HintPath>
+    <Reference Include="ReactiveUI.Blend">
+      <HintPath>..\packages\reactiveui-platforms.5.5.0\lib\net45\ReactiveUI.Blend.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Events, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-events.5.4.0\lib\net45\ReactiveUI.Events.dll</HintPath>
+    <Reference Include="ReactiveUI.Events">
+      <HintPath>..\packages\reactiveui-events.5.5.0\lib\net45\ReactiveUI.Events.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.NLog, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-nlog.5.4.0\lib\net45\ReactiveUI.NLog.dll</HintPath>
+    <Reference Include="ReactiveUI.NLog">
+      <HintPath>..\packages\reactiveui-nlog.5.5.0\lib\net45\ReactiveUI.NLog.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Xaml, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI.Xaml, Version=5.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-platforms.5.4.0\lib\net45\ReactiveUI.Xaml.dll</HintPath>
+      <HintPath>..\packages\reactiveui-platforms.5.5.0\lib\net45\ReactiveUI.Xaml.dll</HintPath>
     </Reference>
     <Reference Include="Shimmer.Client">
       <HintPath>..\packages\Shimmer.Client.0.7.4\lib\net40\Shimmer.Client.dll</HintPath>
@@ -177,13 +174,13 @@
     <Reference Include="System" />
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.IO.Abstractions, Version=1.4.0.73, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
+    <Reference Include="System.IO.Abstractions, Version=1.4.0.83, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\System.IO.Abstractions.1.4.0.73\lib\net35\System.IO.Abstractions.dll</HintPath>
+      <HintPath>..\packages\System.IO.Abstractions.1.4.0.83\lib\net35\System.IO.Abstractions.dll</HintPath>
     </Reference>
-    <Reference Include="System.IO.Abstractions.TestingHelpers, Version=1.4.0.73, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
+    <Reference Include="System.IO.Abstractions.TestingHelpers, Version=1.4.0.83, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\System.IO.Abstractions.TestingHelpers.1.4.0.73\lib\net35\System.IO.Abstractions.TestingHelpers.dll</HintPath>
+      <HintPath>..\packages\System.IO.Abstractions.TestingHelpers.1.4.0.83\lib\net35\System.IO.Abstractions.TestingHelpers.dll</HintPath>
     </Reference>
     <Reference Include="System.Net" />
     <Reference Include="System.Reactive.Core, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -204,7 +201,7 @@
     </Reference>
     <Reference Include="System.Reactive.Windows.Threading, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Rx-XAML.2.2.2\lib\net45\System.Reactive.Windows.Threading.dll</HintPath>
+      <HintPath>..\packages\Rx-Xaml.2.2.2\lib\net45\System.Reactive.Windows.Threading.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -310,7 +307,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Espera.View_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <AppDesigner Include="Properties\" />
