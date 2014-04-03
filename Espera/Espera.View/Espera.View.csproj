@@ -44,6 +44,7 @@
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <_ResolveReferenceDependencies>true</_ResolveReferenceDependencies>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>D3FCCDACCDAA91F1AFF6D744DAE87C2582D1D8E4</ManifestCertificateThumbprint>
