@@ -1,3 +1,15 @@
+# v2.0.0 Beta 10
+
+## Features
+- Added more accent colors
+
+## Bugfixes
+- Fixed various issues with the window.
+- Fixed the playback resetting when the accent color is changed.
+- Fixed some YouTube videos not playing.
+- Fixed an application crash when a link is opened.
+- Fixed the order of artists in the local song tab.
+
 # v2.0.0 Beta 9
 
 ## Features
