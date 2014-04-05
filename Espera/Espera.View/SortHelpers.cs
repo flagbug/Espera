@@ -7,13 +7,6 @@ namespace Espera.View
 {
     internal static class SortHelpers
     {
-        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByAlbum<T>(SortOrder sortOrder) where T : SongViewModelBase
-        {
-            return songs => songs
-                .OrderBy(song => song.Album, sortOrder)
-                .ThenBy(song => song.TrackNumber, sortOrder);
-        }
-
         public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByArtist<T>(SortOrder sortOrder) where T : SongViewModelBase
         {
             return songs => songs
@@ -26,15 +19,6 @@ namespace Espera.View
         {
             return songs => songs
                 .OrderBy(song => song.Duration, sortOrder);
-        }
-
-        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByGenre<T>(SortOrder sortOrder) where T : SongViewModelBase
-        {
-            return songs => songs
-                .OrderBy(song => song.Genre, sortOrder)
-                .ThenBy(song => song.Artist, sortOrder)
-                .ThenBy(song => song.Album, sortOrder)
-                .ThenBy(song => song.TrackNumber, sortOrder);
         }
 
         public static Func<IEnumerable<YoutubeSongViewModel>, IOrderedEnumerable<YoutubeSongViewModel>> GetOrderByRating(SortOrder sortOrder)
