@@ -36,7 +36,7 @@ namespace Espera.View.ViewModels
 
             this.artistUpdateSignal = new Subject<Unit>();
             this.gate = new object();
-
+            
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
             this.allArtists = new ReactiveList<ArtistViewModel> { this.allArtistsViewModel };
 
@@ -75,7 +75,7 @@ namespace Espera.View.ViewModels
 
                 return this.Library.PlayInstantlyAsync(this.SelectableSongs.Skip(songIndex).Select(x => x.Model), accessToken);
             });
-
+            
             this.showAddSongsHelperMessage = this.Library.SongsUpdated
                 .StartWith(Unit.Default)
                 .Select(_ => this.Library.Songs.Count == 0)

@@ -77,7 +77,7 @@ namespace Espera.Core.Management
                 .SelectMany(x => this.HandleSongFinishAsync(x).ToObservable())
                 .Subscribe();
 
-            this.CurrentTimeChanged = this.audioPlayer.CurrentTimeChanged;
+            this.CurrentPlaybackTime = this.audioPlayer.CurrentTimeChanged;
         }
 
         public IAudioPlayerCallback AudioPlayerCallback
@@ -104,15 +104,7 @@ namespace Espera.Core.Management
             get { return this.currentPlaylistChanged.AsObservable(); }
         }
 
-        /// <summary>
-        /// Gets or sets the current song's elapsed time.
-        /// </summary>
-        public TimeSpan CurrentTime
-        {
-            get { return this.audioPlayer.CurrentTime; }
-        }
-
-        public IObservable<TimeSpan> CurrentTimeChanged { get; private set; }
+        public IObservable<TimeSpan> CurrentPlaybackTime { get; private set; }
 
         /// <summary>
         /// Gets an observable that reports whether the library is currently looking for new songs

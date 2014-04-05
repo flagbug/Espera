@@ -128,12 +128,12 @@ namespace Espera.View.ViewModels
                 .Select(x => x == AudioPlayerState.Playing)
                 .ToProperty(this, x => x.IsPlaying);
 
-            this.currentTime = this.library.CurrentTimeChanged
+            this.currentTime = this.library.CurrentPlaybackTime
                 .StartWith(TimeSpan.Zero)
                 .Select(x => x.FormatAdaptive())
                 .ToProperty(this, x => x.CurrentTime);
 
-            this.currentSeconds = this.library.CurrentTimeChanged
+            this.currentSeconds = this.library.CurrentPlaybackTime
                 .Select(x => (int)x.TotalSeconds)
                 .ToProperty(this, x => x.CurrentSeconds);
 
