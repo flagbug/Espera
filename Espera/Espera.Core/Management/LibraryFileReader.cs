@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Espera.Core.Management
 {
@@ -40,14 +40,9 @@ namespace Espera.Core.Management
                 return LibraryDeserializer.DeserializePlaylists(this.cache, this.songCache);
             }
 
-            catch (Exception ex)
+            catch (Exception ex) if (ex is JsonException || ex is IOException)
             {
-                if (ex is JsonException || ex is IOException)
-                {
-                    throw new LibraryReadException("Failed to read playlists.", ex);
-                }
-
-                throw;
+                throw new LibraryReadException("Failed to read playlists.", ex);
             }
         }
 
@@ -62,14 +57,9 @@ namespace Espera.Core.Management
                 songs = LibraryDeserializer.DeserializeSongs(this.cache);
             }
 
-            catch (Exception ex)
+            catch (Exception ex) if (ex is JsonException || ex is IOException)
             {
-                if (ex is JsonException || ex is IOException)
-                {
-                    throw new LibraryReadException("Failed to read songs.", ex);
-                }
-
-                throw;
+                throw new LibraryReadException("Failed to read songs.", ex);
             }
 
             this.songCache = songs;
@@ -85,14 +75,9 @@ namespace Espera.Core.Management
                 return LibraryDeserializer.DeserializeSongSourcePath(this.cache);
             }
 
-            catch (Exception ex)
+            catch (Exception ex) if (ex is JsonException || ex is IOException)
             {
-                if (ex is JsonException || ex is IOException)
-                {
-                    throw new LibraryReadException("Failed to read song source path.", ex);
-                }
-
-                throw;
+                throw new LibraryReadException("Failed to read song source path.", ex);
             }
         }
 

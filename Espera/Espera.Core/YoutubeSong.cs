@@ -77,12 +77,9 @@ namespace Espera.Core
                 video = await GetVideoInfoForStreaming(this.OriginalPath, qualityHint);
             }
 
-            catch (Exception ex)
+            catch (Exception ex) if (ex is WebException || ex is VideoNotAvailableException || ex is YoutubeParseException)
             {
-                if (ex is WebException || ex is VideoNotAvailableException || ex is YoutubeParseException)
-                {
-                    throw new SongPreparationException(ex);
-                }
+                throw new SongPreparationException(ex);
             }
 
             if (video == null)
