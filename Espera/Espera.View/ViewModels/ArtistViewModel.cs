@@ -74,9 +74,7 @@ namespace Espera.View.ViewModels
                 return 1;
             }
 
-            var prefixes = new[] { "A", "The" };
-
-            return String.Compare(RemoveArtistPrefixes(this.Name, prefixes), RemoveArtistPrefixes(other.Name, prefixes), StringComparison.InvariantCultureIgnoreCase);
+            return String.Compare(SortHelpers.RemoveArtistPrefixes(this.Name), SortHelpers.RemoveArtistPrefixes(other.Name), StringComparison.InvariantCultureIgnoreCase);
         }
 
         public bool Equals(ArtistViewModel other)
@@ -92,21 +90,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        /// <example>With prefixes "A" and "The": "A Bar" -&gt; "Bar", "The Foos" -&gt; "Foos"</example>
-        private static string RemoveArtistPrefixes(string artistName, IEnumerable<string> prefixes)
-        {
-            foreach (string prefix in prefixes)
-            {
-                int lengthWithSpace = prefix.Length + 1;
-
-                if (artistName.Length >= lengthWithSpace && artistName.Substring(0, lengthWithSpace).Equals(prefix + " ", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    return artistName.Substring(lengthWithSpace);
-                }
-            }
-
-            return artistName;
-        }
+        
 
         private static async Task SaveImageToBlobCache(string key, IBitmap bitmap)
         {
