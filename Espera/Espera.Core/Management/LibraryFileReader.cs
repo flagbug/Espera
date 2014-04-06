@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Espera.Core.Management
 {
@@ -40,9 +40,14 @@ namespace Espera.Core.Management
                 return LibraryDeserializer.DeserializePlaylists(this.cache, this.songCache);
             }
 
-            catch (Exception ex) if (ex is JsonException || ex is IOException)
+            catch (Exception ex)
             {
-                throw new LibraryReadException("Failed to read playlists.", ex);
+                if (ex is JsonException || ex is IOException)
+                {
+                    throw new LibraryReadException("Failed to read playlists.", ex);
+                }
+
+                throw;
             }
         }
 
@@ -57,9 +62,14 @@ namespace Espera.Core.Management
                 songs = LibraryDeserializer.DeserializeSongs(this.cache);
             }
 
-            catch (Exception ex) if (ex is JsonException || ex is IOException)
+            catch (Exception ex)
             {
-                throw new LibraryReadException("Failed to read songs.", ex);
+                if (ex is JsonException || ex is IOException)
+                {
+                    throw new LibraryReadException("Failed to read songs.", ex);
+                }
+
+                throw;
             }
 
             this.songCache = songs;
@@ -75,9 +85,14 @@ namespace Espera.Core.Management
                 return LibraryDeserializer.DeserializeSongSourcePath(this.cache);
             }
 
-            catch (Exception ex) if (ex is JsonException || ex is IOException)
+            catch (Exception ex)
             {
-                throw new LibraryReadException("Failed to read song source path.", ex);
+                if (ex is JsonException || ex is IOException)
+                {
+                    throw new LibraryReadException("Failed to read song source path.", ex);
+                }
+
+                throw;
             }
         }
 
