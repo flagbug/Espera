@@ -75,6 +75,11 @@ namespace Espera.Core
             try
             {
                 video = await GetVideoInfoForStreaming(this.OriginalPath, qualityHint);
+
+                if (video != null)
+                {
+                    await Task.Run(() => DownloadUrlResolver.DecryptDownloadUrl(video));
+                }
             }
 
             catch (Exception ex)
@@ -143,7 +148,7 @@ namespace Espera.Core
 
         private static async Task<VideoInfo> GetVideoInfoForStreaming(string youtubeLink, YoutubeStreamingQuality qualitySetting)
         {
-            IEnumerable<VideoInfo> videoInfos = await Task.Run(() => DownloadUrlResolver.GetDownloadUrls(youtubeLink));
+            IEnumerable<VideoInfo> videoInfos = await Task.Run(() => DownloadUrlResolver.GetDownloadUrls(youtubeLink, false));
 
             IEnumerable<VideoInfo> filtered = videoInfos
                 .Where(info => info.VideoType == VideoType.Mp4 && !info.Is3D && info.AdaptiveType == AdaptiveType.None);

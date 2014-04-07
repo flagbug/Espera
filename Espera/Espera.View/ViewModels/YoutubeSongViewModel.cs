@@ -1,6 +1,4 @@
-﻿using Espera.Core;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -12,6 +10,8 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Espera.Core;
+using ReactiveUI;
 using YoutubeExtractor;
 
 namespace Espera.View.ViewModels
@@ -155,7 +155,7 @@ namespace Espera.View.ViewModels
         {
             this.IsLoadingContextMenu = true;
 
-            IEnumerable<VideoInfo> infos = await Task.Run(() => DownloadUrlResolver.GetDownloadUrls(this.Path).ToList());
+            IEnumerable<VideoInfo> infos = await Task.Run(() => DownloadUrlResolver.GetDownloadUrls(this.Path, false).ToList());
             this.VideosToDownload = infos.OrderBy(x => x.VideoType).ThenByDescending(x => x.Resolution).ToList();
             this.AudioToDownload = infos.Where(x => x.CanExtractAudio).OrderByDescending(x => x.AudioBitrate).ToList();
 
@@ -164,6 +164,7 @@ namespace Espera.View.ViewModels
 
         private async Task DownloadAudio(VideoInfo videoInfo, string downloadPath)
         {
+            await Task.Run(() => DownloadUrlResolver.DecryptDownloadUrl(videoInfo));
             await this.DownloadFromYoutube(() => YoutubeSong.DownloadAudioAsync(videoInfo, downloadPath, Observer.Create<double>(progress => this.DownloadProgress = progress)));
         }
 
@@ -185,6 +186,7 @@ namespace Espera.View.ViewModels
 
         private async Task DownloadVideo(VideoInfo videoInfo, string downloadPath)
         {
+            await Task.Run(() => DownloadUrlResolver.DecryptDownloadUrl(videoInfo));
             await this.DownloadFromYoutube(() => YoutubeSong.DownloadVideoAsync(videoInfo, downloadPath, Observer.Create<double>(progress => this.DownloadProgress = progress)));
         }
 
