@@ -9,6 +9,7 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
+using Espera.Core;
 using Espera.Core.Analytics;
 using Espera.Core.Management;
 using Espera.Network;
@@ -171,23 +172,20 @@ namespace Espera.Core.Mobile
                 return;
             }
 
-            var fileTransferClients = Observable.Defer(() => this.fileListener.AcceptTcpClientAsync().ToObservable())
-                .Repeat()
-                .Replay();
-
-            Observable.Defer(() => this.messageListener.AcceptTcpClientAsync().ToObservable())
-                .Repeat()
-                .Subscribe(async socket =>
+            // We wait on a message and file transfer client that have the same origin address
+            Observable.Defer(() => this.messageListener.AcceptTcpClientAsync().ToObservable()).Repeat()
+                .MatchPair(Observable.Defer(() => this.fileListener.AcceptTcpClientAsync().ToObservable()).Repeat(),
+                    x => ((IPEndPoint)x.Client.RemoteEndPoint).Address)
+                .Subscribe(sockets =>
                 {
+                    TcpClient messageTransferClient = sockets.Left;
+                    TcpClient fileTransferClient = sockets.Right;
+
+                    var mobileClient = new MobileClient(messageTransferClient, fileTransferClient, this.library);
+
                     this.Log().Info("New client detected");
 
                     AnalyticsClient.Instance.RecordMobileUsage();
-
-                    // Wait on the corresponding endpoint for file transfers
-                    TcpClient fileTransferClient = await fileTransferClients.FirstAsync(x =>
-                        ((IPEndPoint)x.Client.RemoteEndPoint).Address.Equals(((IPEndPoint)socket.Client.RemoteEndPoint).Address));
-
-                    var mobileClient = new MobileClient(socket, fileTransferClient, this.library);
 
                     mobileClient.Disconnected.FirstAsync()
                         .Subscribe(x =>
@@ -207,8 +205,6 @@ namespace Espera.Core.Mobile
                         this.clients.Add(mobileClient);
                     }
                 }).DisposeWith(this.listenerSubscriptions);
-
-            fileTransferClients.Connect().DisposeWith(this.listenerSubscriptions);
         }
     }
 }
