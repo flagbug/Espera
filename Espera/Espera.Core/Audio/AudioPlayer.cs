@@ -4,6 +4,7 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
+using ReactiveUI;
 
 namespace Espera.Core.Audio
 {
@@ -30,7 +31,7 @@ namespace Espera.Core.Audio
 
             this.currentTimeChangedFromOuter = new Subject<TimeSpan>();
 
-            this.CurrentTimeChanged = Observable.Interval(TimeSpan.FromMilliseconds(300))
+            this.CurrentTimeChanged = Observable.Interval(TimeSpan.FromMilliseconds(300), RxApp.TaskpoolScheduler)
                 .CombineLatest(this.PlaybackState, (l, state) => state)
                 .Where(x => x == AudioPlayerState.Playing)
                 .Select(_ => this.CurrentTime)

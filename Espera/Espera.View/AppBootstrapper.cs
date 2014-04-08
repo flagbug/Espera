@@ -1,4 +1,18 @@
-﻿using Akavache;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.IO.Abstractions;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
+using System.Reflection;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
+using Akavache;
 using Caliburn.Micro;
 using Espera.Core;
 using Espera.Core.Analytics;
@@ -13,20 +27,6 @@ using ReactiveUI;
 using ReactiveUI.NLog;
 using Shimmer.Client;
 using Shimmer.Core;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.IO.Abstractions;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
-using System.Reflection;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Threading;
 
 namespace Espera.View
 {
@@ -127,7 +127,7 @@ namespace Espera.View
 
             this.SetupMobileApi();
 
-            this.updateSubscription = Observable.Interval(TimeSpan.FromMinutes(15))
+            this.updateSubscription = Observable.Interval(TimeSpan.FromMinutes(15), RxApp.TaskpoolScheduler)
                 .StartWith(0) // Trigger an initial update
                 .SelectMany(x => this.UpdateSilentlyAsync().ToObservable())
                 .Subscribe();
