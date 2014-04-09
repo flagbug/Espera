@@ -110,12 +110,13 @@ namespace Espera.View.ViewModels
                 int size = 50;
                 string sizeAffix = string.Format("-{0}x{0}", size);
 
-                // If we don't have the small version of an artwork, resize, save and return it.
-                // This saves us a bunch of memory at the next startup, because BitmapImage has some
-                // kind of memory leak, so the not-resized image hangs around in memory forever
+                // If we don't have the small version of an artwork, resize, save it in the
+                // background and return it. This saves us a bunch of memory at the next startup,
+                // because BitmapImage has some kind of memory leak, so the not-resized image hangs
+                // around in memory forever.
                 IBitmap img = await BlobCache.LocalMachine.LoadImage(key + sizeAffix)
                     .Catch(BlobCache.LocalMachine.LoadImage(key, size, size)
-                        .Do(x => SaveImageToBlobCacheAsync(key + sizeAffix, x))) // We have the resized image already, so don't wait on this
+                        .Do(x => SaveImageToBlobCacheAsync(key + sizeAffix, x))) // We already have the resized image, so don't wait on this
                     .Finally(() => Gate.Release());
 
                 return img.ToNative();
