@@ -115,7 +115,7 @@ namespace Espera.View.ViewModels
                 // kind of memory leak, so the not-resized image hangs around in memory forever
                 IBitmap img = await BlobCache.LocalMachine.LoadImage(key + sizeAffix)
                     .Catch(BlobCache.LocalMachine.LoadImage(key, size, size)
-                    .Do(x => SaveImageToBlobCache(key + sizeAffix, x))) // We have the resized image already, so don't wait on this
+                        .Do(x => SaveImageToBlobCache(key + sizeAffix, x))) // We have the resized image already, so don't wait on this
                     .Finally(() => Gate.Release());
 
                 return img.ToNative();
