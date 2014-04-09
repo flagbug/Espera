@@ -1,7 +1,4 @@
-﻿using Akavache;
-using ReactiveUI;
-using Splat;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reactive.Linq;
@@ -9,6 +6,9 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
+using Akavache;
+using ReactiveUI;
+using Splat;
 
 namespace Espera.View.ViewModels
 {
@@ -89,8 +89,6 @@ namespace Espera.View.ViewModels
                 this.artworkKeys.OnNext(key);
             }
         }
-
-        
 
         private static async Task SaveImageToBlobCache(string key, IBitmap bitmap)
         {
