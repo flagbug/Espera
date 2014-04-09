@@ -1,9 +1,9 @@
-﻿using Espera.Core.Management;
-using Espera.Core.Settings;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Espera.Core.Management;
+using Espera.Core.Settings;
+using ReactiveUI;
 using Xunit;
 
 namespace Espera.Core.Tests
@@ -134,7 +134,7 @@ namespace Espera.Core.Tests
             [Fact]
             public void SmokeTest()
             {
-                var settings = new CoreSettings();
+                var settings = new CoreSettings { EnableVotingSystem = true };
                 var accessControl = new AccessControl(settings);
                 Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
 
