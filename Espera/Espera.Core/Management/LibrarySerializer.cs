@@ -1,9 +1,10 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Text;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Espera.Core.Management
 {
@@ -39,7 +40,7 @@ namespace Espera.Core.Management
                 })
             }, new JsonSerializer { NullValueHandling = NullValueHandling.Ignore });
 
-            using (var sw = new StreamWriter(targetStream))
+            using (var sw = new StreamWriter(targetStream, Encoding.UTF8, 64 * 1024, true))
             using (var jw = new JsonTextWriter(sw))
             {
                 jw.Formatting = Formatting.Indented;
