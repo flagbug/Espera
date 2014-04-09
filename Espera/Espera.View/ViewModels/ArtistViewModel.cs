@@ -90,7 +90,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        private static async Task SaveImageToBlobCache(string key, IBitmap bitmap)
+        private static async Task SaveImageToBlobCacheAsync(string key, IBitmap bitmap)
         {
             using (var ms = new MemoryStream())
             {
@@ -115,7 +115,7 @@ namespace Espera.View.ViewModels
                 // kind of memory leak, so the not-resized image hangs around in memory forever
                 IBitmap img = await BlobCache.LocalMachine.LoadImage(key + sizeAffix)
                     .Catch(BlobCache.LocalMachine.LoadImage(key, size, size)
-                        .Do(x => SaveImageToBlobCache(key + sizeAffix, x))) // We have the resized image already, so don't wait on this
+                        .Do(x => SaveImageToBlobCacheAsync(key + sizeAffix, x))) // We have the resized image already, so don't wait on this
                     .Finally(() => Gate.Release());
 
                 return img.ToNative();
