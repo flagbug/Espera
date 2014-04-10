@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -12,9 +12,9 @@ namespace Espera.View
 
         public static async Task<Changelog> FetchAsync()
         {
-            var client = new WebClient();
+            var client = new HttpClient();
 
-            string markdown = await client.DownloadStringTaskAsync(ChangelogUrl);
+            string markdown = await client.GetStringAsync(ChangelogUrl);
 
             var versionMatch = new Regex("# (v.*)\r$", RegexOptions.Multiline);
             var versionMatchNoCapture = new Regex("# v.*\r$", RegexOptions.Multiline);
