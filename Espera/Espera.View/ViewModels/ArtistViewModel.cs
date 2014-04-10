@@ -96,8 +96,7 @@ namespace Espera.View.ViewModels
             {
                 await bitmap.Save(CompressedBitmapFormat.Jpeg, 1, ms);
 
-                // We don't want to wait on the disk, just fire-and-forget
-                BlobCache.LocalMachine.Insert(key, ms.ToArray()).Subscribe();
+                await BlobCache.LocalMachine.Insert(key, ms.ToArray());
             }
         }
 
@@ -116,7 +115,7 @@ namespace Espera.View.ViewModels
                 // around in memory forever.
                 IBitmap img = await BlobCache.LocalMachine.LoadImage(key + sizeAffix)
                     .Catch(BlobCache.LocalMachine.LoadImage(key, size, size)
-                        .Do(x => SaveImageToBlobCacheAsync(key + sizeAffix, x))) // We already have the resized image, so don't wait on this
+                        .Do(async x => await SaveImageToBlobCacheAsync(key + sizeAffix, x)))
                     .Finally(() => Gate.Release());
 
                 return img.ToNative();
