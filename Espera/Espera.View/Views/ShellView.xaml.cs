@@ -1,10 +1,3 @@
-using Espera.Core.Audio;
-using Espera.Core.Management;
-using Espera.View.ViewModels;
-using GlobalHotKey;
-using MahApps.Metro;
-using MahApps.Metro.Controls.Dialogs;
-using ReactiveUI;
 using System;
 using System.ComponentModel;
 using System.Globalization;
@@ -14,6 +7,13 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Espera.Core.Audio;
+using Espera.Core.Management;
+using Espera.View.ViewModels;
+using GlobalHotKey;
+using MahApps.Metro;
+using MahApps.Metro.Controls.Dialogs;
+using ReactiveUI;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using ListView = System.Windows.Controls.ListView;
 using TextBox = System.Windows.Controls.TextBox;
@@ -59,12 +59,11 @@ namespace Espera.View.Views
 
             this.Loaded += async (sender, args) =>
             {
-                var updateViewModel = ((ShellViewModel)this.DataContext).UpdateViewModel;
+                var updateViewModel = this.shellViewModel.UpdateViewModel;
 
                 if (updateViewModel.ShowChangelog)
                 {
                     var dialog = (SimpleDialog)this.Resources["Changelog"];
-
                     await this.ShowMetroDialogAsync(dialog);
                 }
             };
@@ -88,7 +87,7 @@ namespace Espera.View.Views
 
             await this.HideMetroDialogAsync(dialog);
 
-            var updateViewModel = ((ShellViewModel)this.DataContext).UpdateViewModel;
+            var updateViewModel = this.shellViewModel.UpdateViewModel;
             updateViewModel.ChangelogShown();
         }
 
