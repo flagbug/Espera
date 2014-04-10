@@ -1,3 +1,13 @@
+# v2.0.0 Beta 11
+
+## Features
+- Added instant search for YouTube videos
+
+## Bugfixes
+- Fixed the changelog being empty.
+- Fixed various window issues.
+- Fixed various issues with YouTube.
+
 # v2.0.0 Beta 10
 
 ## Features
