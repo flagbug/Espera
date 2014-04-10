@@ -8,7 +8,7 @@ namespace Espera.View
 {
     internal static class ChangelogFetcher
     {
-        private const string ChangelogUrl = "https://getespera.com/espera/Changelog.md";
+        private const string ChangelogUrl = "http://getespera.com/Changelog.md";
 
         public static async Task<Changelog> FetchAsync()
         {
