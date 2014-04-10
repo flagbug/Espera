@@ -238,7 +238,7 @@ namespace Espera.View
             string updateUrl = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..", "Releases");
             updateUrl = Path.GetFullPath(updateUrl);
 #else
-            string updateUrl = "http://espera.s3.amazonaws.com/Releases/Stable";
+            string updateUrl = "http://getespera.com/Releases/Stable";
 #endif
 
             using (var updateManager = new UpdateManager(updateUrl, "Espera", FrameworkVersion.Net45))

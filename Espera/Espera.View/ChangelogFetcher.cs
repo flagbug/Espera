@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace Espera.View
 {
-    internal class ChangelogFetcher
+    internal static class ChangelogFetcher
     {
-        private static readonly string changelogUrl = "https://s3.amazonaws.com/espera/Changelog.md";
+        private const string ChangelogUrl = "https://getespera.com/espera/Changelog.md";
 
         public static async Task<Changelog> FetchAsync()
         {
             var client = new WebClient();
 
-            string markdown = await client.DownloadStringTaskAsync(changelogUrl);
+            string markdown = await client.DownloadStringTaskAsync(ChangelogUrl);
 
             var versionMatch = new Regex("# (v.*)\r$", RegexOptions.Multiline);
             var versionMatchNoCapture = new Regex("# v.*\r$", RegexOptions.Multiline);
