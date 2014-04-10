@@ -65,7 +65,7 @@ namespace Espera.View.ViewModels
                 .Merge(status.IsAvailable.Where(x => x).Select(_ => Unit.Default))
                 .Select(_ => this.StartSearchAsync().ToObservable())
                 // We don't use SelectMany, because we only care about the latest invocation and
-                // don't want an old, still running progress to override a request that is newer and faster
+                // don't want an old, still running request to override a request that is newer and faster
                 .Switch()
                 .Subscribe(x =>
                 {
