@@ -1,7 +1,7 @@
 # v2.0.0 Beta 11
 
 ## Features
-- Added instant search for YouTube videos
+- Added instant search for YouTube videos.
 
 ## Bugfixes
 - Fixed the changelog being empty.
@@ -11,7 +11,7 @@
 # v2.0.0 Beta 10
 
 ## Features
-- Added more accent colors
+- Added more accent colors.
 
 ## Bugfixes
 - Fixed various issues with the window.
