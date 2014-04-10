@@ -1,15 +1,16 @@
-﻿using Espera.Core;
-using Espera.Core.Management;
-using Espera.Core.Settings;
-using Rareform.Validation;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
+using Espera.Core;
+using Espera.Core.Management;
+using Espera.Core.Settings;
+using Rareform.Validation;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
@@ -60,7 +61,17 @@ namespace Espera.View.ViewModels
             // We need a default sorting order
             this.OrderByTitle();
 
-            status.IsAvailable.Where(x => x).Subscribe(async x => await this.StartSearchAsync());
+            this.WhenAnyValue(x => x.SearchText).Skip(1).Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler).Select(_ => Unit.Default)
+                .Merge(status.IsAvailable.Where(x => x).Select(_ => Unit.Default))
+                .Select(_ => this.StartSearchAsync().ToObservable())
+                // We don't use SelectMany, because we only care about the latest invocation and
+                // don't want an old, still running progress to override a request that is newer and faster
+                .Switch()
+                .Subscribe(x =>
+                {
+                    this.SelectableSongs = x;
+                    this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
+                });
         }
 
         public int DurationColumnWidth
@@ -134,7 +145,7 @@ namespace Espera.View.ViewModels
             this.ApplyOrder(SortHelpers.GetOrderByViews, ref this.viewsOrder);
         }
 
-        public async Task StartSearchAsync()
+        private async Task<IReadOnlyList<YoutubeSongViewModel>> StartSearchAsync()
         {
             this.IsSearching = true;
             this.SelectedSongs = null;
@@ -143,14 +154,14 @@ namespace Espera.View.ViewModels
             {
                 IReadOnlyList<YoutubeSong> songs = await this.songFinder.GetSongsAsync(this.SearchText);
 
-                this.SelectableSongs = songs.Select(x => new YoutubeSongViewModel(x, () => this.coreSettings.YoutubeDownloadPath)).ToList();
-
-                this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
+                return songs.Select(x => new YoutubeSongViewModel(x, () => this.coreSettings.YoutubeDownloadPath)).ToList();
             }
 
             catch (Exception)
             {
                 this.connectionError.OnNext(Unit.Default);
+
+                return new List<YoutubeSongViewModel>();
             }
 
             finally
