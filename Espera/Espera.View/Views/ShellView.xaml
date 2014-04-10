@@ -85,13 +85,13 @@
             <dialogs:SimpleDialog x:Key="Changelog"
                                   Height="700"
                                   Title="Espera has been updated!">
-                <Grid Margin="10">
+                <Grid Margin="10" DataContext="{Binding Path=UpdateViewModel}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <ScrollViewer Grid.Row="0">
-                        <ItemsControl ItemsSource="{Binding UpdateViewModel.ReleaseEntries}">
+                        <ItemsControl ItemsSource="{Binding Path=ReleaseEntries}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Vertical" Margin="10, 0, 0, 15">
@@ -124,8 +124,8 @@
                                 Orientation="Horizontal"
                                 HorizontalAlignment="Right">
                         <CheckBox Content="Don't show the changelog again"
-                                  IsChecked="{Binding Path=UpdateViewModel.DisableChangelog}"
-                                  HorizontalAlignment="Left" />
+                                  IsChecked="{Binding Path=DisableChangelog}"
+                                  HorizontalAlignment="Left" Foreground="{DynamicResource WhiteBrush}" />
                         <Button Margin="10, 0, 0, 0"
                                 Height="35"
                                 Width="80"
