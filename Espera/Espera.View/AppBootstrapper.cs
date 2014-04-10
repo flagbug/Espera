@@ -257,6 +257,7 @@ namespace Espera.View
                 {
                     Task changelogFetchTask = ChangelogFetcher.FetchAsync().ToObservable()
                         .SelectMany(x => BlobCache.LocalMachine.InsertObject(BlobCacheKeys.Changelog, x))
+                        .LoggedCatch(this, null, "Could not to fetch changelog")
                         .ToTask();
 
                     this.Log().Info("Found {0} updates.", releases.Count);
