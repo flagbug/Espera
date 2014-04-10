@@ -52,7 +52,7 @@ namespace Espera.View.ViewModels
                 .Select(x => x == null ? null : (YoutubeSongViewModel)this.SelectedSongs.FirstOrDefault())
                 .ToProperty(this, x => x.SelectedSong);
 
-            var status = (networkstatus ?? new NetworkStatus());
+            var status = networkstatus ?? new NetworkStatus();
             this.isNetworkUnavailable = status.IsAvailable
                 .Select(x => !x)
                 .Merge(this.connectionError.Select(x => true))
