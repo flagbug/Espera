@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -203,11 +204,11 @@ namespace Espera.View.ViewModels
         {
             this.IsLoadingThumbnail = true;
 
-            using (var webClient = new WebClient())
+            using (var client = new HttpClient())
             {
                 try
                 {
-                    byte[] imageBytes = await webClient.DownloadDataTaskAsync(((YoutubeSong)this.Model).ThumbnailSource);
+                    byte[] imageBytes = await client.GetByteArrayAsync(((YoutubeSong)this.Model).ThumbnailSource);
 
                     if (imageBytes == null)
                     {
