@@ -1,9 +1,10 @@
-﻿using Google.GData.Client;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Google.GData.Client;
 using Google.GData.YouTube;
 using Google.YouTube;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Espera.Core
 {
@@ -25,10 +26,11 @@ namespace Espera.Core
             var settings = new YouTubeRequestSettings("Espera", ApiKey);
             var request = new YouTubeRequest(settings);
             Feed<Video> feed = await Task.Run(() => request.Get<Video>(query));
+            List<Video> entries = await Task.Run(() => feed.Entries.ToList());
 
             var songs = new List<YoutubeSong>();
 
-            foreach (Video video in await Task.Run(() => feed.Entries))
+            foreach (Video video in entries)
             {
                 var duration = TimeSpan.FromSeconds(Int32.Parse(video.YouTubeEntry.Duration.Seconds));
                 string url = video.WatchPage.OriginalString
