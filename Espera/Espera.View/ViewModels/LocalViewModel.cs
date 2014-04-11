@@ -1,14 +1,14 @@
-﻿using Espera.Core;
-using Espera.Core.Management;
-using Espera.Core.Settings;
-using Rareform.Validation;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Espera.Core;
+using Espera.Core.Management;
+using Espera.Core.Settings;
+using Rareform.Validation;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
@@ -36,7 +36,7 @@ namespace Espera.View.ViewModels
 
             this.artistUpdateSignal = new Subject<Unit>();
             this.gate = new object();
-            
+
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
             this.allArtists = new ReactiveList<ArtistViewModel> { this.allArtistsViewModel };
 
@@ -63,6 +63,7 @@ namespace Espera.View.ViewModels
                 });
 
             this.WhenAnyValue(x => x.SelectedArtist)
+                .Skip(1)
                 .Synchronize(this.gate)
                 .Subscribe(_ => this.UpdateSelectableSongs());
 
@@ -75,7 +76,7 @@ namespace Espera.View.ViewModels
 
                 return this.Library.PlayInstantlyAsync(this.SelectableSongs.Skip(songIndex).Select(x => x.Model), accessToken);
             });
-            
+
             this.showAddSongsHelperMessage = this.Library.SongsUpdated
                 .StartWith(Unit.Default)
                 .Select(_ => this.Library.Songs.Count == 0)
