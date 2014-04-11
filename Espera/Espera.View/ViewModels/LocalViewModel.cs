@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
@@ -56,16 +57,16 @@ namespace Espera.View.ViewModels
                     .Do(_ => this.SelectedArtist = this.allArtistsViewModel))
                 .Synchronize(this.gate)
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ =>
+                .Subscribe(async _ =>
                 {
-                    this.UpdateSelectableSongs();
+                    await this.UpdateSelectableSongs();
                     this.UpdateArtists();
                 });
 
             this.WhenAnyValue(x => x.SelectedArtist)
                 .Skip(1)
                 .Synchronize(this.gate)
-                .Subscribe(_ => this.UpdateSelectableSongs());
+                .Subscribe(async _ => await this.UpdateSelectableSongs());
 
             this.playNowCommand = this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
                 .Select(x => x == AccessPermission.Admin || !coreSettings.LockPlayPause)
@@ -159,7 +160,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        private void UpdateSelectableSongs()
+        private async Task UpdateSelectableSongs()
         {
             this.filteredSongs = this.Library.Songs.FilterSongs(this.SearchText)
                 .ToLookup(x => x.Artist, StringComparer.InvariantCultureIgnoreCase);
@@ -172,13 +173,13 @@ namespace Espera.View.ViewModels
                 this.artistUpdateSignal.OnNext(Unit.Default);
             }
 
-            var selectableSongs = this.filteredSongs
+            List<LocalSongViewModel> selectableSongs = await Task.Run(() => this.filteredSongs
                 .AsParallel()
-                .Where(group => this.SelectedArtist.IsAllArtists || group.Key.Equals(this.SelectedArtist.Name, StringComparison.InvariantCultureIgnoreCase))
+                .Where(group => this.SelectedArtist.IsAllArtists || @group.Key.Equals(this.SelectedArtist.Name, StringComparison.InvariantCultureIgnoreCase))
                 .SelectMany(x => x)
                 .Select(song => new LocalSongViewModel(song))
                 .OrderBy(this.SongOrderFunc)
-                .ToList();
+                .ToList());
 
             // Ignore redundant song updates.
             if (!selectableSongs.SequenceEqual(this.SelectableSongs))
