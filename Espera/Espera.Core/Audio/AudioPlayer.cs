@@ -60,12 +60,7 @@ namespace Espera.Core.Audio
             get { return this.loadedSong.AsObservable(); }
         }
 
-        public Func<Task> LoadRequest { set; private get; }
-
-        public Uri Path
-        {
-            get { return new Uri(this.loadedSong.Value.PlaybackPath); }
-        }
+        public Func<Uri, Task> LoadRequest { set; private get; }
 
         public Func<Task> PauseRequest { set; private get; }
 
@@ -110,7 +105,7 @@ namespace Espera.Core.Audio
 
             try
             {
-                await this.LoadRequest();
+                await this.LoadRequest(new Uri(this.loadedSong.Value.PlaybackPath));
             }
 
             catch (Exception ex)

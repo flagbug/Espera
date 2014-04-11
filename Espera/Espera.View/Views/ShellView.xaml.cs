@@ -296,7 +296,7 @@ namespace Espera.View.Views
             callback.GetVolume = () => this.Dispatcher.Invoke(() => (float)this.videoPlayer.Volume);
             callback.SetVolume = volume => this.Dispatcher.Invoke(() => this.videoPlayer.Volume = volume);
 
-            callback.LoadRequest = () => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Source = callback.Path).Task;
+            callback.LoadRequest = path => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Source = path).Task;
             callback.PauseRequest = () => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Pause()).Task;
             callback.PlayRequest = () => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Play()).Task;
             callback.StopRequest = () => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Stop()).Task;

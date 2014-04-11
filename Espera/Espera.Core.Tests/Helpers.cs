@@ -1,8 +1,4 @@
-﻿using Espera.Core.Audio;
-using Espera.Core.Management;
-using Espera.Core.Settings;
-using NSubstitute;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
@@ -11,6 +7,10 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
+using Espera.Core.Audio;
+using Espera.Core.Management;
+using Espera.Core.Settings;
+using NSubstitute;
 using Xunit;
 
 namespace Espera.Core.Tests
@@ -100,7 +100,7 @@ namespace Espera.Core.Tests
             IAudioPlayerCallback c = library.AudioPlayerCallback;
             c.GetTime = () => TimeSpan.Zero;
             c.GetVolume = () => 1.0f;
-            c.LoadRequest = () => Task.Delay(0);
+            c.LoadRequest = path => Task.Delay(0);
             c.PauseRequest = () => Task.Delay(0);
             c.PlayRequest = () =>
             {

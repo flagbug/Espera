@@ -1,12 +1,4 @@
-﻿using Akavache;
-using Espera.Core.Audio;
-using Espera.Core.Management;
-using Espera.Core.Settings;
-using Microsoft.Reactive.Testing;
-using NSubstitute;
-using ReactiveUI;
-using ReactiveUI.Testing;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
@@ -16,6 +8,14 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
+using Akavache;
+using Espera.Core.Audio;
+using Espera.Core.Management;
+using Espera.Core.Settings;
+using Microsoft.Reactive.Testing;
+using NSubstitute;
+using ReactiveUI;
+using ReactiveUI.Testing;
 using Xunit;
 
 namespace Espera.Core.Tests
@@ -557,16 +557,16 @@ namespace Espera.Core.Tests
                 {
                     using (var handle = new CountdownEvent(2))
                     {
-                        library.AudioPlayerCallback.LoadRequest = () =>
+                        library.AudioPlayerCallback.LoadRequest = path =>
                         {
                             switch (handle.CurrentCount)
                             {
-                                case 2:
-                                    handle.Signal();
-                                    throw new SongLoadException();
-                                case 1:
-                                    handle.Signal();
-                                    break;
+                            case 2:
+                                handle.Signal();
+                                throw new SongLoadException();
+                            case 1:
+                                handle.Signal();
+                                break;
                             }
 
                             return Task.Delay(0);
@@ -728,7 +728,7 @@ namespace Espera.Core.Tests
 
                 using (Library library = Helpers.CreateLibraryWithPlaylist())
                 {
-                    library.AudioPlayerCallback.LoadRequest = () => { throw new SongLoadException(); };
+                    library.AudioPlayerCallback.LoadRequest = path => { throw new SongLoadException(); };
                     await test(library);
                 }
 

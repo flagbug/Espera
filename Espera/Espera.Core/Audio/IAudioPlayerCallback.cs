@@ -9,9 +9,7 @@ namespace Espera.Core.Audio
 
         Func<float> GetVolume { set; }
 
-        Func<Task> LoadRequest { set; }
-
-        Uri Path { get; }
+        Func<Uri, Task> LoadRequest { set; }
 
         Func<Task> PauseRequest { set; }
 
