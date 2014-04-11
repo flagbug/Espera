@@ -1,24 +1,24 @@
-﻿using Espera.Core.Management;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Espera.Core.Management;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
     public abstract class SongSourceViewModel<T> : ReactiveObject, ISongSourceViewModel
-        where T : SongViewModelBase
+        where T : ISongViewModelBase
     {
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly Library library;
         private readonly Subject<Unit> timeoutWarning;
         private string searchText;
         private IEnumerable<T> selectableSongs;
-        private IEnumerable<SongViewModelBase> selectedSongs;
+        private IEnumerable<ISongViewModelBase> selectedSongs;
 
         protected SongSourceViewModel(Library library, Guid accessToken)
         {
@@ -56,13 +56,12 @@ namespace Espera.View.ViewModels
 
             this.SelectionChangedCommand = new ReactiveCommand();
             this.SelectionChangedCommand.Where(x => x != null)
-                .Select(x => ((IEnumerable)x).Cast<T>())
+                .Select(x => ((IEnumerable)x).Cast<ISongViewModelBase>())
                 .Subscribe(x => this.SelectedSongs = x);
-            
+
             this.isAdmin = this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
                 .Select(x => x == AccessPermission.Admin)
                 .ToProperty(this, x => x.IsAdmin);
-
         }
 
         public IReactiveCommand AddToPlaylistCommand { get; private set; }
@@ -86,7 +85,7 @@ namespace Espera.View.ViewModels
             protected set { this.RaiseAndSetIfChanged(ref this.selectableSongs, value); }
         }
 
-        public IEnumerable<SongViewModelBase> SelectedSongs
+        public IEnumerable<ISongViewModelBase> SelectedSongs
         {
             get { return this.selectedSongs; }
             set { this.RaiseAndSetIfChanged(ref this.selectedSongs, value); }

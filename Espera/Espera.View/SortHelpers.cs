@@ -7,7 +7,7 @@ namespace Espera.View
 {
     internal static class SortHelpers
     {
-        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByArtist<T>(SortOrder sortOrder) where T : SongViewModelBase
+        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByArtist<T>(SortOrder sortOrder) where T : ISongViewModelBase
         {
             return songs => songs
                 .OrderBy(song => RemoveArtistPrefixes(song.Artist), sortOrder)
@@ -15,7 +15,7 @@ namespace Espera.View
                 .ThenBy(song => song.TrackNumber, sortOrder);
         }
 
-        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByDuration<T>(SortOrder sortOrder) where T : SongViewModelBase
+        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByDuration<T>(SortOrder sortOrder) where T : ISongViewModelBase
         {
             return songs => songs
                 .OrderBy(song => song.Duration, sortOrder);
@@ -27,7 +27,7 @@ namespace Espera.View
                 .OrderBy(song => song.Rating, sortOrder);
         }
 
-        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByTitle<T>(SortOrder sortOrder) where T : SongViewModelBase
+        public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByTitle<T>(SortOrder sortOrder) where T : ISongViewModelBase
         {
             return songs => songs
                 .OrderBy(song => song.Title, sortOrder);

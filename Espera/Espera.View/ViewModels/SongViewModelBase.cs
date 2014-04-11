@@ -1,11 +1,11 @@
-﻿using Espera.Core;
+﻿using System;
+using Espera.Core;
 using Rareform.Validation;
 using ReactiveUI;
-using System;
 
 namespace Espera.View.ViewModels
 {
-    public abstract class SongViewModelBase : ReactiveObject
+    public abstract class SongViewModelBase : ReactiveObject, ISongViewModelBase
     {
         protected SongViewModelBase(Song model)
         {

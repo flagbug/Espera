@@ -247,6 +247,7 @@
     <Compile Include="ViewModels\CrashViewModel.cs" />
     <Compile Include="ViewModels\DesignTimeShellViewModel.cs" />
     <Compile Include="ViewModels\ISongSourceViewModel.cs" />
+    <Compile Include="ViewModels\ISongViewModelBase.cs" />
     <Compile Include="ViewModels\LocalSongViewModel.cs" />
     <Compile Include="ViewModels\LocalViewModel.cs" />
     <Compile Include="ViewModels\PlaylistEntryViewModel.cs" />
