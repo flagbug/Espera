@@ -329,7 +329,7 @@
                           IsChecked="{Binding Path=ShowVideoPlayer}"
                           Padding="0"
                           ToolTip="YouTube video player">
-                    <Rectangle Width="12" Height="12">
+                    <Rectangle Width="15" Height="15">
                         <Rectangle.Fill>
                             <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_youtube_play}" />
                         </Rectangle.Fill>
