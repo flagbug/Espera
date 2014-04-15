@@ -92,7 +92,12 @@ namespace Espera.Core
 
         private static string GetKeyForArtwork(byte[] artworkData)
         {
-            byte[] hash = MD5.Create().ComputeHash(artworkData);
+            byte[] hash;
+
+            using (var hashAlgorithm = MD5.Create())
+            {
+                hash = hashAlgorithm.ComputeHash(artworkData);
+            }
 
             return BlobCacheKeys.Artwork + BitConverter.ToString(hash).Replace("-", "").ToLower();
         }
