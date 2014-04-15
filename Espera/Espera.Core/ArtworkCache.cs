@@ -14,7 +14,7 @@ namespace Espera.Core
 {
     /// <summary>
     /// A smart cache for artworks that prioritizes the retrieving of artworks as well as
-    /// prioritizing artwork from artists that come early in the alphabet.
+    /// prioritizing the retrieval of artwork with a priority number.
     /// </summary>
     public class ArtworkCache : IEnableLogger
     {
