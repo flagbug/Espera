@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
@@ -31,8 +32,8 @@ namespace Espera.View.ViewModels
                 .Merge()
                 .Where(x => x != null)
                 .Distinct() // Ignore duplicate artworks
-                .ObserveOn(RxApp.TaskpoolScheduler)
-                .Select(key => LoadArtworkAsync(key).Result)
+                .Select(key => LoadArtworkAsync(key).ToObservable())
+                .Merge(1)
                 .FirstOrDefaultAsync(pic => pic != null)
                 .ToProperty(this, x => x.Cover);
 
