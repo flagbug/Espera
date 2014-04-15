@@ -339,7 +339,7 @@
         </Grid>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250" />
+                <ColumnDefinition Width="300" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0" Visibility="{Binding Path=IsLocal, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -405,7 +405,7 @@
             <Grid Grid.Column="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="300" />
+                    <ColumnDefinition Width="350" />
                 </Grid.ColumnDefinitions>
                 <TabControl Grid.Column="0">
                     <TabItem Header="local" IsSelected="{Binding Path=IsLocal}">
