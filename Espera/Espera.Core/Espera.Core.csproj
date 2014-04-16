@@ -63,6 +63,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\taglib.2.1.0.0\lib\policy.2.0.taglib-sharp.dll</HintPath>
     </Reference>
+    <Reference Include="Punchclock">
+      <HintPath>..\packages\Punchclock.1.1.0\lib\Portable-Net45+WinRT45+WP8\Punchclock.dll</HintPath>
+    </Reference>
     <Reference Include="Rareform, Version=1.5.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Rareform.1.5.2\lib\Rareform.dll</HintPath>
@@ -121,6 +124,7 @@
     <Compile Include="Analytics\AnalyticsClient.cs" />
     <Compile Include="Analytics\BuddyAnalyticsEndpoint.cs" />
     <Compile Include="Analytics\IAnalyticsEndpoint.cs" />
+    <Compile Include="ArtworkCache.cs" />
     <Compile Include="Audio\SongPreparationException.cs" />
     <Compile Include="Audio\IAudioPlayerCallback.cs" />
     <Compile Include="Audio\SongLoadException.cs" />

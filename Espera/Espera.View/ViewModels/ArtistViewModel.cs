@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
-using Akavache;
+using Espera.Core;
 using ReactiveUI;
 using Splat;
 
@@ -14,25 +13,32 @@ namespace Espera.View.ViewModels
 {
     public sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>
     {
-        private static readonly SemaphoreSlim Gate; // This gate is used to limit the I/O access when accessing the artwork cache to 1 item at a time
         private readonly Subject<IObservable<string>> artworkKeys;
         private readonly ObservableAsPropertyHelper<BitmapSource> cover;
+        private readonly int orderHint;
 
-        static ArtistViewModel()
-        {
-            Gate = new SemaphoreSlim(1, 1);
-        }
-
-        public ArtistViewModel(string artistName, IEnumerable<IObservable<string>> artworkKeys)
+        /// <summary>
+        /// The constructor.
+        /// </summary>
+        /// <param name="artistName"></param>
+        /// <param name="artworkKeys"></param>
+        /// <param name="orderHint">
+        /// A hint that tells this instance which position it has in the artist list. This helps for
+        /// priorizing the album cover loading. The higher the number, the earlier it is in the list
+        /// (Think of a reversed sorted list).
+        /// </param>
+        public ArtistViewModel(string artistName, IEnumerable<IObservable<string>> artworkKeys, int orderHint)
         {
             this.artworkKeys = new Subject<IObservable<string>>();
+
+            this.orderHint = orderHint;
 
             this.cover = this.artworkKeys
                 .Merge()
                 .Where(x => x != null)
                 .Distinct() // Ignore duplicate artworks
-                .ObserveOn(RxApp.TaskpoolScheduler)
-                .Select(key => LoadArtworkAsync(key).Result)
+                .Select(key => LoadArtworkAsync(key).ToObservable())
+                .Merge(1)
                 .FirstOrDefaultAsync(pic => pic != null)
                 .ToProperty(this, x => x.Cover);
 
@@ -90,32 +96,11 @@ namespace Espera.View.ViewModels
             }
         }
 
-        private static async Task SaveImageToBlobCacheAsync(string key, IBitmap bitmap)
-        {
-            using (var ms = new MemoryStream())
-            {
-                await bitmap.Save(CompressedBitmapFormat.Jpeg, 1, ms);
-
-                await BlobCache.LocalMachine.Insert(key, ms.ToArray());
-            }
-        }
-
         private async Task<BitmapSource> LoadArtworkAsync(string key)
         {
             try
             {
-                await Gate.WaitAsync();
-
-                int size = 50;
-                string sizeAffix = string.Format("-{0}x{0}", size);
-
-                // If we don't have the small version of an artwork, resize it, save it and return
-                // it. This saves us a bunch of memory at the next startup, because BitmapImage has
-                // some kind of memory leak, so the not-resized image hangs around in memory forever.
-                IBitmap img = await BlobCache.LocalMachine.LoadImage(key + sizeAffix) // Try to load the small version
-                    .Catch(BlobCache.LocalMachine.LoadImage(key, size, size) // If we can't load the small version, resize the image
-                        .Do(async x => await SaveImageToBlobCacheAsync(key + sizeAffix, x))) // Then save the resized image into the cache
-                    .Finally(() => Gate.Release());
+                IBitmap img = await ArtworkCache.Instance.Retrieve(key, 50, orderHint);
 
                 return img.ToNative();
             }

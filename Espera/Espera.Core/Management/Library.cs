@@ -1,12 +1,4 @@
-﻿using Akavache;
-using Espera.Core.Analytics;
-using Espera.Core.Audio;
-using Espera.Core.Settings;
-using Rareform.Extensions;
-using Rareform.Validation;
-using ReactiveMarrow;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
@@ -17,9 +9,16 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using Akavache;
+using Espera.Core.Analytics;
+using Espera.Core.Audio;
+using Espera.Core.Settings;
+using Rareform.Extensions;
+using Rareform.Validation;
+using ReactiveMarrow;
+using ReactiveUI;
 
 namespace Espera.Core.Management
 {
@@ -97,14 +96,14 @@ namespace Espera.Core.Management
         /// <value>true if the previous song in the playlist can be played; otherwise, false.</value>
         public IObservable<bool> CanPlayPreviousSong { get; private set; }
 
+        public IObservable<TimeSpan> CurrentPlaybackTime { get; private set; }
+
         public Playlist CurrentPlaylist { get; private set; }
 
         public IObservable<Playlist> CurrentPlaylistChanged
         {
             get { return this.currentPlaylistChanged.AsObservable(); }
         }
-
-        public IObservable<TimeSpan> CurrentPlaybackTime { get; private set; }
 
         /// <summary>
         /// Gets an observable that reports whether the library is currently looking for new songs
@@ -811,22 +810,8 @@ namespace Espera.Core.Management
 
                         if (artworkData != null)
                         {
-                            byte[] hash = MD5.Create().ComputeHash(artworkData);
-                            string artworkKey = BlobCacheKeys.Artwork + BitConverter.ToString(hash).Replace("-", "").ToLower();
-
-                            if (artworkLookup.Add(artworkKey))
-                            {
-                                this.Log().Info("Adding new artwork {0} of {1} to the BlobCache", artworkKey, song);
-
-                                BlobCache.LocalMachine.Insert(artworkKey, artworkData)
-                                    .Do(_ => this.Log().Debug("Added artwork {0} to the BlobCache", artworkKey))
-                                    .Subscribe(x => song.NotifyArtworkStored(artworkKey));
-                            }
-
-                            else
-                            {
-                                song.NotifyArtworkStored(artworkKey);
-                            }
+                            ArtworkCache.Instance.Store(artworkData).ToObservable()
+                                .Subscribe(song.NotifyArtworkStored);
                         }
 
                         this.songsUpdated.OnNext(Unit.Default);

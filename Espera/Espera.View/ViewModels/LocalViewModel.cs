@@ -139,6 +139,14 @@ namespace Espera.View.ViewModels
 
             this.allArtists.RemoveAll(artistsToRemove);
 
+            // We use this reverse ordered list of artists so we can priorize the loading of album
+            // covers of artists that we display first in the artist list. This way we can "fake" a
+            // fast loading of all covers, as the user doesn't see most of the artists down the
+            // list. The higher the number, the higher the prioritization.
+            List<string> orderedArtists = groupedByArtist.Select(x => x.Key)
+                .OrderByDescending(SortHelpers.RemoveArtistPrefixes)
+                .ToList();
+
             foreach (var songs in groupedByArtist)
             {
                 ArtistViewModel model = this.allArtists.FirstOrDefault(x => x.Name.Equals(songs.Key, StringComparison.InvariantCultureIgnoreCase));
@@ -149,7 +157,8 @@ namespace Espera.View.ViewModels
 
                 if (model == null)
                 {
-                    this.allArtists.Add(new ArtistViewModel(songs.Key, artworkKeys));
+                    int priority = orderedArtists.IndexOf(songs.Key) + 1;
+                    this.allArtists.Add(new ArtistViewModel(songs.Key, artworkKeys, priority));
                 }
 
                 else
