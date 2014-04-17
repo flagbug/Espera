@@ -1,10 +1,4 @@
-﻿using Espera.Core.Analytics;
-using Espera.Core.Management;
-using Rareform.Validation;
-using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Reactive.Linq;
@@ -12,6 +6,10 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
+using Espera.Core.Analytics;
+using Espera.Core.Management;
+using Rareform.Validation;
+using ReactiveUI;
 
 namespace Espera.Services
 {
@@ -79,34 +77,16 @@ namespace Espera.Services
 
         public async Task SendBroadcastAsync()
         {
-            var client = new UdpClient();
+            byte[] message = Encoding.Unicode.GetBytes("espera-server-discovery");
 
-            IPAddress[] addresses = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
-
-            while (!this.dispose)
+            using (var client = new UdpClient(this.port))
             {
-                IEnumerable<IPAddress> localSubnets = addresses.Where(x => x.AddressFamily == AddressFamily.InterNetwork);
-
-                // Get all intern networks and fire our discovery message on the last byte up and
-                // down This is the only way to ensure that the clients can discover the server reliably
-                foreach (IPAddress ipAddress in localSubnets)
+                while (!this.dispose)
                 {
-                    byte[] address = ipAddress.GetAddressBytes();
-                    byte[] message = Encoding.Unicode.GetBytes("espera-server-discovery");
+                    await client.SendAsync(message, message.Length, new IPEndPoint(IPAddress.Broadcast, this.port));
 
-                    // Start one single task here, instead of creating over 200 tasks for sending
-                    await Task.Run(() =>
-                    {
-                        foreach (int i in Enumerable.Range(1, 254).Where(x => x != address[3]).ToList()) // Save to a list before we change the last address byte
-                        {
-                            address[3] = (byte)i;
-
-                            client.Send(message, message.Length, new IPEndPoint(new IPAddress(address), this.port));
-                        }
-                    });
+                    await Task.Delay(1000);
                 }
-
-                await Task.Delay(1000);
             }
         }
 
@@ -119,6 +99,7 @@ namespace Espera.Services
             {
                 listener.Start();
             }
+
             catch (SocketException ex)
             {
                 this.Log().ErrorException(string.Format("Port {0} is already taken", this.port), ex);
