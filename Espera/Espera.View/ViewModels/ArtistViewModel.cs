@@ -27,7 +27,7 @@ namespace Espera.View.ViewModels
         /// priorizing the album cover loading. The higher the number, the earlier it is in the list
         /// (Think of a reversed sorted list).
         /// </param>
-        public ArtistViewModel(string artistName, IEnumerable<IObservable<string>> artworkKeys, int orderHint)
+        public ArtistViewModel(string artistName, IEnumerable<IObservable<string>> artworkKeys, int orderHint = 1)
         {
             this.artworkKeys = new Subject<IObservable<string>>();
 
