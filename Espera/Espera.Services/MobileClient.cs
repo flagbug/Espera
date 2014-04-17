@@ -1,12 +1,4 @@
-﻿using Espera.Core;
-using Espera.Core.Audio;
-using Espera.Core.Management;
-using Espera.Network;
-using Newtonsoft.Json.Linq;
-using Rareform.Validation;
-using ReactiveUI;
-using ReactiveMarrow;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -19,6 +11,14 @@ using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Espera.Core;
+using Espera.Core.Audio;
+using Espera.Core.Management;
+using Espera.Network;
+using Newtonsoft.Json.Linq;
+using Rareform.Validation;
+using ReactiveMarrow;
+using ReactiveUI;
 
 namespace Espera.Services
 {
@@ -86,7 +86,7 @@ namespace Espera.Services
 
         public void ListenAsync()
         {
-            Observable.Defer(() => this.socket.ReadNextMessageAsync().ToObservable())
+            Observable.Defer(() => this.socket.GetStream().ReadNextMessageAsync().ToObservable())
                 .Repeat()
                 .TakeWhile(x => x != null)
                 // If we don't do this, the application will throw up whenever we are manipulating a
