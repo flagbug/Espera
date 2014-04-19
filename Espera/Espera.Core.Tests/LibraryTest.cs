@@ -696,8 +696,8 @@ namespace Espera.Core.Tests
 
                     var coll = library.PlaybackState.CreateCollection();
 
-                    var conn = library.PlaybackState.Where(x => x == AudioPlayerState.Playing)
-                        .Take(2)
+                    var conn = library.PlaybackState.Count(x => x == AudioPlayerState.Playing)
+                        .FirstAsync(x => x == 2)
                         .PublishLast();
                     conn.Connect();
 
@@ -796,7 +796,7 @@ namespace Espera.Core.Tests
                 {
                     Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                    Song[] songs = Helpers.SetupSongMocks(4, true);
+                    Song[] songs = Helpers.SetupSongMocks(4);
 
                     library.AddSongsToPlaylist(songs, token);
 
@@ -882,11 +882,14 @@ namespace Espera.Core.Tests
                 {
                     Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
+                    library.AudioPlayerCallback.PlayRequest = () => Task.Delay(0);
+
                     library.AudioPlayerCallback.StopRequest = () =>
                     {
                         finishedFired = true;
                         return Task.Delay(0);
                     };
+
                     library.AddSongsToPlaylist(Helpers.SetupSongMocks(1), token);
 
                     await library.PlaySongAsync(0, token);

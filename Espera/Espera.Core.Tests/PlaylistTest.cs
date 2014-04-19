@@ -222,7 +222,7 @@ namespace Espera.Core.Tests
             [Fact]
             public void ReturnsCorrectIndexesForMultipleSongs()
             {
-                Song[] songs = Helpers.SetupSongMocks(3, true);
+                Song[] songs = Helpers.SetupSongMocks(3);
 
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
@@ -234,7 +234,7 @@ namespace Espera.Core.Tests
             [Fact]
             public void ReturnsCorrectIndexesForOneSong()
             {
-                Song song = Helpers.SetupSongMock("Song", true);
+                Song song = Helpers.SetupSongMock();
 
                 Playlist playlist = Helpers.SetupPlaylist(song);
 
@@ -246,7 +246,7 @@ namespace Espera.Core.Tests
             [Fact]
             public void ReturnsCorrectIndexesForOneSongWithMultipleReferences()
             {
-                Song song = Helpers.SetupSongMock("Song", true);
+                Song song = Helpers.SetupSongMock();
 
                 Playlist playlist = Helpers.SetupPlaylist(Enumerable.Repeat(song, 3));
 
@@ -258,7 +258,7 @@ namespace Espera.Core.Tests
             [Fact]
             public void ReturnsNoIndexesForSongsThatAreNotInPlaylist()
             {
-                Song[] songs = Helpers.SetupSongMocks(4, true);
+                Song[] songs = Helpers.SetupSongMocks(4);
 
                 Playlist playlist = Helpers.SetupPlaylist(songs.Take(2));
 
@@ -408,7 +408,7 @@ namespace Espera.Core.Tests
             [Fact]
             public void MigratesCurrentSongIndex()
             {
-                Song[] songs = Helpers.SetupSongMocks(100, true);
+                Song[] songs = Helpers.SetupSongMocks(100);
 
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 

@@ -133,21 +133,22 @@ namespace Espera.Core.Tests
             }
         }
 
-        public static Song SetupSongMock(string name = "Song", bool callBase = false, TimeSpan duration = new TimeSpan())
+        public static Song SetupSongMock(string name = "Song",  TimeSpan duration = new TimeSpan())
         {
-            var mock = Substitute.For<Song>(name, duration);
+            var mock = Substitute.For<Song>(Path.Combine("C://", Guid.NewGuid().ToString(), ".mp3"), duration);
+            mock.Title = name;
             mock.PrepareAsync(Arg.Any<YoutubeStreamingQuality>()).Returns(Task.Delay(0));
 
             return mock;
         }
 
-        public static Song[] SetupSongMocks(int count, bool callBase = false)
+        public static Song[] SetupSongMocks(int count)
         {
             var songs = new Song[count];
 
             for (int i = 0; i < count; i++)
             {
-                songs[i] = SetupSongMock("Song" + i, callBase);
+                songs[i] = SetupSongMock("Song" + i);
             }
 
             return songs;
