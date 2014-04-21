@@ -248,7 +248,8 @@ namespace Espera.View
                 UpdateInfo updateInfo = await updateManager.CheckForUpdate()
                     .LoggedCatch(this, Observable.Return<UpdateInfo>(null), "Error while checking for updates: ");
 
-                if (updateInfo == null)
+                // The currently installed version being null should only happen in debugging situations
+                if (updateInfo == null || updateInfo.CurrentlyInstalledVersion == null)
                     return;
 
                 List<ReleaseEntry> releases = updateInfo.ReleasesToApply.ToList();
