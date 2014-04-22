@@ -20,7 +20,7 @@ Espera is an open-source media player that plays audio files and YouTube videos 
 
 ## Remote control
 
-Espera has an open remote control API for e.g mobile devices. An official Android version is coming soon.
+Espera has an [open remote control API](https://github.com/flagbug/Espera.Network) for e.g mobile devices. An official Android version is coming soon.
 
 ### Party-Mode
 
