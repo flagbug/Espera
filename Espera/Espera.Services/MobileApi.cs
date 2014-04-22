@@ -6,10 +6,8 @@ using System.Net.Sockets;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
-using Espera.Core;
 using Espera.Core.Analytics;
 using Espera.Core.Management;
 using Rareform.Validation;
@@ -172,8 +170,8 @@ namespace Espera.Services
             }
 
             // We wait on a message and file transfer client that have the same origin address
-            Observable.Defer(() => this.messageListener.AcceptTcpClientAsync().ToObservable()).Repeat()
-                .MatchPair(Observable.Defer(() => this.fileListener.AcceptTcpClientAsync().ToObservable()).Repeat(),
+            Observable.FromAsync(() => this.messageListener.AcceptTcpClientAsync()).Repeat()
+                .MatchPair(Observable.FromAsync(() => this.fileListener.AcceptTcpClientAsync()).Repeat(),
                     x => ((IPEndPoint)x.Client.RemoteEndPoint).Address)
                 .Subscribe(sockets =>
                 {
