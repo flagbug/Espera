@@ -7,7 +7,6 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -86,7 +85,7 @@ namespace Espera.Services
 
         public void ListenAsync()
         {
-            Observable.Defer(() => this.socket.GetStream().ReadNextMessageAsync().ToObservable())
+            Observable.FromAsync(() => this.socket.GetStream().ReadNextMessageAsync())
                 .Repeat()
                 .TakeWhile(x => x != null)
                 // If we don't do this, the application will throw up whenever we are manipulating a
