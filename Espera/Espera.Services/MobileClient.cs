@@ -14,6 +14,7 @@ using Espera.Core;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Network;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Rareform.Validation;
 using ReactiveMarrow;
@@ -30,7 +31,7 @@ namespace Espera.Services
         private readonly CompositeDisposable disposable;
         private readonly SemaphoreSlim gate;
         private readonly Library library;
-        private readonly Dictionary<string, Func<JToken, Task<ResponseInfo>>> messageActionMap;
+        private readonly Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>> messageActionMap;
         private readonly TcpClient socket;
         private Guid accessToken;
 
@@ -49,24 +50,24 @@ namespace Espera.Services
             this.gate = new SemaphoreSlim(1, 1);
             this.disconnected = new Subject<Unit>();
 
-            this.messageActionMap = new Dictionary<string, Func<JToken, Task<ResponseInfo>>>
+            this.messageActionMap = new Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>>
             {
-                {"get-connection-info", this.GetConnectionInfo},
-                {"get-library-content", this.GetLibraryContent},
-                {"post-playlist-song", this.PostPlaylistSong},
-                {"post-play-instantly", this.PostPlayInstantly},
-                {"get-current-playlist", this.GetCurrentPlaylist},
-                {"post-play-playlist-song", this.PostPlayPlaylistSong},
-                {"post-continue-song", this.PostContinueSong},
-                {"post-pause-song", this.PostPauseSong},
-                {"post-play-next-song", this.PostPlayNextSong},
-                {"post-play-previous-song", this.PostPlayPreviousSong},
-                {"post-remove-playlist-song", this.PostRemovePlaylistSong},
-                {"move-playlist-song-up", this.MovePlaylistSongUp},
-                {"move-playlist-song-down", this.MovePlaylistSongDown},
-                {"get-volume", this.GetVolume},
-                {"set-volume", this.SetVolume},
-                {"vote-for-song", this.VoteForSong}
+                {RequestAction.GetConnectionInfo, this.GetConnectionInfo},
+                {RequestAction.GetLibraryContent, this.GetLibraryContent},
+                {RequestAction.AddPlaylistSongs, this.AddPlaylistSongs},
+                {RequestAction.AddPlaylistSongNow, this.AddPlaylistSongsNow},
+                {RequestAction.GetCurrentPlaylist, this.GetCurrentPlaylist},
+                {RequestAction.PlayPlaylistSong, this.PlayPlaylistSong},
+                {RequestAction.ContinueSong, this.ContinueSong},
+                {RequestAction.PauseSong, this.PauseSong},
+                {RequestAction.PlayNextSong, this.PlayNextSong},
+                {RequestAction.PlayPreviousSong, this.PlayPreviousSong},
+                {RequestAction.RemovePlaylistSong, this.PostRemovePlaylistSong},
+                {RequestAction.MovePlaylistSongUp, this.MovePlaylistSongUp},
+                {RequestAction.MovePlaylistSongDown, this.MovePlaylistSongDown},
+                {RequestAction.GetVolume, this.GetVolume},
+                {RequestAction.SetVolume, this.SetVolume},
+                {RequestAction.VoteForSong, this.VoteForSong}
             };
         }
 
@@ -93,21 +94,20 @@ namespace Espera.Services
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(async message =>
                 {
-                    var request = message.Payload.ToObject<RequestInfo>();
-                    var responseMessage = new NetworkMessage { MessageType = NetworkMessageType.Response };
+                    RequestInfo request;
 
-                    if (request.RequestAction == null)
+                    try
                     {
-                        this.Log().Warn("Mobile client with access token {0} sent a request without specifiying an action!", this.accessToken);
+                        request = message.Payload.ToObject<RequestInfo>();
+                    }
 
-                        ResponseInfo response = CreateResponse(ResponseStatus.MalformedRequest);
-                        response.RequestId = request.RequestId;
-                        responseMessage.Payload = JObject.FromObject(response);
-
-                        await this.SendMessage(responseMessage);
-
+                    catch (JsonException ex)
+                    {
+                        this.Log().ErrorException("Mobile client with access token {0} sent a malformed request", ex);
                         return;
                     }
+
+                    var responseMessage = new NetworkMessage { MessageType = NetworkMessageType.Response };
 
                     Func<JToken, Task<ResponseInfo>> action;
 
@@ -150,7 +150,7 @@ namespace Espera.Services
                 .DisposeWith(this.disposable);
         }
 
-        private static NetworkMessage CreatePush(string action, JObject content)
+        private static NetworkMessage CreatePushMessage(PushAction action, JObject content)
         {
             var message = new NetworkMessage
             {
@@ -178,6 +178,95 @@ namespace Espera.Services
                 Message = message,
                 Content = content,
             };
+        }
+
+        private Task<ResponseInfo> AddPlaylistSongs(JToken parameters)
+        {
+            Guid songGuid;
+            bool valid = Guid.TryParse(parameters["songGuid"].ToString(), out songGuid);
+
+            if (!valid)
+            {
+                return Task.FromResult(CreateResponse(ResponseStatus.MalformedRequest, "Malformed GUID"));
+            }
+
+            LocalSong song = this.library.Songs.FirstOrDefault(x => x.Guid == songGuid);
+
+            if (song == null)
+            {
+                return Task.FromResult(CreateResponse(ResponseStatus.NotFound, "Song not found"));
+            }
+
+            this.library.AddSongToPlaylist(song);
+
+            return Task.FromResult(CreateResponse(ResponseStatus.Success));
+        }
+
+        private async Task<ResponseInfo> AddPlaylistSongsNow(JToken parameters)
+        {
+            var guids = new List<Guid>();
+
+            foreach (string guidString in parameters["guids"].Select(x => x.ToString()))
+            {
+                Guid guid;
+
+                bool valid = Guid.TryParse(guidString, out guid);
+
+                if (valid)
+                {
+                    guids.Add(guid);
+                }
+
+                else
+                {
+                    return CreateResponse(ResponseStatus.MalformedRequest, "One or more GUIDs are malformed");
+                }
+            }
+
+            Dictionary<Guid, LocalSong> dic = this.library.Songs.ToDictionary(x => x.Guid);
+
+            List<LocalSong> songs = guids.Select(x =>
+            {
+                LocalSong song;
+
+                dic.TryGetValue(x, out song);
+
+                return song;
+            })
+            .Where(x => x != null)
+            .ToList();
+
+            if (guids.Count != songs.Count)
+            {
+                return CreateResponse(ResponseStatus.NotFound, "One or more songs could not be found");
+            }
+
+            try
+            {
+                await this.library.PlayInstantlyAsync(songs, this.accessToken);
+            }
+
+            catch (AccessException)
+            {
+                return CreateResponse(ResponseStatus.Unauthorized);
+            }
+
+            return CreateResponse(ResponseStatus.Success);
+        }
+
+        private async Task<ResponseInfo> ContinueSong(JToken content)
+        {
+            try
+            {
+                await this.library.ContinueSongAsync(this.accessToken);
+            }
+
+            catch (AccessException)
+            {
+                return CreateResponse(ResponseStatus.Unauthorized);
+            }
+
+            return CreateResponse(ResponseStatus.Success);
         }
 
         private async Task<ResponseInfo> GetConnectionInfo(JToken parameters)
@@ -309,22 +398,7 @@ namespace Espera.Services
             return Task.FromResult(CreateResponse(ResponseStatus.Success));
         }
 
-        private async Task<ResponseInfo> PostContinueSong(JToken content)
-        {
-            try
-            {
-                await this.library.ContinueSongAsync(this.accessToken);
-            }
-
-            catch (AccessException)
-            {
-                return CreateResponse(ResponseStatus.Unauthorized);
-            }
-
-            return CreateResponse(ResponseStatus.Success);
-        }
-
-        private async Task<ResponseInfo> PostPauseSong(JToken dontCare)
+        private async Task<ResponseInfo> PauseSong(JToken dontCare)
         {
             try
             {
@@ -339,81 +413,7 @@ namespace Espera.Services
             return CreateResponse(ResponseStatus.Success);
         }
 
-        private async Task<ResponseInfo> PostPlayInstantly(JToken parameters)
-        {
-            var guids = new List<Guid>();
-
-            foreach (string guidString in parameters["guids"].Select(x => x.ToString()))
-            {
-                Guid guid;
-
-                bool valid = Guid.TryParse(guidString, out guid);
-
-                if (valid)
-                {
-                    guids.Add(guid);
-                }
-
-                else
-                {
-                    return CreateResponse(ResponseStatus.MalformedRequest, "One or more GUIDs are malformed");
-                }
-            }
-
-            Dictionary<Guid, LocalSong> dic = this.library.Songs.ToDictionary(x => x.Guid);
-
-            List<LocalSong> songs = guids.Select(x =>
-            {
-                LocalSong song;
-
-                dic.TryGetValue(x, out song);
-
-                return song;
-            })
-            .Where(x => x != null)
-            .ToList();
-
-            if (guids.Count != songs.Count)
-            {
-                return CreateResponse(ResponseStatus.NotFound, "One or more songs could not be found");
-            }
-
-            try
-            {
-                await this.library.PlayInstantlyAsync(songs, this.accessToken);
-            }
-
-            catch (AccessException)
-            {
-                return CreateResponse(ResponseStatus.Unauthorized);
-            }
-
-            return CreateResponse(ResponseStatus.Success);
-        }
-
-        private Task<ResponseInfo> PostPlaylistSong(JToken parameters)
-        {
-            Guid songGuid;
-            bool valid = Guid.TryParse(parameters["songGuid"].ToString(), out songGuid);
-
-            if (!valid)
-            {
-                return Task.FromResult(CreateResponse(ResponseStatus.MalformedRequest, "Malformed GUID"));
-            }
-
-            LocalSong song = this.library.Songs.FirstOrDefault(x => x.Guid == songGuid);
-
-            if (song == null)
-            {
-                return Task.FromResult(CreateResponse(ResponseStatus.NotFound, "Song not found"));
-            }
-
-            this.library.AddSongToPlaylist(song);
-
-            return Task.FromResult(CreateResponse(ResponseStatus.Success));
-        }
-
-        private async Task<ResponseInfo> PostPlayNextSong(JToken dontCare)
+        private async Task<ResponseInfo> PlayNextSong(JToken dontCare)
         {
             try
             {
@@ -428,7 +428,7 @@ namespace Espera.Services
             return CreateResponse(ResponseStatus.Success);
         }
 
-        private async Task<ResponseInfo> PostPlayPlaylistSong(JToken parameters)
+        private async Task<ResponseInfo> PlayPlaylistSong(JToken parameters)
         {
             Guid songGuid;
             bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
@@ -458,7 +458,7 @@ namespace Espera.Services
             return CreateResponse(ResponseStatus.Success);
         }
 
-        private async Task<ResponseInfo> PostPlayPreviousSong(JToken dontCare)
+        private async Task<ResponseInfo> PlayPreviousSong(JToken dontCare)
         {
             try
             {
@@ -496,7 +496,7 @@ namespace Espera.Services
                 accessPermission
             });
 
-            NetworkMessage message = CreatePush("update-access-permission", content);
+            NetworkMessage message = CreatePushMessage(PushAction.UpdateAccessPermission, content);
 
             await this.SendMessage(message);
         }
@@ -508,7 +508,7 @@ namespace Espera.Services
                 state
             });
 
-            NetworkMessage message = CreatePush("update-playback-state", content);
+            NetworkMessage message = CreatePushMessage(PushAction.UpdatePlaybackState, content);
 
             await this.SendMessage(message);
         }
@@ -517,7 +517,7 @@ namespace Espera.Services
         {
             JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes, state);
 
-            NetworkMessage message = CreatePush("update-current-playlist", content);
+            NetworkMessage message = CreatePushMessage(PushAction.UpdateCurrentPlaylist, content);
 
             await this.SendMessage(message);
         }
@@ -529,7 +529,7 @@ namespace Espera.Services
                 remainingVotes
             });
 
-            NetworkMessage message = CreatePush("update-remaining-votes", content);
+            NetworkMessage message = CreatePushMessage(PushAction.UpdateRemainingVotes, content);
 
             await this.SendMessage(message);
         }
