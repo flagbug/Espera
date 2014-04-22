@@ -34,7 +34,7 @@ namespace Espera.Core.Management
         private readonly ILibraryWriter libraryWriter;
         private readonly Func<string, ILocalSongFinder> localSongFinderFunc;
         private readonly Subject<Unit> manualUpdateTrigger;
-        private readonly ReactiveUI.ReactiveList<Playlist> playlists;
+        private readonly ReactiveList<Playlist> playlists;
         private readonly CoreSettings settings;
         private readonly ReaderWriterLockSlim songLock;
         private readonly HashSet<LocalSong> songs;
@@ -71,8 +71,8 @@ namespace Espera.Core.Management
             this.TotalTime = this.audioPlayer.TotalTime;
             this.PlaybackState = this.audioPlayer.PlaybackState;
 
-            this.audioPlayer.PlaybackState.Where(p => p == AudioPlayerState.Finished)
-                .CombineLatestValue(this.CanPlayNextSong, (state, canPlayNextSong) => canPlayNextSong)
+            this.CanPlayNextSong.SampleAndCombineLatest(this.audioPlayer.PlaybackState
+                    .Where(p => p == AudioPlayerState.Finished), (canPlayNextSong, _) => canPlayNextSong)
                 .SelectMany(x => this.HandleSongFinishAsync(x).ToObservable())
                 .Subscribe();
 

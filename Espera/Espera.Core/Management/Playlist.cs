@@ -1,12 +1,13 @@
-﻿using Rareform.Validation;
-using ReactiveMarrow;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
+using Rareform.Validation;
+using ReactiveMarrow;
+using ReactiveUI;
 
 namespace Espera.Core.Management
 {
@@ -15,7 +16,7 @@ namespace Espera.Core.Management
     /// </summary>
     public sealed class Playlist : IEnumerable<PlaylistEntry>, INotifyCollectionChanged, INotifyPropertyChanged
     {
-        private readonly ReactiveUI.ReactiveList<PlaylistEntry> playlist;
+        private readonly ReactiveList<PlaylistEntry> playlist;
         private string name;
 
         internal Playlist(string name, bool isTemporary = false)
@@ -32,13 +33,13 @@ namespace Espera.Core.Management
             });
 
             var canPlayNextSong = this.CurrentSongIndex
-                .CombineLatest(this.Changed(), (i, args) => i.HasValue && this.ContainsIndex(i.Value + 1))
+                .CombineLatest(this.playlist.Changed, (i, args) => i.HasValue && this.ContainsIndex(i.Value + 1))
                 .Publish(false);
             canPlayNextSong.Connect();
             this.CanPlayNextSong = canPlayNextSong;
 
             var canPlayPeviousSong = this.CurrentSongIndex
-                .CombineLatest(this.Changed(), (i, args) => i.HasValue && this.ContainsIndex(i.Value - 1))
+                .CombineLatest(this.playlist.Changed, (i, args) => i.HasValue && this.ContainsIndex(i.Value - 1))
                 .Publish(false);
             canPlayPeviousSong.Connect();
             this.CanPlayPreviousSong = canPlayPeviousSong;
@@ -63,6 +64,11 @@ namespace Espera.Core.Management
         /// </summary>
         /// <value>true if the previous song in the playlist can be played; otherwise, false.</value>
         public IObservable<bool> CanPlayPreviousSong { get; private set; }
+
+        public IObservable<NotifyCollectionChangedEventArgs> Changed
+        {
+            get { return this.playlist.Changed; }
+        }
 
         /// <summary>
         /// Gets or sets the index of the currently played song in the playlist.
