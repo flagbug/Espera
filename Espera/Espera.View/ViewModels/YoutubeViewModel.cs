@@ -1,89 +1,128 @@
-﻿using Espera.Core;
-using Espera.Core.Management;
-using Espera.View.Properties;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
+using Espera.Core;
+using Espera.Core.Management;
+using Espera.Core.Settings;
+using Rareform.Validation;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class YoutubeViewModel : SongSourceViewModel<YoutubeSongViewModel>
+    public sealed class YoutubeViewModel : SongSourceViewModel<YoutubeSongViewModel>
     {
-        private IEnumerable<YoutubeSong> currentSongs;
+        private readonly Subject<Unit> connectionError;
+        private readonly CoreSettings coreSettings;
+        private readonly ObservableAsPropertyHelper<bool> isNetworkUnavailable;
+        private readonly IReactiveCommand playNowCommand;
+        private readonly ObservableAsPropertyHelper<YoutubeSongViewModel> selectedSong;
+        private readonly IYoutubeSongFinder songFinder;
+        private readonly ViewSettings viewSettings;
         private SortOrder durationOrder;
         private bool isSearching;
         private SortOrder ratingOrder;
-        private string searchText;
         private SortOrder titleOrder;
         private SortOrder viewsOrder;
 
-        public YoutubeViewModel(Library library)
-            : base(library)
+        public YoutubeViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, Guid accessToken, INetworkStatus networkstatus = null, IYoutubeSongFinder songFinder = null)
+            : base(library, accessToken)
         {
-            this.searchText = String.Empty;
+            if (viewSettings == null)
+                Throw.ArgumentNullException(() => viewSettings);
+
+            if (coreSettings == null)
+                Throw.ArgumentNullException(() => coreSettings);
+
+            this.viewSettings = viewSettings;
+            this.coreSettings = coreSettings;
+            this.songFinder = songFinder ?? new YoutubeSongFinder();
+
+            this.connectionError = new Subject<Unit>();
+            this.playNowCommand = this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
+                .Select(x => x == AccessPermission.Admin || !this.coreSettings.LockPlayPause)
+                .ToCommand();
+            this.playNowCommand.RegisterAsyncTask(_ => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model), accessToken));
+
+            this.selectedSong = this.WhenAnyValue(x => x.SelectedSongs)
+                .Select(x => x == null ? null : (YoutubeSongViewModel)this.SelectedSongs.FirstOrDefault())
+                .ToProperty(this, x => x.SelectedSong);
+
+            var status = networkstatus ?? new NetworkStatus();
+            this.isNetworkUnavailable = status.IsAvailable
+                .Select(x => !x)
+                .Merge(this.connectionError.Select(x => true))
+                .ToProperty(this, x => x.IsNetworkUnavailable);
 
             // We need a default sorting order
             this.OrderByTitle();
 
-            // Create a default list
-            this.StartSearch();
+            this.WhenAnyValue(x => x.SearchText).Skip(1).Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler).Select(_ => Unit.Default)
+                .Merge(status.IsAvailable.Where(x => x).Select(_ => Unit.Default))
+                .Select(_ => this.StartSearchAsync().ToObservable())
+                // We don't use SelectMany, because we only care about the latest invocation and
+                // don't want an old, still running request to override a request that is newer and faster
+                .Switch()
+                .Subscribe(x =>
+                {
+                    this.SelectableSongs = x;
+                    this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
+                });
         }
 
         public int DurationColumnWidth
         {
-            get { return Settings.Default.YoutubeDurationColumnWidth; }
-            set { Settings.Default.YoutubeDurationColumnWidth = value; }
+            get { return this.viewSettings.YoutubeDurationColumnWidth; }
+            set { this.viewSettings.YoutubeDurationColumnWidth = value; }
+        }
+
+        public bool IsNetworkUnavailable
+        {
+            get { return this.isNetworkUnavailable.Value; }
         }
 
         public bool IsSearching
         {
             get { return this.isSearching; }
-            private set
-            {
-                if (this.IsSearching != value)
-                {
-                    this.isSearching = value;
-                    this.NotifyOfPropertyChange(() => this.IsSearching);
-                }
-            }
+            private set { this.RaiseAndSetIfChanged(ref this.isSearching, value); }
         }
 
         public int LinkColumnWidth
         {
-            get { return Settings.Default.YoutubeLinkColumnWidth; }
-            set { Settings.Default.YoutubeLinkColumnWidth = value; }
+            get { return this.viewSettings.YoutubeLinkColumnWidth; }
+            set { this.viewSettings.YoutubeLinkColumnWidth = value; }
+        }
+
+        public override IReactiveCommand PlayNowCommand
+        {
+            get { return this.playNowCommand; }
         }
 
         public int RatingColumnWidth
         {
-            get { return Settings.Default.YoutubeRatingColumnWidth; }
-            set { Settings.Default.YoutubeRatingColumnWidth = value; }
+            get { return this.viewSettings.YoutubeRatingColumnWidth; }
+            set { this.viewSettings.YoutubeRatingColumnWidth = value; }
         }
 
-        public override string SearchText
+        public YoutubeSongViewModel SelectedSong
         {
-            get { return this.searchText; }
-            set
-            {
-                if (this.SearchText != value)
-                {
-                    this.searchText = value;
-                    this.NotifyOfPropertyChange(() => this.SearchText);
-                }
-            }
+            get { return this.selectedSong.Value; }
         }
 
         public int TitleColumnWidth
         {
-            get { return Settings.Default.YoutubeTitleColumnWidth; }
-            set { Settings.Default.YoutubeTitleColumnWidth = value; }
+            get { return this.viewSettings.YoutubeTitleColumnWidth; }
+            set { this.viewSettings.YoutubeTitleColumnWidth = value; }
         }
 
         public int ViewsColumnWidth
         {
-            get { return Settings.Default.YoutubeViewsColumnWidth; }
-            set { Settings.Default.YoutubeViewsColumnWidth = value; }
+            get { return this.viewSettings.YoutubeViewsColumnWidth; }
+            set { this.viewSettings.YoutubeViewsColumnWidth = value; }
         }
 
         public void OrderByDuration()
@@ -106,31 +145,29 @@ namespace Espera.View.ViewModels
             this.ApplyOrder(SortHelpers.GetOrderByViews, ref this.viewsOrder);
         }
 
-        public void StartSearch()
+        private async Task<IReadOnlyList<YoutubeSongViewModel>> StartSearchAsync()
         {
             this.IsSearching = true;
+            this.SelectedSongs = null;
 
-            Task.Factory.StartNew(this.UpdateSelectableSongs);
-        }
-
-        private void UpdateSelectableSongs()
-        {
-            if (this.IsSearching || this.currentSongs == null)
+            try
             {
-                var finder = new YoutubeSongFinder(this.SearchText);
-                finder.Start();
+                IReadOnlyList<YoutubeSong> songs = await this.songFinder.GetSongsAsync(this.SearchText);
 
-                this.IsSearching = false;
-
-                this.currentSongs = finder.SongsFound;
+                return songs.Select(x => new YoutubeSongViewModel(x, () => this.coreSettings.YoutubeDownloadPath)).ToList();
             }
 
-            this.SelectableSongs = currentSongs
-                .Select(song => new YoutubeSongViewModel(song))
-                .OrderBy(this.SongOrderFunc)
-                .ToList();
+            catch (Exception)
+            {
+                this.connectionError.OnNext(Unit.Default);
 
-            this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
+                return new List<YoutubeSongViewModel>();
+            }
+
+            finally
+            {
+                this.IsSearching = false;
+            }
         }
     }
 }

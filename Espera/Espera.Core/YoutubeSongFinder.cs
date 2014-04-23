@@ -1,55 +1,43 @@
-﻿using Espera.Core.Audio;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Google.GData.Client;
 using Google.GData.YouTube;
 using Google.YouTube;
-using Rareform.Validation;
-using System;
 
 namespace Espera.Core
 {
-    public sealed class YoutubeSongFinder : SongFinder<YoutubeSong>
+    public sealed class YoutubeSongFinder : IYoutubeSongFinder
     {
         private const string ApiKey =
             "AI39si5_zcffmO_ErRSZ9xUkfy_XxPZLWuxTOzI_1RH9HhXDI-GaaQ-j6MONkl2JiF01yBDgBFPbC8-mn6U9Qo4Ek50nKcqH5g";
 
-        private readonly string searchString;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="YoutubeSongFinder"/> class.
-        /// </summary>
-        /// <param name="searchString">The search string.</param>
-        public YoutubeSongFinder(string searchString)
-        {
-            if (searchString == null)
-                Throw.ArgumentNullException(() => searchString);
-
-            this.searchString = searchString;
-        }
-
-        /// <summary>
-        /// Starts the <see cref="YoutubeSongFinder"/>.
-        /// </summary>
-        public override void Start()
+        public async Task<IReadOnlyList<YoutubeSong>> GetSongsAsync(string searchTerm)
         {
             var query = new YouTubeQuery(YouTubeQuery.DefaultVideoUri)
             {
                 OrderBy = "relevance",
-                Query = searchString,
+                Query = searchTerm,
                 SafeSearch = YouTubeQuery.SafeSearchValues.None
             };
 
+            // NB: I have no idea where this API blocks exactly
             var settings = new YouTubeRequestSettings("Espera", ApiKey);
             var request = new YouTubeRequest(settings);
-            Feed<Video> feed = request.Get<Video>(query);
+            Feed<Video> feed = await Task.Run(() => request.Get<Video>(query));
+            List<Video> entries = await Task.Run(() => feed.Entries.ToList());
 
-            foreach (Video video in feed.Entries)
+            var songs = new List<YoutubeSong>();
+
+            foreach (Video video in entries)
             {
                 var duration = TimeSpan.FromSeconds(Int32.Parse(video.YouTubeEntry.Duration.Seconds));
                 string url = video.WatchPage.OriginalString
-                    .Replace("&feature=youtube_gdata_player", String.Empty) /* Unnecessary long url */
-                    .Replace("https://", "http://"); /* Dont use https for streaming */
+                    .Replace("&feature=youtube_gdata_player", String.Empty) // Unnecessary long url
+                    .Replace("https://", "http://"); // Secure connections are not always easy to handle when streaming
 
-                var song = new YoutubeSong(url, AudioType.Mp3, duration, CoreSettings.Default.StreamYoutube)
+                var song = new YoutubeSong(url, duration)
                 {
                     Title = video.Title,
                     Description = video.Description,
@@ -58,12 +46,10 @@ namespace Espera.Core
                     Views = video.ViewCount
                 };
 
-                this.InternSongsFound.Add(song);
-
-                this.OnSongFound(new SongEventArgs(song));
+                songs.Add(song);
             }
 
-            this.OnFinished(EventArgs.Empty);
+            return songs;
         }
     }
 }

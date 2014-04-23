@@ -1,131 +1,61 @@
-﻿using Espera.Core.Audio;
-using Rareform.IO;
-using Rareform.Validation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Reactive.Linq;
+using Rareform.Validation;
+using ReactiveUI;
 using TagLib;
+using File = TagLib.File;
 
 namespace Espera.Core
 {
     /// <summary>
-    /// Encapsulates a recursive call through the local filesystem that reads the tags of all WAV and MP3 files and returns them.
+    /// Encapsulates a recursive call through the local filesystem that reads the tags of all WAV
+    /// and MP3 files and returns them.
     /// </summary>
-    internal sealed class LocalSongFinder : SongFinder<LocalSong>
+    internal sealed class LocalSongFinder : ILocalSongFinder, IEnableLogger
     {
-        private static readonly string[] AllowedExtensions = new[] { ".mp3", ".wav" };
-        private readonly List<string> corruptFiles;
-        private readonly Queue<string> pathQueue;
-        private readonly DirectoryScanner scanner;
-        private readonly object songListLock;
-        private readonly object tagLock;
-        private volatile bool abort;
-        private DriveType driveType;
-        private volatile bool isSearching;
-        private volatile bool isTagging;
+        private static readonly string[] AllowedExtensions = { ".mp3", ".wav", ".m4a", ".aac" };
+        private readonly string directoryPath;
+        private readonly IFileSystem fileSystem;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LocalSongFinder"/> class.
-        /// </summary>
-        /// <param name="path">The path of the directory where the recursive search should start.</param>
-        public LocalSongFinder(string path)
+        public LocalSongFinder(string directoryPath, IFileSystem fileSystem = null)
         {
-            if (path == null)
-                Throw.ArgumentNullException(() => path);
+            if (directoryPath == null)
+                Throw.ArgumentNullException(() => directoryPath);
 
-            this.tagLock = new object();
-            this.songListLock = new object();
-
-            this.pathQueue = new Queue<string>();
-            this.corruptFiles = new List<string>();
-            this.scanner = new DirectoryScanner(path);
-            this.scanner.FileFound += ScannerFileFound;
-
-            this.driveType = new DriveInfo(Path.GetPathRoot(path)).DriveType;
+            this.directoryPath = directoryPath;
+            this.fileSystem = fileSystem ?? new FileSystem();
         }
 
         /// <summary>
-        /// Gets the files that are corrupt and could not be read.
+        /// This method scans the directory, specified in the constructor, and returns an observable
+        /// with a tuple that contains the song and the data of the artwork.
         /// </summary>
-        public IEnumerable<string> CorruptFiles
+        public IObservable<Tuple<LocalSong, byte[]>> GetSongsAsync()
         {
-            get { return this.corruptFiles; }
+            return this.ScanDirectoryForValidPaths(this.directoryPath)
+                .Select(this.ProcessFile)
+                .Where(t => t != null)
+                .ToObservable(RxApp.TaskpoolScheduler);
         }
 
-        /// <summary>
-        /// Gets the total number of songs that are counted yet.
-        /// </summary>
-        public int CurrentTotalSongs
+        private static Tuple<LocalSong, byte[]> CreateSong(Tag tag, TimeSpan duration, string filePath)
         {
-            get
-            {
-                int pathCount;
-
-                lock (this.tagLock)
-                {
-                    pathCount = this.pathQueue.Count;
-                }
-
-                lock (this.songListLock)
-                {
-                    pathCount += this.InternSongsFound.Count;
-                }
-
-                return pathCount;
-            }
-        }
-
-        /// <summary>
-        /// Gets the number of tags that are processed yet.
-        /// </summary>
-        public int TagsProcessed
-        {
-            get
-            {
-                int songCount;
-
-                lock (this.songListLock)
-                {
-                    songCount = this.InternSongsFound.Count;
-                }
-
-                return songCount;
-            }
-        }
-
-        public void Abort()
-        {
-            this.abort = true;
-        }
-
-        /// <summary>
-        /// Starts the <see cref="LocalSongFinder"/>.
-        /// </summary>
-        public override void Start()
-        {
-            var fileScanTask = Task.Factory.StartNew(this.StartFileScan);
-
-            this.isSearching = true;
-
-            var tagScanTask = Task.Factory.StartNew(this.StartTagScan);
-
-            Task.WaitAll(fileScanTask, tagScanTask);
-
-            this.OnFinished(EventArgs.Empty);
-        }
-
-        private static LocalSong CreateSong(Tag tag, TimeSpan duration, AudioType audioType, string filePath, DriveType driveType)
-        {
-            return new LocalSong(filePath, audioType, duration, driveType)
+            var song = new LocalSong(filePath, duration)
             {
                 Album = PrepareTag(tag.Album, String.Empty),
-                Artist = PrepareTag(tag.FirstPerformer, "Unknown Artist"), //HACK: In the future retrieve the string for an unkown artist from the view if we want to localize it
+                Artist = PrepareTag(tag.FirstPerformer ?? tag.FirstAlbumArtist, "Unknown Artist"), //HACK: In the future retrieve the string for an unkown artist from the view if we want to localize it
                 Genre = PrepareTag(tag.FirstGenre, String.Empty),
                 Title = PrepareTag(tag.Title, Path.GetFileNameWithoutExtension(filePath)),
                 TrackNumber = (int)tag.Track
             };
+
+            IPicture picture = tag.Pictures.FirstOrDefault();
+
+            return Tuple.Create(song, picture == null ? null : picture.Data.Data);
         }
 
         private static string PrepareTag(string tag, string replacementIfNull)
@@ -133,103 +63,93 @@ namespace Espera.Core
             return tag == null ? replacementIfNull : TagSanitizer.Sanitize(tag);
         }
 
-        private void AddSong(TagLib.File file, AudioType audioType)
-        {
-            var song = CreateSong(file.Tag, file.Properties.Duration, audioType, file.Name, this.driveType);
-
-            lock (this.songListLock)
-            {
-                this.InternSongsFound.Add(song);
-            }
-
-            this.OnSongFound(new SongEventArgs(song));
-        }
-
-        private void ProcessFile(string filePath)
+        private Tuple<LocalSong, byte[]> ProcessFile(string filePath)
         {
             try
             {
-                AudioType? audioType = null; // Use a nullable value so that we don't have to assign a enum value
-
-                TagLib.File file = null;
-
-                switch (Path.GetExtension(filePath))
+                using (var fileAbstraction = new TagLibFileAbstraction(filePath, this.fileSystem))
                 {
-                    case ".mp3":
-                        file = new TagLib.Mpeg.AudioFile(filePath);
-                        audioType = AudioType.Mp3;
-                        break;
-
-                    case ".wav":
-                        file = new TagLib.WavPack.File(filePath);
-                        audioType = AudioType.Wav;
-                        break;
-                }
-
-                if (file != null)
-                {
-                    if (file.Tag != null)
+                    using (var file = File.Create(fileAbstraction))
                     {
-                        this.AddSong(file, audioType.Value);
-                    }
+                        if (file != null && file.Tag != null)
+                        {
+                            return CreateSong(file.Tag, file.Properties.Duration, file.Name);
+                        }
 
-                    file.Dispose();
+                        return null;
+                    }
                 }
             }
 
-            catch (CorruptFileException)
+            catch (Exception ex)
             {
-                this.corruptFiles.Add(filePath);
-            }
-
-            catch (IOException)
-            {
-                this.corruptFiles.Add(filePath);
+                this.Log().ErrorException(string.Format("Couldn't read song file {0}", filePath), ex);
+                return null;
             }
         }
 
-        private void ScannerFileFound(object sender, FileEventArgs e)
+        private IEnumerable<string> ScanDirectoryForValidPaths(string rootPath)
         {
-            if (this.abort || !AllowedExtensions.Contains(e.File.Extension))
-                return;
+            IEnumerable<string> files = Enumerable.Empty<string>();
 
-            lock (this.tagLock)
+            try
             {
-                this.pathQueue.Enqueue(e.File.FullName);
+                files = this.fileSystem.Directory.GetFiles(rootPath)
+                     .Where(x => AllowedExtensions.Contains(Path.GetExtension(x).ToLowerInvariant()));
             }
-        }
 
-        private void StartFileScan()
-        {
-            this.scanner.Start();
-            this.isSearching = false;
-        }
-
-        private void StartTagScan()
-        {
-            this.isTagging = true;
-
-            while ((this.isSearching || this.isTagging) && !this.abort)
+            catch (Exception ex)
             {
-                string filePath = null;
+                this.Log().ErrorException(string.Format("Couldn't get files from directory {0}", rootPath), ex);
+            }
 
-                lock (this.tagLock)
-                {
-                    if (this.pathQueue.Any())
-                    {
-                        filePath = this.pathQueue.Dequeue();
-                    }
+            IEnumerable<string> directories = Enumerable.Empty<string>();
 
-                    else if (!this.isSearching)
-                    {
-                        this.isTagging = false;
-                    }
-                }
+            try
+            {
+                directories = this.fileSystem.Directory.GetDirectories(rootPath);
+            }
 
-                if (filePath != null)
-                {
-                    this.ProcessFile(filePath);
-                }
+            catch (Exception ex)
+            {
+                this.Log().ErrorException(string.Format("Couldn't get directories from directory {0}", rootPath), ex);
+            }
+
+            return files.Concat(directories.SelectMany(ScanDirectoryForValidPaths));
+        }
+
+        private class TagLibFileAbstraction : File.IFileAbstraction, IDisposable
+        {
+            public TagLibFileAbstraction(string path, IFileSystem fileSystem)
+            {
+                if (path == null)
+                    throw new ArgumentNullException("path");
+
+                if (fileSystem == null)
+                    throw new ArgumentNullException("fileSystem");
+
+                this.Name = path;
+
+                Stream stream = fileSystem.File.Open(path, FileMode.Open, FileAccess.ReadWrite);
+
+                this.ReadStream = stream;
+                this.WriteStream = stream;
+            }
+
+            public string Name { get; private set; }
+
+            public Stream ReadStream { get; private set; }
+
+            public Stream WriteStream { get; private set; }
+
+            public void CloseStream(Stream stream)
+            {
+                stream.Close();
+            }
+
+            public void Dispose()
+            {
+                this.ReadStream.Dispose();
             }
         }
     }

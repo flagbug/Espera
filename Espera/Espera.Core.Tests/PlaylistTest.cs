@@ -1,336 +1,545 @@
 ﻿using Espera.Core.Management;
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace Espera.Core.Tests
 {
-    [TestFixture]
     public sealed class PlaylistTest
     {
-        [Test]
-        public void AddSongs_AddTwoSong_IndexesAreCorrect()
-        {
-            Song[] songs = Helpers.SetupSongMocks(2);
-
-            var playlist = new Playlist("Playlist");
-
-            playlist.AddSongs(songs);
-
-            Assert.AreEqual(0, playlist[0].Index);
-            Assert.AreEqual(1, playlist[1].Index);
-        }
-
-        [Test]
-        public void AddSongs_ArgumentIsNull_ThrowsArgumentNullException()
+        [Fact]
+        public void VotesAfterCurrentSongIndexDontResetWhenCurrentSongIndexAdvances()
         {
             var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(3));
 
-            Assert.Throws<ArgumentNullException>(() => playlist.AddSongs(null));
+            playlist.VoteFor(0);
+            playlist.VoteFor(1);
+            playlist.VoteFor(2);
+
+            playlist.CurrentSongIndex.Value = 1;
+
+            Assert.Equal(1, playlist[1].Votes);
+            Assert.Equal(1, playlist[2].Votes);
         }
 
-        [Test]
-        public void AddSongs_PlaylistContainsSongs()
-        {
-            Song[] songs = Helpers.SetupSongMocks(4);
-            Playlist playlist = Helpers.SetupPlaylist(songs);
-
-            Assert.AreEqual(4, playlist.Count());
-            Assert.AreEqual(songs[0], playlist[0].Song);
-            Assert.AreEqual(songs[1], playlist[1].Song);
-            Assert.AreEqual(songs[2], playlist[2].Song);
-            Assert.AreEqual(songs[3], playlist[3].Song);
-        }
-
-        [Test]
-        public void CanPlayNextSong_CurrentSongIndexIsLastSong_ReturnsFalse()
-        {
-            Song[] songs = Helpers.SetupSongMocks(4);
-            Playlist playlist = Helpers.SetupPlaylist(songs);
-
-            playlist.CurrentSongIndex = 3;
-
-            Assert.IsFalse(playlist.CanPlayNextSong);
-        }
-
-        [Test]
-        public void CanPlayNextSong_CurrentSongIndexIsNull_ReturnsFalse()
-        {
-            Song[] songs = Helpers.SetupSongMocks(4);
-            Playlist playlist = Helpers.SetupPlaylist(songs);
-
-            playlist.CurrentSongIndex = null;
-
-            Assert.IsFalse(playlist.CanPlayNextSong);
-        }
-
-        [Test]
-        public void CanPlayNextSong_CurrentSongIndexIsZero_ReturnsTrue()
-        {
-            Song[] songs = Helpers.SetupSongMocks(4);
-            Playlist playlist = Helpers.SetupPlaylist(songs);
-
-            playlist.CurrentSongIndex = 0;
-
-            Assert.IsTrue(playlist.CanPlayNextSong);
-        }
-
-        [Test]
-        public void CanPlayNextSong_PlaylistIsEmpty_ReturnsFalse()
+        [Fact]
+        public void VotesResetWhenCurrentSongIndexAdvances()
         {
             var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(3));
 
-            Assert.IsFalse(playlist.CanPlayNextSong);
+            playlist.VoteFor(0);
+
+            playlist.CurrentSongIndex.Value = 0;
+
+            Assert.Equal(1, playlist[0].Votes);
+
+            playlist.CurrentSongIndex.Value = 1;
+
+            Assert.Equal(0, playlist[0].Votes);
+
+            playlist.VoteFor(2);
+
+            playlist.CurrentSongIndex.Value = 2;
+
+            Assert.Equal(0, playlist[1].Votes);
         }
 
-        [Test]
-        public void CanPlayPreviousSong_CurrentSongIndexIsLastSong_ReturnsTrue()
-        {
-            Song[] songs = Helpers.SetupSongMocks(4);
-            Playlist playlist = Helpers.SetupPlaylist(songs);
-
-            playlist.CurrentSongIndex = 3;
-
-            Assert.IsTrue(playlist.CanPlayPreviousSong);
-        }
-
-        [Test]
-        public void CanPlayPreviousSong_CurrentSongIndexIsNull_ReturnsFalse()
-        {
-            Song[] songs = Helpers.SetupSongMocks(4);
-            Playlist playlist = Helpers.SetupPlaylist(songs);
-
-            playlist.CurrentSongIndex = null;
-
-            Assert.IsFalse(playlist.CanPlayPreviousSong);
-        }
-
-        [Test]
-        public void CanPlayPreviousSong_CurrentSongIndexIsZero_ReturnsFalse()
-        {
-            Song[] songs = Helpers.SetupSongMocks(4);
-            Playlist playlist = Helpers.SetupPlaylist(songs);
-
-            playlist.CurrentSongIndex = 0;
-
-            Assert.IsFalse(playlist.CanPlayPreviousSong);
-        }
-
-        [Test]
-        public void CanPlayPreviousSong_PlaylistIsEmpty_ReturnsFalse()
+        [Fact]
+        public void VotesRespectCurrentSongIndex()
         {
             var playlist = new Playlist("Playlist");
+            playlist.AddSongs(Helpers.SetupSongMocks(5));
+            List<PlaylistEntry> entries = playlist.ToList();
+            var expectedOrder = new[] { entries[0], entries[1], entries[3], entries[4], entries[2] };
 
-            Assert.IsFalse(playlist.CanPlayPreviousSong);
+            playlist.CurrentSongIndex.Value = 1;
+
+            playlist.VoteFor(4);
+            playlist.VoteFor(4);
+            playlist.VoteFor(3);
+
+            Assert.Equal(playlist, expectedOrder);
         }
 
-        [Test]
-        public void CurrentSongIndexSetter_PlaylistIsEmptyAndSetToNull_Passes()
+        public class TheAddSongsMethod
         {
-            new Playlist("Playlist")
+            [Fact]
+            public void SetsCorrectPlaylistIndexes()
             {
-                CurrentSongIndex = null
-            };
+                Song[] songs = Helpers.SetupSongMocks(2);
+
+                var playlist = new Playlist("Playlist");
+
+                playlist.AddSongs(songs);
+
+                Assert.Equal(0, playlist[0].Index);
+                Assert.Equal(1, playlist[1].Index);
+            }
+
+            [Fact]
+            public void ShouldThrowArgumentNullExceptionIfArgumentIsNull()
+            {
+                var playlist = new Playlist("Playlist");
+
+                Assert.Throws<ArgumentNullException>(() => playlist.AddSongs(null));
+            }
+
+            [Fact]
+            public void SmokeTest()
+            {
+                Song[] songs = Helpers.SetupSongMocks(4);
+                Playlist playlist = Helpers.SetupPlaylist(songs);
+
+                Assert.Equal(4, playlist.Count());
+                Assert.Equal(songs[0], playlist[0].Song);
+                Assert.Equal(songs[1], playlist[1].Song);
+                Assert.Equal(songs[2], playlist[2].Song);
+                Assert.Equal(songs[3], playlist[3].Song);
+            }
         }
 
-        [Test]
-        public void CurrentSongIndexSetter_PlaylistIsEmptyAndSetToZero_ThrowsArgumentOutOfRangeException()
+        public class TheCanPlayNextSongProperty
         {
-            var playlist = new Playlist("Playlist");
+            [Fact]
+            public async Task ReturnsFalseIfCurrentSongIndexIsLastSong()
+            {
+                Song[] songs = Helpers.SetupSongMocks(4);
+                Playlist playlist = Helpers.SetupPlaylist(songs);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex = 0);
+                playlist.CurrentSongIndex.Value = 3;
+
+                Assert.False(await playlist.CanPlayNextSong.FirstAsync());
+            }
+
+            [Fact]
+            public async Task ReturnsFalseIfCurrentSongIndexIsNull()
+            {
+                Song[] songs = Helpers.SetupSongMocks(4);
+                Playlist playlist = Helpers.SetupPlaylist(songs);
+
+                playlist.CurrentSongIndex.Value = null;
+
+                Assert.False(await playlist.CanPlayNextSong.FirstAsync());
+            }
+
+            [Fact]
+            public async Task ReturnsFalseIfPlaylistIsEmpty()
+            {
+                var playlist = new Playlist("Playlist");
+
+                Assert.False(await playlist.CanPlayNextSong.FirstAsync());
+            }
+
+            [Fact]
+            public async Task ReturnsTrueIfCurrentSongIndexIsZero()
+            {
+                Song[] songs = Helpers.SetupSongMocks(4);
+                Playlist playlist = Helpers.SetupPlaylist(songs);
+
+                playlist.CurrentSongIndex.Value = 0;
+
+                Assert.True(await playlist.CanPlayNextSong.FirstAsync());
+            }
         }
 
-        [Test]
-        public void CurrentSongIndexSetter_ValueIsNotInPlaylistRange_ThrowsArgumentOutOfRangeException()
+        public class TheCanPlayPreviousSongProperty
         {
-            Song[] songs = Helpers.SetupSongMocks(3);
-            Playlist playlist = Helpers.SetupPlaylist(songs);
+            [Fact]
+            public async Task ReturnsFalseIfCurrentSongIndexIsNull()
+            {
+                Song[] songs = Helpers.SetupSongMocks(4);
+                Playlist playlist = Helpers.SetupPlaylist(songs);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex = 3);
+                playlist.CurrentSongIndex.Value = null;
+
+                Assert.False(await playlist.CanPlayPreviousSong.FirstAsync());
+            }
+
+            [Fact]
+            public async Task ReturnsFalseIfCurrentSongIndexIsZero()
+            {
+                Song[] songs = Helpers.SetupSongMocks(4);
+                Playlist playlist = Helpers.SetupPlaylist(songs);
+
+                playlist.CurrentSongIndex.Value = 0;
+
+                Assert.False(await playlist.CanPlayPreviousSong.FirstAsync());
+            }
+
+            [Fact]
+            public async Task ReturnsFalseIfPlaylistIsEmpty()
+            {
+                var playlist = new Playlist("Playlist");
+
+                Assert.False(await playlist.CanPlayPreviousSong.FirstAsync());
+            }
+
+            [Fact]
+            public async Task ReturnsTrueIfCurrentSongIndexIsLastSong()
+            {
+                Song[] songs = Helpers.SetupSongMocks(4);
+                Playlist playlist = Helpers.SetupPlaylist(songs);
+
+                playlist.CurrentSongIndex.Value = 3;
+
+                Assert.True(await playlist.CanPlayPreviousSong.FirstAsync());
+            }
         }
 
-        [Test]
-        public void GetIndexes_MultipleSongs_ReturnsCorrectIndexes()
+        public class TheCurrentSongIndexProperty
         {
-            Song[] songs = Helpers.SetupSongMocks(3, true);
+            [Fact]
+            public void SetterSmokeTest()
+            {
+                new Playlist("Playlist").CurrentSongIndex.Value = null;
+            }
 
-            Playlist playlist = Helpers.SetupPlaylist(songs);
+            [Fact]
+            public void SetterThrowsArgumentOutOfRangeExceptionIfSetToZeroWhilePlaylistIsEmpty()
+            {
+                var playlist = new Playlist("Playlist");
 
-            IEnumerable<int> indexes = playlist.GetIndexes(songs);
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex.Value = 0);
+            }
 
-            Assert.IsTrue(indexes.SequenceEqual(new[] { 0, 1, 2 }));
+            [Fact]
+            public void SetterThrowsArgumentOutOfRangeExceptionIfValueIsNotInPlaylistRange()
+            {
+                Song[] songs = Helpers.SetupSongMocks(3);
+                Playlist playlist = Helpers.SetupPlaylist(songs);
+
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex.Value = 3);
+            }
         }
 
-        [Test]
-        public void GetIndexes_OneSong_ReturnsCorrectIndexes()
+        public class TheGetIndexesMethod
         {
-            Song song = Helpers.SetupSongMock("Song", true);
+            [Fact]
+            public void ReturnsCorrectIndexesForMultipleSongs()
+            {
+                Song[] songs = Helpers.SetupSongMocks(3);
 
-            Playlist playlist = Helpers.SetupPlaylist(song);
+                Playlist playlist = Helpers.SetupPlaylist(songs);
 
-            int index = playlist.GetIndexes(new[] { song }).Single();
+                IEnumerable<int> indexes = playlist.GetIndexes(songs);
 
-            Assert.AreEqual(0, index);
+                Assert.Equal(new[] { 0, 1, 2 }, indexes);
+            }
+
+            [Fact]
+            public void ReturnsCorrectIndexesForOneSong()
+            {
+                Song song = Helpers.SetupSongMock();
+
+                Playlist playlist = Helpers.SetupPlaylist(song);
+
+                int index = playlist.GetIndexes(new[] { song }).Single();
+
+                Assert.Equal(0, index);
+            }
+
+            [Fact]
+            public void ReturnsCorrectIndexesForOneSongWithMultipleReferences()
+            {
+                Song song = Helpers.SetupSongMock();
+
+                Playlist playlist = Helpers.SetupPlaylist(Enumerable.Repeat(song, 3));
+
+                IEnumerable<int> indexes = playlist.GetIndexes(new[] { song });
+
+                Assert.Equal(new[] { 0, 1, 2 }, indexes);
+            }
+
+            [Fact]
+            public void ReturnsNoIndexesForSongsThatAreNotInPlaylist()
+            {
+                Song[] songs = Helpers.SetupSongMocks(4);
+
+                Playlist playlist = Helpers.SetupPlaylist(songs.Take(2));
+
+                IEnumerable<int> indexes = playlist.GetIndexes(songs.Skip(2));
+
+                Assert.Empty(indexes);
+            }
         }
 
-        [Test]
-        public void GetIndexes_OneSongWithMultipleReferences_ReturnsCorrectIndexes()
+        public class TheIndexer
         {
-            Song song = Helpers.SetupSongMock("Song", true);
+            [Fact]
+            public void ThrowsArgumentOutOfRangeExceptionIfLessThanZero()
+            {
+                var playlist = new Playlist("Playlist");
 
-            Playlist playlist = Helpers.SetupPlaylist(Enumerable.Repeat(song, 3));
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist[-1]);
+            }
 
-            IEnumerable<int> indexes = playlist.GetIndexes(new[] { song });
+            [Fact]
+            public void ThrowsArgumentOutOfRangeExceptionIfMoreThanZero()
+            {
+                Song song = Helpers.SetupSongMock();
+                var playlist = Helpers.SetupPlaylist(song);
 
-            Assert.IsTrue(indexes.SequenceEqual(new[] { 0, 1, 2 }));
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist[1]);
+            }
         }
 
-        [Test]
-        public void GetIndexes_PassSongsThatAreNotInPlaylist_ReturnsNoIndexes()
+        public class TheMoveSongDownMethod
         {
-            Song[] songs = Helpers.SetupSongMocks(4, true);
+            [Fact]
+            public void SmokeTest()
+            {
+                Song[] songs = Helpers.SetupSongMocks(5);
+                var playlist = new Playlist("Playlist");
+                playlist.AddSongs(songs);
 
-            Playlist playlist = Helpers.SetupPlaylist(songs.Take(2));
+                playlist.MoveSongDown(0);
 
-            IEnumerable<int> indexes = playlist.GetIndexes(songs.Skip(2));
+                Assert.Equal(songs[0], playlist[1].Song);
+            }
 
-            Assert.IsEmpty(indexes);
+            [Fact]
+            public void ValidatesRange()
+            {
+                var playlist = new Playlist("Playlist");
+                playlist.AddSongs(Helpers.SetupSongMocks(5));
+
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSongDown(4));
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSongDown(-1));
+            }
         }
 
-        [Test]
-        public void Indexer_LessThanZero_ThrowsArgumentOutOfRangeException()
+        public class TheMoveSongUpMethod
         {
-            var playlist = new Playlist("Playlist");
+            [Fact]
+            public void SmokeTest()
+            {
+                Song[] songs = Helpers.SetupSongMocks(5);
+                var playlist = new Playlist("Playlist");
+                playlist.AddSongs(songs);
 
-            PlaylistEntry temp;
+                playlist.MoveSongUp(4);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => temp = playlist[-1]);
+                Assert.Equal(songs[4], playlist[3].Song);
+            }
+
+            [Fact]
+            public void ValidatesIndexRange()
+            {
+                var playlist = new Playlist("Playlist");
+                playlist.AddSongs(Helpers.SetupSongMocks(5));
+
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSongUp(0));
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSongUp(5));
+            }
         }
 
-        [Test]
-        public void Indexer_MoreThanZero_ThrowsArgumentOutOfRangeException()
+        public class TheNameProperty
         {
-            Song song = Helpers.SetupSongMock();
-            var playlist = Helpers.SetupPlaylist(song);
+            [Fact]
+            public void SetterThrowsInvalidOperationExceptionIfIsTemporaryIsTrue()
+            {
+                var playlist = new Playlist("Playlist", true);
 
-            PlaylistEntry temp;
-
-            Assert.Throws<ArgumentOutOfRangeException>(() => temp = playlist[1]);
+                Assert.Throws<InvalidOperationException>(() => playlist.Name = "Test");
+            }
         }
 
-        [Test]
-        public void InsertMove_FromIndexIsLessThanZero_ThrowsArgumentOutOfRangeException()
+        public class TheRemoveSongsMethod
         {
-            var playlist = new Playlist("Playlist");
+            [Fact]
+            public void CorrectsCurrentSongIndex()
+            {
+                Song[] songs = Helpers.SetupSongMocks(2);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.InsertMove(-1, 0));
+                Playlist playlist = Helpers.SetupPlaylist(songs);
+
+                playlist.CurrentSongIndex.Value = 1;
+
+                playlist.RemoveSongs(new[] { 0 });
+
+                Assert.Equal(0, playlist.CurrentSongIndex.Value);
+            }
+
+            [Fact]
+            public void EnsuresOrderForMultipleRemovedSongs()
+            {
+                Song[] songs = Helpers.SetupSongMocks(7);
+                Playlist playlist = Helpers.SetupPlaylist(songs);
+
+                playlist.RemoveSongs(new[] { 1, 3, 4 });
+
+                Assert.Equal(4, playlist.Count());
+                Assert.Equal(songs[0], playlist[0].Song);
+                Assert.Equal(songs[2], playlist[1].Song);
+                Assert.Equal(songs[5], playlist[2].Song);
+                Assert.Equal(songs[6], playlist[3].Song);
+            }
+
+            [Fact]
+            public void EnsuresOrderForOneRemovedSong()
+            {
+                Song[] songs = Helpers.SetupSongMocks(4);
+                Playlist playlist = Helpers.SetupPlaylist(songs);
+
+                playlist.RemoveSongs(new[] { 1 });
+
+                Assert.Equal(3, playlist.Count());
+                Assert.Equal(songs[0], playlist[0].Song);
+                Assert.Equal(songs[2], playlist[1].Song);
+                Assert.Equal(songs[3], playlist[2].Song);
+            }
+
+            [Fact]
+            public void ThrowsArgumentNullExceptionifArgumentIsNull()
+            {
+                var playlist = new Playlist("Playlist");
+
+                Assert.Throws<ArgumentNullException>(() => playlist.RemoveSongs(null));
+            }
         }
 
-        [Test]
-        public void InsertMove_InsertSongToPlaylist_OrderIsCorrent()
+        public class TheShuffleMethod
         {
-            Song[] songs = Helpers.SetupSongMocks(5);
+            [Fact]
+            public void MigratesCurrentSongIndex()
+            {
+                Song[] songs = Helpers.SetupSongMocks(100);
 
-            Playlist playlist = Helpers.SetupPlaylist(songs);
+                Playlist playlist = Helpers.SetupPlaylist(songs);
 
-            playlist.InsertMove(3, 1);
+                playlist.CurrentSongIndex.Value = 0;
 
-            var expected = new[] { songs[0], songs[3], songs[1], songs[2], songs[4] };
+                playlist.Shuffle();
 
-            Assert.IsTrue(playlist.Select(entry => entry.Song).SequenceEqual(expected));
+                int newIndex = playlist.GetIndexes(new[] { songs[0] }).First();
+
+                Assert.Equal(newIndex, playlist.CurrentSongIndex.Value);
+            }
         }
 
-        [Test]
-        public void InsertMove_ToIndexIsBiggerThanFromIndex_ThrowsArgumentException()
+        public class TheVoteForMethod
         {
-            var playlist = new Playlist("Playlist");
+            [Fact]
+            public void ChecksIndexBounds()
+            {
+                var playlist = new Playlist("Playlist");
+                playlist.AddSongs(Helpers.SetupSongMocks(1));
 
-            Assert.Throws<ArgumentException>(() => playlist.InsertMove(0, 1));
-        }
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.VoteFor(-1));
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.VoteFor(2));
+            }
 
-        [Test]
-        public void InsertMove_ToIndexIsEqualFromIndex_ThrowsArgumentException()
-        {
-            var playlist = new Playlist("Playlist");
+            [Fact]
+            public void EntryBeforeCurrentSongWorks()
+            {
+                var playlist = new Playlist("Playlist");
+                playlist.AddSongs(Helpers.SetupSongMocks(2));
 
-            Assert.Throws<ArgumentException>(() => playlist.InsertMove(0, 0));
-        }
+                playlist.CurrentSongIndex.Value = 0;
 
-        [Test]
-        public void InsertMove_ToIndexIsLessThanZero_ThrowsArgumentOutOfRangeException()
-        {
-            var playlist = new Playlist("Playlist");
+                playlist.VoteFor(1);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => playlist.InsertMove(0, -1));
-        }
+                Assert.Equal(1, playlist[1].Votes);
+            }
 
-        [Test]
-        public void RemoveSongs_ArgumentIsNull_ThrowsArgumentNullException()
-        {
-            var playlist = new Playlist("Playlist");
+            [Fact]
+            public void FirstEntryLeavesItInFirstPlace()
+            {
+                var playlist = new Playlist("Playlist");
+                playlist.AddSongs(Helpers.SetupSongMocks(2));
+                List<PlaylistEntry> snapshot = playlist.ToList();
 
-            Assert.Throws<ArgumentNullException>(() => playlist.RemoveSongs(null));
-        }
+                playlist.VoteFor(0);
 
-        [Test]
-        public void RemoveSongs_RemoveMultipleSongs_OrderIsCorrect()
-        {
-            Song[] songs = Helpers.SetupSongMocks(7);
-            Playlist playlist = Helpers.SetupPlaylist(songs);
+                Assert.Equal(snapshot, playlist);
+            }
 
-            playlist.RemoveSongs(new[] { 1, 3, 4 });
+            [Fact]
+            public void IncreasesVoteCount()
+            {
+                var playlist = new Playlist("Playlist");
+                playlist.AddSongs(Helpers.SetupSongMocks(1));
 
-            Assert.AreEqual(4, playlist.Count());
-            Assert.AreEqual(songs[0], playlist[0].Song);
-            Assert.AreEqual(songs[2], playlist[1].Song);
-            Assert.AreEqual(songs[5], playlist[2].Song);
-            Assert.AreEqual(songs[6], playlist[3].Song);
-        }
+                playlist.VoteFor(0);
 
-        [Test]
-        public void RemoveSongs_RemoveOneSong_OrderIsCorrect()
-        {
-            Song[] songs = Helpers.SetupSongMocks(4);
-            Playlist playlist = Helpers.SetupPlaylist(songs);
+                Assert.Equal(1, playlist[0].Votes);
+            }
 
-            playlist.RemoveSongs(new[] { 1 });
+            [Fact]
+            public void IsFirstInFirstOut()
+            {
+                var playlist = new Playlist("Playlist");
+                playlist.AddSongs(Helpers.SetupSongMocks(5));
 
-            Assert.AreEqual(3, playlist.Count());
-            Assert.AreEqual(songs[0], playlist[0].Song);
-            Assert.AreEqual(songs[2], playlist[1].Song);
-            Assert.AreEqual(songs[3], playlist[2].Song);
-        }
+                playlist.VoteFor(4);
 
-        [Test]
-        public void RemoveSongsCorrectsCurrentSongIndex()
-        {
-            Song[] songs = Helpers.SetupSongMocks(2);
+                PlaylistEntry entry1 = playlist[4];
+                playlist.VoteFor(4);
 
-            Playlist playlist = Helpers.SetupPlaylist(songs);
+                Assert.Equal(1, entry1.Index);
 
-            playlist.CurrentSongIndex = 1;
+                PlaylistEntry entry2 = playlist[4];
+                playlist.VoteFor(4);
 
-            playlist.RemoveSongs(new[] { 0 });
+                Assert.Equal(2, entry2.Index);
+            }
 
-            Assert.AreEqual(0, playlist.CurrentSongIndex);
-        }
+            [Fact]
+            public void LeavesEntryInSamePlaceIfNextEntryHasSameVoteCount()
+            {
+                var playlist = new Playlist("Playlist");
+                playlist.AddSongs(Helpers.SetupSongMocks(2));
+                List<PlaylistEntry> snapshot = playlist.ToList();
 
-        [Test]
-        public void ShuffleMigratesCurrentSongIndex()
-        {
-            Song[] songs = Helpers.SetupSongMocks(100, true);
+                playlist.VoteFor(0);
+                playlist.VoteFor(1);
 
-            Playlist playlist = Helpers.SetupPlaylist(songs);
+                Assert.Equal(snapshot, playlist);
+            }
 
-            playlist.CurrentSongIndex = 0;
+            [Fact]
+            public void SmokeTest()
+            {
+                var playlist = new Playlist("Playlist");
+                playlist.AddSongs(Helpers.SetupSongMocks(4));
+                List<PlaylistEntry> snapShot = playlist.ToList();
+                var expectedOrder = new[] { snapShot[3], snapShot[2], snapShot[0], snapShot[1] };
 
-            playlist.Shuffle();
+                playlist.VoteFor(3);
+                playlist.VoteFor(0);
 
-            int newIndex = playlist.GetIndexes(new[] { songs[0] }).First();
+                playlist.VoteFor(3);
+                playlist.VoteFor(2);
 
-            Assert.AreEqual(newIndex, playlist.CurrentSongIndex);
+                Assert.Equal(expectedOrder, playlist);
+            }
+
+            [Fact]
+            public void WithIndexThatEqualsCurrentSongIndexThrowsInvalidOperationException()
+            {
+                var playlist = new Playlist("Playlist");
+                playlist.AddSongs(Helpers.SetupSongMocks(3));
+
+                playlist.CurrentSongIndex.Value = 1;
+
+                Assert.Throws<InvalidOperationException>(() => playlist.VoteFor(1));
+            }
+
+            [Fact]
+            public void WithIndexThatIsLessThanCurrentSongIndexThrowsInvalidOperationException()
+            {
+                var playlist = new Playlist("Playlist");
+                playlist.AddSongs(Helpers.SetupSongMocks(3));
+
+                playlist.CurrentSongIndex.Value = 1;
+
+                Assert.Throws<InvalidOperationException>(() => playlist.VoteFor(0));
+            }
         }
     }
 }

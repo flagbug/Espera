@@ -4,6 +4,12 @@ namespace Espera.Core.Management
 {
     public interface ILibraryWriter
     {
-        void Write(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists);
+        /// <summary>
+        /// Writes the songs, playlist and the song directory to the save file.
+        /// </summary>
+        /// <exception cref="LibraryWriteException">
+        /// An exception occured while writing the library.
+        /// </exception>
+        void Write(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists, string songSourcePath);
     }
 }

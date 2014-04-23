@@ -1,28 +1,27 @@
 ﻿namespace Espera.Core.Audio
 {
     /// <summary>
-    /// Represents the current playback state of an <see cref="AudioPlayer"/> object.
+    /// Represents the current playback state of an <see cref="AudioPlayer" /> object.
     /// </summary>
-    internal enum AudioPlayerState
+    public enum AudioPlayerState
     {
         /// <summary>
-        /// The <see cref="AudioPlayer"/> is playing.
+        /// The initial state of the <see cref="AudioPlayer" />.
         /// </summary>
-        Playing,
+        None = 0,
+
+        Playing = 1,
+        Paused = 2,
 
         /// <summary>
-        /// The <see cref="AudioPlayer"/>  is paused.
+        /// The playback of the <see cref="AudioPlayer" /> was prematurely stopped and cannot be
+        /// started again.
         /// </summary>
-        Paused,
+        Stopped = 3,
 
         /// <summary>
-        /// The <see cref="AudioPlayer"/>  is stopped.
+        /// The <see cref="AudioPlayer" /> has finished the playback and cannot be started again.
         /// </summary>
-        Stopped,
-
-        /// <summary>
-        /// The <see cref="AudioPlayer"/>  has no state.
-        /// </summary>
-        None
+        Finished = 4
     }
 }

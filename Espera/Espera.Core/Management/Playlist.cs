@@ -1,68 +1,104 @@
-﻿using Rareform.Reflection;
-using Rareform.Validation;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Linq;
+using Rareform.Validation;
+using ReactiveMarrow;
+using ReactiveUI;
 
 namespace Espera.Core.Management
 {
     /// <summary>
     /// Represents a playlist where songs are stored with an associated index.
     /// </summary>
-    public sealed class Playlist : IEnumerable<PlaylistEntry>
+    public sealed class Playlist : IEnumerable<PlaylistEntry>, INotifyCollectionChanged, INotifyPropertyChanged
     {
-        private int? currentSongIndex;
-        private List<PlaylistEntry> playlist;
+        private readonly ReactiveList<PlaylistEntry> playlist;
+        private string name;
 
-        internal Playlist(string name)
+        internal Playlist(string name, bool isTemporary = false)
         {
             this.Name = name;
-            this.playlist = new List<PlaylistEntry>();
+            this.IsTemporary = isTemporary;
+
+            this.playlist = new ReactiveUI.ReactiveList<PlaylistEntry>();
+
+            this.CurrentSongIndex = new ReactiveProperty<int?>(x => x == null || this.ContainsIndex(x.Value), typeof(ArgumentOutOfRangeException));
+            this.CurrentSongIndex.Where(x => x != null).Subscribe(x =>
+            {
+                this.ResetVotesBeforeIndex(x.Value);
+            });
+
+            var canPlayNextSong = this.CurrentSongIndex
+                .CombineLatest(this.playlist.Changed, (i, args) => i.HasValue && this.ContainsIndex(i.Value + 1))
+                .Publish(false);
+            canPlayNextSong.Connect();
+            this.CanPlayNextSong = canPlayNextSong;
+
+            var canPlayPeviousSong = this.CurrentSongIndex
+                .CombineLatest(this.playlist.Changed, (i, args) => i.HasValue && this.ContainsIndex(i.Value - 1))
+                .Publish(false);
+            canPlayPeviousSong.Connect();
+            this.CanPlayPreviousSong = canPlayPeviousSong;
+        }
+
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+        public event PropertyChangedEventHandler PropertyChanged
+        {
+            add { this.playlist.PropertyChanged += value; }
+            remove { this.playlist.PropertyChanged -= value; }
         }
 
         /// <summary>
         /// Gets a value indicating whether the next song in the playlist can be played.
         /// </summary>
-        /// <value>
-        /// true if the next song in the playlist can be played; otherwise, false.
-        /// </value>
-        public bool CanPlayNextSong
-        {
-            get { return this.CurrentSongIndex.HasValue && this.ContainsIndex(this.CurrentSongIndex.Value + 1); }
-        }
+        /// <value>true if the next song in the playlist can be played; otherwise, false.</value>
+        public IObservable<bool> CanPlayNextSong { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the previous song in the playlist can be played.
         /// </summary>
-        /// <value>
-        /// true if the previous song in the playlist can be played; otherwise, false.
-        /// </value>
-        public bool CanPlayPreviousSong
+        /// <value>true if the previous song in the playlist can be played; otherwise, false.</value>
+        public IObservable<bool> CanPlayPreviousSong { get; private set; }
+
+        public IObservable<NotifyCollectionChangedEventArgs> Changed
         {
-            get { return this.CurrentSongIndex.HasValue && this.ContainsIndex(this.CurrentSongIndex.Value - 1); }
+            get { return this.playlist.Changed; }
         }
 
         /// <summary>
-        /// Gets the index of the currently played song in the playlist.
+        /// Gets or sets the index of the currently played song in the playlist.
         /// </summary>
         /// <value>
-        /// The index of the currently played song in the playlist. <c>null</c>, if no song is currently played.
+        /// The index of the currently played song in the playlist. <c>null</c>, if no song is
+        /// currently played.
         /// </value>
-        /// <exception cref="ArgumentOutOfRangeException">The value is not in the range of the playlist's indexes.</exception>
-        public int? CurrentSongIndex
-        {
-            get { return this.currentSongIndex; }
-            internal set
-            {
-                if (value != null && !this.ContainsIndex(value.Value))
-                    Throw.ArgumentOutOfRangeException(() => value);
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// The value is not in the range of the playlist's indexes.
+        /// </exception>
+        public ReactiveProperty<int?> CurrentSongIndex { get; private set; }
 
-                this.currentSongIndex = value;
+        /// <summary>
+        /// Gets a value indicating whether this playlist is temporary and used for instant-playing.
+        /// This means that this playlist isn't saved to the harddrive when closing the application.
+        /// </summary>
+        public bool IsTemporary { get; private set; }
+
+        public string Name
+        {
+            get { return this.name; }
+            set
+            {
+                if (this.IsTemporary)
+                    throw new InvalidOperationException("Cannot change the name of a temporary playlist.");
+
+                this.name = value;
             }
         }
-
-        public string Name { get; set; }
 
         public PlaylistEntry this[int index]
         {
@@ -71,7 +107,7 @@ namespace Espera.Core.Management
                 if (index < 0)
                     Throw.ArgumentOutOfRangeException(() => index, 0);
 
-                int maxIndex = this.playlist.Count;
+                int maxIndex = this.playlist.Count - 1;
 
                 if (index > maxIndex)
                     Throw.ArgumentOutOfRangeException(() => index, maxIndex);
@@ -120,50 +156,62 @@ namespace Espera.Core.Management
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
 
-            foreach (Song song in songList)
-            {
-                if (song.HasToCache && !song.IsCaching)
-                {
-                    GlobalSongCacheQueue.Instance.Enqueue(song);
-                };
+            int index = this.playlist.Count;
 
-                this.playlist.Add(new PlaylistEntry(this.playlist.Count, song));
+            var itemsToAdd = songList.Select(song => new PlaylistEntry(index++, song)).ToList();
+
+            // We don't use the change notification directly, but record them for later. This allows
+            // us to have the correct semantics, even if we rebuild the indexes after the changes to
+            // the list were made
+            var recordedChanges = this.playlist.Changed.Replay();
+            using (recordedChanges.Connect())
+            {
+                this.playlist.AddRange(itemsToAdd);
             }
+
+            this.OnCollectionChanged(recordedChanges);
         }
 
-        /// <summary>
-        /// Inserts a song from a specified index to a other index in the playlist and moves all songs in between these indexes one index back.
-        /// </summary>
-        /// <param name="fromIndex">The index of the song to move.</param>
-        /// <param name="toIndex">To index to insert the song.</param>
-        internal void InsertMove(int fromIndex, int toIndex)
+        internal void MoveSongDown(int fromIndex)
         {
+            if (fromIndex >= this.playlist.Count - 1)
+                Throw.ArgumentOutOfRangeException(() => fromIndex);
+
             if (fromIndex < 0)
-                Throw.ArgumentOutOfRangeException(() => fromIndex, 0);
+                Throw.ArgumentOutOfRangeException(() => fromIndex);
 
-            if (toIndex < 0)
-                Throw.ArgumentOutOfRangeException(() => toIndex, 0);
-
-            if (toIndex >= fromIndex)
-                Throw.ArgumentException(
-                    String.Format("{0} has to be smaller than {1}",
-                    Reflector.GetMemberName(() => toIndex), Reflector.GetMemberName(() => fromIndex)),
-                    () => toIndex);
-
-            PlaylistEntry from = this[fromIndex];
-
-            for (int i = fromIndex; i > toIndex; i--)
+            var recordedChanges = this.playlist.Changed.Replay();
+            using (recordedChanges.Connect())
             {
-                this.playlist[i].Index = i - 1;
-                this.playlist[i] = this[i - 1];
+                this.playlist.Move(fromIndex, fromIndex + 1);
+
+                this.RebuildIndexes();
             }
 
-            from.Index = toIndex;
-            this.playlist[toIndex] = from;
+            this.OnCollectionChanged(recordedChanges);
+        }
+
+        internal void MoveSongUp(int fromIndex)
+        {
+            if (fromIndex <= 0)
+                Throw.ArgumentOutOfRangeException(() => fromIndex);
+
+            if (fromIndex >= this.playlist.Count)
+                Throw.ArgumentOutOfRangeException(() => fromIndex);
+
+            var recordedChanges = this.playlist.Changed.Replay();
+            using (recordedChanges.Connect())
+            {
+                this.playlist.Move(fromIndex, fromIndex - 1);
+
+                this.RebuildIndexes();
+            }
+
+            this.OnCollectionChanged(recordedChanges);
         }
 
         /// <summary>
-        /// Removes the songs with the specified indexes from the <see cref="Playlist"/>.
+        /// Removes the songs with the specified indexes from the <see cref="Playlist" />.
         /// </summary>
         /// <param name="indexes">The indexes of the songs to remove.</param>
         internal void RemoveSongs(IEnumerable<int> indexes)
@@ -171,66 +219,95 @@ namespace Espera.Core.Management
             if (indexes == null)
                 Throw.ArgumentNullException(() => indexes);
 
-            // Use a hashset for better lookup performance
+            // Use a HashSet for better lookup performance
             var indexList = new HashSet<int>(indexes);
 
-            if (this.CurrentSongIndex.HasValue && indexList.Contains(this.CurrentSongIndex.Value))
+            if (this.CurrentSongIndex.Value.HasValue && indexList.Contains(this.CurrentSongIndex.Value.Value))
             {
-                this.CurrentSongIndex = null;
+                this.CurrentSongIndex.Value = null;
             }
 
-            this.playlist.RemoveAll(entry => indexList.Contains(entry.Index));
+            var itemsToRemove = this.playlist.Where(x => indexList.Contains(x.Index)).ToList();
 
-            this.RebuildIndexes();
+            var recordedChanges = this.playlist.Changed.Replay();
+            using (recordedChanges.Connect())
+            {
+                this.playlist.RemoveAll(itemsToRemove);
+
+                this.RebuildIndexes();
+            }
+
+            this.OnCollectionChanged(recordedChanges);
         }
 
         internal void Shuffle()
         {
-            int count = this.playlist.Count;
+            var newList = new List<PlaylistEntry>(this.playlist.Count);
+            newList.AddRange(this.playlist.OrderBy(x => Guid.NewGuid()));
 
-            var random = new Random();
+            this.playlist.Clear();
+            this.playlist.AddRange(newList);
 
-            for (int index = 0; index < count; index++)
+            this.RebuildIndexes();
+
+            this.OnCollectionChanged(Observable.Return(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)));
+        }
+
+        internal PlaylistEntry VoteFor(int index)
+        {
+            if (index < 0)
+                Throw.ArgumentOutOfRangeException(() => index, 0);
+
+            if (index > this.playlist.Count)
+                Throw.ArgumentOutOfRangeException(() => index, this.playlist.Count);
+
+            if (this.CurrentSongIndex.Value.HasValue && index <= this.CurrentSongIndex.Value)
+                throw new InvalidOperationException("Index can't be less or equal the current song index");
+
+            PlaylistEntry entry = this[index];
+            entry.Vote();
+
+            if (this.playlist.Count == 1 || (this.CurrentSongIndex.Value.HasValue && index == this.CurrentSongIndex.Value + 1))
+                return entry;
+
+            var targetEntry = this.Skip(this.CurrentSongIndex.Value.HasValue ?
+                    this.CurrentSongIndex.Value.Value + 1 : 0)
+                .SkipWhile(x => x.Votes >= this[index].Votes && x != this[index])
+                .First();
+
+            var recordedChanges = this.playlist.Changed.Replay();
+            using (recordedChanges.Connect())
             {
-                int newIndex = random.Next(count);
+                this.playlist.Move(index, targetEntry.Index);
 
-                // Migrate the CurrentSongIndex to the new position
-                if (index == this.CurrentSongIndex)
-                {
-                    this.CurrentSongIndex = newIndex;
-                }
-
-                else if (newIndex == this.CurrentSongIndex)
-                {
-                    this.CurrentSongIndex = index;
-                }
-
-                PlaylistEntry temp = this.playlist[index];
-
-                this.playlist[newIndex].Index = index;
-                this.playlist[index] = this.playlist[newIndex];
-
-                temp.Index = newIndex;
-                this.playlist[newIndex] = temp;
+                this.RebuildIndexes();
             }
+
+            this.OnCollectionChanged(recordedChanges);
+
+            return entry;
+        }
+
+        private void OnCollectionChanged(IObservable<NotifyCollectionChangedEventArgs> args)
+        {
+            if (this.CollectionChanged == null)
+                return;
+
+            args.Subscribe(x => this.CollectionChanged(this, x));
         }
 
         private void RebuildIndexes()
         {
             int index = 0;
             int? migrateIndex = null;
-            var current = this.playlist.ToList();
 
-            this.playlist.Clear();
-
-            foreach (var entry in current)
+            foreach (var entry in this.playlist)
             {
-                if (this.CurrentSongIndex == entry.Index)
+                if (this.CurrentSongIndex.Value == entry.Index)
                 {
                     migrateIndex = index;
                 }
 
-                this.playlist.Add(entry);
                 entry.Index = index;
 
                 index++;
@@ -238,7 +315,15 @@ namespace Espera.Core.Management
 
             if (migrateIndex.HasValue)
             {
-                this.CurrentSongIndex = migrateIndex;
+                this.CurrentSongIndex.Value = migrateIndex;
+            }
+        }
+
+        private void ResetVotesBeforeIndex(int index)
+        {
+            for (int i = 0; i < index; i++)
+            {
+                this[i].ResetVotes();
             }
         }
     }

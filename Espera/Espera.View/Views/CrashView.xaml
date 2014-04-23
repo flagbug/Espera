@@ -4,12 +4,12 @@
                       xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                       Title="Espera crashed"
                       Width="600"
-                      Height="400"
+                      Height="410"
                       ResizeMode="NoResize">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colours.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
@@ -26,7 +26,20 @@
     </Window.Resources>
     <StackPanel Margin="10" Orientation="Vertical">
         <TextBlock Style="{StaticResource DescriptionHeaderStyle}" Text="Sorry, Espera has crashed :(" />
-        <TextBlock Style="{StaticResource DescriptionHeaderStyle2}" Text="You can send a crash report to help improving Espera" />
+        <TextBlock>
+            <TextBlock.Style>
+                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource DescriptionHeaderStyle2}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=SendsAutomatically}" Value="True">
+                            <Setter Property="Text" Value="A crash report has been sent!" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=SendsAutomatically}" Value="False">
+                            <Setter Property="Text" Value="You can send a crash report to help improving Espera" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
         <Expander Margin="0, 10, 0, 0" Header="Show details">
             <TextBox Height="200"
                      Margin="0, 5, 0, 0"

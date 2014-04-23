@@ -1,91 +1,101 @@
-﻿using Caliburn.Micro;
-using Espera.Core.Management;
-using Rareform.Extensions;
-using Rareform.Patterns.MVVM;
-using System;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Input;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using Espera.Core.Management;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
-    internal abstract class SongSourceViewModel<T> : PropertyChangedBase, ISongSourceViewModel
-        where T : SongViewModelBase
+    public abstract class SongSourceViewModel<T> : ReactiveObject, ISongSourceViewModel
+        where T : ISongViewModelBase
     {
+        private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly Library library;
+        private readonly Subject<Unit> timeoutWarning;
+        private string searchText;
         private IEnumerable<T> selectableSongs;
-        private IEnumerable<SongViewModelBase> selectedSongs;
+        private IEnumerable<ISongViewModelBase> selectedSongs;
 
-        protected SongSourceViewModel(Library library)
+        protected SongSourceViewModel(Library library, Guid accessToken)
         {
             this.library = library;
+
+            this.searchText = String.Empty;
             this.selectableSongs = Enumerable.Empty<T>();
-        }
+            this.timeoutWarning = new Subject<Unit>();
 
-        public event EventHandler TimeoutWarning;
+            IConnectableObservable<bool> canAddToPlaylist = this.WhenAnyValue(x => x.SelectedSongs, x => x != null && x.Any())
+                .Publish(true);
+            canAddToPlaylist.Connect();
 
-        public ICommand AddToPlaylistCommand
-        {
-            get
+            this.AddToPlaylistCommand = new ReactiveCommand();
+            this.AddToPlaylistCommand.Subscribe(p =>
             {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        if (!this.Library.CanAddSongToPlaylist)
-                        {
-                            // Trigger the animation
-                            this.TimeoutWarning.RaiseSafe(this, EventArgs.Empty);
+                if (!canAddToPlaylist.FirstAsync().Wait())
+                {
+                    // Trigger the animation
+                    this.timeoutWarning.OnNext(Unit.Default);
 
-                            return;
-                        }
+                    return;
+                }
 
-                        if (this.IsAdmin)
-                        {
-                            this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model));
-                        }
+                if (this.IsAdmin)
+                {
+                    this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model), accessToken);
+                }
 
-                        else
-                        {
-                            this.library.AddSongToPlaylist(this.SelectedSongs.Select(song => song.Model).Single());
-                        }
-                    },
-                    param => this.SelectedSongs != null && this.SelectedSongs.Any()
-                );
-            }
+                else
+                {
+                    this.library.AddSongToPlaylist(this.SelectedSongs.Select(song => song.Model).Single());
+                }
+            });
+
+            this.SelectionChangedCommand = new ReactiveCommand();
+            this.SelectionChangedCommand.Where(x => x != null)
+                .Select(x => ((IEnumerable)x).Cast<ISongViewModelBase>())
+                .Subscribe(x => this.SelectedSongs = x);
+
+            this.isAdmin = this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
+                .Select(x => x == AccessPermission.Admin)
+                .ToProperty(this, x => x.IsAdmin);
         }
+
+        public IReactiveCommand AddToPlaylistCommand { get; private set; }
 
         public bool IsAdmin
         {
-            get { return this.library.AccessMode == AccessMode.Administrator; }
+            get { return this.isAdmin.Value; }
         }
 
-        public abstract string SearchText { get; set; }
+        public abstract IReactiveCommand PlayNowCommand { get; }
+
+        public string SearchText
+        {
+            get { return this.searchText; }
+            set { this.RaiseAndSetIfChanged(ref this.searchText, value); }
+        }
 
         public IEnumerable<T> SelectableSongs
         {
             get { return this.selectableSongs; }
-            protected set
-            {
-                if (this.selectableSongs != value)
-                {
-                    this.selectableSongs = value;
-                    this.NotifyOfPropertyChange(() => this.SelectableSongs);
-                }
-            }
+            protected set { this.RaiseAndSetIfChanged(ref this.selectableSongs, value); }
         }
 
-        public IEnumerable<SongViewModelBase> SelectedSongs
+        public IEnumerable<ISongViewModelBase> SelectedSongs
         {
             get { return this.selectedSongs; }
-            set
-            {
-                if (this.selectedSongs != value)
-                {
-                    this.selectedSongs = value;
-                    this.NotifyOfPropertyChange(() => this.SelectedSongs);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(ref this.selectedSongs, value); }
+        }
+
+        public ReactiveCommand SelectionChangedCommand { get; set; }
+
+        public IObservable<Unit> TimeoutWarning
+        {
+            get { return this.timeoutWarning.AsObservable(); }
         }
 
         protected Library Library

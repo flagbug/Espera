@@ -1,65 +1,45 @@
-﻿using Caliburn.Micro;
-using Espera.Services;
-using Rareform.Patterns.MVVM;
+﻿using Espera.Core.Analytics;
+using ReactiveUI;
 using System;
-using System.Reflection;
-using System.Windows.Input;
+using System.Reactive.Linq;
 
 namespace Espera.View.ViewModels
 {
-    internal class CrashViewModel : PropertyChangedBase
+    internal class CrashViewModel : ReactiveObject
     {
-        private readonly Exception exception;
-        private readonly string version;
-        private bool? sendingSucceeded;
+        private readonly ObservableAsPropertyHelper<bool?> sendingSucceeded;
 
         public CrashViewModel(Exception exception)
         {
-            this.exception = exception;
-            this.version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            this.ReportContent = exception.ToString();
+
+            this.SubmitCrashReport = this.WhenAnyValue(x => x.SendingSucceeded)
+                .Select(x => x == null || !x.Value)
+                .ToCommand();
+
+            this.sendingSucceeded = this.SubmitCrashReport
+                .RegisterAsyncTask(x => AnalyticsClient.Instance.RecordCrashAsync(exception))
+                .Select(x => new bool?(x))
+                .ToProperty(this, x => x.SendingSucceeded);
+
+            if (AnalyticsClient.Instance.EnableAutomaticReports)
+            {
+                this.SubmitCrashReport.Execute(null);
+            }
         }
 
-        public string ReportContent
-        {
-            get { return "Version " + this.version + "\n\n" + this.exception; }
-        }
+        public string ReportContent { get; private set; }
 
         public bool? SendingSucceeded
         {
-            get { return this.sendingSucceeded; }
-            set
-            {
-                if (this.SendingSucceeded != value)
-                {
-                    this.sendingSucceeded = value;
-                    this.NotifyOfPropertyChange(() => this.SendingSucceeded);
-                }
-            }
+            get { return this.sendingSucceeded == null ? null : this.sendingSucceeded.Value; }
         }
 
-        public ICommand SubmitCrashReport
+        public bool SendsAutomatically
         {
-            get
-            {
-                return new RelayCommand
-                (
-                    param =>
-                    {
-                        try
-                        {
-                            FogBugzService.SubmitReport(this.ReportContent);
-
-                            this.SendingSucceeded = true;
-                        }
-
-                        catch (Exception)
-                        {
-                            this.SendingSucceeded = false;
-                        }
-                    },
-                    param => this.SendingSucceeded == null || !this.SendingSucceeded.Value
-                );
-            }
+            get { return AnalyticsClient.Instance.EnableAutomaticReports; }
         }
+
+        public IReactiveCommand SubmitCrashReport { get; private set; }
     }
 }

@@ -5,6 +5,7 @@
              xmlns:ViewModels="clr-namespace:Espera.View.ViewModels"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:valueConverters="clr-namespace:Rareform.ValueConverters;assembly=Rareform"
              d:DataContext="{d:DesignInstance ViewModels:DesignTimeSettingsViewModel,
                                               IsDesignTimeCreatable=True}"
              d:DesignHeight="800"
@@ -12,19 +13,25 @@
              mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
-            <Style x:Key="ColorPickerButtonStyle" TargetType="{x:Type Button}">
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/FlatSlider.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="AccentPickerButtonStyle" TargetType="{x:Type Button}">
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border Width="150"
-                                    Height="150"
-                                    Margin="0, 0, 20, 20"
+                            <Border BorderThickness="{TemplateBinding BorderThickness}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
                                     Background="{TemplateBinding Background}">
                                 <ContentPresenter />
                             </Border>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
+                <Setter Property="Width" Value="90" />
+                <Setter Property="Height" Value="90" />
+                <Setter Property="Margin" Value="0, 0, 15, 15" />
+                <Setter Property="BorderThickness" Value="0" />
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
                         <Setter Property="Opacity" Value="0.8" />
@@ -34,17 +41,29 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
+            <Style x:Key="ThemePickerButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource AccentPickerButtonStyle}">
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="{DynamicResource AccentColorBrush}" />
+            </Style>
             <Style x:Key="SettingsHeaderStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="64" />
+                <Setter Property="FontSize" Value="60" />
                 <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
-                <!--  For some reason the foreground has to be set manually, otherwise it would be black.  -->
-                <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            </Style>
+            <Style x:Key="SettingsTextStyle" TargetType="{x:Type TextBlock}">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontFamily" Value="{DynamicResource ContentFontFamily}" />
+                <Setter Property="Opacity" Value="0.6" />
             </Style>
             <Style BasedOn="{StaticResource {x:Type Controls:ToggleSwitch}}" TargetType="{x:Type Controls:ToggleSwitch}">
                 <Setter Property="Margin" Value="0, 10, 0, 0" />
                 <Setter Property="OnLabel" Value="Yes" />
                 <Setter Property="OffLabel" Value="No" />
             </Style>
+            <Style x:Key="AboutInfoStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="FontSize" Value="15" />
+            </Style>
+            <valueConverters:BoolNegationValueConverter x:Key="BoolNegationConverter" />
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -57,30 +76,139 @@
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Top">
                             <StackPanel Orientation="Horizontal">
-                                <Button Background="#FF1C739D"
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC00ABA9"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Teal"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC1BA1E2"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Cyan"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button Background="#CC119EDA"
                                         Command="{Binding Path=ChangeAccentColorCommand}"
                                         CommandParameter="Blue"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
-                                <Button Background="#CC48CB00"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button Background="#CC0050EF"
                                         Command="{Binding Path=ChangeAccentColorCommand}"
-                                        CommandParameter="Green"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Button Background="#CCB400FF"
+                                        CommandParameter="Cobalt"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC6459DF"
                                         Command="{Binding Path=ChangeAccentColorCommand}"
                                         CommandParameter="Purple"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
-                                <Button Background="#CCCB0000"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC6A00FF"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Indigo"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCAA00FF"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Violet"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCD80073"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Magenta"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCF472D0"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Pink"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCA20025"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Crimson"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCFEDE06"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Yellow"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button Background="#CCF0A30A"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Amber"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCFA6800"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Orange"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC76608A"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Mauve"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCE51400"
                                         Command="{Binding Path=ChangeAccentColorCommand}"
                                         CommandParameter="Red"
-                                        Style="{StaticResource ColorPickerButtonStyle}" />
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
                             </StackPanel>
-                            <Button HorizontalAlignment="Left"
-                                    Background="#FFDE872A"
-                                    Command="{Binding Path=ChangeAccentColorCommand}"
-                                    CommandParameter="Orange"
-                                    Style="{StaticResource ColorPickerButtonStyle}" />
+                            <StackPanel Orientation="Horizontal">
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CCA4C400"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Lime"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC008A00"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Emerald"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC60A917"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Green"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC6D8764"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Olive"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                                <Button HorizontalAlignment="Left"
+                                        Background="#CC647687"
+                                        Command="{Binding Path=ChangeAccentColorCommand}"
+                                        CommandParameter="Steel"
+                                        Style="{StaticResource AccentPickerButtonStyle}" />
+                            </StackPanel>
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="theme" />
+                        <StackPanel Margin="0, 10, 0, 0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Orientation="Horizontal">
+                            <Button Background="#FF252525"
+                                    Command="{Binding Path=ChangeAppThemeCommand}"
+                                    CommandParameter="BaseDark"
+                                    Style="{StaticResource ThemePickerButtonStyle}" />
+                            <Button Background="#FFFFFFFF"
+                                    Command="{Binding Path=ChangeAppThemeCommand}"
+                                    CommandParameter="BaseLight"
+                                    Style="{StaticResource ThemePickerButtonStyle}" />
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="scaling" />
+                        <TextBlock Style="{StaticResource SettingsTextStyle}" Text="Use this option whenever you have Espera displayed on a TV or any other big screen" />
+                        <StackPanel Orientation="Horizontal" Margin="0, 5, 0, 0">
+                            <Slider Width="200"
+                                    VerticalAlignment="Center"
+                                    Maximum="2"
+                                    Minimum="1"
+                                    Style="{StaticResource FlatSlider}"
+                                    Value="{Binding Path=Scaling}" />
+                            <TextBox Width="30"
+                                     Margin="10, 0, 0, 0"
+                                     Text="{Binding Path=Scaling,
+                                                    UpdateSourceTrigger=PropertyChanged,
+                                                    StringFormat=\{0:F1\}}" />
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
@@ -88,12 +216,17 @@
             <TabItem Header="party mode">
                 <ScrollViewer Padding="0, 0, 10, 10" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <Controls:ToggleSwitch Header="Lock play/pause" IsChecked="{Binding Path=LockPlayPause}" />
+                        <TextBlock Margin="0, 15, 0, 0"
+                                   Style="{StaticResource SettingsTextStyle}"
+                                   FontSize="18"
+                                   Text="The party mode allows you to lock Espera, so your guests cannot interrupt the playback or change the volume"
+                                   TextWrapping="Wrap" />
+                        <Controls:ToggleSwitch Margin="0, 20, 0, 0"
+                                               Header="Lock play/pause"
+                                               IsChecked="{Binding Path=LockPlayPause}" />
                         <Controls:ToggleSwitch Header="Lock volume" IsChecked="{Binding Path=LockVolume}" />
                         <Controls:ToggleSwitch Header="Lock time" IsChecked="{Binding Path=LockTime}" />
-                        <Controls:ToggleSwitch Header="Lock playlist switching" IsChecked="{Binding Path=LockPlaylistSwitching}" />
-                        <Controls:ToggleSwitch Header="Lock song removal from playlist" IsChecked="{Binding Path=LockPlaylistRemoval}" />
-                        <Controls:ToggleSwitch Header="Lock song removal from library" IsChecked="{Binding Path=LockLibraryRemoval}" />
+                        <Controls:ToggleSwitch Header="Lock playlist" IsChecked="{Binding Path=LockPlaylist}" />
                         <Controls:ToggleSwitch Header="Enable timeout when adding songs to the playlist" IsChecked="{Binding Path=EnablePlaylistTimeout}" />
                         <StackPanel Margin="30, 5, 0, 0"
                                     IsEnabled="{Binding Path=EnablePlaylistTimeout}"
@@ -128,8 +261,8 @@
                                     Margin="0, 5, 0, 0"
                                     HorizontalAlignment="Left"
                                     Click="CreateAdminButtonClick"
-                                    Command="{Binding Path=CreateAdminCommand}"
-                                    Content="Create Administrator" />
+                                    Content="Create Administrator"
+                                    IsEnabled="{Binding Path=CanCreateAdmin}" />
                             <Button Width="200"
                                     Margin="0, 15, 0, 0"
                                     HorizontalAlignment="Left"
@@ -139,34 +272,145 @@
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
+            <TabItem Header="library">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="song source" />
+                    <TextBlock Style="{StaticResource SettingsTextStyle}" Text="The path where Espera searches for songs" />
+                    <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
+                        <TextBox Width="325"
+                                 VerticalAlignment="Top"
+                                 IsReadOnly="True"
+                                 Text="{Binding Path=LibrarySource,
+                                                Mode=OneWay}" />
+                        <Button Margin="10, 0, 0, 0"
+                                Click="AddSongSourceButtonClick"
+                                Content="Change library path" />
+                        <Button Margin="5, 0, 0, 0"
+                                VerticalAlignment="Center"
+                                Command="{Binding Path=UpdateLibraryCommand}"
+                                Content="Update Now" />
+                    </StackPanel>
+                    <Controls:ToggleSwitch Header="Update library automatically" IsChecked="{Binding Path=EnableAutomaticLibraryUpdates}" />
+                    <StackPanel Margin="30, 5, 0, 0"
+                                Orientation="Horizontal"
+                                IsEnabled="{Binding Path=EnableAutomaticLibraryUpdates}">
+                        <TextBlock Text="Update interval" VerticalAlignment="Center" />
+                        <Slider Width="200"
+                                Style="{StaticResource FlatSlider}"
+                                VerticalAlignment="Center"
+                                Margin="5, 0, 0, 0"
+                                Maximum="60"
+                                Minimum="1"
+                                Value="{Binding Path=SongSourceUpdateInterval}" />
+                        <TextBlock Margin="5, 0, 0, 0" Text="{Binding Path=SongSourceUpdateInterval, StringFormat=\{0\} Minutes}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
             <TabItem Header="youtube">
-                <Controls:ToggleSwitch Header="Stream from Youtube instead of downloading.&#10;Changing this option requires a restart." IsChecked="{Binding Path=StreamYoutube}" />
+                <StackPanel>
+                    <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="streaming" />
+                    <Controls:ToggleSwitch Margin="10, 5, 0, 0"
+                                           Header="Always stream highest quality"
+                                           IsChecked="{Binding Path=StreamHighestYoutubeQuality}" />
+                    <StackPanel Margin="20, 0, 0, 0"
+                                IsEnabled="{Binding Path=StreamHighestYoutubeQuality,
+                                                    Converter={StaticResource BoolNegationConverter}}"
+                                Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="Streaming quality" />
+                        <ComboBox Width="100"
+                                  Margin="10, 0, 0, 0"
+                                  ItemsSource="{Binding Path=YoutubeStreamingQualities}"
+                                  SelectedIndex="0"
+                                  SelectedItem="{Binding Path=YoutubeStreamingQuality}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="download path" />
+                        <TextBlock Style="{StaticResource SettingsTextStyle}" Text="The path where Espera downloads the YouTube videos and audio tracks" />
+                        <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
+                            <TextBox Width="350"
+                                     VerticalAlignment="Top"
+                                     IsReadOnly="True"
+                                     Text="{Binding Path=YoutubeDownloadPath,
+                                                    Mode=OneWay}" />
+                            <Button Margin="10, 0, 0, 0"
+                                    Click="ChangeYoutubeDownloadPath"
+                                    Content="Change download path" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="remote control">
+                <StackPanel>
+                    <Controls:ToggleSwitch Header="Enable remote control" IsChecked="{Binding Path=EnableRemoteControl}" />
+                    <StackPanel Margin="15, 0, 0, 0" Orientation="Vertical" IsEnabled="{Binding Path=EnableRemoteControl}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Port (49152 - 65535)" VerticalAlignment="Center" />
+                            <TextBox Margin="10, 0, 0, 0" Width="50" Text="{Binding Path=Port, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button Margin="10, 0, 0, 0" Content="Change port" Command="{Binding Path=ChangePortCommand}" />
+                        </StackPanel>
+                        <TextBlock Text="Port is occupied, you may want to choose a different one"
+                                   Visibility="{Binding Path=IsPortOccupied, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                   Foreground="{StaticResource ControlsValidationBrush}" />
+                    </StackPanel>
+                    <Controls:ToggleSwitch Header="Lock remote control with password" IsChecked="{Binding Path=LockRemoteControl}" />
+                    <StackPanel IsEnabled="{Binding Path=LockRemoteControl}" Margin="15, 0, 0, 0" Orientation="Horizontal">
+                        <TextBlock Text="Password" VerticalAlignment="Center" />
+                        <PasswordBox Margin="10, 0, 0, 0"
+                                     Width="200"
+                                     Name="RemotePasswordBox"
+                                     VerticalContentAlignment="Center"
+                                     Controls:TextboxHelper.Watermark="Enter a password"
+                                     PasswordChanged="RemotePasswordChanged"
+                                     x:FieldModifier="private" />
+                        <Button Margin="10, 0, 0, 0"
+                                Content="Change password"
+                                Command="{Binding Path=ChangeRemoteControlPasswordCommand}" />
+                    </StackPanel>
+                    <Controls:ToggleSwitch Header="Enable voting system" IsChecked="{Binding Path=EnableVotingSystem}" />
+                    <TextBlock Margin="0, 50, 0, 0"
+                               Style="{StaticResource SettingsTextStyle}"
+                               HorizontalAlignment="Center"
+                               Text="Coming soon for Android"
+                               FontSize="40" />
+                </StackPanel>
             </TabItem>
             <TabItem Header="about">
                 <StackPanel>
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="espera" />
-                    <TextBlock Margin="0, 10, 0, 0" Text="{Binding Path=Version, StringFormat=Version \{0\}}" />
-                    <TextBlock Text="Author: Dennis Daume" />
-                    <TextBlock>
+                    <TextBlock Margin="0, 10, 0, 0"
+                               Text="{Binding Path=Version, StringFormat=Version \{0\}}"
+                               Style="{StaticResource AboutInfoStyle}" />
+                    <TextBlock Text="Author: Dennis Daume" Style="{StaticResource AboutInfoStyle}" />
+                    <TextBlock Margin="0, 10, 0, 0" Style="{StaticResource AboutInfoStyle}">
                         <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=Homepage}">
                             <Run Foreground="#FF00B7C0" Text="Project Website" />
                         </Hyperlink>
                     </TextBlock>
-                    <TextBlock>
+                    <TextBlock Style="{StaticResource AboutInfoStyle}">
                         <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=ReleaseNotes}">
                             <Run Foreground="#FF00B7C0" Text="Release Notes" />
                         </Hyperlink>
                     </TextBlock>
-                    <TextBlock>
+                    <TextBlock Style="{StaticResource AboutInfoStyle}">
                         <Hyperlink Command="{Binding Path=ReportBugCommand}">
                             <Run Foreground="#FF00B7C0" Text="Report a bug" />
                         </Hyperlink>
                     </TextBlock>
-                    <TextBlock>
+                    <TextBlock Style="{StaticResource AboutInfoStyle}">
                         <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=DonationPage}">
                             <Run Foreground="#FF00B7C0" Text="Donate :)" />
                         </Hyperlink>
                     </TextBlock>
+                    <Controls:ToggleSwitch Margin="0, 20, 0, 0"
+                                           Header="Enable anonymous crash/error/usage reporting"
+                                           IsChecked="{Binding Path=EnableAutomaticReports}" />
+                    <TextBlock Margin="10, 5, 0, 0"
+                               Style="{StaticResource SettingsTextStyle}"
+                               Text="Espera will NEVER collect any personal identifiable information"
+                               FontSize="15" />
+                    <Controls:ToggleSwitch Margin="0, 30, 0, 0"
+                                           Header="Show the changlog after an update"
+                                           IsChecked="{Binding Path=EnableChangelog}" />
                 </StackPanel>
             </TabItem>
         </TabControl>

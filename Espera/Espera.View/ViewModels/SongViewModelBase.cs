@@ -1,11 +1,11 @@
-﻿using Caliburn.Micro;
+﻿using System;
 using Espera.Core;
 using Rareform.Validation;
-using System;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
-    public abstract class SongViewModelBase : PropertyChangedBase
+    public abstract class SongViewModelBase : ReactiveObject, ISongViewModelBase
     {
         protected SongViewModelBase(Song model)
         {
@@ -28,6 +28,11 @@ namespace Espera.View.ViewModels
         public TimeSpan Duration
         {
             get { return this.Model.Duration; }
+        }
+
+        public string FormattedDuration
+        {
+            get { return this.Duration.FormatAdaptive(); }
         }
 
         public string Genre

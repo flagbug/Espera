@@ -1,66 +1,129 @@
-﻿using Caliburn.Micro;
+﻿using System;
+using System.Collections.Generic;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
+using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
+using Espera.Core;
+using ReactiveUI;
+using Splat;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class ArtistViewModel : PropertyChangedBase
+    public sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>
     {
-        private int? albumCount;
-        private int? artistCount;
-        private int? songCount;
+        private readonly Subject<IObservable<string>> artworkKeys;
+        private readonly ObservableAsPropertyHelper<BitmapSource> cover;
+        private readonly int orderHint;
 
-        public ArtistViewModel(string name, int albumCount, int songCount)
+        /// <summary>
+        /// The constructor.
+        /// </summary>
+        /// <param name="artistName"></param>
+        /// <param name="artworkKeys"></param>
+        /// <param name="orderHint">
+        /// A hint that tells this instance which position it has in the artist list. This helps for
+        /// priorizing the album cover loading. The higher the number, the earlier it is in the list
+        /// (Think of a reversed sorted list).
+        /// </param>
+        public ArtistViewModel(string artistName, IEnumerable<IObservable<string>> artworkKeys, int orderHint = 1)
         {
-            this.Name = name;
-            this.AlbumCount = albumCount;
-            this.SongCount = songCount;
+            this.artworkKeys = new Subject<IObservable<string>>();
+
+            this.orderHint = orderHint;
+
+            this.cover = this.artworkKeys
+                .Merge()
+                .Where(x => x != null)
+                .Distinct() // Ignore duplicate artworks
+                .Select(key => LoadArtworkAsync(key).ToObservable())
+                .Merge(1)
+                .FirstOrDefaultAsync(pic => pic != null)
+                .ToProperty(this, x => x.Cover);
+
+            this.UpdateArtwork(artworkKeys);
+
+            this.Name = artistName;
+            this.IsAllArtists = false;
         }
 
-        public ArtistViewModel(string name)
+        public ArtistViewModel(string allArtistsName)
         {
-            this.Name = name;
+            this.Name = allArtistsName;
             this.IsAllArtists = true;
         }
 
-        public int? AlbumCount
+        public BitmapSource Cover
         {
-            get { return this.albumCount; }
-            set
-            {
-                if (this.AlbumCount != value)
-                {
-                    this.albumCount = value;
-                    this.NotifyOfPropertyChange(() => this.AlbumCount);
-                }
-            }
-        }
-
-        public int? ArtistCount
-        {
-            get { return this.artistCount; }
-            set
-            {
-                if (this.ArtistCount != value)
-                {
-                    this.artistCount = value;
-                    this.NotifyOfPropertyChange(() => this.ArtistCount);
-                }
-            }
+            get { return this.cover == null ? null : this.cover.Value; }
         }
 
         public bool IsAllArtists { get; private set; }
 
         public string Name { get; private set; }
 
-        public int? SongCount
+        public int CompareTo(ArtistViewModel other)
         {
-            get { return this.songCount; }
-            set
+            if (this.IsAllArtists && other.IsAllArtists)
             {
-                if (this.SongCount != value)
-                {
-                    this.songCount = value;
-                    this.NotifyOfPropertyChange(() => this.SongCount);
-                }
+                return 0;
+            }
+
+            if (this.IsAllArtists)
+            {
+                return -1;
+            }
+
+            if (other.IsAllArtists)
+            {
+                return 1;
+            }
+
+            return String.Compare(SortHelpers.RemoveArtistPrefixes(this.Name), SortHelpers.RemoveArtistPrefixes(other.Name), StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        public bool Equals(ArtistViewModel other)
+        {
+            return this.Name == other.Name;
+        }
+
+        public void UpdateArtwork(IEnumerable<IObservable<string>> keys)
+        {
+            foreach (IObservable<string> key in keys)
+            {
+                this.artworkKeys.OnNext(key);
+            }
+        }
+
+        private async Task<BitmapSource> LoadArtworkAsync(string key)
+        {
+            try
+            {
+                IBitmap img = await ArtworkCache.Instance.Retrieve(key, 50, orderHint);
+
+                return img.ToNative();
+            }
+
+            catch (KeyNotFoundException ex)
+            {
+                this.Log().WarnException("Could not find key of album cover. This reeks like a threading problem", ex);
+
+                return null;
+            }
+
+            catch (NotSupportedException ex)
+            {
+                this.Log().InfoException("Unable to load artist cover", ex);
+
+                return null;
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().InfoException("Akavache threw an error on artist cover loading", ex);
+
+                return null;
             }
         }
     }

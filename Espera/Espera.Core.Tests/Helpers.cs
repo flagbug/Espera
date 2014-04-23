@@ -1,16 +1,23 @@
-﻿using Espera.Core.Audio;
-using Espera.Core.Management;
-using Espera.Core.Settings;
-using Moq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
+using System.Text;
+using System.Threading.Tasks;
+using Espera.Core.Audio;
+using Espera.Core.Management;
+using Espera.Core.Settings;
+using NSubstitute;
+using Xunit;
 
 namespace Espera.Core.Tests
 {
-    internal static class Helpers
+    public static class Helpers
     {
-        public static readonly LocalSong LocalSong1 = new LocalSong("Path1", AudioType.Mp3, TimeSpan.FromTicks(1), DriveType.Fixed)
+        public static readonly LocalSong LocalSong1 = new LocalSong("C:/Music/Path1/Song1.mp3", TimeSpan.FromTicks(1), "artwork-7e316d0e701df0505fa72e2b89467910")
         {
             Album = "Album1",
             Artist = "Artist1",
@@ -19,7 +26,7 @@ namespace Espera.Core.Tests
             TrackNumber = 1
         };
 
-        public static readonly LocalSong LocalSong2 = new LocalSong("Path2", AudioType.Wav, TimeSpan.FromTicks(2), DriveType.Fixed)
+        public static readonly LocalSong LocalSong2 = new LocalSong("C:/Music/Path2/Song2.mp3", TimeSpan.FromTicks(2))
         {
             Album = "Album2",
             Artist = "Artist2",
@@ -32,8 +39,10 @@ namespace Espera.Core.Tests
 
         public static readonly Playlist Playlist2;
 
+        public static readonly string SongSourcePath = "C:/Music/";
+
         public static readonly YoutubeSong YoutubeSong1 =
-            new YoutubeSong("www.youtube.com?watch=xyz", AudioType.Mp3, TimeSpan.FromTicks(1), true) { Title = "Title1" };
+            new YoutubeSong("www.youtube.com?watch=xyz", TimeSpan.FromTicks(1)) { Title = "Title1" };
 
         static Helpers()
         {
@@ -44,79 +53,102 @@ namespace Espera.Core.Tests
             Playlist2.AddSongs(new[] { (Song)LocalSong1, YoutubeSong1 });
         }
 
-        public static Library CreateLibrary(ILibrarySettings settings = null)
+        public static async Task AwaitInitializationAndUpdate(this Library library)
         {
-            return new Library(
-                new Mock<IRemovableDriveWatcher>().Object,
-                new Mock<ILibraryReader>().Object,
-                new Mock<ILibraryWriter>().Object,
-                settings ?? new Mock<ILibrarySettings>().SetupAllProperties().Object);
+            var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().ToTask();
+
+            library.Initialize();
+
+            await updateCompleted;
         }
 
-        public static Library CreateLibraryWithPlaylist(string playlistName = "Playlist", ILibrarySettings settings = null)
+        public static Library CreateLibrary(ILibraryWriter writer)
         {
-            var library = CreateLibrary(settings);
-            library.AddAndSwitchToPlaylist(playlistName);
+            return CreateLibrary(null, null, writer);
+        }
+
+        public static Library CreateLibrary(IFileSystem fileSystem)
+        {
+            return CreateLibrary(null, null, null, fileSystem);
+        }
+
+        public static Library CreateLibrary(ILibraryReader reader, IFileSystem fileSystem = null)
+        {
+            return CreateLibrary(null, reader, null, fileSystem);
+        }
+
+        public static Library CreateLibrary(IFileSystem fileSystem, ILocalSongFinder localSongFinder)
+        {
+            return CreateLibrary(null, null, null, fileSystem, localSongFinder);
+        }
+
+        public static Library CreateLibrary(ILibraryReader reader, IFileSystem fileSystem, ILocalSongFinder localSongFinder)
+        {
+            return CreateLibrary(null, reader, null, fileSystem, localSongFinder);
+        }
+
+        public static Library CreateLibrary(CoreSettings settings = null, ILibraryReader reader = null, ILibraryWriter writer = null,
+            IFileSystem fileSystem = null, ILocalSongFinder localSongFinder = null)
+        {
+            var library = new Library(
+                reader ?? Substitute.For<ILibraryReader>(),
+                writer ?? Substitute.For<ILibraryWriter>(),
+                settings ?? new CoreSettings(),
+                fileSystem ?? new MockFileSystem(),
+                x => localSongFinder ?? SetupDefaultLocalSongFinder());
+
+            IAudioPlayerCallback c = library.AudioPlayerCallback;
+            c.GetTime = () => TimeSpan.Zero;
+            c.GetVolume = () => 1.0f;
+            c.LoadRequest = path => Task.Delay(0);
+            c.PauseRequest = () => Task.Delay(0);
+            c.PlayRequest = () =>
+            {
+                Task.Run(() => library.AudioPlayerCallback.Finished());
+
+                return Task.Delay(0);
+            };
+            c.SetTime = x => { };
+            c.SetVolume = x => { };
+            c.StopRequest = () => Task.Delay(0);
 
             return library;
         }
 
-        public static Mock<Song> CreateSongMock(string name = "Song", bool callBase = false, AudioType audioType = AudioType.Mp3, TimeSpan duration = new TimeSpan())
+        public static Library CreateLibraryWithPlaylist(string playlistName = "Playlist", CoreSettings settings = null)
         {
-            return new Mock<Song>(name, audioType, duration) { CallBase = callBase };
-        }
+            var library = CreateLibrary(settings);
+            library.AddAndSwitchToPlaylist(playlistName, library.LocalAccessControl.RegisterLocalAccessToken());
 
-        public static Mock<Song>[] CreateSongMocks(int count, bool callBase)
-        {
-            var songs = new Mock<Song>[count];
-
-            for (int i = 0; i < count; i++)
-            {
-                songs[i] = CreateSongMock("Song" + i, callBase);
-            }
-
-            return songs;
+            return library;
         }
 
         public static string GenerateSaveFile()
         {
-            return
-                "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
-                "<Root>" +
-                "  <Version>1.0.0</Version>" +
-                "  <Songs>" +
-                "    <Song Album=\"" + LocalSong1.Album + "\" Artist=\"" + LocalSong1.Artist + "\" AudioType=\"" + LocalSong1.AudioType + "\" Duration=\"" + LocalSong1.Duration.Ticks + "\" Genre=\"" + LocalSong1.Genre + "\" Path=\"" + LocalSong1.OriginalPath + "\" Title=\"" + LocalSong1.Title + "\" TrackNumber=\"" + LocalSong1.TrackNumber + "\" />" +
-                "    <Song Album=\"" + LocalSong2.Album + "\" Artist=\"" + LocalSong2.Artist + "\" AudioType=\"" + LocalSong2.AudioType + "\" Duration=\"" + LocalSong2.Duration.Ticks + "\" Genre=\"" + LocalSong2.Genre + "\" Path=\"" + LocalSong2.OriginalPath + "\" Title=\"" + LocalSong2.Title + "\" TrackNumber=\"" + LocalSong2.TrackNumber + "\" />" +
-                "  </Songs>" +
-                "  <Playlists>" +
-                "    <Playlist Name=\"" + Playlist1.Name + "\">" +
-                "      <Entries>" +
-                "        <Entry Path=\"" + LocalSong1.OriginalPath + "\" Type=\"Local\" />" +
-                "        <Entry Path=\"" + LocalSong2.OriginalPath + "\" Type=\"Local\" />" +
-                "      </Entries>" +
-                "    </Playlist>" +
-                "    <Playlist Name=\"" + Playlist2.Name + "\">" +
-                "      <Entries>" +
-                "        <Entry Path=\"" + LocalSong1.OriginalPath + "\" Type=\"Local\" />" +
-                "        <Entry Path=\"" + YoutubeSong1.OriginalPath + "\" Title=\"" + YoutubeSong1.Title + "\" Type=\"YouTube\" Duration=\"" + YoutubeSong1.Duration.Ticks + "\" />" +
-                "      </Entries>" +
-                "    </Playlist>" +
-                "  </Playlists>" +
-                "</Root>";
+            using (var stream = new MemoryStream())
+            {
+                LibrarySerializer.Serialize(new[] { LocalSong1, LocalSong2 }, new[] { Playlist1, Playlist2 }, SongSourcePath, stream);
+
+                return Encoding.UTF8.GetString(stream.ToArray());
+            }
         }
 
-        public static Song SetupSongMock(string name = "Song", bool callBase = false, AudioType audioType = AudioType.Mp3, TimeSpan duration = new TimeSpan())
+        public static Song SetupSongMock(string name = "Song",  TimeSpan duration = new TimeSpan())
         {
-            return CreateSongMock(name, callBase, audioType, duration).Object;
+            var mock = Substitute.For<Song>(Path.Combine("C://", Guid.NewGuid().ToString(), ".mp3"), duration);
+            mock.Title = name;
+            mock.PrepareAsync(Arg.Any<YoutubeStreamingQuality>()).Returns(Task.Delay(0));
+
+            return mock;
         }
 
-        public static Song[] SetupSongMocks(int count, bool callBase = false)
+        public static Song[] SetupSongMocks(int count)
         {
             var songs = new Song[count];
 
             for (int i = 0; i < count; i++)
             {
-                songs[i] = SetupSongMock("Song" + i, callBase);
+                songs[i] = SetupSongMock("Song" + i);
             }
 
             return songs;
@@ -130,6 +162,21 @@ namespace Espera.Core.Tests
 
                 return reader.ReadToEnd();
             }
+        }
+
+        public async static Task<T> ThrowsAsync<T>(Func<Task> testCode) where T : Exception
+        {
+            try
+            {
+                await testCode();
+                Assert.Throws<T>(() => { }); // Use xUnit's default behavior.
+            }
+            catch (T exception)
+            {
+                return exception;
+            }
+
+            return null;
         }
 
         public static Stream ToStream(this string s)
@@ -154,6 +201,14 @@ namespace Espera.Core.Tests
             playlist.AddSongs(songs);
 
             return playlist;
+        }
+
+        private static ILocalSongFinder SetupDefaultLocalSongFinder()
+        {
+            var localSongFinder = Substitute.For<ILocalSongFinder>();
+            localSongFinder.GetSongsAsync().Returns(Observable.Empty<Tuple<LocalSong, byte[]>>());
+
+            return localSongFinder;
         }
     }
 }

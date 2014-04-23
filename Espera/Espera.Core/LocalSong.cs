@@ -1,84 +1,50 @@
-﻿using Espera.Core.Audio;
-using Rareform.IO;
+﻿using Rareform.Validation;
 using System;
-using System.IO;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace Espera.Core
 {
     public sealed class LocalSong : Song
     {
-        private readonly DriveType sourceDriveType;
+        private readonly BehaviorSubject<string> artworkKey;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalSong"/> class.
         /// </summary>
         /// <param name="path">The path of the file.</param>
-        /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
-        /// <param name="sourceDriveType">The drive type where the song comes from.</param>
-        public LocalSong(string path, AudioType audioType, TimeSpan duration, DriveType sourceDriveType)
-            : base(path, audioType, duration)
+        /// <param name="artworkKey">The key of the artwork for Akavache to retrieve. Null, if there is no album cover or the artwork isn't retrieved yet.</param>
+        public LocalSong(string path, TimeSpan duration, string artworkKey = null)
+            : base(path, duration)
         {
-            this.sourceDriveType = sourceDriveType;
+            if (artworkKey == String.Empty)
+                Throw.ArgumentException("Artwork key cannot be an empty string", () => artworkKey);
+
+            this.artworkKey = new BehaviorSubject<string>(artworkKey);
+
+            this.Guid = Guid.NewGuid();
         }
 
-        public override bool HasToCache
+        /// <summary>
+        /// Gets the key of the artwork for Akavache to retrieve. Null, if there is no album cover.
+        /// </summary>
+        public IObservable<string> ArtworkKey
         {
-            get { return this.sourceDriveType != DriveType.Fixed && this.sourceDriveType != DriveType.Network; }
+            get { return this.artworkKey.AsObservable(); }
         }
 
-        public override string StreamingPath
+        /// <summary>
+        /// A runtime identifier for interaction with the mobile API.
+        /// </summary>
+        public Guid Guid { get; private set; }
+        /// <summary>
+        /// Notifies the <see cref="LocalSong"/> that the artwork has been stored to the permanent storage.
+        /// </summary>
+        /// <param name="key">The key of the artwork for Akavache to be retrieved.</param>
+        internal void NotifyArtworkStored(string key)
         {
-            get { return this.HasToCache ? base.StreamingPath : this.OriginalPath; }
-            protected set { base.StreamingPath = value; }
-        }
-
-        public override void LoadToCache()
-        {
-            this.IsCaching = true;
-
-            try
-            {
-                this.LoadToTempFile();
-                this.IsCached = true;
-            }
-
-            catch (IOException)
-            {
-                this.OnCachingFailed(EventArgs.Empty);
-            }
-
-            finally
-            {
-                this.IsCaching = false;
-            }
-        }
-
-        internal override AudioPlayer CreateAudioPlayer()
-        {
-            return new LocalAudioPlayer(this);
-        }
-
-        private void LoadToTempFile()
-        {
-            string path = Path.GetTempFileName();
-
-            using (Stream sourceStream = File.OpenRead(this.OriginalPath))
-            {
-                using (Stream targetStream = File.OpenWrite(path))
-                {
-                    var operation = new StreamCopyOperation(sourceStream, targetStream);
-
-                    operation.CopyProgressChanged += (sender, e) =>
-                    {
-                        this.CachingProgress = (int)e.ProgressPercentage;
-                    };
-
-                    operation.Execute();
-                }
-            }
-
-            this.StreamingPath = path;
+            this.artworkKey.OnNext(key);
         }
     }
 }

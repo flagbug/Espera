@@ -2,6 +2,7 @@
 using Espera.Core.Settings;
 using System;
 using System.IO;
+using System.IO.Abstractions.TestingHelpers;
 
 namespace Espera.View
 {
@@ -14,11 +15,11 @@ namespace Espera.View
             if (library == null)
             {
                 string directoryPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Espera\");
-                string filePath = Path.Combine(directoryPath, "Library.xml");
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\");
+                string filePath = Path.Combine(directoryPath, "Library.json");
 
-                library = new Library(new RemovableDriveWatcher(), new LibraryFileReader(filePath),
-                                      new LibraryFileWriter(filePath), new LibrarySettingsWrapper());
+                library = new Library(new LibraryFileReader(filePath), new LibraryFileWriter(filePath),
+                    new CoreSettings(), new MockFileSystem());
             }
 
             return library;

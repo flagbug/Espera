@@ -1,48 +1,42 @@
-﻿using Espera.Core.Audio;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using YoutubeExtractor;
-using AudioType = Espera.Core.Audio.AudioType;
 
 namespace Espera.Core
 {
     public sealed class YoutubeSong : Song
     {
-        private readonly bool isStreaming;
+        private static readonly IReadOnlyDictionary<YoutubeStreamingQuality, IEnumerable<int>> StreamingQualityMap =
+            new Dictionary<YoutubeStreamingQuality, IEnumerable<int>>
+            {
+                { YoutubeStreamingQuality.High, new HashSet<int> { 1080, 720 } },
+                { YoutubeStreamingQuality.Medium, new HashSet<int> { 480 } },
+                { YoutubeStreamingQuality.Low, new HashSet<int> { 360, 240 } }
+            };
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="YoutubeSong"/> class.
+        /// Initializes a new instance of the <see cref="YoutubeSong" /> class.
         /// </summary>
         /// <param name="path">The path of the song.</param>
-        /// <param name="audioType">The audio type.</param>
         /// <param name="duration">The duration of the song.</param>
-        /// <param name="isStreaming">if set to true, the song streams from YouTube, instead of downloading.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="path"/> is null.</exception>
-        public YoutubeSong(string path, AudioType audioType, TimeSpan duration, bool isStreaming)
-            : base(path, audioType, duration)
-        {
-            this.isStreaming = isStreaming;
-        }
+        /// <exception cref="ArgumentNullException"><paramref name="path" /> is null.</exception>
+        public YoutubeSong(string path, TimeSpan duration)
+            : base(path, duration)
+        { }
 
         /// <summary>
         /// Gets or sets the description that was entered by the uploader of the YouTube video.
         /// </summary>
         public string Description { get; set; }
 
-        public override bool HasToCache
-        {
-            get { return !this.isStreaming; }
-        }
-
         /// <summary>
         /// Gets or sets the average rating.
         /// </summary>
-        /// <value>
-        /// The average rating. <c>null</c>, if the rating is unknown.
-        /// </value>
+        /// <value>The average rating. <c>null</c>, if the rating is unknown.</value>
         public double? Rating { get; set; }
 
         /// <summary>
@@ -55,107 +49,111 @@ namespace Espera.Core
         /// </summary>
         public int Views { get; set; }
 
-        public override void LoadToCache()
+        public static async Task DownloadAudioAsync(VideoInfo videoInfo, string downloadPath, IObserver<double> progress)
         {
-            this.IsCaching = true;
+            var downloader = new AudioDownloader(videoInfo, Path.Combine(downloadPath, videoInfo.Title + videoInfo.AudioExtension));
+
+            downloader.DownloadProgressChanged += (sender, args) => progress.OnNext(args.ProgressPercentage * 0.95);
+            downloader.AudioExtractionProgressChanged += (sender, args) => progress.OnNext(95 + args.ProgressPercentage * 0.05);
+
+            await DownloadFromYoutube(downloader, new[] { typeof(IOException), typeof(WebException), typeof(AudioExtractionException) }, progress);
+        }
+
+        public static async Task DownloadVideoAsync(VideoInfo videoInfo, string downloadPath, IObserver<double> progress)
+        {
+            var downloader = new VideoDownloader(videoInfo, Path.Combine(downloadPath, videoInfo.Title + videoInfo.VideoExtension));
+
+            downloader.DownloadProgressChanged += (sender, args) => progress.OnNext(args.ProgressPercentage);
+
+            await DownloadFromYoutube(downloader, new[] { typeof(IOException), typeof(WebException) }, progress);
+        }
+
+        internal override async Task PrepareAsync(YoutubeStreamingQuality qualityHint)
+        {
+            VideoInfo video = null;
 
             try
             {
-                string tempPath = Path.GetTempFileName();
+                video = await GetVideoInfoForStreaming(this.OriginalPath, qualityHint);
 
-                VideoInfo video = GetVideoInfoForDownload(this.OriginalPath);
-
-                this.DownloadAudioTrack(video, tempPath);
-
-                this.StreamingPath = tempPath;
-                this.IsCached = true;
+                if (video != null)
+                {
+                    await Task.Run(() => DownloadUrlResolver.DecryptDownloadUrl(video));
+                }
             }
 
-            catch (IOException)
+            catch (Exception ex)
             {
-                this.OnCachingFailed(EventArgs.Empty);
+                if (ex is WebException || ex is VideoNotAvailableException || ex is YoutubeParseException)
+                {
+                    throw new SongPreparationException(ex);
+                }
             }
 
-            catch (WebException)
+            if (video == null)
             {
-                this.OnCachingFailed(EventArgs.Empty);
+                throw new SongPreparationException("No suitable video found");
             }
 
-            catch (VideoNotAvailableException)
-            {
-                this.OnCachingFailed(EventArgs.Empty);
-            }
-
-            catch (YoutubeParseException)
-            {
-                this.OnCachingFailed(EventArgs.Empty);
-            }
-
-            catch (AudioExtractionException)
-            {
-                this.OnCachingFailed(EventArgs.Empty);
-            }
-
-            finally
-            {
-                this.IsCaching = false;
-            }
+            this.PlaybackPath = video.DownloadUrl;
         }
 
-        internal override AudioPlayer CreateAudioPlayer()
+        private static async Task DownloadFromYoutube(Downloader downloader, IEnumerable<Type> exceptionTypes, IObserver<double> progress)
         {
-            if (this.isStreaming)
+            try
             {
-                VideoInfo video = GetVideoInfoForStreaming(this.OriginalPath);
-
-                this.StreamingPath = video.DownloadUrl;
+                await Task.Run(() => downloader.Execute());
             }
-            return this.isStreaming ? (AudioPlayer)new YoutubeAudioPlayer(this) : new LocalAudioPlayer(this);
+
+            catch (Exception ex)
+            {
+                Exception outer = new YoutubeDownloadException("Youtube video or audio download failed", ex);
+
+                if (exceptionTypes.Contains(ex.GetType()))
+                {
+                    progress.OnError(outer);
+                }
+
+                throw outer;
+            }
+
+            progress.OnCompleted();
         }
 
-        private static VideoInfo GetVideoInfoForDownload(string youtubeLink)
+        private static VideoInfo GetVideoByStreamingQuality(IEnumerable<VideoInfo> videos, YoutubeStreamingQuality quality)
         {
-            IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(youtubeLink);
+            videos = videos.ToList(); // Prevent multiple enumeration
 
-            VideoInfo video = videoInfos
-                .Where(info => info.CanExtractAudio && info.AudioType == YoutubeExtractor.AudioType.Mp3)
-                .OrderByDescending(info => info.AudioBitrate)
-                .First();
+            if (quality == YoutubeStreamingQuality.High)
+            {
+                return videos.OrderByDescending(x => x.Resolution)
+                    .FirstOrDefault();
+            }
+
+            IEnumerable<int> preferredResolutions = StreamingQualityMap[quality];
+
+            IEnumerable<VideoInfo> preferredVideos = videos
+                .Where(info => preferredResolutions.Contains(info.Resolution))
+                .OrderByDescending(info => info.Resolution);
+
+            VideoInfo video = preferredVideos.FirstOrDefault();
+
+            if (video == null)
+            {
+                return GetVideoByStreamingQuality(videos, (YoutubeStreamingQuality)(((int)quality) - 1));
+            }
 
             return video;
         }
 
-        private static VideoInfo GetVideoInfoForStreaming(string youtubeLink)
+        private static async Task<VideoInfo> GetVideoInfoForStreaming(string youtubeLink, YoutubeStreamingQuality qualitySetting)
         {
-            IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(youtubeLink);
+            IEnumerable<VideoInfo> videoInfos = await Task.Run(() => DownloadUrlResolver.GetDownloadUrls(youtubeLink, false));
 
-            // For now, we select the lowest resolution to avoid buffering, later we let the user decide which quality he prefers
-            VideoInfo video = videoInfos
-                .Where(info => info.VideoType == VideoType.Mp4 && !info.Is3D)
-                .OrderBy(info => info.Resolution)
-                .First();
+            IEnumerable<VideoInfo> filtered = videoInfos
+                .Where(info => info.VideoType == VideoType.Mp4 && !info.Is3D && info.AdaptiveType == AdaptiveType.None);
 
-            return video;
-        }
-
-        private void DownloadAudioTrack(VideoInfo video, string tempPath)
-        {
-            var downloader = new AudioDownloader(video, tempPath);
-
-            // We need a factor at which the downlaod progress is preferred to the audio extraction progress
-            const double factor = 0.95;
-
-            downloader.DownloadProgressChanged += (sender, args) =>
-            {
-                this.CachingProgress = (int)(args.ProgressPercentage * factor);
-            };
-
-            downloader.AudioExtractionProgressChanged += (sender, args) =>
-            {
-                this.CachingProgress = (int)(factor * 100) + (int)(args.ProgressPercentage * (1 - factor));
-            };
-
-            downloader.Execute();
+            return GetVideoByStreamingQuality(filtered, qualitySetting);
         }
     }
 }

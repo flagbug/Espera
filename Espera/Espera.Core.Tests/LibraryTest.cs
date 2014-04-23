@@ -1,925 +1,1055 @@
-﻿using Espera.Core.Audio;
+﻿using System;
+using System.Collections.Generic;
+using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Threading;
+using System.Threading.Tasks;
+using Akavache;
+using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
-using Espera.Core.Tests.Mocks;
-using Moq;
-using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+using Microsoft.Reactive.Testing;
+using NSubstitute;
+using ReactiveUI;
+using ReactiveUI.Testing;
+using Xunit;
 
 namespace Espera.Core.Tests
 {
-    [TestFixture]
     public sealed class LibraryTest
     {
-        [Test]
-        public void AddAndSwitchToPlaylist_SomeGenericName_WorksAsExpected()
+        [Fact]
+        public async Task CanPlayAWholeBunchOfSongs()
         {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.AddAndSwitchToPlaylist("Playlist");
-
-                Assert.AreEqual("Playlist", library.CurrentPlaylist.Name);
-                Assert.AreEqual("Playlist", library.Playlists.First().Name);
-                Assert.AreEqual(1, library.Playlists.Count());
-            }
-        }
-
-        [Test]
-        public void AddAndSwitchToPlaylist_TwoPlaylistsWithSameName_ThrowsInvalidOperationException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.AddAndSwitchToPlaylist("Playlist");
-
-                Assert.Throws<InvalidOperationException>(() => library.AddAndSwitchToPlaylist("Playlist"));
-            }
-        }
-
-        [Test]
-        public void AddLocalSongsAsync_PathIsNull_ThrowsArgumentNullException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentNullException>(() => library.AddLocalSongsAsync(null));
-            }
-        }
-
-        [Test]
-        public void AddPlayist_AddTwoPlaylistsWithSameName_ThrowInvalidOperationException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.AddPlaylist("Playlist");
-
-                Assert.Throws<InvalidOperationException>(() => library.AddPlaylist("Playlist"));
-            }
-        }
-
-        [Test]
-        public void AddPlaylist_NameIsNull_ThrowsArgumentNullException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentNullException>(() => library.AddPlaylist(null));
-            }
-        }
-
-        [Test]
-        public void AddSongsToPlaylist_PartyModeAndMultipleSongsAdded_ThrowsInvalidOperationException()
-        {
-            var songs = new[] { new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero).Object, new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero).Object };
-
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.CreateAdmin("TestPassword");
-                library.ChangeToParty();
-
-                Assert.Throws<InvalidOperationException>(() => library.AddSongsToPlaylist(songs));
-            }
-        }
-
-        [Test]
-        public void AddSongsToPlaylist_SongListIsNull_ThrowsArgumentNullException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentNullException>(() => library.AddSongsToPlaylist(null));
-            }
-        }
-
-        [Test]
-        public void AddSongToPlaylist_SongIsNull_ThrowsArgumentNullException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentNullException>(() => library.AddSongToPlaylist(null));
-            }
-        }
-
-        [Test]
-        public void AutoNextSong_SongIsCaching_SwapSongs()
-        {
-            var eventWait = new ManualResetEvent(false); // We need this, because Library.PlaySong() pops up a new thread internally and then returns
-
-            var jumpAudioPlayer = new JumpAudioPlayer();
-
-            var jumpSong = new Mock<Song>("JumpSong", AudioType.Mp3, TimeSpan.Zero);
-            jumpSong.Setup(p => p.CreateAudioPlayer()).Returns(jumpAudioPlayer);
-            jumpSong.SetupGet(p => p.HasToCache).Returns(false);
-
-            var foreverAudioPlayer = new Mock<AudioPlayer>();
-            foreverAudioPlayer.SetupProperty(p => p.Volume);
-            foreverAudioPlayer.Setup(p => p.Play()).Callback(() => { }); // Never raises SongFinished
-
-            var cachingSong = new Mock<Song>("CachingSong", AudioType.Mp3, TimeSpan.Zero);
-            cachingSong.SetupGet(p => p.HasToCache).Returns(true);
-            cachingSong.Setup(p => p.CreateAudioPlayer()).Returns(foreverAudioPlayer.Object);
-
-            var cachingSong2 = new Mock<Song>("CachingSong2", AudioType.Mp3, TimeSpan.Zero);
-            cachingSong2.SetupGet(p => p.HasToCache).Returns(true);
-
-            var nextSong = new Mock<Song>("NextSong", AudioType.Mp3, TimeSpan.Zero);
-            nextSong.Setup(p => p.CreateAudioPlayer()).Returns(jumpAudioPlayer);
-            nextSong.SetupGet(p => p.HasToCache).Returns(false);
+            var song = new LocalSong("C://", TimeSpan.Zero);
+            var awaitSubject = new AsyncSubject<Unit>();
+            int invocationCount = 0;
 
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
-                int finished = 0;
-
-                // We need to wait till the second played song has finished and then release our lock,
-                // otherwise it would directly call the assertion, without anything changed
-                library.SongFinished += (sender, e) =>
+                library.AudioPlayerCallback.PlayRequest = () =>
                 {
-                    finished++;
+                    invocationCount++;
 
-                    if (finished == 2)
+                    if (invocationCount == 100)
                     {
-                        eventWait.Set();
+                        awaitSubject.OnNext(Unit.Default);
+                        awaitSubject.OnCompleted();
                     }
+
+                    Task.Run(() => library.AudioPlayerCallback.Finished());
+
+                    return Task.Delay(0);
                 };
 
-                IEnumerable<Song> songs = new[]
+                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                await library.PlayInstantlyAsync(Enumerable.Repeat(song, 100).ToList(), token);
+
+                await awaitSubject.Timeout(TimeSpan.FromSeconds(5));
+            }
+
+            Assert.Equal(100, invocationCount);
+        }
+
+        [Fact]
+        public void DisabledAutomaticUpdatesDoesntTriggerUpdate()
+        {
+            var fileSystem = Substitute.For<IFileSystem>();
+
+            var settings = new CoreSettings
+            {
+                EnableAutomaticLibraryUpdates = false
+            };
+
+            using (Library library = Helpers.CreateLibrary(settings, null, null, fileSystem))
+            {
+                (new TestScheduler()).With(scheduler =>
                 {
-                    jumpSong.Object, cachingSong.Object, cachingSong2.Object, nextSong.Object
-                };
+                    library.Initialize();
 
-                library.AddSongsToPlaylist(songs);
+                    scheduler.AdvanceByMs(settings.SongSourceUpdateInterval.TotalMilliseconds);
+                });
+            }
 
-                library.PlaySong(0);
+            fileSystem.Directory.DidNotReceiveWithAnyArgs().GetFiles(null);
+        }
 
-                eventWait.WaitOne();
+        [Fact]
+        public async Task ExternalTagChangesArePropagated()
+        {
+            var song = new LocalSong("C://Song.mp3", TimeSpan.Zero) { Title = "A" };
+            var updatedSong = new LocalSong("C://Song.mp3", TimeSpan.Zero) { Title = "B" };
 
-                var expectedSongs = new[]
+            var libraryReader = Substitute.For<ILibraryReader>();
+            libraryReader.LibraryExists.Returns(true);
+            libraryReader.ReadSongSourcePath().Returns("C://");
+            libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+            libraryReader.ReadSongs().Returns(new[] { song });
+
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { song.OriginalPath, new MockFileData("DontCare") } });
+
+            var songFinder = Substitute.For<ILocalSongFinder>();
+            songFinder.GetSongsAsync().Returns(Observable.Return(Tuple.Create(updatedSong, (byte[])null)));
+
+            using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem, songFinder))
+            {
+                await library.AwaitInitializationAndUpdate();
+
+                Assert.Equal("B", library.Songs[0].Title);
+            }
+        }
+
+        [Fact]
+        public async Task UpdateRemovesArtworkOnlyWithoutReferenceToSong()
+        {
+            var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero, "artwork-abcdefg");
+            var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero, "artwork-abcdefg");
+            await BlobCache.LocalMachine.Insert("artwork-abcdefg", new byte[] { 0, 1 });
+
+            var libraryReader = Substitute.For<ILibraryReader>();
+            libraryReader.LibraryExists.Returns(true);
+            libraryReader.ReadSongSourcePath().Returns("C://");
+            libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+            libraryReader.ReadSongs().Returns(new[] { existingSong, missingSong });
+
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
+
+            using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
+            {
+                await library.AwaitInitializationAndUpdate();
+
+                Assert.NotNull(BlobCache.LocalMachine.GetAllKeys().FirstOrDefault(x => x == "artwork-abcdefg"));
+            }
+        }
+
+        [Fact]
+        public async Task UpdateRemovesArtworkWhenSongIsMissing()
+        {
+            var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero, "artwork-abcdefg");
+            await BlobCache.LocalMachine.Insert("artwork-abcdefg", new byte[] { 0, 1 });
+
+            var libraryReader = Substitute.For<ILibraryReader>();
+            libraryReader.LibraryExists.Returns(true);
+            libraryReader.ReadSongSourcePath().Returns("C://");
+            libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+            libraryReader.ReadSongs().Returns(new[] { missingSong });
+
+            using (Library library = Helpers.CreateLibrary(libraryReader))
+            {
+                await library.AwaitInitializationAndUpdate();
+
+                Assert.Null(BlobCache.LocalMachine.GetAllKeys().FirstOrDefault(x => x == "artwork-abcdefg"));
+            }
+        }
+
+        [Fact]
+        public async Task UpdateRemovesMissingSongsFromLibrary()
+        {
+            var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero);
+            var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero);
+
+            var libraryReader = Substitute.For<ILibraryReader>();
+            libraryReader.LibraryExists.Returns(true);
+            libraryReader.ReadSongSourcePath().Returns("C://");
+            libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+            libraryReader.ReadSongs().Returns(new[] { existingSong, missingSong });
+
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
+
+            using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
+            {
+                await library.AwaitInitializationAndUpdate();
+
+                Assert.Equal(1, library.Songs.Count());
+            }
+        }
+
+        [Fact]
+        public async Task UpdateRemovesMissingSongsFromPlaylists()
+        {
+            var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero);
+            var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero);
+
+            var songs = new[] { existingSong, missingSong };
+
+            var playlist1 = new Playlist("Playlist 1");
+            playlist1.AddSongs(songs);
+
+            var playlist2 = new Playlist("Playlist 2");
+            playlist2.AddSongs(songs);
+
+            var libraryReader = Substitute.For<ILibraryReader>();
+            libraryReader.LibraryExists.Returns(true);
+            libraryReader.ReadSongSourcePath().Returns("C://");
+            libraryReader.ReadPlaylists().Returns(new[] { playlist1, playlist2 });
+            libraryReader.ReadSongs().Returns(songs);
+
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
+
+            using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
+            {
+                await library.AwaitInitializationAndUpdate();
+
+                Assert.Equal(1, library.Playlists[0].Count());
+                Assert.Equal(1, library.Playlists[1].Count());
+            }
+        }
+
+        [Fact]
+        public async Task UpdateRemovesMissingSongWithoutArtworkFromLibraryWhenOtherArtworksArePresent()
+        {
+            var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero, "artwork-abcdefg");
+            var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero);
+
+            var libraryReader = Substitute.For<ILibraryReader>();
+            libraryReader.LibraryExists.Returns(true);
+            libraryReader.ReadSongSourcePath().Returns("C://");
+            libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+            libraryReader.ReadSongs().Returns(new[] { existingSong, missingSong });
+
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
+
+            using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
+            {
+                await library.AwaitInitializationAndUpdate();
+
+                Assert.Equal(1, library.Songs.Count());
+            }
+        }
+
+        [Fact]
+        public void YoutubeDownloadPathSetterThrowsArgumentExceptionIfDirectoryDoesntExist()
+        {
+            using (Library library = Helpers.CreateLibrary())
+            {
+                Assert.Throws<ArgumentNullException>(() => library.SwitchToPlaylist(null, library.LocalAccessControl.RegisterLocalAccessToken()));
+            }
+        }
+
+        public class TheAddAndSwitchToPlaylistMethod
+        {
+            [Fact]
+            public void SmokeTest()
+            {
+                using (Library library = Helpers.CreateLibrary())
                 {
-                    jumpSong.Object, nextSong.Object, cachingSong.Object, cachingSong2.Object
-                };
+                    library.AddAndSwitchToPlaylist("Playlist", library.LocalAccessControl.RegisterLocalAccessToken());
 
-                Assert.IsTrue(expectedSongs.SequenceEqual(library.CurrentPlaylist.Select(entry => entry.Song)));
-            }
-        }
-
-        [Test]
-        public void CanAddSongToPlaylist_IsAdministrator_ReturnsTrue()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.IsTrue(library.CanAddSongToPlaylist);
-            }
-        }
-
-        [Test]
-        public void CanAddSongToPlaylist_IsPartyModeAndRemainingTimeIsBiggerThanZero_ReturnsTrue()
-        {
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
-            {
-                library.PlaylistTimeout = TimeSpan.FromMinutes(1);
-
-                library.CreateAdmin("Password");
-                library.ChangeToParty();
-
-                Song song = Helpers.SetupSongMock();
-
-                library.AddSongToPlaylist(song);
-
-                Assert.IsFalse(library.CanAddSongToPlaylist);
-            }
-        }
-
-        [Test]
-        public void CanChangeTime_IsAdministrator_IsTrue()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.IsTrue(library.CanChangeTime);
-            }
-        }
-
-        [Test]
-        public void CanChangeTime_IsNotAdministratorAndLockTimeIsFalse_IsTrue()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.LockTime = false;
-
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.IsTrue(library.CanChangeTime);
-            }
-        }
-
-        [Test]
-        public void CanChangeTime_IsNotAdministratorAndLockTimeIsTrue_IsFalse()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.LockTime = true;
-
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.IsFalse(library.CanChangeTime);
-            }
-        }
-
-        [Test]
-        public void CanChangeVolume_IsAdministrator_IsTrue()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.IsTrue(library.CanChangeVolume);
-            }
-        }
-
-        [Test]
-        public void CanChangeVolume_IsNotAdministratorAndLockVolumeIsFalse_IsTrue()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.LockVolume = false;
-
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.IsTrue(library.CanChangeVolume);
-            }
-        }
-
-        [Test]
-        public void CanChangeVolume_IsNotAdministratorAndLockVolumeIsTrue_IsFalse()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.LockVolume = true;
-
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.IsFalse(library.CanChangeVolume);
-            }
-        }
-
-        [Test]
-        public void CanSwitchPlaylist_IsAdministrator_IsTrue()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.IsTrue(library.CanSwitchPlaylist);
-            }
-        }
-
-        [Test]
-        public void CanSwitchPlaylist_IsNotAdministratorAndLockPlaylistSwitchingIsFalse_IsTrue()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.LockPlaylistSwitching = false;
-
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.IsTrue(library.CanSwitchPlaylist);
-            }
-        }
-
-        [Test]
-        public void CanSwitchPlaylist_IsNotAdministratorAndLockPlaylistSwitchingIsTrue_IsFalse()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.LockPlaylistSwitching = true;
-
-                library.CreateAdmin("password");
-                library.ChangeToParty();
-
-                Assert.IsFalse(library.CanSwitchPlaylist);
-            }
-        }
-
-        [Test]
-        public void ChangeToAdmin_PasswordIsCorrent_AccessModeIsAdministrator()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.CreateAdmin("TestPassword");
-                library.ChangeToAdmin("TestPassword");
-
-                Assert.AreEqual(AccessMode.Administrator, library.AccessMode);
-            }
-        }
-
-        [Test]
-        public void ChangeToAdmin_PasswordIsNotCorrent_ThrowsWrongPasswordException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.CreateAdmin("TestPassword");
-
-                Assert.Throws<WrongPasswordException>(() => library.ChangeToAdmin("WrongPassword"));
-            }
-        }
-
-        [Test]
-        public void ChangeToAdmin_PasswordIsNull_ThrowsArgumentNullException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentNullException>(() => library.ChangeToAdmin(null));
-            }
-        }
-
-        [Test]
-        public void ChangeToParty_AdministratorIsNotCreated_ThrowsInvalidOperationException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<InvalidOperationException>(library.ChangeToParty);
-            }
-        }
-
-        [Test]
-        public void ContinueSong_IsNotAdmin_ThrowsInvalidOperationException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.CreateAdmin("Password");
-                library.ChangeToParty();
-
-                Assert.Throws<InvalidOperationException>(library.ContinueSong);
-            }
-        }
-
-        [Test]
-        public void ContinueSongCallsAudioPlayerPlay()
-        {
-            var handle = new ManualResetEvent(false);
-
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
-            {
-                Mock<Song> song = Helpers.CreateSongMock();
-                var audioPlayer = new Mock<AudioPlayer>();
-                audioPlayer.Setup(p => p.Play()).Callback(() => handle.Set());
-
-                song.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
-
-                library.AddSongToPlaylist(song.Object);
-
-                library.PlaySong(0);
-
-                // The library starts a new thread when playing a song, we want to wait till it called the audio player
-                // to avoid threading issues and a wrong test result
-                handle.WaitOne();
-
-                library.ContinueSong();
-
-                audioPlayer.Verify(p => p.Play(), Times.Exactly(2));
-            }
-        }
-
-        [Test]
-        public void CreateAdmin_AdminAlreadyCreated_ThrowsInvalidOperationException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.CreateAdmin("Password");
-                Assert.Throws<InvalidOperationException>(() => library.CreateAdmin("Password"));
-            }
-        }
-
-        [Test]
-        public void CreateAdmin_PasswordIsEmpty_ThrowsArgumentException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentException>(() => library.CreateAdmin(String.Empty));
-            }
-        }
-
-        [Test]
-        public void CreateAdmin_PasswordIsNull_ThrowsArgumentNullException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentNullException>(() => library.CreateAdmin(null));
-            }
-        }
-
-        [Test]
-        public void CreateAdmin_PasswordIsTestPassword_AdministratorIsCreated()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.CreateAdmin("TestPassword");
-
-                Assert.IsTrue(library.IsAdministratorCreated);
-            }
-        }
-
-        [Test]
-        public void CreateAdmin_PasswordIsWhiteSpace_ThrowsArgumentException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentException>(() => library.CreateAdmin(" "));
-            }
-        }
-
-        [Test]
-        public void GetPlaylistByName_PlaylistNameIsNotAPlaylist_ReturnsNull()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.IsNull(library.GetPlaylistByName("Playlist"));
-            }
-        }
-
-        [Test]
-        public void GetPlaylistByName_PlaylistNameIsNull_ThrowsArgumentNullException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentNullException>(() => library.GetPlaylistByName(null));
-            }
-        }
-
-        [Test]
-        public void InitializeUpgradesCoreSettingsIfRequired()
-        {
-            var settings = new Mock<ILibrarySettings>();
-            settings.SetupProperty(p => p.UpgradeRequired, true);
-
-            using (Library library = Helpers.CreateLibrary(settings.Object))
-            {
-                library.Initialize();
+                    Assert.Equal("Playlist", library.CurrentPlaylist.Name);
+                    Assert.Equal("Playlist", library.Playlists.First().Name);
+                    Assert.Equal(1, library.Playlists.Count());
+                }
             }
 
-            Assert.IsFalse(settings.Object.UpgradeRequired);
-        }
-
-        [Test]
-        public void PauseSong_IsNotAdministratorAndPausingIsLocked_ThrowsInvalidOperationException()
-        {
-            var settings = new Mock<ILibrarySettings>();
-            settings.SetupProperty(p => p.LockPlayPause, true);
-
-            using (Library library = Helpers.CreateLibrary(settings.Object))
+            [Fact]
+            public void ThrowsInvalidOperationExceptionIfPlaylistWithExistingNameIsAdded()
             {
-                library.CreateAdmin("Password");
-                library.ChangeToParty();
-
-                Assert.Throws<InvalidOperationException>(library.PauseSong);
-            }
-        }
-
-        [Test]
-        public void PauseSongCallsAudioPlayerPause()
-        {
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
-            {
-                Mock<Song> song = Helpers.CreateSongMock();
-                var audioPlayer = new Mock<AudioPlayer>();
-
-                song.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
-
-                library.AddSongToPlaylist(song.Object);
-
-                library.PlaySong(0);
-
-                library.PauseSong();
-
-                audioPlayer.Verify(p => p.Pause(), Times.Once());
-            }
-        }
-
-        [Test]
-        [Ignore("Test fails with NCrunch but not when starting it manually with NUnit. Needs to be revised.")]
-        public void Play_SongIsCorrupted_PlaysNextSong()
-        {
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
-            {
-                var audioPlayer = new Mock<AudioPlayer>();
-                audioPlayer.Setup(p => p.Play()).Throws<PlaybackException>();
-
-                Mock<Song> corruptedSong = Helpers.CreateSongMock();
-                corruptedSong.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
-
-                Mock<Song> nextSong = Helpers.CreateSongMock();
-                nextSong.Setup(p => p.CreateAudioPlayer()).Returns(new JumpAudioPlayer());
-
-                library.AddSongsToPlaylist(new[] { corruptedSong.Object, nextSong.Object });
-
-                var handle = new AutoResetEvent(false);
-
-                library.SongCorrupted += (sender, args) => handle.Set();
-                library.SongStarted += (sender, args) => handle.Set();
-
-                library.PlaySong(0);
-
-                handle.WaitOne();
-                handle.WaitOne();
-
-                // The test will fail, if the last wait timeouts
-            }
-        }
-
-        [Test]
-        public void Play_ThrowsPlaybackException_SetsSongIsCorruptedToTrue()
-        {
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
-            {
-                var audioPlayer = new Mock<AudioPlayer>();
-                audioPlayer.Setup(p => p.Play()).Throws<PlaybackException>();
-
-                Mock<Song> song = Helpers.CreateSongMock();
-                song.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
-
-                library.AddSongToPlaylist(song.Object);
-
-                var handle = new ManualResetEvent(false);
-
-                song.Object.Corrupted += (sender, args) => handle.Set();
-
-                library.PlaySong(0);
-
-                handle.WaitOne();
-
-                Assert.IsTrue(song.Object.IsCorrupted);
-            }
-        }
-
-        [Test]
-        public void Play_ThrowsSongLoadException_SetsSongIsCorruptedToTrue()
-        {
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
-            {
-                var audioPlayer = new Mock<AudioPlayer>();
-                audioPlayer.Setup(p => p.Load()).Throws<SongLoadException>();
-
-                Mock<Song> song = Helpers.CreateSongMock();
-                song.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayer.Object);
-
-                library.AddSongToPlaylist(song.Object);
-
-                var handle = new ManualResetEvent(false);
-
-                song.Object.Corrupted += (sender, args) => handle.Set();
-
-                library.PlaySong(0);
-
-                handle.WaitOne();
-
-                Assert.IsTrue(song.Object.IsCorrupted);
-            }
-        }
-
-        [Test]
-        public void PlayNextSong_UserIsNotAdministrator_ThrowsInvalidOperationException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                library.CreateAdmin("TestPassword");
-                library.ChangeToParty();
-
-                Assert.Throws<InvalidOperationException>(library.PlayNextSong);
-            }
-        }
-
-        [Test]
-        public void PlayPreviousSong_PlaylistIsEmpty_ThrowsInvalidOperationException()
-        {
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
-            {
-                Assert.Throws<InvalidOperationException>(library.PlayPreviousSong);
-            }
-        }
-
-        [Test]
-        public void PlaysNextSongAutomatically()
-        {
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
-            {
-                var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-                song1.Setup(p => p.CreateAudioPlayer()).Returns(() => new JumpAudioPlayer());
-
-                var song2 = new Mock<Song>("TestPath2", AudioType.Mp3, TimeSpan.Zero);
-                song2.Setup(p => p.CreateAudioPlayer()).Returns(() => new JumpAudioPlayer());
-
-                library.AddSongsToPlaylist(new[] { song1.Object, song2.Object });
-
-                var handle = new ManualResetEvent(false);
-                int played = 0;
-
-                library.SongStarted += (sender, e) =>
+                using (Library library = Helpers.CreateLibrary())
                 {
-                    played++;
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.AddAndSwitchToPlaylist("Playlist", token);
 
-                    if (played == 2)
-                    {
-                        handle.Set();
-                    }
-                };
-
-                library.PlaySong(0);
-
-                if (!handle.WaitOne(5000))
-                {
-                    Assert.Fail("Timout");
+                    Assert.Throws<InvalidOperationException>(() => library.AddAndSwitchToPlaylist("Playlist", token));
                 }
             }
         }
 
-        [Test]
-        public void PlaySong_IndexIsLessThanZero_ThrowsArgumentOutOfRangeException()
+        public class TheAddPlaylistMethod
         {
-            using (Library library = Helpers.CreateLibrary())
+            [Fact]
+            public void ThrowInvalidOperationExceptionIfPlaylistWithExistingNameIsAdded()
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => library.PlaySong(-1));
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    library.AddPlaylist("Playlist", token);
+
+                    Assert.Throws<InvalidOperationException>(() => library.AddPlaylist("Playlist", token));
+                }
+            }
+
+            [Fact]
+            public void ThrowsArgumentNullExceptionIfNameIsNull()
+            {
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Assert.Throws<ArgumentNullException>(() => library.AddPlaylist(null, library.LocalAccessControl.RegisterLocalAccessToken()));
+                }
             }
         }
 
-        [Test]
-        public void PlaySong_UserIsNotAdministratorAndLockPlayPauseIsTrue_ThrowsInvalidOperationException()
+        public class TheAddSongsToPlaylistMethod
         {
-            var settings = new Mock<ILibrarySettings>();
-            settings.SetupProperty(p => p.LockPlayPause, true);
-
-            using (Library library = Helpers.CreateLibrary(settings.Object))
+            [Fact]
+            public void ThrowsAccessExceptionWithGuestTokenAndMultipleSongs()
             {
-                library.CreateAdmin("TestPassword");
-                library.ChangeToParty();
+                var songs = new[]
+            {
+                Substitute.For<Song>("TestPath", TimeSpan.Zero),
+                Substitute.For<Song>("TestPath", TimeSpan.Zero)
+            };
 
-                Assert.Throws<InvalidOperationException>(() => library.PlaySong(0));
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    library.LocalAccessControl.SetLocalPassword(token, "Password");
+                    library.LocalAccessControl.DowngradeLocalAccess(token);
+
+                    Assert.Throws<AccessException>(() => library.AddSongsToPlaylist(songs, token));
+                }
+            }
+
+            [Fact]
+            public void ThrowsArgumentNullExceptionIfSongIsNull()
+            {
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Assert.Throws<ArgumentNullException>(() => library.AddSongToPlaylist(null));
+                }
+            }
+
+            [Fact]
+            public void ThrowsArgumentNullExceptionIfSongListIsNull()
+            {
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Assert.Throws<ArgumentNullException>(() => library.AddSongsToPlaylist(null, library.LocalAccessControl.RegisterLocalAccessToken()));
+                }
             }
         }
 
-        [Test]
-        public void RemoveFromLibrary_IsNotAdministratorAndRemovalIsLocked_ThrowsInvalidOperationException()
+        public class TheChangeSongSourceMethod
         {
-            using (Library library = Helpers.CreateLibrary())
+            [Fact]
+            public async Task SmokeTest()
             {
-                library.LockLibraryRemoval = true;
+                var fileSystem = new MockFileSystem();
+                fileSystem.Directory.CreateDirectory("C://Test");
 
-                library.CreateAdmin("Password");
-                library.ChangeToParty();
+                using (Library library = Helpers.CreateLibrary(fileSystem))
+                {
+                    library.ChangeSongSourcePath("C://Test", library.LocalAccessControl.RegisterLocalAccessToken());
+                    Assert.Equal("C://Test", await library.SongSourcePath.FirstAsync());
+                }
+            }
 
-                Assert.Throws<InvalidOperationException>(() => library.RemoveFromLibrary(Helpers.SetupSongMocks(1)));
+            [Fact]
+            public void ThrowsArgumentExceptionIfDirectoryDoesntExist()
+            {
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Assert.Throws<ArgumentException>(() => library.ChangeSongSourcePath("C://Test", library.LocalAccessControl.RegisterLocalAccessToken()));
+                }
+            }
+
+            [Fact]
+            public async Task TriggersUpdate()
+            {
+                var fileSystem = new MockFileSystem();
+                fileSystem.Directory.CreateDirectory("C://Test");
+
+                using (var library = Helpers.CreateLibrary(fileSystem))
+                {
+                    library.Initialize();
+
+                    var updated = library.IsUpdating.FirstAsync(x => x).PublishLast();
+                    updated.Connect();
+
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    library.ChangeSongSourcePath("C://Test", token);
+
+                    await updated.Timeout(TimeSpan.FromSeconds(5));
+                }
             }
         }
 
-        [Test]
-        public void RemoveFromLibrary_SongListIsNull_ThrowsArgumentNullException()
+        public class TheContinueSongAsyncMethod
         {
-            using (Library library = Helpers.CreateLibrary())
+            [Fact]
+            public async Task CallsAudioPlayerPlay()
             {
-                Assert.Throws<ArgumentNullException>(() => library.RemoveFromLibrary(null));
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    bool called = false;
+                    library.AudioPlayerCallback.PlayRequest = () =>
+                    {
+                        called = true;
+                        return Task.Delay(0);
+                    };
+
+                    Song song = Helpers.SetupSongMock();
+
+                    library.AddSongToPlaylist(song);
+
+                    await library.PlaySongAsync(0, token);
+
+                    await library.ContinueSongAsync(token);
+
+                    Assert.True(called);
+                }
+            }
+
+            [Fact]
+            public async Task ThrowsAccessExceptionWithGuestToken()
+            {
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    library.LocalAccessControl.SetLocalPassword(token, "Password");
+                    library.LocalAccessControl.DowngradeLocalAccess(token);
+
+                    await Helpers.ThrowsAsync<AccessException>(async () => await library.ContinueSongAsync(token));
+                }
             }
         }
 
-        [Test]
-        public void RemoveFromPlaylist_AccessModeIsPartyAndLockPlaylistRemovalIsTrue_ThrowsInvalidOperationException()
+        public class TheGetPlaylistByNameMethod
         {
-            var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-
-            var settings = new Mock<ILibrarySettings>();
-            settings.SetupProperty(p => p.LockPlaylistRemoval, true);
-
-            using (Library library = Helpers.CreateLibraryWithPlaylist(settings: settings.Object))
+            [Fact]
+            public void ReturnsNullIfPlaylistDoesNotExist()
             {
-                library.AddSongsToPlaylist(new[] { songMock.Object });
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Assert.Null(library.GetPlaylistByName("Playlist"));
+                }
+            }
 
-                library.CreateAdmin("SomePassword");
-
-                library.ChangeToParty();
-
-                Assert.Throws<InvalidOperationException>(() => library.RemoveFromPlaylist(new[] { 0 }));
+            [Fact]
+            public void ThrowsArgumentNullExceptionIfPlaylistNameIsNull()
+            {
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Assert.Throws<ArgumentNullException>(() => library.GetPlaylistByName(null));
+                }
             }
         }
 
-        [Test]
-        public void RemoveFromPlaylist_IndexesIsNull_ThrowsArgumentNullException()
+        public class TheInitializeMethod
         {
-            using (Library library = Helpers.CreateLibrary())
+            [Fact]
+            public async Task FiresInitalUpdateAfterLibraryLoad()
             {
-                Assert.Throws<ArgumentNullException>(() => library.RemoveFromPlaylist((IEnumerable<int>)null));
+                var fileSystem = new MockFileSystem();
+                fileSystem.Directory.CreateDirectory("C://Test");
+
+                var readerFired = new Subject<int>();
+                var reader = Substitute.For<ILibraryReader>();
+                reader.LibraryExists.Returns(true);
+                reader.ReadPlaylists().Returns(new List<Playlist>());
+                reader.ReadSongSourcePath().Returns(String.Empty);
+                reader.ReadSongs().Returns(x =>
+                {
+                    readerFired.OnNext(1);
+                    return new List<LocalSong>();
+                });
+
+                using (var library = Helpers.CreateLibrary(null, reader, null, fileSystem))
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    library.ChangeSongSourcePath("C://Test", token);
+
+                    var isUpdating = library.IsUpdating.FirstAsync(x => x).Select(x => 2).PublishLast();
+                    isUpdating.Connect();
+
+                    var first = readerFired.Amb(isUpdating).FirstAsync().PublishLast();
+                    first.Connect();
+
+                    library.Initialize();
+
+                    Assert.Equal(1, await first.Timeout(TimeSpan.FromSeconds(5)));
+                }
             }
         }
 
-        [Test]
-        public void RemoveFromPlaylist_RemoveByIndexes_SongsAreRemovedFromPlaylist()
+        public class TheIsUpdatingProperty
         {
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
+            [Fact]
+            public async Task SmokeTest()
             {
-                Song[] songs = Helpers.SetupSongMocks(4);
+                var fileSystem = new MockFileSystem();
+                fileSystem.Directory.CreateDirectory("C://Test");
 
-                library.AddSongsToPlaylist(songs);
+                using (var library = Helpers.CreateLibrary(fileSystem))
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                library.RemoveFromPlaylist(new[] { 0, 2 });
+                    library.ChangeSongSourcePath("C://Test", token);
 
-                Song[] remaining = library.CurrentPlaylist.Select(entry => entry.Song).ToArray();
+                    var isUpdating = library.IsUpdating.CreateCollection();
 
-                Assert.AreEqual(songs[1], remaining[0]);
-                Assert.AreEqual(songs[3], remaining[1]);
+                    var last = library.IsUpdating.Where(x => !x).ElementAt(1).PublishLast();
+                    last.Connect();
+
+                    library.Initialize();
+
+                    await last.Timeout(TimeSpan.FromSeconds(5));
+
+                    Assert.Equal(new[] { false, true, false }, isUpdating);
+                }
             }
         }
 
-        [Test]
-        public void RemoveFromPlaylist_RemoveBySongReference_SongsAreRemovedFromPlaylist()
+        public class ThePauseSongAsyncMethod
         {
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
+            [Fact]
+            public async Task CallsAudioPlayerPause()
             {
-                Song[] songs = Helpers.SetupSongMocks(4, true);
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    bool called = false;
+                    library.AudioPlayerCallback.PauseRequest = () =>
+                    {
+                        called = true;
+                        return Task.Delay(0);
+                    };
 
-                library.AddSongsToPlaylist(songs);
+                    Song song = Helpers.SetupSongMock();
 
-                library.RemoveFromPlaylist(new[] { songs[0], songs[2] });
+                    library.AddSongToPlaylist(song);
 
-                Song[] remaining = library.CurrentPlaylist.Select(entry => entry.Song).ToArray();
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                Assert.AreEqual(songs[1], remaining[0]);
-                Assert.AreEqual(songs[3], remaining[1]);
+                    await library.PlaySongAsync(0, token);
+
+                    await library.PauseSongAsync(token);
+
+                    Assert.True(called);
+                }
+            }
+
+            [Fact]
+            public async Task ThrowsAccessExceptionIfIsNotAdministratorAndPausingIsLocked()
+            {
+                var settings = new CoreSettings
+                {
+                    LockPlayPause = true
+                };
+
+                using (Library library = Helpers.CreateLibrary(settings))
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.LocalAccessControl.SetLocalPassword(token, "Password");
+                    library.LocalAccessControl.DowngradeLocalAccess(token);
+
+                    await Helpers.ThrowsAsync<AccessException>(async () => await library.PauseSongAsync(token));
+                }
             }
         }
 
-        [Test]
-        public void RemoveFromPlaylist_SongIsPlaying_CurrentPlayerIsStopped()
+        public class ThePlayInstantlyAsyncMethod
         {
-            var audioPlayerMock = new Mock<AudioPlayer>();
-
-            var songMock = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-            songMock.Setup(p => p.CreateAudioPlayer()).Returns(audioPlayerMock.Object);
-
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
+            [Fact]
+            public async Task JumpsOverCorruptedSong()
             {
-                library.AddSongsToPlaylist(new[] { songMock.Object });
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    using (var handle = new CountdownEvent(2))
+                    {
+                        library.AudioPlayerCallback.LoadRequest = path =>
+                        {
+                            switch (handle.CurrentCount)
+                            {
+                            case 2:
+                                handle.Signal();
+                                throw new SongLoadException();
+                            case 1:
+                                handle.Signal();
+                                break;
+                            }
 
-                library.PlaySong(0);
+                            return Task.Delay(0);
+                        };
 
-                library.RemoveFromPlaylist(new[] { 0 });
+                        Song[] songs = Helpers.SetupSongMocks(2);
 
-                audioPlayerMock.Verify(p => p.Stop(), Times.Once());
+                        await library.PlayInstantlyAsync(songs, library.LocalAccessControl.RegisterLocalAccessToken());
+
+                        if (!handle.Wait(5000))
+                        {
+                            Assert.False(true, "Timeout");
+                        }
+                    }
+                }
+            }
+
+            [Fact]
+            public async Task PlaysMultipleSongsInARow()
+            {
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    var conn = library.PlaybackState.Where(x => x == AudioPlayerState.Playing)
+                        .Take(2)
+                        .PublishLast();
+                    conn.Connect();
+
+                    await library.PlayInstantlyAsync(Helpers.SetupSongMocks(2), library.LocalAccessControl.RegisterLocalAccessToken());
+
+                    await conn.Timeout(TimeSpan.FromSeconds(5));
+                }
+            }
+
+            [Fact]
+            public async Task SmokeTest()
+            {
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    int called = 0;
+                    library.AudioPlayerCallback.PlayRequest = () =>
+                    {
+                        called++;
+                        return Task.Delay(0);
+                    };
+                    Song song = Helpers.SetupSongMock();
+
+                    await library.PlayInstantlyAsync(new[] { song }, library.LocalAccessControl.RegisterLocalAccessToken());
+
+                    Assert.Equal(1, called);
+                }
+            }
+
+            [Fact]
+            public async Task ThrowsArgumentNullExceptionIfSongListIsNull()
+            {
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    await Helpers.ThrowsAsync<ArgumentNullException>(async () => await library.PlayInstantlyAsync(null, library.LocalAccessControl.RegisterLocalAccessToken()));
+                }
+            }
+
+            [Fact]
+            public async Task ValidatesRemoteAccess()
+            {
+                var settings = new CoreSettings
+                {
+                    EnableRemoteControl = true,
+                    LockRemoteControl = true,
+                    RemoteControlPassword = "password"
+                };
+
+                Song[] songs = Helpers.SetupSongMocks(3);
+
+                using (Library library = Helpers.CreateLibrary(settings))
+                {
+                    Guid token = library.RemoteAccessControl.RegisterRemoteAccessToken(new Guid());
+
+                    await Helpers.ThrowsAsync<AccessException>(async () => await library.PlayInstantlyAsync(songs, token));
+
+                    settings.LockRemoteControl = false;
+                    await library.PlayInstantlyAsync(songs, token);
+
+                    settings.EnableRemoteControl = false;
+                    await library.PlayInstantlyAsync(songs, token);
+                }
             }
         }
 
-        [Test]
-        public void RemoveFromPlaylist_SongListIsNull_ThrowsArgumentNullException()
+        public class ThePlayNextSongAsyncMethod
         {
-            using (Library library = Helpers.CreateLibrary())
+            [Fact]
+            public async Task ThrowsAccessExceptionIfUserIsNotAdministrator()
             {
-                Assert.Throws<ArgumentNullException>(() => library.RemoveFromPlaylist((IEnumerable<Song>)null));
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.LocalAccessControl.SetLocalPassword(token, "Password");
+                    library.LocalAccessControl.DowngradeLocalAccess(token);
+
+                    await Helpers.ThrowsAsync<AccessException>(async () => await library.PlayNextSongAsync(token));
+                }
             }
         }
 
-        [Test]
-        public void RemovePlaylist_NoPlaylistExists_ThrowsInvalidOperationException()
+        public class ThePlayPreviousSongAsyncMethod
         {
-            using (Library library = Helpers.CreateLibrary())
+            [Fact]
+            public async Task ThrowsInvalidOperationExceptionIfPlaylistIsEmpty()
             {
-                Assert.Throws<InvalidOperationException>(() => library.RemovePlaylist("Playlist"));
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    await Helpers.ThrowsAsync<InvalidOperationException>(async () => await library.PlayPreviousSongAsync(library.LocalAccessControl.RegisterLocalAccessToken()));
+                }
             }
         }
 
-        [Test]
-        public void RemovePlaylist_PlaylistDoesNotExist_ThrowsInvalidOperationException()
+        public class ThePlaySongAsyncMethod
         {
-            using (Library library = Helpers.CreateLibrary())
+            [Fact]
+            public async Task PlaysNextSongAutomatically()
             {
-                library.AddPlaylist("Playlist");
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                Assert.Throws<InvalidOperationException>(() => library.RemovePlaylist("Playlist 2"));
+                    library.AddSongsToPlaylist(Helpers.SetupSongMocks(2), token);
+
+                    var coll = library.PlaybackState.CreateCollection();
+
+                    var conn = library.PlaybackState.Count(x => x == AudioPlayerState.Playing)
+                        .FirstAsync(x => x == 2)
+                        .PublishLast();
+                    conn.Connect();
+
+                    await library.PlaySongAsync(0, token);
+
+                    await conn.Timeout(TimeSpan.FromSeconds(5));
+                }
+            }
+
+            [Fact]
+            public async Task SetsSongIsCorruptedToTrueIfFailing()
+            {
+                Func<Library, Task> test = async library =>
+                {
+                    Song song = Helpers.SetupSongMock();
+
+                    library.AddSongToPlaylist(song);
+
+                    var observable = song.IsCorrupted.FirstAsync(x => x).PublishLast();
+                    observable.Connect();
+
+                    await library.PlaySongAsync(0, library.LocalAccessControl.RegisterLocalAccessToken());
+
+                    await observable.Timeout(TimeSpan.FromSeconds(10));
+
+                    Assert.True(song.IsCorrupted.Value);
+                };
+
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    library.AudioPlayerCallback.LoadRequest = path => { throw new SongLoadException(); };
+                    await test(library);
+                }
+
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    library.AudioPlayerCallback.PlayRequest = () => { throw new SongLoadException(); };
+                    await test(library);
+                }
+            }
+
+            [Fact]
+            public async Task ThrowsAccessExceptionIfUserIsNotAdministratorAndLockPlayPauseIsTrue()
+            {
+                var settings = new CoreSettings
+                {
+                    LockPlayPause = true
+                };
+
+                using (Library library = Helpers.CreateLibrary(settings))
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.LocalAccessControl.SetLocalPassword(token, "Password");
+                    library.LocalAccessControl.DowngradeLocalAccess(token);
+
+                    await Helpers.ThrowsAsync<AccessException>(async () => await library.PlaySongAsync(0, token));
+                }
+            }
+
+            [Fact]
+            public async Task ThrowsArgumentOutOfRangeExceptionIfIndexIsLessThanZero()
+            {
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    await Helpers.ThrowsAsync<ArgumentOutOfRangeException>(async () => await library.PlaySongAsync(-1, library.LocalAccessControl.RegisterLocalAccessToken()));
+                }
             }
         }
 
-        [Test]
-        public void RemovePlaylist_PlaylistNameIsNull_ThrowsArgumentNullException()
+        public class TheRemoveFromPlaylistMethod
         {
-            using (Library library = Helpers.CreateLibrary())
+            [Fact]
+            public void ByIndexesTest()
             {
-                Assert.Throws<ArgumentNullException>(() => library.RemovePlaylist(null));
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    Song[] songs = Helpers.SetupSongMocks(4);
+
+                    library.AddSongsToPlaylist(songs, token);
+
+                    library.RemoveFromPlaylist(new[] { 0, 2 }, token);
+
+                    Song[] remaining = library.CurrentPlaylist.Select(entry => entry.Song).ToArray();
+
+                    Assert.Equal(songs[1], remaining[0]);
+                    Assert.Equal(songs[3], remaining[1]);
+                }
+            }
+
+            [Fact]
+            public void BySongReferenceTest()
+            {
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    Song[] songs = Helpers.SetupSongMocks(4);
+
+                    library.AddSongsToPlaylist(songs, token);
+
+                    library.RemoveFromPlaylist(new[] { songs[0], songs[2] }, token);
+
+                    Song[] remaining = library.CurrentPlaylist.Select(entry => entry.Song).ToArray();
+
+                    Assert.Equal(songs[1], remaining[0]);
+                    Assert.Equal(songs[3], remaining[1]);
+                }
+            }
+
+            [Fact]
+            public void SmokeTest()
+            {
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    library.AddPlaylist("Playlist", token);
+
+                    library.RemovePlaylist(library.GetPlaylistByName("Playlist"), token);
+
+                    Assert.Empty(library.Playlists);
+                }
+            }
+
+            [Fact]
+            public void ThrowsAccessExceptionIfAccessModeIsPartyAndLockPlaylistRemovalIsTrue()
+            {
+                var songMock = Substitute.For<Song>("TestPath", TimeSpan.Zero);
+
+                var settings = new CoreSettings
+                {
+                    LockPlaylist = true
+                };
+
+                using (Library library = Helpers.CreateLibraryWithPlaylist(settings: settings))
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.LocalAccessControl.SetLocalPassword(token, "Password");
+                    library.LocalAccessControl.DowngradeLocalAccess(token);
+
+                    library.AddSongToPlaylist(songMock);
+
+                    Assert.Throws<AccessException>(() => library.RemoveFromPlaylist(new[] { 0 }, token));
+                }
+            }
+
+            [Fact]
+            public void ThrowsArgumentNullExceptionIfIndexesIsNull()
+            {
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Assert.Throws<ArgumentNullException>(() => library.RemoveFromPlaylist((IEnumerable<int>)null, library.LocalAccessControl.RegisterLocalAccessToken()));
+                }
+            }
+
+            [Fact]
+            public void ThrowsArgumentNullExceptionIfPlaylistNameIsNull()
+            {
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Assert.Throws<ArgumentNullException>(() => library.RemovePlaylist(null, library.LocalAccessControl.RegisterLocalAccessToken()));
+                }
+            }
+
+            [Fact]
+            public void ThrowsArgumentNullExceptionIfSongListIsNull()
+            {
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Assert.Throws<ArgumentNullException>(() => library.RemoveFromPlaylist((IEnumerable<Song>)null, library.LocalAccessControl.RegisterLocalAccessToken()));
+                }
+            }
+
+            [Fact]
+            public async Task WhileSongIsPlayingStopsCurrentSong()
+            {
+                bool finishedFired = false;
+
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    library.AudioPlayerCallback.PlayRequest = () => Task.Delay(0);
+
+                    library.AudioPlayerCallback.StopRequest = () =>
+                    {
+                        finishedFired = true;
+                        return Task.Delay(0);
+                    };
+
+                    library.AddSongsToPlaylist(Helpers.SetupSongMocks(1), token);
+
+                    await library.PlaySongAsync(0, token);
+
+                    library.RemoveFromPlaylist(new[] { 0 }, token);
+                }
+
+                Assert.True(finishedFired);
             }
         }
 
-        [Test]
-        public void RemovePlaylist_RemoveFirstPlaylist_PlaylistIsRemoved()
+        public class TheSaveMethod
         {
-            using (Library library = Helpers.CreateLibrary())
+            [Fact]
+            public async Task DoesNotSaveTemporaryPlaylist()
             {
-                library.AddPlaylist("Playlist");
+                var libraryWriter = Substitute.For<ILibraryWriter>();
 
-                library.RemovePlaylist("Playlist");
+                using (Library library = Helpers.CreateLibrary(libraryWriter))
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                Assert.IsEmpty(library.Playlists);
+                    library.AddAndSwitchToPlaylist("Playlist", token);
+
+                    await library.PlayInstantlyAsync(Helpers.SetupSongMocks(1), token);
+
+                    library.Save();
+                }
+
+                libraryWriter.Received(1).Write(Arg.Any<IEnumerable<LocalSong>>(), Arg.Is<IEnumerable<Playlist>>(x => x.Count() == 1), Arg.Any<string>());
             }
         }
 
-        [Test]
-        public void SwitchToPlaylist_ChangeToOtherPlaylistAndPlayFirstSong_CurrentSongIndexIsCorrectlySet()
+        public class TheSwitchToPlaylistMethod
         {
-            var blockingPlayer = new Mock<AudioPlayer>();
-            blockingPlayer.Setup(p => p.Play()).Callback(() => { });
-
-            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-            song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
-
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
+            [Fact]
+            public async Task PreventsNextSongFromPlaying()
             {
-                library.AddSongToPlaylist(song.Object);
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                library.PlaySong(0);
+                    int played = 0;
 
-                library.AddPlaylist("Playlist 2");
-                library.SwitchToPlaylist(library.Playlists.Last());
-                library.AddSongToPlaylist(song.Object);
+                    library.AudioPlayerCallback.PlayRequest = () =>
+                    {
+                        if (played == 0)
+                        {
+                            library.AddAndSwitchToPlaylist("Playlist2", token);
+                        }
 
-                library.PlaySong(0);
+                        played++;
 
-                Assert.AreEqual(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
-                Assert.AreEqual(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
+                        return Task.Delay(0);
+                    };
+
+                    library.AddSongsToPlaylist(Helpers.SetupSongMocks(2), token);
+
+                    await library.PlaySongAsync(0, token);
+
+                    Assert.Equal(1, played);
+                }
+            }
+
+            [Fact]
+            public async Task SetsCurrentSongIndexIfChangingToOtherPlaylistAndPlayingFirstSong()
+            {
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    library.AddSongToPlaylist(Helpers.SetupSongMock());
+
+                    await library.PlaySongAsync(0, token);
+
+                    library.AddPlaylist("Playlist 2", token);
+                    library.SwitchToPlaylist(library.Playlists.Last(), token);
+                    library.AddSongToPlaylist(Helpers.SetupSongMock());
+
+                    await library.PlaySongAsync(0, token);
+
+                    Assert.Equal(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex.Value);
+                    Assert.Equal(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex.Value);
+                }
+            }
+
+            [Fact]
+            public void ThrowsAccessExceptionIfPartyModeAndLockPlaylistSwitchingIsTrue()
+            {
+                var settings = new CoreSettings
+                {
+                    LockPlaylist = true
+                };
+
+                using (Library library = Helpers.CreateLibraryWithPlaylist("Playlist 1", settings))
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    library.AddPlaylist("Playlist 2", token);
+
+                    library.LocalAccessControl.SetLocalPassword(token, "Password");
+                    library.LocalAccessControl.DowngradeLocalAccess(token);
+
+                    Assert.Throws<AccessException>(() => library.SwitchToPlaylist(library.GetPlaylistByName("Playlist 2"), token));
+                }
+            }
+
+            [Fact]
+            public async Task WhilePlayingSongsChangesCurrentSongIndex()
+            {
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    library.AddSongToPlaylist(Helpers.SetupSongMock());
+
+                    await library.PlaySongAsync(0, token);
+
+                    library.AddPlaylist("Playlist 2", token);
+                    library.SwitchToPlaylist(library.GetPlaylistByName("Playlist 2"), token);
+                    library.AddSongToPlaylist(Helpers.SetupSongMock());
+
+                    await library.PlaySongAsync(0, token);
+
+                    library.SwitchToPlaylist(library.GetPlaylistByName("Playlist"), token);
+
+                    Assert.Equal(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex.Value);
+                    Assert.Equal(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex.Value);
+                }
             }
         }
 
-        [Test]
-        public void SwitchToPlaylist_ChangeToOtherPlaylistPlaySongAndChangeBack_CurrentSongIndexIsCorrectlySet()
+        public class TheUpdateNewMethod
         {
-            var blockingPlayer = new Mock<AudioPlayer>();
-            blockingPlayer.Setup(p => p.Play()).Callback(() => { });
-
-            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-            song.Setup(p => p.CreateAudioPlayer()).Returns(blockingPlayer.Object);
-
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
+            [Fact]
+            public async Task TriggersUpdate()
             {
-                library.AddSongToPlaylist(song.Object);
+                var fileSystem = new MockFileSystem();
+                fileSystem.Directory.CreateDirectory("C://Test");
 
-                library.PlaySong(0);
+                using (var library = Helpers.CreateLibrary(fileSystem))
+                {
+                    library.Initialize();
 
-                library.AddPlaylist("Playlist 2");
-                library.SwitchToPlaylist(library.GetPlaylistByName("Playlist 2"));
-                library.AddSongToPlaylist(song.Object);
+                    var firstUpdateFinished = library.IsUpdating.Where(x => !x).ElementAt(1).PublishLast();
+                    firstUpdateFinished.Connect();
 
-                library.PlaySong(0);
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                library.SwitchToPlaylist(library.GetPlaylistByName("Playlist"));
+                    library.ChangeSongSourcePath("C://Test", token);
 
-                Assert.AreEqual(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
-                Assert.AreEqual(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
-            }
-        }
+                    await firstUpdateFinished.Timeout(TimeSpan.FromSeconds(5));
 
-        [Test]
-        public void SwitchToPlaylist_PartyModeAndLockPlaylistSwitchingIsTrue_ThrowsInvalidOperationException()
-        {
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
-            {
-                library.LockPlaylistSwitching = true;
+                    var updated = library.IsUpdating.FirstAsync(x => x).PublishLast();
+                    updated.Connect();
 
-                library.AddPlaylist("Playlist 2");
+                    library.UpdateNow();
 
-                library.CreateAdmin("Password");
-                library.ChangeToParty();
-
-                Assert.Throws<InvalidOperationException>(() => library.SwitchToPlaylist(library.GetPlaylistByName("Playlist 2")));
-            }
-        }
-
-        [Test]
-        public void SwitchToPlaylist_PlaylistIsNull_ThrowsArgumentNullException()
-        {
-            using (Library library = Helpers.CreateLibrary())
-            {
-                Assert.Throws<ArgumentNullException>(() => library.SwitchToPlaylist(null));
-            }
-        }
-
-        [Test]
-        public void SwitchToPlaylist_PlaySongThenChangePlaylist_NextSongDoesNotPlayWhenSongFinishes()
-        {
-            using (Library library = Helpers.CreateLibraryWithPlaylist())
-            {
-                var handle = new ManualResetEvent(false);
-
-                var player = new HandledAudioPlayer(handle);
-
-                var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero);
-                song.Setup(p => p.CreateAudioPlayer()).Returns(player);
-
-                bool played = false;
-
-                var notPlayedSong = new Mock<Song>("TestPath2", AudioType.Mp3, TimeSpan.Zero);
-                notPlayedSong.Setup(p => p.CreateAudioPlayer())
-                    .Returns(new Mock<AudioPlayer>().Object)
-                    .Callback(() => played = true);
-
-                library.AddSongToPlaylist(song.Object);
-                library.PlaySong(0);
-
-                library.AddAndSwitchToPlaylist("Playlist2");
-
-                handle.Set();
-
-                Assert.IsFalse(played);
+                    await updated.Timeout(TimeSpan.FromSeconds(5));
+                }
             }
         }
     }

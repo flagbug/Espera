@@ -1,6 +1,6 @@
 ﻿namespace Espera.View
 {
-    internal enum SortOrder
+    public enum SortOrder
     {
         Ascending,
         Descending

@@ -1,23 +1,28 @@
-using Espera.Core;
-using Espera.View.Properties;
-using Espera.View.ViewModels;
-using Ionic.Utils;
-using MahApps.Metro;
-using Ookii.Dialogs.Wpf;
-using Rareform.Reflection;
 using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Espera.Core.Audio;
+using Espera.Core.Management;
+using Espera.View.ViewModels;
+using GlobalHotKey;
+using MahApps.Metro;
+using MahApps.Metro.Controls.Dialogs;
+using ReactiveUI;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using ListView = System.Windows.Controls.ListView;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace Espera.View.Views
 {
-    public partial class ShellView
+    public partial class ShellView : IEnableLogger
     {
+        private HotKeyManager hotKeyManager;
         private ShellViewModel shellViewModel;
 
         public ShellView()
@@ -26,61 +31,70 @@ namespace Espera.View.Views
 
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("en-us");
 
-            this.ChangeColor(Settings.Default.AccentColor);
-
             this.DataContextChanged += (sender, args) =>
             {
                 this.WireDataContext();
-                this.WireVideoPlayer();
+                this.WirePlayer();
                 this.WireScreenStateUpdater();
+
+                try
+                {
+                    this.RegisterGlobalHotKeys();
+                }
+
+                catch (Win32Exception ex)
+                {
+                    this.Log().ErrorException("Couldn't register hotkeys. " +
+                                              "There is probably another instance of Espera running " +
+                                              "or another application that requested the global hooks", ex);
+                }
+
+                this.Events().KeyUp.Where(x => x.Key == Key.Space)
+                    .InvokeCommand(this.shellViewModel, x => x.PauseContinueCommand);
+
+                this.shellViewModel.WhenAnyObservable(x => x.CurrentPlaylist.CurrentPlayingEntry)
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .Subscribe(x => this.PlaylistListBox.ScrollIntoView(x));
             };
 
-            Settings.Default.PropertyChanged += (sender, args) =>
+            this.Loaded += async (sender, args) =>
             {
-                if (args.PropertyName == Reflector.GetMemberName(() => Settings.Default.AccentColor))
+                var updateViewModel = this.shellViewModel.UpdateViewModel;
+
+                if (updateViewModel.ShowChangelog)
                 {
-                    this.ChangeColor(Settings.Default.AccentColor);
+                    var dialog = (SimpleDialog)this.Resources["Changelog"];
+                    await this.ShowMetroDialogAsync(dialog);
                 }
             };
         }
 
-        private void AddSongsButtonClick(object sender, RoutedEventArgs e)
+        private static void ChangeAccent(string accentName)
         {
-            string selectedPath;
-
-            if (VistaFolderBrowserDialog.IsVistaFolderDialogSupported)
-            {
-                var dialog = new VistaFolderBrowserDialog();
-
-                dialog.ShowDialog(this);
-
-                selectedPath = dialog.SelectedPath;
-            }
-
-            else
-            {
-                using (var dialog = new FolderBrowserDialogEx())
-                {
-                    dialog.ShowDialog();
-
-                    selectedPath = dialog.SelectedPath;
-                }
-            }
-
-            if (!String.IsNullOrEmpty(selectedPath))
-            {
-                this.shellViewModel.LocalViewModel.AddSongs(selectedPath);
-            }
+            Accent accent = ThemeManager.Accents.First(x => x.Name == accentName);
+            AppTheme theme = ThemeManager.DetectAppStyle(Application.Current).Item1;
+            ThemeManager.ChangeAppStyle(Application.Current, accent, theme);
         }
 
-        private void ChangeColor(string color)
+        private static void ChangeAppTheme(string themeName)
         {
-            ThemeManager.ChangeTheme(this, ThemeManager.DefaultAccents.First(accent => accent.Name == color), Theme.Dark);
+            ThemeManager.ChangeAppTheme(Application.Current, themeName);
+        }
+
+        private async void CloseChangelog(object sender, RoutedEventArgs e)
+        {
+            var dialog = (SimpleDialog)this.Resources["Changelog"];
+
+            await this.HideMetroDialogAsync(dialog);
+
+            var updateViewModel = this.shellViewModel.UpdateViewModel;
+            updateViewModel.ChangelogShown();
         }
 
         private void LoginButtonClick(object sender, RoutedEventArgs e)
         {
             ICommand command = this.shellViewModel.SettingsViewModel.LoginCommand;
+
             if (command.CanExecute(null))
             {
                 command.Execute(null);
@@ -107,6 +121,7 @@ namespace Espera.View.Views
             if (this.shellViewModel.CanModifyWindow)
             {
                 this.shellViewModel.Dispose();
+                this.hotKeyManager.Dispose();
             }
 
             else
@@ -117,7 +132,7 @@ namespace Espera.View.Views
 
         private void PlaylistContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            if (((ListView)sender).Items.IsEmpty)
+            if (((ListBox)sender).Items.IsEmpty)
             {
                 e.Handled = true;
             }
@@ -139,6 +154,8 @@ namespace Espera.View.Views
                 {
                     this.shellViewModel.RemoveSelectedPlaylistEntriesCommand.Execute(null);
                 }
+
+                e.Handled = true;
             }
 
             else if (e.Key == Key.Enter)
@@ -147,6 +164,8 @@ namespace Espera.View.Views
                 {
                     this.shellViewModel.PlayOverrideCommand.Execute(null);
                 }
+
+                e.Handled = true;
             }
         }
 
@@ -179,42 +198,48 @@ namespace Espera.View.Views
 
         private void PlaylistSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            this.shellViewModel.SelectedPlaylistEntries = ((ListView)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
+            this.shellViewModel.SelectedPlaylistEntries = ((ListBox)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
         }
 
-        private void SearchTextBoxKeyUp(object sender, KeyEventArgs e)
+        private void RegisterGlobalHotKeys()
         {
-            if (e.Key == Key.Enter)
-            {
-                this.shellViewModel.YoutubeViewModel.StartSearch();
-            }
+            this.hotKeyManager = new HotKeyManager();
+            this.hotKeyManager.Register(Key.MediaNextTrack, ModifierKeys.None);
+            this.hotKeyManager.Register(Key.MediaPreviousTrack, ModifierKeys.None);
+            this.hotKeyManager.Register(Key.MediaPlayPause, ModifierKeys.None);
 
-            e.Handled = true;
-        }
+            IObservable<Key> keyPressed = Observable.FromEventPattern<KeyPressedEventArgs>(
+                    h => this.hotKeyManager.KeyPressed += h,
+                    h => this.hotKeyManager.KeyPressed -= h)
+                .Select(x => x.EventArgs.HotKey.Key);
 
-        private void SetupVideoPlayer()
-        {
-            IVideoPlayerCallback callback = this.shellViewModel.VideoPlayerCallback;
-
-            callback.GetTime = () => (TimeSpan)this.Dispatcher.Invoke(new Func<TimeSpan>(() => this.videoPlayer.Position));
-            callback.SetTime = time => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Position = time));
-
-            callback.GetVolume = () => (float)this.Dispatcher.Invoke(new Func<float>(() => (float)this.videoPlayer.Volume));
-            callback.SetVolume = volume => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Volume = volume));
-
-            callback.LoadRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Source = callback.VideoUrl));
-            callback.PauseRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Pause()));
-            callback.PlayRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Play()));
-            callback.StopRequest = () => this.Dispatcher.Invoke(new Action(() => this.videoPlayer.Stop()));
+            keyPressed.Where(x => x == Key.MediaNextTrack).InvokeCommand(this.shellViewModel, x => x.NextSongCommand);
+            keyPressed.Where(x => x == Key.MediaPreviousTrack).InvokeCommand(this.shellViewModel, x => x.PreviousSongCommand);
+            keyPressed.Where(x => x == Key.MediaPlayPause).InvokeCommand(this.shellViewModel, x => x.PauseContinueCommand);
         }
 
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ICommand addToPlaylist = this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
+            ICommand command = this.shellViewModel.IsAdmin ? this.shellViewModel.CurrentSongSource.PlayNowCommand : this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
 
-            if (e.LeftButton == MouseButtonState.Pressed && addToPlaylist.CanExecute(null))
+            if (e.LeftButton == MouseButtonState.Pressed && command.CanExecute(null))
             {
-                addToPlaylist.Execute(null);
+                command.Execute(null);
+            }
+        }
+
+        private void SongKeyPressed(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                ICommand command = this.shellViewModel.IsAdmin ? this.shellViewModel.CurrentSongSource.PlayNowCommand : this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
+
+                if (command.CanExecute(null))
+                {
+                    command.Execute(null);
+                }
+
+                e.Handled = true;
             }
         }
 
@@ -224,36 +249,6 @@ namespace Espera.View.Views
             {
                 e.Handled = true;
             }
-        }
-
-        private void SongListSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            this.shellViewModel.CurrentSongSource.SelectedSongs = ((ListView)sender).SelectedItems.Cast<SongViewModelBase>();
-        }
-
-        private void SortLocalSongAlbum(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.LocalViewModel.OrderByAlbum();
-        }
-
-        private void SortLocalSongArtist(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.LocalViewModel.OrderByArtist();
-        }
-
-        private void SortLocalSongDuration(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.LocalViewModel.OrderByDuration();
-        }
-
-        private void SortLocalSongGenre(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.LocalViewModel.OrderByGenre();
-        }
-
-        private void SortLocalSongTitle(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.LocalViewModel.OrderByTitle();
         }
 
         private void SortYoutubeSongDuration(object sender, RoutedEventArgs e)
@@ -278,33 +273,49 @@ namespace Espera.View.Views
 
         private void VideoPlayerMediaEnded(object sender, RoutedEventArgs e)
         {
-            this.shellViewModel.VideoPlayerCallback.Finished();
+            this.shellViewModel.AudioPlayerCallback.Finished();
         }
 
         private void WireDataContext()
         {
             this.shellViewModel = (ShellViewModel)this.DataContext;
+
+            this.shellViewModel.ViewSettings.WhenAnyValue(x => x.AccentColor)
+                .Subscribe(ChangeAccent);
+
+            this.shellViewModel.ViewSettings.WhenAnyValue(x => x.AppTheme)
+                .Subscribe(ChangeAppTheme);
+        }
+
+        private void WirePlayer()
+        {
+            IAudioPlayerCallback callback = this.shellViewModel.AudioPlayerCallback;
+            callback.GetTime = () => this.Dispatcher.Invoke(() => this.videoPlayer.Position);
+            callback.SetTime = time => this.Dispatcher.Invoke(() => this.videoPlayer.Position = time);
+
+            callback.GetVolume = () => this.Dispatcher.Invoke(() => (float)this.videoPlayer.Volume);
+            callback.SetVolume = volume => this.Dispatcher.Invoke(() => this.videoPlayer.Volume = volume);
+
+            callback.LoadRequest = path => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Source = path).Task;
+            callback.PauseRequest = () => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Pause()).Task;
+            callback.PlayRequest = () => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Play()).Task;
+            callback.StopRequest = () => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Stop()).Task;
         }
 
         private void WireScreenStateUpdater()
         {
-            this.shellViewModel.UpdateScreenState += (sender2, args2) =>
+            this.shellViewModel.UpdateScreenState.Subscribe(x =>
             {
-                if (Settings.Default.LockWindow && Settings.Default.GoFullScreenOnLock)
+                if (this.shellViewModel.ViewSettings.LockWindow && this.shellViewModel.ViewSettings.GoFullScreenOnLock)
                 {
-                    this.IgnoreTaskbarOnMaximize = !this.shellViewModel.IsAdmin && Settings.Default.GoFullScreenOnLock;
+                    this.IgnoreTaskbarOnMaximize = x == AccessPermission.Guest && this.shellViewModel.ViewSettings.GoFullScreenOnLock;
 
                     this.WindowState = WindowState.Normal;
                     this.WindowState = WindowState.Maximized;
 
                     this.Topmost = this.IgnoreTaskbarOnMaximize;
                 }
-            };
-        }
-
-        private void WireVideoPlayer()
-        {
-            this.shellViewModel.VideoPlayerCallbackChanged += (sender, args) => this.SetupVideoPlayer();
+            });
         }
     }
 }

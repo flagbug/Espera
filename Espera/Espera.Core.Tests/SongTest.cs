@@ -1,63 +1,58 @@
-﻿using System;
-using Espera.Core.Audio;
-using Moq;
-using NUnit.Framework;
+﻿using NSubstitute;
+using System;
+using Xunit;
 
 namespace Espera.Core.Tests
 {
-    [TestFixture]
     public sealed class SongTest
     {
-        [Test]
-        public void ClearCache_SongHasNotToBeCached_ThrowsInvalidOperationException()
+        public class TheEqualsMethod
         {
-            var song = new Mock<Song>("TestPath1", AudioType.Mp3, TimeSpan.Zero);
-            song.SetupGet(p => p.HasToCache).Returns(false);
+            [Fact]
+            public void EqualsNullIsFalse()
+            {
+                var song = Substitute.For<Song>("TestPath", TimeSpan.Zero);
 
-            Assert.Throws<InvalidOperationException>(() => song.Object.ClearCache());
+                Assert.False(song.Equals(null));
+            }
+
+            [Fact]
+            public void EqualsSamePathIsTrue()
+            {
+                var song1 = Substitute.For<Song>("TestPath", TimeSpan.Zero);
+                var song2 = Substitute.For<Song>("TestPath", TimeSpan.Zero);
+
+                Assert.True(song1.Equals(song2));
+            }
+
+            [Fact]
+            public void EqualsSameReferenceIsTrue()
+            {
+                var song = Substitute.For<Song>("TestPath", TimeSpan.Zero);
+
+                Assert.True(song.Equals(song));
+            }
+
+            [Fact]
+            public void EqualsSongWithDifferentPathIsFalse()
+            {
+                var song1 = Substitute.For<Song>("TestPath", TimeSpan.Zero);
+                var song2 = Substitute.For<Song>("TestPath1", TimeSpan.Zero);
+
+                Assert.False(song1.Equals(song2));
+            }
         }
 
-        [Test]
-        public void EqualsNullIsFalse()
+        public class TheGetHashCodeMethod
         {
-            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero).Object;
+            [Fact]
+            public void ReturnsEqualHashCodesForEqualObjects()
+            {
+                var song1 = Substitute.For<Song>("TestPath", TimeSpan.Zero);
+                var song2 = Substitute.For<Song>("TestPath", TimeSpan.Zero);
 
-            Assert.IsFalse(song.Equals(null));
-        }
-
-        [Test]
-        public void EqualsSamePathIsTrue()
-        {
-            var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero).Object;
-            var song2 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero).Object;
-
-            Assert.IsTrue(song1.Equals(song2));
-        }
-
-        [Test]
-        public void EqualsSameReferenceIsTrue()
-        {
-            var song = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero).Object;
-
-            Assert.IsTrue(song.Equals(song));
-        }
-
-        [Test]
-        public void EqualsSongWithDifferentPathIsFalse()
-        {
-            var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero).Object;
-            var song2 = new Mock<Song>("TestPath1", AudioType.Mp3, TimeSpan.Zero).Object;
-
-            Assert.IsFalse(song1.Equals(song2));
-        }
-
-        [Test]
-        public void GetHashcode_EqualObjects_ReturnsEqualHashCodes()
-        {
-            var song1 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero) { CallBase = true }.Object;
-            var song2 = new Mock<Song>("TestPath", AudioType.Mp3, TimeSpan.Zero) { CallBase = true }.Object;
-
-            Assert.AreEqual(song1.GetHashCode(), song2.GetHashCode());
+                Assert.Equal(song1.GetHashCode(), song2.GetHashCode());
+            }
         }
     }
 }

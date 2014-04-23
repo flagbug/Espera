@@ -1,25 +1,27 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
+using Xunit;
 
 namespace Espera.Core.Tests
 {
-    [TestFixture]
     public class TagSanitizerTest
     {
-        [Test]
-        public void Sanitize_TagContainsInvalidXmlCharacter_ReturnsSanitizedString()
+        public class TheSanitizeMethod
         {
-            const string tag = "A\u0018B";
+            [Fact]
+            public void ThrowsArgumentNullExceptionIfTagIsNull()
+            {
+                Assert.Throws<ArgumentNullException>(() => TagSanitizer.Sanitize(null));
+            }
 
-            string sanitized = TagSanitizer.Sanitize(tag);
+            [Fact]
+            public void WithInvalidXmlCharacter()
+            {
+                const string tag = "A\u0018B";
 
-            Assert.AreEqual("A_B", sanitized);
-        }
+                string sanitized = TagSanitizer.Sanitize(tag);
 
-        [Test]
-        public void Sanitize_TagIsNull_ThrowsArgumentNullException()
-        {
-            Assert.Throws<ArgumentNullException>(() => TagSanitizer.Sanitize(null));
+                Assert.Equal("A_B", sanitized);
+            }
         }
     }
 }

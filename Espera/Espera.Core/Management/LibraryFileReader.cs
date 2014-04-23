@@ -1,62 +1,109 @@
-﻿using Rareform.Validation;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace Espera.Core.Management
 {
     public class LibraryFileReader : ILibraryReader
     {
-        private readonly Dictionary<string, DriveType> driveTypeCache;
         private readonly string sourcePath;
+        private JObject cache;
+        private IReadOnlyList<LocalSong> songCache;
 
         public LibraryFileReader(string sourcePath)
         {
             if (sourcePath == null)
-                Throw.ArgumentNullException(() => sourcePath);
+                throw new ArgumentNullException("sourcePath");
 
             this.sourcePath = sourcePath;
-            this.driveTypeCache = new Dictionary<string, DriveType>();
         }
 
-        public IEnumerable<Playlist> ReadPlaylists()
+        public bool LibraryExists
         {
-            if (!File.Exists(this.sourcePath))
-                return Enumerable.Empty<Playlist>();
+            get { return File.Exists(this.sourcePath); }
+        }
 
-            using (FileStream sourceStream = File.OpenRead(this.sourcePath))
+        public void InvalidateCache()
+        {
+            this.cache = null;
+            this.songCache = null;
+        }
+
+        public IReadOnlyList<Playlist> ReadPlaylists()
+        {
+            try
             {
-                return LibraryReader.ReadPlaylists(sourceStream, this.GetDriveType);
+                this.LoadToCache();
+
+                return LibraryDeserializer.DeserializePlaylists(this.cache, this.songCache);
+            }
+
+            catch (Exception ex)
+            {
+                if (ex is JsonException || ex is IOException)
+                {
+                    throw new LibraryReadException("Failed to read playlists.", ex);
+                }
+
+                throw;
             }
         }
 
-        public IEnumerable<LocalSong> ReadSongs()
+        public IReadOnlyList<LocalSong> ReadSongs()
         {
-            if (!File.Exists(this.sourcePath))
-                return Enumerable.Empty<LocalSong>();
+            IReadOnlyList<LocalSong> songs;
 
-            using (FileStream sourceStream = File.OpenRead(this.sourcePath))
+            try
             {
-                return LibraryReader.ReadSongs(sourceStream, this.GetDriveType);
+                this.LoadToCache();
+
+                songs = LibraryDeserializer.DeserializeSongs(this.cache);
+            }
+
+            catch (Exception ex)
+            {
+                if (ex is JsonException || ex is IOException)
+                {
+                    throw new LibraryReadException("Failed to read songs.", ex);
+                }
+
+                throw;
+            }
+
+            this.songCache = songs;
+            return songs;
+        }
+
+        public string ReadSongSourcePath()
+        {
+            try
+            {
+                this.LoadToCache();
+
+                return LibraryDeserializer.DeserializeSongSourcePath(this.cache);
+            }
+
+            catch (Exception ex)
+            {
+                if (ex is JsonException || ex is IOException)
+                {
+                    throw new LibraryReadException("Failed to read song source path.", ex);
+                }
+
+                throw;
             }
         }
 
-        private DriveType GetDriveType(string path)
+        private void LoadToCache()
         {
-            string root = Path.GetPathRoot(path);
+            if (cache != null)
+                return;
 
-            DriveType driveType;
+            string json = File.ReadAllText(this.sourcePath);
 
-            if (this.driveTypeCache.TryGetValue(root, out driveType))
-            {
-                return driveType;
-            }
-
-            driveType = new DriveInfo(root).DriveType;
-
-            this.driveTypeCache.Add(root, driveType);
-
-            return driveType;
+            this.cache = JObject.Parse(json);
         }
     }
 }

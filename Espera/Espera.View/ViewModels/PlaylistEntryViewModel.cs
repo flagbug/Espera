@@ -1,14 +1,18 @@
 ﻿using Espera.Core;
 using Espera.Core.Management;
+using ReactiveMarrow;
+using ReactiveUI;
 using System;
+using System.Reactive.Disposables;
 
 namespace Espera.View.ViewModels
 {
     public sealed class PlaylistEntryViewModel : SongViewModelBase, IDisposable
     {
+        private readonly CompositeDisposable disposable;
         private readonly PlaylistEntry entry;
-        private bool hasCachingFailed;
-        private bool isInactive;
+        private readonly ObservableAsPropertyHelper<bool> isCorrupted;
+        private readonly ObservableAsPropertyHelper<int> votes;
         private bool isPlaying;
 
         public PlaylistEntryViewModel(PlaylistEntry entry)
@@ -16,34 +20,15 @@ namespace Espera.View.ViewModels
         {
             this.entry = entry;
 
-            if (this.Model.HasToCache && !this.Model.IsCached)
-            {
-                this.Model.CachingProgressChanged += this.CachingProgressChanged;
+            this.disposable = new CompositeDisposable();
 
-                this.Model.CachingFailed += this.OnCachingFailed;
+            this.isCorrupted = this.Model.IsCorrupted
+                .ToProperty(this, x => x.IsCorrupted)
+                .DisposeWith(disposable);
 
-                this.Model.CachingCompleted += this.OnCachingCompleted;
-            }
-
-            this.Model.Corrupted += OnCorrupted;
-        }
-
-        public int CacheProgress
-        {
-            get { return this.Model.CachingProgress; }
-        }
-
-        public bool HasCachingFailed
-        {
-            get { return this.hasCachingFailed; }
-            set
-            {
-                if (this.HasCachingFailed != value)
-                {
-                    this.hasCachingFailed = value;
-                    this.NotifyOfPropertyChange(() => this.HasCachingFailed);
-                }
-            }
+            this.votes = this.entry.WhenAnyValue(x => x.Votes)
+                .ToProperty(this, x => x.Votes)
+                .DisposeWith(disposable);
         }
 
         public int Index
@@ -53,90 +38,28 @@ namespace Espera.View.ViewModels
 
         public bool IsCorrupted
         {
-            get { return this.Model.IsCorrupted; }
-        }
-
-        public bool IsInactive
-        {
-            get { return this.isInactive; }
-            set
-            {
-                if (this.IsInactive != value)
-                {
-                    this.isInactive = value;
-                    this.NotifyOfPropertyChange(() => this.IsInactive);
-                }
-            }
+            get { return this.isCorrupted.Value; }
         }
 
         public bool IsPlaying
         {
             get { return this.isPlaying; }
-            set
-            {
-                if (this.IsPlaying != value)
-                {
-                    this.isPlaying = value;
-                    this.NotifyOfPropertyChange(() => this.IsPlaying);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(ref this.isPlaying, value); }
         }
 
-        public bool ShowCaching
+        public bool IsYoutube
         {
-            get { return this.Model.HasToCache && this.CacheProgress != 100 || this.HasCachingFailed; }
+            get { return this.Model is YoutubeSong; }
         }
 
-        public string Source
+        public int Votes
         {
-            get
-            {
-                if (this.Model is LocalSong)
-                {
-                    return "Local";
-                }
-
-                if (this.Model is YoutubeSong)
-                {
-                    return "YouTube";
-                }
-
-                throw new InvalidOperationException();
-            }
+            get { return this.votes.Value; }
         }
 
         public void Dispose()
         {
-            if (this.Model.HasToCache && !this.Model.IsCached)
-            {
-                this.Model.CachingProgressChanged -= this.CachingProgressChanged;
-
-                this.Model.CachingFailed -= this.OnCachingFailed;
-
-                this.Model.CachingCompleted -= this.OnCachingCompleted;
-            }
-
-            this.Model.Corrupted -= this.OnCorrupted;
-        }
-
-        private void CachingProgressChanged(object sender, EventArgs e)
-        {
-            this.NotifyOfPropertyChange(() => this.CacheProgress);
-        }
-
-        private void OnCachingCompleted(object sender, EventArgs eventArgs)
-        {
-            this.NotifyOfPropertyChange(() => this.ShowCaching);
-        }
-
-        private void OnCachingFailed(object sender, EventArgs eventArgs)
-        {
-            this.HasCachingFailed = true;
-        }
-
-        private void OnCorrupted(object sender, EventArgs eventArgs)
-        {
-            this.NotifyOfPropertyChange(() => this.IsCorrupted);
+            this.disposable.Dispose();
         }
     }
 }

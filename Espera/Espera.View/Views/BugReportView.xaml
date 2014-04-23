@@ -4,12 +4,12 @@
                       xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                       Title="Bug report"
                       Width="600"
-                      Height="400"
+                      Height="430"
                       ResizeMode="NoResize">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colours.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
@@ -27,8 +27,14 @@
     <StackPanel Margin="10" Orientation="Vertical">
         <TextBlock Style="{StaticResource DescriptionHeaderStyle}" Text="Report a bug" />
         <TextBlock Style="{StaticResource DescriptionHeaderStyle2}" Text="You can send a bug report to help improving Espera" />
+        <DockPanel Margin="0, 10, 0, 0">
+            <TextBlock Text="Email (optional)" VerticalAlignment="Center" DockPanel.Dock="Left" />
+            <TextBox Margin="10, 0, 0, 0" Text="{Binding Path=Email}" DockPanel.Dock="Right" />
+        </DockPanel>
         <TextBox Height="225"
-                 Margin="0, 15, 0, 0"
+                 TextWrapping="Wrap"
+                 AcceptsReturn="True"
+                 Margin="0, 10, 0, 0"
                  Controls:TextboxHelper.Watermark="Please enter a detailed description of the bug you encountered."
                  Text="{Binding Path=Message,
                                 UpdateSourceTrigger=PropertyChanged}" />
