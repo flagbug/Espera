@@ -771,8 +771,6 @@ namespace Espera.Core.Management
 
             await this.RemoveMissingSongsAsync(path);
 
-            var artworkLookup = new HashSet<string>(this.Songs.Select(x => x.ArtworkKey.FirstAsync().Wait()).Where(x => x != null));
-
             ILocalSongFinder songFinder = this.localSongFinderFunc(path);
 
             this.currentSongFinderSubscription = songFinder.GetSongsAsync()
