@@ -311,7 +311,7 @@
                 <TextBlock VerticalAlignment="Center" Text="/" />
                 <TextBlock VerticalAlignment="Center" Text="{Binding Path=TotalTime}" />
             </StackPanel>
-            <Grid Grid.Column="4" Width="300">
+            <Grid Grid.Column="4" Width="350">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
