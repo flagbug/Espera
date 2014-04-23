@@ -12,8 +12,6 @@ Bitcoin: 1PHaQ2Qg6rR3Qo2FfLqjG6se529dQTCEAD
 
 ## Overview
 
-**This is the development branch of the soon to be released version 2.0 of Espera**
-
 Espera is an open-source media player that plays audio files and YouTube videos and has a special "party mode".
 
 ## Features
