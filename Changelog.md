@@ -1,101 +1,11 @@
-# v2.0.0 Beta 11
-
-## Features
-- Added instant search for YouTube videos.
-
-## Bugfixes
-- Fixed the changelog being empty.
-- Fixed various window issues.
-- Fixed various issues with YouTube.
-
-# v2.0.0 Beta 10
-
-## Features
-- Added more accent colors.
-
-## Bugfixes
-- Fixed various issues with the window.
-- Fixed the playback resetting when the accent color is changed.
-- Fixed some YouTube videos not playing.
-- Fixed an application crash when a link is opened.
-- Fixed the order of artists in the local song tab.
-
-# v2.0.0 Beta 9
-
-## Features
-- Added a light theme. It it selectable in the appearance settings menu.
-
-## Bugfixes
-- Fixed some possibilities of library corruption.
-- Fixed the application crashing when another application also registers global hooks to the media keys.
-- Fixed a bug that caused the settings menu to be unopenable when in party mode.
-
-# v2.0.0 Beta 8
-
-## Features
-- Added media key bindings, for playing, pausing as well as playing the next and previous song. 
-  They also work even if Espera isn't focused.
-- Added an option to disable the automatic display of the changelog when Espera is updated.
-
-## Bugfixes
-- Fixed various issues with YouTube.
-- Fixed some UI quirks.
-- Fixed an issue where pressing the space bar multiple times wouldn't pause or continue a song anymore.
-- Fixed Espera not looking for an update at startup.
-
-# v2.0.0 Beta 7
-
-## Features
-- Search for updates regularly.
-
-## Bugfixes
-- Fixed some visual bugs.
-- Fixed a bug that caused the application to crash when pressing the "Play" button.
-
-# v2.0.0 Beta 6
-
-## Features
-- Added an option to disable crash/error/statistics tracking.
-
-## Bugfixes
-- Fixed a bug that caused the application to crash, if the remote control port was already in use.
-
-# v2.0.0 Beta 5
-
-## Features
-- The full changelog is now shown after an update.
-
-## Changes
-- Removed the "Dev" update channel.
-- The default YouTube download path has changes to the videos folder.
-
-## Bugfixes
-- Fixed a bug where a YouTube download path change isn't reflected in the UI.
-
-# v2.0.0 Beta 4
-
-## Changes
-- Changed the library savefile format.
-
-# v2.0.0 Beta 3
-
-## Bugfixes
-- Fixed the changelog dialog appearing at every application startup.
-- Fixed some problems with the error reporting.
-
-# v2.0.0 Beta 2
-
-## Changes
-- The beta now has the "Dev" channel as default update channel.
-
-# v2.0.0 Beta 1
+# v2.0.0
 
 ## Features
 - Espera has been completely rewritten.
 - Double clicking a song now starts the playback instantly, 
   there's no need to create a new playlist beforehand.
 - New songs in the library folder and existing ones are automatically updates 
-  if their metatdata has changed.
+  if their metadata has changed.
 - The YouTube player can now show the video and has support for multiple 
   quality settings.
 - Added support for AAC playback.
@@ -103,13 +13,24 @@
 - Album covers are now displayed next to the artist.
 - Added a slider to change the scaling of the application. This is useful when 
   Espera is displayed on a TV screen.
-- Espera can now be remote-controled via an Android app. The app will soon be 
+- Espera can now be remote-controlled via an Android app. The app will soon be 
   released.
-- Added support for downloadig YouTube videos directly.
+- Added instant search for YouTube videos.
+- Added support for downloading YouTube videos directly.
+- Added more accent colors.
+- Added a light application theme.
+- Added media key bindings, for playing, pausing as well as playing the next and previous song. 
+  They also work even if Espera isn't focused.
+- Espera now automatically updates in the background.
 
 ## Changes
 - Youtube streaming is now enabled by default.
 - Espera now requires .NET 4.5 to be installed.
+
+## Bugfixes
+- Fixed various YouTube playback issues.
+- Fixed some possibilities of library corruption.
+- Fixed an issue where pressing the space bar multiple times wouldn't pause or continue a song anymore.
 
 # v1.7.6
 
@@ -117,7 +38,7 @@
 - YouTube streaming is now enabled by default.
 
 ## Bugfixes
-- Fixed the settings not beeing fully accessible in a small window.
+- Fixed the settings not being fully accessible in a small window.
 
 # v1.7.5
 
