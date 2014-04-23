@@ -4,17 +4,14 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Abstractions;
-using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Akavache;
 using Caliburn.Micro;
-using Espera.Core;
 using Espera.Core.Analytics;
 using Espera.Core.Management;
 using Espera.Core.Settings;
@@ -25,8 +22,6 @@ using NLog.Config;
 using NLog.Targets;
 using ReactiveUI;
 using ReactiveUI.NLog;
-using Shimmer.Client;
-using Shimmer.Core;
 
 namespace Espera.View
 {
@@ -127,11 +122,6 @@ namespace Espera.View
 
             this.SetupMobileApi();
 
-            this.updateSubscription = Observable.Interval(TimeSpan.FromMinutes(15), RxApp.TaskpoolScheduler)
-                .StartWith(0) // Trigger an initial update
-                .SelectMany(x => this.UpdateSilentlyAsync().ToObservable())
-                .Subscribe();
-
             base.OnStartup(sender, e);
         }
 
@@ -230,80 +220,6 @@ namespace Espera.View
             coreSettings.WhenAnyValue(x => x.EnableRemoteControl)
                 .Where(x => !x && this.mobileApi != null)
                 .Subscribe(x => this.mobileApi.Dispose());
-        }
-
-        private async Task UpdateSilentlyAsync()
-        {
-#if DEBUG
-            string updateUrl = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..", "Releases");
-            updateUrl = Path.GetFullPath(updateUrl);
-#else
-            string updateUrl = "http://getespera.com/Releases/Stable";
-#endif
-
-            using (var updateManager = new UpdateManager(updateUrl, "Espera", FrameworkVersion.Net45))
-            {
-                this.Log().Info("Looking for application updates at {0}", updateUrl);
-
-                UpdateInfo updateInfo = await updateManager.CheckForUpdate()
-                    .LoggedCatch(this, Observable.Return<UpdateInfo>(null), "Error while checking for updates: ");
-
-                // The currently installed version being null should only happen in debugging situations
-                if (updateInfo == null || updateInfo.CurrentlyInstalledVersion == null)
-                    return;
-
-                List<ReleaseEntry> releases = updateInfo.ReleasesToApply.ToList();
-
-                if (releases.Any())
-                {
-                    Task changelogFetchTask = ChangelogFetcher.FetchAsync().ToObservable()
-                        .SelectMany(x => BlobCache.LocalMachine.InsertObject(BlobCacheKeys.Changelog, x))
-                        .LoggedCatch(this, null, "Could not to fetch changelog")
-                        .ToTask();
-
-                    this.Log().Info("Found {0} updates.", releases.Count);
-                    this.Log().Info("Downloading updates...");
-
-                    try
-                    {
-                        await updateManager.DownloadReleases(releases);
-                    }
-
-                    catch (Exception ex)
-                    {
-                        this.Log().ErrorException("Failed downloading updates.", ex);
-                        return;
-                    }
-
-                    this.Log().Info("Updates downloaded.");
-                    this.Log().Info("Updating from v{0} to v{1}", updateInfo.CurrentlyInstalledVersion.Version, releases.Last().Version);
-                    this.Log().Info("Applying updates...");
-
-                    try
-                    {
-                        await updateManager.ApplyReleases(updateInfo);
-                    }
-
-                    catch (Exception ex)
-                    {
-                        this.Log().Fatal("Failed to apply updates.", ex);
-                        AnalyticsClient.Instance.RecordErrorAsync(ex);
-                        return;
-                    }
-
-                    this.Log().Info("Updates applied.");
-
-                    await changelogFetchTask;
-
-                    var settings = this.kernel.Get<ViewSettings>();
-                    settings.IsUpdated = true;
-                }
-
-                else
-                {
-                    this.Log().Info("No updates found.");
-                }
-            }
         }
     }
 }
