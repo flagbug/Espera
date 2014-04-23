@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Deployment.Application;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Abstractions;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Akavache;
 using Caliburn.Micro;
+using Espera.Core;
 using Espera.Core.Analytics;
 using Espera.Core.Management;
 using Espera.Core.Settings;
@@ -122,6 +125,11 @@ namespace Espera.View
 
             this.SetupMobileApi();
 
+            this.updateSubscription = Observable.Interval(TimeSpan.FromMinutes(15), RxApp.TaskpoolScheduler)
+                .StartWith(0) // Trigger an initial update check
+                .SelectMany(x => this.UpdateSilentlyAsync().ToObservable())
+                .Subscribe();
+
             base.OnStartup(sender, e);
         }
 
@@ -220,6 +228,63 @@ namespace Espera.View
             coreSettings.WhenAnyValue(x => x.EnableRemoteControl)
                 .Where(x => !x && this.mobileApi != null)
                 .Subscribe(x => this.mobileApi.Dispose());
+        }
+
+        private async Task UpdateSilentlyAsync()
+        {
+            this.Log().Info("Looking for application updates");
+
+            ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
+
+            UpdateCheckInfo updateInfo;
+
+            try
+            {
+                updateInfo = await Task.Run(() => deployment.CheckForDetailedUpdate());
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Error while checking for updates", ex);
+                return;
+            }
+
+            if (updateInfo.UpdateAvailable)
+            {
+                this.Log().Info("New version available: {0}", updateInfo.AvailableVersion);
+                this.Log().Info("Downloadsize is {0}KB", updateInfo.UpdateSizeBytes);
+
+                Task changelogFetchTask = ChangelogFetcher.FetchAsync().ToObservable()
+                    .SelectMany(x => BlobCache.LocalMachine.InsertObject(BlobCacheKeys.Changelog, x))
+                    .LoggedCatch(this, null, "Could not to fetch changelog")
+                    .ToTask();
+
+                this.Log().Info("Applying updates...");
+
+                try
+                {
+                    await Task.Run(() => deployment.Update());
+                }
+
+                catch (Exception ex)
+                {
+                    this.Log().Fatal("Failed to apply updates.", ex);
+                    AnalyticsClient.Instance.RecordErrorAsync(ex);
+                    return;
+                }
+
+                this.Log().Info("Updates applied.");
+
+                await changelogFetchTask;
+
+                var settings = this.kernel.Get<ViewSettings>();
+                settings.IsUpdated = true;
+            }
+
+            else
+            {
+                this.Log().Info("No updates found.");
+            }
         }
     }
 }
