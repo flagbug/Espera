@@ -1,20 +1,21 @@
-﻿using Rareform.Validation;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Linq;
+using Rareform.Validation;
+using ReactiveUI;
 using TagLib;
 using File = TagLib.File;
 
 namespace Espera.Core
 {
     /// <summary>
-    /// Encapsulates a recursive call through the local filesystem that reads the tags of all WAV and MP3 files and returns them.
+    /// Encapsulates a recursive call through the local filesystem that reads the tags of all WAV
+    /// and MP3 files and returns them.
     /// </summary>
-    internal sealed class LocalSongFinder : ILocalSongFinder
+    internal sealed class LocalSongFinder : ILocalSongFinder, IEnableLogger
     {
         private static readonly string[] AllowedExtensions = { ".mp3", ".wav", ".m4a", ".aac" };
         private readonly string directoryPath;
@@ -30,8 +31,8 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// This method scans the directory, specified in the constructor,
-        /// and returns an observable with a tuple that contains the song and the data of the artwork.
+        /// This method scans the directory, specified in the constructor, and returns an observable
+        /// with a tuple that contains the song and the data of the artwork.
         /// </summary>
         public IObservable<Tuple<LocalSong, byte[]>> GetSongsAsync()
         {
@@ -80,8 +81,9 @@ namespace Espera.Core
                 }
             }
 
-            catch (Exception)
+            catch (Exception ex)
             {
+                this.Log().ErrorException(string.Format("Couldn't read song file {0}", filePath), ex);
                 return null;
             }
         }
@@ -96,8 +98,10 @@ namespace Espera.Core
                      .Where(x => AllowedExtensions.Contains(Path.GetExtension(x).ToLowerInvariant()));
             }
 
-            catch (Exception)
-            { }
+            catch (Exception ex)
+            {
+                this.Log().ErrorException(string.Format("Couldn't get files from directory {0}", rootPath), ex);
+            }
 
             IEnumerable<string> directories = Enumerable.Empty<string>();
 
@@ -105,8 +109,11 @@ namespace Espera.Core
             {
                 directories = this.fileSystem.Directory.GetDirectories(rootPath);
             }
-            catch (Exception)
-            { }
+
+            catch (Exception ex)
+            {
+                this.Log().ErrorException(string.Format("Couldn't get directories from directory {0}", rootPath), ex);
+            }
 
             return files.Concat(directories.SelectMany(ScanDirectoryForValidPaths));
         }
