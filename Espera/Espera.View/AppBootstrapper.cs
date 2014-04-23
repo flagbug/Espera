@@ -126,14 +126,18 @@ namespace Espera.View
 
             this.SetupMobileApi();
 
-            this.updateSubscription = Disposable.Empty;
+            if (ApplicationDeployment.IsNetworkDeployed)
+            {
+                this.updateSubscription = Observable.Interval(TimeSpan.FromMinutes(15), RxApp.TaskpoolScheduler)
+                    .StartWith(0) // Trigger an initial update check
+                    .SelectMany(x => this.UpdateSilentlyAsync().ToObservable())
+                    .Subscribe();
+            }
 
-#if !PORTABLE
-            this.updateSubscription = Observable.Interval(TimeSpan.FromMinutes(15), RxApp.TaskpoolScheduler)
-                .StartWith(0) // Trigger an initial update check
-                .SelectMany(x => this.UpdateSilentlyAsync().ToObservable())
-                .Subscribe();
-#endif
+            else
+            {
+                this.updateSubscription = Disposable.Empty;
+            }
 
             base.OnStartup(sender, e);
         }
