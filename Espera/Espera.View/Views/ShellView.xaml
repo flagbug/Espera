@@ -408,7 +408,7 @@
                     <ColumnDefinition Width="350" />
                 </Grid.ColumnDefinitions>
                 <TabControl Grid.Column="0">
-                    <TabItem Header="local" IsSelected="{Binding Path=IsLocal}">
+                    <TabItem Header="my music" IsSelected="{Binding Path=IsLocal}">
                         <TabItem.Resources>
                             <CollectionViewSource x:Key="SongsCollectionViewSource" Source="{Binding LocalViewModel.SelectableSongs}">
                                 <CollectionViewSource.GroupDescriptions>
