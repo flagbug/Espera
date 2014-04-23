@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Abstractions;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
@@ -125,10 +126,14 @@ namespace Espera.View
 
             this.SetupMobileApi();
 
+            this.updateSubscription = Disposable.Empty;
+
+#if !PORTABLE
             this.updateSubscription = Observable.Interval(TimeSpan.FromMinutes(15), RxApp.TaskpoolScheduler)
                 .StartWith(0) // Trigger an initial update check
                 .SelectMany(x => this.UpdateSilentlyAsync().ToObservable())
                 .Subscribe();
+#endif
 
             base.OnStartup(sender, e);
         }
@@ -252,7 +257,6 @@ namespace Espera.View
             if (updateInfo.UpdateAvailable)
             {
                 this.Log().Info("New version available: {0}", updateInfo.AvailableVersion);
-                this.Log().Info("Downloadsize is {0}KB", updateInfo.UpdateSizeBytes);
 
                 Task changelogFetchTask = ChangelogFetcher.FetchAsync().ToObservable()
                     .SelectMany(x => BlobCache.LocalMachine.InsertObject(BlobCacheKeys.Changelog, x))
