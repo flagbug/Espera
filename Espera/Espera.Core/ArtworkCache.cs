@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Akavache;
 using Punchclock;
@@ -49,7 +48,7 @@ namespace Espera.Core
             if (priority < 1)
                 throw new ArgumentOutOfRangeException("priority", "Priority must be greater than zero");
 
-            string keyWithSize = GetKeyWithSize(artworkKey, size);
+            string keyWithSize = BlobCacheKeys.GetArtworkKeyWithSize(artworkKey, size);
 
             // If we don't have the small version of an artwork, resize it, save it and return it.
             // This saves us a bunch of memory at the next startup, because BitmapImage has some
@@ -69,7 +68,7 @@ namespace Espera.Core
             if (data == null)
                 throw new ArgumentNullException("data");
 
-            string key = GetKeyForArtwork(data);
+            string key = BlobCacheKeys.GetKeyForArtwork(data);
 
             lock (this.keyCache)
             {
@@ -88,23 +87,6 @@ namespace Espera.Core
             this.Log().Debug("Added artwork {0} to the BlobCache", key);
 
             return key;
-        }
-
-        private static string GetKeyForArtwork(byte[] artworkData)
-        {
-            byte[] hash;
-
-            using (var hashAlgorithm = MD5.Create())
-            {
-                hash = hashAlgorithm.ComputeHash(artworkData);
-            }
-
-            return BlobCacheKeys.Artwork + BitConverter.ToString(hash).Replace("-", "").ToLower();
-        }
-
-        private static string GetKeyWithSize(string key, int size)
-        {
-            return string.Format("{0}-{1}x{1}", key, size);
         }
 
         private async Task SaveImageToBlobCacheAsync(string key, IBitmap bitmap)
