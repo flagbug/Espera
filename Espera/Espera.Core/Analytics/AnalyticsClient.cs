@@ -1,11 +1,11 @@
-using Espera.Core.Settings;
-using ReactiveUI;
 using System;
 using System.IO;
 using System.IO.Compression;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
+using Espera.Core.Settings;
+using ReactiveUI;
 
 namespace Espera.Core.Analytics
 {
@@ -71,9 +71,7 @@ namespace Espera.Core.Analytics
         /// uploads the log file located in the application data folder.
         /// </summary>
         /// <param name="message">The bugreport message.</param>
-        /// <param name="email">
-        /// The optional email address. Pass null if no email should be sent.
-        /// </param>
+        /// <param name="email">The optional email address. Pass null if no email should be sent.</param>
         /// <returns>A task that returns whether the report was successfully sent or not.</returns>
         public async Task<bool> RecordBugReportAsync(string message, string email = null)
         {
@@ -190,8 +188,6 @@ namespace Espera.Core.Analytics
                     string analyticsToken = await this.client.CreateUserAsync();
                     this.coreSettings.AnalyticsToken = analyticsToken;
 
-                    await this.client.RecordDeviceInformationAsync();
-
                     this.Log().Info("Created new analytics user");
                 }
 
@@ -214,6 +210,19 @@ namespace Espera.Core.Analytics
             finally
             {
                 this.isAuthenticating.OnNext(false);
+            }
+
+            if (this.isAuthenticated)
+            {
+                try
+                {
+                    await this.client.RecordDeviceInformationAsync();
+                }
+
+                catch (Exception ex)
+                {
+                    this.Log().ErrorException("Could not record device information", ex);
+                }
             }
         }
 
