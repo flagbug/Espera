@@ -1,3 +1,11 @@
+# v2.0.1
+
+## Changes
+- The "local" tab is now called "my music"
+
+## Bugfixes
+- Fixed the width of the search box being to small.
+
 # v2.0.0
 
 ## Features
