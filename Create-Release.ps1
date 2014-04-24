@@ -21,10 +21,10 @@ cp ".\Changelog.md" ".\Release\Portable\Changelog.txt"
 Write-Host "Building ClickOnce version"
 
 # We explicitely clean the solution, as rebuilding and publish somehow won't work together
-& "$MSBuildLocation\MSBuild.exe" /target:clean /p:Configuration=Release /p:Platform="x86" /v:quiet ".\Espera\Espera.sln"
-& "$MSBuildLocation\MSBuild.exe" /target:publish /p:Configuration=Release /p:Platform="x86" /v:quiet ".\Espera\Espera.sln"
+& "$MSBuildLocation\MSBuild.exe" /t:clean /p:Configuration=Release /p:Platform="x86" /v:quiet ".\Espera\Espera.sln"
+& "$MSBuildLocation\MSBuild.exe" /t:publish /p:Configuration=Release /p:Platform="x86" /v:quiet ".\Espera\Espera.sln"
 
-cp ".\Espera\Espera.View\publish\*" ".\Release\Publish\"
-Rename-Item ".\Release\Publish\setup.exe" "EsperaSetup.exe"
+cp -r ".\Espera\Espera.View\bin\Release\app.publish\" ".\Release\"
+Rename-Item ".\Release\app.publish\setup.exe" "EsperaSetup.exe"
 
 
