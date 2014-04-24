@@ -9,8 +9,8 @@ namespace Espera.Core.Analytics
         Task AuthenticateUserAsync(string analyticsToken);
 
         /// <summary>
-        /// Creates a new user and returns a unique authentication token.
-        /// This method also authenticates the with the returned token.
+        /// Creates a new user and returns a unique authentication token. This method also
+        /// authenticates the with the returned token.
         /// </summary>
         /// <returns>A unique token used for the next authentication.</returns>
         Task<string> CreateUserAsync();
@@ -34,6 +34,11 @@ namespace Espera.Core.Analytics
 
     public static class AnalyticsEndpointMixin
     {
+        public static Task RecordLanguageAsync(this IAnalyticsEndpoint endpoint)
+        {
+            return endpoint.RecordMetaDataAsync("language", CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
+        }
+
         public static Task RecordLibrarySizeAsync(this IAnalyticsEndpoint endpoint, int songCount)
         {
             return endpoint.RecordMetaDataAsync("library-size", songCount.ToString(CultureInfo.InvariantCulture));

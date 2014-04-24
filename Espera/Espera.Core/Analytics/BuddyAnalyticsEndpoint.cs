@@ -1,9 +1,9 @@
-﻿using Buddy;
-using System;
+﻿using System;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using Buddy;
 
 namespace Espera.Core.Analytics
 {
@@ -33,11 +33,12 @@ namespace Espera.Core.Analytics
             return user.Token;
         }
 
-        public Task RecordDeviceInformationAsync()
+        public async Task RecordDeviceInformationAsync()
         {
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-            return this.client.Device.RecordInformationAsync(Environment.OSVersion.VersionString, "Desktop", this.storedUser, version);
+            await this.client.Device.RecordInformationAsync(Environment.OSVersion.VersionString, "Desktop", this.storedUser, version);
+            await this.RecordLanguageAsync();
         }
 
         public Task RecordErrorAsync(string message, string logId, string stackTrace = null)
