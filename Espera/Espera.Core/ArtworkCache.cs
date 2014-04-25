@@ -80,7 +80,7 @@ namespace Espera.Core
                 }
             }
 
-            this.Log().Info("Adding new artwork {0} of to the BlobCache", key);
+            this.Log().Info("Adding new artwork {0} to the BlobCache", key);
 
             await queue.EnqueueObservableOperation(1, () => cache.Insert(key, data));
 
