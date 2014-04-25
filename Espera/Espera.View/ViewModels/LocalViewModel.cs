@@ -114,7 +114,11 @@ namespace Espera.View.ViewModels
         public ArtistViewModel SelectedArtist
         {
             get { return this.selectedArtist; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedArtist, value); }
+            set
+            {
+                // We don't ever want the selected artist to be null
+                this.RaiseAndSetIfChanged(ref this.selectedArtist, value ?? this.allArtistsViewModel);
+            }
         }
 
         public bool ShowAddSongsHelperMessage
