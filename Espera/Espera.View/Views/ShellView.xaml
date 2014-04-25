@@ -9,15 +9,15 @@
                       xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                       xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
                       Title="Espera"
-                      Width="1100"
-                      Height="650"
+                      Width="800"
+                      Height="600"
                       Closing="MetroWindowClosing"
                       Icon="/Espera;component/Images/ApplicationIcon.png"
                       MouseDown="MainWindowMouseDown"
                       ShowCloseButton="{Binding Path=CanModifyWindow}"
                       ShowMaxRestoreButton="{Binding Path=CanModifyWindow}"
                       ShowMinButton="{Binding Path=CanModifyWindow}"
-                      
+                      WindowState="Maximized"
                       GlowBrush="{DynamicResource AccentColorBrush}"
                       d:DataContext="{d:DesignInstance ViewModels:DesignTimeShellViewModel,
                                                        IsDesignTimeCreatable=True}"
@@ -888,7 +888,7 @@
                                     <StackPanel Grid.Column="1" Margin="5, 0, 0, 0">
                                         <Grid VerticalAlignment="Top">
                                             <TextBlock FontSize="14"
-                                                       MaxWidth="225"
+                                                       MaxWidth="175"
                                                        HorizontalAlignment="Left"
                                                        Text="{Binding Path=Title}"
                                                        TextTrimming="CharacterEllipsis" />
