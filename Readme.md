@@ -54,4 +54,4 @@ Espera is released under the [MIT-License](http://opensource.org/licenses/mit-li
 
 ## Screenshot
 
-![Screenshot](http://flagbug.github.com/espera/screenshot.jpg)
+![Screenshot](http://getespera.com/images/screenshot.png)
