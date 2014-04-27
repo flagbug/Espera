@@ -304,9 +304,12 @@ namespace Espera.View.Views
 
         private void WireScreenStateUpdater()
         {
-            this.shellViewModel.UpdateScreenState.Skip(1).Subscribe(x =>
-            {
-                if (this.shellViewModel.ViewSettings.LockWindow && this.shellViewModel.ViewSettings.GoFullScreenOnLock)
+            ShellViewModel vm = this.shellViewModel;
+
+            this.shellViewModel.UpdateScreenState
+                .Skip(1)
+                .Where(_ => vm.ViewSettings.LockWindow && vm.ViewSettings.GoFullScreenOnLock)
+                .Subscribe(x =>
                 {
                     this.IgnoreTaskbarOnMaximize = x == AccessPermission.Guest && this.shellViewModel.ViewSettings.GoFullScreenOnLock;
 
@@ -314,8 +317,7 @@ namespace Espera.View.Views
                     this.WindowState = WindowState.Maximized;
 
                     this.Topmost = this.IgnoreTaskbarOnMaximize;
-                }
-            });
+                });
         }
     }
 }
