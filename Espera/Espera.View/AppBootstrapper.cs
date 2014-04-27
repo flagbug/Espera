@@ -128,7 +128,7 @@ namespace Espera.View
 
             if (ApplicationDeployment.IsNetworkDeployed)
             {
-                this.updateSubscription = Observable.Interval(TimeSpan.FromMinutes(15), RxApp.TaskpoolScheduler)
+                this.updateSubscription = Observable.Interval(TimeSpan.FromHours(2), RxApp.TaskpoolScheduler)
                     .StartWith(0) // Trigger an initial update check
                     .SelectMany(x => this.UpdateSilentlyAsync().ToObservable())
                     .Subscribe();
