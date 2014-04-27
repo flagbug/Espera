@@ -304,7 +304,7 @@ namespace Espera.View.Views
 
         private void WireScreenStateUpdater()
         {
-            this.shellViewModel.UpdateScreenState.Subscribe(x =>
+            this.shellViewModel.UpdateScreenState.Skip(1).Subscribe(x =>
             {
                 if (this.shellViewModel.ViewSettings.LockWindow && this.shellViewModel.ViewSettings.GoFullScreenOnLock)
                 {
