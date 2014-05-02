@@ -759,6 +759,37 @@ namespace Espera.Core.Management
             }
         }
 
+        private async Task StartOnlineArtworkLookup()
+        {
+            this.Log().Info("Starting online artwork lookup");
+
+            List<LocalSong> songsWithoutArtwork = this.Songs.Where(x => x.ArtworkKey.FirstAsync().Wait() == null).ToList();
+
+            this.Log().Info("{0} songs don't have an artwork", songsWithoutArtwork.Count);
+
+            foreach (LocalSong song in songsWithoutArtwork)
+            {
+                string key = null;
+
+                try
+                {
+                    key = await ArtworkCache.Instance.FetchOnline(song.Artist, song.Album);
+                }
+
+                catch (ArtworkFetchException ex)
+                {
+                    this.Log().ErrorException(string.Format("Error while fetching artwork for {0} - {1}", song.Artist, song.Album), ex);
+                }
+
+                if (key != null)
+                {
+                    song.NotifyArtworkStored(key);
+                }
+            }
+
+            this.Log().Info("Finished online artwork lookup");
+        }
+
         private async Task UpdateSongsAsync(string path)
         {
             if (this.currentSongFinderSubscription != null)
@@ -816,6 +847,8 @@ namespace Espera.Core.Management
                     }
                 }, () =>
                 {
+                    this.StartOnlineArtworkLookup();
+
                     this.songLock.EnterReadLock();
                     int songCount = this.songs.Count;
                     this.songLock.ExitReadLock();
