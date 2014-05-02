@@ -49,18 +49,17 @@ namespace Espera.Core
         /// <summary>
         /// Fetches an artwork for the specified combination of artist and album.
         /// </summary>
-        /// <returns>The fetched artwork, or <c>null</c>, if no artwork could be found.</returns>
+        /// <returns>
+        /// The cache key of the fetched artwork, or <c>null</c>, if no artwork could be found.
+        /// </returns>
         /// <exception cref="ArtworkFetchException">An error occured while fetching the artwork.</exception>
-        public async Task<IBitmap> FetchOnline(string artist, string album, int size)
+        public async Task<string> FetchOnline(string artist, string album)
         {
             if (artist == null)
                 throw new ArgumentNullException("artist");
 
             if (album == null)
                 throw new ArgumentNullException("album");
-
-            if (size < 0)
-                throw new ArgumentOutOfRangeException("size");
 
             string lookupKey = BlobCacheKeys.GetKeyForOnlineArtwork(artist, album);
 
@@ -87,7 +86,7 @@ namespace Espera.Core
 
                 this.keyedMemoizedSemaphore.Release(lookupKey);
 
-                return await this.Retrieve(artworkCacheKey, size, 1);
+                return artworkCacheKey;
             }
 
             this.Log().Info("Fetching online link for artwork {0} - {1}", artist, album);
@@ -121,7 +120,7 @@ namespace Espera.Core
 
             this.keyedMemoizedSemaphore.Release(lookupKey);
 
-            return await this.Retrieve(artworkCacheKey, size, 1);
+            return artworkCacheKey;
         }
 
         public async Task<IBitmap> Retrieve(string artworkKey, int size, int priority)
