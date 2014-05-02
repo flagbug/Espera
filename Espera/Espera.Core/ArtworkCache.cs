@@ -72,12 +72,21 @@ namespace Espera.Core
             try
             {
                 // Each lookup key gets an artwork key assigned, let's see if it's already in the cache
-                artworkCacheKey = await this.cache.GetObjectAsync<string>(lookupKey);
+                artworkCacheKey = await this.queue.EnqueueObservableOperation(1, () => this.cache.GetObjectAsync<string>(lookupKey));
             }
 
             catch (KeyNotFoundException)
             {
                 this.Log().Info("Online artwork for {0} - {1} isn't in the cache", artist, album);
+            }
+
+            if (artworkCacheKey == "FAILED")
+            {
+                this.Log().Info("Key {0} is marked as failed, returning.", lookupKey);
+
+                this.keyedMemoizedSemaphore.Release(lookupKey);
+
+                return null;
             }
 
             if (artworkCacheKey != null)
@@ -90,10 +99,27 @@ namespace Espera.Core
             }
 
             this.Log().Info("Fetching online link for artwork {0} - {1}", artist, album);
-            Uri artworkLink = await this.artworkFetcher.RetrieveAsync(artist, album);
+
+            Uri artworkLink;
+
+            try
+            {
+                artworkLink = await this.artworkFetcher.RetrieveAsync(artist, album);
+            }
+
+            finally
+            {
+                this.keyedMemoizedSemaphore.Release(lookupKey);
+            }
 
             if (artworkLink == null)
             {
+                this.Log().Info("Could not fetch artwork, marking key {0} as failed", lookupKey);
+
+                // If we can't retrieve an artwork, mark the lookup key as failed and don't look
+                // again for the next 7 days.
+                await this.queue.EnqueueObservableOperation(1, () => this.cache.InsertObject(lookupKey, "FAILED", TimeSpan.FromDays(7)));
+
                 this.keyedMemoizedSemaphore.Release(lookupKey);
 
                 return null;
@@ -112,13 +138,15 @@ namespace Espera.Core
 
                 catch (WebException ex)
                 {
+                    this.keyedMemoizedSemaphore.Release(lookupKey);
+
                     throw new ArtworkFetchException(string.Format("Unable to download artwork from {0}", artworkLink), ex);
                 }
             }
 
             artworkCacheKey = await this.Store(imageData);
 
-            await this.cache.InsertObject(lookupKey, artworkCacheKey);
+            await this.queue.EnqueueObservableOperation(1, () => this.cache.InsertObject(lookupKey, artworkCacheKey));
 
             this.keyedMemoizedSemaphore.Release(lookupKey);
 
