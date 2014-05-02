@@ -13,7 +13,7 @@ namespace Espera.Core
     public class MusicBrainzArtworkFetcher : IArtworkFetcher
     {
         private const string ArtworkEndpoint = "http://coverartarchive.org/release/{0}/";
-        private const string SearchEndpoint = "http://www.musicbrainz.org/ws/2/recording/?query=artist:{0}+release:{1}";
+        private const string SearchEndpoint = "http://www.musicbrainz.org/ws/2/release/?query=artist:{0}+release:{1}";
         private readonly RateLimitedOperationQueue queue;
 
         public MusicBrainzArtworkFetcher()
