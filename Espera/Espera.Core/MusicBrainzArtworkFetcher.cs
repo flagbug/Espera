@@ -41,19 +41,28 @@ namespace Espera.Core
             {
                 string artworkRequestUrl = string.Format(ArtworkEndpoint, releaseId);
 
-                string response;
+                HttpResponseMessage response;
 
                 try
                 {
-                    response = await client.GetStringAsync(artworkRequestUrl);
+                    response = await client.GetAsync(artworkRequestUrl);
+
+                    // The only valid failure status is "Not Found"
+                    if (response.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        return null;
+                    }
+
+                    response.EnsureSuccessStatusCode();
                 }
 
-                catch (WebException ex)
+                catch (HttpRequestException ex)
                 {
                     throw new ArtworkFetchException(string.Format("Could not download artwork informations for release id {0}", releaseId), ex);
                 }
 
-                JToken artworkUrlToken = JObject.Parse(response).SelectToken("images[0].image");
+                string responseContent = await response.Content.ReadAsStringAsync();
+                JToken artworkUrlToken = JObject.Parse(responseContent).SelectToken("images[0].image");
 
                 if (artworkUrlToken == null)
                 {
@@ -77,7 +86,7 @@ namespace Espera.Core
                     searchResponse = await client.GetStringAsync(searchRequestUrl);
                 }
 
-                catch (WebException ex)
+                catch (HttpRequestException ex)
                 {
                     throw new ArtworkFetchException(string.Format("Error while requesting the release id for artist {0} and album {1}", artist, album), ex);
                 }
