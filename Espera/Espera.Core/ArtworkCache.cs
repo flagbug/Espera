@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Akavache;
@@ -18,8 +21,10 @@ namespace Espera.Core
     public class ArtworkCache : IEnableLogger
     {
         private static readonly Lazy<ArtworkCache> instance;
+        private readonly MusicBrainzArtworkFetcher artworkFetcher;
         private readonly IBlobCache cache;
         private readonly HashSet<string> keyCache;
+        private readonly Dictionary<string, AsyncSubject<Unit>> keyedSemaphore;
         private readonly OperationQueue queue;
 
         static ArtworkCache()
@@ -33,6 +38,8 @@ namespace Espera.Core
 
             this.queue = new OperationQueue(1); // Disk operations should be serialized
             this.keyCache = new HashSet<string>();
+            this.artworkFetcher = new MusicBrainzArtworkFetcher();
+            this.keyedSemaphore = new Dictionary<string, AsyncSubject<Unit>>();
         }
 
         public static ArtworkCache Instance
@@ -40,7 +47,91 @@ namespace Espera.Core
             get { return instance.Value; }
         }
 
-        public Task<IBitmap> Retrieve(string artworkKey, int size, int priority)
+        public async Task<IBitmap> FetchOnline(string artist, string album, int size)
+        {
+            if (artist == null)
+                throw new ArgumentNullException("artist");
+
+            if (album == null)
+                throw new ArgumentNullException("album");
+
+            string lookupKey = BlobCacheKeys.GetKeyForOnlineArtwork(artist, album);
+
+            AsyncSubject<Unit> semaphore;
+            bool semaphoreExists = false;
+
+            // Requests with the same lookup key have to wait on the first and then get the cached
+            // artwork key. That won't happen often, but when it does, we are save.
+            lock (this.keyedSemaphore)
+            {
+                if (this.keyedSemaphore.TryGetValue(lookupKey, out semaphore))
+                {
+                    semaphoreExists = true;
+                }
+
+                else
+                {
+                    semaphore = new AsyncSubject<Unit>();
+                    this.keyedSemaphore.Add(lookupKey, semaphore);
+                }
+            }
+
+            if (semaphoreExists)
+            {
+                await semaphore;
+            }
+
+            string artworkCacheKey = null;
+
+            try
+            {
+                // Each lookup key gets an artwork key assigned, let's see if it's already in the cache
+                artworkCacheKey = await this.cache.GetObjectAsync<string>(lookupKey);
+            }
+
+            catch (KeyNotFoundException)
+            {
+                this.Log().Info("Online artwork for {0} - {1} isn't in the cache", artist, album);
+            }
+
+            if (artworkCacheKey != null)
+            {
+                // We already have the artwork cached? Great!
+
+                if (!semaphoreExists)
+                {
+                    semaphore.OnNext(Unit.Default);
+                    semaphore.OnCompleted();
+                }
+
+                return await this.Retrieve(artworkCacheKey, size, 1);
+            }
+
+            this.Log().Info("Fetching online link for artwork {0} - {1}", artist, album);
+            Uri artworkLink = await this.artworkFetcher.RetrieveAsync(artist, album);
+
+            byte[] imageData;
+
+            using (var client = new HttpClient())
+            {
+                this.Log().Info("Dowloading artwork data for {0} - {1} from {2}", artist, album, artworkLink);
+                imageData = await client.GetByteArrayAsync(artworkLink);
+            }
+
+            artworkCacheKey = await this.Store(imageData);
+
+            await this.cache.InsertObject(lookupKey, artworkCacheKey);
+
+            if (!semaphoreExists)
+            {
+                semaphore.OnNext(Unit.Default);
+                semaphore.OnCompleted();
+            }
+
+            return await this.Retrieve(artworkCacheKey, size, 1);
+        }
+
+        public async Task<IBitmap> Retrieve(string artworkKey, int size, int priority)
         {
             if (artworkKey == null)
                 throw new ArgumentNullException("artworkKey");
@@ -57,7 +148,9 @@ namespace Espera.Core
                 .Catch(BlobCache.LocalMachine.LoadImage(artworkKey, size, size) // If we can't load the small version, resize the image
                     .Do(async x => await SaveImageToBlobCacheAsync(keyWithSize, x)))); // Then save the resized image into the cache
 
-            return this.queue.EnqueueObservableOperation(priority + 1, () => operation).ToTask();
+            IBitmap image = await this.queue.EnqueueObservableOperation(priority + 1, () => operation).ToTask();
+
+            return image;
         }
 
         /// <summary>

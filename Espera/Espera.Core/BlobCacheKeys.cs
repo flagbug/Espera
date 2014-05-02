@@ -19,6 +19,8 @@ namespace Espera.Core
         /// </summary>
         public const string Changelog = "changelog";
 
+        public const string OnlineArtwork = "artwork-online-lookup-";
+
         /// <summary>
         /// Gets the artwork key for the specified artwork hash and size.
         /// </summary>
@@ -37,6 +39,11 @@ namespace Espera.Core
             }
 
             return BlobCacheKeys.Artwork + BitConverter.ToString(hash).Replace("-", "").ToLower();
+        }
+
+        public static string GetKeyForOnlineArtwork(string artist, string album)
+        {
+            return string.Format(OnlineArtwork + "{0}-{1}", artist.ToLowerInvariant(), album.ToLowerInvariant());
         }
     }
 }
