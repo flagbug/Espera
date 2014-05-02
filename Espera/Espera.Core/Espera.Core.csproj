@@ -132,6 +132,7 @@
     <Compile Include="BlobCacheKeys.cs" />
     <Compile Include="IArtworkFetcher.cs" />
     <Compile Include="ILocalSongFinder.cs" />
+    <Compile Include="KeyedMemoizedSemaphore.cs" />
     <Compile Include="Management\AccessControl.cs" />
     <Compile Include="Management\AccessException.cs" />
     <Compile Include="IYoutubeSongFinder.cs" />

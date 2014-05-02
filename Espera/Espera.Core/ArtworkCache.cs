@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Akavache;
@@ -25,7 +23,7 @@ namespace Espera.Core
         private readonly MusicBrainzArtworkFetcher artworkFetcher;
         private readonly IBlobCache cache;
         private readonly HashSet<string> keyCache;
-        private readonly Dictionary<string, AsyncSubject<Unit>> keyedSemaphore;
+        private readonly KeyedMemoizedSemaphore keyedMemoizedSemaphore;
         private readonly OperationQueue queue;
 
         static ArtworkCache()
@@ -40,7 +38,7 @@ namespace Espera.Core
             this.queue = new OperationQueue(1); // Disk operations should be serialized
             this.keyCache = new HashSet<string>();
             this.artworkFetcher = new MusicBrainzArtworkFetcher();
-            this.keyedSemaphore = new Dictionary<string, AsyncSubject<Unit>>();
+            this.keyedMemoizedSemaphore = new KeyedMemoizedSemaphore();
         }
 
         public static ArtworkCache Instance
@@ -66,29 +64,9 @@ namespace Espera.Core
 
             string lookupKey = BlobCacheKeys.GetKeyForOnlineArtwork(artist, album);
 
-            AsyncSubject<Unit> semaphore;
-            bool semaphoreExists = false;
-
             // Requests with the same lookup key have to wait on the first and then get the cached
             // artwork key. That won't happen often, but when it does, we are save.
-            lock (this.keyedSemaphore)
-            {
-                if (this.keyedSemaphore.TryGetValue(lookupKey, out semaphore))
-                {
-                    semaphoreExists = true;
-                }
-
-                else
-                {
-                    semaphore = new AsyncSubject<Unit>();
-                    this.keyedSemaphore.Add(lookupKey, semaphore);
-                }
-            }
-
-            if (semaphoreExists)
-            {
-                await semaphore;
-            }
+            await this.keyedMemoizedSemaphore.Wait(lookupKey);
 
             string artworkCacheKey = null;
 
@@ -107,11 +85,7 @@ namespace Espera.Core
             {
                 // We already have the artwork cached? Great!
 
-                if (!semaphoreExists)
-                {
-                    semaphore.OnNext(Unit.Default);
-                    semaphore.OnCompleted();
-                }
+                this.keyedMemoizedSemaphore.Release(lookupKey);
 
                 return await this.Retrieve(artworkCacheKey, size, 1);
             }
@@ -145,11 +119,7 @@ namespace Espera.Core
 
             await this.cache.InsertObject(lookupKey, artworkCacheKey);
 
-            if (!semaphoreExists)
-            {
-                semaphore.OnNext(Unit.Default);
-                semaphore.OnCompleted();
-            }
+            this.keyedMemoizedSemaphore.Release(lookupKey);
 
             return await this.Retrieve(artworkCacheKey, size, 1);
         }
