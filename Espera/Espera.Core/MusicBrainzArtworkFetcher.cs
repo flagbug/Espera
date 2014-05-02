@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Newtonsoft.Json.Linq;
@@ -24,6 +25,10 @@ namespace Espera.Core
 
         public async Task<Uri> RetrieveAsync(string artist, string album)
         {
+            // Replace special character, as MusicBrainz uses Lucene in the backend
+            artist = Escape(artist);
+            album = Escape(album);
+
             // Only searches are rate-limited, artwork retrievals are fine
             string releaseId = await this.queue.EnqueueOperation(() => GetReleaseIdAsync(artist, album));
 
@@ -33,6 +38,29 @@ namespace Espera.Core
             }
 
             return await GetArtworkLinkAsync(releaseId);
+        }
+
+        /// <summary>
+        /// Escapes a lucene query
+        /// </summary>
+        private static String Escape(String s)
+        {
+            var sb = new StringBuilder();
+
+            foreach (char c in s)
+            {
+                // These characters are part of the query syntax and must be escaped
+                if (c == '\\' || c == '+' || c == '-' || c == '!' || c == '(' || c == ')' || c == ':'
+                    || c == '^' || c == '[' || c == ']' || c == '\"' || c == '{' || c == '}' || c == '~'
+                    || c == '*' || c == '?' || c == '|' || c == '&')
+                {
+                    sb.Append('\\');
+                }
+
+                sb.Append(c);
+            }
+
+            return sb.ToString();
         }
 
         private static async Task<Uri> GetArtworkLinkAsync(string releaseId)
