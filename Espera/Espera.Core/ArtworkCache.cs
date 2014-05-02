@@ -128,7 +128,7 @@ namespace Espera.Core
 
             using (var client = new HttpClient())
             {
-                this.Log().Info("Dowloading artwork data for {0} - {1} from {2}", artist, album, artworkLink);
+                this.Log().Info("Downloading artwork data for {0} - {1} from {2}", artist, album, artworkLink);
 
                 try
                 {
