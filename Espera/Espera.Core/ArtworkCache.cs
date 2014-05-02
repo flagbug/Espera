@@ -80,6 +80,7 @@ namespace Espera.Core
                 this.Log().Info("Online artwork for {0} - {1} isn't in the cache", artist, album);
             }
 
+            // Previously failed lookups are marked as failed, it doesn't make sense to let it fail again
             if (artworkCacheKey == "FAILED")
             {
                 this.Log().Info("Key {0} is marked as failed, returning.", lookupKey);
@@ -107,18 +108,16 @@ namespace Espera.Core
                 artworkLink = await this.artworkFetcher.RetrieveAsync(artist, album);
             }
 
-            finally
+            catch (ArtworkFetchException)
             {
                 this.keyedMemoizedSemaphore.Release(lookupKey);
+
+                throw;
             }
 
             if (artworkLink == null)
             {
-                this.Log().Info("Could not fetch artwork, marking key {0} as failed", lookupKey);
-
-                // If we can't retrieve an artwork, mark the lookup key as failed and don't look
-                // again for the next 7 days.
-                await this.queue.EnqueueObservableOperation(1, () => this.cache.InsertObject(lookupKey, "FAILED", TimeSpan.FromDays(7)));
+                await this.MarkOnlineLookupKeyAsFailed(lookupKey);
 
                 this.keyedMemoizedSemaphore.Release(lookupKey);
 
@@ -202,6 +201,15 @@ namespace Espera.Core
             this.Log().Debug("Added artwork {0} to the BlobCache", key);
 
             return key;
+        }
+
+        private Task MarkOnlineLookupKeyAsFailed(string lookupKey)
+        {
+            this.Log().Info("Could not fetch artwork, marking key {0} as failed", lookupKey);
+
+            // If we can't retrieve an artwork, mark the lookup key as failed and don't look again
+            // for the next 7 days.
+            return this.queue.EnqueueObservableOperation(1, () => this.cache.InsertObject(lookupKey, "FAILED", TimeSpan.FromDays(7))).ToTask();
         }
 
         private async Task SaveImageToBlobCacheAsync(string key, IBitmap bitmap)
