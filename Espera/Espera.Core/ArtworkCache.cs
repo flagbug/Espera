@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -47,6 +48,11 @@ namespace Espera.Core
             get { return instance.Value; }
         }
 
+        /// <summary>
+        /// Fetches an artwork for the specified combination of artist and album.
+        /// </summary>
+        /// <returns>The fetched artwork, or <c>null</c>, if no artwork could be found.</returns>
+        /// <exception cref="ArtworkFetchException">An error occured while fetching the artwork.</exception>
         public async Task<IBitmap> FetchOnline(string artist, string album, int size)
         {
             if (artist == null)
@@ -54,6 +60,9 @@ namespace Espera.Core
 
             if (album == null)
                 throw new ArgumentNullException("album");
+
+            if (size < 0)
+                throw new ArgumentOutOfRangeException("size");
 
             string lookupKey = BlobCacheKeys.GetKeyForOnlineArtwork(artist, album);
 
@@ -110,12 +119,26 @@ namespace Espera.Core
             this.Log().Info("Fetching online link for artwork {0} - {1}", artist, album);
             Uri artworkLink = await this.artworkFetcher.RetrieveAsync(artist, album);
 
+            if (artworkLink == null)
+            {
+                return null;
+            }
+
             byte[] imageData;
 
             using (var client = new HttpClient())
             {
                 this.Log().Info("Dowloading artwork data for {0} - {1} from {2}", artist, album, artworkLink);
-                imageData = await client.GetByteArrayAsync(artworkLink);
+
+                try
+                {
+                    imageData = await client.GetByteArrayAsync(artworkLink);
+                }
+
+                catch (WebException ex)
+                {
+                    throw new ArtworkFetchException(string.Format("Unable to download artwork from {0}", artworkLink), ex);
+                }
             }
 
             artworkCacheKey = await this.Store(imageData);
