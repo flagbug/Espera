@@ -94,6 +94,8 @@ namespace Espera.Core
 
             if (artworkLink == null)
             {
+                this.keyedMemoizedSemaphore.Release(lookupKey);
+
                 return null;
             }
 
