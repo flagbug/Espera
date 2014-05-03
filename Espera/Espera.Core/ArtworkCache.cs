@@ -20,7 +20,7 @@ namespace Espera.Core
     public class ArtworkCache : IEnableLogger
     {
         private static readonly Lazy<ArtworkCache> instance;
-        private readonly MusicBrainzArtworkFetcher artworkFetcher;
+        private readonly IArtworkFetcher artworkFetcher;
         private readonly IBlobCache cache;
         private readonly HashSet<string> keyCache;
         private readonly KeyedMemoizingSemaphore keyedMemoizingSemaphore;
@@ -31,13 +31,13 @@ namespace Espera.Core
             instance = new Lazy<ArtworkCache>(() => new ArtworkCache());
         }
 
-        public ArtworkCache(IBlobCache cache = null)
+        public ArtworkCache(IBlobCache cache = null, IArtworkFetcher artworkFetcher = null)
         {
             this.cache = cache ?? BlobCache.LocalMachine;
+            this.artworkFetcher = artworkFetcher ?? new MusicBrainzArtworkFetcher();
 
             this.queue = new OperationQueue(1); // Disk operations should be serialized
             this.keyCache = new HashSet<string>();
-            this.artworkFetcher = new MusicBrainzArtworkFetcher();
             this.keyedMemoizingSemaphore = new KeyedMemoizingSemaphore();
         }
 
