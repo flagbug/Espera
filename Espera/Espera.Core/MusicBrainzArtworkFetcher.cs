@@ -12,7 +12,7 @@ using ReactiveUI;
 
 namespace Espera.Core
 {
-    public class MusicBrainzArtworkFetcher : IArtworkFetcher
+    public class MusicBrainzArtworkFetcher : IArtworkFetcher, IEnableLogger
     {
         private const string ArtworkEndpoint = "http://coverartarchive.org/release/{0}/";
         private const string SearchEndpoint = "http://www.musicbrainz.org/ws/2/release/?query=artist:{0}+release:{1}";
@@ -68,54 +68,6 @@ namespace Espera.Core
             return sb.ToString();
         }
 
-        private static async Task<Uri> GetArtworkLinkAsync(IReadOnlyList<string> releaseIds)
-        {
-            using (var client = new HttpClient())
-            {
-                foreach (string releaseId in releaseIds)
-                {
-                    string artworkRequestUrl = string.Format(ArtworkEndpoint, releaseId);
-
-                    HttpResponseMessage response;
-
-                    try
-                    {
-                        response = await client.GetAsync(artworkRequestUrl);
-
-                        // The only valid failure status is "Not Found"
-                        if (response.StatusCode == HttpStatusCode.NotFound)
-                        {
-                            continue;
-                        }
-
-                        response.EnsureSuccessStatusCode();
-                    }
-
-                    catch (HttpRequestException ex)
-                    {
-                        if (releaseId == releaseIds.Last())
-                        {
-                            throw new ArtworkFetchException(string.Format("Could not download artwork informations for release id {0}", releaseId), ex);
-                        }
-
-                        continue;
-                    }
-
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    JToken artworkUrlToken = JObject.Parse(responseContent).SelectToken("images[0].image");
-
-                    if (artworkUrlToken == null)
-                    {
-                        continue;
-                    }
-
-                    return new Uri(artworkUrlToken.ToObject<string>());
-                }
-            }
-
-            return null;
-        }
-
         private static async Task<IReadOnlyList<string>> GetReleaseIdsAsync(string artist, string album)
         {
             using (var client = new HttpClient())
@@ -145,6 +97,62 @@ namespace Espera.Core
 
                 return releaseIds;
             }
+        }
+
+        private async Task<Uri> GetArtworkLinkAsync(IReadOnlyList<string> releaseIds)
+        {
+            using (var client = new HttpClient())
+            {
+                foreach (string releaseId in releaseIds)
+                {
+                    string artworkRequestUrl = string.Format(ArtworkEndpoint, releaseId);
+
+                    HttpResponseMessage response;
+
+                    try
+                    {
+                        response = await client.GetAsync(artworkRequestUrl);
+
+                        // The only valid failure status is "Not Found"
+                        if (response.StatusCode == HttpStatusCode.NotFound)
+                        {
+                            continue;
+                        }
+
+                        response.EnsureSuccessStatusCode();
+                    }
+
+                    catch (HttpRequestException ex)
+                    {
+                        string errorInfo = string.Format("Could not download artwork informations for release id {0}", releaseId);
+
+                        // If we can't even get the last artwork, throw
+                        if (releaseId == releaseIds.Last())
+                        {
+                            throw new ArtworkFetchException(errorInfo, ex);
+                        }
+
+                        if (releaseIds.Count > 1)
+                        {
+                            this.Log().Error(errorInfo + ", retrying with next in list.");
+                        }
+
+                        continue;
+                    }
+
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    JToken artworkUrlToken = JObject.Parse(responseContent).SelectToken("images[0].image");
+
+                    if (artworkUrlToken == null)
+                    {
+                        continue;
+                    }
+
+                    return new Uri(artworkUrlToken.ToObject<string>());
+                }
+            }
+
+            return null;
         }
     }
 }
