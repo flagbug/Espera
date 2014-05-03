@@ -23,7 +23,7 @@ namespace Espera.Core
         private readonly MusicBrainzArtworkFetcher artworkFetcher;
         private readonly IBlobCache cache;
         private readonly HashSet<string> keyCache;
-        private readonly KeyedMemoizedSemaphore keyedMemoizedSemaphore;
+        private readonly KeyedMemoizingSemaphore keyedMemoizingSemaphore;
         private readonly OperationQueue queue;
 
         static ArtworkCache()
@@ -38,7 +38,7 @@ namespace Espera.Core
             this.queue = new OperationQueue(1); // Disk operations should be serialized
             this.keyCache = new HashSet<string>();
             this.artworkFetcher = new MusicBrainzArtworkFetcher();
-            this.keyedMemoizedSemaphore = new KeyedMemoizedSemaphore();
+            this.keyedMemoizingSemaphore = new KeyedMemoizingSemaphore();
         }
 
         public static ArtworkCache Instance
@@ -65,7 +65,7 @@ namespace Espera.Core
 
             // Requests with the same lookup key have to wait on the first and then get the cached
             // artwork key. That won't happen often, but when it does, we are save.
-            await this.keyedMemoizedSemaphore.Wait(lookupKey);
+            await this.keyedMemoizingSemaphore.Wait(lookupKey);
 
             string artworkCacheKey = null;
 
@@ -85,7 +85,7 @@ namespace Espera.Core
             {
                 this.Log().Info("Key {0} is marked as failed, returning.", lookupKey);
 
-                this.keyedMemoizedSemaphore.Release(lookupKey);
+                this.keyedMemoizingSemaphore.Release(lookupKey);
 
                 return null;
             }
@@ -94,7 +94,7 @@ namespace Espera.Core
             {
                 // We already have the artwork cached? Great!
 
-                this.keyedMemoizedSemaphore.Release(lookupKey);
+                this.keyedMemoizingSemaphore.Release(lookupKey);
 
                 return artworkCacheKey;
             }
@@ -110,7 +110,7 @@ namespace Espera.Core
 
             catch (ArtworkFetchException)
             {
-                this.keyedMemoizedSemaphore.Release(lookupKey);
+                this.keyedMemoizingSemaphore.Release(lookupKey);
 
                 throw;
             }
@@ -119,7 +119,7 @@ namespace Espera.Core
             {
                 await this.MarkOnlineLookupKeyAsFailed(lookupKey);
 
-                this.keyedMemoizedSemaphore.Release(lookupKey);
+                this.keyedMemoizingSemaphore.Release(lookupKey);
 
                 return null;
             }
@@ -137,7 +137,7 @@ namespace Espera.Core
 
                 catch (WebException ex)
                 {
-                    this.keyedMemoizedSemaphore.Release(lookupKey);
+                    this.keyedMemoizingSemaphore.Release(lookupKey);
 
                     throw new ArtworkFetchException(string.Format("Unable to download artwork from {0}", artworkLink), ex);
                 }
@@ -147,7 +147,7 @@ namespace Espera.Core
 
             await this.queue.EnqueueObservableOperation(1, () => this.cache.InsertObject(lookupKey, artworkCacheKey));
 
-            this.keyedMemoizedSemaphore.Release(lookupKey);
+            this.keyedMemoizingSemaphore.Release(lookupKey);
 
             return artworkCacheKey;
         }

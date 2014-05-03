@@ -113,7 +113,7 @@
     <Compile Include="ArtworkCacheTest.cs" />
     <Compile Include="BlobCacheKeysTest.cs" />
     <Compile Include="Helpers.cs" />
-    <Compile Include="KeyedMemoizedSemaphoreTest.cs" />
+    <Compile Include="KeyedMemoizingSemaphoreTest.cs" />
     <Compile Include="LibraryDeserializerTest.cs" />
     <Compile Include="LibraryTest.cs" />
     <Compile Include="LibrarySerializerTest.cs" />

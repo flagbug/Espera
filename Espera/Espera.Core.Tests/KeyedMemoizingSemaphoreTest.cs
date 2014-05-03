@@ -4,14 +4,14 @@ using Xunit;
 
 namespace Espera.Core.Tests
 {
-    public class KeyedMemoizedSemaphoreTest
+    public class KeyedMemoizingSemaphoreTest
     {
         public class TheReleaseMethod
         {
             [Fact]
             public void NotAwaitedKeyThrowsKeyNotFoundException()
             {
-                var semaphore = new KeyedMemoizedSemaphore();
+                var semaphore = new KeyedMemoizingSemaphore();
 
                 Assert.Throws<KeyNotFoundException>(() => semaphore.Release("wat"));
             }
@@ -22,7 +22,7 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task DifferentKeysIgnoreEachOther()
             {
-                var semaphore = new KeyedMemoizedSemaphore();
+                var semaphore = new KeyedMemoizingSemaphore();
 
                 await semaphore.Wait("key1");
                 await semaphore.Wait("key2");
@@ -46,7 +46,7 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task FirstWaitIsReleasedImmediately()
             {
-                var semaphore = new KeyedMemoizedSemaphore();
+                var semaphore = new KeyedMemoizingSemaphore();
 
                 await semaphore.Wait("key");
             }
@@ -54,7 +54,7 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task SameKeysWaitOnRelease()
             {
-                var semaphore = new KeyedMemoizedSemaphore();
+                var semaphore = new KeyedMemoizingSemaphore();
 
                 await semaphore.Wait("key");
 

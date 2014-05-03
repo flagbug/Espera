@@ -10,11 +10,11 @@ namespace Espera.Core
     /// A semaphore, that holds a one-time lock on a specific key. It also memoizes the keys, so
     /// once released keys aren't locked when waiting on them the next time.
     /// </summary>
-    public class KeyedMemoizedSemaphore
+    public class KeyedMemoizingSemaphore
     {
         private readonly Dictionary<string, AsyncSubject<Unit>> keyedSemaphore;
 
-        public KeyedMemoizedSemaphore()
+        public KeyedMemoizingSemaphore()
         {
             this.keyedSemaphore = new Dictionary<string, AsyncSubject<Unit>>();
         }
