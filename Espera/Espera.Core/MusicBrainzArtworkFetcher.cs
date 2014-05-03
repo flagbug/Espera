@@ -30,14 +30,14 @@ namespace Espera.Core
             album = Escape(album);
 
             // Only searches are rate-limited, artwork retrievals are fine
-            string releaseId = await this.queue.EnqueueOperation(() => GetReleaseIdAsync(artist, album));
+            IReadOnlyList<string> releaseIds = await this.queue.EnqueueOperation(() => GetReleaseIdsAsync(artist, album));
 
-            if (releaseId == null)
+            if (releaseIds == null)
             {
                 return null;
             }
 
-            return await GetArtworkLinkAsync(releaseId);
+            return await GetArtworkLinkAsync(releaseIds);
         }
 
         /// <summary>
@@ -63,45 +63,55 @@ namespace Espera.Core
             return sb.ToString();
         }
 
-        private static async Task<Uri> GetArtworkLinkAsync(string releaseId)
+        private static async Task<Uri> GetArtworkLinkAsync(IReadOnlyList<string> releaseIds)
         {
             using (var client = new HttpClient())
             {
-                string artworkRequestUrl = string.Format(ArtworkEndpoint, releaseId);
-
-                HttpResponseMessage response;
-
-                try
+                foreach (string releaseId in releaseIds)
                 {
-                    response = await client.GetAsync(artworkRequestUrl);
+                    string artworkRequestUrl = string.Format(ArtworkEndpoint, releaseId);
 
-                    // The only valid failure status is "Not Found"
-                    if (response.StatusCode == HttpStatusCode.NotFound)
+                    HttpResponseMessage response;
+
+                    try
                     {
-                        return null;
+                        response = await client.GetAsync(artworkRequestUrl);
+
+                        // The only valid failure status is "Not Found"
+                        if (response.StatusCode == HttpStatusCode.NotFound)
+                        {
+                            continue;
+                        }
+
+                        response.EnsureSuccessStatusCode();
                     }
 
-                    response.EnsureSuccessStatusCode();
+                    catch (HttpRequestException ex)
+                    {
+                        if (releaseId == releaseIds.Last())
+                        {
+                            throw new ArtworkFetchException(string.Format("Could not download artwork informations for release id {0}", releaseId), ex);
+                        }
+
+                        continue;
+                    }
+
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    JToken artworkUrlToken = JObject.Parse(responseContent).SelectToken("images[0].image");
+
+                    if (artworkUrlToken == null)
+                    {
+                        continue;
+                    }
+
+                    return new Uri(artworkUrlToken.ToObject<string>());
                 }
-
-                catch (HttpRequestException ex)
-                {
-                    throw new ArtworkFetchException(string.Format("Could not download artwork informations for release id {0}", releaseId), ex);
-                }
-
-                string responseContent = await response.Content.ReadAsStringAsync();
-                JToken artworkUrlToken = JObject.Parse(responseContent).SelectToken("images[0].image");
-
-                if (artworkUrlToken == null)
-                {
-                    return null;
-                }
-
-                return new Uri(artworkUrlToken.ToObject<string>());
             }
+
+            return null;
         }
 
-        private static async Task<string> GetReleaseIdAsync(string artist, string album)
+        private static async Task<IReadOnlyList<string>> GetReleaseIdsAsync(string artist, string album)
         {
             using (var client = new HttpClient())
             {
@@ -122,9 +132,13 @@ namespace Espera.Core
                 XNamespace ns = "http://musicbrainz.org/ns/mmd-2.0#";
                 var releases = XDocument.Parse(searchResponse).Descendants(ns + "release");
 
-                IEnumerable<string> releaseIds = releases.Select(x => x.Attribute("id").Value);
+                XNamespace scoreNs = "http://musicbrainz.org/ns/ext#-2.0";
 
-                return releaseIds.FirstOrDefault();
+                List<string> releaseIds = releases.Where(x => (int?)x.Attribute(scoreNs + "score") >= 95)
+                    .Select(x => x.Attribute("id").Value)
+                    .ToList();
+
+                return releaseIds;
             }
         }
     }
