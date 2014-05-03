@@ -52,9 +52,14 @@ namespace Espera.Core
                 // These characters are part of the query syntax and must be escaped
                 if (c == '\\' || c == '+' || c == '-' || c == '!' || c == '(' || c == ')' || c == ':'
                     || c == '^' || c == '[' || c == ']' || c == '\"' || c == '{' || c == '}' || c == '~'
-                    || c == '*' || c == '?' || c == '|' || c == '&')
+                    || c == '*' || c == '?')
                 {
-                    sb.Append('\\');
+                    sb.Append(@"\");
+                }
+
+                if (c == '|' || c == '&')
+                {
+                    sb.Append(@"\\");
                 }
 
                 sb.Append(c);
