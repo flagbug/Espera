@@ -152,7 +152,7 @@ namespace Espera.Core
             return artworkCacheKey;
         }
 
-        public async Task<IBitmap> Retrieve(string artworkKey, int size, int priority)
+        public Task<IBitmap> Retrieve(string artworkKey, int size, int priority)
         {
             if (artworkKey == null)
                 throw new ArgumentNullException("artworkKey");
@@ -160,18 +160,7 @@ namespace Espera.Core
             if (priority < 1)
                 throw new ArgumentOutOfRangeException("priority", "Priority must be greater than zero");
 
-            string keyWithSize = BlobCacheKeys.GetArtworkKeyWithSize(artworkKey, size);
-
-            // If we don't have the small version of an artwork, resize it, save it and return it.
-            // This saves us a bunch of memory at the next startup, because BitmapImage has some
-            // kind of memory leak, so the not-resized image hangs around in memory forever.
-            var operation = Observable.Defer(() => BlobCache.LocalMachine.LoadImage(keyWithSize) // Try to load the small version
-                .Catch(BlobCache.LocalMachine.LoadImage(artworkKey, size, size) // If we can't load the small version, resize the image
-                    .Do(async x => await SaveImageToBlobCacheAsync(keyWithSize, x)))); // Then save the resized image into the cache
-
-            IBitmap image = await this.queue.EnqueueObservableOperation(priority + 1, () => operation).ToTask();
-
-            return image;
+            return this.queue.Enqueue(priority + 1, () => this.LoadImageFromCache(artworkKey, size));
         }
 
         /// <summary>
@@ -201,6 +190,28 @@ namespace Espera.Core
             this.Log().Debug("Added artwork {0} to the BlobCache", key);
 
             return key;
+        }
+
+        private async Task<IBitmap> LoadImageFromCache(string key, int size)
+        {
+            // If we don't have the small version of an artwork, resize it, save it and return it.
+            // This saves us a bunch of memory at the next startup, because BitmapImage has some
+            // kind of memory leak, so the not-resized image hangs around in memory forever.
+
+            string keyWithSize = BlobCacheKeys.GetArtworkKeyWithSize(key, size);
+
+            bool resizedExists = await this.cache.GetCreatedAt(keyWithSize) != null;
+
+            if (resizedExists)
+            {
+                return await this.cache.LoadImage(keyWithSize);
+            }
+
+            IBitmap resized = await this.cache.LoadImage(key, size, size);
+
+            await this.SaveImageToBlobCacheAsync(key, resized);
+
+            return resized;
         }
 
         private Task MarkOnlineLookupKeyAsFailed(string lookupKey)
