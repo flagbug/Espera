@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Akavache;
 using NSubstitute;
@@ -9,6 +10,66 @@ namespace Espera.Core.Tests
 {
     public class ArtworkCacheTest
     {
+        public class TheFetchOnlineMethod
+        {
+            [Fact]
+            public async Task FailedRequestThrowsException()
+            {
+                var fetcher = Substitute.For<IArtworkFetcher>();
+                fetcher.RetrieveAsync(Arg.Any<string>(), Arg.Any<string>()).Returns(Observable.Throw<Uri>(new ArtworkFetchException(String.Empty, null)).ToTask());
+                var blobCache = new TestBlobCache();
+                var fixture = new ArtworkCache(blobCache, fetcher);
+
+                await Helpers.ThrowsAsync<ArtworkFetchException>(() => fixture.FetchOnline("A", "B"));
+            }
+
+            [Fact]
+            public async Task NotFoundRequestIsMarked()
+            {
+                var fetcher = Substitute.For<IArtworkFetcher>();
+                fetcher.RetrieveAsync(Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult<Uri>(null));
+                var blobCache = new TestBlobCache();
+                var fixture = new ArtworkCache(blobCache, fetcher);
+                string artist = "A";
+                string album = "B";
+                string lookupKey = BlobCacheKeys.GetKeyForOnlineArtwork(artist, album);
+
+                await fixture.FetchOnline(artist, album);
+
+                Assert.Equal("FAILED", await blobCache.GetObjectAsync<string>(lookupKey));
+            }
+
+            [Fact]
+            public async Task NotFoundRequestReturnsNull()
+            {
+                var fetcher = Substitute.For<IArtworkFetcher>();
+                fetcher.RetrieveAsync(Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult<Uri>(null));
+                var blobCache = new TestBlobCache();
+                var fixture = new ArtworkCache(blobCache, fetcher);
+
+                string returned = await fixture.FetchOnline("A", "B");
+
+                Assert.Null(returned);
+            }
+
+            [Fact]
+            public async Task PullsSearchesFromCache()
+            {
+                string artist = "A";
+                string album = "B";
+                string key = BlobCacheKeys.GetKeyForOnlineArtwork(artist, album);
+                var fetcher = Substitute.For<IArtworkFetcher>();
+                var blobCache = new TestBlobCache();
+                await blobCache.InsertObject(key, "TestArtworkKey");
+                var fixture = new ArtworkCache(blobCache, fetcher);
+
+                string returned = await fixture.FetchOnline(artist, album);
+
+                Assert.Equal("TestArtworkKey", returned);
+                fetcher.DidNotReceiveWithAnyArgs().RetrieveAsync(null, null);
+            }
+        }
+
         public class TheRetrieveMethod
         {
             [Fact]

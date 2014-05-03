@@ -48,9 +48,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Rareform.1.5.2\lib\Rareform.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveMarrow, Version=0.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveMarrow, Version=0.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ReactiveMarrow.0.4.0\lib\portable-net45+wp8+win8+monoandroid+monotouch\ReactiveMarrow.dll</HintPath>
+      <HintPath>..\packages\ReactiveMarrow.0.5.0\lib\portable-net45+wp8+win8+monoandroid+monotouch\ReactiveMarrow.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveUI">
       <HintPath>..\packages\reactiveui-core.5.5.1\lib\Portable-Net45+WinRT45+WP8\ReactiveUI.dll</HintPath>

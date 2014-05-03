@@ -52,8 +52,9 @@
     <Reference Include="NSubstitute">
       <HintPath>..\packages\NSubstitute.1.7.2.0\lib\NET45\NSubstitute.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveMarrow">
-      <HintPath>..\packages\ReactiveMarrow.0.4.0\lib\portable-net45+wp8+win8+monoandroid+monotouch\ReactiveMarrow.dll</HintPath>
+    <Reference Include="ReactiveMarrow, Version=0.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ReactiveMarrow.0.5.0\lib\portable-net45+wp8+win8+monoandroid+monotouch\ReactiveMarrow.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveUI, Version=5.5.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -112,6 +113,7 @@
     <Compile Include="ArtworkCacheTest.cs" />
     <Compile Include="BlobCacheKeysTest.cs" />
     <Compile Include="Helpers.cs" />
+    <Compile Include="KeyedMemoizingSemaphoreTest.cs" />
     <Compile Include="LibraryDeserializerTest.cs" />
     <Compile Include="LibraryTest.cs" />
     <Compile Include="LibrarySerializerTest.cs" />
