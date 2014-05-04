@@ -321,6 +321,7 @@
                      VerticalAlignment="Center"
                      VerticalContentAlignment="Center"
                      Controls:TextboxHelper.Watermark="Search"
+                     KeyUp="SearchTextBoxKeyUp"
                      Text="{Binding Path=CurrentSongSource.SearchText,
                                     UpdateSourceTrigger=PropertyChanged}" />
                 <ToggleButton Grid.Column="1"

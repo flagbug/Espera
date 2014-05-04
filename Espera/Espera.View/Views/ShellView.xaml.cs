@@ -218,6 +218,12 @@ namespace Espera.View.Views
             keyPressed.Where(x => x == Key.MediaPlayPause).InvokeCommand(this.shellViewModel, x => x.PauseContinueCommand);
         }
 
+        private void SearchTextBoxKeyUp(object sender, KeyEventArgs e)
+        {
+            // Prevent all keys from bubbling up
+            e.Handled = true;
+        }
+
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
         {
             ICommand command = this.shellViewModel.IsAdmin ? this.shellViewModel.CurrentSongSource.PlayNowCommand : this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
