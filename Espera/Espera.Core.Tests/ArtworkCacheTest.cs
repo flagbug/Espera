@@ -22,7 +22,7 @@ namespace Espera.Core.Tests
                 var blobCache = new TestBlobCache();
                 var fixture = new ArtworkCache(blobCache, fetcher);
 
-                await Helpers.ThrowsAsync<ArtworkFetchException>(() => fixture.FetchOnline("A", "B"));
+                await Helpers.ThrowsAsync<ArtworkCacheException>(() => fixture.FetchOnline("A", "B"));
             }
 
             [Fact]
