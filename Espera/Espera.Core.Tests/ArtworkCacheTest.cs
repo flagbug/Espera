@@ -90,11 +90,15 @@ namespace Espera.Core.Tests
             public async Task DoesntStoreArtworkIfAlreadyInLocalCache()
             {
                 var blobCache = Substitute.For<IBlobCache>();
+
                 var artworkCache = new ArtworkCache(blobCache);
 
                 var data = new byte[] { 0, 1 };
 
                 await artworkCache.Store(data);
+
+                blobCache.GetCreatedAt(Arg.Any<string>()).Returns(Observable.Return(new DateTimeOffset?(DateTimeOffset.MaxValue)));
+
                 await artworkCache.Store(data);
 
                 blobCache.Received(1).Insert(Arg.Any<string>(), Arg.Any<byte[]>());
