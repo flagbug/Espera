@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -71,15 +70,10 @@ namespace Espera.Core
 
             string artworkCacheKey = null;
 
-            try
+            // Each lookup key gets an artwork key assigned, let's see if it's already in the cache
+            if (await this.cache.GetObjectCreatedAt<string>(lookupKey) != null)
             {
-                // Each lookup key gets an artwork key assigned, let's see if it's already in the cache
                 artworkCacheKey = await this.queue.EnqueueObservableOperation(1, () => this.cache.GetObjectAsync<string>(lookupKey));
-            }
-
-            catch (KeyNotFoundException)
-            {
-                this.Log().Info("Online artwork for {0} - {1} isn't in the cache", artist, album);
             }
 
             // Previously failed lookups are marked as failed, it doesn't make sense to let it fail again
