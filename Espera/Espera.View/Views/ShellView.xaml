@@ -503,7 +503,7 @@
                                        VerticalAlignment="Center"
                                        FontSize="16"
                                        Foreground="{StaticResource GrayBrush3}"
-                                       Text="Add songs to the library by going to Settings -&gt; Library -&gt; Change Library Path"
+                                       Text="Add songs to the library by going to the Settings (right upper corner, next to the window minimize button) -&gt; Library -&gt; Change Library Path"
                                        TextWrapping="Wrap"
                                        TextAlignment="Center"
                                        Visibility="{Binding Path=LocalViewModel.ShowAddSongsHelperMessage,
