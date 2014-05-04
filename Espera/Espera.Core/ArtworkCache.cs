@@ -22,9 +22,9 @@ namespace Espera.Core
         private static readonly Lazy<ArtworkCache> instance;
         private readonly IArtworkFetcher artworkFetcher;
         private readonly IBlobCache cache;
-        private readonly HashSet<string> keyCache;
         private readonly KeyedMemoizingSemaphore keyedMemoizingSemaphore;
         private readonly OperationQueue queue;
+        private readonly KeyedMemoizingSemaphore storageSemaphore;
 
         static ArtworkCache()
         {
@@ -37,7 +37,7 @@ namespace Espera.Core
             this.artworkFetcher = artworkFetcher ?? new MusicBrainzArtworkFetcher();
 
             this.queue = new OperationQueue(1); // Disk operations should be serialized
-            this.keyCache = new HashSet<string>();
+            this.storageSemaphore = new KeyedMemoizingSemaphore();
             this.keyedMemoizingSemaphore = new KeyedMemoizingSemaphore();
         }
 
@@ -173,21 +173,26 @@ namespace Espera.Core
 
             string key = BlobCacheKeys.GetKeyForArtwork(data);
 
-            lock (this.keyCache)
-            {
-                bool added = this.keyCache.Add(key);
+            await this.storageSemaphore.Wait(key);
 
-                if (!added)
-                {
-                    return key;
-                }
+            if (await this.cache.GetCreatedAt(key) != null)
+            {
+                return key;
             }
 
             this.Log().Info("Adding new artwork {0} to the BlobCache", key);
 
-            await queue.EnqueueObservableOperation(1, () => cache.Insert(key, data));
+            try
+            {
+                await queue.EnqueueObservableOperation(1, () => cache.Insert(key, data));
 
-            this.Log().Debug("Added artwork {0} to the BlobCache", key);
+                this.Log().Debug("Added artwork {0} to the BlobCache", key);
+            }
+
+            finally
+            {
+                this.storageSemaphore.Release(key);
+            }
 
             return key;
         }

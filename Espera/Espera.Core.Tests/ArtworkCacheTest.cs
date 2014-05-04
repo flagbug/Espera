@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Akavache;
@@ -105,6 +107,29 @@ namespace Espera.Core.Tests
                 var artworkCache = new ArtworkCache(blobCache);
 
                 await Helpers.ThrowsAsync<ArgumentNullException>(() => artworkCache.Store(null));
+            }
+
+            [Fact]
+            public void SameKeysWaitOnFirstToFinish()
+            {
+                var signal = new AsyncSubject<Unit>();
+                var blobCache = Substitute.For<IBlobCache>();
+                blobCache.Insert(Arg.Any<string>(), Arg.Any<byte[]>(), Arg.Any<DateTimeOffset?>()).Returns(signal);
+                var fixture = new ArtworkCache(blobCache);
+                var data = new byte[] { 0, 1 };
+
+                Task firstTask = fixture.Store(data);
+
+                Task secondTask = fixture.Store(data);
+
+                Assert.False(firstTask.IsCompleted);
+                Assert.False(secondTask.IsCompleted);
+
+                signal.OnNext(Unit.Default);
+                signal.OnCompleted();
+
+                Assert.True(firstTask.IsCompleted);
+                Assert.True(secondTask.IsCompleted);
             }
 
             [Fact]
