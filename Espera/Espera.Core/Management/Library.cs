@@ -776,7 +776,7 @@ namespace Espera.Core.Management
                     key = await ArtworkCache.Instance.FetchOnline(song.Artist, song.Album);
                 }
 
-                catch (ArtworkFetchException ex)
+                catch (ArtworkCacheException ex)
                 {
                     this.Log().ErrorException(string.Format("Error while fetching artwork for {0} - {1}", song.Artist, song.Album), ex);
                 }

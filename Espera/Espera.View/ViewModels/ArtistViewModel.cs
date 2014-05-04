@@ -112,9 +112,9 @@ namespace Espera.View.ViewModels
                 return null;
             }
 
-            catch (NotSupportedException ex)
+            catch (ArtworkCacheException ex)
             {
-                this.Log().InfoException("Unable to load artist cover", ex);
+                this.Log().ErrorException("Unable to load artwork from cache", ex);
 
                 return null;
             }

@@ -52,7 +52,9 @@ namespace Espera.Core
         /// <returns>
         /// The cache key of the fetched artwork, or <c>null</c>, if no artwork could be found.
         /// </returns>
-        /// <exception cref="ArtworkFetchException">An error occured while fetching the artwork.</exception>
+        /// <exception cref="ArtworkCacheException">
+        /// An error occured while fetching or storing the artwork.
+        /// </exception>
         public async Task<string> FetchOnline(string artist, string album)
         {
             if (artist == null)
@@ -108,11 +110,11 @@ namespace Espera.Core
                 artworkLink = await this.artworkFetcher.RetrieveAsync(artist, album);
             }
 
-            catch (ArtworkFetchException)
+            catch (ArtworkFetchException ex)
             {
                 this.keyedMemoizingSemaphore.Release(lookupKey);
 
-                throw;
+                throw new ArtworkCacheException("Could not retrieve the artwork information", ex);
             }
 
             if (artworkLink == null)
@@ -139,7 +141,7 @@ namespace Espera.Core
                 {
                     this.keyedMemoizingSemaphore.Release(lookupKey);
 
-                    throw new ArtworkFetchException(string.Format("Unable to download artwork from {0}", artworkLink), ex);
+                    throw new ArtworkCacheException(string.Format("Unable to download artwork from {0}", artworkLink), ex);
                 }
             }
 
@@ -152,10 +154,18 @@ namespace Espera.Core
             return artworkCacheKey;
         }
 
+        /// <summary>
+        /// Retrieves the artwork with the specified key and size and priority from the cache. The
+        /// priority can be used to fevor the retrieval of this artwork before others.
+        /// </summary>
+        /// <exception cref="ArtworkCacheException">An error occured while loading the artwork.</exception>
         public Task<IBitmap> Retrieve(string artworkKey, int size, int priority)
         {
             if (artworkKey == null)
                 throw new ArgumentNullException("artworkKey");
+
+            if (size < 0)
+                throw new ArgumentOutOfRangeException("size", "Size must be greater than zero");
 
             if (priority < 1)
                 throw new ArgumentOutOfRangeException("priority", "Priority must be greater than zero");
@@ -209,14 +219,27 @@ namespace Espera.Core
 
             if (resizedExists)
             {
-                return await this.cache.LoadImage(keyWithSize);
+                return await this.LoadImageFromCacheSave(keyWithSize);
             }
 
-            IBitmap resized = await this.cache.LoadImage(key, size, size);
+            IBitmap resized = await this.LoadImageFromCacheSave(key, size);
 
             await this.SaveImageToBlobCacheAsync(key, resized);
 
             return resized;
+        }
+
+        private async Task<IBitmap> LoadImageFromCacheSave(string key, int? size = null)
+        {
+            try
+            {
+                return await this.cache.LoadImage(key, size, size);
+            }
+
+            catch (NotSupportedException ex)
+            {
+                throw new ArtworkCacheException("Couldn't load artwork", ex);
+            }
         }
 
         private Task MarkOnlineLookupKeyAsFailed(string lookupKey)
@@ -232,7 +255,15 @@ namespace Espera.Core
         {
             using (var ms = new MemoryStream())
             {
-                await bitmap.Save(CompressedBitmapFormat.Jpeg, 1, ms);
+                try
+                {
+                    await bitmap.Save(CompressedBitmapFormat.Jpeg, 1, ms);
+                }
+
+                catch (NotSupportedException ex)
+                {
+                    throw new ArtworkCacheException("Couldn't save artwork", ex);
+                }
 
                 await this.cache.Insert(key, ms.ToArray());
             }
