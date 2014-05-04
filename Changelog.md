@@ -1,7 +1,19 @@
+# v2.1.0
+
+## Features
+- Espera now automatically downloads missing artworks.
+
+## Bugfixes
+- Fixed a bug that caused Espera to crash when it encountered a corrupt artwork.
+- Fixed a bug that caused some artworks failing to load.
+- Fixed a crash when changing the song source path.
+- Fixed the playback stopping when pressing the space bar inside the search box.
+- Fixed the width of playlist entries,
+
 # v2.0.1
 
 ## Changes
-- The "local" tab is now called "my music"
+- The "local" tab is now called "my music".
 
 ## Bugfixes
 - Fixed the width of the search box being to small.
