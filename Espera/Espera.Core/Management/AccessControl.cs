@@ -1,13 +1,13 @@
-﻿using Espera.Core.Settings;
-using Rareform.Extensions;
-using Rareform.Validation;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
+using Espera.Core.Settings;
+using Rareform.Extensions;
+using Rareform.Validation;
+using ReactiveUI;
 
 namespace Espera.Core.Management
 {
@@ -15,9 +15,9 @@ namespace Espera.Core.Management
     /// Provides methods to manage access privileges for the local and remote (mobile) users.
     /// </summary>
     /// <remarks>
-    /// The basic idea is, that each endpoint (be it the local GUI, or a mobile phone) gets an access token
-    /// similiar to a Web API. This access token can be upgraded by providing the password that the administrator
-    /// has specified.
+    /// The basic idea is, that each endpoint (be it the local GUI, or a mobile phone) gets an
+    /// access token similiar to a Web API. This access token can be upgraded by providing the
+    /// password that the administrator has specified.
     /// </remarks>
     internal class AccessControl : IEnableLogger, ILocalAccessControl, IRemoteAccessControl
     {
@@ -73,9 +73,8 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Gets the remaining votes for a given access token.
-        /// Returns the current value immediately and then any changes to the remaining votes,
-        /// or <c>null</c>, if voting isn't supported.
+        /// Gets the remaining votes for a given access token. Returns the current value immediately
+        /// and then any changes to the remaining votes, or <c>null</c>, if voting isn't supported.
         /// </summary>
         public IObservable<int?> ObserveRemainingVotes(Guid accessToken)
         {
@@ -98,7 +97,8 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Registers a new remote access token which's default reights depend on the <see cref="CoreSettings.LockRemoteControl"/> setting.
+        /// Registers a new remote access token which's default reights depend on the <see
+        /// cref="CoreSettings.LockRemoteControl" /> setting.
         /// </summary>
         public Guid RegisterRemoteAccessToken(Guid deviceId)
         {
@@ -211,8 +211,13 @@ namespace Espera.Core.Management
         /// Verifies the access rights for the given access token.
         /// </summary>
         /// <param name="accessToken">The access token, whichs access rights should be verified.</param>
-        /// <param name="localRestrictionCombinator">An optional restriction constraint for local access.</param>
-        /// <exception cref="AccessException">The token has local permission and is either of type remote or of type local and the restriction combinator was true.</exception>
+        /// <param name="localRestrictionCombinator">
+        /// An optional restriction constraint for local access.
+        /// </param>
+        /// <exception cref="AccessException">
+        /// The token has guest permission and is either of type remote or of type local and the
+        /// restriction combinator was true.
+        /// </exception>
         public void VerifyAccess(Guid accessToken, bool localRestrictionCombinator = true)
         {
             AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
