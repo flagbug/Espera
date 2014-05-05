@@ -44,7 +44,7 @@ very clean look.
 
 Espera is written in C#, with WPF as frontend.
 
-It also makes heavy uses of the Reactive Extensions framework.
+It also makes heavy uses of Reactive Extensions and ReactiveUI.
 
 If you want to contribute to Espera, just send a pull request!
 
