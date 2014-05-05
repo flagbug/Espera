@@ -124,18 +124,12 @@ namespace Espera.Core.Management
         /// </exception>
         public void RegisterVote(Guid accessToken, PlaylistEntry entry)
         {
-            if (!this.coreSettings.EnableVotingSystem)
-                throw new InvalidOperationException("Voting isn't enabled.");
-
             if (entry == null)
                 throw new ArgumentNullException("entry");
 
-            AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
+            this.VerifyVotingPreconditions(accessToken);
 
-            if (endPoint.EntryCount == this.coreSettings.MaxVoteCount)
-            {
-                throw new InvalidOperationException("No votes left");
-            }
+            AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
 
             if (!endPoint.RegisterEntry(entry))
             {
@@ -227,6 +221,26 @@ namespace Espera.Core.Management
 
             if (endPoint.AccessType == AccessType.Remote || endPoint.AccessType == AccessType.Local && localRestrictionCombinator)
                 throw new AccessException();
+        }
+
+        /// <summary>
+        /// Verifies that voting is enabled and that the vote count of the given endpoint doesn't
+        /// exceed the maximum vote count.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// The exception that is thrown if one of the preconditions isn't satisfied.
+        /// </exception>
+        public void VerifyVotingPreconditions(Guid accessToken)
+        {
+            if (!this.coreSettings.EnableVotingSystem)
+                throw new InvalidOperationException("Voting isn't enabled.");
+
+            AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
+
+            if (endPoint.EntryCount == this.coreSettings.MaxVoteCount)
+            {
+                throw new InvalidOperationException("No votes left");
+            }
         }
 
         private AccessEndPoint FindEndPoint(Guid token)

@@ -1052,5 +1052,56 @@ namespace Espera.Core.Tests
                 }
             }
         }
+
+        public class TheVoteForPlaylistEntryMethod
+        {
+            [Fact]
+            public void IgnoresAccessPermission()
+            {
+                var settings = new CoreSettings
+                {
+                    EnableVotingSystem = true,
+                    LockRemoteControl = true,
+                    RemoteControlPassword = "Password",
+                    MaxVoteCount = 2
+                };
+
+                using (var library = Helpers.CreateLibraryWithPlaylist(settings: settings))
+                {
+                    library.Initialize();
+                    library.AddSongToPlaylist(Helpers.SetupSongMock());
+                    library.AddSongToPlaylist(Helpers.SetupSongMock());
+
+                    Guid accessToken = library.RemoteAccessControl.RegisterRemoteAccessToken(Guid.NewGuid());
+
+                    // Guests can vote
+                    library.VoteForPlaylistEntry(0, accessToken);
+
+                    library.RemoteAccessControl.UpgradeRemoteAccess(accessToken, "Password");
+
+                    // Admins can vote
+                    library.VoteForPlaylistEntry(1, accessToken);
+                }
+            }
+
+            [Fact]
+            public void ThrowsInvalidOperationExceptionIfVotingIsDisabled()
+            {
+                var settings = new CoreSettings
+                {
+                    EnableVotingSystem = false
+                };
+
+                using (var library = Helpers.CreateLibraryWithPlaylist(settings: settings))
+                {
+                    library.Initialize();
+                    library.AddSongToPlaylist(Helpers.SetupSongMock());
+
+                    Guid accessToken = library.RemoteAccessControl.RegisterRemoteAccessToken(Guid.NewGuid());
+
+                    Assert.Throws<InvalidOperationException>(() => library.VoteForPlaylistEntry(0, accessToken));
+                }
+            }
+        }
     }
 }
