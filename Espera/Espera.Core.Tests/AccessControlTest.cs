@@ -228,7 +228,11 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task SmokeTest()
             {
-                var settings = new CoreSettings { MaxVoteCount = 2 };
+                var settings = new CoreSettings
+                {
+                    EnableVotingSystem = true,
+                    MaxVoteCount = 2
+                };
                 var accessControl = new AccessControl(settings);
                 Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
 
@@ -251,7 +255,11 @@ namespace Espera.Core.Tests
             [Fact]
             public void WithoutVotesLeftThrowsInvalidOperationException()
             {
-                var settings = new CoreSettings { MaxVoteCount = 0 };
+                var settings = new CoreSettings
+                {
+                    EnableVotingSystem = true,
+                    MaxVoteCount = 0
+                };
                 var accessControl = new AccessControl(settings);
                 Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
 
