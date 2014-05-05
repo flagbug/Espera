@@ -626,7 +626,7 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Loads the library with the reader specified in the constructor. This methods retires
+        /// Loads the library with the reader specified in the constructor. This methods retries
         /// three times, but doesn't throw if the loading failed after that.
         /// </summary>
         private void Load()
