@@ -42,11 +42,25 @@ namespace Espera.View
 
         static AppBootstrapper()
         {
-            DirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\");
+            string overrideBasePath = null;
+
+#if DEBUG
+            // Set and uncomment this of you have an SSD and want to test the speed of the BlobCache
+            // operations on a HDD
+
+            // overrideBasePath = "D://AppData";
+#endif
+            DirectoryPath = Path.Combine(overrideBasePath ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\");
             LibraryFilePath = Path.Combine(DirectoryPath, "Library.json");
             LogFilePath = Path.Combine(DirectoryPath, "Log.txt");
             Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             BlobCache.ApplicationName = "Espera";
+#if DEBUG
+            if (overrideBasePath != null)
+            {
+                BlobCache.LocalMachine = new DebugBlobCache(Path.Combine(DirectoryPath, "BlobCache"));
+            }
+#endif
         }
 
         public AppBootstrapper()
@@ -295,4 +309,15 @@ namespace Espera.View
             }
         }
     }
+
+#if DEBUG
+
+    internal class DebugBlobCache : PersistentBlobCache
+    {
+        public DebugBlobCache(string path)
+            : base(path, new SimpleFilesystemProvider())
+        { }
+    }
+
+#endif
 }
