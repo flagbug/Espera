@@ -43,18 +43,22 @@ namespace Espera.View
         static AppBootstrapper()
         {
             string overrideBasePath = null;
+            string appName = "Espera";
 
 #if DEBUG
-            // Set and uncomment this of you have an SSD and want to test the speed of the BlobCache
-            // operations on a HDD
+            // Set and uncomment this if you want to change the app data folder for debugging
 
             // overrideBasePath = "D://AppData";
+
+            appName = "EsperaDebug";
 #endif
-            DirectoryPath = Path.Combine(overrideBasePath ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\");
+
+            DirectoryPath = Path.Combine(overrideBasePath ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appName);
             LibraryFilePath = Path.Combine(DirectoryPath, "Library.json");
             LogFilePath = Path.Combine(DirectoryPath, "Log.txt");
             Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            BlobCache.ApplicationName = "Espera";
+            BlobCache.ApplicationName = appName;
+
 #if DEBUG
             if (overrideBasePath != null)
             {
@@ -83,6 +87,10 @@ namespace Espera.View
                     {
                         x.YoutubeDownloadPath = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
                     }
+
+#if DEBUG
+                    x.EnableAutomaticReports = false;
+#endif
                 });
             this.kernel.Bind<IFileSystem>().To<FileSystem>();
             this.kernel.Bind<Library>().To<Library>().InSingletonScope();
