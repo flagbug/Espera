@@ -19,6 +19,15 @@ namespace Espera.Core.Settings
             set { this.SetOrCreate(value); }
         }
 
+        /// <summary>
+        /// Have we upgraded to the Buddy v2 client yet?
+        /// </summary>
+        public bool BuddyAnalyticsUpgraded
+        {
+            get { return this.GetOrCreate(false); }
+            set { this.SetOrCreate(value); }
+        }
+
         public DefaultPlaybackAction DefaultPlaybackAction
         {
             get { return this.GetOrCreate(DefaultPlaybackAction.PlayNow); }

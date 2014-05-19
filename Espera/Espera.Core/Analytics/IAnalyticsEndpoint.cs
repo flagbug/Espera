@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -20,7 +21,7 @@ namespace Espera.Core.Analytics
         /// </summary>
         Task RecordDeviceInformationAsync();
 
-        Task RecordErrorAsync(string message, string logId, string stackTrace = null);
+        Task RecordErrorAsync(Exception ex, string message = null);
 
         Task RecordMetaDataAsync(string key, string value);
 

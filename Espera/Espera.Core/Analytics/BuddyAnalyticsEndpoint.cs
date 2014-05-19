@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
-using Buddy;
+using BuddySDK;
 
 namespace Espera.Core.Analytics
 {
@@ -14,57 +12,79 @@ namespace Espera.Core.Analytics
 
         public BuddyAnalyticsEndpoint()
         {
-            this.client = new BuddyClient("Espera", "EC60C045-B432-44A6-A4E0-15B4BF607105", autoRecordDeviceInfo: false);
+            this.client = new BuddyClient("bbbbbc.mhbbbxjLrKNl", "83585740-AE7A-4F68-828D-5E6A8825A0EE");
         }
 
         public async Task AuthenticateUserAsync(string analyticsToken)
         {
-            this.storedUser = await this.client.LoginAsync(analyticsToken);
+            var result = await this.client.LoginUserAsync(analyticsToken, analyticsToken);
+
+            if (!result.IsSuccess)
+            {
+                throw result.Error;
+            }
+
+            this.storedUser = result.Value;
         }
 
         public async Task<string> CreateUserAsync()
         {
-            string throwAwayToken = Guid.NewGuid().ToString();
+            string token = Guid.NewGuid().ToString();
 
-            AuthenticatedUser user = await this.client.CreateUserAsync(throwAwayToken, throwAwayToken);
+            var result = await this.client.CreateUserAsync(token, token);
 
-            this.storedUser = user;
+            if (!result.IsSuccess)
+            {
+                throw result.Error;
+            }
 
-            return user.Token;
+            this.storedUser = result.Value;
+
+            return token;
         }
 
         public async Task RecordDeviceInformationAsync()
         {
-            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
-            await this.client.Device.RecordInformationAsync(Environment.OSVersion.VersionString, "Desktop", this.storedUser, version);
             await this.RecordLanguageAsync();
         }
 
-        public Task RecordErrorAsync(string message, string logId, string stackTrace = null)
+        public async Task RecordErrorAsync(Exception ex, string message = null)
         {
-            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            var result = await this.client.AddCrashReportAsync(ex, message);
 
-            return this.client.Device.RecordCrashAsync(message, Environment.OSVersion.VersionString, "Desktop", this.storedUser, stackTrace, version, metadata: logId);
+            if (!result.IsSuccess)
+            {
+                throw result.Error;
+            }
         }
 
-        public Task RecordMetaDataAsync(string key, string value)
+        public async Task RecordMetaDataAsync(string key, string value)
         {
-            return this.storedUser.Metadata.SetAsync(key, value);
+            var result = await this.storedUser.SetMetadataAsync(key, value);
+
+            if (!result.IsSuccess)
+            {
+                throw result.Error;
+            }
         }
 
         public async Task<string> SendBlobAsync(string name, string mimeType, Stream data)
         {
-            Blob blob = await this.storedUser.Blobs.AddAsync(name, mimeType, String.Empty, 0, 0, data);
-            return blob.BlobID.ToString(CultureInfo.InvariantCulture);
+            return null;
         }
 
-        public Task UpdateUserEmailAsync(string email)
+        public async Task UpdateUserEmailAsync(string email)
         {
             AuthenticatedUser user = this.storedUser;
 
-            return user.UpdateAsync(user.Email, String.Empty, user.Gender, user.Age, email, // email is the only field we change here
-                user.Status, user.LocationFuzzing, user.CelebrityMode, user.ApplicationTag);
+            user.Email = email;
+
+            var result = await user.SaveAsync();
+
+            if (!result.IsSuccess)
+            {
+                throw result.Error;
+            }
         }
     }
 }
