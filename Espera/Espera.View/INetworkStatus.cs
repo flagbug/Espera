@@ -7,8 +7,8 @@ namespace Espera.View
     public interface INetworkStatus
     {
         /// <summary>
-        /// Returns an observable that returns the current network status.
-        /// This observable returns the current status upon subscription.
+        /// Returns an observable that returns the current network status. This observable returns
+        /// the current status upon subscription.
         /// </summary>
         IObservable<bool> IsAvailable { get; }
     }
@@ -21,7 +21,8 @@ namespace Espera.View
                 h => NetworkChange.NetworkAvailabilityChanged += h,
                 h => NetworkChange.NetworkAvailabilityChanged -= h)
                 .Select(x => x.EventArgs.IsAvailable)
-                .StartWith(NetworkInterface.GetIsNetworkAvailable());
+                .StartWith(NetworkInterface.GetIsNetworkAvailable())
+                .DistinctUntilChanged();
         }
 
         public IObservable<bool> IsAvailable { get; private set; }

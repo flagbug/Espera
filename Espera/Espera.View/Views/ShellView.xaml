@@ -675,11 +675,22 @@
                             <Grid Visibility="{Binding Path=IsSearching, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Controls:ProgressRing IsActive="True" />
                             </Grid>
-                            <Grid Visibility="{Binding Path=IsNetworkUnavailable, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           Text="Network is currently unavailable" />
-                            </Grid>
+                            <StackPanel Orientation="Vertical" Visibility="{Binding Path=IsNetworkUnavailable, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="Network is currently unavailable" />
+                                <Button Margin="0, 10, 0, 0"
+                                        Width="50"
+                                        Height="50"
+                                        Command="{Binding Path=RefreshNetworkAvailabilityCommand}"
+                                        Style="{DynamicResource MetroCircleButtonStyle}">
+                                    <Rectangle Width="20" Height="20">
+                                        <Rectangle.Fill>
+                                            <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_refresh}" />
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                </Button>
+                            </StackPanel>
                         </Grid>
                     </TabItem>
                 </TabControl>

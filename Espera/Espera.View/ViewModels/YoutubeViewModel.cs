@@ -10,6 +10,7 @@ using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Rareform.Validation;
+using ReactiveMarrow;
 using ReactiveUI;
 
 namespace Espera.View.ViewModels
@@ -52,8 +53,16 @@ namespace Espera.View.ViewModels
                 .Select(x => x == null ? null : (YoutubeSongViewModel)this.SelectedSongs.FirstOrDefault())
                 .ToProperty(this, x => x.SelectedSong);
 
-            var status = networkstatus ?? new NetworkStatus();
-            this.isNetworkUnavailable = status.IsAvailable
+            this.RefreshNetworkAvailabilityCommand = new ReactiveCommand();
+
+            var status = (networkstatus ?? new NetworkStatus());
+            IObservable<bool> networkAvailable = this.RefreshNetworkAvailabilityCommand.ToUnit()
+                .StartWith(Unit.Default)
+                .Do(_ => this.Log().Info("Refreshing network availability"))
+                .Select(_ => status.IsAvailable.Do(x => this.Log().Info("Network available: {0}", x))).Switch()
+                .Replay(1).RefCount();
+
+            this.isNetworkUnavailable = networkAvailable
                 .Select(x => !x)
                 .Merge(this.connectionError.Select(x => true))
                 .ToProperty(this, x => x.IsNetworkUnavailable);
@@ -62,7 +71,7 @@ namespace Espera.View.ViewModels
             this.OrderByTitle();
 
             this.WhenAnyValue(x => x.SearchText).Skip(1).Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler).Select(_ => Unit.Default)
-                .Merge(status.IsAvailable.Where(x => x).Select(_ => Unit.Default))
+                .Merge(networkAvailable.Where(x => x).DistinctUntilChanged().ToUnit())
                 .Select(_ => this.StartSearchAsync().ToObservable())
                 // We don't use SelectMany, because we only care about the latest invocation and
                 // don't want an old, still running request to override a request that is newer and faster
@@ -107,6 +116,8 @@ namespace Espera.View.ViewModels
             get { return this.viewSettings.YoutubeRatingColumnWidth; }
             set { this.viewSettings.YoutubeRatingColumnWidth = value; }
         }
+
+        public ReactiveCommand RefreshNetworkAvailabilityCommand { get; private set; }
 
         public YoutubeSongViewModel SelectedSong
         {
