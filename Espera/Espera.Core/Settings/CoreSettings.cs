@@ -1,7 +1,7 @@
-﻿using Akavache;
+﻿using System;
+using Akavache;
 using Espera.Core.Management;
 using Lager;
-using System;
 
 namespace Espera.Core.Settings
 {
@@ -14,6 +14,12 @@ namespace Espera.Core.Settings
         public string AnalyticsToken
         {
             get { return this.GetOrCreate((string)null); }
+            set { this.SetOrCreate(value); }
+        }
+
+        public DefaultPlaybackAction DefaultPlaybackAction
+        {
+            get { return this.GetOrCreate(DefaultPlaybackAction.PlayNow); }
             set { this.SetOrCreate(value); }
         }
 

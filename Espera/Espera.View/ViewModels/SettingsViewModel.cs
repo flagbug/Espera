@@ -1,11 +1,4 @@
-﻿using Caliburn.Micro;
-using Espera.Core;
-using Espera.Core.Management;
-using Espera.Core.Settings;
-using Espera.Services;
-using Rareform.Validation;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -13,6 +6,13 @@ using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reflection;
+using Caliburn.Micro;
+using Espera.Core;
+using Espera.Core.Management;
+using Espera.Core.Settings;
+using Espera.Services;
+using Rareform.Validation;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
@@ -22,6 +22,14 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> canCreateAdmin;
         private readonly ObservableAsPropertyHelper<bool> canLogin;
         private readonly CoreSettings coreSettings;
+
+        private readonly Dictionary<DefaultPlaybackAction, string> defaultPlaybackActionMap = new Dictionary<DefaultPlaybackAction, string>
+        {
+            {DefaultPlaybackAction.AddToPlaylist, "Add To Playlist"},
+            {DefaultPlaybackAction.PlayNow, "Play Now"}
+        };
+
+        private readonly ObservableAsPropertyHelper<string> defaultPlaybackActionString;
         private readonly ObservableAsPropertyHelper<bool> enableChangelog;
         private readonly ObservableAsPropertyHelper<bool> isPortOccupied;
         private readonly Library library;
@@ -184,6 +192,26 @@ namespace Espera.View.ViewModels
         {
             private get { return this.creationPassword; }
             set { this.RaiseAndSetIfChanged(ref this.creationPassword, value); }
+        }
+
+        public string DefaultPlaybackActionString
+        {
+            get { return this.defaultPlaybackActionMap[this.coreSettings.DefaultPlaybackAction]; }
+            set
+            {
+                this.coreSettings.DefaultPlaybackAction = this.defaultPlaybackActionMap.Single(x => x.Value == value).Key;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        public IEnumerable<string> DefaultPlaybackActionStrings
+        {
+            get
+            {
+                return Enum.GetValues(typeof(DefaultPlaybackAction))
+                    .Cast<DefaultPlaybackAction>()
+                    .Select(x => this.defaultPlaybackActionMap[x]);
+            }
         }
 
         public string DonationPage

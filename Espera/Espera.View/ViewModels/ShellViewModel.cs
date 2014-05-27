@@ -1,12 +1,4 @@
-﻿using Caliburn.Micro;
-using Espera.Core.Audio;
-using Espera.Core.Management;
-using Espera.Core.Settings;
-using Espera.Services;
-using Rareform.Extensions;
-using ReactiveMarrow;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
@@ -14,6 +6,14 @@ using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Caliburn.Micro;
+using Espera.Core.Audio;
+using Espera.Core.Management;
+using Espera.Core.Settings;
+using Espera.Services;
+using Rareform.Extensions;
+using ReactiveMarrow;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
@@ -28,6 +28,7 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<int> currentSeconds;
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
         private readonly ObservableAsPropertyHelper<string> currentTime;
+        private readonly ObservableAsPropertyHelper<IReactiveCommand> defaultPlaybackCommand;
         private readonly ObservableAsPropertyHelper<bool> displayTimeoutWarning;
         private readonly CompositeDisposable disposable;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
@@ -189,6 +190,15 @@ namespace Espera.View.ViewModels
                 .ToCommand();
             this.PlayOverrideCommand.RegisterAsyncTask(_ => this.library.PlaySongAsync(this.SelectedPlaylistEntries.First().Index, this.accessToken));
 
+            // The default play command differs whether we are in party mode or not and depends on
+            // the selected setting in administrator mode.
+            //
+            // In party mode, it is always "Add To Playlist", in administrator mode we look at the setting
+            this.defaultPlaybackCommand = this.coreSettings.WhenAnyValue(x => x.DefaultPlaybackAction)
+                .CombineLatest(this.WhenAnyValue(x => x.IsAdmin), this.WhenAnyValue(x => x.CurrentSongSource),
+                    (action, isAdmin, songSource) => !isAdmin || action == DefaultPlaybackAction.AddToPlaylist ? songSource.AddToPlaylistCommand : songSource.PlayNowCommand)
+                .ToProperty(this, x => x.DefaultPlaybackCommand);
+
             this.PauseCommand = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
                 .CombineLatest(this.isPlaying, (hasAccess, isPlaying) => hasAccess && isPlaying)
                 .ToCommand();
@@ -305,6 +315,11 @@ namespace Espera.View.ViewModels
         public string CurrentTime
         {
             get { return this.currentTime.Value; }
+        }
+
+        public IReactiveCommand DefaultPlaybackCommand
+        {
+            get { return this.defaultPlaybackCommand.Value; }
         }
 
         public bool DisplayTimeoutWarning
