@@ -161,6 +161,7 @@
     <Compile Include="MusicBrainzArtworkFetcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\CoreSettings.cs" />
+    <Compile Include="Settings\DefaultPlaybackAction.cs" />
     <Compile Include="Song.cs" />
     <Compile Include="LocalSongFinder.cs" />
     <Compile Include="TagSanitizer.cs" />

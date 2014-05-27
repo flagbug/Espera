@@ -275,7 +275,9 @@
             <TabItem Header="library">
                 <StackPanel Orientation="Vertical">
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="song source" />
-                    <TextBlock Style="{StaticResource SettingsTextStyle}" Text="The path where Espera searches for songs" />
+                    <TextBlock Style="{StaticResource SettingsTextStyle}"
+                               Margin="0, 10, 0, 0"
+                               Text="The path where Espera searches for songs" />
                     <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
                         <TextBox Width="325"
                                  VerticalAlignment="Top"
@@ -304,6 +306,15 @@
                                 Value="{Binding Path=SongSourceUpdateInterval}" />
                         <TextBlock Margin="5, 0, 0, 0" Text="{Binding Path=SongSourceUpdateInterval, StringFormat=\{0\} Minutes}" VerticalAlignment="Center" />
                     </StackPanel>
+                    <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="playback" />
+                    <TextBlock Style="{StaticResource SettingsTextStyle}"
+                               Margin="0, 10, 0, 0"
+                               Text="Default double click action" />
+                    <ComboBox Width="200"
+                              HorizontalAlignment="Left"
+                              ItemsSource="{Binding Path=DefaultPlaybackActionStrings}"
+                              SelectedItem="{Binding Path=DefaultPlaybackActionString}">
+                    </ComboBox>
                 </StackPanel>
             </TabItem>
             <TabItem Header="youtube">
