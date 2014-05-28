@@ -79,7 +79,7 @@ namespace Espera.Core
             // Previously failed lookups are marked as failed, it doesn't make sense to let it fail again
             if (artworkCacheKey == "FAILED")
             {
-                this.Log().Info("Key {0} is marked as failed, returning.", lookupKey);
+                this.Log().Debug("Key {0} is marked as failed, returning.", lookupKey);
 
                 this.keyedMemoizingSemaphore.Release(lookupKey);
 
