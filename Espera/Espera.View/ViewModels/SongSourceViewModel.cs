@@ -28,14 +28,10 @@ namespace Espera.View.ViewModels
             this.selectableSongs = Enumerable.Empty<T>();
             this.timeoutWarning = new Subject<Unit>();
 
-            IConnectableObservable<bool> canAddToPlaylist = this.WhenAnyValue(x => x.SelectedSongs, x => x != null && x.Any())
-                .Publish(true);
-            canAddToPlaylist.Connect();
-
-            this.AddToPlaylistCommand = new ReactiveCommand();
+            this.AddToPlaylistCommand = this.WhenAnyValue(x => x.SelectedSongs, x => x != null && x.Any()).ToCommand();
             this.AddToPlaylistCommand.Subscribe(p =>
             {
-                if (!canAddToPlaylist.FirstAsync().Wait())
+                if (this.library.RemainingPlaylistTimeout > TimeSpan.Zero)
                 {
                     // Trigger the animation
                     this.timeoutWarning.OnNext(Unit.Default);

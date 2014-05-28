@@ -290,10 +290,10 @@ namespace Espera.Core.Tests
             public void ThrowsAccessExceptionWithGuestTokenAndMultipleSongs()
             {
                 var songs = new[]
-            {
-                Substitute.For<Song>("TestPath", TimeSpan.Zero),
-                Substitute.For<Song>("TestPath", TimeSpan.Zero)
-            };
+                {
+                    Substitute.For<Song>("TestPath", TimeSpan.Zero),
+                    Substitute.For<Song>("TestPath", TimeSpan.Zero)
+                };
 
                 using (Library library = Helpers.CreateLibraryWithPlaylist())
                 {
@@ -307,20 +307,39 @@ namespace Espera.Core.Tests
             }
 
             [Fact]
-            public void ThrowsArgumentNullExceptionIfSongIsNull()
-            {
-                using (Library library = Helpers.CreateLibrary())
-                {
-                    Assert.Throws<ArgumentNullException>(() => library.AddSongToPlaylist(null));
-                }
-            }
-
-            [Fact]
             public void ThrowsArgumentNullExceptionIfSongListIsNull()
             {
                 using (Library library = Helpers.CreateLibrary())
                 {
                     Assert.Throws<ArgumentNullException>(() => library.AddSongsToPlaylist(null, library.LocalAccessControl.RegisterLocalAccessToken()));
+                }
+            }
+        }
+
+        public class TheAddSongToPlaylistMethod
+        {
+            [Fact]
+            public void PlaylistTimeoutThrowsInvalidOperationException()
+            {
+                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.LocalAccessControl.SetLocalPassword(accessToken, "password");
+                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
+
+                    Song song = Helpers.SetupSongMock();
+
+                    library.AddSongToPlaylist(song);
+                    Assert.Throws<InvalidOperationException>(() => library.AddSongToPlaylist(song));
+                }
+            }
+
+            [Fact]
+            public void ThrowsArgumentNullExceptionIfSongIsNull()
+            {
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Assert.Throws<ArgumentNullException>(() => library.AddSongToPlaylist(null));
                 }
             }
         }

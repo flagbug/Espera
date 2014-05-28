@@ -248,10 +248,14 @@ namespace Espera.Core.Management
         /// an outstanding timeout.
         /// </summary>
         /// <param name="song">The song to add to the end of the playlist.</param>
+        /// <exception cref="InvalidOperationException">There is an outstanding playlist timeout.</exception>
         public void AddSongToPlaylist(Song song)
         {
             if (song == null)
                 Throw.ArgumentNullException(() => song);
+
+            if (this.RemainingPlaylistTimeout > TimeSpan.Zero)
+                throw new InvalidOperationException();
 
             this.CurrentPlaylist.AddSongs(new[] { song });
 
