@@ -57,172 +57,6 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
-        public void DisabledAutomaticUpdatesDoesntTriggerUpdate()
-        {
-            var fileSystem = Substitute.For<IFileSystem>();
-
-            var settings = new CoreSettings
-            {
-                EnableAutomaticLibraryUpdates = false
-            };
-
-            using (Library library = Helpers.CreateLibrary(settings, null, null, fileSystem))
-            {
-                (new TestScheduler()).With(scheduler =>
-                {
-                    library.Initialize();
-
-                    scheduler.AdvanceByMs(settings.SongSourceUpdateInterval.TotalMilliseconds);
-                });
-            }
-
-            fileSystem.Directory.DidNotReceiveWithAnyArgs().GetFiles(null);
-        }
-
-        [Fact]
-        public async Task ExternalTagChangesArePropagated()
-        {
-            var song = new LocalSong("C://Song.mp3", TimeSpan.Zero) { Title = "A" };
-            var updatedSong = new LocalSong("C://Song.mp3", TimeSpan.Zero) { Title = "B" };
-
-            var libraryReader = Substitute.For<ILibraryReader>();
-            libraryReader.LibraryExists.Returns(true);
-            libraryReader.ReadSongSourcePath().Returns("C://");
-            libraryReader.ReadPlaylists().Returns(new List<Playlist>());
-            libraryReader.ReadSongs().Returns(new[] { song });
-
-            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { song.OriginalPath, new MockFileData("DontCare") } });
-
-            var songFinder = Substitute.For<ILocalSongFinder>();
-            songFinder.GetSongsAsync().Returns(Observable.Return(Tuple.Create(updatedSong, (byte[])null)));
-
-            using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem, songFinder))
-            {
-                await library.AwaitInitializationAndUpdate();
-
-                Assert.Equal("B", library.Songs[0].Title);
-            }
-        }
-
-        [Fact]
-        public async Task UpdateRemovesArtworkOnlyWithoutReferenceToSong()
-        {
-            var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero, "artwork-abcdefg");
-            var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero, "artwork-abcdefg");
-            await BlobCache.LocalMachine.Insert("artwork-abcdefg", new byte[] { 0, 1 });
-
-            var libraryReader = Substitute.For<ILibraryReader>();
-            libraryReader.LibraryExists.Returns(true);
-            libraryReader.ReadSongSourcePath().Returns("C://");
-            libraryReader.ReadPlaylists().Returns(new List<Playlist>());
-            libraryReader.ReadSongs().Returns(new[] { existingSong, missingSong });
-
-            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
-
-            using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
-            {
-                await library.AwaitInitializationAndUpdate();
-
-                Assert.NotNull(BlobCache.LocalMachine.GetAllKeys().FirstOrDefault(x => x == "artwork-abcdefg"));
-            }
-        }
-
-        [Fact]
-        public async Task UpdateRemovesArtworkWhenSongIsMissing()
-        {
-            var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero, "artwork-abcdefg");
-            await BlobCache.LocalMachine.Insert("artwork-abcdefg", new byte[] { 0, 1 });
-
-            var libraryReader = Substitute.For<ILibraryReader>();
-            libraryReader.LibraryExists.Returns(true);
-            libraryReader.ReadSongSourcePath().Returns("C://");
-            libraryReader.ReadPlaylists().Returns(new List<Playlist>());
-            libraryReader.ReadSongs().Returns(new[] { missingSong });
-
-            using (Library library = Helpers.CreateLibrary(libraryReader))
-            {
-                await library.AwaitInitializationAndUpdate();
-
-                Assert.Null(BlobCache.LocalMachine.GetAllKeys().FirstOrDefault(x => x == "artwork-abcdefg"));
-            }
-        }
-
-        [Fact]
-        public async Task UpdateRemovesMissingSongsFromLibrary()
-        {
-            var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero);
-            var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero);
-
-            var libraryReader = Substitute.For<ILibraryReader>();
-            libraryReader.LibraryExists.Returns(true);
-            libraryReader.ReadSongSourcePath().Returns("C://");
-            libraryReader.ReadPlaylists().Returns(new List<Playlist>());
-            libraryReader.ReadSongs().Returns(new[] { existingSong, missingSong });
-
-            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
-
-            using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
-            {
-                await library.AwaitInitializationAndUpdate();
-
-                Assert.Equal(1, library.Songs.Count());
-            }
-        }
-
-        [Fact]
-        public async Task UpdateRemovesMissingSongsFromPlaylists()
-        {
-            var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero);
-            var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero);
-
-            var songs = new[] { existingSong, missingSong };
-
-            var playlist1 = new Playlist("Playlist 1");
-            playlist1.AddSongs(songs);
-
-            var playlist2 = new Playlist("Playlist 2");
-            playlist2.AddSongs(songs);
-
-            var libraryReader = Substitute.For<ILibraryReader>();
-            libraryReader.LibraryExists.Returns(true);
-            libraryReader.ReadSongSourcePath().Returns("C://");
-            libraryReader.ReadPlaylists().Returns(new[] { playlist1, playlist2 });
-            libraryReader.ReadSongs().Returns(songs);
-
-            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
-
-            using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
-            {
-                await library.AwaitInitializationAndUpdate();
-
-                Assert.Equal(1, library.Playlists[0].Count());
-                Assert.Equal(1, library.Playlists[1].Count());
-            }
-        }
-
-        [Fact]
-        public async Task UpdateRemovesMissingSongWithoutArtworkFromLibraryWhenOtherArtworksArePresent()
-        {
-            var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero, "artwork-abcdefg");
-            var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero);
-
-            var libraryReader = Substitute.For<ILibraryReader>();
-            libraryReader.LibraryExists.Returns(true);
-            libraryReader.ReadSongSourcePath().Returns("C://");
-            libraryReader.ReadPlaylists().Returns(new List<Playlist>());
-            libraryReader.ReadSongs().Returns(new[] { existingSong, missingSong });
-
-            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
-
-            using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
-            {
-                await library.AwaitInitializationAndUpdate();
-
-                Assert.Equal(1, library.Songs.Count());
-            }
-        }
-
-        [Fact]
         public void YoutubeDownloadPathSetterThrowsArgumentExceptionIfDirectoryDoesntExist()
         {
             using (Library library = Helpers.CreateLibrary())
@@ -1037,6 +871,208 @@ namespace Espera.Core.Tests
 
                     Assert.Equal(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex.Value);
                     Assert.Equal(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex.Value);
+                }
+            }
+        }
+
+        public class TheUpdateBehavior
+        {
+            [Fact]
+            public void DisabledAutomaticUpdatesDoesntTriggerUpdate()
+            {
+                var fileSystem = Substitute.For<IFileSystem>();
+
+                var settings = new CoreSettings
+                {
+                    EnableAutomaticLibraryUpdates = false
+                };
+
+                using (Library library = Helpers.CreateLibrary(settings, null, null, fileSystem))
+                {
+                    (new TestScheduler()).With(scheduler =>
+                    {
+                        library.Initialize();
+
+                        scheduler.AdvanceByMs(settings.SongSourceUpdateInterval.TotalMilliseconds);
+                    });
+                }
+
+                fileSystem.Directory.DidNotReceiveWithAnyArgs().GetFiles(null);
+            }
+
+            [Fact]
+            public async Task ExternalTagChangesArePropagated()
+            {
+                var song = new LocalSong("C://Song.mp3", TimeSpan.Zero) { Title = "A" };
+                var updatedSong = new LocalSong("C://Song.mp3", TimeSpan.Zero) { Title = "B" };
+
+                var libraryReader = Substitute.For<ILibraryReader>();
+                libraryReader.LibraryExists.Returns(true);
+                libraryReader.ReadSongSourcePath().Returns("C://");
+                libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+                libraryReader.ReadSongs().Returns(new[] { song });
+
+                var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { song.OriginalPath, new MockFileData("DontCare") } });
+
+                var songFinder = Substitute.For<ILocalSongFinder>();
+                songFinder.GetSongsAsync().Returns(Observable.Return(Tuple.Create(updatedSong, (byte[])null)));
+
+                using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem, songFinder))
+                {
+                    await library.AwaitInitializationAndUpdate();
+
+                    Assert.Equal("B", library.Songs[0].Title);
+                }
+            }
+
+            [Fact]
+            public async Task UnavailableSongsSourceDoesntPurgeLibrary()
+            {
+                var settings = new CoreSettings
+                {
+                    EnableAutomaticLibraryUpdates = false
+                };
+
+                var song = new LocalSong("C://Song.mp3", TimeSpan.Zero) { Title = "A" };
+
+                var libraryReader = Substitute.For<ILibraryReader>();
+                libraryReader.LibraryExists.Returns(true);
+                libraryReader.ReadSongSourcePath().Returns("C://");
+                libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+                libraryReader.ReadSongs().Returns(new[] { song });
+
+                var fileSystem = new MockFileSystem();
+
+                using (Library library = Helpers.CreateLibrary(settings, libraryReader, fileSystem: fileSystem))
+                {
+                    library.Initialize();
+
+                    var updateFinished = library.IsUpdating.FirstAsync(x => !x).PublishLast();
+                    updateFinished.Connect();
+
+                    library.UpdateNow();
+
+                    await updateFinished.Timeout(TimeSpan.FromSeconds(5));
+
+                    Assert.Equal(1, library.Songs.Count);
+                }
+            }
+
+            [Fact]
+            public async Task UpdateRemovesArtworkOnlyWithoutReferenceToSong()
+            {
+                var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero, "artwork-abcdefg");
+                var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero, "artwork-abcdefg");
+                await BlobCache.LocalMachine.Insert("artwork-abcdefg", new byte[] { 0, 1 });
+
+                var libraryReader = Substitute.For<ILibraryReader>();
+                libraryReader.LibraryExists.Returns(true);
+                libraryReader.ReadSongSourcePath().Returns("C://");
+                libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+                libraryReader.ReadSongs().Returns(new[] { existingSong, missingSong });
+
+                var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
+
+                using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
+                {
+                    await library.AwaitInitializationAndUpdate();
+
+                    Assert.NotNull(BlobCache.LocalMachine.GetAllKeys().FirstOrDefault(x => x == "artwork-abcdefg"));
+                }
+            }
+
+            [Fact]
+            public async Task UpdateRemovesArtworkWhenSongIsMissing()
+            {
+                var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero, "artwork-abcdefg");
+                await BlobCache.LocalMachine.Insert("artwork-abcdefg", new byte[] { 0, 1 });
+
+                var libraryReader = Substitute.For<ILibraryReader>();
+                libraryReader.LibraryExists.Returns(true);
+                libraryReader.ReadSongSourcePath().Returns("C://");
+                libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+                libraryReader.ReadSongs().Returns(new[] { missingSong });
+
+                using (Library library = Helpers.CreateLibrary(libraryReader))
+                {
+                    await library.AwaitInitializationAndUpdate();
+
+                    Assert.Null(BlobCache.LocalMachine.GetAllKeys().FirstOrDefault(x => x == "artwork-abcdefg"));
+                }
+            }
+
+            [Fact]
+            public async Task UpdateRemovesMissingSongsFromLibrary()
+            {
+                var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero);
+                var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero);
+
+                var libraryReader = Substitute.For<ILibraryReader>();
+                libraryReader.LibraryExists.Returns(true);
+                libraryReader.ReadSongSourcePath().Returns("C://");
+                libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+                libraryReader.ReadSongs().Returns(new[] { existingSong, missingSong });
+
+                var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
+
+                using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
+                {
+                    await library.AwaitInitializationAndUpdate();
+
+                    Assert.Equal(1, library.Songs.Count());
+                }
+            }
+
+            [Fact]
+            public async Task UpdateRemovesMissingSongsFromPlaylists()
+            {
+                var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero);
+                var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero);
+
+                var songs = new[] { existingSong, missingSong };
+
+                var playlist1 = new Playlist("Playlist 1");
+                playlist1.AddSongs(songs);
+
+                var playlist2 = new Playlist("Playlist 2");
+                playlist2.AddSongs(songs);
+
+                var libraryReader = Substitute.For<ILibraryReader>();
+                libraryReader.LibraryExists.Returns(true);
+                libraryReader.ReadSongSourcePath().Returns("C://");
+                libraryReader.ReadPlaylists().Returns(new[] { playlist1, playlist2 });
+                libraryReader.ReadSongs().Returns(songs);
+
+                var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
+
+                using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
+                {
+                    await library.AwaitInitializationAndUpdate();
+
+                    Assert.Equal(1, library.Playlists[0].Count());
+                    Assert.Equal(1, library.Playlists[1].Count());
+                }
+            }
+
+            [Fact]
+            public async Task UpdateRemovesMissingSongWithoutArtworkFromLibraryWhenOtherArtworksArePresent()
+            {
+                var existingSong = new LocalSong("C://Existing.mp3", TimeSpan.Zero, "artwork-abcdefg");
+                var missingSong = new LocalSong("C://Missing.mp3", TimeSpan.Zero);
+
+                var libraryReader = Substitute.For<ILibraryReader>();
+                libraryReader.LibraryExists.Returns(true);
+                libraryReader.ReadSongSourcePath().Returns("C://");
+                libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+                libraryReader.ReadSongs().Returns(new[] { existingSong, missingSong });
+
+                var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { existingSong.OriginalPath, new MockFileData("DontCare") } });
+
+                using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
+                {
+                    await library.AwaitInitializationAndUpdate();
+
+                    Assert.Equal(1, library.Songs.Count());
                 }
             }
         }

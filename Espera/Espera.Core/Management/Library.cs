@@ -318,6 +318,21 @@ namespace Espera.Core.Management
             update.CombineLatest(this.songSourcePath, (_, path) => path)
                 .Where(path => !String.IsNullOrEmpty(path))
                 .Do(_ => this.Log().Info("Triggering library update."))
+                // Abort the update if the song source doesn't exist.
+                //
+                // The source may be a NAS that's just temporarily offline and we don't want to
+                // purge the whole library in this case.
+                .Where(path =>
+                {
+                    bool exists = this.fileSystem.Directory.Exists(path);
+
+                    if (!exists)
+                    {
+                        this.Log().Info("Song source isn't available, aborting library update.");
+                    }
+
+                    return exists;
+                })
                 .Subscribe(path => this.UpdateSongsAsync(path))
                 .DisposeWith(this.globalSubscriptions);
         }
