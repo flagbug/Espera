@@ -7,6 +7,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.View.ViewModels;
@@ -22,6 +23,8 @@ namespace Espera.View.Views
 {
     public partial class ShellView : IEnableLogger
     {
+        private const int SC_MOVE = 0xF010;
+        private const int WM_SYSCOMMAND = 0x0112;
         private HotKeyManager hotKeyManager;
         private ShellViewModel shellViewModel;
 
@@ -89,6 +92,24 @@ namespace Espera.View.Views
 
             var updateViewModel = this.shellViewModel.UpdateViewModel;
             updateViewModel.ChangelogShown();
+        }
+
+        private IntPtr HandleWindowMove(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            switch (msg)
+            {
+            case WM_SYSCOMMAND:
+                int command = wParam.ToInt32() & 0xfff0;
+
+                if (command == SC_MOVE)
+                {
+                    // Intercept the move command if we aren't allowed to modify the window
+                    handled = !this.shellViewModel.CanModifyWindow;
+                }
+                break;
+            }
+
+            return IntPtr.Zero;
         }
 
         private void LoginButtonClick(object sender, RoutedEventArgs e)
@@ -312,18 +333,27 @@ namespace Espera.View.Views
         {
             ShellViewModel vm = this.shellViewModel;
 
-            this.shellViewModel.UpdateScreenState
+            vm.UpdateScreenState
                 .Skip(1)
                 .Where(_ => vm.ViewSettings.LockWindow && vm.ViewSettings.GoFullScreenOnLock)
                 .Subscribe(x =>
                 {
-                    this.IgnoreTaskbarOnMaximize = x == AccessPermission.Guest && this.shellViewModel.ViewSettings.GoFullScreenOnLock;
+                    this.IgnoreTaskbarOnMaximize = x == AccessPermission.Guest && vm.ViewSettings.GoFullScreenOnLock;
 
                     this.WindowState = WindowState.Normal;
                     this.WindowState = WindowState.Maximized;
 
                     this.Topmost = this.IgnoreTaskbarOnMaximize;
                 });
+
+            // Register the window move intercept to prevent the window being resizable by dragging
+            // it down on the titlebar
+            this.Events().SourceInitialized.FirstAsync().Subscribe(_ =>
+            {
+                var helper = new WindowInteropHelper(this);
+                HwndSource source = HwndSource.FromHwnd(helper.Handle);
+                source.AddHook(HandleWindowMove);
+            });
         }
     }
 }
