@@ -570,10 +570,8 @@ namespace Espera.Core.Tests
 
                     library.AddSongsToPlaylist(Helpers.SetupSongMocks(2), token);
 
-                    var coll = library.PlaybackState.CreateCollection();
-
-                    var conn = library.PlaybackState.Count(x => x == AudioPlayerState.Playing)
-                        .FirstAsync(x => x == 2)
+                    var conn = library.PlaybackState.Where(x => x == AudioPlayerState.Playing)
+                        .Take(2)
                         .PublishLast();
                     conn.Connect();
 
