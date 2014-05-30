@@ -993,7 +993,10 @@ namespace Espera.Core.Tests
                 libraryReader.ReadPlaylists().Returns(new List<Playlist>());
                 libraryReader.ReadSongs().Returns(new[] { missingSong });
 
-                using (Library library = Helpers.CreateLibrary(libraryReader))
+                var fileSystem = new MockFileSystem();
+                fileSystem.Directory.CreateDirectory("C://");
+
+                using (Library library = Helpers.CreateLibrary(libraryReader, fileSystem))
                 {
                     await library.AwaitInitializationAndUpdate();
 
