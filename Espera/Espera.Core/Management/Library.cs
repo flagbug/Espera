@@ -255,7 +255,7 @@ namespace Espera.Core.Management
                 Throw.ArgumentNullException(() => song);
 
             if (this.RemainingPlaylistTimeout > TimeSpan.Zero)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Current playlist has a remaining timeout.");
 
             this.CurrentPlaylist.AddSongs(new[] { song });
 
