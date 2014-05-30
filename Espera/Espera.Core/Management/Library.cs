@@ -254,12 +254,15 @@ namespace Espera.Core.Management
             if (song == null)
                 Throw.ArgumentNullException(() => song);
 
-            if (this.RemainingPlaylistTimeout > TimeSpan.Zero)
+            if (this.settings.EnablePlaylistTimeout && this.RemainingPlaylistTimeout > TimeSpan.Zero)
                 throw new InvalidOperationException("Current playlist has a remaining timeout.");
 
             this.CurrentPlaylist.AddSongs(new[] { song });
 
-            this.lastSongAddTime = DateTime.Now;
+            if (this.settings.EnablePlaylistTimeout)
+            {
+                this.lastSongAddTime = DateTime.Now;
+            }
         }
 
         public void ChangeSongSourcePath(string path, Guid accessToken)

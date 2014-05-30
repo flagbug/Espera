@@ -153,6 +153,29 @@ namespace Espera.Core.Tests
         public class TheAddSongToPlaylistMethod
         {
             [Fact]
+            public void DisabledTimeoutSmokeTest()
+            {
+                var settings = new CoreSettings
+                {
+                    EnablePlaylistTimeout = false
+                };
+
+                using (Library library = Helpers.CreateLibraryWithPlaylist(settings: settings))
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.LocalAccessControl.SetLocalPassword(accessToken, "password");
+                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
+
+                    Song song = Helpers.SetupSongMock();
+
+                    library.AddSongToPlaylist(song);
+                    library.AddSongToPlaylist(song);
+
+                    Assert.Equal(2, library.CurrentPlaylist.Count());
+                }
+            }
+
+            [Fact]
             public void PlaylistTimeoutThrowsInvalidOperationException()
             {
                 using (Library library = Helpers.CreateLibraryWithPlaylist())
@@ -1121,7 +1144,8 @@ namespace Espera.Core.Tests
                     EnableVotingSystem = true,
                     LockRemoteControl = true,
                     RemoteControlPassword = "Password",
-                    MaxVoteCount = 2
+                    MaxVoteCount = 2,
+                    EnablePlaylistTimeout = false
                 };
 
                 using (var library = Helpers.CreateLibraryWithPlaylist(settings: settings))
