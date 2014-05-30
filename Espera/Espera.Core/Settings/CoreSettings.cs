@@ -2,13 +2,14 @@
 using Akavache;
 using Espera.Core.Management;
 using Lager;
+using ReactiveUI;
 
 namespace Espera.Core.Settings
 {
     public class CoreSettings : SettingsStorage
     {
         public CoreSettings()
-            : base("__CoreSettings__", BlobCache.LocalMachine)
+            : base("__CoreSettings__", RxApp.InUnitTestRunner() ? new TestBlobCache() : BlobCache.LocalMachine)
         { }
 
         public string AnalyticsToken
