@@ -1,16 +1,19 @@
-﻿using Rareform.Validation;
-using ReactiveMarrow;
-using System;
+﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Rareform.Validation;
 
 namespace Espera.Core
 {
     [DebuggerDisplay("{Artist}-{Album}-{Title}")]
-    public abstract class Song : IEquatable<Song>
+    public abstract class Song : IEquatable<Song>, INotifyPropertyChanged
     {
+        private bool isCorrupted;
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="Song"/> class.
+        /// Initializes a new instance of the <see cref="Song" /> class.
         /// </summary>
         /// <param name="path">The path of the song.</param>
         /// <param name="duration">The duration of the song.</param>
@@ -28,9 +31,9 @@ namespace Espera.Core
             this.Artist = String.Empty;
             this.Genre = String.Empty;
             this.Title = String.Empty;
-
-            this.IsCorrupted = new ReactiveProperty<bool>();
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public string Album { get; set; }
 
@@ -44,7 +47,18 @@ namespace Espera.Core
         /// Gets a value indicating whether the song is corrupted and can't be played.
         /// </summary>
         /// <value><c>true</c> if the song is corrupted; otherwise, <c>false</c>.</value>
-        public ReactiveProperty<bool> IsCorrupted { get; private set; }
+        public bool IsCorrupted
+        {
+            get { return this.isCorrupted; }
+            set
+            {
+                if (this.isCorrupted != value)
+                {
+                    this.isCorrupted = value;
+                    this.OnPropertyChanged();
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the path of the song on the local filesystem, or in the internet.
@@ -136,6 +150,16 @@ namespace Espera.Core
         internal virtual Task PrepareAsync(YoutubeStreamingQuality qualityHint)
         {
             return Task.Delay(0);
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChangedEventHandler handler = this.PropertyChanged;
+
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
     }
 }

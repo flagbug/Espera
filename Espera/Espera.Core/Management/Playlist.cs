@@ -2,11 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
 using Rareform.Validation;
-using ReactiveMarrow;
 using ReactiveUI;
 
 namespace Espera.Core.Management
@@ -14,9 +12,10 @@ namespace Espera.Core.Management
     /// <summary>
     /// Represents a playlist where songs are stored with an associated index.
     /// </summary>
-    public sealed class Playlist : IEnumerable<PlaylistEntry>, INotifyCollectionChanged, INotifyPropertyChanged
+    public sealed class Playlist : ReactiveObject, IEnumerable<PlaylistEntry>, INotifyCollectionChanged
     {
         private readonly ReactiveList<PlaylistEntry> playlist;
+        private int? currentSongIndex;
         private string name;
 
         internal Playlist(string name, bool isTemporary = false)
@@ -24,21 +23,20 @@ namespace Espera.Core.Management
             this.Name = name;
             this.IsTemporary = isTemporary;
 
-            this.playlist = new ReactiveUI.ReactiveList<PlaylistEntry>();
+            this.playlist = new ReactiveList<PlaylistEntry>();
 
-            this.CurrentSongIndex = new ReactiveProperty<int?>(x => x == null || this.ContainsIndex(x.Value), typeof(ArgumentOutOfRangeException));
-            this.CurrentSongIndex.Where(x => x != null).Subscribe(x =>
+            this.WhenAnyValue(x => x.CurrentSongIndex).Where(x => x != null).Subscribe(x =>
             {
                 this.ResetVotesBeforeIndex(x.Value);
             });
 
-            var canPlayNextSong = this.CurrentSongIndex
+            var canPlayNextSong = this.WhenAnyValue(x => x.CurrentSongIndex)
                 .CombineLatest(this.playlist.Changed, (i, args) => i.HasValue && this.ContainsIndex(i.Value + 1))
                 .Publish(false);
             canPlayNextSong.Connect();
             this.CanPlayNextSong = canPlayNextSong;
 
-            var canPlayPeviousSong = this.CurrentSongIndex
+            var canPlayPeviousSong = this.WhenAnyValue(x => x.CurrentSongIndex)
                 .CombineLatest(this.playlist.Changed, (i, args) => i.HasValue && this.ContainsIndex(i.Value - 1))
                 .Publish(false);
             canPlayPeviousSong.Connect();
@@ -46,12 +44,6 @@ namespace Espera.Core.Management
         }
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
-
-        public event PropertyChangedEventHandler PropertyChanged
-        {
-            add { this.playlist.PropertyChanged += value; }
-            remove { this.playlist.PropertyChanged -= value; }
-        }
 
         /// <summary>
         /// Gets a value indicating whether the next song in the playlist can be played.
@@ -65,11 +57,6 @@ namespace Espera.Core.Management
         /// <value>true if the previous song in the playlist can be played; otherwise, false.</value>
         public IObservable<bool> CanPlayPreviousSong { get; private set; }
 
-        public IObservable<NotifyCollectionChangedEventArgs> Changed
-        {
-            get { return this.playlist.Changed; }
-        }
-
         /// <summary>
         /// Gets or sets the index of the currently played song in the playlist.
         /// </summary>
@@ -80,7 +67,17 @@ namespace Espera.Core.Management
         /// <exception cref="ArgumentOutOfRangeException">
         /// The value is not in the range of the playlist's indexes.
         /// </exception>
-        public ReactiveProperty<int?> CurrentSongIndex { get; private set; }
+        public int? CurrentSongIndex
+        {
+            get { return this.currentSongIndex; }
+            set
+            {
+                if (value != null && !this.ContainsIndex(value.Value))
+                    throw new ArgumentOutOfRangeException("value");
+
+                this.RaiseAndSetIfChanged(ref this.currentSongIndex, value);
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether this playlist is temporary and used for instant-playing.
@@ -222,9 +219,9 @@ namespace Espera.Core.Management
             // Use a HashSet for better lookup performance
             var indexList = new HashSet<int>(indexes);
 
-            if (this.CurrentSongIndex.Value.HasValue && indexList.Contains(this.CurrentSongIndex.Value.Value))
+            if (this.CurrentSongIndex.HasValue && indexList.Contains(this.CurrentSongIndex.Value))
             {
-                this.CurrentSongIndex.Value = null;
+                this.CurrentSongIndex = null;
             }
 
             var itemsToRemove = this.playlist.Where(x => indexList.Contains(x.Index)).ToList();
@@ -261,17 +258,17 @@ namespace Espera.Core.Management
             if (index > this.playlist.Count)
                 Throw.ArgumentOutOfRangeException(() => index, this.playlist.Count);
 
-            if (this.CurrentSongIndex.Value.HasValue && index <= this.CurrentSongIndex.Value)
+            if (this.CurrentSongIndex.HasValue && index <= this.CurrentSongIndex.Value)
                 throw new InvalidOperationException("Index can't be less or equal the current song index");
 
             PlaylistEntry entry = this[index];
             entry.Vote();
 
-            if (this.playlist.Count == 1 || (this.CurrentSongIndex.Value.HasValue && index == this.CurrentSongIndex.Value + 1))
+            if (this.playlist.Count == 1 || (this.CurrentSongIndex.HasValue && index == this.CurrentSongIndex.Value + 1))
                 return entry;
 
-            var targetEntry = this.Skip(this.CurrentSongIndex.Value.HasValue ?
-                    this.CurrentSongIndex.Value.Value + 1 : 0)
+            var targetEntry = this.Skip(this.CurrentSongIndex.HasValue ?
+                    this.CurrentSongIndex.Value + 1 : 0)
                 .SkipWhile(x => x.Votes >= this[index].Votes && x != this[index])
                 .First();
 
@@ -303,7 +300,7 @@ namespace Espera.Core.Management
 
             foreach (var entry in this.playlist)
             {
-                if (this.CurrentSongIndex.Value == entry.Index)
+                if (this.CurrentSongIndex == entry.Index)
                 {
                     migrateIndex = index;
                 }
@@ -315,7 +312,7 @@ namespace Espera.Core.Management
 
             if (migrateIndex.HasValue)
             {
-                this.CurrentSongIndex.Value = migrateIndex;
+                this.CurrentSongIndex = migrateIndex;
             }
         }
 

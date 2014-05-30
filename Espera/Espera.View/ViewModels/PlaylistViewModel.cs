@@ -1,15 +1,15 @@
-﻿using Espera.Core.Management;
-using Rareform.Extensions;
-using Rareform.Reflection;
-using ReactiveMarrow;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using Espera.Core.Management;
+using Rareform.Extensions;
+using Rareform.Reflection;
+using ReactiveMarrow;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
@@ -44,7 +44,7 @@ namespace Espera.View.ViewModels
                 .DisposeWith(this.disposable);
             this.entries.ItemsRemoved.Subscribe(x => x.Dispose()).DisposeWith(this.disposable);
 
-            IObservable<int?> currentSongUpdated = this.playlist.CurrentSongIndex.Do(this.UpdateCurrentSong);
+            IObservable<int?> currentSongUpdated = this.playlist.WhenAnyValue(x => x.CurrentSongIndex).Do(this.UpdateCurrentSong);
             IObservable<IEnumerable<PlaylistEntryViewModel>> remainingSongs = this.entries.Changed
                 .Select(x => Unit.Default)
                 .Merge(currentSongUpdated.Select(x => Unit.Default))
@@ -60,7 +60,7 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.TimeRemaining)
                 .DisposeWith(this.disposable);
 
-            this.CurrentPlayingEntry = this.Model.CurrentSongIndex.Select(x => x != null ? this.entries[x.Value] : null);
+            this.CurrentPlayingEntry = this.Model.WhenAnyValue(x => x.CurrentSongIndex).Select(x => x != null ? this.entries[x.Value] : null);
         }
 
         public IObservable<PlaylistEntryViewModel> CurrentPlayingEntry { get; private set; }

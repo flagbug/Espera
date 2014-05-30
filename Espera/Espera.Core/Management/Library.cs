@@ -405,10 +405,10 @@ namespace Espera.Core.Management
         {
             this.accessControl.VerifyAccess(accessToken, await this.CurrentPlaylist.CanPlayPreviousSong.FirstAsync());
 
-            if (!this.CurrentPlaylist.CurrentSongIndex.Value.HasValue)
+            if (!this.CurrentPlaylist.CurrentSongIndex.HasValue)
                 throw new InvalidOperationException("The previous song can't be played as there is no current playlist index.");
 
-            await this.PlaySongAsync(this.CurrentPlaylist.CurrentSongIndex.Value.Value - 1, accessToken);
+            await this.PlaySongAsync(this.CurrentPlaylist.CurrentSongIndex.Value - 1, accessToken);
         }
 
         /// <summary>
@@ -552,7 +552,7 @@ namespace Espera.Core.Management
         {
             if (!await this.CurrentPlaylist.CanPlayNextSong.FirstAsync())
             {
-                this.CurrentPlaylist.CurrentSongIndex.Value = null;
+                this.CurrentPlaylist.CurrentSongIndex = null;
             }
 
             else
@@ -565,7 +565,7 @@ namespace Espera.Core.Management
         {
             if (!canPlayNextSong)
             {
-                this.CurrentPlaylist.CurrentSongIndex.Value = null;
+                this.CurrentPlaylist.CurrentSongIndex = null;
             }
 
             if (canPlayNextSong)
@@ -576,10 +576,10 @@ namespace Espera.Core.Management
 
         private async Task InternPlayNextSongAsync()
         {
-            if (!await this.CurrentPlaylist.CanPlayNextSong.FirstAsync() || !this.CurrentPlaylist.CurrentSongIndex.Value.HasValue)
+            if (!await this.CurrentPlaylist.CanPlayNextSong.FirstAsync() || !this.CurrentPlaylist.CurrentSongIndex.HasValue)
                 throw new InvalidOperationException("The next song couldn't be played.");
 
-            int nextIndex = this.CurrentPlaylist.CurrentSongIndex.Value.Value + 1;
+            int nextIndex = this.CurrentPlaylist.CurrentSongIndex.Value + 1;
 
             await this.InternPlaySongAsync(nextIndex);
         }
@@ -591,12 +591,12 @@ namespace Espera.Core.Management
 
             if (this.currentPlayingPlaylist != null && this.currentPlayingPlaylist != this.CurrentPlaylist)
             {
-                this.currentPlayingPlaylist.CurrentSongIndex.Value = null;
+                this.currentPlayingPlaylist.CurrentSongIndex = null;
             }
 
             this.currentPlayingPlaylist = this.CurrentPlaylist;
 
-            this.CurrentPlaylist.CurrentSongIndex.Value = playlistIndex;
+            this.CurrentPlaylist.CurrentSongIndex = playlistIndex;
 
             this.audioPlayer.Volume = this.Volume;
 
@@ -626,7 +626,7 @@ namespace Espera.Core.Management
             catch (SongLoadException ex)
             {
                 this.Log().ErrorException("Failed to load song", ex);
-                song.IsCorrupted.Value = true;
+                song.IsCorrupted = true;
 
                 this.HandleSongCorruptionAsync();
 
@@ -641,7 +641,7 @@ namespace Espera.Core.Management
             catch (PlaybackException ex)
             {
                 this.Log().ErrorException("Failed to play song", ex);
-                song.IsCorrupted.Value = true;
+                song.IsCorrupted = true;
 
                 this.HandleSongCorruptionAsync();
             }
@@ -736,7 +736,7 @@ namespace Espera.Core.Management
 
         private void RemoveFromPlaylist(Playlist playlist, IEnumerable<int> indexes)
         {
-            bool stopCurrentSong = playlist == this.CurrentPlaylist && indexes.Any(index => index == this.CurrentPlaylist.CurrentSongIndex.Value);
+            bool stopCurrentSong = playlist == this.CurrentPlaylist && indexes.Any(index => index == this.CurrentPlaylist.CurrentSongIndex);
 
             playlist.RemoveSongs(indexes);
 

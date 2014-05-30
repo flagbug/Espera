@@ -1,9 +1,9 @@
-﻿using Espera.Core;
+﻿using System;
+using System.Reactive.Disposables;
+using Espera.Core;
 using Espera.Core.Management;
 using ReactiveMarrow;
 using ReactiveUI;
-using System;
-using System.Reactive.Disposables;
 
 namespace Espera.View.ViewModels
 {
@@ -22,7 +22,7 @@ namespace Espera.View.ViewModels
 
             this.disposable = new CompositeDisposable();
 
-            this.isCorrupted = this.Model.IsCorrupted
+            this.isCorrupted = this.Model.WhenAnyValue(x => x.IsCorrupted)
                 .ToProperty(this, x => x.IsCorrupted)
                 .DisposeWith(disposable);
 

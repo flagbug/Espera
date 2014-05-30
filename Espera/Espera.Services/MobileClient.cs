@@ -565,7 +565,7 @@ namespace Espera.Services
                     .Switch())
                 .Merge(this.library.CurrentPlaylistChanged
                     .StartWith(this.library.CurrentPlaylist)
-                    .Select(x => x.CurrentSongIndex.Skip(1).Select(y => x))
+                    .Select(x => x.WhenAnyValue(y => y.CurrentSongIndex).Skip(1).Select(y => x))
                     .Switch())
                 .CombineLatest(this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken),
                     this.library.PlaybackState, Tuple.Create)
@@ -642,7 +642,7 @@ namespace Espera.Services
                 return CreateResponse(ResponseStatus.Rejected, "Vote already registered");
             }
 
-            if (playlist.CurrentSongIndex.Value.HasValue && entry.Index <= playlist.CurrentSongIndex.Value)
+            if (playlist.CurrentSongIndex.HasValue && entry.Index <= playlist.CurrentSongIndex.Value)
             {
                 return CreateResponse(ResponseStatus.Rejected, "Vote rejected");
             }

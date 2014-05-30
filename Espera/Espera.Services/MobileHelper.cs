@@ -1,11 +1,11 @@
-﻿using Espera.Core;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Espera.Core;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Network;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Espera.Services
 {
@@ -16,7 +16,7 @@ namespace Espera.Services
             var networkPlaylist = new NetworkPlaylist
             {
                 Name = playlist.Name,
-                CurrentIndex = playlist.CurrentSongIndex.Value,
+                CurrentIndex = playlist.CurrentSongIndex,
                 Songs = playlist.Select(x =>
 
                     new NetworkSong

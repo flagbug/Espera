@@ -1,9 +1,9 @@
-﻿using Espera.Core.Management;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Espera.Core.Management;
 using Xunit;
 
 namespace Espera.Core.Tests
@@ -20,7 +20,7 @@ namespace Espera.Core.Tests
             playlist.VoteFor(1);
             playlist.VoteFor(2);
 
-            playlist.CurrentSongIndex.Value = 1;
+            playlist.CurrentSongIndex = 1;
 
             Assert.Equal(1, playlist[1].Votes);
             Assert.Equal(1, playlist[2].Votes);
@@ -34,17 +34,17 @@ namespace Espera.Core.Tests
 
             playlist.VoteFor(0);
 
-            playlist.CurrentSongIndex.Value = 0;
+            playlist.CurrentSongIndex = 0;
 
             Assert.Equal(1, playlist[0].Votes);
 
-            playlist.CurrentSongIndex.Value = 1;
+            playlist.CurrentSongIndex = 1;
 
             Assert.Equal(0, playlist[0].Votes);
 
             playlist.VoteFor(2);
 
-            playlist.CurrentSongIndex.Value = 2;
+            playlist.CurrentSongIndex = 2;
 
             Assert.Equal(0, playlist[1].Votes);
         }
@@ -57,7 +57,7 @@ namespace Espera.Core.Tests
             List<PlaylistEntry> entries = playlist.ToList();
             var expectedOrder = new[] { entries[0], entries[1], entries[3], entries[4], entries[2] };
 
-            playlist.CurrentSongIndex.Value = 1;
+            playlist.CurrentSongIndex = 1;
 
             playlist.VoteFor(4);
             playlist.VoteFor(4);
@@ -111,7 +111,7 @@ namespace Espera.Core.Tests
                 Song[] songs = Helpers.SetupSongMocks(4);
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
-                playlist.CurrentSongIndex.Value = 3;
+                playlist.CurrentSongIndex = 3;
 
                 Assert.False(await playlist.CanPlayNextSong.FirstAsync());
             }
@@ -122,7 +122,7 @@ namespace Espera.Core.Tests
                 Song[] songs = Helpers.SetupSongMocks(4);
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
-                playlist.CurrentSongIndex.Value = null;
+                playlist.CurrentSongIndex = null;
 
                 Assert.False(await playlist.CanPlayNextSong.FirstAsync());
             }
@@ -141,7 +141,7 @@ namespace Espera.Core.Tests
                 Song[] songs = Helpers.SetupSongMocks(4);
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
-                playlist.CurrentSongIndex.Value = 0;
+                playlist.CurrentSongIndex = 0;
 
                 Assert.True(await playlist.CanPlayNextSong.FirstAsync());
             }
@@ -155,7 +155,7 @@ namespace Espera.Core.Tests
                 Song[] songs = Helpers.SetupSongMocks(4);
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
-                playlist.CurrentSongIndex.Value = null;
+                playlist.CurrentSongIndex = null;
 
                 Assert.False(await playlist.CanPlayPreviousSong.FirstAsync());
             }
@@ -166,7 +166,7 @@ namespace Espera.Core.Tests
                 Song[] songs = Helpers.SetupSongMocks(4);
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
-                playlist.CurrentSongIndex.Value = 0;
+                playlist.CurrentSongIndex = 0;
 
                 Assert.False(await playlist.CanPlayPreviousSong.FirstAsync());
             }
@@ -185,7 +185,7 @@ namespace Espera.Core.Tests
                 Song[] songs = Helpers.SetupSongMocks(4);
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
-                playlist.CurrentSongIndex.Value = 3;
+                playlist.CurrentSongIndex = 3;
 
                 Assert.True(await playlist.CanPlayPreviousSong.FirstAsync());
             }
@@ -196,7 +196,7 @@ namespace Espera.Core.Tests
             [Fact]
             public void SetterSmokeTest()
             {
-                new Playlist("Playlist").CurrentSongIndex.Value = null;
+                new Playlist("Playlist").CurrentSongIndex = null;
             }
 
             [Fact]
@@ -204,7 +204,7 @@ namespace Espera.Core.Tests
             {
                 var playlist = new Playlist("Playlist");
 
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex.Value = 0);
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex = 0);
             }
 
             [Fact]
@@ -213,7 +213,7 @@ namespace Espera.Core.Tests
                 Song[] songs = Helpers.SetupSongMocks(3);
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex.Value = 3);
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex = 3);
             }
         }
 
@@ -358,11 +358,11 @@ namespace Espera.Core.Tests
 
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
-                playlist.CurrentSongIndex.Value = 1;
+                playlist.CurrentSongIndex = 1;
 
                 playlist.RemoveSongs(new[] { 0 });
 
-                Assert.Equal(0, playlist.CurrentSongIndex.Value);
+                Assert.Equal(0, playlist.CurrentSongIndex);
             }
 
             [Fact]
@@ -412,13 +412,13 @@ namespace Espera.Core.Tests
 
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
-                playlist.CurrentSongIndex.Value = 0;
+                playlist.CurrentSongIndex = 0;
 
                 playlist.Shuffle();
 
                 int newIndex = playlist.GetIndexes(new[] { songs[0] }).First();
 
-                Assert.Equal(newIndex, playlist.CurrentSongIndex.Value);
+                Assert.Equal(newIndex, playlist.CurrentSongIndex);
             }
         }
 
@@ -440,7 +440,7 @@ namespace Espera.Core.Tests
                 var playlist = new Playlist("Playlist");
                 playlist.AddSongs(Helpers.SetupSongMocks(2));
 
-                playlist.CurrentSongIndex.Value = 0;
+                playlist.CurrentSongIndex = 0;
 
                 playlist.VoteFor(1);
 
@@ -525,7 +525,7 @@ namespace Espera.Core.Tests
                 var playlist = new Playlist("Playlist");
                 playlist.AddSongs(Helpers.SetupSongMocks(3));
 
-                playlist.CurrentSongIndex.Value = 1;
+                playlist.CurrentSongIndex = 1;
 
                 Assert.Throws<InvalidOperationException>(() => playlist.VoteFor(1));
             }
@@ -536,7 +536,7 @@ namespace Espera.Core.Tests
                 var playlist = new Playlist("Playlist");
                 playlist.AddSongs(Helpers.SetupSongMocks(3));
 
-                playlist.CurrentSongIndex.Value = 1;
+                playlist.CurrentSongIndex = 1;
 
                 Assert.Throws<InvalidOperationException>(() => playlist.VoteFor(0));
             }

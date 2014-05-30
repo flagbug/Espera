@@ -590,14 +590,9 @@ namespace Espera.Core.Tests
 
                     library.AddSongToPlaylist(song);
 
-                    var observable = song.IsCorrupted.FirstAsync(x => x).PublishLast();
-                    observable.Connect();
-
                     await library.PlaySongAsync(0, library.LocalAccessControl.RegisterLocalAccessToken());
 
-                    await observable.Timeout(TimeSpan.FromSeconds(10));
-
-                    Assert.True(song.IsCorrupted.Value);
+                    Assert.True(song.IsCorrupted);
                 };
 
                 using (Library library = Helpers.CreateLibraryWithPlaylist())
@@ -831,7 +826,12 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task SetsCurrentSongIndexIfChangingToOtherPlaylistAndPlayingFirstSong()
             {
-                using (Library library = Helpers.CreateLibraryWithPlaylist())
+                var settings = new CoreSettings
+                {
+                    EnablePlaylistTimeout = false
+                };
+
+                using (Library library = Helpers.CreateLibraryWithPlaylist(settings: settings))
                 {
                     Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
@@ -845,8 +845,8 @@ namespace Espera.Core.Tests
 
                     await library.PlaySongAsync(0, token);
 
-                    Assert.Equal(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex.Value);
-                    Assert.Equal(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex.Value);
+                    Assert.Equal(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
+                    Assert.Equal(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
                 }
             }
 
@@ -890,8 +890,8 @@ namespace Espera.Core.Tests
 
                     library.SwitchToPlaylist(library.GetPlaylistByName("Playlist"), token);
 
-                    Assert.Equal(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex.Value);
-                    Assert.Equal(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex.Value);
+                    Assert.Equal(null, library.Playlists.First(p => p.Name == "Playlist").CurrentSongIndex);
+                    Assert.Equal(0, library.Playlists.First(p => p.Name == "Playlist 2").CurrentSongIndex);
                 }
             }
         }
