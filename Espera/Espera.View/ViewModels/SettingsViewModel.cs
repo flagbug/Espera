@@ -29,7 +29,6 @@ namespace Espera.View.ViewModels
             {DefaultPlaybackAction.PlayNow, "Play Now"}
         };
 
-        private readonly ObservableAsPropertyHelper<string> defaultPlaybackActionString;
         private readonly ObservableAsPropertyHelper<bool> enableChangelog;
         private readonly ObservableAsPropertyHelper<bool> isPortOccupied;
         private readonly Library library;
