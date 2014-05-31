@@ -1,3 +1,17 @@
+# v2.2.0
+
+## Features
+- Added a setting to select the default playback behavior when double clicking a song.
+  There is an option between "Add To Playlist" and "Play Now".
+  
+## Changes
+- The library isn't purged anymore when the song source path is unavailable.
+  
+## Bugfixes
+- Fixed the network availability not updating when the PC wakes up from sleep mode.
+- Fixed the window being resizable by dragging it down on the titlebar, even if it was locked in party mode.
+- Fixed a bug that caused the playlist timeout not being ignored when disabled.
+
 # v2.1.0
 
 ## Features
@@ -8,7 +22,7 @@
 - Fixed a bug that caused some artworks failing to load.
 - Fixed a crash when changing the song source path.
 - Fixed the playback stopping when pressing the space bar inside the search box.
-- Fixed the width of playlist entries,
+- Fixed the width of playlist entries.
 
 # v2.0.1
 
