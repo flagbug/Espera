@@ -1,6 +1,7 @@
 ﻿using System;
 using Akavache;
 using Espera.Core.Management;
+using Espera.Network;
 using Lager;
 using ReactiveUI;
 
@@ -101,7 +102,7 @@ namespace Espera.Core.Settings
 
         public int Port
         {
-            get { return this.GetOrCreate(49587); }
+            get { return this.GetOrCreate(NetworkConstants.DefaultPort); }
             set { this.SetOrCreate(value); }
         }
 

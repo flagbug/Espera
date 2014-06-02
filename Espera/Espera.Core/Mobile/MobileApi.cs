@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Espera.Core.Analytics;
 using Espera.Core.Management;
+using Espera.Network;
 using Rareform.Validation;
 using ReactiveUI;
 
@@ -32,7 +33,7 @@ namespace Espera.Core.Mobile
 
         public MobileApi(int port, Library library)
         {
-            if (port < 49152 || port > 65535)
+            if (port < NetworkConstants.MinPort || port > NetworkConstants.MaxPort)
                 Throw.ArgumentOutOfRangeException(() => port);
 
             if (library == null)
