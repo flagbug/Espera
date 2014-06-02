@@ -1,14 +1,14 @@
-﻿using Caliburn.Micro;
+﻿using System;
+using System.IO.Abstractions.TestingHelpers;
+using System.Reactive.Linq;
+using Caliburn.Micro;
 using Espera.Core.Management;
+using Espera.Core.Mobile;
 using Espera.Core.Settings;
 using Espera.Core.Tests;
-using Espera.Services;
 using Espera.View.ViewModels;
 using NSubstitute;
 using ReactiveUI;
-using System;
-using System.IO.Abstractions.TestingHelpers;
-using System.Reactive.Linq;
 using Xunit;
 
 namespace Espera.View.Tests

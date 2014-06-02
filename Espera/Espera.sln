@@ -1,22 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30324.0
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.Core", "Espera.Core\Espera.Core.csproj", "{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.View", "Espera.View\Espera.View.csproj", "{3DB64346-7403-48C0-9766-D62A5862973F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D} = {D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}
-		{CD457EBC-86CC-434B-BB0D-0DB4F93E4A56} = {CD457EBC-86CC-434B-BB0D-0DB4F93E4A56}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.Core.Tests", "Espera.Core.Tests\Espera.Core.Tests.csproj", "{10836E51-EAAD-4AB1-9AD8-CE200498500D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D} = {D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.Services", "Espera.Services\Espera.Services.csproj", "{CD457EBC-86CC-434B-BB0D-0DB4F93E4A56}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D} = {D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}
 	EndProjectSection
@@ -51,10 +45,6 @@ Global
 		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Debug|x86.Build.0 = Debug|x86
 		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Release|x86.ActiveCfg = Release|x86
 		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Release|x86.Build.0 = Release|x86
-		{CD457EBC-86CC-434B-BB0D-0DB4F93E4A56}.Debug|x86.ActiveCfg = Debug|x86
-		{CD457EBC-86CC-434B-BB0D-0DB4F93E4A56}.Debug|x86.Build.0 = Debug|x86
-		{CD457EBC-86CC-434B-BB0D-0DB4F93E4A56}.Release|x86.ActiveCfg = Release|x86
-		{CD457EBC-86CC-434B-BB0D-0DB4F93E4A56}.Release|x86.Build.0 = Release|x86
 		{49FD0B93-B56E-44B1-815B-D3E9607B7F2F}.Debug|x86.ActiveCfg = Debug|x86
 		{49FD0B93-B56E-44B1-815B-D3E9607B7F2F}.Debug|x86.Build.0 = Debug|x86
 		{49FD0B93-B56E-44B1-815B-D3E9607B7F2F}.Release|x86.ActiveCfg = Release|x86

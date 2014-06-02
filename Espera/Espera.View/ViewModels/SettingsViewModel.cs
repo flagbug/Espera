@@ -9,8 +9,8 @@ using System.Reflection;
 using Caliburn.Micro;
 using Espera.Core;
 using Espera.Core.Management;
+using Espera.Core.Mobile;
 using Espera.Core.Settings;
-using Espera.Services;
 using Rareform.Validation;
 using ReactiveUI;
 

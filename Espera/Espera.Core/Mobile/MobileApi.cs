@@ -14,7 +14,7 @@ using Espera.Core.Management;
 using Rareform.Validation;
 using ReactiveUI;
 
-namespace Espera.Services
+namespace Espera.Core.Mobile
 {
     /// <summary>
     /// Provides methods for connecting mobile endpoints with the application.

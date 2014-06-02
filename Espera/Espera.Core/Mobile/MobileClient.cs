@@ -10,7 +10,6 @@ using System.Reactive.Subjects;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Espera.Core;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Network;
@@ -20,7 +19,7 @@ using Rareform.Validation;
 using ReactiveMarrow;
 using ReactiveUI;
 
-namespace Espera.Services
+namespace Espera.Core.Mobile
 {
     /// <summary>
     /// Represents one mobile endpoint and handles the interaction.
@@ -55,7 +54,7 @@ namespace Espera.Services
                 {RequestAction.GetConnectionInfo, this.GetConnectionInfo},
                 {RequestAction.GetLibraryContent, this.GetLibraryContent},
                 {RequestAction.AddPlaylistSongs, this.AddPlaylistSongs},
-                {RequestAction.AddPlaylistSongNow, this.AddPlaylistSongsNow},
+                {RequestAction.AddPlaylistSongsNow, this.AddPlaylistSongsNow},
                 {RequestAction.GetCurrentPlaylist, this.GetCurrentPlaylist},
                 {RequestAction.PlayPlaylistSong, this.PlayPlaylistSong},
                 {RequestAction.ContinueSong, this.ContinueSong},

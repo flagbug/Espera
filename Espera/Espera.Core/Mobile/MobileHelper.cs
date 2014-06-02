@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Espera.Core;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Network;
 using Newtonsoft.Json.Linq;
 
-namespace Espera.Services
+namespace Espera.Core.Mobile
 {
     public static class MobileHelper
     {

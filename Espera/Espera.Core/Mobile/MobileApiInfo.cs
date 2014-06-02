@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Espera.Services
+namespace Espera.Core.Mobile
 {
     /// <summary>
     /// Represents stats about the current stats of the mobile API, the number of currently

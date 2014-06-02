@@ -342,10 +342,6 @@
       <Project>{d4ad0e4a-fecb-4ca9-9258-6bd1f22fac0d}</Project>
       <Name>Espera.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Espera.Services\Espera.Services.csproj">
-      <Project>{cd457ebc-86cc-434b-bb0d-0db4f93e4a56}</Project>
-      <Name>Espera.Services</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

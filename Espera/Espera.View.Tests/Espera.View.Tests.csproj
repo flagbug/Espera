@@ -150,10 +150,6 @@
       <Project>{d4ad0e4a-fecb-4ca9-9258-6bd1f22fac0d}</Project>
       <Name>Espera.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Espera.Services\Espera.Services.csproj">
-      <Project>{CD457EBC-86CC-434B-BB0D-0DB4F93E4A56}</Project>
-      <Name>Espera.Services</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Espera.View\Espera.View.csproj">
       <Project>{3db64346-7403-48c0-9766-d62a5862973f}</Project>
       <Name>Espera.View</Name>
