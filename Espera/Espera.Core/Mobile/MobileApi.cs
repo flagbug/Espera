@@ -161,6 +161,7 @@ namespace Espera.Core.Mobile
                 this.messageListener.Start();
                 this.Log().Info("Starting to listen for incoming message connections on port {0}", this.port);
             }
+
             catch (SocketException ex)
             {
                 this.fileListener.Stop();
