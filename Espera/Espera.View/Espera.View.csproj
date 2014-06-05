@@ -239,6 +239,7 @@
     <Compile Include="ViewModels\BugReportViewModel.cs" />
     <Compile Include="ViewModels\CrashViewModel.cs" />
     <Compile Include="ViewModels\DesignTimeShellViewModel.cs" />
+    <Compile Include="ViewModels\DirectYoutubeViewModel.cs" />
     <Compile Include="ViewModels\ISongSourceViewModel.cs" />
     <Compile Include="ViewModels\ISongViewModelBase.cs" />
     <Compile Include="ViewModels\LocalSongViewModel.cs" />

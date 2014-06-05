@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Espera.Core
@@ -6,5 +7,7 @@ namespace Espera.Core
     public interface IYoutubeSongFinder
     {
         Task<IReadOnlyList<YoutubeSong>> GetSongsAsync(string searchTerm);
+
+        Task<YoutubeSong> ResolveYoutubeSongFromUrl(Uri url);
     }
 }

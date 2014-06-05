@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,6 +16,7 @@ using GlobalHotKey;
 using MahApps.Metro;
 using MahApps.Metro.Controls.Dialogs;
 using ReactiveUI;
+using YoutubeExtractor;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using ListView = System.Windows.Controls.ListView;
 using TextBox = System.Windows.Controls.TextBox;
@@ -323,12 +325,25 @@ namespace Espera.View.Views
                 .Where(x => x.LeftButton == MouseButtonState.Pressed)
                 .Subscribe(x => DragDrop.DoDragDrop((DependencyObject)x.Source, songSourceFormat, DragDropEffects.Link));
 
+            // Local songs and YouTube songs
             this.PlaylistListBox.Events().Drop
                 .Where(x => x.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Data.GetData(DataFormats.StringFormat) == songSourceFormat)
                 .Select(_ => this.shellViewModel.WhenAnyValue(x => x.CurrentSongSource).Select(x => x.AddToPlaylistCommand))
                 .Switch()
                 .Where(x => x.CanExecute(null))
                 .Subscribe(x => x.Execute(null));
+
+            // YouTube links (e.g from the browser)
+            this.PlaylistListBox.Events().Drop
+                .Where(x =>
+                {
+                    string urlDontCare;
+                    return x.Data.GetDataPresent(DataFormats.StringFormat) &&
+                        DownloadUrlResolver.TryNormalizeYoutubeUrl((string)x.Data.GetData(DataFormats.StringFormat), out urlDontCare);
+                })
+                .Select(x => this.shellViewModel.DirectYoutubeViewModel.AddDirectYoutubeUrlToPlaylist(new Uri((string)x.Data.GetData(DataFormats.StringFormat))).ToObservable())
+                .Concat()
+                .Subscribe();
         }
 
         private void WirePlayer()
