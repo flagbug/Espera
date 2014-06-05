@@ -335,13 +335,17 @@ namespace Espera.View.Views
 
             // YouTube links (e.g from the browser)
             this.PlaylistListBox.Events().Drop
+                .Where(x => x.Data.GetDataPresent(DataFormats.StringFormat))
+                .Select(x => (string)x.Data.GetData(DataFormats.StringFormat))
                 .Where(x =>
                 {
+                    Uri uriResult;
+                    bool result = Uri.TryCreate(x, UriKind.Absolute, out uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+
                     string urlDontCare;
-                    return x.Data.GetDataPresent(DataFormats.StringFormat) &&
-                        DownloadUrlResolver.TryNormalizeYoutubeUrl((string)x.Data.GetData(DataFormats.StringFormat), out urlDontCare);
+                    return result && DownloadUrlResolver.TryNormalizeYoutubeUrl(x, out urlDontCare);
                 })
-                .Select(x => this.shellViewModel.DirectYoutubeViewModel.AddDirectYoutubeUrlToPlaylist(new Uri((string)x.Data.GetData(DataFormats.StringFormat))).ToObservable())
+                .Select(x => this.shellViewModel.DirectYoutubeViewModel.AddDirectYoutubeUrlToPlaylist(new Uri(x)).ToObservable())
                 .Concat()
                 .Subscribe();
         }
