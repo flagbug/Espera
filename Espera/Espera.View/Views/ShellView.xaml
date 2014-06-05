@@ -945,7 +945,7 @@
                             <TextBlock.Style>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=SongsRemaining}" Value="1">
+                                        <DataTrigger Binding="{Binding Path=CurrentPlaylist.SongsRemaining}" Value="1">
                                             <Setter Property="Visibility" Value="Collapsed" />
                                         </DataTrigger>
                                     </Style.Triggers>
