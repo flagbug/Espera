@@ -9,7 +9,7 @@ namespace Espera.View.ViewModels
     /// <summary>
     /// This ViewModel is used as proxy to add links from YouTube directly
     /// </summary>
-    internal class DirectYoutubeViewModel : SongSourceViewModel<YoutubeSongViewModel>
+    public class DirectYoutubeViewModel : SongSourceViewModel<YoutubeSongViewModel>
     {
         private readonly IYoutubeSongFinder youtubeSongFinder;
 
