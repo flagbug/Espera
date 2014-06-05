@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Espera.Core;
 using Espera.Core.Management;
+using Rareform.Validation;
 using ReactiveUI;
 
 namespace Espera.View.ViewModels
@@ -29,6 +30,9 @@ namespace Espera.View.ViewModels
         /// </summary>
         public async Task AddDirectYoutubeUrlToPlaylist(Uri url)
         {
+            if (url == null)
+                Throw.ArgumentNullException(() => url);
+
             YoutubeSong song = await this.youtubeSongFinder.ResolveYoutubeSongFromUrl(url);
 
             if (song == null)
