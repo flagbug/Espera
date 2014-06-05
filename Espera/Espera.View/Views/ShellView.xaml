@@ -847,6 +847,7 @@
                     </Grid>
                     <ListBox x:Name="PlaylistListBox"
                              Grid.Row="2"
+                             AllowDrop="True"
                              Margin="0, 10, 0, 0"
                              ContextMenuOpening="PlaylistContextMenuOpening"
                              Focusable="False"

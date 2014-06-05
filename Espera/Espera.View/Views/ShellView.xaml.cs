@@ -39,6 +39,7 @@ namespace Espera.View.Views
                 this.WireDataContext();
                 this.WirePlayer();
                 this.WireScreenStateUpdater();
+                this.WireDragAndDrop();
 
                 try
                 {
@@ -312,6 +313,22 @@ namespace Espera.View.Views
 
             this.shellViewModel.ViewSettings.WhenAnyValue(x => x.AppTheme)
                 .Subscribe(ChangeAppTheme);
+        }
+
+        private void WireDragAndDrop()
+        {
+            const string songSourceFormat = "SongSource";
+
+            this.LocalSongs.Events().MouseMove.Merge(this.YoutubeSongs.Events().MouseMove)
+                .Where(x => x.LeftButton == MouseButtonState.Pressed)
+                .Subscribe(x => DragDrop.DoDragDrop((DependencyObject)x.Source, songSourceFormat, DragDropEffects.Link));
+
+            this.PlaylistListBox.Events().Drop
+                .Where(x => x.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Data.GetData(DataFormats.StringFormat) == songSourceFormat)
+                .Select(_ => this.shellViewModel.WhenAnyValue(x => x.CurrentSongSource).Select(x => x.AddToPlaylistCommand))
+                .Switch()
+                .Where(x => x.CanExecute(null))
+                .Subscribe(x => x.Execute(null));
         }
 
         private void WirePlayer()
