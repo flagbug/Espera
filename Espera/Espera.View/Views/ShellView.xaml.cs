@@ -348,6 +348,22 @@ namespace Espera.View.Views
                 .Select(x => this.shellViewModel.DirectYoutubeViewModel.AddDirectYoutubeUrlToPlaylist(new Uri(x)).ToObservable())
                 .Concat()
                 .Subscribe();
+
+            // Moving items inside the playlist
+            this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x))
+                .Where(x => x.Item2.LeftButton == MouseButtonState.Pressed && this.shellViewModel.SelectedPlaylistEntries.Any())
+                .Subscribe(x => DragDrop.DoDragDrop((ListBoxItem)x.Item1, this.shellViewModel.SelectedPlaylistEntries.First(), DragDropEffects.Move));
+
+            this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
+                .Subscribe(x =>
+                {
+                    if (this.shellViewModel.MovePlaylistSongCommand.CanExecute(null))
+                    {
+                        var target = (PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext;
+
+                        this.shellViewModel.MovePlaylistSongCommand.Execute(target.Index);
+                    }
+                });
         }
 
         private void WirePlayer()

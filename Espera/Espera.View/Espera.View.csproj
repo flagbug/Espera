@@ -229,6 +229,7 @@
     <Compile Include="ChangelogFetcher.cs" />
     <Compile Include="DesignTime.cs" />
     <Compile Include="INetworkStatus.cs" />
+    <Compile Include="ReactiveViewHelper.cs" />
     <Compile Include="ReleaseEntry.cs" />
     <Compile Include="SearchEngine.cs" />
     <Compile Include="SortHelpers.cs" />
