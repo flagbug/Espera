@@ -236,7 +236,7 @@ namespace Espera.View.ViewModels
             this.MovePlaylistSongUpCommand.Subscribe(_ =>
             {
                 int index = this.SelectedPlaylistEntries.First().Index;
-                this.library.MovePlaylistSong(index, index + 1, this.accessToken);
+                this.library.MovePlaylistSong(index, index - 1, this.accessToken);
                 reEvaluateSelectedPlaylistEntry.OnNext(Unit.Default);
             });
 
@@ -248,7 +248,7 @@ namespace Espera.View.ViewModels
             this.MovePlaylistSongDownCommand.Subscribe(_ =>
             {
                 int index = this.SelectedPlaylistEntries.First().Index;
-                this.library.MovePlaylistSong(index, index - 1, this.accessToken);
+                this.library.MovePlaylistSong(index, index + 1, this.accessToken);
                 reEvaluateSelectedPlaylistEntry.OnNext(Unit.Default);
             });
 
