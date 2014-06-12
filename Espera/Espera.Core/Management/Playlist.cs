@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Rareform.Validation;
 using ReactiveUI;
@@ -160,13 +161,10 @@ namespace Espera.Core.Management
             // We don't use the change notification directly, but record them for later. This allows
             // us to have the correct semantics, even if we rebuild the indexes after the changes to
             // the list were made
-            var recordedChanges = this.playlist.Changed.Replay();
-            using (recordedChanges.Connect())
+            using (this.WithIndexRebuild())
             {
                 this.playlist.AddRange(itemsToAdd);
             }
-
-            this.OnCollectionChanged(recordedChanges);
         }
 
         internal void MoveSongDown(int fromIndex)
@@ -177,15 +175,10 @@ namespace Espera.Core.Management
             if (fromIndex < 0)
                 Throw.ArgumentOutOfRangeException(() => fromIndex);
 
-            var recordedChanges = this.playlist.Changed.Replay();
-            using (recordedChanges.Connect())
+            using (this.WithIndexRebuild())
             {
                 this.playlist.Move(fromIndex, fromIndex + 1);
-
-                this.RebuildIndexes();
             }
-
-            this.OnCollectionChanged(recordedChanges);
         }
 
         internal void MoveSongUp(int fromIndex)
@@ -196,15 +189,10 @@ namespace Espera.Core.Management
             if (fromIndex >= this.playlist.Count)
                 Throw.ArgumentOutOfRangeException(() => fromIndex);
 
-            var recordedChanges = this.playlist.Changed.Replay();
-            using (recordedChanges.Connect())
+            using (this.WithIndexRebuild())
             {
                 this.playlist.Move(fromIndex, fromIndex - 1);
-
-                this.RebuildIndexes();
             }
-
-            this.OnCollectionChanged(recordedChanges);
         }
 
         /// <summary>
@@ -226,15 +214,10 @@ namespace Espera.Core.Management
 
             var itemsToRemove = this.playlist.Where(x => indexList.Contains(x.Index)).ToList();
 
-            var recordedChanges = this.playlist.Changed.Replay();
-            using (recordedChanges.Connect())
+            using (this.WithIndexRebuild())
             {
                 this.playlist.RemoveAll(itemsToRemove);
-
-                this.RebuildIndexes();
             }
-
-            this.OnCollectionChanged(recordedChanges);
         }
 
         internal void Shuffle()
@@ -272,15 +255,10 @@ namespace Espera.Core.Management
                 .SkipWhile(x => x.Votes >= this[index].Votes && x != this[index])
                 .First();
 
-            var recordedChanges = this.playlist.Changed.Replay();
-            using (recordedChanges.Connect())
+            using (this.WithIndexRebuild())
             {
                 this.playlist.Move(index, targetEntry.Index);
-
-                this.RebuildIndexes();
             }
-
-            this.OnCollectionChanged(recordedChanges);
 
             return entry;
         }
@@ -322,6 +300,26 @@ namespace Espera.Core.Management
             {
                 this[i].ResetVotes();
             }
+        }
+
+        /// <summary>
+        /// Records the collection changes that are made unitil the method is disposed, rebuilds the
+        /// playlist indexes and then sends the change notification to the subscribers.
+        /// </summary>
+        private IDisposable WithIndexRebuild()
+        {
+            var recordedChanges = this.playlist.Changed.Replay();
+            IDisposable record = recordedChanges.Connect();
+
+            var rebuildAndNotify = Disposable.Create(() =>
+            {
+                this.RebuildIndexes();
+
+                record.Dispose();
+                this.OnCollectionChanged(recordedChanges);
+            });
+
+            return rebuildAndNotify;
         }
     }
 }
