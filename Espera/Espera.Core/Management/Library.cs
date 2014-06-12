@@ -340,18 +340,11 @@ namespace Espera.Core.Management
                 .DisposeWith(this.globalSubscriptions);
         }
 
-        public void MovePlaylistSongDown(int songIndex, Guid accessToken)
+        public void MovePlaylistSong(int fromIndex, int toIndex, Guid accessToken)
         {
             this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylist);
 
-            this.CurrentPlaylist.MoveSongDown(songIndex);
-        }
-
-        public void MovePlaylistSongUp(int songIndex, Guid accessToken)
-        {
-            this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylist);
-
-            this.CurrentPlaylist.MoveSongUp(songIndex);
+            this.CurrentPlaylist.MoveSong(fromIndex, toIndex);
         }
 
         /// <summary>

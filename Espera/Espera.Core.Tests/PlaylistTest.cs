@@ -288,53 +288,33 @@ namespace Espera.Core.Tests
             }
         }
 
-        public class TheMoveSongDownMethod
+        public class TheMoveSongMethod
         {
             [Fact]
             public void SmokeTest()
             {
-                Song[] songs = Helpers.SetupSongMocks(5);
+                Song[] songs = Helpers.SetupSongMocks(3);
                 var playlist = new Playlist("Playlist");
                 playlist.AddSongs(songs);
 
-                playlist.MoveSongDown(0);
+                playlist.MoveSong(0, 2);
 
-                Assert.Equal(songs[0], playlist[1].Song);
+                Assert.Equal(songs[1], playlist[0].Song);
+                Assert.Equal(songs[2], playlist[1].Song);
+                Assert.Equal(songs[0], playlist[2].Song);
             }
 
             [Fact]
-            public void ValidatesRange()
+            public void ValidatesArguments()
             {
-                var playlist = new Playlist("Playlist");
-                playlist.AddSongs(Helpers.SetupSongMocks(5));
-
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSongDown(4));
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSongDown(-1));
-            }
-        }
-
-        public class TheMoveSongUpMethod
-        {
-            [Fact]
-            public void SmokeTest()
-            {
-                Song[] songs = Helpers.SetupSongMocks(5);
+                Song[] songs = Helpers.SetupSongMocks(2);
                 var playlist = new Playlist("Playlist");
                 playlist.AddSongs(songs);
 
-                playlist.MoveSongUp(4);
-
-                Assert.Equal(songs[4], playlist[3].Song);
-            }
-
-            [Fact]
-            public void ValidatesIndexRange()
-            {
-                var playlist = new Playlist("Playlist");
-                playlist.AddSongs(Helpers.SetupSongMocks(5));
-
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSongUp(0));
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSongUp(5));
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSong(-1, 1));
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSong(2, 1));
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSong(0, 2));
+                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSong(0, -1));
             }
         }
 

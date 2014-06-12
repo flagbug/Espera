@@ -167,31 +167,23 @@ namespace Espera.Core.Management
             }
         }
 
-        internal void MoveSongDown(int fromIndex)
+        internal void MoveSong(int fromIndex, int toIndex)
         {
-            if (fromIndex >= this.playlist.Count - 1)
+            if (fromIndex >= this.playlist.Count)
                 Throw.ArgumentOutOfRangeException(() => fromIndex);
 
             if (fromIndex < 0)
                 Throw.ArgumentOutOfRangeException(() => fromIndex);
 
-            using (this.WithIndexRebuild())
-            {
-                this.playlist.Move(fromIndex, fromIndex + 1);
-            }
-        }
-
-        internal void MoveSongUp(int fromIndex)
-        {
-            if (fromIndex <= 0)
+            if (toIndex >= this.playlist.Count)
                 Throw.ArgumentOutOfRangeException(() => fromIndex);
 
-            if (fromIndex >= this.playlist.Count)
+            if (toIndex < 0)
                 Throw.ArgumentOutOfRangeException(() => fromIndex);
 
             using (this.WithIndexRebuild())
             {
-                this.playlist.Move(fromIndex, fromIndex - 1);
+                this.playlist.Move(fromIndex, toIndex);
             }
         }
 
