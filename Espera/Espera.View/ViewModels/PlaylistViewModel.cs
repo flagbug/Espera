@@ -44,10 +44,13 @@ namespace Espera.View.ViewModels
                 .DisposeWith(this.disposable);
             this.entries.ItemsRemoved.Subscribe(x => x.Dispose()).DisposeWith(this.disposable);
 
-            IObservable<int?> currentSongUpdated = this.playlist.WhenAnyValue(x => x.CurrentSongIndex).Do(this.UpdateCurrentSong);
+            this.playlist.WhenAnyValue(x => x.CurrentSongIndex).ToUnit()
+                .Merge(this.entries.Changed.ToUnit())
+                .Subscribe(_ => this.UpdateCurrentSong());
+
             IObservable<IEnumerable<PlaylistEntryViewModel>> remainingSongs = this.entries.Changed
                 .Select(x => Unit.Default)
-                .Merge(currentSongUpdated.Select(x => Unit.Default))
+                .Merge(this.playlist.WhenAnyValue(x => x.CurrentSongIndex).ToUnit())
                 .Select(x => this.entries.Reverse().TakeWhile(entry => !entry.IsPlaying).ToList());
 
             this.songsRemaining = remainingSongs
@@ -167,16 +170,16 @@ namespace Espera.View.ViewModels
             }
         }
 
-        private void UpdateCurrentSong(int? currentSongIndex)
+        private void UpdateCurrentSong()
         {
             foreach (PlaylistEntryViewModel entry in entries)
             {
                 entry.IsPlaying = false;
             }
 
-            if (currentSongIndex.HasValue)
+            if (this.playlist.CurrentSongIndex.HasValue)
             {
-                PlaylistEntryViewModel entry = this.entries[currentSongIndex.Value];
+                PlaylistEntryViewModel entry = this.entries[this.playlist.CurrentSongIndex.Value];
 
                 if (!entry.IsCorrupted)
                 {
