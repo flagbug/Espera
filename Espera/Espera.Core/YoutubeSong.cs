@@ -76,7 +76,7 @@ namespace Espera.Core
             {
                 video = await GetVideoInfoForStreaming(this.OriginalPath, qualityHint);
 
-                if (video != null)
+                if (video != null && video.RequiresDecryption)
                 {
                     await Task.Run(() => DownloadUrlResolver.DecryptDownloadUrl(video));
                 }
