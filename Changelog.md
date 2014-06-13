@@ -1,3 +1,10 @@
+# v2.2.1
+
+## Bugfixes
+- Fixed a bug that caused an incorrect current song marker.
+- Fixed some issues with YouTube.
+- Fixed the remaining songs indicator spelling "songs" when only one song is left.
+
 # v2.2.0
 
 ## Features
