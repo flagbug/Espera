@@ -51,5 +51,10 @@ namespace Espera.Core
 
             return songs;
         }
+
+        public async Task<YoutubeSong> ResolveYoutubeSongFromUrl(Uri url)
+        {
+            return (await GetSongsAsync(url.OriginalString)).FirstOrDefault();
+        }
     }
 }

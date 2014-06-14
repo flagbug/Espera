@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,6 +16,7 @@ using GlobalHotKey;
 using MahApps.Metro;
 using MahApps.Metro.Controls.Dialogs;
 using ReactiveUI;
+using YoutubeExtractor;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using ListView = System.Windows.Controls.ListView;
 using TextBox = System.Windows.Controls.TextBox;
@@ -39,6 +41,7 @@ namespace Espera.View.Views
                 this.WireDataContext();
                 this.WirePlayer();
                 this.WireScreenStateUpdater();
+                this.WireDragAndDrop();
 
                 try
                 {
@@ -312,6 +315,55 @@ namespace Espera.View.Views
 
             this.shellViewModel.ViewSettings.WhenAnyValue(x => x.AppTheme)
                 .Subscribe(ChangeAppTheme);
+        }
+
+        private void WireDragAndDrop()
+        {
+            const string songSourceFormat = "SongSource";
+
+            this.LocalSongs.Events().MouseMove.Merge(this.YoutubeSongs.Events().MouseMove)
+                .Where(x => x.LeftButton == MouseButtonState.Pressed)
+                .Subscribe(x => DragDrop.DoDragDrop((DependencyObject)x.Source, songSourceFormat, DragDropEffects.Link));
+
+            // Local songs and YouTube songs
+            this.PlaylistListBox.Events().Drop
+                .Where(x => x.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Data.GetData(DataFormats.StringFormat) == songSourceFormat)
+                .Select(_ => this.shellViewModel.WhenAnyValue(x => x.CurrentSongSource).Select(x => x.AddToPlaylistCommand))
+                .Switch()
+                .Where(x => x.CanExecute(null))
+                .Subscribe(x => x.Execute(null));
+
+            // YouTube links (e.g from the browser)
+            this.PlaylistListBox.Events().Drop
+                .Where(x => x.Data.GetDataPresent(DataFormats.StringFormat))
+                .Select(x => (string)x.Data.GetData(DataFormats.StringFormat))
+                .Where(x =>
+                {
+                    Uri uriResult;
+                    bool result = Uri.TryCreate(x, UriKind.Absolute, out uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+
+                    string urlDontCare;
+                    return result && DownloadUrlResolver.TryNormalizeYoutubeUrl(x, out urlDontCare);
+                })
+                .Select(x => this.shellViewModel.DirectYoutubeViewModel.AddDirectYoutubeUrlToPlaylist(new Uri(x)).ToObservable())
+                .Concat()
+                .Subscribe();
+
+            // Moving items inside the playlist
+            this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x))
+                .Where(x => x.Item2.LeftButton == MouseButtonState.Pressed && this.shellViewModel.SelectedPlaylistEntries.Any())
+                .Subscribe(x => DragDrop.DoDragDrop((ListBoxItem)x.Item1, this.shellViewModel.SelectedPlaylistEntries.First(), DragDropEffects.Move));
+
+            this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
+                .Subscribe(x =>
+                {
+                    if (this.shellViewModel.MovePlaylistSongCommand.CanExecute(null))
+                    {
+                        var target = (PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext;
+
+                        this.shellViewModel.MovePlaylistSongCommand.Execute(target.Index);
+                    }
+                });
         }
 
         private void WirePlayer()

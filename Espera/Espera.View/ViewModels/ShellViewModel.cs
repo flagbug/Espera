@@ -96,6 +96,7 @@ namespace Espera.View.ViewModels
 
             this.LocalViewModel = new LocalViewModel(this.library, this.ViewSettings, this.coreSettings, accessToken);
             this.YoutubeViewModel = new YoutubeViewModel(this.library, this.ViewSettings, this.coreSettings, accessToken);
+            this.DirectYoutubeViewModel = new DirectYoutubeViewModel(this.library, accessToken);
 
             Observable.Interval(TimeSpan.FromMilliseconds(300), RxApp.TaskpoolScheduler)
                 .Where(_ => this.RemainingPlaylistTimeout > TimeSpan.Zero)
@@ -106,9 +107,7 @@ namespace Espera.View.ViewModels
                 (x1, x2) => x1 ? (ISongSourceViewModel)this.LocalViewModel : this.YoutubeViewModel)
                 .ToProperty(this, x => x.CurrentSongSource, null, ImmediateScheduler.Instance);
 
-            this.displayTimeoutWarning = this.currentSongSource
-                .Select(x => x.TimeoutWarning)
-                .Switch()
+            this.displayTimeoutWarning = Observable.Merge(this.LocalViewModel.TimeoutWarning, this.YoutubeViewModel.TimeoutWarning, this.DirectYoutubeViewModel.TimeoutWarning)
                 .SelectMany(x => new[] { true, false }.ToObservable())
                 .ToProperty(this, x => x.DisplayTimeoutWarning);
 
@@ -252,6 +251,18 @@ namespace Espera.View.ViewModels
                 reEvaluateSelectedPlaylistEntry.OnNext(Unit.Default);
             });
 
+            this.MovePlaylistSongCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
+                .Merge(reEvaluateSelectedPlaylistEntry.Select(_ => this.SelectedPlaylistEntries))
+                .Select(x => x != null && x.Count() == 1)
+                .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveUp, canAlterPlaylist) => canMoveUp && canAlterPlaylist)
+                .ToCommand();
+            this.MovePlaylistSongCommand.Subscribe(x =>
+            {
+                int index = this.SelectedPlaylistEntries.First().Index;
+                this.library.MovePlaylistSong(index, (int)x, this.accessToken);
+                reEvaluateSelectedPlaylistEntry.OnNext(Unit.Default);
+            });
+
             this.IsLocal = true;
         }
 
@@ -324,6 +335,8 @@ namespace Espera.View.ViewModels
             get { return this.defaultPlaybackCommand.Value; }
         }
 
+        public DirectYoutubeViewModel DirectYoutubeViewModel { get; private set; }
+
         public bool DisplayTimeoutWarning
         {
             get { return this.displayTimeoutWarning.Value; }
@@ -354,6 +367,8 @@ namespace Espera.View.ViewModels
         }
 
         public LocalViewModel LocalViewModel { get; private set; }
+
+        public ReactiveCommand MovePlaylistSongCommand { get; private set; }
 
         public ReactiveCommand MovePlaylistSongDownCommand { get; private set; }
 

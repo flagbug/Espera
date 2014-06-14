@@ -8,6 +8,7 @@
                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                       xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                       xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+                      xmlns:view="clr-namespace:Espera.View"
                       Title="Espera"
                       Width="800"
                       Height="600"
@@ -847,12 +848,14 @@
                     </Grid>
                     <ListBox x:Name="PlaylistListBox"
                              Grid.Row="2"
+                             AllowDrop="True"
                              Margin="0, 10, 0, 0"
                              ContextMenuOpening="PlaylistContextMenuOpening"
                              Focusable="False"
                              ItemsSource="{Binding Path=CurrentPlaylist.Songs}"
                              KeyUp="PlaylistKeyUp"
                              SelectionMode="Extended"
+                             view:DragDropExtension.ScrollOnDragDrop="True"
                              ScrollViewer.CanContentScroll="True"
                              ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                              SelectionChanged="PlaylistSelectionChanged"
@@ -875,64 +878,100 @@
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid Margin="5, 10, 10, 10">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="25" />
-                                        <ColumnDefinition />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid Grid.Column="0">
-                                        <Rectangle Width="15"
+                                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" Background="Transparent">
+                                    <StackPanel.Triggers>
+                                        <EventTrigger RoutedEvent="StackPanel.DragEnter">
+                                            <BeginStoryboard>
+                                                <Storyboard TargetName="PlaylistItemDragIndicator" TargetProperty="Visibility">
+                                                    <ObjectAnimationUsingKeyFrames>
+                                                        <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}" />
+                                                    </ObjectAnimationUsingKeyFrames>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                        <EventTrigger RoutedEvent="StackPanel.DragLeave">
+                                            <BeginStoryboard>
+                                                <Storyboard TargetName="PlaylistItemDragIndicator" TargetProperty="Visibility">
+                                                    <ObjectAnimationUsingKeyFrames>
+                                                        <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Collapsed}" />
+                                                    </ObjectAnimationUsingKeyFrames>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                        <EventTrigger RoutedEvent="StackPanel.Drop">
+                                            <BeginStoryboard>
+                                                <Storyboard TargetName="PlaylistItemDragIndicator" TargetProperty="Visibility">
+                                                    <ObjectAnimationUsingKeyFrames>
+                                                        <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Collapsed}" />
+                                                    </ObjectAnimationUsingKeyFrames>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </StackPanel.Triggers>
+                                    <Rectangle x:Name="PlaylistItemDragIndicator"
+                                               HorizontalAlignment="Stretch"
+                                               Height="2"
+                                               Visibility="Collapsed"
+                                               Fill="{DynamicResource AccentColorBrush}" />
+                                    <Grid Margin="5, 10, 10, 10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="25" />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid Grid.Column="0">
+                                            <Rectangle Width="15"
                                                    Height="15"
                                                    Visibility="{Binding Path=IsPlaying, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <Rectangle.Fill>
-                                                <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_sound_3}" />
-                                            </Rectangle.Fill>
-                                        </Rectangle>
-                                        <Rectangle Width="15"
+                                                <Rectangle.Fill>
+                                                    <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_sound_3}" />
+                                                </Rectangle.Fill>
+                                            </Rectangle>
+                                            <Rectangle Width="15"
                                                    Height="15"
                                                    ToolTip="Song is corrupted. Cannot play!"
                                                    Visibility="{Binding Path=IsCorrupted, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <Rectangle.Fill>
-                                                <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_close}" />
-                                            </Rectangle.Fill>
-                                        </Rectangle>
-                                    </Grid>
-                                    <StackPanel Grid.Column="1" Margin="5, 0, 0, 0">
-                                        <Grid VerticalAlignment="Top">
-                                            <TextBlock FontSize="14"
+                                                <Rectangle.Fill>
+                                                    <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_close}" />
+                                                </Rectangle.Fill>
+                                            </Rectangle>
+                                        </Grid>
+                                        <StackPanel Grid.Column="1" Margin="5, 0, 0, 0">
+                                            <Grid VerticalAlignment="Top">
+                                                <TextBlock FontSize="14"
                                                        MaxWidth="225"
                                                        HorizontalAlignment="Left"
                                                        Text="{Binding Path=Title}"
                                                        TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Style="{StaticResource ArtistInfoStyle}"
+                                                <TextBlock Style="{StaticResource ArtistInfoStyle}"
                                                        HorizontalAlignment="Right"
                                                        Text="{Binding Path=FormattedDuration}" />
-                                        </Grid>
-                                        <Grid VerticalAlignment="Bottom" Margin="0, 5, 0, 0">
-                                            <TextBlock TextTrimming="CharacterEllipsis"
+                                            </Grid>
+                                            <Grid VerticalAlignment="Bottom" Margin="0, 5, 0, 0">
+                                                <TextBlock TextTrimming="CharacterEllipsis"
                                                        MaxWidth="175"
                                                        HorizontalAlignment="Left">
-                                                <TextBlock.Style>
-                                                    <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Path=IsYoutube}" Value="True">
-                                                                <Setter Property="Text" Value="YouTube" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Path=IsYoutube}" Value="False">
-                                                                <Setter Property="Text" Value="{Binding Path=Artist}" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                            <TextBlock Style="{StaticResource ArtistInfoStyle}"
+                                                    <TextBlock.Style>
+                                                        <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Path=IsYoutube}" Value="True">
+                                                                    <Setter Property="Text" Value="YouTube" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Path=IsYoutube}" Value="False">
+                                                                    <Setter Property="Text" Value="{Binding Path=Artist}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock Style="{StaticResource ArtistInfoStyle}"
                                                        HorizontalAlignment="Right"
                                                        Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Controls:MetroWindow}},
                                                            Path=DataContext.ShowVotes, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                        Text="{Binding Path=Votes, StringFormat=\{0\} Votes}" />
-                                        </Grid>
-                                    </StackPanel>
-                                </Grid>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>

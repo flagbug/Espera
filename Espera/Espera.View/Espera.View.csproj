@@ -228,7 +228,9 @@
     <Compile Include="ChangelogEntry.cs" />
     <Compile Include="ChangelogFetcher.cs" />
     <Compile Include="DesignTime.cs" />
+    <Compile Include="DragDropExtension.cs" />
     <Compile Include="INetworkStatus.cs" />
+    <Compile Include="ReactiveViewHelper.cs" />
     <Compile Include="ReleaseEntry.cs" />
     <Compile Include="SearchEngine.cs" />
     <Compile Include="SortHelpers.cs" />
@@ -239,6 +241,7 @@
     <Compile Include="ViewModels\BugReportViewModel.cs" />
     <Compile Include="ViewModels\CrashViewModel.cs" />
     <Compile Include="ViewModels\DesignTimeShellViewModel.cs" />
+    <Compile Include="ViewModels\DirectYoutubeViewModel.cs" />
     <Compile Include="ViewModels\ISongSourceViewModel.cs" />
     <Compile Include="ViewModels\ISongViewModelBase.cs" />
     <Compile Include="ViewModels\LocalSongViewModel.cs" />
