@@ -8,6 +8,7 @@
                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                       xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                       xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+                      xmlns:view="clr-namespace:Espera.View"
                       Title="Espera"
                       Width="800"
                       Height="600"
@@ -854,6 +855,7 @@
                              ItemsSource="{Binding Path=CurrentPlaylist.Songs}"
                              KeyUp="PlaylistKeyUp"
                              SelectionMode="Extended"
+                             view:DragDropExtension.ScrollOnDragDrop="True"
                              ScrollViewer.CanContentScroll="True"
                              ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                              SelectionChanged="PlaylistSelectionChanged"
@@ -906,7 +908,7 @@
                                             </BeginStoryboard>
                                         </EventTrigger>
                                     </StackPanel.Triggers>
-                                    <Rectangle x:Name="PlaylistItemDragIndicator" 
+                                    <Rectangle x:Name="PlaylistItemDragIndicator"
                                                HorizontalAlignment="Stretch"
                                                Height="2"
                                                Visibility="Collapsed"
