@@ -16,6 +16,7 @@ using GlobalHotKey;
 using MahApps.Metro;
 using MahApps.Metro.Controls.Dialogs;
 using ReactiveUI;
+using Splat;
 using YoutubeExtractor;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using ListView = System.Windows.Controls.ListView;
@@ -61,6 +62,15 @@ namespace Espera.View.Views
                 this.shellViewModel.WhenAnyObservable(x => x.CurrentPlaylist.CurrentPlayingEntry)
                     .ObserveOn(RxApp.MainThreadScheduler)
                     .Subscribe(x => this.PlaylistListBox.ScrollIntoView(x));
+
+                this.shellViewModel.WhenAnyValue(x => x.IsPlaying, x => x ? "Pause" : "Play")
+                    .BindTo(this.PauseContinueTaskbarButton, x => x.Description);
+                this.shellViewModel.WhenAnyValue(x => x.IsPlaying, x => x ? "Pause" : "Play")
+                    .Select(x => BitmapLoader.Current.LoadFromResource(string.Format("pack://application:,,,/Espera;component/Images/{0}.png", x), null, null).ToObservable())
+                    .Switch()
+                    .Select(x => x.ToNative())
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .BindTo(this.PauseContinueTaskbarButton, x => x.ImageSource);
             };
 
             this.Loaded += async (sender, args) =>
