@@ -59,6 +59,10 @@ namespace Espera.View.Views
 
                 this.Events().KeyUp.Where(x => x.Key == Key.Space)
                     .InvokeCommand(this.shellViewModel, x => x.PauseContinueCommand);
+
+                this.shellViewModel.WhenAnyObservable(x => x.CurrentPlaylist.CurrentPlayingEntry)
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .Subscribe(x => this.PlaylistListBox.ScrollIntoView(x));
             };
 
             this.Loaded += async (sender, args) =>
@@ -408,10 +412,6 @@ namespace Espera.View.Views
 
         private void WireTaskbarButtons()
         {
-            this.shellViewModel.WhenAnyObservable(x => x.CurrentPlaylist.CurrentPlayingEntry)
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(x => this.PlaylistListBox.ScrollIntoView(x));
-
             this.shellViewModel.WhenAnyValue(x => x.IsPlaying, x => x ? "Pause" : "Play")
                 .BindTo(this.PauseContinueTaskbarButton, x => x.Description);
             this.shellViewModel.WhenAnyValue(x => x.IsPlaying, x => x ? "Pause" : "Play")
