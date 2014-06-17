@@ -415,11 +415,8 @@ namespace Espera.View.Views
             this.shellViewModel.WhenAnyValue(x => x.IsPlaying, x => x ? "Pause" : "Play")
                 .BindTo(this.PauseContinueTaskbarButton, x => x.Description);
             this.shellViewModel.WhenAnyValue(x => x.IsPlaying, x => x ? "Pause" : "Play")
-                .Select(
-                    x =>
-                        BitmapLoader.Current.LoadFromResource(
-                            string.Format("pack://application:,,,/Espera;component/Images/{0}.png", x), null, null)
-                            .ToObservable())
+                .Select(x => string.Format("pack://application:,,,/Espera;component/Images/{0}.png", x))
+                .Select(x => BitmapLoader.Current.LoadFromResource(x, null, null).ToObservable())
                 .Switch()
                 .Select(x => x.ToNative())
                 .ObserveOn(RxApp.MainThreadScheduler)
