@@ -138,6 +138,26 @@
             </dialogs:SimpleDialog>
         </ResourceDictionary>
     </Window.Resources>
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo>
+            <TaskbarItemInfo.ThumbButtonInfos>
+                <ThumbButtonInfoCollection>
+                    <ThumbButtonInfo x:Name="PauseContinueTaskbarButton"
+                                     Command="{Binding PauseContinueCommand}"
+                                     DismissWhenClicked="False">
+                    </ThumbButtonInfo>
+                    <ThumbButtonInfo Command="{Binding PreviousSongCommand}"
+                                     DismissWhenClicked="False"
+                                     Description="Previous Song"
+                                     ImageSource="../Images/Previous.png" />
+                    <ThumbButtonInfo Command="{Binding NextSongCommand}"
+                                     DismissWhenClicked="False"
+                                     Description="Next Song"
+                                     ImageSource="../Images/Next.png" />
+                </ThumbButtonInfoCollection>
+            </TaskbarItemInfo.ThumbButtonInfos>
+        </TaskbarItemInfo>
+    </Window.TaskbarItemInfo>
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
             <Button Command="{Binding Path=ShowSettingsCommand}" Content="settings" />

@@ -16,6 +16,7 @@ using GlobalHotKey;
 using MahApps.Metro;
 using MahApps.Metro.Controls.Dialogs;
 using ReactiveUI;
+using Splat;
 using YoutubeExtractor;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using ListView = System.Windows.Controls.ListView;
@@ -42,6 +43,7 @@ namespace Espera.View.Views
                 this.WirePlayer();
                 this.WireScreenStateUpdater();
                 this.WireDragAndDrop();
+                this.WireTaskbarButtons();
 
                 try
                 {
@@ -406,6 +408,19 @@ namespace Espera.View.Views
                 HwndSource source = HwndSource.FromHwnd(helper.Handle);
                 source.AddHook(HandleWindowMove);
             });
+        }
+
+        private void WireTaskbarButtons()
+        {
+            this.shellViewModel.WhenAnyValue(x => x.IsPlaying, x => x ? "Pause" : "Play")
+                .BindTo(this.PauseContinueTaskbarButton, x => x.Description);
+            this.shellViewModel.WhenAnyValue(x => x.IsPlaying, x => x ? "Pause" : "Play")
+                .Select(x => string.Format("pack://application:,,,/Espera;component/Images/{0}.png", x))
+                .Select(x => BitmapLoader.Current.LoadFromResource(x, null, null).ToObservable())
+                .Switch()
+                .Select(x => x.ToNative())
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .BindTo(this.PauseContinueTaskbarButton, x => x.ImageSource);
         }
     }
 }
