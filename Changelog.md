@@ -1,3 +1,11 @@
+# v2.3.0
+
+## Features
+- Drag & Drop support for moving songs inside the playlist.
+- Drag & Drop support for adding local and YouTube songs into the playlist.
+- Drag & Drop support for adding YouTube links from the Browser into the playlist.
+- Added playback controls in the task bar item.
+
 # v2.2.1
 
 ## Bugfixes
