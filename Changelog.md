@@ -1,3 +1,9 @@
+# v2.3.1
+
+## Bugfixes
+- Fixed a bug that caused a song to be inserted at the wrong place when dragging it into the playlist.
+- Fixed a bug that caused the current selected playlist item to be moved when dragging a song into the playlist.
+
 # v2.3.0
 
 ## Features
