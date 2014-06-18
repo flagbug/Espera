@@ -352,11 +352,14 @@ namespace Espera.View.Views
                 .Subscribe();
 
             // Moving items inside the playlist
+            const string movePlaylistSongFormat = "MovePlaylistSong";
+
             this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x))
                 .Where(x => x.Item2.LeftButton == MouseButtonState.Pressed && this.shellViewModel.SelectedPlaylistEntries.Any())
-                .Subscribe(x => DragDrop.DoDragDrop((ListBoxItem)x.Item1, this.shellViewModel.SelectedPlaylistEntries.First(), DragDropEffects.Move));
+                .Subscribe(x => DragDrop.DoDragDrop((ListBoxItem)x.Item1, movePlaylistSongFormat, DragDropEffects.Move));
 
             this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
+                .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Item2.Data.GetData(DataFormats.StringFormat) == movePlaylistSongFormat)
                 .Subscribe(x =>
                 {
                     if (this.shellViewModel.MovePlaylistSongCommand.CanExecute(null))
