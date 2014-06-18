@@ -330,18 +330,14 @@ namespace Espera.View.Views
             // Local songs and YouTube songs
             this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
                 .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Item2.Data.GetData(DataFormats.StringFormat) == songSourceFormat)
-                .Select(x =>
+                .Subscribe(x =>
                 {
                     var target = (PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext;
 
-                    return target.Index;
-                })
-                .Subscribe(targetIndex =>
-                {
                     var addCommand = this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
                     if (addCommand.CanExecute(null))
                     {
-                        addCommand.Execute(targetIndex);
+                        addCommand.Execute(target.Index);
                     }
                 });
 
