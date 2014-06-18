@@ -28,7 +28,7 @@ namespace Espera.View.ViewModels
         /// <summary>
         /// Resolves the given YouTube URL and adds the song to the playlist.
         /// </summary>
-        public async Task AddDirectYoutubeUrlToPlaylist(Uri url)
+        public async Task AddDirectYoutubeUrlToPlaylist(Uri url, int targetIndex)
         {
             if (url == null)
                 Throw.ArgumentNullException(() => url);
@@ -43,7 +43,7 @@ namespace Espera.View.ViewModels
 
             this.SelectedSongs = new[] { new YoutubeSongViewModel(song, () => { throw new NotImplementedException(); }) };
 
-            this.AddToPlaylistCommand.Execute(null);
+            this.AddToPlaylistCommand.Execute(targetIndex);
         }
     }
 }

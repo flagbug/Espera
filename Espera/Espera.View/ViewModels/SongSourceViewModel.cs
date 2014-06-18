@@ -29,7 +29,7 @@ namespace Espera.View.ViewModels
             this.timeoutWarning = new Subject<Unit>();
 
             this.AddToPlaylistCommand = this.WhenAnyValue(x => x.SelectedSongs, x => x != null && x.Any()).ToCommand();
-            this.AddToPlaylistCommand.Subscribe(p =>
+            this.AddToPlaylistCommand.Subscribe(x =>
             {
                 if (this.library.RemainingPlaylistTimeout > TimeSpan.Zero)
                 {
@@ -42,6 +42,7 @@ namespace Espera.View.ViewModels
                 if (this.IsAdmin)
                 {
                     this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model), accessToken);
+                    this.library.MovePlaylistSong(this.library.CurrentPlaylist.Last().Index, (int)x, accessToken);
                 }
 
                 else

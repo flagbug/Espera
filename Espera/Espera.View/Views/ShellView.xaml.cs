@@ -328,28 +328,43 @@ namespace Espera.View.Views
                 .Subscribe(x => DragDrop.DoDragDrop((DependencyObject)x.Source, songSourceFormat, DragDropEffects.Link));
 
             // Local songs and YouTube songs
-            this.PlaylistListBox.Events().Drop
-                .Where(x => x.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Data.GetData(DataFormats.StringFormat) == songSourceFormat)
-                .Select(_ => this.shellViewModel.WhenAnyValue(x => x.CurrentSongSource).Select(x => x.AddToPlaylistCommand))
-                .Switch()
-                .Where(x => x.CanExecute(null))
-                .Subscribe(x => x.Execute(null));
+            this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
+                .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Item2.Data.GetData(DataFormats.StringFormat) == songSourceFormat)
+                .Select(x =>
+                {
+                    var target = (PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext;
+
+                    return target.Index;
+                })
+                .Subscribe(targetIndex =>
+                {
+                    var addCommand = this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
+                    if (addCommand.CanExecute(null))
+                    {
+                        addCommand.Execute(targetIndex);
+                    }
+                });
 
             // YouTube links (e.g from the browser)
-            this.PlaylistListBox.Events().Drop
-                .Where(x => x.Data.GetDataPresent(DataFormats.StringFormat))
-                .Select(x => (string)x.Data.GetData(DataFormats.StringFormat))
+            this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
+                .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat))
                 .Where(x =>
                 {
+                    var url = (string)x.Item2.Data.GetData(DataFormats.StringFormat);
                     Uri uriResult;
-                    bool result = Uri.TryCreate(x, UriKind.Absolute, out uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+                    bool result = Uri.TryCreate(url, UriKind.Absolute, out uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
 
                     string urlDontCare;
-                    return result && DownloadUrlResolver.TryNormalizeYoutubeUrl(x, out urlDontCare);
+
+                    return result && DownloadUrlResolver.TryNormalizeYoutubeUrl(url, out urlDontCare);
                 })
-                .Select(x => this.shellViewModel.DirectYoutubeViewModel.AddDirectYoutubeUrlToPlaylist(new Uri(x)).ToObservable())
-                .Concat()
-                .Subscribe();
+                .Subscribe(async x =>
+                {
+                    var url = (string)x.Item2.Data.GetData(DataFormats.StringFormat);
+                    var target = (PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext;
+
+                    await this.shellViewModel.DirectYoutubeViewModel.AddDirectYoutubeUrlToPlaylist(new Uri(url), target.Index);
+                });
 
             // Moving items inside the playlist
             const string movePlaylistSongFormat = "MovePlaylistSong";
