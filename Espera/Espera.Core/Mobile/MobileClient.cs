@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -30,12 +29,12 @@ namespace Espera.Core.Mobile
         private readonly Subject<Unit> disconnected;
         private readonly CompositeDisposable disposable;
         private readonly TcpClient fileSocket;
-        private readonly ConcurrentBag<Guid> fileTransfers;
         private readonly SemaphoreSlim gate;
         private readonly Library library;
         private readonly Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>> messageActionMap;
         private readonly TcpClient socket;
         private Guid accessToken;
+        private IObservable<SongTransferMessage> songTransfers;
 
         public MobileClient(TcpClient socket, TcpClient fileSocket, Library library)
         {
@@ -55,7 +54,6 @@ namespace Espera.Core.Mobile
             this.disposable = new CompositeDisposable();
             this.gate = new SemaphoreSlim(1, 1);
             this.disconnected = new Subject<Unit>();
-            this.fileTransfers = new ConcurrentBag<Guid>();
 
             this.messageActionMap = new Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>>
             {
@@ -157,13 +155,14 @@ namespace Espera.Core.Mobile
                 }, ex => this.disconnected.OnNext(Unit.Default), () => this.disconnected.OnNext(Unit.Default))
                 .DisposeWith(this.disposable);
 
-            Observable.FromAsync(() => this.fileSocket.GetStream().ReadNextFileTransferMessageAsync())
+            var transfers = Observable.FromAsync(() => this.fileSocket.GetStream().ReadNextFileTransferMessageAsync())
                 .Repeat()
                 .Retry()
                 .TakeWhile(x => x != null)
-                .Subscribe(message =>
-                {
-                }).DisposeWith(this.disposable);
+                .Publish();
+            transfers.Connect().DisposeWith(this.disposable);
+
+            this.songTransfers = transfers;
         }
 
         private static NetworkMessage CreatePushMessage(PushAction action, JObject content)
@@ -552,9 +551,13 @@ namespace Espera.Core.Mobile
 
         private Task<ResponseInfo> QueueRemoteSong(JToken parameters)
         {
-            var transferInfo = parameters.ToObject<FileTransferInfo>();
+            var transferInfo = parameters.ToObject<SongTransferInfo>();
 
-            this.fileTransfers.Add(transferInfo.TransferId);
+            IObservable<byte[]> data = this.songTransfers.FirstAsync(x => x.TransferId == transferInfo.TransferId).Select(x => x.Data);
+
+            var song = MobileSong.Create(transferInfo.Metadata, data);
+
+            this.library.AddSongToPlaylist(song);
 
             return Task.FromResult(CreateResponse(ResponseStatus.Success));
         }
