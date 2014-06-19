@@ -1,16 +1,25 @@
 ﻿using System;
 using System.IO;
 using System.IO.Abstractions;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
+using System.Threading.Tasks;
 using Espera.Network;
+using ReactiveMarrow;
 
 namespace Espera.Core.Mobile
 {
     public class MobileSong : Song
     {
+        private readonly AsyncSubject<Unit> dataGate;
+
         private MobileSong(string path, TimeSpan duration)
             : base(path, duration)
-        { }
+        {
+            this.dataGate = new AsyncSubject<Unit>();
+        }
 
         internal static MobileSong Create(NetworkSong metaData, IObservable<byte[]> data, IFileSystem fileSystem = null)
         {
@@ -23,8 +32,6 @@ namespace Espera.Core.Mobile
             fileSystem.File.Move(tempPath, newName);
             tempPath = newName;
 
-            data.FirstAsync().Subscribe(x => fileSystem.File.WriteAllBytes(tempPath, x));
-
             var song = new MobileSong(tempPath, metaData.Duration)
             {
                 Album = metaData.Album,
@@ -33,7 +40,18 @@ namespace Espera.Core.Mobile
                 Title = metaData.Title
             };
 
+            var conn = data.FirstAsync()
+                .Do(x => fileSystem.File.WriteAllBytes(tempPath, x))
+                .ToUnit()
+                .Multicast(song.dataGate);
+            conn.Connect();
+
             return song;
+        }
+
+        internal override Task PrepareAsync(YoutubeStreamingQuality qualityHint)
+        {
+            return this.dataGate.ToTask();
         }
     }
 }
