@@ -601,20 +601,24 @@ namespace Espera.Core.Mobile
                     .Switch())
                 .CombineLatest(this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken),
                     this.library.PlaybackState, Tuple.Create)
+                .ObserveOn(RxApp.TaskpoolScheduler)
                 .Subscribe(x => this.PushPlaylist(x.Item1, x.Item2, x.Item3))
                 .DisposeWith(this.disposable);
 
             this.library.PlaybackState.Skip(1)
+                .ObserveOn(RxApp.TaskpoolScheduler)
                 .Subscribe(x => this.PushPlaybackState(x))
                 .DisposeWith(this.disposable);
 
             this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken)
                 .Skip(1)
+                .ObserveOn(RxApp.TaskpoolScheduler)
                 .Subscribe(x => this.PushAccessPermission(x))
                 .DisposeWith(this.disposable);
 
             this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken)
                 .Skip(1)
+                .ObserveOn(RxApp.TaskpoolScheduler)
                 .Subscribe(x => this.PushRemainingVotes(x))
                 .DisposeWith(this.disposable);
         }
