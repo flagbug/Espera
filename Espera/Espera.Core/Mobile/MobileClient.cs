@@ -593,7 +593,7 @@ namespace Espera.Core.Mobile
             this.library.CurrentPlaylistChanged
                 .Merge(this.library.CurrentPlaylistChanged
                     .StartWith(this.library.CurrentPlaylist)
-                    .Select(x => x.Changed.Select(y => x))
+                    .Select(x => x.Changed().Select(y => x))
                     .Switch())
                 .Merge(this.library.CurrentPlaylistChanged
                     .StartWith(this.library.CurrentPlaylist)
