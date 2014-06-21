@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Espera.Network;
+using ReactiveMarrow;
+using System;
 using System.IO;
 using System.IO.Abstractions;
 using System.Reactive;
@@ -6,8 +8,6 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
-using Espera.Network;
-using ReactiveMarrow;
 
 namespace Espera.Core.Mobile
 {
@@ -19,6 +19,11 @@ namespace Espera.Core.Mobile
             : base(path, duration)
         {
             this.dataGate = new AsyncSubject<Unit>();
+        }
+
+        public override NetworkSongSource NetworkSongSource
+        {
+            get { return NetworkSongSource.Mobile; }
         }
 
         internal static MobileSong Create(NetworkSong metaData, IObservable<byte[]> data, IFileSystem fileSystem = null)

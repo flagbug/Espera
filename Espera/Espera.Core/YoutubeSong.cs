@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Espera.Network;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,6 +33,11 @@ namespace Espera.Core
         /// Gets or sets the description that was entered by the uploader of the YouTube video.
         /// </summary>
         public string Description { get; set; }
+
+        public override NetworkSongSource NetworkSongSource
+        {
+            get { return NetworkSongSource.Youtube; }
+        }
 
         /// <summary>
         /// Gets or sets the average rating.

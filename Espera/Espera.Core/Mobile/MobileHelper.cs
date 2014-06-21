@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Espera.Core.Audio;
+﻿using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Network;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Espera.Core.Mobile
 {
@@ -17,12 +17,11 @@ namespace Espera.Core.Mobile
                 Name = playlist.Name,
                 CurrentIndex = playlist.CurrentSongIndex,
                 Songs = playlist.Select(x =>
-
                     new NetworkSong
                     {
                         Artist = x.Song.Artist,
                         Title = x.Song.Title,
-                        Source = x.Song is LocalSong ? NetworkSongSource.Local : NetworkSongSource.Youtube,
+                        Source = x.Song.NetworkSongSource,
                         Guid = x.Guid
                     }
                 ).ToList().AsReadOnly(),
