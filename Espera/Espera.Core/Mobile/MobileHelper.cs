@@ -16,15 +16,7 @@ namespace Espera.Core.Mobile
             {
                 Name = playlist.Name,
                 CurrentIndex = playlist.CurrentSongIndex,
-                Songs = playlist.Select(x =>
-                    new NetworkSong
-                    {
-                        Artist = x.Song.Artist,
-                        Title = x.Song.Title,
-                        Source = x.Song.NetworkSongSource,
-                        Guid = x.Guid
-                    }
-                ).ToList().AsReadOnly(),
+                Songs = playlist.Select(x => x.Song.ToNetworkSong(x.Guid)).ToList().AsReadOnly(),
                 RemainingVotes = remainingVotes,
                 PlaybackState = (NetworkPlaybackState)Enum.ToObject(typeof(NetworkPlaybackState), (int)playbackState)
             };
@@ -34,23 +26,26 @@ namespace Espera.Core.Mobile
 
         public static JObject SerializeSongs(IEnumerable<LocalSong> songs)
         {
-            var networkSongs = songs.Select(x =>
-                new NetworkSong
-                {
-                    Album = x.Album,
-                    Artist = x.Artist,
-                    Duration = x.Duration,
-                    Genre = x.Genre,
-                    Title = x.Title,
-                    Guid = x.Guid
-                });
-
             var serialized = JObject.FromObject(new
             {
-                songs = networkSongs
+                songs = songs.Select(x => x.ToNetworkSong(x.Guid))
             });
 
             return JObject.FromObject(serialized);
+        }
+
+        private static NetworkSong ToNetworkSong(this Song song, Guid guid)
+        {
+            return new NetworkSong
+            {
+                Album = song.Album,
+                Artist = song.Artist,
+                Duration = song.Duration,
+                Genre = song.Genre,
+                Title = song.Title,
+                Source = song.NetworkSongSource,
+                Guid = guid
+            };
         }
     }
 }
