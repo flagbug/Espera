@@ -42,7 +42,11 @@ namespace Espera.View.ViewModels
                 if (this.IsAdmin)
                 {
                     this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model), accessToken);
-                    this.library.MovePlaylistSong(this.library.CurrentPlaylist.Last().Index, (int)x, accessToken);
+
+                    if (x != null)
+                    {
+                        this.library.MovePlaylistSong(this.library.CurrentPlaylist.Last().Index, (int)x, accessToken);
+                    }
                 }
 
                 else
