@@ -14,14 +14,6 @@ using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Caliburn.Micro;
-using Espera.Core.Audio;
-using Espera.Core.Management;
-using Espera.Core.Mobile;
-using Espera.Core.Settings;
-using Rareform.Extensions;
-using ReactiveMarrow;
-using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
@@ -266,8 +258,17 @@ namespace Espera.View.ViewModels
                 .ToCommand();
             this.MovePlaylistSongCommand.Subscribe(x =>
             {
-                int index = this.SelectedPlaylistEntries.First().Index;
-                this.library.MovePlaylistSong(index, (int)x, this.accessToken);
+                int fromIndex = this.SelectedPlaylistEntries.First().Index;
+                int toIndex = (int?)x ?? this.CurrentPlaylist.Songs.Last().Index + 1;
+
+                // If we move a song from the front of the playlist to the back, we want it move be
+                // in front of the target song
+                if (fromIndex < toIndex)
+                {
+                    toIndex--;
+                }
+
+                this.library.MovePlaylistSong(fromIndex, toIndex, this.accessToken);
                 reEvaluateSelectedPlaylistEntry.OnNext(Unit.Default);
             });
 

@@ -376,16 +376,18 @@ namespace Espera.View.Views
                 .Where(x => x.Item2.LeftButton == MouseButtonState.Pressed && this.shellViewModel.SelectedPlaylistEntries.Any())
                 .Subscribe(x => DragDrop.DoDragDrop((ListBoxItem)x.Item1, movePlaylistSongFormat, DragDropEffects.Move));
 
-            this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
+            playlistDropEvent
                 .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Item2.Data.GetData(DataFormats.StringFormat) == movePlaylistSongFormat)
                 .Subscribe(x =>
                 {
                     if (this.shellViewModel.MovePlaylistSongCommand.CanExecute(null))
                     {
-                        var target = (PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext;
+                        int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
 
-                        this.shellViewModel.MovePlaylistSongCommand.Execute(target.Index);
+                        this.shellViewModel.MovePlaylistSongCommand.Execute(targetIndex);
                     }
+
+                    x.Item2.Handled = true;
                 });
         }
 

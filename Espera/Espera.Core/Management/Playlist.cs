@@ -181,13 +181,6 @@ namespace Espera.Core.Management
             if (toIndex < 0)
                 Throw.ArgumentOutOfRangeException(() => fromIndex);
 
-            // If we move a song from the front of the playlist to the back, we want it move be in
-            // front of the target song
-            if (fromIndex < toIndex)
-            {
-                toIndex--;
-            }
-
             using (this.WithIndexRebuild())
             {
                 this.playlist.Move(fromIndex, toIndex);

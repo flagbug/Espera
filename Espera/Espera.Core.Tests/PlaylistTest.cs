@@ -291,21 +291,35 @@ namespace Espera.Core.Tests
         public class TheMoveSongMethod
         {
             [Fact]
-            public void BackToFrontSmokeTest()
+            public void CanDecrementIndex()
             {
                 Song[] songs = Helpers.SetupSongMocks(3);
                 var playlist = new Playlist("Playlist");
                 playlist.AddSongs(songs);
 
-                playlist.MoveSong(2, 0);
+                playlist.MoveSong(2, 1);
 
-                Assert.Equal(songs[0], playlist[1].Song);
+                Assert.Equal(songs[0], playlist[0].Song);
                 Assert.Equal(songs[1], playlist[2].Song);
-                Assert.Equal(songs[2], playlist[0].Song);
+                Assert.Equal(songs[2], playlist[1].Song);
             }
 
             [Fact]
-            public void FrontToBackDecrementsIndex()
+            public void CanIncrementIndex()
+            {
+                Song[] songs = Helpers.SetupSongMocks(3);
+                var playlist = new Playlist("Playlist");
+                playlist.AddSongs(songs);
+
+                playlist.MoveSong(0, 1);
+
+                Assert.Equal(songs[0], playlist[1].Song);
+                Assert.Equal(songs[1], playlist[0].Song);
+                Assert.Equal(songs[2], playlist[2].Song);
+            }
+
+            [Fact]
+            public void SmokeTest()
             {
                 Song[] songs = Helpers.SetupSongMocks(3);
                 var playlist = new Playlist("Playlist");
