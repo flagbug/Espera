@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Threading;
-using System.Threading.Tasks;
-using Akavache;
+﻿using Akavache;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
@@ -16,6 +6,17 @@ using Microsoft.Reactive.Testing;
 using NSubstitute;
 using ReactiveUI;
 using ReactiveUI.Testing;
+using System;
+using System.Collections.Generic;
+using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Espera.Core.Tests
@@ -437,12 +438,12 @@ namespace Espera.Core.Tests
                         {
                             switch (handle.CurrentCount)
                             {
-                            case 2:
-                                handle.Signal();
-                                throw new SongLoadException();
-                            case 1:
-                                handle.Signal();
-                                break;
+                                case 2:
+                                    handle.Signal();
+                                    throw new SongLoadException();
+                                case 1:
+                                    handle.Signal();
+                                    break;
                             }
 
                             return Task.Delay(0);
@@ -606,6 +607,36 @@ namespace Espera.Core.Tests
                     library.AudioPlayerCallback.PlayRequest = () => { throw new SongLoadException(); };
                     await test(library);
                 }
+            }
+
+            [Fact]
+            public async Task SongPreparationCanTimeout()
+            {
+                await new TestScheduler().With(async sched =>
+                {
+                    var song = Substitute.For<Song>("C://", TimeSpan.Zero);
+                    song.PrepareAsync(Arg.Any<YoutubeStreamingQuality>()).Returns(Observable.Return(Unit.Default)
+                        .Delay(Library.PreparationTimeout + TimeSpan.FromSeconds(1), sched).ToTask());
+
+                    using (Library library = Helpers.CreateLibraryWithPlaylist())
+                    {
+                        Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                        library.AddSongsToPlaylist(new[] { song }, token);
+
+                        int invocationCount = 0;
+
+                        library.AudioPlayerCallback.LoadRequest = uri => Task.Run(() => invocationCount++);
+
+                        Task play = library.PlaySongAsync(0, token);
+
+                        sched.AdvanceByMs((Library.PreparationTimeout + TimeSpan.FromSeconds(2)).TotalMilliseconds);
+
+                        await play;
+
+                        Assert.Equal(0, invocationCount);
+                    }
+                });
             }
 
             [Fact]

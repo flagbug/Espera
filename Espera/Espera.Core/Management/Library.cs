@@ -1,4 +1,12 @@
-﻿using System;
+﻿using Akavache;
+using Espera.Core.Analytics;
+using Espera.Core.Audio;
+using Espera.Core.Settings;
+using Rareform.Extensions;
+using Rareform.Validation;
+using ReactiveMarrow;
+using ReactiveUI;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
@@ -11,19 +19,13 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
-using Akavache;
-using Espera.Core.Analytics;
-using Espera.Core.Audio;
-using Espera.Core.Settings;
-using Rareform.Extensions;
-using Rareform.Validation;
-using ReactiveMarrow;
-using ReactiveUI;
 
 namespace Espera.Core.Management
 {
     public sealed class Library : IDisposable, IEnableLogger
     {
+        public static readonly TimeSpan PreparationTimeout = TimeSpan.FromSeconds(10);
+
         private readonly AccessControl accessControl;
         private readonly AudioPlayer audioPlayer;
         private readonly Subject<Playlist> currentPlaylistChanged;
@@ -597,7 +599,8 @@ namespace Espera.Core.Management
 
             try
             {
-                await song.PrepareAsync(this.settings.StreamHighestYoutubeQuality ? YoutubeStreamingQuality.High : this.settings.YoutubeStreamingQuality);
+                await song.PrepareAsync(this.settings.StreamHighestYoutubeQuality ? YoutubeStreamingQuality.High : this.settings.YoutubeStreamingQuality)
+                    .ToObservable().Timeout(Library.PreparationTimeout, RxApp.TaskpoolScheduler);
             }
 
             catch (SongPreparationException ex)
@@ -605,6 +608,15 @@ namespace Espera.Core.Management
                 this.Log().ErrorException("Failed to prepare song", ex);
 
                 AnalyticsClient.Instance.RecordErrorAsync(ex, false);
+
+                this.HandleSongCorruptionAsync();
+
+                return;
+            }
+
+            catch (TimeoutException ex)
+            {
+                this.Log().ErrorException("Song preparation timeout", ex);
 
                 this.HandleSongCorruptionAsync();
 
