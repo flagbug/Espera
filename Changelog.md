@@ -1,3 +1,9 @@
+# v2.3.2
+
+## Bugfixes
+- Fixed a bug that caused Espera to crash when adding songs to the playlist.
+- Fixed various Drag & Drop issues.
+
 # v2.3.1
 
 ## Bugfixes
