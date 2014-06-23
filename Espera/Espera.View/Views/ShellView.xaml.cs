@@ -1,3 +1,11 @@
+using Espera.Core.Audio;
+using Espera.Core.Management;
+using Espera.View.ViewModels;
+using GlobalHotKey;
+using MahApps.Metro;
+using MahApps.Metro.Controls.Dialogs;
+using ReactiveUI;
+using Splat;
 using System;
 using System.ComponentModel;
 using System.Globalization;
@@ -103,15 +111,15 @@ namespace Espera.View.Views
         {
             switch (msg)
             {
-            case WM_SYSCOMMAND:
-                int command = wParam.ToInt32() & 0xfff0;
+                case WM_SYSCOMMAND:
+                    int command = wParam.ToInt32() & 0xfff0;
 
-                if (command == SC_MOVE)
-                {
-                    // Intercept the move command if we aren't allowed to modify the window
-                    handled = !this.shellViewModel.CanModifyWindow;
-                }
-                break;
+                    if (command == SC_MOVE)
+                    {
+                        // Intercept the move command if we aren't allowed to modify the window
+                        handled = !this.shellViewModel.CanModifyWindow;
+                    }
+                    break;
             }
 
             return IntPtr.Zero;
@@ -327,22 +335,27 @@ namespace Espera.View.Views
                 .Where(x => x.LeftButton == MouseButtonState.Pressed)
                 .Subscribe(x => DragDrop.DoDragDrop((DependencyObject)x.Source, songSourceFormat, DragDropEffects.Link));
 
+            var playlistDropEvent = this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
+                .Merge(this.PlaylistListBox.Events().Drop.Select(x => Tuple.Create((object)null, x)));
+
             // Local songs and YouTube songs
-            this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
+            playlistDropEvent
                 .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Item2.Data.GetData(DataFormats.StringFormat) == songSourceFormat)
                 .Subscribe(x =>
                 {
-                    var target = (PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext;
+                    int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
 
                     var addCommand = this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
                     if (addCommand.CanExecute(null))
                     {
-                        addCommand.Execute(target.Index);
+                        addCommand.Execute(targetIndex);
                     }
+
+                    x.Item2.Handled = true;
                 });
 
             // YouTube links (e.g from the browser)
-            this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
+            playlistDropEvent
                 .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat))
                 .Where(x =>
                 {
@@ -357,9 +370,11 @@ namespace Espera.View.Views
                 .Subscribe(async x =>
                 {
                     var url = (string)x.Item2.Data.GetData(DataFormats.StringFormat);
-                    var target = (PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext;
+                    int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
 
-                    await this.shellViewModel.DirectYoutubeViewModel.AddDirectYoutubeUrlToPlaylist(new Uri(url), target.Index);
+                    await this.shellViewModel.DirectYoutubeViewModel.AddDirectYoutubeUrlToPlaylist(new Uri(url), targetIndex);
+
+                    x.Item2.Handled = true;
                 });
 
             // Moving items inside the playlist

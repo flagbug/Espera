@@ -1,4 +1,12 @@
-﻿using System;
+﻿using Caliburn.Micro;
+using Espera.Core.Audio;
+using Espera.Core.Management;
+using Espera.Core.Mobile;
+using Espera.Core.Settings;
+using Rareform.Extensions;
+using ReactiveMarrow;
+using ReactiveUI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
@@ -423,7 +431,7 @@ namespace Espera.View.ViewModels
         public IEnumerable<PlaylistEntryViewModel> SelectedPlaylistEntries
         {
             get { return this.selectedPlaylistEntries; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedPlaylistEntries, value); }
+            set { this.RaiseAndSetIfChanged(ref this.selectedPlaylistEntries, value ?? Enumerable.Empty<PlaylistEntryViewModel>()); }
         }
 
         public SettingsViewModel SettingsViewModel { get; private set; }

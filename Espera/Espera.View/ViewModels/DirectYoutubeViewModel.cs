@@ -28,7 +28,7 @@ namespace Espera.View.ViewModels
         /// <summary>
         /// Resolves the given YouTube URL and adds the song to the playlist.
         /// </summary>
-        public async Task AddDirectYoutubeUrlToPlaylist(Uri url, int targetIndex)
+        public async Task AddDirectYoutubeUrlToPlaylist(Uri url, int? targetIndex)
         {
             if (url == null)
                 Throw.ArgumentNullException(() => url);
