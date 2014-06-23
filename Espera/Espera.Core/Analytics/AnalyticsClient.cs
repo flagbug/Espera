@@ -115,7 +115,7 @@ namespace Espera.Core.Analytics
 
             try
             {
-                await this.client.RecordErrorAsync(exception.Message, logId, exception.StackTrace);
+                await this.client.RecordErrorAsync(exception.Message, logId, exception.ToString());
             }
 
             catch (Exception ex)
@@ -136,7 +136,7 @@ namespace Espera.Core.Analytics
 
             try
             {
-                await this.client.RecordErrorAsync(exception.Message, logId, exception.StackTrace);
+                await this.client.RecordErrorAsync(exception.Message, logId, exception.ToString());
             }
 
             catch (Exception ex)
