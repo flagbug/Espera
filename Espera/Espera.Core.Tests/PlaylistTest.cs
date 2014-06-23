@@ -291,7 +291,21 @@ namespace Espera.Core.Tests
         public class TheMoveSongMethod
         {
             [Fact]
-            public void SmokeTest()
+            public void BackToFrontSmokeTest()
+            {
+                Song[] songs = Helpers.SetupSongMocks(3);
+                var playlist = new Playlist("Playlist");
+                playlist.AddSongs(songs);
+
+                playlist.MoveSong(2, 0);
+
+                Assert.Equal(songs[0], playlist[1].Song);
+                Assert.Equal(songs[1], playlist[2].Song);
+                Assert.Equal(songs[2], playlist[0].Song);
+            }
+
+            [Fact]
+            public void FrontToBackDecrementsIndex()
             {
                 Song[] songs = Helpers.SetupSongMocks(3);
                 var playlist = new Playlist("Playlist");
@@ -299,9 +313,9 @@ namespace Espera.Core.Tests
 
                 playlist.MoveSong(0, 2);
 
+                Assert.Equal(songs[0], playlist[1].Song);
                 Assert.Equal(songs[1], playlist[0].Song);
-                Assert.Equal(songs[2], playlist[1].Song);
-                Assert.Equal(songs[0], playlist[2].Song);
+                Assert.Equal(songs[2], playlist[2].Song);
             }
 
             [Fact]
