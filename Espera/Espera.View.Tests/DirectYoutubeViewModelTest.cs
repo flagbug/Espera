@@ -30,7 +30,7 @@ namespace Espera.View.Tests
 
                     var fixture = new DirectYoutubeViewModel(library, accessToken, songFinder);
 
-                    await Helpers.ThrowsAsync<ArgumentNullException>(() => fixture.AddDirectYoutubeUrlToPlaylist(null));
+                    await Helpers.ThrowsAsync<ArgumentNullException>(() => fixture.AddDirectYoutubeUrlToPlaylist(null, null));
                 }
             }
 
@@ -49,7 +49,7 @@ namespace Espera.View.Tests
 
                     var fixture = new DirectYoutubeViewModel(library, accessToken, songFinder);
 
-                    await fixture.AddDirectYoutubeUrlToPlaylist(new Uri("http://youtube.com?v=yadda"));
+                    await fixture.AddDirectYoutubeUrlToPlaylist(new Uri("http://youtube.com?v=yadda"), null);
 
                     Assert.Equal(0, playlist.Count());
                 }
@@ -72,7 +72,7 @@ namespace Espera.View.Tests
 
                     var fixture = new DirectYoutubeViewModel(library, accessToken, songFinder);
 
-                    await fixture.AddDirectYoutubeUrlToPlaylist(new Uri(youtubePath));
+                    await fixture.AddDirectYoutubeUrlToPlaylist(new Uri(youtubePath), null);
 
                     Assert.Equal(1, playlist.Count());
                 }
