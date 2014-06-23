@@ -327,9 +327,9 @@ namespace Espera.Core.Tests
 
                 playlist.MoveSong(0, 2);
 
-                Assert.Equal(songs[0], playlist[1].Song);
                 Assert.Equal(songs[1], playlist[0].Song);
-                Assert.Equal(songs[2], playlist[2].Song);
+                Assert.Equal(songs[2], playlist[1].Song);
+                Assert.Equal(songs[0], playlist[2].Song);
             }
 
             [Fact]
