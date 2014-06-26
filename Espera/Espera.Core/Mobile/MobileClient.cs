@@ -372,7 +372,7 @@ namespace Espera.Core.Mobile
 
             try
             {
-                this.library.MovePlaylistSong(entry.Index, entry.Index - 1, this.accessToken);
+                this.library.MovePlaylistSong(entry.Index, entry.Index + 1, this.accessToken);
             }
 
             catch (AccessException)
@@ -402,7 +402,7 @@ namespace Espera.Core.Mobile
 
             try
             {
-                this.library.MovePlaylistSong(entry.Index, entry.Index + 1, this.accessToken);
+                this.library.MovePlaylistSong(entry.Index, entry.Index - 1, this.accessToken);
             }
 
             catch (AccessException)
