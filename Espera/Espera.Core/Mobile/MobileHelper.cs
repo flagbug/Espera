@@ -10,7 +10,7 @@ namespace Espera.Core.Mobile
 {
     public static class MobileHelper
     {
-        public static JObject SerializePlaylist(Playlist playlist, int? remainingVotes, AudioPlayerState playbackState)
+        public static JObject SerializePlaylist(Playlist playlist, int? remainingVotes, AudioPlayerState playbackState, TimeSpan currentTime, TimeSpan totalTime)
         {
             var networkPlaylist = new NetworkPlaylist
             {
@@ -18,7 +18,9 @@ namespace Espera.Core.Mobile
                 CurrentIndex = playlist.CurrentSongIndex,
                 Songs = playlist.Select(x => x.Song.ToNetworkSong(x.Guid)).ToList().AsReadOnly(),
                 RemainingVotes = remainingVotes,
-                PlaybackState = (NetworkPlaybackState)Enum.ToObject(typeof(NetworkPlaybackState), (int)playbackState)
+                PlaybackState = (NetworkPlaybackState)Enum.ToObject(typeof(NetworkPlaybackState), (int)playbackState),
+                CurrentTime = currentTime,
+                TotalTime = totalTime
             };
 
             return JObject.FromObject(networkPlaylist);

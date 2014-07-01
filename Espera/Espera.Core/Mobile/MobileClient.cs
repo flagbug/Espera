@@ -329,7 +329,9 @@ namespace Espera.Core.Mobile
             int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
             AudioPlayerState playbackState = await this.library.PlaybackState.FirstAsync();
 
-            JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes, playbackState);
+            JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes, playbackState,
+                await this.library.CurrentPlaybackTime.FirstAsync(),
+                await this.library.TotalTime.FirstAsync());
 
             return CreateResponse(ResponseStatus.Success, null, content);
         }
@@ -516,6 +518,18 @@ namespace Espera.Core.Mobile
             await this.SendMessage(message);
         }
 
+        private Task PushCurrentPlaybackTime(TimeSpan currentPlaybackTime)
+        {
+            var content = JObject.FromObject(new
+            {
+                currentPlaybackTime
+            });
+
+            NetworkMessage message = CreatePushMessage(PushAction.UpdateCurrentPlaybackTime, content);
+
+            return this.SendMessage(message);
+        }
+
         private async Task PushPlaybackState(AudioPlayerState state)
         {
             var content = JObject.FromObject(new
@@ -530,7 +544,9 @@ namespace Espera.Core.Mobile
 
         private async Task PushPlaylist(Playlist playlist, int? remainingVotes, AudioPlayerState state)
         {
-            JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes, state);
+            JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes, state,
+                await this.library.CurrentPlaybackTime.FirstAsync(),
+                await this.library.TotalTime.FirstAsync());
 
             NetworkMessage message = CreatePushMessage(PushAction.UpdateCurrentPlaylist, content);
 
@@ -620,6 +636,12 @@ namespace Espera.Core.Mobile
                 .Skip(1)
                 .ObserveOn(RxApp.TaskpoolScheduler)
                 .Subscribe(x => this.PushRemainingVotes(x))
+                .DisposeWith(this.disposable);
+
+            // We can assume that, if the total time difference exceeds two seconds, the time change is from an external source (e.g the user clicked on the time slider)
+            this.library.CurrentPlaybackTime.Buffer(2)
+                .Where(x => Math.Abs(x[0].TotalSeconds - x[1].TotalSeconds) >= 2).Select(x => x[1])
+                .Subscribe(x => this.PushCurrentPlaybackTime(x))
                 .DisposeWith(this.disposable);
         }
 
