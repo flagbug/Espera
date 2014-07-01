@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -28,21 +28,27 @@ namespace Espera.Core.Mobile
     {
         private readonly Subject<Unit> disconnected;
         private readonly CompositeDisposable disposable;
+        private readonly TcpClient fileSocket;
         private readonly SemaphoreSlim gate;
         private readonly Library library;
         private readonly Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>> messageActionMap;
         private readonly TcpClient socket;
         private Guid accessToken;
+        private IObservable<SongTransferMessage> songTransfers;
 
-        public MobileClient(TcpClient socket, Library library)
+        public MobileClient(TcpClient socket, TcpClient fileSocket, Library library)
         {
             if (socket == null)
+                Throw.ArgumentNullException(() => socket);
+
+            if (fileSocket == null)
                 Throw.ArgumentNullException(() => socket);
 
             if (library == null)
                 Throw.ArgumentNullException(() => library);
 
             this.socket = socket;
+            this.fileSocket = fileSocket;
             this.library = library;
 
             this.disposable = new CompositeDisposable();
@@ -66,7 +72,8 @@ namespace Espera.Core.Mobile
                 {RequestAction.MovePlaylistSongDown, this.MovePlaylistSongDown},
                 {RequestAction.GetVolume, this.GetVolume},
                 {RequestAction.SetVolume, this.SetVolume},
-                {RequestAction.VoteForSong, this.VoteForSong}
+                {RequestAction.VoteForSong, this.VoteForSong},
+                {RequestAction.QueueRemoteSong, this.QueueRemoteSong}
             };
         }
 
@@ -147,6 +154,15 @@ namespace Espera.Core.Mobile
                     }
                 }, ex => this.disconnected.OnNext(Unit.Default), () => this.disconnected.OnNext(Unit.Default))
                 .DisposeWith(this.disposable);
+
+            var transfers = Observable.FromAsync(() => this.fileSocket.GetStream().ReadNextFileTransferMessageAsync())
+                .Repeat()
+                .Retry()
+                .TakeWhile(x => x != null)
+                .Publish();
+            transfers.Connect().DisposeWith(this.disposable);
+
+            this.songTransfers = transfers;
         }
 
         private static NetworkMessage CreatePushMessage(PushAction action, JObject content)
@@ -356,7 +372,7 @@ namespace Espera.Core.Mobile
 
             try
             {
-                this.library.MovePlaylistSong(entry.Index, entry.Index - 1, this.accessToken);
+                this.library.MovePlaylistSong(entry.Index, entry.Index + 1, this.accessToken);
             }
 
             catch (AccessException)
@@ -386,7 +402,7 @@ namespace Espera.Core.Mobile
 
             try
             {
-                this.library.MovePlaylistSong(entry.Index, entry.Index + 1, this.accessToken);
+                this.library.MovePlaylistSong(entry.Index, entry.Index - 1, this.accessToken);
             }
 
             catch (AccessException)
@@ -533,9 +549,26 @@ namespace Espera.Core.Mobile
             await this.SendMessage(message);
         }
 
+        private Task<ResponseInfo> QueueRemoteSong(JToken parameters)
+        {
+            var transferInfo = parameters.ToObject<SongTransferInfo>();
+
+            IObservable<byte[]> data = this.songTransfers.FirstAsync(x => x.TransferId == transferInfo.TransferId).Select(x => x.Data);
+
+            var song = MobileSong.Create(transferInfo.Metadata, data);
+
+            this.library.AddSongToPlaylist(song);
+
+            return Task.FromResult(CreateResponse(ResponseStatus.Success));
+        }
+
         private async Task SendMessage(NetworkMessage content)
         {
-            byte[] message = await NetworkHelpers.PackMessageAsync(content);
+            byte[] message;
+            using (MeasureHelper.Measure())
+            {
+                message = await NetworkHelpers.PackMessageAsync(content);
+            }
 
             await this.gate.WaitAsync();
 
@@ -560,7 +593,7 @@ namespace Espera.Core.Mobile
             this.library.CurrentPlaylistChanged
                 .Merge(this.library.CurrentPlaylistChanged
                     .StartWith(this.library.CurrentPlaylist)
-                    .Select(x => x.Changed.Select(y => x))
+                    .Select(x => x.Changed().Select(y => x))
                     .Switch())
                 .Merge(this.library.CurrentPlaylistChanged
                     .StartWith(this.library.CurrentPlaylist)
@@ -568,20 +601,24 @@ namespace Espera.Core.Mobile
                     .Switch())
                 .CombineLatest(this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken),
                     this.library.PlaybackState, Tuple.Create)
+                .ObserveOn(RxApp.TaskpoolScheduler)
                 .Subscribe(x => this.PushPlaylist(x.Item1, x.Item2, x.Item3))
                 .DisposeWith(this.disposable);
 
             this.library.PlaybackState.Skip(1)
+                .ObserveOn(RxApp.TaskpoolScheduler)
                 .Subscribe(x => this.PushPlaybackState(x))
                 .DisposeWith(this.disposable);
 
             this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken)
                 .Skip(1)
+                .ObserveOn(RxApp.TaskpoolScheduler)
                 .Subscribe(x => this.PushAccessPermission(x))
                 .DisposeWith(this.disposable);
 
             this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken)
                 .Skip(1)
+                .ObserveOn(RxApp.TaskpoolScheduler)
                 .Subscribe(x => this.PushRemainingVotes(x))
                 .DisposeWith(this.disposable);
         }

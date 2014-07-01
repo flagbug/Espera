@@ -36,8 +36,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\akavache.3.2.0\lib\net45\Akavache.dll</HintPath>
     </Reference>
-    <Reference Include="Espera.Network">
-      <HintPath>..\packages\Espera-Network.1.0.11\lib\net45\Espera.Network.dll</HintPath>
+    <Reference Include="Espera.Network, Version=1.0.14.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Espera-Network.1.0.14\lib\net45\Espera.Network.dll</HintPath>
     </Reference>
     <Reference Include="Lager, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -122,6 +123,7 @@
     <Compile Include="LibrarySerializerTest.cs" />
     <Compile Include="LocalSongFinderTest.cs" />
     <Compile Include="MobileApiTest.cs" />
+    <Compile Include="MobileSongTest.cs" />
     <Compile Include="PlaylistTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SongTest.cs" />

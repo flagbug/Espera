@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Espera.Network;
+using Rareform.Validation;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Rareform.Validation;
 
 namespace Espera.Core
 {
@@ -59,6 +60,8 @@ namespace Espera.Core
                 }
             }
         }
+
+        public abstract NetworkSongSource NetworkSongSource { get; }
 
         /// <summary>
         /// Gets the path of the song on the local filesystem, or in the internet.

@@ -1,4 +1,5 @@
-﻿using Rareform.Validation;
+﻿using Espera.Network;
+using Rareform.Validation;
 using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -10,11 +11,14 @@ namespace Espera.Core
         private readonly BehaviorSubject<string> artworkKey;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalSong"/> class.
+        /// Initializes a new instance of the <see cref="LocalSong" /> class.
         /// </summary>
         /// <param name="path">The path of the file.</param>
         /// <param name="duration">The duration of the song.</param>
-        /// <param name="artworkKey">The key of the artwork for Akavache to retrieve. Null, if there is no album cover or the artwork isn't retrieved yet.</param>
+        /// <param name="artworkKey">
+        /// The key of the artwork for Akavache to retrieve. Null, if there is no album cover or the
+        /// artwork isn't retrieved yet.
+        /// </param>
         public LocalSong(string path, TimeSpan duration, string artworkKey = null)
             : base(path, duration)
         {
@@ -38,8 +42,14 @@ namespace Espera.Core
         /// A runtime identifier for interaction with the mobile API.
         /// </summary>
         public Guid Guid { get; private set; }
+
+        public override NetworkSongSource NetworkSongSource
+        {
+            get { return NetworkSongSource.Local; }
+        }
+
         /// <summary>
-        /// Notifies the <see cref="LocalSong"/> that the artwork has been stored to the permanent storage.
+        /// Notifies the <see cref="LocalSong" /> that the artwork has been stored to the permanent storage.
         /// </summary>
         /// <param name="key">The key of the artwork for Akavache to be retrieved.</param>
         internal void NotifyArtworkStored(string key)
