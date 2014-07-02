@@ -73,7 +73,8 @@ namespace Espera.Core.Mobile
                 {RequestAction.GetVolume, this.GetVolume},
                 {RequestAction.SetVolume, this.SetVolume},
                 {RequestAction.VoteForSong, this.VoteForSong},
-                {RequestAction.QueueRemoteSong, this.QueueRemoteSong}
+                {RequestAction.QueueRemoteSong, this.QueueRemoteSong},
+                {RequestAction.SetCurrentTime, this.SetCurrentTime}
             };
         }
 
@@ -604,6 +605,23 @@ namespace Espera.Core.Mobile
             }
         }
 
+        private Task<ResponseInfo> SetCurrentTime(JToken parameters)
+        {
+            var time = parameters["time"].ToObject<TimeSpan>();
+
+            try
+            {
+                this.library.SetCurrentTime(time, this.accessToken);
+            }
+
+            catch (AccessException)
+            {
+                return Task.FromResult(CreateResponse(ResponseStatus.Unauthorized));
+            }
+
+            return Task.FromResult(CreateResponse(ResponseStatus.Success));
+        }
+
         private void SetupPushNotifications()
         {
             this.library.CurrentPlaylistChanged
@@ -638,9 +656,14 @@ namespace Espera.Core.Mobile
                 .Subscribe(x => this.PushRemainingVotes(x))
                 .DisposeWith(this.disposable);
 
+            TimeSpan lastTime = TimeSpan.Zero;
             // We can assume that, if the total time difference exceeds two seconds, the time change is from an external source (e.g the user clicked on the time slider)
-            this.library.CurrentPlaybackTime.Buffer(2)
-                .Where(x => Math.Abs(x[0].TotalSeconds - x[1].TotalSeconds) >= 2).Select(x => x[1])
+            this.library.CurrentPlaybackTime
+                .Select(x => Math.Abs(lastTime.TotalSeconds - x.TotalSeconds) >= 2 ? Tuple.Create(x, true) : Tuple.Create(x, false))
+                .Do(x => lastTime = x.Item1)
+                .Where(x => x.Item2)
+                .Select(x => x.Item1)
+                .ObserveOn(RxApp.TaskpoolScheduler)
                 .Subscribe(x => this.PushCurrentPlaybackTime(x))
                 .DisposeWith(this.disposable);
         }
