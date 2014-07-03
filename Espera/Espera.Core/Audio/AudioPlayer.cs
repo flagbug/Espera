@@ -31,12 +31,15 @@ namespace Espera.Core.Audio
 
             this.currentTimeChangedFromOuter = new Subject<TimeSpan>();
 
-            this.CurrentTimeChanged = Observable.Interval(TimeSpan.FromMilliseconds(300), RxApp.TaskpoolScheduler)
+            var conn = Observable.Interval(TimeSpan.FromMilliseconds(300), RxApp.TaskpoolScheduler)
                 .CombineLatest(this.PlaybackState, (l, state) => state)
                 .Where(x => x == AudioPlayerState.Playing)
                 .Select(_ => this.CurrentTime)
                 .Merge(this.currentTimeChangedFromOuter)
-                .DistinctUntilChanged(x => x.TotalSeconds);
+                .DistinctUntilChanged(x => x.TotalSeconds)
+                .Publish(TimeSpan.Zero);
+            conn.Connect();
+            this.CurrentTimeChanged = conn;
         }
 
         public TimeSpan CurrentTime
