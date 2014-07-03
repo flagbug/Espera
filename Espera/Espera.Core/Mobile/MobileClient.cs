@@ -330,7 +330,7 @@ namespace Espera.Core.Mobile
             int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
             AudioPlayerState playbackState = await this.library.PlaybackState.FirstAsync();
 
-            TimeSpan currentTime =await this.library.CurrentPlaybackTime.FirstAsync();
+            TimeSpan currentTime = await this.library.CurrentPlaybackTime.FirstAsync();
             TimeSpan totalTime = await this.library.TotalTime.FirstAsync();
             JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes, playbackState, currentTime, totalTime);
 
