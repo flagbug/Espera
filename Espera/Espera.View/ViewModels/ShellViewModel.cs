@@ -38,12 +38,11 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> showVotes;
         private readonly ObservableAsPropertyHelper<int> totalSeconds;
         private readonly ObservableAsPropertyHelper<string> totalTime;
+        private readonly ObservableAsPropertyHelper<double> volume;
         private bool isLocal;
         private bool isYoutube;
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
         private bool showVideoPlayer;
-
-        private ObservableAsPropertyHelper<double> volume;
 
         public ShellViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, IWindowManager windowManager, MobileApiInfo mobileApiInfo)
         {
