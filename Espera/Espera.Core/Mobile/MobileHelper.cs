@@ -45,6 +45,7 @@ namespace Espera.Core.Mobile
                 Duration = song.Duration,
                 Genre = song.Genre,
                 Title = song.Title,
+                TrackNumber = song.TrackNumber,
                 Source = song.NetworkSongSource,
                 Guid = guid
             };
