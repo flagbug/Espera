@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 
 namespace Espera.Core.Management
 {
-    public sealed class Library : IDisposable, IEnableLogger
+    public sealed class Library : ReactiveObject, IDisposable
     {
         public static readonly TimeSpan PreparationTimeout = TimeSpan.FromSeconds(10);
 
@@ -45,6 +45,7 @@ namespace Espera.Core.Management
         private Playlist currentPlayingPlaylist;
         private IDisposable currentSongFinderSubscription;
         private DateTime lastSongAddTime;
+        private ObservableAsPropertyHelper<float> volume;
 
         public Library(ILibraryReader libraryReader, ILibraryWriter libraryWriter, CoreSettings settings,
             IFileSystem fileSystem, Func<string, ILocalSongFinder> localSongFinderFunc = null)
@@ -59,7 +60,7 @@ namespace Espera.Core.Management
             this.accessControl = new AccessControl(settings);
             this.songLock = new ReaderWriterLockSlim();
             this.songs = new HashSet<LocalSong>();
-            this.playlists = new ReactiveUI.ReactiveList<Playlist>();
+            this.playlists = new ReactiveList<Playlist>();
             this.currentPlaylistChanged = new Subject<Playlist>();
             this.CanPlayNextSong = this.currentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
             this.CanPlayPreviousSong = this.currentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
@@ -79,6 +80,9 @@ namespace Espera.Core.Management
                 .Subscribe();
 
             this.CurrentPlaybackTime = this.audioPlayer.CurrentTimeChanged;
+
+            this.volume = this.settings.WhenAnyValue(x => x.Volume)
+                .ToProperty(this, x => x.Volume);
         }
 
         public IAudioPlayerCallback AudioPlayerCallback
@@ -188,7 +192,7 @@ namespace Espera.Core.Management
 
         public float Volume
         {
-            get { return this.settings.Volume; }
+            get { return this.volume.Value; }
         }
 
         /// <summary>

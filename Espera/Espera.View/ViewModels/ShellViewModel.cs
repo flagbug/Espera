@@ -43,6 +43,8 @@ namespace Espera.View.ViewModels
         private IEnumerable<PlaylistEntryViewModel> selectedPlaylistEntries;
         private bool showVideoPlayer;
 
+        private ObservableAsPropertyHelper<double> volume;
+
         public ShellViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, IWindowManager windowManager, MobileApiInfo mobileApiInfo)
         {
             this.library = library;
@@ -144,6 +146,9 @@ namespace Espera.View.ViewModels
             this.totalSeconds = this.library.TotalTime
                 .Select(x => (int)x.TotalSeconds)
                 .ToProperty(this, x => x.TotalSeconds);
+
+            this.volume = this.library.WhenAnyValue(x => x.Volume, x => (double)x)
+                .ToProperty(this, x => x.Volume);
 
             this.AddPlaylistCommand = new ReactiveCommand(this.WhenAnyValue(x => x.CanAlterPlaylist));
             this.AddPlaylistCommand.Subscribe(x => this.AddPlaylist());
@@ -487,7 +492,7 @@ namespace Espera.View.ViewModels
 
         public double Volume
         {
-            get { return this.library.Volume; }
+            get { return this.volume.Value; }
             set
             {
                 this.library.SetVolume((float)value, this.accessToken);
