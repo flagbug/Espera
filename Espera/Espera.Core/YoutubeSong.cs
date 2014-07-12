@@ -78,46 +78,21 @@ namespace Espera.Core
 
         internal override async Task PrepareAsync(YoutubeStreamingQuality qualityHint)
         {
-            bool hasUrl = false;
-
-            await Task.Run(() =>
+            try
             {
-                var startprog = new Process
-                {
-                    StartInfo =
-                    {
-                        FileName = "binaries/youtube-dl.exe",
-                        Arguments = "-g --prefer-insecure " + this.OriginalPath,
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        WindowStyle = ProcessWindowStyle.Hidden,
-                        CreateNoWindow = true
-                    }
-                };
+                string output = await RunYoutubeDlAsync("-g --prefer-insecure", this.OriginalPath);
 
-                try
+                Uri dontCare;
+                if (Uri.TryCreate(output, UriKind.Absolute, out dontCare))
                 {
-                    startprog.Start();
-                    string output = startprog.StandardOutput.ReadToEnd();
-                    startprog.WaitForExit();
-
-                    Uri dontCare;
-                    if (Uri.TryCreate(output, UriKind.Absolute, out dontCare))
-                    {
-                        this.PlaybackPath = output;
-                        hasUrl = true;
-                    }
+                    this.PlaybackPath = output;
+                    return;
                 }
+            }
 
-                catch (Exception ex)
-                {
-                    this.Log().ErrorException("youtube-dl extraction failed", ex);
-                }
-            });
-
-            if (hasUrl)
+            catch (Exception ex)
             {
-                return;
+                this.Log().ErrorException("youtube-dl extraction failed", ex);
             }
 
             VideoInfo video = null;
@@ -204,6 +179,31 @@ namespace Espera.Core
                 .Where(info => info.VideoType == VideoType.Mp4 && !info.Is3D && info.AdaptiveType == AdaptiveType.None);
 
             return GetVideoByStreamingQuality(filtered, qualitySetting);
+        }
+
+        private static Task<string> RunYoutubeDlAsync(string parameters, string youtubeUrl)
+        {
+            var startprog = new Process
+            {
+                StartInfo =
+                {
+                    FileName = "binaries/youtube-dl.exe",
+                    Arguments = parameters + " " + youtubeUrl,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    CreateNoWindow = true
+                }
+            };
+
+            return Task.Run(() =>
+            {
+                startprog.Start();
+                string output = startprog.StandardOutput.ReadToEnd();
+                startprog.WaitForExit();
+
+                return output;
+            });
         }
     }
 }
