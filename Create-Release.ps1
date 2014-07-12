@@ -15,6 +15,7 @@ Write-Host "Building Portable Version"
 cp ".\Espera\Espera.View\bin\Release\*.dll" ".\Release\Portable\"
 cp ".\Espera\Espera.View\bin\Release\Espera.exe" ".\Release\Portable\"
 cp ".\Espera\Espera.View\bin\Release\Espera.exe.config" ".\Release\Portable\"
+cp ".\Espera\Espera.View\bin\Release\binaries\youtube-dl.exe" ".\Release\Portable\binaries\youtube-dl.exe"
 cp ".\Changelog.md" ".\Release\Portable\Changelog.txt"
 
 # Build the ClickOnce version

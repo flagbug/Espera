@@ -86,7 +86,7 @@ namespace Espera.Core
                 {
                     StartInfo =
                     {
-                        FileName = "youtube-dl/youtube-dl.exe",
+                        FileName = "binaries/youtube-dl.exe",
                         Arguments = "-g --prefer-insecure " + this.OriginalPath,
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
