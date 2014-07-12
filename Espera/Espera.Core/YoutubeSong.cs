@@ -1,15 +1,17 @@
-﻿using Espera.Network;
+﻿using System.Diagnostics;
+using Espera.Network;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using ReactiveUI;
 using YoutubeExtractor;
 
 namespace Espera.Core
 {
-    public sealed class YoutubeSong : Song
+    public sealed class YoutubeSong : Song, IEnableLogger
     {
         private static readonly IReadOnlyDictionary<YoutubeStreamingQuality, IEnumerable<int>> StreamingQualityMap =
             new Dictionary<YoutubeStreamingQuality, IEnumerable<int>>
@@ -76,6 +78,48 @@ namespace Espera.Core
 
         internal override async Task PrepareAsync(YoutubeStreamingQuality qualityHint)
         {
+            bool hasUrl = false;
+
+            await Task.Run(() =>
+            {
+                var startprog = new Process
+                {
+                    StartInfo =
+                    {
+                        FileName = "youtube-dl/youtube-dl.exe",
+                        Arguments = "-g --prefer-insecure " + this.OriginalPath,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        WindowStyle = ProcessWindowStyle.Hidden,
+                        CreateNoWindow = true
+                    }
+                };
+
+                try
+                {
+                    startprog.Start();
+                    string output = startprog.StandardOutput.ReadToEnd();
+                    startprog.WaitForExit();
+
+                    Uri dontCare;
+                    if (Uri.TryCreate(output, UriKind.Absolute, out dontCare))
+                    {
+                        this.PlaybackPath = output;
+                        hasUrl = true;
+                    }
+                }
+
+                catch (Exception ex)
+                {
+                    this.Log().ErrorException("youtube-dl extraction failed", ex);
+                }
+            });
+
+            if (hasUrl)
+            {
+                return;
+            }
+
             VideoInfo video = null;
 
             try
@@ -91,9 +135,8 @@ namespace Espera.Core
             catch (Exception ex)
             {
                 if (ex is WebException || ex is VideoNotAvailableException || ex is YoutubeParseException)
-                {
+
                     throw new SongPreparationException(ex);
-                }
             }
 
             if (video == null)
