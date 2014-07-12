@@ -135,8 +135,9 @@ namespace Espera.Core
             catch (Exception ex)
             {
                 if (ex is WebException || ex is VideoNotAvailableException || ex is YoutubeParseException)
-
+                {
                     throw new SongPreparationException(ex);
+                }
             }
 
             if (video == null)
