@@ -6,6 +6,7 @@ if (Test-Path .\Release) {
 
 mkdir .\Release
 mkdir .\Release\Portable
+mkdir .\Release\Portable\binaries
 mkdir .\Release\Publish
 
 # Build the portable version
