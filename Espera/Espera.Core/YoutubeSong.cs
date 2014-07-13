@@ -78,9 +78,29 @@ namespace Espera.Core
 
         internal override async Task PrepareAsync(YoutubeStreamingQuality qualityHint)
         {
+            VideoInfo video = null;
+
             try
             {
-                string output = await RunYoutubeDlAsync("-g --prefer-insecure", this.OriginalPath);
+                video = await GetVideoInfoForStreaming(this.OriginalPath, qualityHint);
+            }
+
+            catch (Exception ex)
+            {
+                if (ex is WebException || ex is VideoNotAvailableException || ex is YoutubeParseException)
+                {
+                    throw new SongPreparationException(ex);
+                }
+            }
+
+            if (video == null)
+            {
+                throw new SongPreparationException("No suitable video found");
+            }
+
+            try
+            {
+                string output = await RunYoutubeDlAsync("-g --prefer-insecure -f " + video.FormatCode, this.OriginalPath);
 
                 Uri dontCare;
                 if (Uri.TryCreate(output, UriKind.Absolute, out dontCare))
@@ -95,13 +115,9 @@ namespace Espera.Core
                 this.Log().ErrorException("youtube-dl extraction failed", ex);
             }
 
-            VideoInfo video = null;
-
             try
             {
-                video = await GetVideoInfoForStreaming(this.OriginalPath, qualityHint);
-
-                if (video != null && video.RequiresDecryption)
+                if (video.RequiresDecryption)
                 {
                     await Task.Run(() => DownloadUrlResolver.DecryptDownloadUrl(video));
                 }
@@ -109,15 +125,12 @@ namespace Espera.Core
 
             catch (Exception ex)
             {
-                if (ex is WebException || ex is VideoNotAvailableException || ex is YoutubeParseException)
+                this.Log().ErrorException("Couldn't decrypt YouTube video signature", ex);
+
+                if (ex is WebException || ex is YoutubeParseException)
                 {
                     throw new SongPreparationException(ex);
                 }
-            }
-
-            if (video == null)
-            {
-                throw new SongPreparationException("No suitable video found");
             }
 
             this.PlaybackPath = video.DownloadUrl;
