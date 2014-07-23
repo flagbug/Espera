@@ -364,7 +364,7 @@ namespace Espera.View.ViewModels
 
         public string ReleaseNotes
         {
-            get { return "http://espera.flagbug.com/release-notes"; }
+            get { return "http://getespera.com/release-notes"; }
         }
 
         public string RemoteControlPassword
