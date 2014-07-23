@@ -397,12 +397,12 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.showSettings, value); }
         }
 
-        public int SongSourceUpdateInterval
+        public double SongSourceUpdateInterval
         {
-            get { return (int)this.coreSettings.SongSourceUpdateInterval.TotalMinutes; }
+            get { return this.coreSettings.SongSourceUpdateInterval.TotalHours; }
             set
             {
-                this.coreSettings.SongSourceUpdateInterval = TimeSpan.FromMinutes(value);
+                this.coreSettings.SongSourceUpdateInterval = TimeSpan.FromHours(value);
 
                 this.RaisePropertyChanged();
             }

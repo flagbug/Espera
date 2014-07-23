@@ -301,10 +301,12 @@
                                 Style="{StaticResource FlatSlider}"
                                 VerticalAlignment="Center"
                                 Margin="5, 0, 0, 0"
-                                Maximum="60"
-                                Minimum="1"
+                                Maximum="12"
+                                Minimum="0.5"
+                                IsSnapToTickEnabled="True"
+                                TickFrequency="0.5"
                                 Value="{Binding Path=SongSourceUpdateInterval}" />
-                        <TextBlock Margin="5, 0, 0, 0" Text="{Binding Path=SongSourceUpdateInterval, StringFormat=\{0\} Minutes}" VerticalAlignment="Center" />
+                        <TextBlock Margin="5, 0, 0, 0" Text="{Binding Path=SongSourceUpdateInterval, StringFormat=\{0\} Hours}" VerticalAlignment="Center" />
                     </StackPanel>
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="playback" />
                     <TextBlock Style="{StaticResource SettingsTextStyle}"

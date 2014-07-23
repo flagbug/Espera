@@ -117,7 +117,7 @@ namespace Espera.Core.Settings
 
         public TimeSpan SongSourceUpdateInterval
         {
-            get { return this.GetOrCreate(TimeSpan.FromMinutes(30)); }
+            get { return this.GetOrCreate(TimeSpan.FromHours(3)); }
             set { this.SetOrCreate(value); }
         }
 
