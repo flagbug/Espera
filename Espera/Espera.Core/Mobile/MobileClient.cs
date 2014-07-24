@@ -99,7 +99,7 @@ namespace Espera.Core.Mobile
                 // If we don't do this, the application will throw up whenever we are manipulating a
                 // collection that is surfaced to the UI Yes, this is astoundingly stupid
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(async message =>
+                .SelectMany(async message =>
                 {
                     RequestInfo request;
 
@@ -111,7 +111,7 @@ namespace Espera.Core.Mobile
                     catch (JsonException ex)
                     {
                         this.Log().ErrorException("Mobile client with access token {0} sent a malformed request", ex);
-                        return;
+                        return Unit.Default;
                     }
 
                     var responseMessage = new NetworkMessage { MessageType = NetworkMessageType.Response };
@@ -152,8 +152,12 @@ namespace Espera.Core.Mobile
                             // Client what are you doing? Client stahp!
                             await this.SendMessage(responseMessage);
                         }
+
+                        return Unit.Default;
                     }
-                }, ex => this.disconnected.OnNext(Unit.Default), () => this.disconnected.OnNext(Unit.Default))
+
+                    return Unit.Default;
+                }).Subscribe(_ => { }, ex => this.disconnected.OnNext(Unit.Default), () => this.disconnected.OnNext(Unit.Default))
                 .DisposeWith(this.disposable);
 
             var transfers = Observable.FromAsync(() => this.fileSocket.GetStream().ReadNextFileTransferMessageAsync())
@@ -657,7 +661,8 @@ namespace Espera.Core.Mobile
                 .DisposeWith(this.disposable);
 
             TimeSpan lastTime = TimeSpan.Zero;
-            // We can assume that, if the total time difference exceeds two seconds, the time change is from an external source (e.g the user clicked on the time slider)
+            // We can assume that, if the total time difference exceeds two seconds, the time change
+            // is from an external source (e.g the user clicked on the time slider)
             this.library.CurrentPlaybackTime
                 .Select(x => Math.Abs(lastTime.TotalSeconds - x.TotalSeconds) >= 2 ? Tuple.Create(x, true) : Tuple.Create(x, false))
                 .Do(x => lastTime = x.Item1)

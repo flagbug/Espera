@@ -174,7 +174,7 @@ namespace Espera.View.ViewModels
 
                         // If the current song is paused, the command can be executed
                         (loadedSong != null || playBackState == AudioPlayerState.Paused))));
-            this.PlayCommand.Subscribe(async x =>
+            this.PlayCommand.SelectMany(async x =>
             {
                 if (await this.library.PlaybackState.FirstAsync() == AudioPlayerState.Paused || await this.library.LoadedSong.FirstAsync() != null)
                 {
@@ -185,7 +185,9 @@ namespace Espera.View.ViewModels
                 {
                     await this.library.PlaySongAsync(this.SelectedPlaylistEntries.First().Index, this.accessToken);
                 }
-            });
+
+                return Unit.Default;
+            }).Subscribe();
 
             this.PlayOverrideCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .CombineLatest(this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause)), (selectedPlaylistEntries, hasAccess) =>
@@ -212,7 +214,7 @@ namespace Espera.View.ViewModels
             pauseOrContinueCommand.Connect();
 
             this.PauseContinueCommand = pauseOrContinueCommand.Select(x => x.CanExecuteObservable).Switch().ToCommand();
-            this.PauseContinueCommand.Subscribe(async _ => (await pauseOrContinueCommand.FirstAsync()).Execute(null));
+            this.PauseContinueCommand.SelectMany(async _ => await pauseOrContinueCommand.FirstAsync()).Subscribe(x => x.Execute(null));
 
             this.EditPlaylistNameCommand = this.WhenAnyValue(x => x.CanAlterPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 && !x2.Model.IsTemporary)
                 .ToCommand();

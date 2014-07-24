@@ -1,3 +1,4 @@
+using System.Reactive;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.View.ViewModels;
@@ -359,7 +360,7 @@ namespace Espera.View.Views
 
                     return result && DownloadUrlResolver.TryNormalizeYoutubeUrl(url, out urlDontCare);
                 })
-                .Subscribe(async x =>
+                .SelectMany(async x =>
                 {
                     var url = (string)x.Item2.Data.GetData(DataFormats.StringFormat);
                     int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
@@ -367,7 +368,9 @@ namespace Espera.View.Views
                     await this.shellViewModel.DirectYoutubeViewModel.AddDirectYoutubeUrlToPlaylist(new Uri(url), targetIndex);
 
                     x.Item2.Handled = true;
-                });
+
+                    return Unit.Default;
+                }).Subscribe();
 
             // Moving items inside the playlist
             const string movePlaylistSongFormat = "MovePlaylistSong";
