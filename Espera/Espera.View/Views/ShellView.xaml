@@ -680,7 +680,7 @@
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock>
-                                                        <Hyperlink Command="{Binding Path=OpenPathCommand}">
+                                                        <Hyperlink PreviewMouseLeftButtonDown="YoutubeHyperLinkLeftMouseButtonDown" PreviewMouseLeftButtonUp="YoutubeHyperLinkLeftMouseButtonUp">
                                                             <TextBlock Text="{Binding Path=Path}"
                                                                        TextTrimming="CharacterEllipsis"
                                                                        Foreground="{DynamicResource BlackColorBrush}"

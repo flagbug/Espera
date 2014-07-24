@@ -1,4 +1,5 @@
 using System.Reactive;
+using System.Windows.Documents;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.View.ViewModels;
@@ -324,9 +325,14 @@ namespace Espera.View.Views
         {
             const string songSourceFormat = "SongSource";
 
-            this.LocalSongs.Events().MouseMove.Merge(this.YoutubeSongs.Events().MouseMove)
-                .Where(x => x.LeftButton == MouseButtonState.Pressed)
-                .Subscribe(x => DragDrop.DoDragDrop((DependencyObject)x.Source, songSourceFormat, DragDropEffects.Link));
+            this.LocalSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x))
+                .Merge(this.YoutubeSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)))
+                .Where(x => x.Item2.LeftButton == MouseButtonState.Pressed)
+                .Subscribe(x =>
+                {
+                    x.Item2.Handled = true;
+                    DragDrop.DoDragDrop((ListViewItem)x.Item1, songSourceFormat, DragDropEffects.Link);
+                });
 
             var playlistDropEvent = this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
                 .Merge(this.PlaylistListBox.Events().Drop.Select(x => Tuple.Create((object)null, x)));
@@ -447,6 +453,18 @@ namespace Espera.View.Views
                 .Select(x => x.ToNative())
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .BindTo(this.PauseContinueTaskbarButton, x => x.ImageSource);
+        }
+
+        private void YoutubeHyperLinkLeftMouseButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        private void YoutubeHyperLinkLeftMouseButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            ((YoutubeSongViewModel)((Hyperlink)sender).DataContext).OpenPathCommand.Execute(null);
+
+            e.Handled = true;
         }
     }
 }
