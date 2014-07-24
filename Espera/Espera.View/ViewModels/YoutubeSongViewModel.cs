@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -34,7 +35,18 @@ namespace Espera.View.ViewModels
             : base(wrapped)
         {
             this.OpenPathCommand = new ReactiveCommand();
-            this.OpenPathCommand.Subscribe(x => Process.Start(this.Path));
+            this.OpenPathCommand.Subscribe(x =>
+            {
+                try
+                {
+                    Process.Start(this.Path);
+                }
+
+                catch (Win32Exception ex)
+                {
+                    this.Log().ErrorException(string.Format("Could not open YouTube link {0}", this.Path), ex);
+                }
+            });
 
             this.hasThumbnail = this.WhenAnyValue(x => x.Thumbnail)
                 .Select(x => x != null)
