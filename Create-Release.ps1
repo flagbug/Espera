@@ -6,6 +6,7 @@ if (Test-Path .\Release) {
 
 mkdir .\Release
 mkdir .\Release\Portable
+mkdir .\Release\Portable\binaries
 mkdir .\Release\Publish
 
 # Build the portable version
@@ -15,6 +16,7 @@ Write-Host "Building Portable Version"
 cp ".\Espera\Espera.View\bin\Release\*.dll" ".\Release\Portable\"
 cp ".\Espera\Espera.View\bin\Release\Espera.exe" ".\Release\Portable\"
 cp ".\Espera\Espera.View\bin\Release\Espera.exe.config" ".\Release\Portable\"
+cp ".\Espera\Espera.View\bin\Release\binaries\youtube-dl.exe" ".\Release\Portable\binaries\"
 cp ".\Changelog.md" ".\Release\Portable\Changelog.txt"
 
 # Build the ClickOnce version

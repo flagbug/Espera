@@ -1,15 +1,17 @@
-﻿using Espera.Network;
+﻿using System.Diagnostics;
+using Espera.Network;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using ReactiveUI;
 using YoutubeExtractor;
 
 namespace Espera.Core
 {
-    public sealed class YoutubeSong : Song
+    public sealed class YoutubeSong : Song, IEnableLogger
     {
         private static readonly IReadOnlyDictionary<YoutubeStreamingQuality, IEnumerable<int>> StreamingQualityMap =
             new Dictionary<YoutubeStreamingQuality, IEnumerable<int>>
@@ -81,11 +83,6 @@ namespace Espera.Core
             try
             {
                 video = await GetVideoInfoForStreaming(this.OriginalPath, qualityHint);
-
-                if (video != null && video.RequiresDecryption)
-                {
-                    await Task.Run(() => DownloadUrlResolver.DecryptDownloadUrl(video));
-                }
             }
 
             catch (Exception ex)
@@ -99,6 +96,41 @@ namespace Espera.Core
             if (video == null)
             {
                 throw new SongPreparationException("No suitable video found");
+            }
+
+            try
+            {
+                string output = await RunYoutubeDlAsync("-g --prefer-insecure -f " + video.FormatCode, this.OriginalPath);
+
+                Uri dontCare;
+                if (Uri.TryCreate(output, UriKind.Absolute, out dontCare))
+                {
+                    this.PlaybackPath = output;
+                    return;
+                }
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("youtube-dl extraction failed", ex);
+            }
+
+            try
+            {
+                if (video.RequiresDecryption)
+                {
+                    await Task.Run(() => DownloadUrlResolver.DecryptDownloadUrl(video));
+                }
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Couldn't decrypt YouTube video signature", ex);
+
+                if (ex is WebException || ex is YoutubeParseException)
+                {
+                    throw new SongPreparationException(ex);
+                }
             }
 
             this.PlaybackPath = video.DownloadUrl;
@@ -160,6 +192,31 @@ namespace Espera.Core
                 .Where(info => info.VideoType == VideoType.Mp4 && !info.Is3D && info.AdaptiveType == AdaptiveType.None);
 
             return GetVideoByStreamingQuality(filtered, qualitySetting);
+        }
+
+        private static Task<string> RunYoutubeDlAsync(string parameters, string youtubeUrl)
+        {
+            var startprog = new Process
+            {
+                StartInfo =
+                {
+                    FileName = "binaries/youtube-dl.exe",
+                    Arguments = parameters + " " + youtubeUrl,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    CreateNoWindow = true
+                }
+            };
+
+            return Task.Run(() =>
+            {
+                startprog.Start();
+                string output = startprog.StandardOutput.ReadToEnd();
+                startprog.WaitForExit();
+
+                return output;
+            });
         }
     }
 }
