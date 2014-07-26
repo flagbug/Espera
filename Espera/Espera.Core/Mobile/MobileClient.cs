@@ -18,6 +18,7 @@ using Newtonsoft.Json.Linq;
 using Rareform.Validation;
 using ReactiveMarrow;
 using ReactiveUI;
+using Splat;
 
 namespace Espera.Core.Mobile
 {

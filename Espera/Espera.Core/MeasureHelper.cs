@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Reactive.Disposables;
 using System.Runtime.CompilerServices;
-using ReactiveUI;
+using Splat;
 
 namespace Espera.Core
 {

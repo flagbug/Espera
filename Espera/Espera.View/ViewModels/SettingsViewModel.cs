@@ -13,6 +13,7 @@ using Espera.Core.Mobile;
 using Espera.Core.Settings;
 using Rareform.Validation;
 using ReactiveUI;
+using Splat;
 
 namespace Espera.View.ViewModels
 {
@@ -68,7 +69,7 @@ namespace Espera.View.ViewModels
                 .WhenAnyValue(x => x.CreationPassword, x => !string.IsNullOrWhiteSpace(x) && !this.isAdminCreated)
                 .ToProperty(this, x => x.CanCreateAdmin);
 
-            this.CreateAdminCommand = new ReactiveCommand(this.canCreateAdmin, false,
+            this.CreateAdminCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.CanCreateAdmin), false,
                 ImmediateScheduler.Instance); // Immediate execution, because we set the password to an empty string afterwards
             this.CreateAdminCommand.Subscribe(p =>
             {
@@ -76,7 +77,7 @@ namespace Espera.View.ViewModels
                 this.isAdminCreated = true;
             });
 
-            this.ChangeToPartyCommand = new ReactiveCommand(this.CreateAdminCommand.Select(x => true).StartWith(false));
+            this.ChangeToPartyCommand = new ReactiveUI.Legacy.ReactiveCommand(this.CreateAdminCommand.Select(x => true).StartWith(false));
             this.ChangeToPartyCommand.Subscribe(p =>
             {
                 this.library.LocalAccessControl.DowngradeLocalAccess(this.accessToken);
@@ -86,7 +87,7 @@ namespace Espera.View.ViewModels
             this.canLogin = this.WhenAnyValue(x => x.LoginPassword, x => !string.IsNullOrWhiteSpace(x))
                 .ToProperty(this, x => x.CanLogin);
 
-            this.LoginCommand = new ReactiveCommand(this.canLogin, false,
+            this.LoginCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.CanLogin), false,
                 ImmediateScheduler.Instance); // Immediate execution, because we set the password to an empty string afterwards
             this.LoginCommand.Subscribe(p =>
             {
@@ -105,7 +106,7 @@ namespace Espera.View.ViewModels
                 }
             });
 
-            this.OpenLinkCommand = new ReactiveCommand();
+            this.OpenLinkCommand = new ReactiveUI.Legacy.ReactiveCommand();
             this.OpenLinkCommand.Cast<string>().Subscribe(x =>
             {
                 try
@@ -119,33 +120,30 @@ namespace Espera.View.ViewModels
                 }
             });
 
-            this.ReportBugCommand = new ReactiveCommand();
+            this.ReportBugCommand = new ReactiveUI.Legacy.ReactiveCommand();
             this.ReportBugCommand.Subscribe(p => this.windowManager.ShowWindow(new BugReportViewModel()));
 
-            this.ChangeAccentColorCommand = new ReactiveCommand();
+            this.ChangeAccentColorCommand = new ReactiveUI.Legacy.ReactiveCommand();
             this.ChangeAccentColorCommand.Subscribe(x => this.viewSettings.AccentColor = (string)x);
 
-            this.ChangeAppThemeCommand = new ReactiveCommand();
+            this.ChangeAppThemeCommand = new ReactiveUI.Legacy.ReactiveCommand();
             this.ChangeAppThemeCommand.Subscribe(x => this.viewSettings.AppTheme = (string)x);
 
-            this.UpdateLibraryCommand = this.library.IsUpdating
+            this.UpdateLibraryCommand = new ReactiveUI.Legacy.ReactiveCommand(this.library.IsUpdating
                 .Select(x => !x)
-                .CombineLatest(this.library.SongSourcePath.Select(x => !String.IsNullOrEmpty(x)), (x1, x2) => x1 && x2)
-                .ToCommand();
+                .CombineLatest(this.library.SongSourcePath.Select(x => !String.IsNullOrEmpty(x)), (x1, x2) => x1 && x2));
             this.UpdateLibraryCommand.Subscribe(x => this.library.UpdateNow());
 
             this.librarySource = this.library.SongSourcePath.ToProperty(this, x => x.LibrarySource);
 
             this.port = this.coreSettings.Port;
-            this.ChangePortCommand = this.WhenAnyValue(x => x.Port)
-                .Select(x => x > 49152 && x < 65535)
-                .ToCommand();
+            this.ChangePortCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.Port)
+                .Select(x => x > 49152 && x < 65535));
             this.ChangePortCommand.Subscribe(x => this.coreSettings.Port = this.Port);
 
             this.remoteControlPassword = this.coreSettings.RemoteControlPassword;
-            this.ChangeRemoteControlPasswordCommand = this.WhenAnyValue(x => x.RemoteControlPassword)
-                .Select(x => !String.IsNullOrWhiteSpace(x))
-                .ToCommand();
+            this.ChangeRemoteControlPasswordCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.RemoteControlPassword)
+                .Select(x => !String.IsNullOrWhiteSpace(x)));
             this.ChangeRemoteControlPasswordCommand.Subscribe(x =>
                 this.library.RemoteAccessControl.SetRemotePassword(this.accessToken, this.RemoteControlPassword));
 
@@ -175,17 +173,17 @@ namespace Espera.View.ViewModels
             get { return this.canLogin.Value; }
         }
 
-        public IReactiveCommand ChangeAccentColorCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand ChangeAccentColorCommand { get; private set; }
 
-        public ReactiveCommand ChangeAppThemeCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand ChangeAppThemeCommand { get; private set; }
 
-        public ReactiveCommand ChangePortCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand ChangePortCommand { get; private set; }
 
-        public ReactiveCommand ChangeRemoteControlPasswordCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand ChangeRemoteControlPasswordCommand { get; private set; }
 
-        public IReactiveCommand ChangeToPartyCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand ChangeToPartyCommand { get; private set; }
 
-        public IReactiveCommand CreateAdminCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand CreateAdminCommand { get; private set; }
 
         public string CreationPassword
         {
@@ -340,7 +338,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public IReactiveCommand LoginCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand LoginCommand { get; private set; }
 
         public string LoginPassword
         {
@@ -348,7 +346,7 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.loginPassword, value); }
         }
 
-        public IReactiveCommand OpenLinkCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand OpenLinkCommand { get; private set; }
 
         public int PlaylistTimeout
         {
@@ -373,7 +371,7 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.remoteControlPassword, value); }
         }
 
-        public IReactiveCommand ReportBugCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand ReportBugCommand { get; private set; }
 
         public double Scaling
         {
@@ -419,7 +417,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public ReactiveCommand UpdateLibraryCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand UpdateLibraryCommand { get; private set; }
 
         public string Version
         {

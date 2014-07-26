@@ -7,7 +7,6 @@ using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Akavache;
 using Punchclock;
-using ReactiveUI;
 using Splat;
 
 namespace Espera.Core
@@ -73,7 +72,7 @@ namespace Espera.Core
             // Each lookup key gets an artwork key assigned, let's see if it's already in the cache
             if (await this.cache.GetObjectCreatedAt<string>(lookupKey) != null)
             {
-                artworkCacheKey = await this.queue.EnqueueObservableOperation(1, () => this.cache.GetObjectAsync<string>(lookupKey));
+                artworkCacheKey = await this.queue.EnqueueObservableOperation(1, () => this.cache.GetObject<string>(lookupKey));
             }
 
             // Previously failed lookups are marked as failed, it doesn't make sense to let it fail again

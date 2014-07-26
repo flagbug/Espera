@@ -14,6 +14,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Espera.Core;
 using ReactiveUI;
+using ReactiveUI.Legacy;
+using Splat;
 using YoutubeExtractor;
 
 namespace Espera.View.ViewModels
@@ -34,7 +36,7 @@ namespace Espera.View.ViewModels
         public YoutubeSongViewModel(YoutubeSong wrapped, Func<string> downloadPathFunc)
             : base(wrapped)
         {
-            this.OpenPathCommand = new ReactiveCommand();
+            this.OpenPathCommand = new ReactiveUI.Legacy.ReactiveCommand();
             this.OpenPathCommand.Subscribe(x =>
             {
                 try
@@ -60,10 +62,10 @@ namespace Espera.View.ViewModels
             // We have to set a dummy here, so that we can connect the commands
             this.isDownloading = Observable.Never<bool>().ToProperty(this, x => x.IsDownloading);
 
-            this.DownloadVideoCommand = new ReactiveCommand(this.WhenAnyValue(x => x.IsDownloading).Select(x => !x));
+            this.DownloadVideoCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.IsDownloading).Select(x => !x));
             this.DownloadVideoCommand.RegisterAsyncTask(x => this.DownloadVideo((VideoInfo)x, downloadPathFunc()));
 
-            this.DownloadAudioCommand = new ReactiveCommand(this.WhenAnyValue(x => x.IsDownloading).Select(x => !x));
+            this.DownloadAudioCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.IsDownloading).Select(x => !x));
             this.DownloadAudioCommand.RegisterAsyncTask(x => this.DownloadAudio((VideoInfo)x, downloadPathFunc()));
 
             this.isDownloading = this.DownloadVideoCommand.IsExecuting
@@ -82,7 +84,7 @@ namespace Espera.View.ViewModels
             get { return ((YoutubeSong)this.Model).Description; }
         }
 
-        public IReactiveCommand DownloadAudioCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand DownloadAudioCommand { get; private set; }
 
         public bool DownloadFailed
         {
@@ -96,7 +98,7 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.downloadProgress, value); }
         }
 
-        public IReactiveCommand DownloadVideoCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand DownloadVideoCommand { get; private set; }
 
         public bool HasThumbnail
         {
@@ -126,7 +128,7 @@ namespace Espera.View.ViewModels
             private set { this.RaiseAndSetIfChanged(ref this.isLoadingThumbnail, value); }
         }
 
-        public IReactiveCommand OpenPathCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand OpenPathCommand { get; private set; }
 
         public double? Rating
         {

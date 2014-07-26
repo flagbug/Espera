@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Espera.Core;
 using Espera.Core.Management;
 using Rareform.Validation;
-using ReactiveUI;
+using Splat;
 
 namespace Espera.View.ViewModels
 {
@@ -20,7 +20,7 @@ namespace Espera.View.ViewModels
             this.youtubeSongFinder = youtubeSongFinder ?? new YoutubeSongFinder();
         }
 
-        public override IReactiveCommand PlayNowCommand
+        public override ReactiveUI.Legacy.ReactiveCommand PlayNowCommand
         {
             get { throw new NotImplementedException(); }
         }

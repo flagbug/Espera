@@ -1007,7 +1007,7 @@ namespace Espera.Core.Tests
                 {
                     await library.AwaitInitializationAndUpdate();
 
-                    Assert.NotNull(BlobCache.LocalMachine.GetAllKeys().FirstOrDefault(x => x == "artwork-abcdefg"));
+                    Assert.NotNull(await BlobCache.LocalMachine.GetCreatedAt("artwork-abcdefg"));
                 }
             }
 
@@ -1030,7 +1030,7 @@ namespace Espera.Core.Tests
                 {
                     await library.AwaitInitializationAndUpdate();
 
-                    Assert.Null(BlobCache.LocalMachine.GetAllKeys().FirstOrDefault(x => x == "artwork-abcdefg"));
+                    Assert.Null(await BlobCache.LocalMachine.GetCreatedAt("artwork-abcdefg"));
                 }
             }
 

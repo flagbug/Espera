@@ -27,7 +27,7 @@ namespace Espera.View.ViewModels
         {
             get
             {
-                return BlobCache.LocalMachine.GetObjectAsync<Changelog>(BlobCacheKeys.Changelog)
+                return BlobCache.LocalMachine.GetObject<Changelog>(BlobCacheKeys.Changelog)
                     .Select(x => x.Releases)
                     .Wait();
             }

@@ -12,6 +12,8 @@ using Espera.Core.Settings;
 using Rareform.Validation;
 using ReactiveMarrow;
 using ReactiveUI;
+using ReactiveUI.Legacy;
+using Splat;
 
 namespace Espera.View.ViewModels
 {
@@ -20,7 +22,7 @@ namespace Espera.View.ViewModels
         private readonly Subject<Unit> connectionError;
         private readonly CoreSettings coreSettings;
         private readonly ObservableAsPropertyHelper<bool> isNetworkUnavailable;
-        private readonly IReactiveCommand playNowCommand;
+        private readonly ReactiveUI.Legacy.ReactiveCommand playNowCommand;
         private readonly ObservableAsPropertyHelper<YoutubeSongViewModel> selectedSong;
         private readonly IYoutubeSongFinder songFinder;
         private readonly ViewSettings viewSettings;
@@ -44,16 +46,15 @@ namespace Espera.View.ViewModels
             this.songFinder = songFinder ?? new YoutubeSongFinder();
 
             this.connectionError = new Subject<Unit>();
-            this.playNowCommand = this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
-                .Select(x => x == AccessPermission.Admin || !this.coreSettings.LockPlayPause)
-                .ToCommand();
+            this.playNowCommand = new ReactiveUI.Legacy.ReactiveCommand(this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
+                .Select(x => x == AccessPermission.Admin || !this.coreSettings.LockPlayPause));
             this.playNowCommand.RegisterAsyncTask(_ => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model), accessToken));
 
             this.selectedSong = this.WhenAnyValue(x => x.SelectedSongs)
                 .Select(x => x == null ? null : (YoutubeSongViewModel)this.SelectedSongs.FirstOrDefault())
                 .ToProperty(this, x => x.SelectedSong);
 
-            this.RefreshNetworkAvailabilityCommand = new ReactiveCommand();
+            this.RefreshNetworkAvailabilityCommand = new ReactiveUI.Legacy.ReactiveCommand();
 
             var status = (networkstatus ?? new NetworkStatus());
             IObservable<bool> networkAvailable = this.RefreshNetworkAvailabilityCommand.ToUnit()
@@ -106,7 +107,7 @@ namespace Espera.View.ViewModels
             set { this.viewSettings.YoutubeLinkColumnWidth = value; }
         }
 
-        public override IReactiveCommand PlayNowCommand
+        public override ReactiveUI.Legacy.ReactiveCommand PlayNowCommand
         {
             get { return this.playNowCommand; }
         }
@@ -117,7 +118,7 @@ namespace Espera.View.ViewModels
             set { this.viewSettings.YoutubeRatingColumnWidth = value; }
         }
 
-        public ReactiveCommand RefreshNetworkAvailabilityCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand RefreshNetworkAvailabilityCommand { get; private set; }
 
         public YoutubeSongViewModel SelectedSong
         {

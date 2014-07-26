@@ -14,6 +14,7 @@ using Espera.Network;
 using Rareform.Validation;
 using ReactiveMarrow;
 using ReactiveUI;
+using Splat;
 
 namespace Espera.Core.Mobile
 {

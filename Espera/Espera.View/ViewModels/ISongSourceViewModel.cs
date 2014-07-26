@@ -7,9 +7,9 @@ namespace Espera.View.ViewModels
 {
     internal interface ISongSourceViewModel
     {
-        IReactiveCommand AddToPlaylistCommand { get; }
+        ReactiveUI.Legacy.ReactiveCommand AddToPlaylistCommand { get; }
 
-        IReactiveCommand PlayNowCommand { get; }
+        ReactiveUI.Legacy.ReactiveCommand PlayNowCommand { get; }
 
         string SearchText { get; set; }
 

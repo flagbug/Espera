@@ -9,6 +9,7 @@ using System.Xml.Linq;
 using Newtonsoft.Json.Linq;
 using ReactiveMarrow;
 using ReactiveUI;
+using Splat;
 
 namespace Espera.Core
 {

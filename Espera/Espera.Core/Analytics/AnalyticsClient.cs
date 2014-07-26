@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Espera.Core.Settings;
-using ReactiveUI;
+using Splat;
 
 namespace Espera.Core.Analytics
 {

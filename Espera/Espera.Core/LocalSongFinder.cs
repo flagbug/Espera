@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using Rareform.Validation;
 using ReactiveUI;
+using Splat;
 using TagLib;
 using File = TagLib.File;
 

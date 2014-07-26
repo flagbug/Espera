@@ -1,13 +1,12 @@
 ﻿using Akavache;
 using Lager;
-using ReactiveUI;
 
 namespace Espera.View
 {
     public class ViewSettings : SettingsStorage
     {
         public ViewSettings()
-            : base("__ViewSettings__", RxApp.InUnitTestRunner() ? new TestBlobCache() : BlobCache.LocalMachine)
+            : base("__ViewSettings__", BlobCache.LocalMachine)
         { }
 
         public string AccentColor

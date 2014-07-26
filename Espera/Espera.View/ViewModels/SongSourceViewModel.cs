@@ -28,7 +28,7 @@ namespace Espera.View.ViewModels
             this.selectableSongs = Enumerable.Empty<T>();
             this.timeoutWarning = new Subject<Unit>();
 
-            this.AddToPlaylistCommand = this.WhenAnyValue(x => x.SelectedSongs, x => x != null && x.Any()).ToCommand();
+            this.AddToPlaylistCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.SelectedSongs, x => x != null && x.Any()));
             this.AddToPlaylistCommand.Subscribe(x =>
             {
                 if (this.library.RemainingPlaylistTimeout > TimeSpan.Zero)
@@ -55,7 +55,7 @@ namespace Espera.View.ViewModels
                 }
             });
 
-            this.SelectionChangedCommand = new ReactiveCommand();
+            this.SelectionChangedCommand = new ReactiveUI.Legacy.ReactiveCommand();
             this.SelectionChangedCommand.Where(x => x != null)
                 .Select(x => ((IEnumerable)x).Cast<ISongViewModelBase>())
                 .Subscribe(x => this.SelectedSongs = x);
@@ -65,14 +65,14 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.IsAdmin);
         }
 
-        public IReactiveCommand AddToPlaylistCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand AddToPlaylistCommand { get; private set; }
 
         public bool IsAdmin
         {
             get { return this.isAdmin.Value; }
         }
 
-        public abstract IReactiveCommand PlayNowCommand { get; }
+        public abstract ReactiveUI.Legacy.ReactiveCommand PlayNowCommand { get; }
 
         public string SearchText
         {
@@ -92,7 +92,7 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.selectedSongs, value); }
         }
 
-        public ReactiveCommand SelectionChangedCommand { get; set; }
+        public ReactiveUI.Legacy.ReactiveCommand SelectionChangedCommand { get; set; }
 
         public IObservable<Unit> TimeoutWarning
         {

@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Akavache;
+using Akavache.Sqlite3;
 using Caliburn.Micro;
 using Espera.Core;
 using Espera.Core.Analytics;
@@ -25,7 +26,7 @@ using Ninject;
 using NLog.Config;
 using NLog.Targets;
 using ReactiveUI;
-using ReactiveUI.NLog;
+using Splat;
 
 namespace Espera.View
 {
@@ -199,7 +200,7 @@ namespace Espera.View
             logConfig.LoggingRules.Add(new LoggingRule("*", NLog.LogLevel.Info, target));
             NLog.LogManager.Configuration = logConfig;
 
-            RxApp.MutableResolver.RegisterConstant(new NLogLogger(NLog.LogManager.GetCurrentClassLogger()), typeof(ILogger));
+            //Splat.MutableResolver.RegisterConstant(new NLogLogger(NLog.LogManager.GetCurrentClassLogger()), typeof(ILogger));
         }
 
         private async Task SetupAnalyticsClient()
@@ -320,10 +321,10 @@ namespace Espera.View
 
 #if DEBUG
 
-    internal class DebugBlobCache : PersistentBlobCache
+    internal class DebugBlobCache : SQLitePersistentBlobCache
     {
         public DebugBlobCache(string path)
-            : base(path, new SimpleFilesystemProvider())
+            : base(path)
         { }
     }
 

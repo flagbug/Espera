@@ -19,7 +19,7 @@ namespace Espera.Core.Tests
             {
                 var fetcher = Substitute.For<IArtworkFetcher>();
                 fetcher.RetrieveAsync(Arg.Any<string>(), Arg.Any<string>()).Returns(Observable.Throw<Uri>(new ArtworkFetchException(String.Empty, null)).ToTask());
-                var blobCache = new TestBlobCache();
+                var blobCache = new InMemoryBlobCache();
                 var fixture = new ArtworkCache(blobCache, fetcher);
 
                 await Helpers.ThrowsAsync<ArtworkCacheException>(() => fixture.FetchOnline("A", "B"));
@@ -30,7 +30,7 @@ namespace Espera.Core.Tests
             {
                 var fetcher = Substitute.For<IArtworkFetcher>();
                 fetcher.RetrieveAsync(Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult<Uri>(null));
-                var blobCache = new TestBlobCache();
+                var blobCache = new InMemoryBlobCache();
                 var fixture = new ArtworkCache(blobCache, fetcher);
                 string artist = "A";
                 string album = "B";
@@ -38,7 +38,7 @@ namespace Espera.Core.Tests
 
                 await fixture.FetchOnline(artist, album);
 
-                Assert.Equal("FAILED", await blobCache.GetObjectAsync<string>(lookupKey));
+                Assert.Equal("FAILED", await blobCache.GetObject<string>(lookupKey));
             }
 
             [Fact]
@@ -46,7 +46,7 @@ namespace Espera.Core.Tests
             {
                 var fetcher = Substitute.For<IArtworkFetcher>();
                 fetcher.RetrieveAsync(Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult<Uri>(null));
-                var blobCache = new TestBlobCache();
+                var blobCache = new InMemoryBlobCache();
                 var fixture = new ArtworkCache(blobCache, fetcher);
 
                 string returned = await fixture.FetchOnline("A", "B");
@@ -61,7 +61,7 @@ namespace Espera.Core.Tests
                 string album = "B";
                 string key = BlobCacheKeys.GetKeyForOnlineArtwork(artist, album);
                 var fetcher = Substitute.For<IArtworkFetcher>();
-                var blobCache = new TestBlobCache();
+                var blobCache = new InMemoryBlobCache();
                 await blobCache.InsertObject(key, "TestArtworkKey");
                 var fixture = new ArtworkCache(blobCache, fetcher);
 
@@ -77,7 +77,7 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task ThrowsArgumentNullExceptionIfKeyIsNull()
             {
-                var blobCache = new TestBlobCache();
+                var blobCache = new InMemoryBlobCache();
                 var artworkCache = new ArtworkCache(blobCache);
 
                 await Helpers.ThrowsAsync<ArgumentNullException>(() => artworkCache.Retrieve(null, 100, 100));
@@ -105,7 +105,7 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task NullDataThrowsArgumentNullException()
             {
-                var blobCache = new TestBlobCache();
+                var blobCache = new InMemoryBlobCache();
                 var artworkCache = new ArtworkCache(blobCache);
 
                 await Helpers.ThrowsAsync<ArgumentNullException>(() => artworkCache.Store(null));
@@ -137,14 +137,14 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task StoresArtworkInBlobCache()
             {
-                var blobCache = new TestBlobCache();
+                var blobCache = new InMemoryBlobCache();
                 var artworkCache = new ArtworkCache(blobCache);
 
                 var data = new byte[] { 0, 1 };
 
                 string key = await artworkCache.Store(data);
 
-                Assert.Equal(data, await blobCache.GetAsync(key));
+                Assert.Equal(data, await blobCache.Get(key));
             }
         }
     }

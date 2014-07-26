@@ -2,6 +2,7 @@
 using ReactiveUI;
 using System;
 using System.Reactive.Linq;
+using ReactiveUI.Legacy;
 
 namespace Espera.View.ViewModels
 {
@@ -13,9 +14,8 @@ namespace Espera.View.ViewModels
         {
             this.ReportContent = exception.ToString();
 
-            this.SubmitCrashReport = this.WhenAnyValue(x => x.SendingSucceeded)
-                .Select(x => x == null || !x.Value)
-                .ToCommand();
+            this.SubmitCrashReport = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.SendingSucceeded)
+                .Select(x => x == null || !x.Value));
 
             this.sendingSucceeded = this.SubmitCrashReport
                 .RegisterAsyncTask(x => AnalyticsClient.Instance.RecordCrashAsync(exception))
@@ -40,6 +40,6 @@ namespace Espera.View.ViewModels
             get { return AnalyticsClient.Instance.EnableAutomaticReports; }
         }
 
-        public IReactiveCommand SubmitCrashReport { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand SubmitCrashReport { get; private set; }
     }
 }

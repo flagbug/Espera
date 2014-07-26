@@ -6,6 +6,7 @@ using Espera.Core.Settings;
 using Rareform.Extensions;
 using ReactiveMarrow;
 using ReactiveUI;
+using ReactiveUI.Legacy;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +29,7 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<int> currentSeconds;
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
         private readonly ObservableAsPropertyHelper<string> currentTime;
-        private readonly ObservableAsPropertyHelper<IReactiveCommand> defaultPlaybackCommand;
+        private readonly ObservableAsPropertyHelper<ReactiveUI.Legacy.ReactiveCommand> defaultPlaybackCommand;
         private readonly ObservableAsPropertyHelper<bool> displayTimeoutWarning;
         private readonly CompositeDisposable disposable;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
@@ -73,14 +74,12 @@ namespace Espera.View.ViewModels
                 .Select(x => x == AccessPermission.Admin)
                 .ToProperty(this, x => x.IsAdmin);
 
-            this.NextSongCommand = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
-                .CombineLatest(this.library.CanPlayNextSong, (x1, x2) => x1 && x2)
-                .ToCommand();
+            this.NextSongCommand = new ReactiveUI.Legacy.ReactiveCommand(this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
+                .CombineLatest(this.library.CanPlayNextSong, (x1, x2) => x1 && x2));
             this.NextSongCommand.RegisterAsyncTask(_ => this.library.PlayNextSongAsync(this.accessToken));
 
-            this.PreviousSongCommand = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
-                .CombineLatest(this.library.CanPlayPreviousSong, (x1, x2) => x1 && x2)
-                .ToCommand();
+            this.PreviousSongCommand = new ReactiveUI.Legacy.ReactiveCommand(this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
+                .CombineLatest(this.library.CanPlayPreviousSong, (x1, x2) => x1 && x2));
             this.PreviousSongCommand.RegisterAsyncTask(_ => this.library.PlayPreviousSongAsync(this.accessToken));
 
             if (!this.library.Playlists.Any())
@@ -116,10 +115,10 @@ namespace Espera.View.ViewModels
                 .CombineLatest(this.WhenAnyValue(x => x.SettingsViewModel.EnablePlaylistTimeout), (isAdmin, enableTimeout) => !isAdmin && enableTimeout)
                 .ToProperty(this, x => x.ShowPlaylistTimeout);
 
-            this.MuteCommand = new ReactiveCommand(this.WhenAnyValue(x => x.IsAdmin));
+            this.MuteCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.IsAdmin));
             this.MuteCommand.Subscribe(x => this.Volume = 0);
 
-            this.UnMuteCommand = new ReactiveCommand(this.WhenAnyValue(x => x.IsAdmin));
+            this.UnMuteCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.IsAdmin));
             this.UnMuteCommand.Subscribe(x => this.Volume = 1);
 
             this.canModifyWindow = this.HasAccess(this.ViewSettings.WhenAnyValue(x => x.LockWindow))
@@ -149,19 +148,19 @@ namespace Espera.View.ViewModels
             this.volume = this.library.WhenAnyValue(x => x.Volume, x => (double)x)
                 .ToProperty(this, x => x.Volume);
 
-            this.AddPlaylistCommand = new ReactiveCommand(this.WhenAnyValue(x => x.CanAlterPlaylist));
+            this.AddPlaylistCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.CanAlterPlaylist));
             this.AddPlaylistCommand.Subscribe(x => this.AddPlaylist());
 
             this.Playlists = this.library.Playlists.CreateDerivedCollection(this.CreatePlaylistViewModel);
             this.Playlists.ItemsRemoved.Subscribe(x => x.Dispose());
 
-            this.ShowSettingsCommand = new ReactiveCommand();
+            this.ShowSettingsCommand = new ReactiveUI.Legacy.ReactiveCommand();
             this.ShowSettingsCommand.Subscribe(x => this.SettingsViewModel.HandleSettings());
 
-            this.ShufflePlaylistCommand = new ReactiveCommand(this.WhenAnyValue(x => x.CanAlterPlaylist));
+            this.ShufflePlaylistCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.CanAlterPlaylist));
             this.ShufflePlaylistCommand.Subscribe(x => this.library.ShufflePlaylist(this.accessToken));
 
-            this.PlayCommand = new ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
+            this.PlayCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .CombineLatest(this.WhenAnyValue(x => x.IsAdmin), this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.library.LoadedSong, this.library.PlaybackState,
                     (selectedPlaylistEntries, isAdmin, lockPlayPause, loadedSong, playBackState) =>
 
@@ -189,10 +188,9 @@ namespace Espera.View.ViewModels
                 return Unit.Default;
             }).Subscribe();
 
-            this.PlayOverrideCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
+            this.PlayOverrideCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .CombineLatest(this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause)), (selectedPlaylistEntries, hasAccess) =>
-                    hasAccess && (selectedPlaylistEntries != null && selectedPlaylistEntries.Count() == 1))
-                .ToCommand();
+                    hasAccess && (selectedPlaylistEntries != null && selectedPlaylistEntries.Count() == 1)));
             this.PlayOverrideCommand.RegisterAsyncTask(_ => this.library.PlaySongAsync(this.SelectedPlaylistEntries.First().Index, this.accessToken));
 
             // The default play command differs whether we are in party mode or not and depends on
@@ -204,40 +202,35 @@ namespace Espera.View.ViewModels
                     (action, isAdmin, songSource) => !isAdmin || action == DefaultPlaybackAction.AddToPlaylist ? songSource.AddToPlaylistCommand : songSource.PlayNowCommand)
                 .ToProperty(this, x => x.DefaultPlaybackCommand);
 
-            this.PauseCommand = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
-                .CombineLatest(this.isPlaying, (hasAccess, isPlaying) => hasAccess && isPlaying)
-                .ToCommand();
+            this.PauseCommand = new ReactiveUI.Legacy.ReactiveCommand(this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
+                .CombineLatest(this.WhenAnyValue(x => x.IsPlaying), (hasAccess, isPlaying) => hasAccess && isPlaying));
             this.PauseCommand.RegisterAsyncTask(_ => this.library.PauseSongAsync(this.accessToken));
 
             var pauseOrContinueCommand = this.WhenAnyValue(x => x.IsPlaying)
                 .Select(x => x ? this.PauseCommand : this.PlayCommand).Publish(null);
             pauseOrContinueCommand.Connect();
 
-            this.PauseContinueCommand = pauseOrContinueCommand.Select(x => x.CanExecuteObservable).Switch().ToCommand();
+            this.PauseContinueCommand = new ReactiveUI.Legacy.ReactiveCommand(pauseOrContinueCommand.Select(x => x.CanExecuteObservable).Switch());
             this.PauseContinueCommand.SelectMany(async _ => await pauseOrContinueCommand.FirstAsync()).Subscribe(x => x.Execute(null));
 
-            this.EditPlaylistNameCommand = this.WhenAnyValue(x => x.CanAlterPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 && !x2.Model.IsTemporary)
-                .ToCommand();
+            this.EditPlaylistNameCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.CanAlterPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 && !x2.Model.IsTemporary));
             this.EditPlaylistNameCommand.Subscribe(x => this.CurrentPlaylist.EditName = true);
 
-            this.RemovePlaylistCommand = this.WhenAnyValue(x => x.CurrentEditedPlaylist, x => x.CurrentPlaylist, x => x.CanAlterPlaylist,
-                    (currentEditedPlaylist, currentPlaylist, canAlterPlaylist) => (currentEditedPlaylist != null || currentPlaylist != null) && canAlterPlaylist)
-                .ToCommand();
+            this.RemovePlaylistCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.CurrentEditedPlaylist, x => x.CurrentPlaylist, x => x.CanAlterPlaylist,
+                    (currentEditedPlaylist, currentPlaylist, canAlterPlaylist) => (currentEditedPlaylist != null || currentPlaylist != null) && canAlterPlaylist));
             this.RemovePlaylistCommand.Subscribe(x => this.RemoveCurrentPlaylist());
 
-            this.RemoveSelectedPlaylistEntriesCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries, x => x.CanAlterPlaylist,
-                    (selectedPlaylistEntries, canAlterPlaylist) => selectedPlaylistEntries != null && selectedPlaylistEntries.Any() && canAlterPlaylist)
-                .ToCommand();
+            this.RemoveSelectedPlaylistEntriesCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries, x => x.CanAlterPlaylist,
+                    (selectedPlaylistEntries, canAlterPlaylist) => selectedPlaylistEntries != null && selectedPlaylistEntries.Any() && canAlterPlaylist));
             this.RemoveSelectedPlaylistEntriesCommand.Subscribe(x => this.library.RemoveFromPlaylist(this.SelectedPlaylistEntries.Select(entry => entry.Index), this.accessToken));
 
             // We re-evaluate the selected entries after each up or down move here, because WPF
             // doesn't send us proper updates about the selection
             var reEvaluateSelectedPlaylistEntry = new Subject<Unit>();
-            this.MovePlaylistSongUpCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
+            this.MovePlaylistSongUpCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .Merge(reEvaluateSelectedPlaylistEntry.Select(_ => this.SelectedPlaylistEntries))
                 .Select(x => x != null && x.Count() == 1 && x.First().Index > 0)
-                .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveUp, canAlterPlaylist) => canMoveUp && canAlterPlaylist)
-                .ToCommand();
+                .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveUp, canAlterPlaylist) => canMoveUp && canAlterPlaylist));
             this.MovePlaylistSongUpCommand.Subscribe(_ =>
             {
                 int index = this.SelectedPlaylistEntries.First().Index;
@@ -245,11 +238,10 @@ namespace Espera.View.ViewModels
                 reEvaluateSelectedPlaylistEntry.OnNext(Unit.Default);
             });
 
-            this.MovePlaylistSongDownCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
+            this.MovePlaylistSongDownCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .Merge(reEvaluateSelectedPlaylistEntry.Select(_ => this.SelectedPlaylistEntries))
                 .Select(x => x != null && x.Count() == 1 && x.First().Index < this.CurrentPlaylist.Songs.Count - 1)
-                .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveDown, canAlterPlaylist) => canMoveDown && canAlterPlaylist)
-                .ToCommand();
+                .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveDown, canAlterPlaylist) => canMoveDown && canAlterPlaylist));
             this.MovePlaylistSongDownCommand.Subscribe(_ =>
             {
                 int index = this.SelectedPlaylistEntries.First().Index;
@@ -257,11 +249,10 @@ namespace Espera.View.ViewModels
                 reEvaluateSelectedPlaylistEntry.OnNext(Unit.Default);
             });
 
-            this.MovePlaylistSongCommand = this.WhenAnyValue(x => x.SelectedPlaylistEntries)
+            this.MovePlaylistSongCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.SelectedPlaylistEntries)
                 .Merge(reEvaluateSelectedPlaylistEntry.Select(_ => this.SelectedPlaylistEntries))
                 .Select(x => x != null && x.Count() == 1)
-                .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveUp, canAlterPlaylist) => canMoveUp && canAlterPlaylist)
-                .ToCommand();
+                .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveUp, canAlterPlaylist) => canMoveUp && canAlterPlaylist));
             this.MovePlaylistSongCommand.Subscribe(x =>
             {
                 int fromIndex = this.SelectedPlaylistEntries.First().Index;
@@ -281,7 +272,7 @@ namespace Espera.View.ViewModels
             this.IsLocal = true;
         }
 
-        public IReactiveCommand AddPlaylistCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand AddPlaylistCommand { get; private set; }
 
         public IAudioPlayerCallback AudioPlayerCallback
         {
@@ -345,7 +336,7 @@ namespace Espera.View.ViewModels
             get { return this.currentTime.Value; }
         }
 
-        public IReactiveCommand DefaultPlaybackCommand
+        public ReactiveUI.Legacy.ReactiveCommand DefaultPlaybackCommand
         {
             get { return this.defaultPlaybackCommand.Value; }
         }
@@ -357,7 +348,7 @@ namespace Espera.View.ViewModels
             get { return this.displayTimeoutWarning.Value; }
         }
 
-        public IReactiveCommand EditPlaylistNameCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand EditPlaylistNameCommand { get; private set; }
 
         public bool IsAdmin
         {
@@ -383,57 +374,57 @@ namespace Espera.View.ViewModels
 
         public LocalViewModel LocalViewModel { get; private set; }
 
-        public ReactiveCommand MovePlaylistSongCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand MovePlaylistSongCommand { get; private set; }
 
-        public ReactiveCommand MovePlaylistSongDownCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand MovePlaylistSongDownCommand { get; private set; }
 
-        public ReactiveCommand MovePlaylistSongUpCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand MovePlaylistSongUpCommand { get; private set; }
 
         /// <summary>
         /// Sets the volume to the lowest possible value.
         /// </summary>
-        public IReactiveCommand MuteCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand MuteCommand { get; private set; }
 
         /// <summary>
         /// Plays the next song in the playlist.
         /// </summary>
-        public IReactiveCommand NextSongCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand NextSongCommand { get; private set; }
 
         /// <summary>
         /// Pauses the currently played song.
         /// </summary>
-        public IReactiveCommand PauseCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand PauseCommand { get; private set; }
 
         /// <summary>
         /// A command that decides whether the songs should be paused or continued.
         /// </summary>
-        public IReactiveCommand PauseContinueCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand PauseContinueCommand { get; private set; }
 
         /// <summary>
         /// Plays the song that is currently selected in the playlist or continues the song if it is paused.
         /// </summary>
-        public IReactiveCommand PlayCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand PlayCommand { get; private set; }
 
         public IReactiveDerivedList<PlaylistViewModel> Playlists { get; private set; }
 
         /// <summary>
         /// Overrides the currently played song.
         /// </summary>
-        public IReactiveCommand PlayOverrideCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand PlayOverrideCommand { get; private set; }
 
         /// <summary>
         /// Plays the song that is before the currently played song in the playlist.
         /// </summary>
-        public IReactiveCommand PreviousSongCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand PreviousSongCommand { get; private set; }
 
         public TimeSpan RemainingPlaylistTimeout
         {
             get { return this.library.RemainingPlaylistTimeout; }
         }
 
-        public IReactiveCommand RemovePlaylistCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand RemovePlaylistCommand { get; private set; }
 
-        public IReactiveCommand RemoveSelectedPlaylistEntriesCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand RemoveSelectedPlaylistEntriesCommand { get; private set; }
 
         public IEnumerable<PlaylistEntryViewModel> SelectedPlaylistEntries
         {
@@ -448,7 +439,7 @@ namespace Espera.View.ViewModels
             get { return this.showPlaylistTimeout.Value; }
         }
 
-        public IReactiveCommand ShowSettingsCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand ShowSettingsCommand { get; private set; }
 
         public bool ShowVideoPlayer
         {
@@ -461,7 +452,7 @@ namespace Espera.View.ViewModels
             get { return this.showVotes.Value; }
         }
 
-        public IReactiveCommand ShufflePlaylistCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand ShufflePlaylistCommand { get; private set; }
 
         public int TotalSeconds
         {
@@ -476,7 +467,7 @@ namespace Espera.View.ViewModels
         /// <summary>
         /// Sets the volume to the highest possible value.
         /// </summary>
-        public IReactiveCommand UnMuteCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand UnMuteCommand { get; private set; }
 
         /// <summary>
         /// Occurs when the view should update the screen state to maximized state or restore it to

@@ -9,6 +9,7 @@ using Espera.Core.Management;
 using Espera.Core.Settings;
 using Rareform.Validation;
 using ReactiveUI;
+using ReactiveUI.Legacy;
 
 namespace Espera.View.ViewModels
 {
@@ -19,7 +20,7 @@ namespace Espera.View.ViewModels
         private readonly Subject<Unit> artistUpdateSignal;
         private readonly object gate;
         private readonly ObservableAsPropertyHelper<bool> isUpdating;
-        private readonly IReactiveCommand playNowCommand;
+        private readonly ReactiveUI.Legacy.ReactiveCommand playNowCommand;
         private readonly ObservableAsPropertyHelper<bool> showAddSongsHelperMessage;
         private readonly ViewSettings viewSettings;
         private SortOrder artistOrder;
@@ -67,9 +68,8 @@ namespace Espera.View.ViewModels
                 .Synchronize(this.gate)
                 .Subscribe(_ => this.UpdateSelectableSongs());
 
-            this.playNowCommand = this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
-                .Select(x => x == AccessPermission.Admin || !coreSettings.LockPlayPause)
-                .ToCommand();
+            this.playNowCommand = new ReactiveUI.Legacy.ReactiveCommand(this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
+                .Select(x => x == AccessPermission.Admin || !coreSettings.LockPlayPause));
             this.PlayNowCommand.RegisterAsyncTask(_ =>
             {
                 int songIndex = this.SelectableSongs.TakeWhile(x => x.Model != this.SelectedSongs.First().Model).Count();
@@ -106,7 +106,7 @@ namespace Espera.View.ViewModels
             get { return this.isUpdating.Value; }
         }
 
-        public override IReactiveCommand PlayNowCommand
+        public override ReactiveUI.Legacy.ReactiveCommand PlayNowCommand
         {
             get { return this.playNowCommand; }
         }
