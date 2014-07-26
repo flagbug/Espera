@@ -200,7 +200,7 @@ namespace Espera.View
             logConfig.LoggingRules.Add(new LoggingRule("*", NLog.LogLevel.Info, target));
             NLog.LogManager.Configuration = logConfig;
 
-            //Splat.MutableResolver.RegisterConstant(new NLogLogger(NLog.LogManager.GetCurrentClassLogger()), typeof(ILogger));
+            Locator.CurrentMutable.RegisterConstant(new NLogLogger(NLog.LogManager.GetCurrentClassLogger()), typeof(ILogger));
         }
 
         private async Task SetupAnalyticsClient()

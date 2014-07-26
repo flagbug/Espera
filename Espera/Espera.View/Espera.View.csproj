@@ -225,6 +225,7 @@
     <Compile Include="DesignTime.cs" />
     <Compile Include="DragDropExtension.cs" />
     <Compile Include="INetworkStatus.cs" />
+    <Compile Include="NLogLogger.cs" />
     <Compile Include="ReactiveViewHelper.cs" />
     <Compile Include="ReleaseEntry.cs" />
     <Compile Include="SearchEngine.cs" />
