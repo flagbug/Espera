@@ -445,6 +445,7 @@ namespace Espera.View.Views
         private void WireTaskbarButtons()
         {
             this.shellViewModel.WhenAnyValue(x => x.IsPlaying, x => x ? "Pause" : "Play")
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .BindTo(this.PauseContinueTaskbarButton, x => x.Description);
             this.shellViewModel.WhenAnyValue(x => x.IsPlaying, x => x ? "Pause" : "Play")
                 .Select(x => string.Format("pack://application:,,,/Espera;component/Images/{0}.png", x))
