@@ -163,6 +163,8 @@ namespace Espera.Core
             if (priority < 1)
                 throw new ArgumentOutOfRangeException("priority", "Priority must be greater than zero");
 
+            this.Log().Info("Requesting artwork with key {0} and size {1} from the cache", artworkKey, size);
+
             return this.queue.Enqueue(priority + 1, () => this.LoadImageFromCache(artworkKey, size));
         }
 
