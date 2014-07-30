@@ -24,13 +24,10 @@ namespace Espera.Core.Tests
 
         public Library Build()
         {
-            var finishSubject = new AsyncSubject<Unit>();
+            var finishSubject = new Subject<Unit>();
             var mediaPlayerCallback = Substitute.For<IMediaPlayerCallback>();
-            mediaPlayerCallback.PlayAsync().Returns(Task.Run(() =>
-            {
-                finishSubject.OnNext(Unit.Default);
-                finishSubject.OnCompleted();
-            }));
+            mediaPlayerCallback.PlayAsync().Returns(_ => Task.Run(() => finishSubject.OnNext(Unit.Default)));
+            mediaPlayerCallback.Finished.Returns(finishSubject);
 
             var library = new Library(
                 this.reader ?? Substitute.For<ILibraryReader>(),
@@ -46,10 +43,7 @@ namespace Espera.Core.Tests
                 library.AddAndSwitchToPlaylist(playlistName, accessToken);
             }
 
-            if (this.audioPlayerCallback != null)
-            {
-                library.RegisterAudioPlayerCallback(audioPlayerCallback, accessToken);
-            }
+            library.RegisterAudioPlayerCallback(this.audioPlayerCallback ?? mediaPlayerCallback, accessToken);
 
             return library;
         }

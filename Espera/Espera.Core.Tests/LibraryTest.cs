@@ -27,22 +27,21 @@ namespace Espera.Core.Tests
         public async Task CanPlayAWholeBunchOfSongs()
         {
             var song = new LocalSong("C://", TimeSpan.Zero);
-            var awaitSubject = new AsyncSubject<Unit>();
-
-            IReactiveDerivedList<AudioPlayerState> coll;
 
             using (Library library = Helpers.CreateLibraryWithPlaylist())
             {
-                coll = library.PlaybackState.Where(x => x == AudioPlayerState.Playing).CreateCollection();
+                var awaiter = library.PlaybackState.Where(x => x == AudioPlayerState.Playing)
+                    .Select((x, i) => i + 1)
+                    .FirstAsync(x => x == 10)
+                    .PublishLast();
+                awaiter.Connect();
 
                 Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                await library.PlayInstantlyAsync(Enumerable.Repeat(song, 100).ToList(), token);
+                await library.PlayInstantlyAsync(Enumerable.Repeat(song, 10).ToList(), token);
 
-                await awaitSubject.Timeout(TimeSpan.FromSeconds(5));
+                await awaiter.Timeout(TimeSpan.FromSeconds(5));
             }
-
-            Assert.Equal(100, coll.Count);
         }
 
         [Fact]
@@ -256,7 +255,7 @@ namespace Espera.Core.Tests
                     await library.ContinueSongAsync(token);
                 }
 
-                audioPlayerCallback.Received(1).PlayAsync();
+                audioPlayerCallback.Received(2).PlayAsync();
             }
 
             [Fact]
@@ -411,7 +410,7 @@ namespace Espera.Core.Tests
                 using (var handle = new CountdownEvent(2))
                 {
                     var audioPlayer = Substitute.For<IMediaPlayerCallback>();
-                    audioPlayer.PlayAsync().Returns(Task.Run(() =>
+                    audioPlayer.PlayAsync().Returns(_ => Task.Run(() =>
                     {
                         switch (handle.CurrentCount)
                         {
