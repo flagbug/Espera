@@ -119,6 +119,7 @@
     <Compile Include="BlobCacheKeysTest.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="KeyedMemoizingSemaphoreTest.cs" />
+    <Compile Include="LibraryBuilder.cs" />
     <Compile Include="LibraryDeserializerTest.cs" />
     <Compile Include="LibraryTest.cs" />
     <Compile Include="LibrarySerializerTest.cs" />

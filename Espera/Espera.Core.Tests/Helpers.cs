@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
-using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using NSubstitute;
@@ -55,7 +53,7 @@ namespace Espera.Core.Tests
 
         public static async Task AwaitInitializationAndUpdate(this Library library)
         {
-            var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().ToTask();
+            var updateCompleted = library.IsUpdating.Where(x => !x).Skip(1).FirstAsync().Timeout(TimeSpan.FromSeconds(5)).ToTask();
 
             library.Initialize();
 
@@ -90,29 +88,12 @@ namespace Espera.Core.Tests
         public static Library CreateLibrary(CoreSettings settings = null, ILibraryReader reader = null, ILibraryWriter writer = null,
             IFileSystem fileSystem = null, ILocalSongFinder localSongFinder = null)
         {
-            var library = new Library(
-                reader ?? Substitute.For<ILibraryReader>(),
-                writer ?? Substitute.For<ILibraryWriter>(),
-                settings ?? new CoreSettings(),
-                fileSystem ?? new MockFileSystem(),
-                x => localSongFinder ?? SetupDefaultLocalSongFinder());
-
-            IAudioPlayerCallback c = library.AudioPlayerCallback;
-            c.GetTime = () => TimeSpan.Zero;
-            c.GetVolume = () => 1.0f;
-            c.LoadRequest = path => Task.Delay(0);
-            c.PauseRequest = () => Task.Delay(0);
-            c.PlayRequest = () =>
-            {
-                Task.Run(() => library.AudioPlayerCallback.Finished());
-
-                return Task.Delay(0);
-            };
-            c.SetTime = x => { };
-            c.SetVolume = x => { };
-            c.StopRequest = () => Task.Delay(0);
-
-            return library;
+            return new LibraryBuilder().WithReader(reader)
+                .WithWriter(writer)
+                .WithSettings(settings)
+                .WithFileSystem(fileSystem)
+                .WithSongFinder(localSongFinder)
+                .Build();
         }
 
         public static Library CreateLibraryWithPlaylist(string playlistName = "Playlist", CoreSettings settings = null)
@@ -133,7 +114,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        public static Song SetupSongMock(string name = "Song",  TimeSpan duration = new TimeSpan())
+        public static Song SetupSongMock(string name = "Song", TimeSpan duration = new TimeSpan())
         {
             var mock = Substitute.For<Song>(Path.Combine("C://", Guid.NewGuid().ToString(), ".mp3"), duration);
             mock.Title = name;
@@ -201,14 +182,6 @@ namespace Espera.Core.Tests
             playlist.AddSongs(songs);
 
             return playlist;
-        }
-
-        private static ILocalSongFinder SetupDefaultLocalSongFinder()
-        {
-            var localSongFinder = Substitute.For<ILocalSongFinder>();
-            localSongFinder.GetSongsAsync().Returns(Observable.Empty<Tuple<LocalSong, byte[]>>());
-
-            return localSongFinder;
         }
     }
 }

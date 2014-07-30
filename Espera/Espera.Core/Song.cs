@@ -61,6 +61,8 @@ namespace Espera.Core
             }
         }
 
+        public abstract bool IsVideo { get; }
+
         public abstract NetworkSongSource NetworkSongSource { get; }
 
         /// <summary>

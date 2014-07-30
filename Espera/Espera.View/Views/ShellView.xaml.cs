@@ -1,6 +1,5 @@
 using System.Reactive;
 using System.Windows.Documents;
-using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.View.ViewModels;
 using GlobalHotKey;
@@ -305,11 +304,6 @@ namespace Espera.View.Views
             this.shellViewModel.YoutubeViewModel.OrderByViews();
         }
 
-        private void VideoPlayerMediaEnded(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.AudioPlayerCallback.Finished();
-        }
-
         private void WireDataContext()
         {
             this.shellViewModel = (ShellViewModel)this.DataContext;
@@ -402,17 +396,9 @@ namespace Espera.View.Views
 
         private void WirePlayer()
         {
-            IAudioPlayerCallback callback = this.shellViewModel.AudioPlayerCallback;
-            callback.GetTime = () => this.Dispatcher.Invoke(() => this.videoPlayer.Position);
-            callback.SetTime = time => this.Dispatcher.Invoke(() => this.videoPlayer.Position = time);
-
-            callback.GetVolume = () => this.Dispatcher.Invoke(() => (float)this.videoPlayer.Volume);
-            callback.SetVolume = volume => this.Dispatcher.Invoke(() => this.videoPlayer.Volume = volume);
-
-            callback.LoadRequest = path => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Source = path).Task;
-            callback.PauseRequest = () => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Pause()).Task;
-            callback.PlayRequest = () => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Play()).Task;
-            callback.StopRequest = () => this.Dispatcher.InvokeAsync(() => this.videoPlayer.Stop()).Task;
+            var player = new WpfMediaPlayer(this.videoPlayer);
+            this.shellViewModel.RegisterVideoPlayer(player);
+            this.shellViewModel.RegisterAudioPlayer(player);
         }
 
         private void WireScreenStateUpdater()
