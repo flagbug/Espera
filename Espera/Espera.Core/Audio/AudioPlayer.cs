@@ -106,16 +106,16 @@ namespace Espera.Core.Audio
                 this.currentCallback = song.IsVideo ? this.videoPlayerCallback.Value : this.audioPlayerCallback.Value;
 
                 await this.currentCallback.LoadAsync(new Uri(this.loadedSong.Value.PlaybackPath));
-
-                this.currentCallback.Finished.FirstAsync().TakeUntil(this.loadedSong.Skip(1))
-                    .SelectMany(_ => this.Finished().ToObservable())
-                    .Subscribe();
             }
 
             catch (Exception ex)
             {
                 throw new SongLoadException("Could not load song", ex);
             }
+
+            this.currentCallback.Finished.FirstAsync().TakeUntil(this.loadedSong.Skip(1))
+                .SelectMany(_ => this.Finished().ToObservable())
+                .Subscribe();
         }
 
         internal async Task PauseAsync()
