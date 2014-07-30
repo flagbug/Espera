@@ -132,8 +132,9 @@
     <Compile Include="ArtworkCache.cs" />
     <Compile Include="ArtworkCacheException.cs" />
     <Compile Include="ArtworkFetchException.cs" />
+    <Compile Include="Audio\DummyMediaPlayerCallback.cs" />
     <Compile Include="Audio\SongPreparationException.cs" />
-    <Compile Include="Audio\IAudioPlayerCallback.cs" />
+    <Compile Include="Audio\IMediaPlayerCallback.cs" />
     <Compile Include="Audio\SongLoadException.cs" />
     <Compile Include="BlobCacheKeys.cs" />
     <Compile Include="IArtworkFetcher.cs" />

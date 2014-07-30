@@ -43,6 +43,11 @@ namespace Espera.Core
         /// </summary>
         public Guid Guid { get; private set; }
 
+        public override bool IsVideo
+        {
+            get { return false; }
+        }
+
         public override NetworkSongSource NetworkSongSource
         {
             get { return NetworkSongSource.Local; }

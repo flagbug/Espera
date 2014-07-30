@@ -21,6 +21,11 @@ namespace Espera.Core.Mobile
             this.dataGate = new AsyncSubject<Unit>();
         }
 
+        public override bool IsVideo
+        {
+            get { return false; }
+        }
+
         public override NetworkSongSource NetworkSongSource
         {
             get { return NetworkSongSource.Mobile; }

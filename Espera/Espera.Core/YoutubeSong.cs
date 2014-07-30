@@ -34,6 +34,11 @@ namespace Espera.Core
         /// </summary>
         public string Description { get; set; }
 
+        public override bool IsVideo
+        {
+            get { return true; }
+        }
+
         public override NetworkSongSource NetworkSongSource
         {
             get { return NetworkSongSource.Youtube; }
