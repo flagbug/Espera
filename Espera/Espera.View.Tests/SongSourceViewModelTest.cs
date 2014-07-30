@@ -12,7 +12,7 @@ namespace Espera.View.Tests
         [Fact]
         public void PartyModeTriggersTimeoutMessage()
         {
-            using (var library = Helpers.CreateLibraryWithPlaylist())
+            using (var library = new LibraryBuilder().WithPlaylist().Build())
             {
                 Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
                 library.LocalAccessControl.SetLocalPassword(accessToken, "password");

@@ -60,31 +60,6 @@ namespace Espera.Core.Tests
             await updateCompleted;
         }
 
-        public static Library CreateLibrary(ILibraryWriter writer)
-        {
-            return CreateLibrary(null, null, writer);
-        }
-
-        public static Library CreateLibrary(IFileSystem fileSystem)
-        {
-            return CreateLibrary(null, null, null, fileSystem);
-        }
-
-        public static Library CreateLibrary(ILibraryReader reader, IFileSystem fileSystem = null)
-        {
-            return CreateLibrary(null, reader, null, fileSystem);
-        }
-
-        public static Library CreateLibrary(IFileSystem fileSystem, ILocalSongFinder localSongFinder)
-        {
-            return CreateLibrary(null, null, null, fileSystem, localSongFinder);
-        }
-
-        public static Library CreateLibrary(ILibraryReader reader, IFileSystem fileSystem, ILocalSongFinder localSongFinder)
-        {
-            return CreateLibrary(null, reader, null, fileSystem, localSongFinder);
-        }
-
         public static Library CreateLibrary(CoreSettings settings = null, ILibraryReader reader = null, ILibraryWriter writer = null,
             IFileSystem fileSystem = null, ILocalSongFinder localSongFinder = null)
         {
@@ -94,14 +69,6 @@ namespace Espera.Core.Tests
                 .WithFileSystem(fileSystem)
                 .WithSongFinder(localSongFinder)
                 .Build();
-        }
-
-        public static Library CreateLibraryWithPlaylist(string playlistName = "Playlist", CoreSettings settings = null)
-        {
-            var library = CreateLibrary(settings);
-            library.AddAndSwitchToPlaylist(playlistName, library.LocalAccessControl.RegisterLocalAccessToken());
-
-            return library;
         }
 
         public static string GenerateSaveFile()

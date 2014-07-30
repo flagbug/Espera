@@ -74,7 +74,7 @@ namespace Espera.View.Tests
 
             var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { "C://Song.mp3", new MockFileData("Bla") } });
 
-            using (Library library = Helpers.CreateLibrary(fileSystem, songFinder))
+            using (Library library = new LibraryBuilder().WithFileSystem(fileSystem).WithSongFinder(songFinder).Build())
             {
                 Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 

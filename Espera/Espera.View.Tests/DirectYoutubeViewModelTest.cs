@@ -21,7 +21,7 @@ namespace Espera.View.Tests
                 var songFinder = Substitute.For<IYoutubeSongFinder>();
                 songFinder.ResolveYoutubeSongFromUrl(Arg.Any<Uri>()).Returns(Task.FromResult(song));
 
-                using (var library = Helpers.CreateLibraryWithPlaylist())
+                using (var library = new LibraryBuilder().WithPlaylist().Build())
                 {
                     Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
@@ -40,7 +40,7 @@ namespace Espera.View.Tests
                 var songFinder = Substitute.For<IYoutubeSongFinder>();
                 songFinder.ResolveYoutubeSongFromUrl(Arg.Any<Uri>()).Returns(Task.FromResult<YoutubeSong>(null));
 
-                using (var library = Helpers.CreateLibraryWithPlaylist())
+                using (var library = new LibraryBuilder().WithPlaylist().Build())
                 {
                     Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
@@ -63,7 +63,7 @@ namespace Espera.View.Tests
                 var songFinder = Substitute.For<IYoutubeSongFinder>();
                 songFinder.ResolveYoutubeSongFromUrl(Arg.Any<Uri>()).Returns(Task.FromResult(song));
 
-                using (var library = Helpers.CreateLibraryWithPlaylist())
+                using (var library = new LibraryBuilder().WithPlaylist().Build())
                 {
                     Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 

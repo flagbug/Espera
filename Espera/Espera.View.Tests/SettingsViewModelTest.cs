@@ -21,7 +21,7 @@ namespace Espera.View.Tests
             var fileSystem = new MockFileSystem();
             fileSystem.Directory.CreateDirectory("C://Test");
 
-            Library library = Helpers.CreateLibrary(fileSystem);
+            Library library = new LibraryBuilder().WithFileSystem(fileSystem).Build();
             Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
             var vm = new SettingsViewModel(library, new ViewSettings(), new CoreSettings(), Substitute.For<IWindowManager>(), token,
                 new MobileApiInfo(Observable.Return(0), Observable.Return(false)));
