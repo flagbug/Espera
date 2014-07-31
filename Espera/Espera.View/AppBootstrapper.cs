@@ -87,6 +87,10 @@ namespace Espera.View
                     {
                         x.YoutubeDownloadPath = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
                     }
+
+#if DEBUG
+                    x.EnableAutomaticReports = false;
+#endif
                 });
             this.kernel.Bind<IFileSystem>().To<FileSystem>();
             this.kernel.Bind<Library>().To<Library>().InSingletonScope();
