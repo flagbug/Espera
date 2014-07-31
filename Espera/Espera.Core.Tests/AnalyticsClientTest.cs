@@ -104,7 +104,7 @@ namespace Espera.Core.Tests
                 await client.RecordBugReportAsync("blabla");
 
                 Assert.True(client.IsAuthenticated);
-                endpoint.Received().RecordErrorAsync("blabla", Arg.Any<string>());
+                endpoint.Received().RecordErrorAsync(new Exception("blabla"), Arg.Any<string>());
             }
 
             [Fact]

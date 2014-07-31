@@ -88,7 +88,10 @@ namespace Espera.Core.Analytics
 
             try
             {
-                await this.client.RecordErrorAsync(message, logId);
+                // The new Buddy API only accepts exceptions, so we wrap the user message into an
+                // exception as a workaround
+                var exception = new Exception(message);
+                await this.client.RecordErrorAsync(exception, logId);
             }
 
             catch (Exception ex)
@@ -115,7 +118,7 @@ namespace Espera.Core.Analytics
 
             try
             {
-                await this.client.RecordErrorAsync(exception.Message, logId, exception.ToString());
+                await this.client.RecordErrorAsync(exception, logId);
             }
 
             catch (Exception ex)
@@ -136,7 +139,7 @@ namespace Espera.Core.Analytics
 
             try
             {
-                await this.client.RecordErrorAsync(exception.Message, logId, exception.ToString());
+                await this.client.RecordErrorAsync(exception, logId);
             }
 
             catch (Exception ex)
@@ -183,10 +186,11 @@ namespace Espera.Core.Analytics
 
             try
             {
-                if (this.coreSettings.AnalyticsToken == null)
+                if (this.coreSettings.AnalyticsToken == null || !this.coreSettings.BuddyAnalyticsUpgraded)
                 {
                     string analyticsToken = await this.client.CreateUserAsync();
                     this.coreSettings.AnalyticsToken = analyticsToken;
+                    this.coreSettings.BuddyAnalyticsUpgraded = true;
 
                     this.Log().Info("Created new analytics user");
                 }
