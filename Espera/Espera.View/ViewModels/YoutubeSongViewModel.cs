@@ -169,7 +169,10 @@ namespace Espera.View.ViewModels
             this.IsLoadingContextMenu = true;
 
             IEnumerable<VideoInfo> infos = await Task.Run(() => DownloadUrlResolver.GetDownloadUrls(this.Path, false).ToList());
-            this.VideosToDownload = infos.OrderBy(x => x.VideoType).ThenByDescending(x => x.Resolution).ToList();
+            this.VideosToDownload = infos.Where(x => x.AdaptiveType == AdaptiveType.None && x.VideoType != VideoType.Unknown)
+                .OrderBy(x => x.VideoType)
+                .ThenByDescending(x => x.Resolution)
+                .ToList();
             this.AudioToDownload = infos.Where(x => x.CanExtractAudio).OrderByDescending(x => x.AudioBitrate).ToList();
 
             this.IsLoadingContextMenu = false;
