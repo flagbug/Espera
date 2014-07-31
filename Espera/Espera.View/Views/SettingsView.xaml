@@ -318,12 +318,11 @@
                               ItemsSource="{Binding Path=DefaultPlaybackActionStrings}"
                               SelectedItem="{Binding Path=DefaultPlaybackActionString}">
                     </ComboBox>
-                    <TextBlock Style="{StaticResource SettingsTextStyle}"
-                               Margin="0, 10, 0, 0"
-                               Text="Playback engine" />
-                    <TextBlock Style="{StaticResource SettingsTextStyle}"
-                               Margin="0, 10, 0, 0"
-                               Text="Change the playback engine if you experience any sound issues" />
+                    <TextBlock Style="{StaticResource SettingsTextStyle}" Margin="0, 20, 0, 0">
+                        Playback engine
+                        <LineBreak />
+                        Change the playback engine if you experience any sound issues
+                    </TextBlock>
                     <ComboBox Width="200"
                               Margin="0, 10, 0, 0"
                               HorizontalAlignment="Left"
