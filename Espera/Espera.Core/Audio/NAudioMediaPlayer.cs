@@ -24,6 +24,7 @@ namespace Espera.Core.Audio
             {
                 return this.currentReader == null ? TimeSpan.Zero : this.currentReader.CurrentTime;
             }
+
             set
             {
                 this.currentReader.CurrentTime = value;
