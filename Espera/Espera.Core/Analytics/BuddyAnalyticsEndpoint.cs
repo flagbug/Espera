@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
 using BuddySDK;
 
@@ -66,11 +65,6 @@ namespace Espera.Core.Analytics
             {
                 throw result.Error;
             }
-        }
-
-        public async Task<string> SendBlobAsync(string name, string mimeType, Stream data)
-        {
-            return null;
         }
 
         public async Task UpdateUserEmailAsync(string email)

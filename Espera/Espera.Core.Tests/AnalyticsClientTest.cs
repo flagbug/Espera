@@ -173,7 +173,7 @@ namespace Espera.Core.Tests
 
                 await client.InitializeAsync(coreSettings);
 
-                await client.RecordErrorAsync(new Exception(), false);
+                await client.RecordErrorAsync(new Exception());
 
                 Assert.False(client.IsAuthenticated);
                 endpoint.DidNotReceiveWithAnyArgs().RecordErrorAsync(null, null);
@@ -188,9 +188,9 @@ namespace Espera.Core.Tests
 
                 await client.InitializeAsync(coreSettings);
 
-                await client.RecordErrorAsync(new Exception(), false);
+                await client.RecordErrorAsync(new Exception());
 
-                endpoint.ReceivedWithAnyArgs().RecordErrorAsync(null, null);
+                endpoint.ReceivedWithAnyArgs().RecordErrorAsync(null);
             }
         }
     }
