@@ -103,6 +103,11 @@ namespace Espera.Core.Audio
 
             try
             {
+                if (this.currentCallback != null)
+                {
+                    await this.currentCallback.StopAsync();
+                }
+
                 this.currentCallback = song.IsVideo ? this.videoPlayerCallback.Value : this.audioPlayerCallback.Value;
 
                 await this.currentCallback.LoadAsync(new Uri(this.loadedSong.Value.PlaybackPath));

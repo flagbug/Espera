@@ -1,6 +1,8 @@
 using System.Reactive;
 using System.Windows.Documents;
+using Espera.Core.Audio;
 using Espera.Core.Management;
+using Espera.Core.Settings;
 using Espera.View.ViewModels;
 using GlobalHotKey;
 using MahApps.Metro;
@@ -396,9 +398,23 @@ namespace Espera.View.Views
 
         private void WirePlayer()
         {
-            var player = new WpfMediaPlayer(this.videoPlayer);
-            this.shellViewModel.RegisterVideoPlayer(player);
-            this.shellViewModel.RegisterAudioPlayer(player);
+            var wpfPlayer = new WpfMediaPlayer(this.videoPlayer);
+            this.shellViewModel.SettingsViewModel.WhenAnyValue(x => x.DefaultPlaybackEngine)
+                .Select<DefaultPlaybackEngine, IMediaPlayerCallback>(x =>
+                {
+                    switch (x)
+                    {
+                        case DefaultPlaybackEngine.NAudio:
+                            return new NAudioMediaPlayer();
+
+                        case DefaultPlaybackEngine.Wpf:
+                            return wpfPlayer;
+                    }
+
+                    throw new NotImplementedException();
+                }).Subscribe(x => this.shellViewModel.RegisterAudioPlayer(x));
+
+            this.shellViewModel.RegisterVideoPlayer(wpfPlayer);
         }
 
         private void WireScreenStateUpdater()

@@ -25,6 +25,12 @@ namespace Espera.Core.Settings
             set { this.SetOrCreate(value); }
         }
 
+        public DefaultPlaybackEngine DefaultPlaybackEngine
+        {
+            get { return this.GetOrCreate(DefaultPlaybackEngine.Wpf); }
+            set { this.SetOrCreate(value); }
+        }
+
         public bool EnableAutomaticLibraryUpdates
         {
             get { return this.GetOrCreate(true); }
