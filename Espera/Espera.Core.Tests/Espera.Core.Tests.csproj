@@ -116,6 +116,7 @@
     <Compile Include="AccessControlTest.cs" />
     <Compile Include="AnalyticsClientTest.cs" />
     <Compile Include="ArtworkCacheTest.cs" />
+    <Compile Include="AudioPlayerTest.cs" />
     <Compile Include="BlobCacheKeysTest.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="KeyedMemoizingSemaphoreTest.cs" />
