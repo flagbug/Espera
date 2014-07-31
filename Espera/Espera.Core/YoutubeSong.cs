@@ -1,4 +1,5 @@
-﻿using Espera.Network;
+﻿using System.Text.RegularExpressions;
+using Espera.Network;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -62,7 +63,8 @@ namespace Espera.Core
 
         public static async Task DownloadAudioAsync(VideoInfo videoInfo, string downloadPath, IObserver<double> progress)
         {
-            var downloader = new AudioDownloader(videoInfo, Path.Combine(downloadPath, videoInfo.Title + videoInfo.AudioExtension));
+            string cleanedTitle = RemoveIllegalPathCharacters(videoInfo.Title);
+            var downloader = new AudioDownloader(videoInfo, Path.Combine(downloadPath, cleanedTitle + videoInfo.AudioExtension));
 
             downloader.DownloadProgressChanged += (sender, args) => progress.OnNext(args.ProgressPercentage * 0.95);
             downloader.AudioExtractionProgressChanged += (sender, args) => progress.OnNext(95 + args.ProgressPercentage * 0.05);
@@ -72,7 +74,8 @@ namespace Espera.Core
 
         public static async Task DownloadVideoAsync(VideoInfo videoInfo, string downloadPath, IObserver<double> progress)
         {
-            var downloader = new VideoDownloader(videoInfo, Path.Combine(downloadPath, videoInfo.Title + videoInfo.VideoExtension));
+            string cleanedTitle = RemoveIllegalPathCharacters(videoInfo.Title);
+            var downloader = new VideoDownloader(videoInfo, Path.Combine(downloadPath, cleanedTitle + videoInfo.VideoExtension));
 
             downloader.DownloadProgressChanged += (sender, args) => progress.OnNext(args.ProgressPercentage);
 
@@ -165,6 +168,13 @@ namespace Espera.Core
                 .Where(info => info.VideoType == VideoType.Mp4 && !info.Is3D && info.AdaptiveType == AdaptiveType.None);
 
             return GetVideoByStreamingQuality(filtered, qualitySetting);
+        }
+
+        private static string RemoveIllegalPathCharacters(string path)
+        {
+            string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+            var r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
+            return r.Replace(path, "");
         }
     }
 }
