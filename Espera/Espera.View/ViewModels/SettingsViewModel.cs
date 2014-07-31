@@ -29,6 +29,14 @@ namespace Espera.View.ViewModels
             {DefaultPlaybackAction.PlayNow, "Play Now"}
         };
 
+        private readonly ObservableAsPropertyHelper<DefaultPlaybackEngine> defaultPlaybackEngine;
+
+        private readonly Dictionary<DefaultPlaybackEngine, string> defaultPlaybackEngineMap = new Dictionary<DefaultPlaybackEngine, string>
+        {
+            {DefaultPlaybackEngine.NAudio, "NAudio"},
+            {DefaultPlaybackEngine.Wpf, "Windows Media Player"}
+        };
+
         private readonly ObservableAsPropertyHelper<bool> enableChangelog;
         private readonly ObservableAsPropertyHelper<bool> isPortOccupied;
         private readonly Library library;
@@ -153,6 +161,9 @@ namespace Espera.View.ViewModels
 
             this.enableChangelog = this.viewSettings.WhenAnyValue(x => x.EnableChangelog)
                 .ToProperty(this, x => x.EnableChangelog);
+
+            this.defaultPlaybackEngine = this.coreSettings.WhenAnyValue(x => x.DefaultPlaybackEngine)
+                .ToProperty(this, x => x.DefaultPlaybackEngine);
         }
 
         public static IEnumerable<YoutubeStreamingQuality> YoutubeStreamingQualities
@@ -210,6 +221,31 @@ namespace Espera.View.ViewModels
                 return Enum.GetValues(typeof(DefaultPlaybackAction))
                     .Cast<DefaultPlaybackAction>()
                     .Select(x => this.defaultPlaybackActionMap[x]);
+            }
+        }
+
+        public DefaultPlaybackEngine DefaultPlaybackEngine
+        {
+            get { return this.defaultPlaybackEngine.Value; }
+        }
+
+        public string DefaultPlaybackEngineString
+        {
+            get { return this.defaultPlaybackEngineMap[this.coreSettings.DefaultPlaybackEngine]; }
+            set
+            {
+                this.coreSettings.DefaultPlaybackEngine = this.defaultPlaybackEngineMap.Single(x => x.Value == value).Key;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        public IEnumerable<string> DefaultPlaybackEngineStrings
+        {
+            get
+            {
+                return Enum.GetValues(typeof(DefaultPlaybackEngine))
+                    .Cast<DefaultPlaybackEngine>()
+                    .Select(x => this.defaultPlaybackEngineMap[x]);
             }
         }
 

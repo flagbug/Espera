@@ -46,7 +46,7 @@ namespace Espera.Core.Audio
         {
             return Task.Run(() =>
             {
-                var newReader = new AudioFileReader(uri.OriginalString); ;
+                var newReader = new AudioFileReader(uri.OriginalString);
 
                 AudioFileReader oldReader = Interlocked.Exchange(ref this.currentReader, newReader);
 

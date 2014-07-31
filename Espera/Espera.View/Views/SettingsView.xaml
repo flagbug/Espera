@@ -318,9 +318,21 @@
                               ItemsSource="{Binding Path=DefaultPlaybackActionStrings}"
                               SelectedItem="{Binding Path=DefaultPlaybackActionString}">
                     </ComboBox>
+                    <TextBlock Style="{StaticResource SettingsTextStyle}"
+                               Margin="0, 10, 0, 0"
+                               Text="Playback engine" />
+                    <TextBlock Style="{StaticResource SettingsTextStyle}"
+                               Margin="0, 10, 0, 0"
+                               Text="Change the playback engine if you experience any sound issues" />
+                    <ComboBox Width="200"
+                              Margin="0, 10, 0, 0"
+                              HorizontalAlignment="Left"
+                              ItemsSource="{Binding Path=DefaultPlaybackEngineStrings}"
+                              SelectedItem="{Binding Path=DefaultPlaybackEngineString}">
+                    </ComboBox>
                 </StackPanel>
             </TabItem>
-            <TabItem Header="youtube">
+            <TabItem Header="youtube" HorizontalAlignment="Right" Width="113">
                 <StackPanel>
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="streaming" />
                     <Controls:ToggleSwitch Margin="10, 5, 0, 0"
