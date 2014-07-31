@@ -331,7 +331,7 @@
                     </ComboBox>
                 </StackPanel>
             </TabItem>
-            <TabItem Header="youtube" HorizontalAlignment="Right" Width="113">
+            <TabItem Header="youtube">
                 <StackPanel>
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="streaming" />
                     <Controls:ToggleSwitch Margin="10, 5, 0, 0"
