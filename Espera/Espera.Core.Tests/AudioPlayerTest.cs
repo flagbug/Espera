@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Espera.Core.Audio;
 using NSubstitute;
 using Xunit;
@@ -7,6 +8,21 @@ namespace Espera.Core.Tests
 {
     public class AudioPlayerTest
     {
+        [Fact]
+        public void CanGetCurrentTimeAfterConstruction()
+        {
+            var audioPlayer = new AudioPlayer();
+
+            Assert.Equal(TimeSpan.Zero, audioPlayer.CurrentTime);
+        }
+
+        [Fact]
+        public void CanSetVolumeAfterConstruction()
+        {
+            var audioPlayer = new AudioPlayer();
+            audioPlayer.SetVolume(0);
+        }
+
         [Fact]
         public async Task StopsCurrentMediaPlayerWhenSwitchingAndPlaying()
         {

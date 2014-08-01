@@ -27,6 +27,7 @@ namespace Espera.Core.Audio
         {
             this.audioPlayerCallback = new BehaviorSubject<IMediaPlayerCallback>(new DummyMediaPlayerCallback());
             this.videoPlayerCallback = new BehaviorSubject<IMediaPlayerCallback>(new DummyMediaPlayerCallback());
+            this.currentCallback = new DummyMediaPlayerCallback();
 
             this.gate = new SemaphoreSlim(1, 1);
 
@@ -51,7 +52,7 @@ namespace Espera.Core.Audio
 
         public TimeSpan CurrentTime
         {
-            get { return this.currentCallback == null ? TimeSpan.Zero : this.currentCallback.CurrentTime; }
+            get { return this.currentCallback.CurrentTime; }
             set
             {
                 this.currentCallback.CurrentTime = value;
