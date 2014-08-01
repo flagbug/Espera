@@ -42,19 +42,20 @@ namespace Espera.View.ViewModels
             this.entries = playlist
                 .CreateDerivedCollection(entry => new PlaylistEntryViewModel(entry))
                 .DisposeWith(this.disposable);
-            this.entries.ItemsRemoved.Subscribe(x => x.Dispose()).DisposeWith(this.disposable);
+            this.entries.ItemsRemoved.Subscribe(x => x.Dispose());
 
             this.playlist.WhenAnyValue(x => x.CurrentSongIndex).ToUnit()
                 .Merge(this.entries.Changed.ToUnit())
-                .Subscribe(_ => this.UpdateCurrentSong());
+                .Subscribe(_ => this.UpdateCurrentSong())
+                .DisposeWith(this.disposable);
 
-            IObservable<IEnumerable<PlaylistEntryViewModel>> remainingSongs = this.entries.Changed
+            IObservable<List<PlaylistEntryViewModel>> remainingSongs = this.entries.Changed
                 .Select(x => Unit.Default)
                 .Merge(this.playlist.WhenAnyValue(x => x.CurrentSongIndex).ToUnit())
                 .Select(x => this.entries.Reverse().TakeWhile(entry => !entry.IsPlaying).ToList());
 
             this.songsRemaining = remainingSongs
-                .Select(x => x.Count())
+                .Select(x => x.Count)
                 .ToProperty(this, x => x.SongsRemaining)
                 .DisposeWith(this.disposable);
 
@@ -63,7 +64,7 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.TimeRemaining)
                 .DisposeWith(this.disposable);
 
-            this.CurrentPlayingEntry = this.Model.WhenAnyValue(x => x.CurrentSongIndex).Select(x => x != null ? this.entries[x.Value] : null);
+            this.CurrentPlayingEntry = this.Model.WhenAnyValue(x => x.CurrentSongIndex).Select(x => x == null ? null : this.entries[x.Value]);
         }
 
         public IObservable<PlaylistEntryViewModel> CurrentPlayingEntry { get; private set; }
