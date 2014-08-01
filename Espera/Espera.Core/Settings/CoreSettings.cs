@@ -36,7 +36,7 @@ namespace Espera.Core.Settings
 
         public DefaultPlaybackEngine DefaultPlaybackEngine
         {
-            get { return this.GetOrCreate(DefaultPlaybackEngine.NAudio); }
+            get { return this.GetOrCreate(DefaultPlaybackEngine.Wpf); }
             set { this.SetOrCreate(value); }
         }
 
