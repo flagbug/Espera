@@ -1,3 +1,13 @@
+# v2.4.1
+
+## Changes
+- Renamed the "library" settings to "my music".
+- Changed the default playback engine to Windows Media Player.
+- Changed the default "my music" and "youtube" column widths.
+
+## Bugfixes
+- Fixed a crash that occured when setting the volume before playing a song.
+
 # v2.4.0
 
 ## Features
