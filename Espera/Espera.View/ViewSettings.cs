@@ -42,19 +42,19 @@ namespace Espera.View
 
         public int LocalDurationColumnWidth
         {
-            get { return this.GetOrCreate(100); }
+            get { return this.GetOrCreate(75); }
             set { this.SetOrCreate(value); }
         }
 
         public int LocalGenreColumnWidth
         {
-            get { return this.GetOrCreate(100); }
+            get { return this.GetOrCreate(200); }
             set { this.SetOrCreate(value); }
         }
 
         public int LocalTitleColumnWidth
         {
-            get { return this.GetOrCreate(100); }
+            get { return this.GetOrCreate(400); }
             set { this.SetOrCreate(value); }
         }
 
@@ -72,25 +72,25 @@ namespace Espera.View
 
         public int YoutubeDurationColumnWidth
         {
-            get { return this.GetOrCreate(100); }
+            get { return this.GetOrCreate(75); }
             set { this.SetOrCreate(value); }
         }
 
         public int YoutubeLinkColumnWidth
         {
-            get { return this.GetOrCreate(100); }
+            get { return this.GetOrCreate(200); }
             set { this.SetOrCreate(value); }
         }
 
         public int YoutubeRatingColumnWidth
         {
-            get { return this.GetOrCreate(100); }
+            get { return this.GetOrCreate(75); }
             set { this.SetOrCreate(value); }
         }
 
         public int YoutubeTitleColumnWidth
         {
-            get { return this.GetOrCreate(100); }
+            get { return this.GetOrCreate(200); }
             set { this.SetOrCreate(value); }
         }
 
