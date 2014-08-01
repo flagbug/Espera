@@ -6,7 +6,7 @@
 - Changed the default "my music" and "youtube" column widths.
 
 ## Bugfixes
-- Fixed a crash that occured when setting the volume before playing a song.
+- Fixed a crash that occurred when setting the volume before playing a song.
 
 # v2.4.0
 
