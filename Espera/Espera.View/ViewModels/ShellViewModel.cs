@@ -274,11 +274,6 @@ namespace Espera.View.ViewModels
 
         public ReactiveUI.Legacy.ReactiveCommand AddPlaylistCommand { get; private set; }
 
-        public IAudioPlayerCallback AudioPlayerCallback
-        {
-            get { return this.library.AudioPlayerCallback; }
-        }
-
         public bool CanAlterPlaylist
         {
             get { return this.canAlterPlaylist.Value; }
@@ -500,6 +495,16 @@ namespace Espera.View.ViewModels
             this.library.Dispose();
 
             this.disposable.Dispose();
+        }
+
+        public void RegisterAudioPlayer(IMediaPlayerCallback callback)
+        {
+            this.library.RegisterAudioPlayerCallback(callback, this.accessToken);
+        }
+
+        public void RegisterVideoPlayer(IMediaPlayerCallback callback)
+        {
+            this.library.RegisterVideoPlayerCallback(callback, this.accessToken);
         }
 
         private void AddPlaylist()

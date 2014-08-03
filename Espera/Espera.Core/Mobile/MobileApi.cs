@@ -65,8 +65,16 @@ namespace Espera.Core.Mobile
 
             this.dispose = true;
             this.listenerSubscriptions.Dispose();
-            this.messageListener.Stop();
-            this.fileListener.Stop();
+
+            if (this.messageListener != null)
+            {
+                this.messageListener.Stop();
+            }
+
+            if (this.fileListener != null)
+            {
+                this.fileListener.Stop();
+            }
 
             lock (this.clientListGate)
             {

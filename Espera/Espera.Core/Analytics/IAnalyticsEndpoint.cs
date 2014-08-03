@@ -1,5 +1,5 @@
-﻿using System.Globalization;
-using System.IO;
+﻿using System;
+using System.Globalization;
 using System.Threading.Tasks;
 
 namespace Espera.Core.Analytics
@@ -20,14 +20,9 @@ namespace Espera.Core.Analytics
         /// </summary>
         Task RecordDeviceInformationAsync();
 
-        Task RecordErrorAsync(string message, string logId, string stackTrace = null);
+        Task RecordErrorAsync(Exception ex, string message = null);
 
         Task RecordMetaDataAsync(string key, string value);
-
-        /// <summary>
-        /// Sends a blob to the analytics endpoint and returns the blob ID.
-        /// </summary>
-        Task<string> SendBlobAsync(string name, string mimeType, Stream data);
 
         Task UpdateUserEmailAsync(string email);
     }
@@ -47,11 +42,6 @@ namespace Espera.Core.Analytics
         public static Task RecordMobileUsageAsync(this IAnalyticsEndpoint endpoint)
         {
             return endpoint.RecordMetaDataAsync("uses-mobile", "true");
-        }
-
-        public static Task<string> SendCrashLogAsync(this IAnalyticsEndpoint endpoint, Stream logFileStream)
-        {
-            return endpoint.SendBlobAsync("Crash report log", "application/zip", logFileStream);
         }
     }
 }

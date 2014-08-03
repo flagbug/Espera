@@ -14,7 +14,7 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task Authenticates()
             {
-                var coreSettings = new CoreSettings { EnableAutomaticReports = true, AnalyticsToken = "cooltoken" };
+                var coreSettings = new CoreSettings { EnableAutomaticReports = true, AnalyticsToken = "cooltoken", BuddyAnalyticsUpgraded = true };
 
                 var endpoint = Substitute.For<IAnalyticsEndpoint>();
                 var client = new AnalyticsClient(endpoint);
@@ -52,7 +52,7 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task DoesntCreateUserIfAnalyticsTokenIsSaved()
             {
-                var coreSettings = new CoreSettings { EnableAutomaticReports = true, AnalyticsToken = "cooltoken" };
+                var coreSettings = new CoreSettings { EnableAutomaticReports = true, AnalyticsToken = "cooltoken", BuddyAnalyticsUpgraded = true };
 
                 var endpoint = Substitute.For<IAnalyticsEndpoint>();
                 var client = new AnalyticsClient(endpoint);
@@ -73,6 +73,19 @@ namespace Espera.Core.Tests
                 await client.InitializeAsync(coreSettings);
 
                 endpoint.Received().RecordDeviceInformationAsync();
+            }
+
+            [Fact]
+            public async Task RecreatesAnalyticsTokenIfNecessacry()
+            {
+                var coreSettings = new CoreSettings { EnableAutomaticReports = true, AnalyticsToken = "cooltoken", BuddyAnalyticsUpgraded = false };
+
+                var endpoint = Substitute.For<IAnalyticsEndpoint>();
+                var client = new AnalyticsClient(endpoint);
+
+                await client.InitializeAsync(coreSettings);
+
+                Assert.NotEqual("cooltoken", coreSettings.AnalyticsToken);
             }
 
             [Fact]
@@ -104,7 +117,7 @@ namespace Espera.Core.Tests
                 await client.RecordBugReportAsync("blabla");
 
                 Assert.True(client.IsAuthenticated);
-                endpoint.Received().RecordErrorAsync("blabla", Arg.Any<string>());
+                endpoint.Received().RecordErrorAsync(Arg.Is<Exception>(x => x.Message == "blabla"), null);
             }
 
             [Fact]
@@ -173,7 +186,7 @@ namespace Espera.Core.Tests
 
                 await client.InitializeAsync(coreSettings);
 
-                await client.RecordErrorAsync(new Exception(), false);
+                await client.RecordErrorAsync(new Exception());
 
                 Assert.False(client.IsAuthenticated);
                 endpoint.DidNotReceiveWithAnyArgs().RecordErrorAsync(null, null);
@@ -188,9 +201,9 @@ namespace Espera.Core.Tests
 
                 await client.InitializeAsync(coreSettings);
 
-                await client.RecordErrorAsync(new Exception(), false);
+                await client.RecordErrorAsync(new Exception());
 
-                endpoint.ReceivedWithAnyArgs().RecordErrorAsync(null, null);
+                endpoint.ReceivedWithAnyArgs().RecordErrorAsync(null);
             }
         }
     }

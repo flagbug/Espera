@@ -1,6 +1,4 @@
 using System;
-using System.IO;
-using System.IO.Compression;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
@@ -84,11 +82,12 @@ namespace Espera.Core.Analytics
                 await this.client.UpdateUserEmailAsync(email);
             }
 
-            string logId = await this.SendLogFileAsync() ?? String.Empty;
-
             try
             {
-                await this.client.RecordErrorAsync(message, logId);
+                // The new Buddy API only accepts exceptions, so we wrap the user message into an
+                // exception as a workaround
+                var exception = new Exception(message);
+                await this.client.RecordErrorAsync(exception);
             }
 
             catch (Exception ex)
@@ -111,11 +110,9 @@ namespace Espera.Core.Analytics
             if (!await this.AwaitAuthenticationAsync(true))
                 return false;
 
-            string logId = await this.SendLogFileAsync() ?? String.Empty;
-
             try
             {
-                await this.client.RecordErrorAsync(exception.Message, logId, exception.ToString());
+                await this.client.RecordErrorAsync(exception);
             }
 
             catch (Exception ex)
@@ -127,16 +124,14 @@ namespace Espera.Core.Analytics
             return true;
         }
 
-        public async Task RecordErrorAsync(Exception exception, bool uploadLogFile = true)
+        public async Task RecordErrorAsync(Exception exception)
         {
             if (!await this.AwaitAuthenticationAsync())
                 return;
 
-            string logId = uploadLogFile ? await this.SendLogFileAsync() ?? String.Empty : String.Empty;
-
             try
             {
-                await this.client.RecordErrorAsync(exception.Message, logId, exception.ToString());
+                await this.client.RecordErrorAsync(exception);
             }
 
             catch (Exception ex)
@@ -183,10 +178,11 @@ namespace Espera.Core.Analytics
 
             try
             {
-                if (this.coreSettings.AnalyticsToken == null)
+                if (this.coreSettings.AnalyticsToken == null || !this.coreSettings.BuddyAnalyticsUpgraded)
                 {
                     string analyticsToken = await this.client.CreateUserAsync();
                     this.coreSettings.AnalyticsToken = analyticsToken;
+                    this.coreSettings.BuddyAnalyticsUpgraded = true;
 
                     this.Log().Info("Created new analytics user");
                 }
@@ -248,64 +244,6 @@ namespace Espera.Core.Analytics
             await this.isAuthenticating.FirstAsync(x => !x);
 
             return this.isAuthenticated;
-        }
-
-        private async Task<Stream> GetCompressedLogFileStreamAsync()
-        {
-            string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\Log.txt");
-
-            try
-            {
-                using (FileStream stream = await Task.Run(() => File.OpenRead(logPath)))
-                {
-                    // Buddy doesn't like empty streams
-                    if (stream.Length == 0)
-                        return null;
-
-                    using (var inputStream = new MemoryStream())
-                    {
-                        await stream.CopyToAsync(inputStream);
-
-                        var compressedStream = new MemoryStream();
-
-                        using (var compressionStream = new GZipStream(compressedStream, CompressionMode.Compress, true))
-                        {
-                            inputStream.Position = 0;
-                            await inputStream.CopyToAsync(compressionStream);
-                        }
-                        compressedStream.Position = 0;
-                        return compressedStream;
-                    }
-                }
-            }
-
-            catch (Exception ex)
-            {
-                this.Log().ErrorException("Couldn't compress log file", ex);
-                return null;
-            }
-        }
-
-        private async Task<string> SendLogFileAsync()
-        {
-            Stream logFileSteam = await this.GetCompressedLogFileStreamAsync();
-
-            if (logFileSteam == null)
-                return null;
-
-            using (logFileSteam)
-            {
-                try
-                {
-                    return await this.client.SendCrashLogAsync(logFileSteam);
-                }
-
-                catch (Exception ex)
-                {
-                    this.Log().ErrorException("Couldn't send log file", ex);
-                    return null;
-                }
-            }
         }
     }
 }

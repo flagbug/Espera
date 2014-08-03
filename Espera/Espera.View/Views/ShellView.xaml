@@ -204,8 +204,7 @@
                 <MediaElement x:Name="videoPlayer"
                               Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Controls:MetroWindow},
                                               Path=ActualWidth}"
-                              LoadedBehavior="Manual"
-                              MediaEnded="VideoPlayerMediaEnded" />
+                              LoadedBehavior="Manual" />
             </Controls:Flyout>
         </Controls:FlyoutsControl>
     </Controls:MetroWindow.Flyouts>

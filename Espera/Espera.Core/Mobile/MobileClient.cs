@@ -203,76 +203,52 @@ namespace Espera.Core.Mobile
 
         private Task<ResponseInfo> AddPlaylistSongs(JToken parameters)
         {
-            Guid songGuid;
-            bool valid = Guid.TryParse(parameters["songGuid"].ToString(), out songGuid);
+            IEnumerable<Song> songs;
+            ResponseInfo response;
 
-            if (!valid)
+            bool areValid = this.TryValidateSongGuids(parameters["guids"].Select(x => x.ToString()), out songs, out response);
+
+            if (areValid)
             {
-                return Task.FromResult(CreateResponse(ResponseStatus.MalformedRequest, "Malformed GUID"));
+                try
+                {
+                    this.library.AddSongsToPlaylist(songs, this.accessToken);
+                }
+
+                catch (AccessException)
+                {
+                    return Task.FromResult(CreateResponse(ResponseStatus.Unauthorized));
+                }
+
+                return Task.FromResult(CreateResponse(ResponseStatus.Success));
             }
 
-            LocalSong song = this.library.Songs.FirstOrDefault(x => x.Guid == songGuid);
-
-            if (song == null)
-            {
-                return Task.FromResult(CreateResponse(ResponseStatus.NotFound, "Song not found"));
-            }
-
-            this.library.AddSongToPlaylist(song);
-
-            return Task.FromResult(CreateResponse(ResponseStatus.Success));
+            return Task.FromResult(response);
         }
 
         private async Task<ResponseInfo> AddPlaylistSongsNow(JToken parameters)
         {
-            var guids = new List<Guid>();
+            IEnumerable<Song> songs;
+            ResponseInfo response;
 
-            foreach (string guidString in parameters["guids"].Select(x => x.ToString()))
+            bool areValid = this.TryValidateSongGuids(parameters["guids"].Select(x => x.ToString()), out songs, out response);
+
+            if (areValid)
             {
-                Guid guid;
-
-                bool valid = Guid.TryParse(guidString, out guid);
-
-                if (valid)
+                try
                 {
-                    guids.Add(guid);
+                    await this.library.PlayInstantlyAsync(songs, this.accessToken);
                 }
 
-                else
+                catch (AccessException)
                 {
-                    return CreateResponse(ResponseStatus.MalformedRequest, "One or more GUIDs are malformed");
+                    return CreateResponse(ResponseStatus.Unauthorized);
                 }
+
+                return CreateResponse(ResponseStatus.Success);
             }
 
-            Dictionary<Guid, LocalSong> dic = this.library.Songs.ToDictionary(x => x.Guid);
-
-            List<LocalSong> songs = guids.Select(x =>
-            {
-                LocalSong song;
-
-                dic.TryGetValue(x, out song);
-
-                return song;
-            })
-            .Where(x => x != null)
-            .ToList();
-
-            if (guids.Count != songs.Count)
-            {
-                return CreateResponse(ResponseStatus.NotFound, "One or more songs could not be found");
-            }
-
-            try
-            {
-                await this.library.PlayInstantlyAsync(songs, this.accessToken);
-            }
-
-            catch (AccessException)
-            {
-                return CreateResponse(ResponseStatus.Unauthorized);
-            }
-
-            return CreateResponse(ResponseStatus.Success);
+            return response;
         }
 
         private async Task<ResponseInfo> ContinueSong(JToken content)
@@ -692,6 +668,54 @@ namespace Espera.Core.Mobile
             }
 
             return Task.FromResult(CreateResponse(ResponseStatus.Success));
+        }
+
+        private bool TryValidateSongGuids(IEnumerable<string> guidStrings, out IEnumerable<Song> foundSongs, out ResponseInfo responseInfo)
+        {
+            var guids = new List<Guid>();
+
+            foreach (string guidString in guidStrings)
+            {
+                Guid guid;
+
+                bool valid = Guid.TryParse(guidString, out guid);
+
+                if (valid)
+                {
+                    guids.Add(guid);
+                }
+
+                else
+                {
+                    responseInfo = CreateResponse(ResponseStatus.MalformedRequest, "One or more GUIDs are malformed");
+                    foundSongs = null;
+                    return false;
+                }
+            }
+
+            Dictionary<Guid, LocalSong> dic = this.library.Songs.ToDictionary(x => x.Guid);
+
+            List<LocalSong> songs = guids.Select(x =>
+            {
+                LocalSong song;
+
+                dic.TryGetValue(x, out song);
+
+                return song;
+            })
+            .Where(x => x != null)
+            .ToList();
+
+            if (guids.Count != songs.Count)
+            {
+                responseInfo = CreateResponse(ResponseStatus.NotFound, "One or more songs could not be found");
+                foundSongs = null;
+                return false;
+            }
+
+            responseInfo = null;
+            foundSongs = songs;
+            return true;
         }
 
         private async Task<ResponseInfo> VoteForSong(JToken parameters)

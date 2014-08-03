@@ -1,3 +1,27 @@
+# v2.4.1
+
+## Changes
+- Renamed the "library" settings to "my music".
+- Changed the default playback engine to Windows Media Player.
+- Changed the default "my music" and "youtube" column widths.
+
+## Bugfixes
+- Fixed a crash that occurred when setting the volume before playing a song.
+
+# v2.4.0
+
+## Features
+- Added a new playback engine and added an option menu in the settings to change it.
+
+## Changes
+- The maximum library auto update interval can now be 12 hours.
+- Changed the default update interval to 3 hours.
+
+## Bugfixes
+- Fixed the YouTube link not doing anything when clicked.
+- Fixed an application crash when downloading a song from YouTube and the song contained invalid characters for a path.
+- Fixed the download progress showing too many decimal places when downloading a song from YouTube.
+
 # v2.3.2
 
 ## Bugfixes

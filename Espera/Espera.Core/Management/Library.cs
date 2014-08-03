@@ -43,10 +43,10 @@ namespace Espera.Core.Management
         private readonly HashSet<LocalSong> songs;
         private readonly BehaviorSubject<string> songSourcePath;
         private readonly Subject<Unit> songsUpdated;
+        private readonly ObservableAsPropertyHelper<float> volume;
         private Playlist currentPlayingPlaylist;
         private IDisposable currentSongFinderSubscription;
         private DateTime lastSongAddTime;
-        private ObservableAsPropertyHelper<float> volume;
 
         public Library(ILibraryReader libraryReader, ILibraryWriter libraryWriter, CoreSettings settings,
             IFileSystem fileSystem, Func<string, ILocalSongFinder> localSongFinderFunc = null)
@@ -84,11 +84,6 @@ namespace Espera.Core.Management
 
             this.volume = this.settings.WhenAnyValue(x => x.Volume)
                 .ToProperty(this, x => x.Volume);
-        }
-
-        public IAudioPlayerCallback AudioPlayerCallback
-        {
-            get { return this.audioPlayer; }
         }
 
         /// <summary>
@@ -425,6 +420,20 @@ namespace Espera.Core.Management
             await this.InternPlaySongAsync(playlistIndex);
         }
 
+        public void RegisterAudioPlayerCallback(IMediaPlayerCallback audioPlayerCallback, Guid accessToken)
+        {
+            this.accessControl.VerifyAccess(accessToken);
+
+            this.audioPlayer.RegisterAudioPlayerCallback(audioPlayerCallback);
+        }
+
+        public void RegisterVideoPlayerCallback(IMediaPlayerCallback videoPlayerCallback, Guid accessToken)
+        {
+            this.accessControl.VerifyAccess(accessToken);
+
+            this.audioPlayer.RegisterVideoPlayerCallback(videoPlayerCallback);
+        }
+
         /// <summary>
         /// Removes the songs with the specified indexes from the playlist.
         /// </summary>
@@ -510,7 +519,7 @@ namespace Espera.Core.Management
             this.accessControl.VerifyAccess(accessToken);
 
             this.settings.Volume = volume;
-            this.audioPlayer.Volume = volume;
+            this.audioPlayer.SetVolume(volume);
         }
 
         public void ShufflePlaylist(Guid accessToken)
@@ -598,8 +607,6 @@ namespace Espera.Core.Management
 
             this.CurrentPlaylist.CurrentSongIndex = playlistIndex;
 
-            this.audioPlayer.Volume = this.Volume;
-
             Song song = this.CurrentPlaylist[playlistIndex].Song;
 
             try
@@ -611,8 +618,6 @@ namespace Espera.Core.Management
             catch (SongPreparationException ex)
             {
                 this.Log().ErrorException("Failed to prepare song", ex);
-
-                AnalyticsClient.Instance.RecordErrorAsync(ex, false);
 
                 this.HandleSongCorruptionAsync();
 
@@ -642,6 +647,8 @@ namespace Espera.Core.Management
 
                 return;
             }
+
+            this.audioPlayer.SetVolume(this.Volume);
 
             try
             {

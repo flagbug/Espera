@@ -26,7 +26,7 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> isDownloading;
         private IEnumerable<VideoInfo> audioToDownload;
         private bool downloadFailed;
-        private double downloadProgress;
+        private int downloadProgress;
         private bool isContextMenuOpen;
         private bool isLoadingContextMenu;
         private bool isLoadingThumbnail;
@@ -92,7 +92,7 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.downloadFailed, value); }
         }
 
-        public double DownloadProgress
+        public int DownloadProgress
         {
             get { return this.downloadProgress; }
             set { this.RaiseAndSetIfChanged(ref this.downloadProgress, value); }
@@ -171,7 +171,10 @@ namespace Espera.View.ViewModels
             this.IsLoadingContextMenu = true;
 
             IEnumerable<VideoInfo> infos = await Task.Run(() => DownloadUrlResolver.GetDownloadUrls(this.Path, false).ToList());
-            this.VideosToDownload = infos.OrderBy(x => x.VideoType).ThenByDescending(x => x.Resolution).ToList();
+            this.VideosToDownload = infos.Where(x => x.AdaptiveType == AdaptiveType.None && x.VideoType != VideoType.Unknown)
+                .OrderBy(x => x.VideoType)
+                .ThenByDescending(x => x.Resolution)
+                .ToList();
             this.AudioToDownload = infos.Where(x => x.CanExtractAudio).OrderByDescending(x => x.AudioBitrate).ToList();
 
             this.IsLoadingContextMenu = false;
@@ -179,7 +182,8 @@ namespace Espera.View.ViewModels
 
         private async Task DownloadAudio(VideoInfo videoInfo, string downloadPath)
         {
-            await this.DownloadFromYoutube(videoInfo, () => YoutubeSong.DownloadAudioAsync(videoInfo, downloadPath, Observer.Create<double>(progress => this.DownloadProgress = progress)));
+            await this.DownloadFromYoutube(videoInfo, () => YoutubeSong.DownloadAudioAsync(videoInfo, downloadPath,
+                Observer.Create<double>(progress => this.DownloadProgress = (int)progress)));
         }
 
         private async Task DownloadFromYoutube(VideoInfo videoInfo, Func<Task> downloadFunction)
@@ -211,7 +215,8 @@ namespace Espera.View.ViewModels
 
         private async Task DownloadVideo(VideoInfo videoInfo, string downloadPath)
         {
-            await this.DownloadFromYoutube(videoInfo, () => YoutubeSong.DownloadVideoAsync(videoInfo, downloadPath, Observer.Create<double>(progress => this.DownloadProgress = progress)));
+            await this.DownloadFromYoutube(videoInfo, () => YoutubeSong.DownloadVideoAsync(videoInfo, downloadPath,
+                Observer.Create<double>(progress => this.DownloadProgress = (int)progress)));
         }
 
         private async Task GetThumbnailAsync()
