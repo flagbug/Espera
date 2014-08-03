@@ -41,6 +41,7 @@ namespace Espera.View.ViewModels
                 .Concat()
                 .FirstOrDefaultAsync(pic => pic != null)
                 .ToProperty(this, x => x.Cover);
+            var connect = this.Cover; // Connect the property to the source observable immediately
 
             this.UpdateArtwork(artworkKeys);
 
