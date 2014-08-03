@@ -15,7 +15,7 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <TargetFrameworkProfile />
     <_ResolveReferenceDependencies>true</_ResolveReferenceDependencies>
-    <NuGetPackageImportStamp>9bde5885</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>6a59f6e0</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -32,11 +32,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Akavache">
-      <HintPath>..\packages\akavache.core.3.99.3-beta\lib\net45\Akavache.dll</HintPath>
-    </Reference>
-    <Reference Include="Akavache.Sqlite3">
-      <HintPath>..\packages\akavache.sqlite3.3.99.3-beta\lib\Portable-Net45+Win8+WP8+Wpa81\Akavache.Sqlite3.dll</HintPath>
+    <Reference Include="Akavache, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\akavache.core.4.0.0\lib\net45\Akavache.dll</HintPath>
     </Reference>
     <Reference Include="Buddy">
       <HintPath>..\packages\BuddyPlatformSdk.1.5.1.5\lib\net45\Buddy.dll</HintPath>
@@ -57,8 +55,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Google.GData.YouTube.2.2.0.0\lib\Google.GData.YouTube.dll</HintPath>
     </Reference>
-    <Reference Include="Lager">
-      <HintPath>..\packages\Lager.0.3.101-beta\lib\portable-net45+wp8+win8+monoandroid+monotouch\Lager.dll</HintPath>
+    <Reference Include="Lager, Version=0.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Lager.0.4.1\lib\portable-net45+wp8+win8+monoandroid+monotouch\Lager.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -196,13 +195,6 @@
   <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
     <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
     <Error Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
-  </Target>
-  <Import Project="..\packages\SQLitePCL.raw_basic.0.4.0-alpha\build\net45\SQLitePCL.raw_basic.targets" Condition="Exists('..\packages\SQLitePCL.raw_basic.0.4.0-alpha\build\net45\SQLitePCL.raw_basic.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\SQLitePCL.raw_basic.0.4.0-alpha\build\net45\SQLitePCL.raw_basic.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCL.raw_basic.0.4.0-alpha\build\net45\SQLitePCL.raw_basic.targets'))" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
