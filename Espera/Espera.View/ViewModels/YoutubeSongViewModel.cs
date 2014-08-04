@@ -1,19 +1,16 @@
-﻿using System;
+﻿using Espera.Core;
+using ReactiveUI;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Espera.Core;
-using ReactiveUI;
 using YoutubeExtractor;
 
 namespace Espera.View.ViewModels
@@ -34,20 +31,6 @@ namespace Espera.View.ViewModels
         public YoutubeSongViewModel(YoutubeSong wrapped, Func<string> downloadPathFunc)
             : base(wrapped)
         {
-            this.OpenPathCommand = new ReactiveCommand();
-            this.OpenPathCommand.Subscribe(x =>
-            {
-                try
-                {
-                    Process.Start(this.Path);
-                }
-
-                catch (Win32Exception ex)
-                {
-                    this.Log().ErrorException(string.Format("Could not open YouTube link {0}", this.Path), ex);
-                }
-            });
-
             this.hasThumbnail = this.WhenAnyValue(x => x.Thumbnail)
                 .Select(x => x != null)
                 .ToProperty(this, x => x.HasThumbnail);
@@ -125,8 +108,6 @@ namespace Espera.View.ViewModels
             get { return this.isLoadingThumbnail; }
             private set { this.RaiseAndSetIfChanged(ref this.isLoadingThumbnail, value); }
         }
-
-        public IReactiveCommand OpenPathCommand { get; private set; }
 
         public double? Rating
         {
@@ -247,7 +228,7 @@ namespace Espera.View.ViewModels
                     }
                 }
 
-                catch (WebException)
+                catch (HttpRequestException)
                 { } // We can't load the thumbnail, ignore it
 
                 finally

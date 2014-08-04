@@ -707,7 +707,7 @@
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock>
-                                                        <Hyperlink PreviewMouseLeftButtonDown="YoutubeHyperLinkLeftMouseButtonDown" PreviewMouseLeftButtonUp="YoutubeHyperLinkLeftMouseButtonUp">
+                                                        <Hyperlink PreviewMouseLeftButtonDown="ExternalPathLeftMouseButtonDown" PreviewMouseLeftButtonUp="ExternalPathLeftMouseButtonUp">
                                                             <TextBlock Text="{Binding Path=Path}"
                                                                        TextTrimming="CharacterEllipsis"
                                                                        Foreground="{DynamicResource BlackColorBrush}"
@@ -815,7 +815,7 @@
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock>
-                                                        <Hyperlink PreviewMouseLeftButtonDown="YoutubeHyperLinkLeftMouseButtonDown" PreviewMouseLeftButtonUp="YoutubeHyperLinkLeftMouseButtonUp">
+                                                        <Hyperlink PreviewMouseLeftButtonDown="ExternalPathLeftMouseButtonDown" PreviewMouseLeftButtonUp="ExternalPathLeftMouseButtonUp">
                                                             <TextBlock Text="{Binding Path=Path}"
                                                                        TextTrimming="CharacterEllipsis"
                                                                        Foreground="{DynamicResource BlackColorBrush}"
