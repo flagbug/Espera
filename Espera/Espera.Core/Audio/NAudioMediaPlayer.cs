@@ -1,21 +1,21 @@
-﻿using System;
+﻿using NAudio.Wave;
+using ReactiveMarrow;
+using System;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using NAudio.Wave;
-using ReactiveMarrow;
 
 namespace Espera.Core.Audio
 {
     public class NAudioMediaPlayer : IMediaPlayerCallback
     {
-        private readonly WaveOut outputDevice;
+        private readonly WaveOutEvent outputDevice;
         private AudioFileReader currentReader;
 
         public NAudioMediaPlayer()
         {
-            this.outputDevice = new WaveOut();
+            this.outputDevice = new WaveOutEvent();
         }
 
         public TimeSpan CurrentTime

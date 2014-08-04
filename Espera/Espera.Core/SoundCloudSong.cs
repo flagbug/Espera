@@ -27,7 +27,7 @@ namespace Espera.Core
 
         public override bool IsVideo
         {
-            get { return true; }
+            get { return false; }
         }
 
         public override NetworkSongSource NetworkSongSource
