@@ -713,6 +713,120 @@
                             </StackPanel>
                         </Grid>
                     </TabItem>
+                    <TabItem Header="soundcloud" IsSelected="{Binding Path=IsSoundCloud}">
+                        <Grid DataContext="{Binding Path=SoundCloudViewModel}">
+                            <ListView ContextMenuOpening="SongListContextMenuOpening"
+                                      IsSynchronizedWithCurrentItem="True"
+                                      ItemsSource="{Binding Path=SelectableSongs}"
+                                      x:Name="SoundCloudSongs">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectionChanged">
+                                        <i:InvokeCommandAction Command="{Binding Path=SelectionChangedCommand}"
+                                                               CommandParameter="{Binding ElementName=SoundCloudSongs, Path=SelectedItems}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                                <ListView.Style>
+                                    <Style BasedOn="{StaticResource {x:Type ListView}}" TargetType="{x:Type ListView}">
+                                        <Setter Property="SelectionMode" Value="Extended" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=IsAdmin}" Value="False">
+                                                <Setter Property="SelectionMode" Value="Single" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=IsSearching}" Value="True">
+                                                <Setter Property="Visibility" Value="Hidden" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=IsNetworkUnavailable}" Value="True">
+                                                <Setter Property="Visibility" Value="Hidden" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListView.Style>
+                                <ListView.ContextMenu>
+                                    <ContextMenu IsOpen="{Binding Path=SelectedSong.IsContextMenuOpen}">
+                                        <MenuItem Command="{Binding Path=PlayNowCommand}" Header="Play Now" />
+                                        <MenuItem Command="{Binding Path=AddToPlaylistCommand}" Header="Add to playlist" />
+                                    </ContextMenu>
+                                </ListView.ContextMenu>
+                                <ListView.ItemContainerStyle>
+                                    <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
+                                        <EventSetter Event="MouseDoubleClick" Handler="SongDoubleClick" />
+                                        <EventSetter Event="KeyUp" Handler="SongKeyPressed" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn Width="{Binding Path=TitleColumnWidth, Mode=TwoWay}">
+                                            <GridViewColumnHeader Click="SortYoutubeSongTitle" Content="Title" />
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Path=Title}" TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Width="{Binding Path=DurationColumnWidth, Mode=TwoWay}">
+                                            <GridViewColumnHeader Click="SortYoutubeSongDuration" Content="Duration" />
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Path=FormattedDuration}" TextTrimming="CharacterEllipsis" />
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Width="{Binding Path=RatingColumnWidth, Mode=TwoWay}">
+                                            <GridViewColumnHeader Click="SortYoutubeSongRating" Content="Rating" />
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Path=Rating, StringFormat=\{0:0.0\}, TargetNullValue=n/a}" TextTrimming="CharacterEllipsis" />
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Width="{Binding Path=ViewsColumnWidth, Mode=TwoWay}">
+                                            <GridViewColumnHeader Click="SortYoutubeSongViews" Content="Views" />
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Path=Views, TargetNullValue=n/a}" TextTrimming="CharacterEllipsis" />
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Width="{Binding Path=LinkColumnWidth, Mode=TwoWay}" Header="Link">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock>
+                                                        <Hyperlink PreviewMouseLeftButtonDown="YoutubeHyperLinkLeftMouseButtonDown" PreviewMouseLeftButtonUp="YoutubeHyperLinkLeftMouseButtonUp">
+                                                            <TextBlock Text="{Binding Path=Path}"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       Foreground="{DynamicResource BlackColorBrush}"
+                                                                       TextDecorations="Underline" />
+                                                        </Hyperlink>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                            <Grid Visibility="{Binding Path=IsSearching, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Controls:ProgressRing IsActive="True" />
+                            </Grid>
+                            <StackPanel Orientation="Vertical" Visibility="{Binding Path=IsNetworkUnavailable, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="Network is currently unavailable" />
+                                <Button Margin="0, 10, 0, 0"
+                                        Width="50"
+                                        Height="50"
+                                        Command="{Binding Path=RefreshNetworkAvailabilityCommand}"
+                                        Style="{DynamicResource MetroCircleButtonStyle}">
+                                    <Rectangle Width="20" Height="20">
+                                        <Rectangle.Fill>
+                                            <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_refresh}" />
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
                 </TabControl>
                 <Grid Grid.Column="1" Margin="5">
                     <Grid.RowDefinitions>
