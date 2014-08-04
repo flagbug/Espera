@@ -257,6 +257,7 @@
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\SongSourceViewModel.cs" />
     <Compile Include="ViewModels\SongViewModelBase.cs" />
+    <Compile Include="ViewModels\SoundCloudSongViewModel.cs" />
     <Compile Include="ViewModels\SoundCloudViewModel.cs" />
     <Compile Include="ViewModels\UpdateViewModel.cs" />
     <Compile Include="ViewModels\YoutubeSongViewModel.cs" />

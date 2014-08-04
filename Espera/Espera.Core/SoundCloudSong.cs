@@ -48,5 +48,12 @@ namespace Espera.Core
             get { return new Uri(this.PlaybackPath); }
             set { this.PlaybackPath = value.ToString(); }
         }
+
+        public User User { get; set; }
+    }
+
+    public class User
+    {
+        public string Username { get; set; }
     }
 }
