@@ -68,12 +68,12 @@ namespace Espera.Core
         /// <summary>
         /// Gets the path of the song on the local filesystem, or in the internet.
         /// </summary>
-        public string OriginalPath { get; set; }
+        public string OriginalPath { get; protected set; }
 
         /// <summary>
         /// Gets the path to stream the audio from.
         /// </summary>
-        public string PlaybackPath { get; set; }
+        public string PlaybackPath { get; protected set; }
 
         public string Title { get; set; }
 
