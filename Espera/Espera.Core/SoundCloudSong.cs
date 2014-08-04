@@ -13,6 +13,8 @@ namespace Espera.Core
         [JsonProperty("artwork_url")]
         public Uri ArtworkUrl { get; set; }
 
+        public string Description { get; set; }
+
         [JsonProperty("duration")]
         public int DurationMilliseconds
         {
