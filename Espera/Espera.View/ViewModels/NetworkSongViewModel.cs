@@ -74,7 +74,7 @@ namespace Espera.View.ViewModels
 
             this.WhenAnyValue(x => x.SearchText).Skip(1).Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler).Select(_ => Unit.Default)
                 .Merge(networkAvailable.Where(x => x).DistinctUntilChanged().ToUnit())
-                .Select(_ => this.StartSearchAsync().ToObservable())
+                .Select(_ => this.StartSearchAsync().ToObservable().LoggedCatch(this, Observable.Empty<IReadOnlyList<TViewModel>>()))
                 // We don't use SelectMany, because we only care about the latest invocation and
                 // don't want an old, still running request to override a request that is newer and faster
                 .Switch()

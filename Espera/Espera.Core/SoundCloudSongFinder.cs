@@ -14,7 +14,17 @@ namespace Espera.Core
         {
             var api = RestService.For<ISoundCloudApi>("http://api.soundcloud.com");
 
-            var songs = (await api.Search(searchTerm, ClientId)).Where(x => x.IsStreamable).ToList();
+            List<SoundCloudSong> songs;
+
+            try
+            {
+                songs = (await api.Search(searchTerm, ClientId)).Where(x => x.IsStreamable).ToList();
+            }
+
+            catch (Exception ex)
+            {
+                throw new NetworkSongFinderException("SoundCloud search failed", ex);
+            }
 
             foreach (SoundCloudSong song in songs)
             {

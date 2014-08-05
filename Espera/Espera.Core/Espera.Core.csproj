@@ -186,6 +186,7 @@
     <Compile Include="Mobile\MobileHelper.cs" />
     <Compile Include="Mobile\MobileSong.cs" />
     <Compile Include="MusicBrainzArtworkFetcher.cs" />
+    <Compile Include="NetworkSongFinderException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\CoreSettings.cs" />
     <Compile Include="Settings\DefaultPlaybackAction.cs" />
