@@ -98,7 +98,7 @@ namespace Espera.View.ViewModels
 
             this.LocalViewModel = new LocalViewModel(this.library, this.ViewSettings, this.coreSettings, accessToken);
             this.YoutubeViewModel = new YoutubeViewModel(this.library, this.ViewSettings, this.coreSettings, accessToken);
-            this.SoundCloudViewModel = new SoundCloudViewModel(this.library, accessToken, this.coreSettings);
+            this.SoundCloudViewModel = new SoundCloudViewModel(this.library, accessToken, this.coreSettings, this.ViewSettings);
             this.DirectYoutubeViewModel = new DirectYoutubeViewModel(this.library, accessToken);
 
             Observable.Interval(TimeSpan.FromMilliseconds(300), RxApp.TaskpoolScheduler)
