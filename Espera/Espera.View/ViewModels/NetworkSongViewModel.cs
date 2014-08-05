@@ -30,7 +30,6 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<ISongViewModelBase> selectedSong;
         private readonly INetworkSongFinder<TSong> songFinder;
         private bool isSearching;
-        private SortOrder titleOrder;
 
         protected NetworkSongViewModel(Library library, Guid accessToken, CoreSettings coreSettings,
                 Func<TSong, TViewModel> modelToViewModelConverter, INetworkStatus networkstatus = null,
@@ -71,9 +70,6 @@ namespace Espera.View.ViewModels
                 .Merge(this.connectionError.Select(x => true))
                 .ToProperty(this, x => x.IsNetworkUnavailable);
 
-            // We need a default sorting order
-            this.OrderByTitle();
-
             this.WhenAnyValue(x => x.SearchText).Skip(1).Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler).Select(_ => Unit.Default)
                 .Merge(networkAvailable.Where(x => x).DistinctUntilChanged().ToUnit())
                 .Select(_ => this.StartSearchAsync().ToObservable().LoggedCatch(this, Observable.Empty<IReadOnlyList<TViewModel>>()))
@@ -108,11 +104,6 @@ namespace Espera.View.ViewModels
         public ISongViewModelBase SelectedSong
         {
             get { return this.selectedSong.Value; }
-        }
-
-        public void OrderByTitle()
-        {
-            this.ApplyOrder(SortHelpers.GetOrderByTitle<TViewModel>, ref this.titleOrder);
         }
 
         private async Task<IReadOnlyList<TViewModel>> StartSearchAsync()

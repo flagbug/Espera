@@ -298,26 +298,6 @@ namespace Espera.View.Views
             }
         }
 
-        private void SortYoutubeSongDuration(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.YoutubeViewModel.OrderByDuration();
-        }
-
-        private void SortYoutubeSongRating(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.YoutubeViewModel.OrderByRating();
-        }
-
-        private void SortYoutubeSongTitle(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.YoutubeViewModel.OrderByTitle();
-        }
-
-        private void SortYoutubeSongViews(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.YoutubeViewModel.OrderByViews();
-        }
-
         private void WireDataContext()
         {
             this.shellViewModel = (ShellViewModel)this.DataContext;

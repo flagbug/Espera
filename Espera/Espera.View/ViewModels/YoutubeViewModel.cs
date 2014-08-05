@@ -3,13 +3,13 @@ using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Rareform.Validation;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
     public sealed class YoutubeViewModel : NetworkSongViewModel<YoutubeSongViewModel, YoutubeSong>
     {
         private readonly ViewSettings viewSettings;
-        private SortOrder durationOrder;
         private SortOrder ratingOrder;
         private SortOrder viewsOrder;
 
@@ -23,6 +23,12 @@ namespace Espera.View.ViewModels
                 Throw.ArgumentNullException(() => viewSettings);
 
             this.viewSettings = viewSettings;
+
+            this.OrderByRatingCommand = new ReactiveCommand();
+            this.OrderByRatingCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByRating, ref this.ratingOrder));
+
+            this.OrderByViewsCommand = new ReactiveCommand();
+            this.OrderByViewsCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByViews, ref this.viewsOrder));
         }
 
         public int DurationColumnWidth
@@ -36,6 +42,10 @@ namespace Espera.View.ViewModels
             get { return this.viewSettings.YoutubeLinkColumnWidth; }
             set { this.viewSettings.YoutubeLinkColumnWidth = value; }
         }
+
+        public ReactiveCommand OrderByRatingCommand { get; private set; }
+
+        public ReactiveCommand OrderByViewsCommand { get; private set; }
 
         public int RatingColumnWidth
         {
@@ -53,21 +63,6 @@ namespace Espera.View.ViewModels
         {
             get { return this.viewSettings.YoutubeViewsColumnWidth; }
             set { this.viewSettings.YoutubeViewsColumnWidth = value; }
-        }
-
-        public void OrderByDuration()
-        {
-            this.ApplyOrder(SortHelpers.GetOrderByDuration<YoutubeSongViewModel>, ref this.durationOrder);
-        }
-
-        public void OrderByRating()
-        {
-            this.ApplyOrder(SortHelpers.GetOrderByRating, ref this.ratingOrder);
-        }
-
-        public void OrderByViews()
-        {
-            this.ApplyOrder(SortHelpers.GetOrderByViews, ref this.viewsOrder);
         }
     }
 }
