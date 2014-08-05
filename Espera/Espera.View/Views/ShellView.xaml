@@ -784,7 +784,7 @@
                                 <ListView.View>
                                     <GridView>
                                         <GridViewColumn Width="{Binding Path=TitleColumnWidth, Mode=TwoWay}">
-                                            <GridViewColumnHeader Click="SortYoutubeSongTitle" Content="Title" />
+                                            <GridViewColumnHeader Command="{Binding Path=OrderByTitleCommand}" Content="Title" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <StackPanel>
@@ -794,7 +794,7 @@
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
                                         <GridViewColumn Width="{Binding Path=UploaderColumnWidth, Mode=TwoWay}">
-                                            <GridViewColumnHeader Click="SortYoutubeSongTitle" Content="Uploader" />
+                                            <GridViewColumnHeader Command="{Binding Path=OrderByUploaderCommand}" Content="Uploader" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <StackPanel>
@@ -804,7 +804,7 @@
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
                                         <GridViewColumn Width="{Binding Path=DurationColumnWidth, Mode=TwoWay}">
-                                            <GridViewColumnHeader Click="SortYoutubeSongDuration" Content="Duration" />
+                                            <GridViewColumnHeader Command="{Binding Path=OrderByDurationCommand}" Content="Duration" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock Text="{Binding Path=FormattedDuration}" TextTrimming="CharacterEllipsis" />
