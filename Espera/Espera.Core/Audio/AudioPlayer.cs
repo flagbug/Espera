@@ -122,7 +122,7 @@ namespace Espera.Core.Audio
                 {
                     try
                     {
-                        await this.currentCallback.StopAsync();
+                        await this.StopAsync();
                     }
 
                     // If the stop method throws an exception and we don't swallow it, we can never
