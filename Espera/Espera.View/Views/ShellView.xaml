@@ -659,7 +659,7 @@
                                 <ListView.View>
                                     <GridView>
                                         <GridViewColumn Width="{Binding Path=TitleColumnWidth, Mode=TwoWay}">
-                                            <GridViewColumnHeader Click="SortYoutubeSongTitle" Content="Title" />
+                                            <GridViewColumnHeader Command="{Binding Path=OrderByTitleCommand}" Content="Title" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <StackPanel Orientation="Horizontal">
@@ -680,7 +680,7 @@
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
                                         <GridViewColumn Width="{Binding Path=DurationColumnWidth, Mode=TwoWay}">
-                                            <GridViewColumnHeader Click="SortYoutubeSongDuration" Content="Duration" />
+                                            <GridViewColumnHeader Command="{Binding Path=OrderByDurationCommand}" Content="Duration" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock Text="{Binding Path=FormattedDuration}" TextTrimming="CharacterEllipsis" />
@@ -688,7 +688,7 @@
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
                                         <GridViewColumn Width="{Binding Path=RatingColumnWidth, Mode=TwoWay}">
-                                            <GridViewColumnHeader Click="SortYoutubeSongRating" Content="Rating" />
+                                            <GridViewColumnHeader Command="{Binding Path=OrderByRatingCommand}" Content="Rating" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock Text="{Binding Path=Rating, StringFormat=\{0:0.0\}, TargetNullValue=n/a}" TextTrimming="CharacterEllipsis" />
@@ -696,7 +696,7 @@
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
                                         <GridViewColumn Width="{Binding Path=ViewsColumnWidth, Mode=TwoWay}">
-                                            <GridViewColumnHeader Click="SortYoutubeSongViews" Content="Views" />
+                                            <GridViewColumnHeader Command="{Binding Path=OrderByViewsCommand}" Content="Views" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock Text="{Binding Path=Views, TargetNullValue=n/a}" TextTrimming="CharacterEllipsis" />
