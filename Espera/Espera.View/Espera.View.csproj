@@ -102,6 +102,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Caliburn.Micro.1.5.2\lib\net45\Caliburn.Micro.dll</HintPath>
     </Reference>
+    <Reference Include="Castle.Core">
+      <HintPath>..\packages\Castle.Core.3.2.0\lib\net45\Castle.Core.dll</HintPath>
+    </Reference>
     <Reference Include="GlobalHotKey">
       <HintPath>..\packages\GlobalHotKey.1.1.0\lib\GlobalHotKey.dll</HintPath>
     </Reference>
@@ -155,6 +158,12 @@
     <Reference Include="ReactiveUI.Xaml, Version=5.5.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\reactiveui-platforms.5.5.1\lib\net45\ReactiveUI.Xaml.dll</HintPath>
+    </Reference>
+    <Reference Include="Refit">
+      <HintPath>..\packages\refit.1.3.0\lib\Net45\Refit.dll</HintPath>
+    </Reference>
+    <Reference Include="Refit-Portable">
+      <HintPath>..\packages\refit.1.3.0\lib\Net45\Refit-Portable.dll</HintPath>
     </Reference>
     <Reference Include="Splat, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -242,11 +251,14 @@
     <Compile Include="ViewModels\ISongViewModelBase.cs" />
     <Compile Include="ViewModels\LocalSongViewModel.cs" />
     <Compile Include="ViewModels\LocalViewModel.cs" />
+    <Compile Include="ViewModels\NetworkSongViewModel.cs" />
     <Compile Include="ViewModels\PlaylistEntryViewModel.cs" />
     <Compile Include="ViewModels\PlaylistViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\SongSourceViewModel.cs" />
     <Compile Include="ViewModels\SongViewModelBase.cs" />
+    <Compile Include="ViewModels\SoundCloudSongViewModel.cs" />
+    <Compile Include="ViewModels\SoundCloudViewModel.cs" />
     <Compile Include="ViewModels\UpdateViewModel.cs" />
     <Compile Include="ViewModels\YoutubeSongViewModel.cs" />
     <Compile Include="ViewModels\YoutubeViewModel.cs" />

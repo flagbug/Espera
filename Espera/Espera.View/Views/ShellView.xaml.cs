@@ -1,5 +1,3 @@
-using System.Reactive;
-using System.Windows.Documents;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
@@ -13,11 +11,13 @@ using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using YoutubeExtractor;
@@ -100,6 +100,18 @@ namespace Espera.View.Views
 
             var updateViewModel = this.shellViewModel.UpdateViewModel;
             updateViewModel.ChangelogShown();
+        }
+
+        private void ExternalPathLeftMouseButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        private void ExternalPathLeftMouseButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            ((SongViewModelBase)((Hyperlink)sender).DataContext).OpenPathCommand.Execute(null);
+
+            e.Handled = true;
         }
 
         private IntPtr HandleWindowMove(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -455,18 +467,6 @@ namespace Espera.View.Views
                 .Select(x => x.ToNative())
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .BindTo(this.PauseContinueTaskbarButton, x => x.ImageSource);
-        }
-
-        private void YoutubeHyperLinkLeftMouseButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            e.Handled = true;
-        }
-
-        private void YoutubeHyperLinkLeftMouseButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            ((YoutubeSongViewModel)((Hyperlink)sender).DataContext).OpenPathCommand.Execute(null);
-
-            e.Handled = true;
         }
     }
 }

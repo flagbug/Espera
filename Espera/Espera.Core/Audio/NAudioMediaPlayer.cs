@@ -1,21 +1,21 @@
-﻿using System;
+﻿using NAudio.Wave;
+using ReactiveMarrow;
+using System;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using NAudio.Wave;
-using ReactiveMarrow;
 
 namespace Espera.Core.Audio
 {
-    public class NAudioMediaPlayer : IMediaPlayerCallback
+    public class NAudioMediaPlayer : IMediaPlayerCallback, IDisposable
     {
-        private readonly WaveOut outputDevice;
+        private readonly WaveOutEvent outputDevice;
         private AudioFileReader currentReader;
 
         public NAudioMediaPlayer()
         {
-            this.outputDevice = new WaveOut();
+            this.outputDevice = new WaveOutEvent();
         }
 
         public TimeSpan CurrentTime
@@ -39,6 +39,23 @@ namespace Espera.Core.Audio
                         h => this.outputDevice.PlaybackStopped += h,
                         h => this.outputDevice.PlaybackStopped -= h)
                     .ToUnit();
+            }
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                this.outputDevice.Dispose();
+            }
+
+            // NAudio does strange things in the Dispose method and can throw a NullReferenceException
+            catch (NullReferenceException)
+            { }
+
+            if (this.currentReader != null)
+            {
+                this.currentReader.Dispose();
             }
         }
 
