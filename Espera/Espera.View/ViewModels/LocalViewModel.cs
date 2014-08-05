@@ -23,6 +23,7 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> showAddSongsHelperMessage;
         private readonly ViewSettings viewSettings;
         private SortOrder artistOrder;
+        private CoreSettings coreSettings;
         private ILookup<string, Song> filteredSongs;
         private ArtistViewModel selectedArtist;
 
@@ -32,7 +33,11 @@ namespace Espera.View.ViewModels
             if (viewSettings == null)
                 Throw.ArgumentNullException(() => viewSettings);
 
+            if (coreSettings == null)
+                Throw.ArgumentNullException(() => coreSettings);
+
             this.viewSettings = viewSettings;
+            this.coreSettings = coreSettings;
 
             this.artistUpdateSignal = new Subject<Unit>();
             this.gate = new object();
@@ -88,6 +93,11 @@ namespace Espera.View.ViewModels
         }
 
         public IReactiveDerivedList<ArtistViewModel> Artists { get; private set; }
+
+        public override DefaultPlaybackAction DefaultPlaybackAction
+        {
+            get { return this.coreSettings.DefaultPlaybackAction; }
+        }
 
         public int DurationColumnWidth
         {

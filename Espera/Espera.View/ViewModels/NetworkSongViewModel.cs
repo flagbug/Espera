@@ -83,6 +83,11 @@ namespace Espera.View.ViewModels
                 });
         }
 
+        public override DefaultPlaybackAction DefaultPlaybackAction
+        {
+            get { return DefaultPlaybackAction.AddToPlaylist; }
+        }
+
         public bool IsNetworkUnavailable
         {
             get { return this.isNetworkUnavailable.Value; }

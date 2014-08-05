@@ -216,12 +216,13 @@ namespace Espera.View.ViewModels
             this.PlayOverrideCommand.RegisterAsyncTask(_ => this.library.PlaySongAsync(this.SelectedPlaylistEntries.First().Index, this.accessToken));
 
             // The default play command differs whether we are in party mode or not and depends on
-            // the selected setting in administrator mode.
+            // the selected setting in administrator mode and the song source.
             //
-            // In party mode, it is always "Add To Playlist", in administrator mode we look at the setting
-            this.defaultPlaybackCommand = this.coreSettings.WhenAnyValue(x => x.DefaultPlaybackAction)
-                .CombineLatest(this.WhenAnyValue(x => x.IsAdmin), this.WhenAnyValue(x => x.CurrentSongSource),
-                    (action, isAdmin, songSource) => !isAdmin || action == DefaultPlaybackAction.AddToPlaylist ? songSource.AddToPlaylistCommand : songSource.PlayNowCommand)
+            // In party mode, it is always "Add To Playlist", in administrator mode we look at the
+            // value that the song source returns
+            this.defaultPlaybackCommand = this.WhenAnyValue(x => x.CurrentSongSource, x => x.IsAdmin,
+                    (songSource, isAdmin) => !isAdmin || songSource.DefaultPlaybackAction == DefaultPlaybackAction.AddToPlaylist ?
+                        songSource.AddToPlaylistCommand : songSource.PlayNowCommand)
                 .ToProperty(this, x => x.DefaultPlaybackCommand);
 
             this.PauseCommand = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))

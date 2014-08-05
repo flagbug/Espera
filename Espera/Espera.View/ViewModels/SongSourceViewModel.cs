@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Espera.Core.Management;
+using Espera.Core.Settings;
 using ReactiveUI;
 
 namespace Espera.View.ViewModels
@@ -75,6 +76,8 @@ namespace Espera.View.ViewModels
         }
 
         public IReactiveCommand AddToPlaylistCommand { get; private set; }
+
+        public abstract DefaultPlaybackAction DefaultPlaybackAction { get; }
 
         public bool IsAdmin
         {
