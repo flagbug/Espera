@@ -18,7 +18,7 @@ namespace Espera.View.ViewModels
     /// <summary>
     /// The base class for songs that we get over the network (e.g YouTube and SoundCloud)
     /// </summary>
-    public class NetworkSongViewModel<TViewModel, TSong> : SongSourceViewModel<TViewModel>
+    public abstract class NetworkSongViewModel<TViewModel, TSong> : SongSourceViewModel<TViewModel>
         where TViewModel : ISongViewModelBase
         where TSong : Song
     {
@@ -32,7 +32,9 @@ namespace Espera.View.ViewModels
         private bool isSearching;
         private SortOrder titleOrder;
 
-        public NetworkSongViewModel(Library library, Guid accessToken, CoreSettings coreSettings, Func<TSong, TViewModel> modelToViewModelConverter, INetworkStatus networkstatus = null, INetworkSongFinder<TSong> songFinder = null)
+        protected NetworkSongViewModel(Library library, Guid accessToken, CoreSettings coreSettings,
+                Func<TSong, TViewModel> modelToViewModelConverter, INetworkStatus networkstatus = null,
+                INetworkSongFinder<TSong> songFinder = null)
             : base(library, accessToken)
         {
             if (coreSettings == null)
