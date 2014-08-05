@@ -6,6 +6,8 @@ namespace Espera.Core
 {
     public class SoundCloudSong : Song
     {
+        private User user;
+
         public SoundCloudSong()
             : base(String.Empty, TimeSpan.Zero)
         { }
@@ -51,7 +53,15 @@ namespace Espera.Core
             set { this.PlaybackPath = value.ToString(); }
         }
 
-        public User User { get; set; }
+        public User User
+        {
+            get { return this.user; }
+            set
+            {
+                this.user = value;
+                this.Artist = value.Username;
+            }
+        }
     }
 
     public class User
