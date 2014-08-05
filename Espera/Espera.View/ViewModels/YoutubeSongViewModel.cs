@@ -228,8 +228,10 @@ namespace Espera.View.ViewModels
                     }
                 }
 
-                catch (HttpRequestException)
-                { } // We can't load the thumbnail, ignore it
+                catch (HttpRequestException ex)
+                {
+                    this.Log().ErrorException("Failed to download YouTube artwork", ex);
+                }
 
                 finally
                 {
