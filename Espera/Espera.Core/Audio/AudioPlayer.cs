@@ -13,7 +13,7 @@ namespace Espera.Core.Audio
     ///
     /// The actual playback implementation is defined in the <see cref="IMediaPlayerCallback" /> implementations.
     /// </summary>
-    public sealed class AudioPlayer
+    public sealed class AudioPlayer : IEnableLogger
     {
         private readonly BehaviorSubject<IMediaPlayerCallback> audioPlayerCallback;
         private readonly Subject<TimeSpan> currentTimeChangedFromOuter;
@@ -120,7 +120,17 @@ namespace Espera.Core.Audio
             {
                 if (this.currentCallback != null)
                 {
-                    await this.currentCallback.StopAsync();
+                    try
+                    {
+                        await this.currentCallback.StopAsync();
+                    }
+
+                    // If the stop method throws an exception and we don't swallow it, we can never
+                    // reassign the current callback
+                    catch (Exception ex)
+                    {
+                        this.Log().ErrorException("Failed to stop current media player callback " + this.currentCallback, ex);
+                    }
                 }
 
                 this.currentCallback = song.IsVideo ? this.videoPlayerCallback.Value : this.audioPlayerCallback.Value;
