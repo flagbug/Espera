@@ -88,7 +88,10 @@ namespace Espera.Core.Audio
 
         public void SetVolume(float volume)
         {
-            this.outputDevice.Volume = volume;
+            if (this.currentReader == null)
+                return;
+
+            this.currentReader.Volume = volume;
         }
 
         public Task StopAsync()
