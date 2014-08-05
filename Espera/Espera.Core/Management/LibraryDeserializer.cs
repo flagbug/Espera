@@ -59,7 +59,7 @@ namespace Espera.Core.Management
 
                     return new
                     {
-                        OrignalPath = entry["path"].ToObject<string>(),
+                        OriginalPath = entry["path"].ToObject<string>(),
                         PlaybackPath = playbackPath,
                         Type = type,
                         Duration = duration,
@@ -77,7 +77,7 @@ namespace Espera.Core.Management
                 {
                     if (entry.Type == typeof(YoutubeSong))
                     {
-                        return new YoutubeSong(entry.OrignalPath, entry.Duration.Value)
+                        return new YoutubeSong(entry.OriginalPath, entry.Duration.Value)
                         {
                             Title = entry.Title
                         };
@@ -87,7 +87,7 @@ namespace Espera.Core.Management
                     {
                         return new SoundCloudSong
                         {
-                            PermaLinkUrl = new Uri(entry.OrignalPath),
+                            PermaLinkUrl = new Uri(entry.OriginalPath),
                             StreamUrl = new Uri(entry.PlaybackPath),
                             Artist = entry.Artist,
                             Title = entry.Title,
@@ -97,7 +97,7 @@ namespace Espera.Core.Management
 
                     // We search for the path locally, so we don't have to serialize data about
                     // local songs
-                    return songs.First(song => song.OriginalPath == entry.OrignalPath);
+                    return songs.First(song => song.OriginalPath == entry.OriginalPath);
                 });
 
                 playlist.AddSongs(s);
