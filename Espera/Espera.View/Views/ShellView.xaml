@@ -430,7 +430,7 @@
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0"
                            Style="{StaticResource VideoInfoHeaderStyle}"
-                           Text="video info" />
+                           Text="song info" />
                 <Grid Grid.Row="1" Margin="5" DataContext="{Binding Path=SoundCloudViewModel.SelectedSong}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
