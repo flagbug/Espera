@@ -29,7 +29,7 @@ using ReactiveUI.NLog;
 
 namespace Espera.View
 {
-    internal class AppBootstrapper : Bootstrapper<ShellViewModel>, IEnableLogger
+    internal class AppBootstrapper : BootstrapperBase, IEnableLogger
     {
         private static readonly string DirectoryPath;
         private static readonly string LibraryFilePath;
@@ -70,6 +70,7 @@ namespace Espera.View
         public AppBootstrapper()
         {
             this.windowManager = new WindowManager();
+            this.Initialize();
         }
 
         protected override void Configure()
@@ -161,7 +162,7 @@ namespace Espera.View
                 this.updateSubscription = Disposable.Empty;
             }
 
-            base.OnStartup(sender, e);
+            this.DisplayRootViewFor<ShellViewModel>();
         }
 
         protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
