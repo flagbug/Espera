@@ -76,6 +76,7 @@ namespace Espera.View.ViewModels
                 // We don't use SelectMany, because we only care about the latest invocation and
                 // don't want an old, still running request to override a request that is newer and faster
                 .Switch()
+                .Select(x => x.OrderBy(this.SongOrderFunc).ToList())
                 .Subscribe(x =>
                 {
                     this.SelectableSongs = x;
