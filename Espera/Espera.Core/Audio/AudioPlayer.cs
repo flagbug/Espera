@@ -15,18 +15,19 @@ namespace Espera.Core.Audio
     /// </summary>
     public sealed class AudioPlayer : IEnableLogger
     {
-        private readonly BehaviorSubject<IMediaPlayerCallback> audioPlayerCallback;
         private readonly Subject<TimeSpan> currentTimeChangedFromOuter;
         private readonly SemaphoreSlim gate;
         private readonly BehaviorSubject<Song> loadedSong;
         private readonly BehaviorSubject<AudioPlayerState> playbackState;
-        private readonly BehaviorSubject<IMediaPlayerCallback> videoPlayerCallback;
+        private IMediaPlayerCallback audioPlayerCallback;
         private IMediaPlayerCallback currentCallback;
+        private bool disposeCurrentAudioCallback;
+        private IMediaPlayerCallback videoPlayerCallback;
 
         internal AudioPlayer()
         {
-            this.audioPlayerCallback = new BehaviorSubject<IMediaPlayerCallback>(new DummyMediaPlayerCallback());
-            this.videoPlayerCallback = new BehaviorSubject<IMediaPlayerCallback>(new DummyMediaPlayerCallback());
+            this.audioPlayerCallback = new DummyMediaPlayerCallback();
+            this.videoPlayerCallback = new DummyMediaPlayerCallback();
             this.currentCallback = new DummyMediaPlayerCallback();
 
             this.gate = new SemaphoreSlim(1, 1);
@@ -73,26 +74,13 @@ namespace Espera.Core.Audio
 
         public void RegisterAudioPlayerCallback(IMediaPlayerCallback audioPlayerCallback)
         {
-            var dispCallback = this.audioPlayerCallback.Value as IDisposable;
-
-            if (dispCallback != null)
-            {
-                dispCallback.Dispose();
-            }
-
-            this.audioPlayerCallback.OnNext(audioPlayerCallback);
+            this.disposeCurrentAudioCallback = true;
+            this.audioPlayerCallback = audioPlayerCallback;
         }
 
         public void RegisterVideoPlayerCallback(IMediaPlayerCallback videoPlayerCallback)
         {
-            var dispCallback = this.videoPlayerCallback.Value as IDisposable;
-
-            if (dispCallback != null)
-            {
-                dispCallback.Dispose();
-            }
-
-            this.videoPlayerCallback.OnNext(videoPlayerCallback);
+            this.videoPlayerCallback = videoPlayerCallback;
         }
 
         public void SetVolume(float volume)
@@ -114,27 +102,33 @@ namespace Espera.Core.Audio
             if (song == null)
                 throw new ArgumentNullException("song");
 
+            try
+            {
+                await this.StopAsync();
+            }
+
+            // If the stop method throws an exception and we don't swallow it, we can never reassign
+            // the current callback
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Failed to stop current media player callback " + this.currentCallback, ex);
+            }
+
+            if (this.loadedSong.Value != null && !this.loadedSong.Value.IsVideo && this.disposeCurrentAudioCallback && this.currentCallback is IDisposable)
+            {
+                ((IDisposable)this.currentCallback).Dispose();
+            }
+
+            this.disposeCurrentAudioCallback = false;
+
+            await this.gate.WaitAsync();
+
             this.loadedSong.OnNext(song);
+
+            this.currentCallback = song.IsVideo ? this.videoPlayerCallback : this.audioPlayerCallback;
 
             try
             {
-                if (this.currentCallback != null)
-                {
-                    try
-                    {
-                        await this.StopAsync();
-                    }
-
-                    // If the stop method throws an exception and we don't swallow it, we can never
-                    // reassign the current callback
-                    catch (Exception ex)
-                    {
-                        this.Log().ErrorException("Failed to stop current media player callback " + this.currentCallback, ex);
-                    }
-                }
-
-                this.currentCallback = song.IsVideo ? this.videoPlayerCallback.Value : this.audioPlayerCallback.Value;
-
                 await this.currentCallback.LoadAsync(new Uri(this.loadedSong.Value.PlaybackPath));
             }
 
@@ -143,8 +137,14 @@ namespace Espera.Core.Audio
                 throw new SongLoadException("Could not load song", ex);
             }
 
-            this.currentCallback.Finished.FirstAsync().TakeUntil(this.loadedSong.Skip(1))
+            finally
+            {
+                this.gate.Release();
+            }
+
+            this.currentCallback.Finished.FirstAsync()
                 .SelectMany(_ => this.Finished().ToObservable())
+                .TakeUntil(this.loadedSong.Skip(1))
                 .Subscribe();
         }
 
@@ -152,10 +152,22 @@ namespace Espera.Core.Audio
         {
             await this.gate.WaitAsync();
 
-            await this.currentCallback.PauseAsync();
-            await this.SetPlaybackStateAsync(AudioPlayerState.Paused);
+            try
+            {
+                await this.currentCallback.PauseAsync();
+                await this.SetPlaybackStateAsync(AudioPlayerState.Paused);
+            }
 
-            this.gate.Release();
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Failed to pause song", ex);
+                throw;
+            }
+
+            finally
+            {
+                this.gate.Release();
+            }
         }
 
         /// <summary>
@@ -188,10 +200,16 @@ namespace Espera.Core.Audio
         {
             await this.gate.WaitAsync();
 
-            await this.currentCallback.StopAsync();
-            await this.SetPlaybackStateAsync(AudioPlayerState.Stopped);
+            try
+            {
+                await this.currentCallback.StopAsync();
+                await this.SetPlaybackStateAsync(AudioPlayerState.Stopped);
+            }
 
-            this.gate.Release();
+            finally
+            {
+                this.gate.Release();
+            }
         }
 
         private async Task Finished()

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Espera.Core.Audio;
 using NSubstitute;
+using ReactiveUI;
 using Xunit;
 
 namespace Espera.Core.Tests
@@ -46,6 +49,78 @@ namespace Espera.Core.Tests
             await audioPlayer.PlayAsync();
 
             oldMediaPlayer.Received(1).StopAsync();
+        }
+
+        public class TheLoadAsyncMethod
+        {
+            [Fact]
+            public async Task DisposesCurrentAudioPlayerIfNewOneRegistered()
+            {
+                var audioPlayer = new AudioPlayer();
+
+                var oldMediaPlayer = Substitute.For<IMediaPlayerCallback, IDisposable>();
+                var newMediaPlayer = Substitute.For<IMediaPlayerCallback, IDisposable>();
+
+                audioPlayer.RegisterAudioPlayerCallback(oldMediaPlayer);
+                await audioPlayer.LoadAsync(Helpers.SetupSongMock());
+
+                audioPlayer.RegisterAudioPlayerCallback(newMediaPlayer);
+
+                ((IDisposable)oldMediaPlayer).DidNotReceive().Dispose();
+
+                await audioPlayer.LoadAsync(Helpers.SetupSongMock());
+
+                ((IDisposable)oldMediaPlayer).Received().Dispose();
+            }
+
+            [Fact]
+            public async Task LoadsIntoAudioPlayerIfSongIsAudio()
+            {
+                var audioPlayer = new AudioPlayer();
+                var mediaPlayerCallback = Substitute.For<IMediaPlayerCallback>();
+                audioPlayer.RegisterAudioPlayerCallback(mediaPlayerCallback);
+
+                var song = Substitute.For<Song>("C://", TimeSpan.Zero);
+                song.IsVideo.Returns(false);
+
+                await audioPlayer.LoadAsync(song);
+
+                mediaPlayerCallback.ReceivedWithAnyArgs().LoadAsync(Arg.Any<Uri>());
+            }
+
+            [Fact]
+            public async Task LoadsIntoVideoPlayerIfSongIsVideo()
+            {
+                var audioPlayer = new AudioPlayer();
+                var mediaPlayerCallback = Substitute.For<IMediaPlayerCallback>();
+                audioPlayer.RegisterVideoPlayerCallback(mediaPlayerCallback);
+
+                var song = Substitute.For<Song>("C://", TimeSpan.Zero);
+                song.IsVideo.Returns(true);
+
+                await audioPlayer.LoadAsync(song);
+
+                mediaPlayerCallback.ReceivedWithAnyArgs().LoadAsync(Arg.Any<Uri>());
+            }
+
+            [Fact]
+            public async Task StopsCurrentPlayback()
+            {
+                var audioPlayer = new AudioPlayer();
+
+                var states = audioPlayer.PlaybackState.CreateCollection();
+
+                var mediaPlayer = Substitute.For<IMediaPlayerCallback>();
+                mediaPlayer.Finished.Returns(Observable.Never<Unit>());
+                audioPlayer.RegisterAudioPlayerCallback(mediaPlayer);
+
+                await audioPlayer.LoadAsync(Helpers.SetupSongMock());
+                await audioPlayer.PlayAsync();
+
+                await audioPlayer.LoadAsync(Helpers.SetupSongMock());
+
+                Assert.Equal(new[] { AudioPlayerState.None, AudioPlayerState.Stopped, AudioPlayerState.Playing, AudioPlayerState.Stopped }, states);
+            }
         }
     }
 }
