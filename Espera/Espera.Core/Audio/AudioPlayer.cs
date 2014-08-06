@@ -136,6 +136,12 @@ namespace Espera.Core.Audio
             try
             {
                 await this.currentCallback.LoadAsync(new Uri(this.loadedSong.Value.PlaybackPath));
+
+                this.currentCallback.Finished
+                    .FirstAsync()
+                    .TakeUntil(this.PlaybackState.Where(x => x == AudioPlayerState.Stopped || x == AudioPlayerState.Finished))
+                    .SelectMany(_ => this.Finished().ToObservable())
+                    .Subscribe();
             }
 
             catch (Exception ex)
@@ -147,11 +153,6 @@ namespace Espera.Core.Audio
             {
                 this.gate.Release();
             }
-
-            this.currentCallback.Finished.FirstAsync()
-                .SelectMany(_ => this.Finished().ToObservable())
-                .TakeUntil(this.loadedSong.Skip(1))
-                .Subscribe();
         }
 
         internal async Task PauseAsync()

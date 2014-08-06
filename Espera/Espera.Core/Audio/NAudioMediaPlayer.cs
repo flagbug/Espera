@@ -78,12 +78,20 @@ namespace Espera.Core.Audio
 
         public Task PauseAsync()
         {
-            return Task.Run(() => this.outputDevice.Pause());
+            return Task.Run(() =>
+            {
+                this.outputDevice.Pause();
+                SpinWait.SpinUntil(() => this.outputDevice.PlaybackState == PlaybackState.Paused);
+            });
         }
 
         public Task PlayAsync()
         {
-            return Task.Run(() => this.outputDevice.Play());
+            return Task.Run(() =>
+            {
+                this.outputDevice.Play();
+                SpinWait.SpinUntil(() => this.outputDevice.PlaybackState == PlaybackState.Playing);
+            });
         }
 
         public void SetVolume(float volume)
@@ -96,7 +104,11 @@ namespace Espera.Core.Audio
 
         public Task StopAsync()
         {
-            return Task.Run(() => this.outputDevice.Stop());
+            return Task.Run(() =>
+            {
+                this.outputDevice.Stop();
+                SpinWait.SpinUntil(() => this.outputDevice.PlaybackState == PlaybackState.Stopped);
+            });
         }
     }
 }
