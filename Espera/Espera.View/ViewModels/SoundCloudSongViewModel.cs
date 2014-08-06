@@ -1,4 +1,5 @@
-﻿using Espera.Core;
+﻿using System.Globalization;
+using Espera.Core;
 using ReactiveUI;
 using System;
 using System.IO;
@@ -38,6 +39,16 @@ namespace Espera.View.ViewModels
         {
             get { return this.isLoadingThumbnail; }
             private set { this.RaiseAndSetIfChanged(ref this.isLoadingThumbnail, value); }
+        }
+
+        public int PlaybackCount
+        {
+            get { return ((SoundCloudSong)this.Model).PlaybackCount; }
+        }
+
+        public string Playbacks
+        {
+            get { return String.Format(NumberFormatInfo.InvariantInfo, "{0:N0}", this.PlaybackCount); }
         }
 
         public ImageSource Thumbnail

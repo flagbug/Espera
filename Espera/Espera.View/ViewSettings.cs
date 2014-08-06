@@ -82,6 +82,12 @@ namespace Espera.View
             set { this.SetOrCreate(value); }
         }
 
+        public int SoundCloudplaybacksColumnWidth
+        {
+            get { return this.GetOrCreate(100); }
+            set { this.SetOrCreate(value); }
+        }
+
         public int SoundCloudTitleColumnWidth
         {
             get { return this.GetOrCreate(250); }

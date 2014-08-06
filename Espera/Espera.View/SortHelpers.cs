@@ -21,6 +21,12 @@ namespace Espera.View
                 .OrderBy(song => song.Duration, sortOrder);
         }
 
+        public static Func<IEnumerable<SoundCloudSongViewModel>, IOrderedEnumerable<SoundCloudSongViewModel>> GetOrderByPlaybacks(SortOrder sortOrder)
+        {
+            return songs => songs
+                .OrderBy(song => song.PlaybackCount, sortOrder);
+        }
+
         public static Func<IEnumerable<YoutubeSongViewModel>, IOrderedEnumerable<YoutubeSongViewModel>> GetOrderByRating(SortOrder sortOrder)
         {
             return songs => songs

@@ -811,6 +811,14 @@
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
+                                        <GridViewColumn Width="{Binding Path=PlaybacksColumnWidth, Mode=TwoWay}">
+                                            <GridViewColumnHeader Command="{Binding Path=OrderByPlaybacksCommand}" Content="Plays" />
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Path=Playbacks}" TextTrimming="CharacterEllipsis" />
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
                                         <GridViewColumn Width="{Binding Path=LinkColumnWidth, Mode=TwoWay}" Header="Link">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>

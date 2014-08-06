@@ -46,6 +46,9 @@ namespace Espera.Core
             set { this.OriginalPath = value.ToString(); }
         }
 
+        [JsonProperty("playback_count")]
+        public int PlaybackCount { get; set; }
+
         [JsonProperty("stream_url")]
         public Uri StreamUrl
         {

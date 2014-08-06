@@ -10,6 +10,7 @@ namespace Espera.View.ViewModels
     internal class SoundCloudViewModel : NetworkSongViewModel<SoundCloudSongViewModel, SoundCloudSong>
     {
         private readonly ViewSettings viewSettings;
+        private SortOrder playbacksOrder;
         private SortOrder uploaderOrder;
 
         public SoundCloudViewModel(Library library, Guid accessToken, CoreSettings coreSettings, ViewSettings viewSettings, INetworkStatus networkStatus = null, INetworkSongFinder<SoundCloudSong> songFinder = null)
@@ -23,6 +24,9 @@ namespace Espera.View.ViewModels
 
             this.OrderByUploaderCommand = new ReactiveCommand();
             this.OrderByUploaderCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByUploader, ref this.uploaderOrder));
+
+            this.OrderByPlaybacksCommand = new ReactiveCommand();
+            this.OrderByPlaybacksCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByPlaybacks, ref this.playbacksOrder));
         }
 
         public int DurationColumnWidth
@@ -37,7 +41,15 @@ namespace Espera.View.ViewModels
             set { this.viewSettings.SoundCloudLinkColumnWidth = value; }
         }
 
+        public ReactiveCommand OrderByPlaybacksCommand { get; private set; }
+
         public ReactiveCommand OrderByUploaderCommand { get; private set; }
+
+        public int PlaybacksColumnWidth
+        {
+            get { return this.viewSettings.SoundCloudplaybacksColumnWidth; }
+            set { this.viewSettings.SoundCloudplaybacksColumnWidth = value; }
+        }
 
         public int TitleColumnWidth
         {
