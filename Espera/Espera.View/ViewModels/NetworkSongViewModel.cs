@@ -70,7 +70,8 @@ namespace Espera.View.ViewModels
                 .Merge(this.connectionError.Select(x => true))
                 .ToProperty(this, x => x.IsNetworkUnavailable);
 
-            this.WhenAnyValue(x => x.SearchText).Skip(1).Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler).Select(_ => Unit.Default)
+            this.WhenAnyValue(x => x.SearchText, x => x.Trim()).DistinctUntilChanged().Skip(1)
+                .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler).Select(_ => Unit.Default)
                 .Merge(networkAvailable.Where(x => x).DistinctUntilChanged().ToUnit())
                 .Select(_ => this.StartSearchAsync().ToObservable().LoggedCatch(this, Observable.Empty<IReadOnlyList<TViewModel>>()))
                 // We don't use SelectMany, because we only care about the latest invocation and
