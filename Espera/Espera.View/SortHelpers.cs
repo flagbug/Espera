@@ -9,8 +9,24 @@ namespace Espera.View
     {
         public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByArtist<T>(SortOrder sortOrder) where T : ISongViewModelBase
         {
+            // We use this as lookup table, as RemoveArtistPrefixes is expensive
+            var artistDic = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+
             return songs => songs
-                .OrderBy(song => RemoveArtistPrefixes(song.Artist), sortOrder)
+                .OrderBy(song =>
+                {
+                    string artist;
+                    if (artistDic.TryGetValue(song.Artist, out artist))
+                    {
+                        return artist;
+                    }
+
+                    string removedPrefixes = RemoveArtistPrefixes(song.Artist);
+
+                    artistDic.Add(song.Artist, removedPrefixes);
+
+                    return removedPrefixes;
+                }, sortOrder)
                 .ThenBy(song => song.Album, sortOrder)
                 .ThenBy(song => song.TrackNumber, sortOrder);
         }
