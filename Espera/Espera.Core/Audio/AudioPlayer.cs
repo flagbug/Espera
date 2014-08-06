@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace Espera.Core.Audio
         private IMediaPlayerCallback audioPlayerCallback;
         private IMediaPlayerCallback currentCallback;
         private bool disposeCurrentAudioCallback;
+        private SerialDisposable finishSubscription;
         private IMediaPlayerCallback videoPlayerCallback;
 
         internal AudioPlayer()
@@ -30,6 +32,7 @@ namespace Espera.Core.Audio
             this.videoPlayerCallback = new DummyMediaPlayerCallback();
             this.currentCallback = new DummyMediaPlayerCallback();
 
+            this.finishSubscription = new SerialDisposable();
             this.gate = new SemaphoreSlim(1, 1);
 
             this.playbackState = new BehaviorSubject<AudioPlayerState>(AudioPlayerState.None);
@@ -108,9 +111,14 @@ namespace Espera.Core.Audio
             if (song == null)
                 throw new ArgumentNullException("song");
 
+            await this.gate.WaitAsync();
+
+            this.finishSubscription.Disposable = Disposable.Empty;
+
             try
             {
-                await this.StopAsync();
+                await this.currentCallback.StopAsync();
+                await this.SetPlaybackStateAsync(AudioPlayerState.Stopped);
             }
 
             // If the stop method throws an exception and we don't swallow it, we can never reassign
@@ -127,8 +135,6 @@ namespace Espera.Core.Audio
 
             this.disposeCurrentAudioCallback = false;
 
-            await this.gate.WaitAsync();
-
             this.loadedSong.OnNext(song);
 
             this.currentCallback = song.IsVideo ? this.videoPlayerCallback : this.audioPlayerCallback;
@@ -137,9 +143,7 @@ namespace Espera.Core.Audio
             {
                 await this.currentCallback.LoadAsync(new Uri(this.loadedSong.Value.PlaybackPath));
 
-                this.currentCallback.Finished
-                    .FirstAsync()
-                    .TakeUntil(this.PlaybackState.Where(x => x == AudioPlayerState.Stopped || x == AudioPlayerState.Finished))
+                this.finishSubscription.Disposable = this.currentCallback.Finished.FirstAsync()
                     .SelectMany(_ => this.Finished().ToObservable())
                     .Subscribe();
             }
