@@ -122,5 +122,27 @@ namespace Espera.Core.Tests
                 Assert.Equal(new[] { AudioPlayerState.None, AudioPlayerState.Stopped, AudioPlayerState.Playing, AudioPlayerState.Stopped }, states);
             }
         }
+
+        public class TheRegisterAudioPlayerMethod
+        {
+            [Fact]
+            public async Task DisposesDanglingAudioPlayer()
+            {
+                var audioPlayer = new AudioPlayer();
+                var mediaPlayer = Substitute.For<IMediaPlayerCallback>();
+                audioPlayer.RegisterAudioPlayerCallback(mediaPlayer);
+                await audioPlayer.LoadAsync(Helpers.SetupSongMock());
+
+                var danglingPlayer = Substitute.For<IMediaPlayerCallback, IDisposable>();
+
+                audioPlayer.RegisterAudioPlayerCallback(danglingPlayer);
+
+                var newPlayer = Substitute.For<IMediaPlayerCallback>();
+
+                audioPlayer.RegisterAudioPlayerCallback(newPlayer);
+
+                ((IDisposable)danglingPlayer).Received(1).Dispose();
+            }
+        }
     }
 }

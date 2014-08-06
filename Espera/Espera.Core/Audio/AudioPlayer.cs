@@ -74,8 +74,14 @@ namespace Espera.Core.Audio
 
         public void RegisterAudioPlayerCallback(IMediaPlayerCallback audioPlayerCallback)
         {
-            this.disposeCurrentAudioCallback = true;
+            if (this.disposeCurrentAudioCallback && this.audioPlayerCallback is IDisposable)
+            {
+                ((IDisposable)this.audioPlayerCallback).Dispose();
+                this.disposeCurrentAudioCallback = false;
+            }
+
             this.audioPlayerCallback = audioPlayerCallback;
+            this.disposeCurrentAudioCallback = true;
         }
 
         public void RegisterVideoPlayerCallback(IMediaPlayerCallback videoPlayerCallback)
