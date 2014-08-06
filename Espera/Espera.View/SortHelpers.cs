@@ -7,6 +7,8 @@ namespace Espera.View
 {
     internal static class SortHelpers
     {
+        public static readonly string[] ArtistPrefixes = { "A", "The" };
+
         public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByArtist<T>(SortOrder sortOrder) where T : ISongViewModelBase
         {
             // We use this as lookup table, as RemoveArtistPrefixes is expensive
@@ -84,8 +86,7 @@ namespace Espera.View
         /// <example>With prefixes "A" and "The": "A Bar" -&gt; "Bar", "The Foos" -&gt; "Foos"</example>
         public static string RemoveArtistPrefixes(string artistName)
         {
-            var prefixes = new[] { "A", "The" };
-            foreach (string prefix in prefixes)
+            foreach (string prefix in ArtistPrefixes)
             {
                 int lengthWithSpace = prefix.Length + 1;
 
