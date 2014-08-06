@@ -145,7 +145,6 @@ namespace Espera.View.ViewModels
         private void UpdateArtists()
         {
             var groupedByArtist = this.Library.Songs
-               .AsParallel()
                .ToLookup(x => x.Artist, StringComparer.InvariantCultureIgnoreCase);
 
             List<ArtistViewModel> artistsToRemove = this.allArtists.Where(x => !groupedByArtist.Contains(x.Name)).ToList();
