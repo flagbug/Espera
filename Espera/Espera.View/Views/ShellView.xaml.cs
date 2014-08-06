@@ -313,8 +313,9 @@ namespace Espera.View.Views
         {
             const string songSourceFormat = "SongSource";
 
-            this.LocalSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x))
-                .Merge(this.YoutubeSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)))
+            Observable.Merge(this.LocalSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)),
+                this.YoutubeSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)),
+                this.SoundCloudSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)))
                 .Where(x => x.Item2.LeftButton == MouseButtonState.Pressed)
                 .Subscribe(x =>
                 {
@@ -325,7 +326,7 @@ namespace Espera.View.Views
             var playlistDropEvent = this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
                 .Merge(this.PlaylistListBox.Events().Drop.Select(x => Tuple.Create((object)null, x)));
 
-            // Local songs and YouTube songs
+            // Local, YouTube and SoundCloud songs
             playlistDropEvent
                 .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Item2.Data.GetData(DataFormats.StringFormat) == songSourceFormat)
                 .Subscribe(x =>
