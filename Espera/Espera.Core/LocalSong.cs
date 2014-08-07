@@ -1,7 +1,7 @@
-﻿using Espera.Network;
+﻿using System.Reactive.Linq;
+using Espera.Network;
 using Rareform.Validation;
 using System;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
 namespace Espera.Core
@@ -36,6 +36,16 @@ namespace Espera.Core
         public IObservable<string> ArtworkKey
         {
             get { return this.artworkKey.AsObservable(); }
+        }
+
+        /// <summary>
+        /// Gets the key of the artwork for Akavache to retrieve. Null, if there is no album cover.
+        ///
+        /// This property ensures fast access without change notification.
+        /// </summary>
+        public string ArtworkKeyProperty
+        {
+            get { return this.artworkKey.Value; }
         }
 
         /// <summary>

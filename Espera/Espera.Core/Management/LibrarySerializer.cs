@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -26,7 +25,7 @@ namespace Espera.Core.Management
                     path = song.OriginalPath,
                     title = song.Title,
                     trackNumber = song.TrackNumber,
-                    artworkKey = song.ArtworkKey.FirstAsync().Wait()
+                    artworkKey = song.ArtworkKeyProperty
                 }),
                 playlists = playlists.Select(playlist => new
                 {
