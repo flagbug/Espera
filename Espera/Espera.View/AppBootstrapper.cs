@@ -139,7 +139,7 @@ namespace Espera.View
             this.Log().Info("******************************");
             this.Log().Info("Application version: " + Version);
             this.Log().Info("OS Version: " + Environment.OSVersion.VersionString);
-            this.Log().Info("Current culture: " + CultureInfo.CurrentCulture.Name);
+            this.Log().Info("Current culture: " + CultureInfo.InstalledUICulture.Name);
 
             Directory.CreateDirectory(DirectoryPath);
 

@@ -31,7 +31,7 @@ namespace Espera.Core.Analytics
     {
         public static Task RecordLanguageAsync(this IAnalyticsEndpoint endpoint)
         {
-            return endpoint.RecordMetaDataAsync("language", CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
+            return endpoint.RecordMetaDataAsync("language", CultureInfo.InstalledUICulture.TwoLetterISOLanguageName);
         }
 
         public static Task RecordLibrarySizeAsync(this IAnalyticsEndpoint endpoint, int songCount)
