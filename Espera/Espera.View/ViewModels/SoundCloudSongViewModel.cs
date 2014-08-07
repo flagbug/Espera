@@ -43,7 +43,7 @@ namespace Espera.View.ViewModels
 
         public int PlaybackCount
         {
-            get { return ((SoundCloudSong)this.Model).PlaybackCount; }
+            get { return ((SoundCloudSong)this.Model).PlaybackCount.GetValueOrDefault(); }
         }
 
         public string Playbacks

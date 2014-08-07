@@ -12,13 +12,25 @@ namespace Espera.Core
 
         public async Task<IReadOnlyList<SoundCloudSong>> GetSongsAsync(string searchTerm)
         {
-            var api = RestService.For<ISoundCloudApi>("http://api.soundcloud.com");
+            IReadOnlyList<SoundCloudSong> songs;
 
-            List<SoundCloudSong> songs;
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var api = RestService.For<ISoundCloudApi>("http://api-v2.soundcloud.com");
+
+                songs = (await api.GetPopularTracks(50)).Tracks;
+            }
+
+            else
+            {
+                var api = RestService.For<ISoundCloudApi>("http://api.soundcloud.com");
+
+                songs = await api.Search(searchTerm, ClientId);
+            }
 
             try
             {
-                songs = (await api.Search(searchTerm, ClientId)).Where(x => x.IsStreamable).ToList();
+                songs = songs.Where(x => x.IsStreamable).ToList();
             }
 
             catch (Exception ex)

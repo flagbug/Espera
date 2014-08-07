@@ -46,8 +46,9 @@ namespace Espera.Core
             set { this.OriginalPath = value.ToString(); }
         }
 
+        /// <remarks>For whatever reasons, the SoundCloud API can return null for this.</remarks>
         [JsonProperty("playback_count")]
-        public int PlaybackCount { get; set; }
+        public int? PlaybackCount { get; set; }
 
         [JsonProperty("stream_url")]
         public Uri StreamUrl
