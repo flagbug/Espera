@@ -30,7 +30,8 @@ namespace Espera.View.ViewModels
             this.searchText = String.Empty;
             this.selectableSongs = Enumerable.Empty<T>();
             this.timeoutWarning = new Subject<Unit>();
-            this.SongOrderFunc = SortHelpers.GetOrderByTitle<T>(SortOrder.Descending);
+
+            this.ApplyOrder(SortHelpers.GetOrderByTitle<T>, ref this.titleOrder);
 
             this.AddToPlaylistCommand = this.WhenAnyValue(x => x.SelectedSongs, x => x != null && x.Any()).ToCommand();
             this.AddToPlaylistCommand.Subscribe(x =>
