@@ -1,3 +1,14 @@
+# v2.5.0
+
+## Features
+- Added SoundCloud support.
+
+## Changes
+- YouTube now adds the song to the end of the playlist instead of playing it directly.
+
+## Bugfixes
+- Fixed issues with the YouTube playback.
+
 # v2.4.1
 
 ## Changes
