@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Deployment.Application;
 using System.Globalization;
 using System.Threading.Tasks;
+using ReactiveUI;
 
 namespace Espera.Core.Analytics
 {
@@ -42,6 +44,12 @@ namespace Espera.Core.Analytics
         public static Task RecordMobileUsageAsync(this IAnalyticsEndpoint endpoint)
         {
             return endpoint.RecordMetaDataAsync("uses-mobile", "true");
+        }
+
+        public static Task RecordDeploymentType(this IAnalyticsEndpoint endpoint)
+        {
+            return endpoint.RecordMetaDataAsync("deployment-type", ApplicationDeployment.IsNetworkDeployed ? 
+                "clickonce" : "portable");
         }
     }
 }

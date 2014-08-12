@@ -42,9 +42,10 @@ namespace Espera.Core.Analytics
             return token;
         }
 
-        public async Task RecordDeviceInformationAsync()
+        public Task RecordDeviceInformationAsync()
         {
-            await this.RecordLanguageAsync();
+            // Buddy automatically records device informations
+            return Task.Delay(0);
         }
 
         public async Task RecordErrorAsync(Exception ex, string message = null)
