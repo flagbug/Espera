@@ -1,4 +1,6 @@
-﻿using Espera.Core;
+﻿using System.ComponentModel;
+using System.Diagnostics;
+using Espera.Core;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;

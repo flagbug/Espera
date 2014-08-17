@@ -69,10 +69,10 @@ namespace Espera.View.ViewModels
                 .Select(x => x == AccessPermission.Admin)
                 .ToProperty(this, x => x.IsAdmin);
 
-            this.OrderByDurationCommand = new ReactiveCommand();
+            this.OrderByDurationCommand = new ReactiveUI.Legacy.ReactiveCommand();
             this.OrderByDurationCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByDuration<T>, ref this.durationOrder));
 
-            this.OrderByTitleCommand = new ReactiveCommand();
+            this.OrderByTitleCommand = new ReactiveUI.Legacy.ReactiveCommand();
             this.OrderByTitleCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByTitle<T>, ref this.titleOrder));
         }
 
@@ -85,9 +85,9 @@ namespace Espera.View.ViewModels
             get { return this.isAdmin.Value; }
         }
 
-        public ReactiveCommand OrderByDurationCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand OrderByDurationCommand { get; private set; }
 
-        public ReactiveCommand OrderByTitleCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand OrderByTitleCommand { get; private set; }
 
         public abstract ReactiveUI.Legacy.ReactiveCommand PlayNowCommand { get; }
 

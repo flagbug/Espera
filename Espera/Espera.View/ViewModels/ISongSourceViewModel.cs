@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reactive;
 using Espera.Core.Settings;
-using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
-    internal interface ISongSourceViewModel : IReactiveNotifyPropertyChanged
+    internal interface ISongSourceViewModel : INotifyPropertyChanged
     {
         ReactiveUI.Legacy.ReactiveCommand AddToPlaylistCommand { get; }
 

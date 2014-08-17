@@ -3,7 +3,6 @@ using Espera.Core.Management;
 using Espera.Core.Settings;
 using System;
 using Rareform.Validation;
-using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
@@ -22,10 +21,10 @@ namespace Espera.View.ViewModels
 
             this.viewSettings = viewSettings;
 
-            this.OrderByUploaderCommand = new ReactiveCommand();
+            this.OrderByUploaderCommand = new ReactiveUI.Legacy.ReactiveCommand();
             this.OrderByUploaderCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByUploader, ref this.uploaderOrder));
 
-            this.OrderByPlaybacksCommand = new ReactiveCommand();
+            this.OrderByPlaybacksCommand = new ReactiveUI.Legacy.ReactiveCommand();
             this.OrderByPlaybacksCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByPlaybacks, ref this.playbacksOrder));
         }
 
@@ -41,9 +40,9 @@ namespace Espera.View.ViewModels
             set { this.viewSettings.SoundCloudLinkColumnWidth = value; }
         }
 
-        public ReactiveCommand OrderByPlaybacksCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand OrderByPlaybacksCommand { get; private set; }
 
-        public ReactiveCommand OrderByUploaderCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand OrderByUploaderCommand { get; private set; }
 
         public int PlaybacksColumnWidth
         {

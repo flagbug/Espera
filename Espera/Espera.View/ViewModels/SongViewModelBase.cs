@@ -4,6 +4,7 @@ using ReactiveUI;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using Splat;
 
 namespace Espera.View.ViewModels
 {
@@ -16,7 +17,7 @@ namespace Espera.View.ViewModels
 
             this.Model = model;
 
-            this.OpenPathCommand = new ReactiveCommand();
+            this.OpenPathCommand = new ReactiveUI.Legacy.ReactiveCommand();
             this.OpenPathCommand.Subscribe(x =>
             {
                 try
@@ -58,7 +59,7 @@ namespace Espera.View.ViewModels
 
         public Song Model { get; private set; }
 
-        public ReactiveCommand OpenPathCommand { get; private set; }
+        public ReactiveUI.Legacy.ReactiveCommand OpenPathCommand { get; private set; }
 
         public string Path
         {
