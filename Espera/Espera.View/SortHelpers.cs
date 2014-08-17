@@ -7,10 +7,28 @@ namespace Espera.View
 {
     internal static class SortHelpers
     {
+        public static readonly string[] ArtistPrefixes = { "A", "The" };
+
         public static Func<IEnumerable<T>, IOrderedEnumerable<T>> GetOrderByArtist<T>(SortOrder sortOrder) where T : ISongViewModelBase
         {
+            // We use this as lookup table, as RemoveArtistPrefixes is expensive
+            var artistDic = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+
             return songs => songs
-                .OrderBy(song => RemoveArtistPrefixes(song.Artist), sortOrder)
+                .OrderBy(song =>
+                {
+                    string artist;
+                    if (artistDic.TryGetValue(song.Artist, out artist))
+                    {
+                        return artist;
+                    }
+
+                    string removedPrefixes = RemoveArtistPrefixes(song.Artist);
+
+                    artistDic.Add(song.Artist, removedPrefixes);
+
+                    return removedPrefixes;
+                }, sortOrder)
                 .ThenBy(song => song.Album, sortOrder)
                 .ThenBy(song => song.TrackNumber, sortOrder);
         }
@@ -19,6 +37,12 @@ namespace Espera.View
         {
             return songs => songs
                 .OrderBy(song => song.Duration, sortOrder);
+        }
+
+        public static Func<IEnumerable<SoundCloudSongViewModel>, IOrderedEnumerable<SoundCloudSongViewModel>> GetOrderByPlaybacks(SortOrder sortOrder)
+        {
+            return songs => songs
+                .OrderBy(song => song.PlaybackCount, sortOrder);
         }
 
         public static Func<IEnumerable<YoutubeSongViewModel>, IOrderedEnumerable<YoutubeSongViewModel>> GetOrderByRating(SortOrder sortOrder)
@@ -31,6 +55,13 @@ namespace Espera.View
         {
             return songs => songs
                 .OrderBy(song => song.Title, sortOrder);
+        }
+
+        public static Func<IEnumerable<SoundCloudSongViewModel>, IOrderedEnumerable<SoundCloudSongViewModel>> GetOrderByUploader(SortOrder sortOrder)
+        {
+            return songs => songs
+                .OrderBy(song => song.Uploader, sortOrder)
+                .ThenBy(song => song.Title);
         }
 
         public static Func<IEnumerable<YoutubeSongViewModel>, IOrderedEnumerable<YoutubeSongViewModel>> GetOrderByViews(SortOrder sortOrder)
@@ -55,8 +86,7 @@ namespace Espera.View
         /// <example>With prefixes "A" and "The": "A Bar" -&gt; "Bar", "The Foos" -&gt; "Foos"</example>
         public static string RemoveArtistPrefixes(string artistName)
         {
-            var prefixes = new[] { "A", "The" };
-            foreach (string prefix in prefixes)
+            foreach (string prefix in ArtistPrefixes)
             {
                 int lengthWithSpace = prefix.Length + 1;
 

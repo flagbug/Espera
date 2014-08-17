@@ -40,7 +40,7 @@ namespace Espera.Core
 
         public string Artist { get; set; }
 
-        public TimeSpan Duration { get; private set; }
+        public TimeSpan Duration { get; set; }
 
         public string Genre { get; set; }
 
@@ -68,7 +68,7 @@ namespace Espera.Core
         /// <summary>
         /// Gets the path of the song on the local filesystem, or in the internet.
         /// </summary>
-        public string OriginalPath { get; private set; }
+        public string OriginalPath { get; protected set; }
 
         /// <summary>
         /// Gets the path to stream the audio from.

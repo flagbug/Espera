@@ -213,6 +213,8 @@ namespace Espera.Core.Analytics
                 try
                 {
                     await this.client.RecordDeviceInformationAsync();
+                    await this.client.RecordLanguageAsync();
+                    await this.client.RecordDeploymentType();
                 }
 
                 catch (Exception ex)

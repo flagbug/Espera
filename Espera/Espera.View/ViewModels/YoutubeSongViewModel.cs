@@ -1,19 +1,16 @@
-﻿using System;
+﻿using Espera.Core;
+using ReactiveUI;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Espera.Core;
-using ReactiveUI;
 using ReactiveUI.Legacy;
 using Splat;
 using YoutubeExtractor;
@@ -249,8 +246,10 @@ namespace Espera.View.ViewModels
                     }
                 }
 
-                catch (WebException)
-                { } // We can't load the thumbnail, ignore it
+                catch (HttpRequestException ex)
+                {
+                    this.Log().ErrorException("Failed to download YouTube artwork", ex);
+                }
 
                 finally
                 {

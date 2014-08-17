@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -25,18 +25,12 @@ namespace Espera.Core.Management
                     path = song.OriginalPath,
                     title = song.Title,
                     trackNumber = song.TrackNumber,
-                    artworkKey = song.ArtworkKey.FirstAsync().Wait()
+                    artworkKey = song.ArtworkKeyProperty
                 }),
                 playlists = playlists.Select(playlist => new
                 {
                     name = playlist.Name,
-                    entries = playlist.Select(entry => new
-                    {
-                        path = entry.Song.OriginalPath,
-                        title = entry.Song is YoutubeSong ? entry.Song.Title : null,
-                        type = entry.Song is YoutubeSong ? "YouTube" : "Local",
-                        duration = entry.Song is YoutubeSong ? new long?(entry.Song.Duration.Ticks) : null
-                    })
+                    entries = playlist.Select(entry => SerializeSong(entry.Song))
                 })
             }, new JsonSerializer { NullValueHandling = NullValueHandling.Ignore });
 
@@ -47,6 +41,44 @@ namespace Espera.Core.Management
 
                 json.WriteTo(jw);
             }
+        }
+
+        private static object SerializeSong(Song song)
+        {
+            // If the song is a local song, we only need to store the path and later look it up locally
+            //
+            // For SoundCloud songs, we need to store the artist (uploader) and playback path additionally
+            string type;
+
+            if (song is LocalSong)
+            {
+                type = "Local";
+            }
+
+            else if (song is YoutubeSong)
+            {
+                type = "YouTube";
+            }
+
+            else if (song is SoundCloudSong)
+            {
+                type = "SoundCloud";
+            }
+
+            else
+            {
+                throw new NotImplementedException("Song type not implemented.");
+            }
+
+            return new
+            {
+                path = song.OriginalPath,
+                playbackPath = song is SoundCloudSong ? song.PlaybackPath : null,
+                title = song is LocalSong ? null : song.Title,
+                type,
+                duration = song is LocalSong ? null : new long?(song.Duration.Ticks),
+                artist = song is SoundCloudSong ? song.Artist : null
+            };
         }
     }
 }

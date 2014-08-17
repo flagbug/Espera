@@ -16,23 +16,55 @@ namespace Espera.Core.Management
                 Name = playlist["name"].ToObject<string>(),
                 Entries = playlist["entries"].Select(entry =>
                 {
-                    var type = entry["type"].ToObject<string>() == "Local" ? typeof(LocalSong) : typeof(YoutubeSong);
+                    var typeString = entry["type"].ToObject<string>();
+                    Type type;
+
+                    if (typeString == "Local")
+                    {
+                        type = typeof(LocalSong);
+                    }
+
+                    else if (typeString == "YouTube")
+                    {
+                        type = typeof(YoutubeSong);
+                    }
+
+                    else if (typeString == "SoundCloud")
+                    {
+                        type = typeof(SoundCloudSong);
+                    }
+
+                    else
+                    {
+                        throw new NotImplementedException("Type not implemented.");
+                    }
 
                     TimeSpan? duration = null;
                     string title = null;
 
-                    if (type == typeof(YoutubeSong))
+                    if (type == typeof(YoutubeSong) || type == typeof(SoundCloudSong))
                     {
                         duration = TimeSpan.FromTicks(entry["duration"].ToObject<long>());
                         title = entry["title"].ToObject<string>();
                     }
 
+                    string artist = null;
+                    string playbackPath = null;
+
+                    if (type == typeof(SoundCloudSong))
+                    {
+                        artist = entry["artist"].ToObject<string>();
+                        playbackPath = entry["playbackPath"].ToObject<string>();
+                    }
+
                     return new
                     {
-                        Path = entry["path"].ToObject<string>(),
+                        OriginalPath = entry["path"].ToObject<string>(),
+                        PlaybackPath = playbackPath,
                         Type = type,
                         Duration = duration,
-                        Title = title
+                        Title = title,
+                        Artist = artist
                     };
                 })
             });
@@ -45,13 +77,27 @@ namespace Espera.Core.Management
                 {
                     if (entry.Type == typeof(YoutubeSong))
                     {
-                        return new YoutubeSong(entry.Path, entry.Duration.Value)
+                        return new YoutubeSong(entry.OriginalPath, entry.Duration.Value)
                         {
                             Title = entry.Title
                         };
                     }
 
-                    return songs.First(song => song.OriginalPath == entry.Path);
+                    if (entry.Type == typeof(SoundCloudSong))
+                    {
+                        return new SoundCloudSong
+                        {
+                            PermaLinkUrl = new Uri(entry.OriginalPath),
+                            StreamUrl = new Uri(entry.PlaybackPath),
+                            Artist = entry.Artist,
+                            Title = entry.Title,
+                            Duration = entry.Duration.Value
+                        };
+                    }
+
+                    // We search for the path locally, so we don't have to serialize data about
+                    // local songs
+                    return songs.First(song => song.OriginalPath == entry.OriginalPath);
                 });
 
                 playlist.AddSongs(s);

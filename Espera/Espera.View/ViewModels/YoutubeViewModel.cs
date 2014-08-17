@@ -1,54 +1,52 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Rareform.Validation;
-using ReactiveMarrow;
 using ReactiveUI;
 using ReactiveUI.Legacy;
 using Splat;
 
 namespace Espera.View.ViewModels
 {
-    public sealed class YoutubeViewModel : SongSourceViewModel<YoutubeSongViewModel>
+    public sealed class YoutubeViewModel : NetworkSongViewModel<YoutubeSongViewModel, YoutubeSong>
     {
-        private readonly Subject<Unit> connectionError;
-        private readonly CoreSettings coreSettings;
-        private readonly ObservableAsPropertyHelper<bool> isNetworkUnavailable;
-        private readonly ReactiveUI.Legacy.ReactiveCommand playNowCommand;
-        private readonly ObservableAsPropertyHelper<YoutubeSongViewModel> selectedSong;
-        private readonly IYoutubeSongFinder songFinder;
         private readonly ViewSettings viewSettings;
-        private SortOrder durationOrder;
-        private bool isSearching;
         private SortOrder ratingOrder;
-        private SortOrder titleOrder;
         private SortOrder viewsOrder;
+        private readonly ReactiveUI.Legacy.ReactiveCommand playNowCommand;
+
+        public int RatingColumnWidth
+        {
+            get { return this.viewSettings.YoutubeRatingColumnWidth; }
+            set { this.viewSettings.YoutubeRatingColumnWidth = value; }
+        }
+
+        public ReactiveCommand OrderByViewsCommand { get; private set; }
+
+        public override ReactiveUI.Legacy.ReactiveCommand PlayNowCommand
+        {
+            get { return this.playNowCommand; }
+        }
 
         public YoutubeViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, Guid accessToken, INetworkStatus networkstatus = null, IYoutubeSongFinder songFinder = null)
             : base(library, accessToken)
+            : base(library, accessToken, coreSettings,
+                song => new YoutubeSongViewModel(song, () => coreSettings.YoutubeDownloadPath),
+                networkstatus,
+                songFinder ?? new YoutubeSongFinder())
         {
             if (viewSettings == null)
                 Throw.ArgumentNullException(() => viewSettings);
 
-            if (coreSettings == null)
-                Throw.ArgumentNullException(() => coreSettings);
-
             this.viewSettings = viewSettings;
-            this.coreSettings = coreSettings;
-            this.songFinder = songFinder ?? new YoutubeSongFinder();
 
             this.connectionError = new Subject<Unit>();
             this.playNowCommand = new ReactiveUI.Legacy.ReactiveCommand(this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
                 .Select(x => x == AccessPermission.Admin || !this.coreSettings.LockPlayPause));
             this.playNowCommand.RegisterAsyncTask(_ => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model), accessToken));
+            this.OrderByRatingCommand = new ReactiveUI.Legacy.ReactiveCommand();
+            this.OrderByRatingCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByRating, ref this.ratingOrder));
 
             this.selectedSong = this.WhenAnyValue(x => x.SelectedSongs)
                 .Select(x => x == null ? null : (YoutubeSongViewModel)this.SelectedSongs.FirstOrDefault())
@@ -90,40 +88,13 @@ namespace Espera.View.ViewModels
             set { this.viewSettings.YoutubeDurationColumnWidth = value; }
         }
 
-        public bool IsNetworkUnavailable
-        {
-            get { return this.isNetworkUnavailable.Value; }
-        }
-
-        public bool IsSearching
-        {
-            get { return this.isSearching; }
-            private set { this.RaiseAndSetIfChanged(ref this.isSearching, value); }
-        }
-
         public int LinkColumnWidth
         {
             get { return this.viewSettings.YoutubeLinkColumnWidth; }
             set { this.viewSettings.YoutubeLinkColumnWidth = value; }
         }
 
-        public override ReactiveUI.Legacy.ReactiveCommand PlayNowCommand
-        {
-            get { return this.playNowCommand; }
-        }
-
-        public int RatingColumnWidth
-        {
-            get { return this.viewSettings.YoutubeRatingColumnWidth; }
-            set { this.viewSettings.YoutubeRatingColumnWidth = value; }
-        }
-
-        public ReactiveUI.Legacy.ReactiveCommand RefreshNetworkAvailabilityCommand { get; private set; }
-
-        public YoutubeSongViewModel SelectedSong
-        {
-            get { return this.selectedSong.Value; }
-        }
+        public ReactiveUI.Legacy.ReactiveCommand OrderByRatingCommand { get; private set; }
 
         public int TitleColumnWidth
         {
@@ -135,51 +106,6 @@ namespace Espera.View.ViewModels
         {
             get { return this.viewSettings.YoutubeViewsColumnWidth; }
             set { this.viewSettings.YoutubeViewsColumnWidth = value; }
-        }
-
-        public void OrderByDuration()
-        {
-            this.ApplyOrder(SortHelpers.GetOrderByDuration<YoutubeSongViewModel>, ref this.durationOrder);
-        }
-
-        public void OrderByRating()
-        {
-            this.ApplyOrder(SortHelpers.GetOrderByRating, ref this.ratingOrder);
-        }
-
-        public void OrderByTitle()
-        {
-            this.ApplyOrder(SortHelpers.GetOrderByTitle<YoutubeSongViewModel>, ref this.titleOrder);
-        }
-
-        public void OrderByViews()
-        {
-            this.ApplyOrder(SortHelpers.GetOrderByViews, ref this.viewsOrder);
-        }
-
-        private async Task<IReadOnlyList<YoutubeSongViewModel>> StartSearchAsync()
-        {
-            this.IsSearching = true;
-            this.SelectedSongs = null;
-
-            try
-            {
-                IReadOnlyList<YoutubeSong> songs = await this.songFinder.GetSongsAsync(this.SearchText);
-
-                return songs.Select(x => new YoutubeSongViewModel(x, () => this.coreSettings.YoutubeDownloadPath)).ToList();
-            }
-
-            catch (Exception)
-            {
-                this.connectionError.OnNext(Unit.Default);
-
-                return new List<YoutubeSongViewModel>();
-            }
-
-            finally
-            {
-                this.IsSearching = false;
-            }
         }
     }
 }

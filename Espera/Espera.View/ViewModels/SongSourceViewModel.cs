@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Espera.Core.Management;
+using Espera.Core.Settings;
 using ReactiveUI;
 
 namespace Espera.View.ViewModels
@@ -16,9 +17,11 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly Library library;
         private readonly Subject<Unit> timeoutWarning;
+        private SortOrder durationOrder;
         private string searchText;
         private IEnumerable<T> selectableSongs;
         private IEnumerable<ISongViewModelBase> selectedSongs;
+        private SortOrder titleOrder;
 
         protected SongSourceViewModel(Library library, Guid accessToken)
         {
@@ -27,6 +30,8 @@ namespace Espera.View.ViewModels
             this.searchText = String.Empty;
             this.selectableSongs = Enumerable.Empty<T>();
             this.timeoutWarning = new Subject<Unit>();
+
+            this.ApplyOrder(SortHelpers.GetOrderByTitle<T>, ref this.titleOrder);
 
             this.AddToPlaylistCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.SelectedSongs, x => x != null && x.Any()));
             this.AddToPlaylistCommand.Subscribe(x =>
@@ -63,14 +68,26 @@ namespace Espera.View.ViewModels
             this.isAdmin = this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
                 .Select(x => x == AccessPermission.Admin)
                 .ToProperty(this, x => x.IsAdmin);
+
+            this.OrderByDurationCommand = new ReactiveCommand();
+            this.OrderByDurationCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByDuration<T>, ref this.durationOrder));
+
+            this.OrderByTitleCommand = new ReactiveCommand();
+            this.OrderByTitleCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByTitle<T>, ref this.titleOrder));
         }
 
         public ReactiveUI.Legacy.ReactiveCommand AddToPlaylistCommand { get; private set; }
+
+        public abstract DefaultPlaybackAction DefaultPlaybackAction { get; }
 
         public bool IsAdmin
         {
             get { return this.isAdmin.Value; }
         }
+
+        public ReactiveCommand OrderByDurationCommand { get; private set; }
+
+        public ReactiveCommand OrderByTitleCommand { get; private set; }
 
         public abstract ReactiveUI.Legacy.ReactiveCommand PlayNowCommand { get; }
 

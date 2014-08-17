@@ -716,7 +716,7 @@ namespace Espera.Core.Management
             this.Log().Info("Library load took {0}ms", stopWatch.ElapsedMilliseconds);
         }
 
-        private void RemoveFromLibrary(IEnumerable<LocalSong> songList)
+        private async Task RemoveFromLibrary(IEnumerable<LocalSong> songList)
         {
             if (songList == null)
                 Throw.ArgumentNullException(() => songList);
@@ -727,17 +727,21 @@ namespace Espera.Core.Management
             // the same artwork key so we don't delete artwork keys that still have a corresponding
             // song in the library
             Dictionary<string, int> artworkKeys = this.Songs
-                .Select(x => x.ArtworkKey.FirstAsync().Wait())
+                .Select(x => x.ArtworkKeyProperty)
                 .Where(x => x != null)
                 .GroupBy(x => x)
                 .ToDictionary(x => x.Key, x => x.Count());
 
             var artworkKeysToDelete = enumerable
-                .GroupBy(x => x.ArtworkKey.FirstAsync().Wait())
+                .GroupBy(x => x.ArtworkKeyProperty)
                 .Where(x => x != null && x.Key != null && artworkKeys[x.Key] == x.Count())
-                .Select(x => x.Key);
+                .Select(x => x.Key)
+                .ToList();
 
-            BlobCache.LocalMachine.Invalidate(artworkKeysToDelete).Subscribe();
+            if (artworkKeysToDelete.Any())
+            {
+                await BlobCache.LocalMachine.Invalidate(artworkKeysToDelete);
+            }
 
             this.playlists.ForEach(playlist => this.RemoveFromPlaylist(playlist, enumerable));
 
@@ -787,7 +791,7 @@ namespace Espera.Core.Management
                 removable = new HashSet<LocalSong>(notInAnySongSource.Concat(nonExistant));
             });
 
-            this.RemoveFromLibrary(removable);
+            await this.RemoveFromLibrary(removable);
 
             if (removable.Any())
             {
@@ -799,7 +803,7 @@ namespace Espera.Core.Management
         {
             this.Log().Info("Starting online artwork lookup");
 
-            List<LocalSong> songsWithoutArtwork = this.Songs.Where(x => x.ArtworkKey.FirstAsync().Wait() == null).ToList();
+            List<LocalSong> songsWithoutArtwork = this.Songs.Where(x => x.ArtworkKeyProperty == null).ToList();
 
             this.Log().Info("{0} songs don't have an artwork", songsWithoutArtwork.Count);
 

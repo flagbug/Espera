@@ -69,6 +69,36 @@ namespace Espera.View
             set { this.SetOrCreate(value); }
         }
 
+        public int SoundCloudDurationColumnWidth
+        {
+            get { return this.GetOrCreate(75); }
+            set { this.SetOrCreate(value); }
+        }
+
+        public int SoundCloudLinkColumnWidth
+        {
+            get { return this.GetOrCreate(200); }
+            set { this.SetOrCreate(value); }
+        }
+
+        public int SoundCloudplaybacksColumnWidth
+        {
+            get { return this.GetOrCreate(100); }
+            set { this.SetOrCreate(value); }
+        }
+
+        public int SoundCloudTitleColumnWidth
+        {
+            get { return this.GetOrCreate(250); }
+            set { this.SetOrCreate(value); }
+        }
+
+        public int SoundCloudUploaderColumnWidth
+        {
+            get { return this.GetOrCreate(150); }
+            set { this.SetOrCreate(value); }
+        }
+
         public int YoutubeDurationColumnWidth
         {
             get { return this.GetOrCreate(75); }

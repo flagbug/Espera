@@ -1,5 +1,3 @@
-using System.Reactive;
-using System.Windows.Documents;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
@@ -13,11 +11,13 @@ using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using YoutubeExtractor;
@@ -100,6 +100,18 @@ namespace Espera.View.Views
 
             var updateViewModel = this.shellViewModel.UpdateViewModel;
             updateViewModel.ChangelogShown();
+        }
+
+        private void ExternalPathLeftMouseButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        private void ExternalPathLeftMouseButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            ((SongViewModelBase)((Hyperlink)sender).DataContext).OpenPathCommand.Execute(null);
+
+            e.Handled = true;
         }
 
         private IntPtr HandleWindowMove(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -286,26 +298,6 @@ namespace Espera.View.Views
             }
         }
 
-        private void SortYoutubeSongDuration(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.YoutubeViewModel.OrderByDuration();
-        }
-
-        private void SortYoutubeSongRating(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.YoutubeViewModel.OrderByRating();
-        }
-
-        private void SortYoutubeSongTitle(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.YoutubeViewModel.OrderByTitle();
-        }
-
-        private void SortYoutubeSongViews(object sender, RoutedEventArgs e)
-        {
-            this.shellViewModel.YoutubeViewModel.OrderByViews();
-        }
-
         private void WireDataContext()
         {
             this.shellViewModel = (ShellViewModel)this.DataContext;
@@ -321,8 +313,9 @@ namespace Espera.View.Views
         {
             const string songSourceFormat = "SongSource";
 
-            this.LocalSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x))
-                .Merge(this.YoutubeSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)))
+            Observable.Merge(this.LocalSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)),
+                this.YoutubeSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)),
+                this.SoundCloudSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)))
                 .Where(x => x.Item2.LeftButton == MouseButtonState.Pressed)
                 .Subscribe(x =>
                 {
@@ -333,7 +326,7 @@ namespace Espera.View.Views
             var playlistDropEvent = this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
                 .Merge(this.PlaylistListBox.Events().Drop.Select(x => Tuple.Create((object)null, x)));
 
-            // Local songs and YouTube songs
+            // Local, YouTube and SoundCloud songs
             playlistDropEvent
                 .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Item2.Data.GetData(DataFormats.StringFormat) == songSourceFormat)
                 .Subscribe(x =>
@@ -456,18 +449,6 @@ namespace Espera.View.Views
                 .Select(x => x.ToNative())
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .BindTo(this.PauseContinueTaskbarButton, x => x.ImageSource);
-        }
-
-        private void YoutubeHyperLinkLeftMouseButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            e.Handled = true;
-        }
-
-        private void YoutubeHyperLinkLeftMouseButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            ((YoutubeSongViewModel)((Hyperlink)sender).DataContext).OpenPathCommand.Execute(null);
-
-            e.Handled = true;
         }
     }
 }

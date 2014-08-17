@@ -1,21 +1,21 @@
-﻿using System;
+﻿using NAudio.Wave;
+using ReactiveMarrow;
+using System;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using NAudio.Wave;
-using ReactiveMarrow;
 
 namespace Espera.Core.Audio
 {
-    public class NAudioMediaPlayer : IMediaPlayerCallback
+    public class NAudioMediaPlayer : IMediaPlayerCallback, IDisposable
     {
-        private readonly WaveOut outputDevice;
+        private readonly WaveOutEvent outputDevice;
         private AudioFileReader currentReader;
 
         public NAudioMediaPlayer()
         {
-            this.outputDevice = new WaveOut();
+            this.outputDevice = new WaveOutEvent();
         }
 
         public TimeSpan CurrentTime
@@ -42,6 +42,23 @@ namespace Espera.Core.Audio
             }
         }
 
+        public void Dispose()
+        {
+            try
+            {
+                this.outputDevice.Dispose();
+            }
+
+            // NAudio does strange things in the Dispose method and can throw a NullReferenceException
+            catch (NullReferenceException)
+            { }
+
+            if (this.currentReader != null)
+            {
+                this.currentReader.Dispose();
+            }
+        }
+
         public Task LoadAsync(Uri uri)
         {
             return Task.Run(() =>
@@ -61,22 +78,37 @@ namespace Espera.Core.Audio
 
         public Task PauseAsync()
         {
-            return Task.Run(() => this.outputDevice.Pause());
+            return Task.Run(() =>
+            {
+                this.outputDevice.Pause();
+                SpinWait.SpinUntil(() => this.outputDevice.PlaybackState == PlaybackState.Paused);
+            });
         }
 
         public Task PlayAsync()
         {
-            return Task.Run(() => this.outputDevice.Play());
+            return Task.Run(() =>
+            {
+                this.outputDevice.Play();
+                SpinWait.SpinUntil(() => this.outputDevice.PlaybackState == PlaybackState.Playing);
+            });
         }
 
         public void SetVolume(float volume)
         {
-            this.outputDevice.Volume = volume;
+            if (this.currentReader == null)
+                return;
+
+            this.currentReader.Volume = volume;
         }
 
         public Task StopAsync()
         {
-            return Task.Run(() => this.outputDevice.Stop());
+            return Task.Run(() =>
+            {
+                this.outputDevice.Stop();
+                SpinWait.SpinUntil(() => this.outputDevice.PlaybackState == PlaybackState.Stopped);
+            });
         }
     }
 }

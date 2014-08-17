@@ -1,7 +1,9 @@
-﻿using System;
-using Espera.Core;
+﻿using Espera.Core;
 using Rareform.Validation;
 using ReactiveUI;
+using System;
+using System.ComponentModel;
+using System.Diagnostics;
 
 namespace Espera.View.ViewModels
 {
@@ -13,6 +15,20 @@ namespace Espera.View.ViewModels
                 Throw.ArgumentNullException(() => model);
 
             this.Model = model;
+
+            this.OpenPathCommand = new ReactiveCommand();
+            this.OpenPathCommand.Subscribe(x =>
+            {
+                try
+                {
+                    Process.Start(this.Path);
+                }
+
+                catch (Win32Exception ex)
+                {
+                    this.Log().ErrorException(string.Format("Could not open link {0}", this.Path), ex);
+                }
+            });
         }
 
         public string Album
@@ -41,6 +57,8 @@ namespace Espera.View.ViewModels
         }
 
         public Song Model { get; private set; }
+
+        public ReactiveCommand OpenPathCommand { get; private set; }
 
         public string Path
         {

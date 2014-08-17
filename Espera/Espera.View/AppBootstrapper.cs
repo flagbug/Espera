@@ -30,7 +30,7 @@ using Splat;
 
 namespace Espera.View
 {
-    internal class AppBootstrapper : Bootstrapper<ShellViewModel>, IEnableLogger
+    internal class AppBootstrapper : BootstrapperBase, IEnableLogger
     {
         private static readonly string DirectoryPath;
         private static readonly string LibraryFilePath;
@@ -71,6 +71,7 @@ namespace Espera.View
         public AppBootstrapper()
         {
             this.windowManager = new WindowManager();
+            this.Initialize();
         }
 
         protected override void Configure()
@@ -83,7 +84,7 @@ namespace Espera.View
             this.kernel.Bind<CoreSettings>().To<CoreSettings>().InSingletonScope()
                 .OnActivation(x =>
                 {
-                    // If we don't have a path or it doesn't exist anymore, rest it.
+                    // If we don't have a path or it doesn't exist anymore, restore it.
                     if (x.YoutubeDownloadPath == String.Empty || !Directory.Exists(x.YoutubeDownloadPath))
                     {
                         x.YoutubeDownloadPath = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
@@ -139,7 +140,7 @@ namespace Espera.View
             this.Log().Info("******************************");
             this.Log().Info("Application version: " + Version);
             this.Log().Info("OS Version: " + Environment.OSVersion.VersionString);
-            this.Log().Info("Current culture: " + CultureInfo.CurrentCulture.Name);
+            this.Log().Info("Current culture: " + CultureInfo.InstalledUICulture.Name);
 
             Directory.CreateDirectory(DirectoryPath);
 
@@ -162,7 +163,7 @@ namespace Espera.View
                 this.updateSubscription = Disposable.Empty;
             }
 
-            base.OnStartup(sender, e);
+            this.DisplayRootViewFor<ShellViewModel>();
         }
 
         protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
