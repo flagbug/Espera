@@ -33,9 +33,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Akavache, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Akavache, Version=4.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\akavache.core.4.0.0\lib\net45\Akavache.dll</HintPath>
+      <HintPath>..\packages\akavache.core.4.0.1\lib\net45\Akavache.dll</HintPath>
     </Reference>
     <Reference Include="Espera.Network, Version=1.0.19.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -69,8 +69,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\reactiveui-testing.6.0.3\lib\net45\ReactiveUI.Testing.dll</HintPath>
     </Reference>
-    <Reference Include="Splat">
-      <HintPath>..\packages\Splat.1.4.0\lib\Net45\Splat.dll</HintPath>
+    <Reference Include="Splat, Version=1.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Splat.1.4.2.1\lib\Net45\Splat.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">

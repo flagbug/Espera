@@ -12,7 +12,7 @@ using Splat;
 
 namespace Espera.View.ViewModels
 {
-    internal class SoundCloudSongViewModel : SongViewModelBase
+    internal class SoundCloudSongViewModel : SongViewModelBase, IEnableLogger
     {
         private readonly ObservableAsPropertyHelper<bool> hasThumbnail;
         private bool isLoadingThumbnail;
