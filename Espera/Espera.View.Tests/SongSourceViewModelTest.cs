@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
 using NSubstitute;
@@ -10,7 +12,7 @@ namespace Espera.View.Tests
     public class SongSourceViewModelTest
     {
         [Fact]
-        public void PartyModeTriggersTimeoutMessage()
+        public async Task PartyModeTriggersTimeoutMessage()
         {
             using (var library = new LibraryBuilder().WithPlaylist().Build())
             {
@@ -28,8 +30,8 @@ namespace Espera.View.Tests
 
                 fixture.SelectedSongs = new[] { songVm };
 
-                fixture.AddToPlaylistCommand.Execute(null);
-                fixture.AddToPlaylistCommand.Execute(null);
+                await fixture.AddToPlaylistCommand.ExecuteAsync();
+                await fixture.AddToPlaylistCommand.ExecuteAsync();
 
                 Assert.Equal(1, timeoutTriggers.Count);
             }

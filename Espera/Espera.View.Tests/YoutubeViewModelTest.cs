@@ -179,7 +179,7 @@ namespace Espera.View.Tests
         public class TheRefreshNetworkAvailabilityCommand
         {
             [Fact]
-            public void SmokeTest()
+            public async Task SmokeTest()
             {
                 var networkStatus = Substitute.For<INetworkStatus>();
                 networkStatus.IsAvailable.Returns(Observable.Return(false), Observable.Return(true));
@@ -194,7 +194,7 @@ namespace Espera.View.Tests
 
                     Assert.True(vm.IsNetworkUnavailable);
 
-                    vm.RefreshNetworkAvailabilityCommand.Execute(null);
+                    await vm.RefreshNetworkAvailabilityCommand.ExecuteAsync();
 
                     Assert.False(vm.IsNetworkUnavailable);
                 }

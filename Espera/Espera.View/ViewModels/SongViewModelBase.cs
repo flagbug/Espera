@@ -17,7 +17,7 @@ namespace Espera.View.ViewModels
 
             this.Model = model;
 
-            this.OpenPathCommand = new ReactiveUI.Legacy.ReactiveCommand();
+            this.OpenPathCommand = ReactiveCommand.Create();
             this.OpenPathCommand.Subscribe(x =>
             {
                 try
@@ -59,7 +59,7 @@ namespace Espera.View.ViewModels
 
         public Song Model { get; private set; }
 
-        public ReactiveUI.Legacy.ReactiveCommand OpenPathCommand { get; private set; }
+        public ReactiveCommand<object> OpenPathCommand { get; private set; }
 
         public string Path
         {
