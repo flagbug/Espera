@@ -9,7 +9,6 @@ using Espera.Core.Management;
 using Espera.Core.Settings;
 using Rareform.Validation;
 using ReactiveUI;
-using ReactiveUI.Legacy;
 
 namespace Espera.View.ViewModels
 {
@@ -20,7 +19,7 @@ namespace Espera.View.ViewModels
         private readonly Subject<Unit> artistUpdateSignal;
         private readonly object gate;
         private readonly ObservableAsPropertyHelper<bool> isUpdating;
-        private readonly ReactiveUI.Legacy.ReactiveCommand playNowCommand;
+        private readonly ReactiveCommand<Unit> playNowCommand;
         private readonly ObservableAsPropertyHelper<bool> showAddSongsHelperMessage;
         private readonly ViewSettings viewSettings;
         private SortOrder artistOrder;
@@ -73,14 +72,13 @@ namespace Espera.View.ViewModels
                 .Synchronize(this.gate)
                 .Subscribe(_ => this.UpdateSelectableSongs());
 
-            this.playNowCommand = new ReactiveUI.Legacy.ReactiveCommand(this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
-                .Select(x => x == AccessPermission.Admin || !coreSettings.LockPlayPause));
-            this.PlayNowCommand.RegisterAsyncTask(_ =>
-            {
-                int songIndex = this.SelectableSongs.TakeWhile(x => x.Model != this.SelectedSongs.First().Model).Count();
+            this.playNowCommand = ReactiveCommand.CreateAsyncTask(this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
+                .Select(x => x == AccessPermission.Admin || !coreSettings.LockPlayPause), _ =>
+                {
+                    int songIndex = this.SelectableSongs.TakeWhile(x => x.Model != this.SelectedSongs.First().Model).Count();
 
-                return this.Library.PlayInstantlyAsync(this.SelectableSongs.Skip(songIndex).Select(x => x.Model), accessToken);
-            });
+                    return this.Library.PlayInstantlyAsync(this.SelectableSongs.Skip(songIndex).Select(x => x.Model), accessToken);
+                });
 
             this.showAddSongsHelperMessage = this.Library.SongsUpdated
                 .StartWith(Unit.Default)
@@ -116,7 +114,7 @@ namespace Espera.View.ViewModels
             get { return this.isUpdating.Value; }
         }
 
-        public override ReactiveUI.Legacy.ReactiveCommand PlayNowCommand
+        public override ReactiveCommand<Unit> PlayNowCommand
         {
             get { return this.playNowCommand; }
         }

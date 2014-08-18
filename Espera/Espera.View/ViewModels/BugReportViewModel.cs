@@ -1,7 +1,7 @@
-﻿using Espera.Core.Analytics;
+﻿using System;
+using Espera.Core.Analytics;
 using ReactiveUI;
 using System.Reactive.Linq;
-using ReactiveUI.Legacy;
 
 namespace Espera.View.ViewModels
 {
@@ -12,11 +12,12 @@ namespace Espera.View.ViewModels
 
         public BugReportViewModel()
         {
-            this.SubmitBugReport = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.Message, x => x.SendingSucceeded,
-                (message, succeeded) => !string.IsNullOrWhiteSpace(message) && (succeeded == null || !succeeded.Value)));
+            IObservable<bool> canSubmit = this.WhenAnyValue(x => x.Message, x => x.SendingSucceeded,
+                (message, succeeded) => !string.IsNullOrWhiteSpace(message) && (succeeded == null || !succeeded.Value));
+            this.SubmitBugReport = ReactiveCommand.CreateAsyncTask(canSubmit, _ =>
+                AnalyticsClient.Instance.RecordBugReportAsync(this.Message, this.Email));
 
             this.sendingSucceeded = this.SubmitBugReport
-                .RegisterAsyncTask(x => AnalyticsClient.Instance.RecordBugReportAsync(this.Message, this.Email))
                 .Select(x => new bool?(x))
                 .ToProperty(this, x => x.SendingSucceeded);
         }
@@ -34,6 +35,6 @@ namespace Espera.View.ViewModels
             get { return this.sendingSucceeded == null ? null : this.sendingSucceeded.Value; }
         }
 
-        public ReactiveUI.Legacy.ReactiveCommand SubmitBugReport { get; private set; }
+        public ReactiveCommand<bool> SubmitBugReport { get; private set; }
     }
 }

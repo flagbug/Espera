@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Reactive;
 using System.Threading.Tasks;
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Rareform.Validation;
+using ReactiveUI;
 using Splat;
 
 namespace Espera.View.ViewModels
@@ -26,7 +28,7 @@ namespace Espera.View.ViewModels
             get { throw new NotImplementedException(); }
         }
 
-        public override ReactiveUI.Legacy.ReactiveCommand PlayNowCommand
+        public override ReactiveCommand<Unit> PlayNowCommand
         {
             get { throw new NotImplementedException(); }
         }

@@ -33,7 +33,7 @@ namespace Espera.View.ViewModels
 
             this.ApplyOrder(SortHelpers.GetOrderByTitle<T>, ref this.titleOrder);
 
-            this.AddToPlaylistCommand = new ReactiveUI.Legacy.ReactiveCommand(this.WhenAnyValue(x => x.SelectedSongs, x => x != null && x.Any()));
+            this.AddToPlaylistCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedSongs, x => x != null && x.Any()));
             this.AddToPlaylistCommand.Subscribe(x =>
             {
                 if (this.library.RemainingPlaylistTimeout > TimeSpan.Zero)
@@ -60,7 +60,7 @@ namespace Espera.View.ViewModels
                 }
             });
 
-            this.SelectionChangedCommand = new ReactiveUI.Legacy.ReactiveCommand();
+            this.SelectionChangedCommand = ReactiveCommand.Create();
             this.SelectionChangedCommand.Where(x => x != null)
                 .Select(x => ((IEnumerable)x).Cast<ISongViewModelBase>())
                 .Subscribe(x => this.SelectedSongs = x);
@@ -69,14 +69,14 @@ namespace Espera.View.ViewModels
                 .Select(x => x == AccessPermission.Admin)
                 .ToProperty(this, x => x.IsAdmin);
 
-            this.OrderByDurationCommand = new ReactiveUI.Legacy.ReactiveCommand();
+            this.OrderByDurationCommand = ReactiveCommand.Create();
             this.OrderByDurationCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByDuration<T>, ref this.durationOrder));
 
-            this.OrderByTitleCommand = new ReactiveUI.Legacy.ReactiveCommand();
+            this.OrderByTitleCommand = ReactiveCommand.Create();
             this.OrderByTitleCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByTitle<T>, ref this.titleOrder));
         }
 
-        public ReactiveUI.Legacy.ReactiveCommand AddToPlaylistCommand { get; private set; }
+        public ReactiveCommand<object> AddToPlaylistCommand { get; private set; }
 
         public abstract DefaultPlaybackAction DefaultPlaybackAction { get; }
 
@@ -85,11 +85,11 @@ namespace Espera.View.ViewModels
             get { return this.isAdmin.Value; }
         }
 
-        public ReactiveUI.Legacy.ReactiveCommand OrderByDurationCommand { get; private set; }
+        public ReactiveCommand<object> OrderByDurationCommand { get; private set; }
 
-        public ReactiveUI.Legacy.ReactiveCommand OrderByTitleCommand { get; private set; }
+        public ReactiveCommand<object> OrderByTitleCommand { get; private set; }
 
-        public abstract ReactiveUI.Legacy.ReactiveCommand PlayNowCommand { get; }
+        public abstract ReactiveCommand<Unit> PlayNowCommand { get; }
 
         public string SearchText
         {
@@ -109,7 +109,7 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.selectedSongs, value); }
         }
 
-        public ReactiveUI.Legacy.ReactiveCommand SelectionChangedCommand { get; set; }
+        public ReactiveCommand<object> SelectionChangedCommand { get; set; }
 
         public IObservable<Unit> TimeoutWarning
         {

@@ -29,7 +29,7 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<int> currentSeconds;
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
         private readonly ObservableAsPropertyHelper<string> currentTime;
-        private readonly ObservableAsPropertyHelper<ReactiveUI.Legacy.ReactiveCommand> defaultPlaybackCommand;
+        private readonly ObservableAsPropertyHelper<IReactiveCommand> defaultPlaybackCommand;
         private readonly ObservableAsPropertyHelper<bool> displayTimeoutWarning;
         private readonly CompositeDisposable disposable;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
@@ -220,7 +220,7 @@ namespace Espera.View.ViewModels
             // value that the song source returns
             this.defaultPlaybackCommand = this.WhenAnyValue(x => x.CurrentSongSource, x => x.IsAdmin,
                     (songSource, isAdmin) => !isAdmin || songSource.DefaultPlaybackAction == DefaultPlaybackAction.AddToPlaylist ?
-                        songSource.AddToPlaylistCommand : songSource.PlayNowCommand)
+                        (IReactiveCommand)songSource.AddToPlaylistCommand : songSource.PlayNowCommand)
                 .ToProperty(this, x => x.DefaultPlaybackCommand);
 
             this.PauseCommand = new ReactiveUI.Legacy.ReactiveCommand(this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
@@ -352,7 +352,7 @@ namespace Espera.View.ViewModels
             get { return this.currentTime.Value; }
         }
 
-        public ReactiveUI.Legacy.ReactiveCommand DefaultPlaybackCommand
+        public IReactiveCommand DefaultPlaybackCommand
         {
             get { return this.defaultPlaybackCommand.Value; }
         }

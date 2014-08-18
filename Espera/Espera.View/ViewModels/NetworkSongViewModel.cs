@@ -13,7 +13,6 @@ using Rareform.Validation;
 using ReactiveMarrow;
 using ReactiveUI;
 using Splat;
-using ReactiveUI.Legacy;
 
 namespace Espera.View.ViewModels
 {
@@ -28,7 +27,7 @@ namespace Espera.View.ViewModels
         private readonly CoreSettings coreSettings;
         private readonly ObservableAsPropertyHelper<bool> isNetworkUnavailable;
         private readonly Func<TSong, TViewModel> modelToViewModelConverter;
-        private readonly ReactiveUI.Legacy.ReactiveCommand playNowCommand;
+        private readonly ReactiveCommand<Unit> playNowCommand;
         private readonly ObservableAsPropertyHelper<ISongViewModelBase> selectedSong;
         private readonly INetworkSongFinder<TSong> songFinder;
         private bool isSearching;
@@ -49,22 +48,26 @@ namespace Espera.View.ViewModels
             this.songFinder = songFinder;
 
             this.connectionError = new Subject<Unit>();
-            this.playNowCommand = new ReactiveUI.Legacy.ReactiveCommand(this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
-                .Select(x => x == AccessPermission.Admin || !this.coreSettings.LockPlayPause));
-            this.playNowCommand.RegisterAsyncTask(_ => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model), accessToken));
+
+            IObservable<bool> canPlayNow = this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
+                .Select(x => x == AccessPermission.Admin || !this.coreSettings.LockPlayPause);
+            this.playNowCommand = ReactiveCommand.CreateAsyncTask(canPlayNow,
+                _ => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model), accessToken));
 
             this.selectedSong = this.WhenAnyValue(x => x.SelectedSongs)
                 .Select(x => x == null ? null : this.SelectedSongs.FirstOrDefault())
                 .ToProperty(this, x => x.SelectedSong);
 
-            this.RefreshNetworkAvailabilityCommand = new ReactiveUI.Legacy.ReactiveCommand();
+            this.RefreshNetworkAvailabilityCommand = ReactiveCommand.Create();
 
             var status = (networkstatus ?? new NetworkStatus());
             IObservable<bool> networkAvailable = this.RefreshNetworkAvailabilityCommand.ToUnit()
                 .StartWith(Unit.Default)
                 .Do(_ => this.Log().Info("Refreshing network availability"))
-                .Select(_ => status.IsAvailable.Do(x => this.Log().Info("Network available: {0}", x))).Switch()
-                .Replay(1).RefCount();
+                .Select(_ => status.IsAvailable.Do(x => this.Log().Info("Network available: {0}", x)))
+                .Switch()
+                .Replay(1)
+                .RefCount();
 
             this.isNetworkUnavailable = networkAvailable
                 .Select(x => !x)
@@ -102,12 +105,12 @@ namespace Espera.View.ViewModels
             private set { this.RaiseAndSetIfChanged(ref this.isSearching, value); }
         }
 
-        public override ReactiveUI.Legacy.ReactiveCommand PlayNowCommand
+        public override ReactiveCommand<Unit> PlayNowCommand
         {
             get { return this.playNowCommand; }
         }
 
-        public ReactiveUI.Legacy.ReactiveCommand RefreshNetworkAvailabilityCommand { get; private set; }
+        public ReactiveCommand<object> RefreshNetworkAvailabilityCommand { get; private set; }
 
         public ISongViewModelBase SelectedSong
         {
