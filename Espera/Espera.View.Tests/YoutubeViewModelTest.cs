@@ -147,10 +147,9 @@ namespace Espera.View.Tests
 
                 var isNetworkUnavailable = vm.WhenAnyValue(x => x.IsNetworkUnavailable).CreateCollection();
 
-                // By setting the availability to true, we invoke a song search
                 isAvailable.OnNext(true);
 
-                Assert.Equal(new[] { false, true, false }, isNetworkUnavailable);
+                Assert.Equal(new[] { true, false, true }, isNetworkUnavailable);
             }
         }
 
@@ -173,7 +172,7 @@ namespace Espera.View.Tests
 
                 isAvailable.OnNext(true);
 
-                Assert.Equal(new[] { false, true, false }, isNetworkUnavailable);
+                Assert.Equal(new[] { true, false }, isNetworkUnavailable);
             }
         }
 
