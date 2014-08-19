@@ -24,7 +24,7 @@ namespace Espera.View.Tests
         {
             var isAvailable = new BehaviorSubject<bool>(false);
             var networkStatus = Substitute.For<INetworkStatus>();
-            networkStatus.IsAvailable.Returns(isAvailable);
+            networkStatus.GetIsAvailableAsync().Returns(isAvailable);
 
             var songFinder = Substitute.For<IYoutubeSongFinder>();
             songFinder.GetSongsAsync(Arg.Any<string>())
@@ -45,7 +45,7 @@ namespace Espera.View.Tests
         public void OldRequestIsThrownAwayIfNewOneArrives()
         {
             var networkStatus = Substitute.For<INetworkStatus>();
-            networkStatus.IsAvailable.Returns(Observable.Return(true));
+            networkStatus.GetIsAvailableAsync().Returns(Observable.Return(true));
 
             using (var library = Helpers.CreateLibrary())
             {
@@ -82,7 +82,7 @@ namespace Espera.View.Tests
         public void SearchTextChangeSetsIsSearchingTest()
         {
             var networkStatus = Substitute.For<INetworkStatus>();
-            networkStatus.IsAvailable.Returns(Observable.Return(true));
+            networkStatus.GetIsAvailableAsync().Returns(Observable.Return(true));
 
             var songFinder = Substitute.For<IYoutubeSongFinder>();
             songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Task.FromResult((IReadOnlyList<YoutubeSong>)new List<YoutubeSong>()));
@@ -114,7 +114,7 @@ namespace Espera.View.Tests
             var songs = (IReadOnlyList<YoutubeSong>)new[] { song1, song2 }.ToList();
 
             var networkStatus = Substitute.For<INetworkStatus>();
-            networkStatus.IsAvailable.Returns(Observable.Return(true));
+            networkStatus.GetIsAvailableAsync().Returns(Observable.Return(true));
 
             var songFinder = Substitute.For<IYoutubeSongFinder>();
             songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Task.FromResult(songs));
@@ -135,7 +135,7 @@ namespace Espera.View.Tests
         {
             var isAvailable = new BehaviorSubject<bool>(false);
             var networkStatus = Substitute.For<INetworkStatus>();
-            networkStatus.IsAvailable.Returns(isAvailable);
+            networkStatus.GetIsAvailableAsync().Returns(isAvailable);
 
             var songFinder = Substitute.For<IYoutubeSongFinder>();
             songFinder.GetSongsAsync(Arg.Any<string>()).Returns(x => { throw new Exception(); });
@@ -158,7 +158,7 @@ namespace Espera.View.Tests
         {
             var isAvailable = new BehaviorSubject<bool>(false);
             var networkStatus = Substitute.For<INetworkStatus>();
-            networkStatus.IsAvailable.Returns(isAvailable);
+            networkStatus.GetIsAvailableAsync().Returns(isAvailable);
 
             var songFinder = Substitute.For<IYoutubeSongFinder>();
             songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Task.FromResult((IReadOnlyList<YoutubeSong>)new List<YoutubeSong>()));
@@ -182,7 +182,7 @@ namespace Espera.View.Tests
             public void SmokeTest()
             {
                 var networkStatus = Substitute.For<INetworkStatus>();
-                networkStatus.IsAvailable.Returns(Observable.Return(false), Observable.Return(true));
+                networkStatus.GetIsAvailableAsync().Returns(Observable.Return(false), Observable.Return(true));
 
                 var songFinder = Substitute.For<IYoutubeSongFinder>();
                 songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Task.FromResult((IReadOnlyList<YoutubeSong>)new List<YoutubeSong>()));
