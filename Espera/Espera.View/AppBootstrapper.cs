@@ -81,19 +81,7 @@ namespace Espera.View
             this.kernel.Bind<ILibraryReader>().To<LibraryFileReader>().WithConstructorArgument("sourcePath", LibraryFilePath);
             this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", LibraryFilePath);
             this.kernel.Bind<ViewSettings>().To<ViewSettings>().InSingletonScope();
-            this.kernel.Bind<CoreSettings>().To<CoreSettings>().InSingletonScope()
-                .OnActivation(x =>
-                {
-                    // If we don't have a path or it doesn't exist anymore, restore it.
-                    if (x.YoutubeDownloadPath == String.Empty || !Directory.Exists(x.YoutubeDownloadPath))
-                    {
-                        x.YoutubeDownloadPath = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
-                    }
-
-#if DEBUG
-                    x.EnableAutomaticReports = false;
-#endif
-                });
+            this.kernel.Bind<CoreSettings>().To<CoreSettings>().InSingletonScope();
             this.kernel.Bind<IFileSystem>().To<FileSystem>();
             this.kernel.Bind<Library>().To<Library>().InSingletonScope();
             this.kernel.Bind<IWindowManager>().To<WindowManager>();
@@ -144,9 +132,9 @@ namespace Espera.View
 
             Directory.CreateDirectory(DirectoryPath);
 
-            this.SetupAnalyticsClient();
-
             this.SetupLager();
+
+            this.SetupAnalyticsClient();
 
             this.SetupMobileApi();
 
@@ -214,7 +202,19 @@ namespace Espera.View
         {
             this.Log().Info("Initializing Lager settings storages...");
 
-            this.kernel.Get<CoreSettings>().InitializeAsync().Wait();
+            var coreSettings = this.kernel.Get<CoreSettings>();
+            coreSettings.InitializeAsync().Wait();
+
+            // If we don't have a path or it doesn't exist anymore, restore it.
+            if (coreSettings.YoutubeDownloadPath == String.Empty || !Directory.Exists(coreSettings.YoutubeDownloadPath))
+            {
+                coreSettings.YoutubeDownloadPath = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
+            }
+
+#if DEBUG
+            coreSettings.EnableAutomaticReports = false;
+#endif
+
             this.kernel.Get<ViewSettings>().InitializeAsync().Wait();
 
             this.Log().Info("Settings storages initialized.");

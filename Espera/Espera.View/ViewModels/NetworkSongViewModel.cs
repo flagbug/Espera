@@ -64,7 +64,7 @@ namespace Espera.View.ViewModels
             IObservable<bool> networkAvailable = this.RefreshNetworkAvailabilityCommand.ToUnit()
                 .StartWith(Unit.Default)
                 .Do(_ => this.Log().Info("Refreshing network availability"))
-                .Select(_ => status.IsAvailable.Do(x => this.Log().Info("Network available: {0}", x)))
+                .Select(_ => status.GetIsAvailableAsync().Do(x => this.Log().Info("Network available: {0}", x)))
                 .Switch()
                 .Replay(1)
                 .RefCount();

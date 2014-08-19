@@ -10,21 +10,20 @@ namespace Espera.View
         /// Returns an observable that returns the current network status. This observable returns
         /// the current status upon subscription.
         /// </summary>
-        IObservable<bool> IsAvailable { get; }
+        IObservable<bool> GetIsAvailableAsync();
     }
 
     public class NetworkStatus : INetworkStatus
     {
-        public NetworkStatus()
+        public IObservable<bool> GetIsAvailableAsync()
         {
-            this.IsAvailable = Observable.FromEventPattern<NetworkAvailabilityChangedEventHandler, NetworkAvailabilityEventArgs>(
-                h => NetworkChange.NetworkAvailabilityChanged += h,
-                h => NetworkChange.NetworkAvailabilityChanged -= h)
-                .Select(x => x.EventArgs.IsAvailable)
-                .StartWith(NetworkInterface.GetIsNetworkAvailable())
+            return Observable.Start(() => NetworkInterface.GetIsNetworkAvailable())
+                .Concat(Observable.FromEventPattern<NetworkAvailabilityChangedEventHandler, NetworkAvailabilityEventArgs>(
+                    h => NetworkChange.NetworkAvailabilityChanged += h,
+                    h => NetworkChange.NetworkAvailabilityChanged -= h)
+                .Select(x => x.EventArgs.IsAvailable))
                 .DistinctUntilChanged();
         }
 
-        public IObservable<bool> IsAvailable { get; private set; }
     }
 }
