@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net.NetworkInformation;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
+using ReactiveUI;
 
 namespace Espera.View
 {
@@ -13,11 +15,11 @@ namespace Espera.View
         IObservable<bool> GetIsAvailableAsync();
     }
 
-    public class NetworkStatus : INetworkStatus
+    public class NetworkStatus : INetworkStatus, IEnableLogger
     {
         public IObservable<bool> GetIsAvailableAsync()
         {
-            return Observable.Start(() => NetworkInterface.GetIsNetworkAvailable())
+            return Observable.FromAsync(PingGoogleAsync)
                 .Concat(Observable.FromEventPattern<NetworkAvailabilityChangedEventHandler, NetworkAvailabilityEventArgs>(
                     h => NetworkChange.NetworkAvailabilityChanged += h,
                     h => NetworkChange.NetworkAvailabilityChanged -= h)
@@ -25,5 +27,26 @@ namespace Espera.View
                 .DistinctUntilChanged();
         }
 
+        private async Task<bool> PingGoogleAsync()
+        {
+            this.Log().Info("Pinging google.com");
+
+            var ping = new Ping();
+
+            try
+            {
+                PingReply reply = await ping.SendPingAsync("google.com", 5000);
+
+                this.Log().Info("Ping received, status: {0}, roundtrip time: {1}ms", reply.Status, reply.RoundtripTime);
+
+                return reply.Status == IPStatus.Success;
+            }
+
+            catch (PingException ex)
+            {
+                this.Log().ErrorException("Ping to google.com failed", ex);
+                return false;
+            }
+        }
     }
 }
