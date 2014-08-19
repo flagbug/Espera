@@ -660,7 +660,11 @@ namespace Espera.Core.Management
                 song.IsCorrupted = true;
 
                 this.HandleSongCorruptionAsync();
+
+                return;
             }
+
+            song.IsCorrupted = false;
         }
 
         /// <summary>

@@ -555,9 +555,35 @@ namespace Espera.Core.Tests
             }
 
             [Fact]
-            public async Task SetsSongIsCorruptedToTrueIfFailing()
+            public async Task ResetsSongIsCorruptedIfPlayingIsWorking()
             {
-                Func<Library, Task> test = async library =>
+                var audioPlayerCallback = Substitute.For<IMediaPlayerCallback>();
+                audioPlayerCallback.LoadAsync(Arg.Any<Uri>()).Returns(Observable.Throw<Unit>(new SongLoadException()).ToTask());
+
+                using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(audioPlayerCallback).Build())
+                {
+                    Song song = Helpers.SetupSongMock();
+
+                    library.AddSongToPlaylist(song);
+
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    await library.PlaySongAsync(0, accessToken);
+
+                    audioPlayerCallback.LoadAsync(Arg.Any<Uri>()).Returns(_ => Task.Delay(0));
+
+                    await library.PlaySongAsync(0, accessToken);
+
+                    Assert.False(song.IsCorrupted);
+                }
+            }
+
+            [Fact]
+            public async Task SetsSongIsCorruptedToTrueIfLoadIsFailing()
+            {
+                var audioPlayerCallback = Substitute.For<IMediaPlayerCallback>();
+                audioPlayerCallback.LoadAsync(Arg.Any<Uri>()).Returns(Observable.Throw<Unit>(new SongLoadException()).ToTask());
+
+                using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(audioPlayerCallback).Build())
                 {
                     Song song = Helpers.SetupSongMock();
 
@@ -566,20 +592,24 @@ namespace Espera.Core.Tests
                     await library.PlaySongAsync(0, library.LocalAccessControl.RegisterLocalAccessToken());
 
                     Assert.True(song.IsCorrupted);
-                };
-
-                var audioPlayerCallback = Substitute.For<IMediaPlayerCallback>();
-                audioPlayerCallback.LoadAsync(Arg.Any<Uri>()).Returns(Observable.Throw<Unit>(new SongLoadException()).ToTask());
-
-                using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(audioPlayerCallback).Build())
-                {
-                    await test(library);
                 }
+            }
 
+            [Fact]
+            public async Task SetsSongIsCorruptedToTrueIfPlayIsFailing()
+            {
+                var audioPlayerCallback = Substitute.For<IMediaPlayerCallback>();
                 audioPlayerCallback.PlayAsync().Returns(Observable.Throw<Unit>(new PlaybackException()).ToTask());
+
                 using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(audioPlayerCallback).Build())
                 {
-                    await test(library);
+                    Song song = Helpers.SetupSongMock();
+
+                    library.AddSongToPlaylist(song);
+
+                    await library.PlaySongAsync(0, library.LocalAccessControl.RegisterLocalAccessToken());
+
+                    Assert.True(song.IsCorrupted);
                 }
             }
 
