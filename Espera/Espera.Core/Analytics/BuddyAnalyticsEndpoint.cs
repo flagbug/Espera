@@ -42,6 +42,16 @@ namespace Espera.Core.Analytics
             return token;
         }
 
+        public async Task IncrementMetadataAsync(string key)
+        {
+            var result = await this.storedUser.IncrementMetadataAsync(key);
+
+            if (!result.IsSuccess)
+            {
+                throw result.Error;
+            }
+        }
+
         public Task RecordDeviceInformationAsync()
         {
             // Buddy automatically records device informations
