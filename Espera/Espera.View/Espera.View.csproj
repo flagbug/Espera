@@ -321,7 +321,6 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Espera.View_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <AppDesigner Include="Properties\" />
   </ItemGroup>
