@@ -36,7 +36,7 @@ namespace Espera.Core
 
         public override NetworkSongSource NetworkSongSource
         {
-            get { return NetworkSongSource.Youtube; }
+            get { return NetworkSongSource.SoundCloud; }
         }
 
         [JsonProperty("permalink_url")]
