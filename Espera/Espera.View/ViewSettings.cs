@@ -1,12 +1,13 @@
 ﻿using Akavache;
 using Lager;
+using Splat;
 
 namespace Espera.View
 {
     public class ViewSettings : SettingsStorage
     {
         public ViewSettings()
-            : base("__ViewSettings__", BlobCache.LocalMachine)
+            : base("__ViewSettings__", ModeDetector.InUnitTestRunner() ? new InMemoryBlobCache() : BlobCache.LocalMachine)
         { }
 
         public string AccentColor

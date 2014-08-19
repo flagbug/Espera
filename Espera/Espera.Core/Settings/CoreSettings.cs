@@ -3,13 +3,14 @@ using Akavache;
 using Espera.Core.Management;
 using Espera.Network;
 using Lager;
+using Splat;
 
 namespace Espera.Core.Settings
 {
     public class CoreSettings : SettingsStorage
     {
         public CoreSettings()
-            : base("__CoreSettings__", BlobCache.LocalMachine)
+            : base("__CoreSettings__", ModeDetector.InUnitTestRunner() ? new InMemoryBlobCache() : BlobCache.LocalMachine)
         { }
 
         public string AnalyticsToken
