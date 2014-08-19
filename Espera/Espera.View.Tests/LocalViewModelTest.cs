@@ -47,7 +47,7 @@ namespace Espera.View.Tests
                 library.LocalAccessControl.SetLocalPassword(accessToken, "Password");
                 library.LocalAccessControl.DowngradeLocalAccess(accessToken);
 
-                Assert.Equal(new[] { true, false }, canExecuteColl);
+                Assert.Equal(new[] { false, true, false }, canExecuteColl);
             }
         }
 
