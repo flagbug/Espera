@@ -143,9 +143,9 @@ namespace Espera.View
 
             Directory.CreateDirectory(DirectoryPath);
 
-            this.SetupAnalyticsClient();
-
             this.SetupLager();
+
+            this.SetupAnalyticsClient();
 
             this.SetupMobileApi();
 
