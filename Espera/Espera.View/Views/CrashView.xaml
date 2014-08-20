@@ -28,7 +28,7 @@
         <TextBlock Style="{StaticResource DescriptionHeaderStyle}" Text="Sorry, Espera has crashed :(" />
         <TextBlock>
             <TextBlock.Style>
-                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource DescriptionHeaderStyle2}">
+                <Style BasedOn="{StaticResource DescriptionHeaderStyle2}" TargetType="{x:Type TextBlock}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Path=SendsAutomatically}" Value="True">
                             <Setter Property="Text" Value="A crash report has been sent!" />

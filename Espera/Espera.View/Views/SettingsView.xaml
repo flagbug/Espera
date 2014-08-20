@@ -20,9 +20,9 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border BorderThickness="{TemplateBinding BorderThickness}"
+                            <Border Background="{TemplateBinding Background}"
                                     BorderBrush="{TemplateBinding BorderBrush}"
-                                    Background="{TemplateBinding Background}">
+                                    BorderThickness="{TemplateBinding BorderThickness}">
                                 <ContentPresenter />
                             </Border>
                         </ControlTemplate>
@@ -41,7 +41,9 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
-            <Style x:Key="ThemePickerButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource AccentPickerButtonStyle}">
+            <Style x:Key="ThemePickerButtonStyle"
+                   BasedOn="{StaticResource AccentPickerButtonStyle}"
+                   TargetType="{x:Type Button}">
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="BorderBrush" Value="{DynamicResource AccentColorBrush}" />
             </Style>
@@ -59,7 +61,9 @@
                 <Setter Property="OnLabel" Value="Yes" />
                 <Setter Property="OffLabel" Value="No" />
             </Style>
-            <Style x:Key="AboutInfoStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Style x:Key="AboutInfoStyle"
+                   BasedOn="{StaticResource {x:Type TextBlock}}"
+                   TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="15" />
             </Style>
             <valueConverters:BoolNegationValueConverter x:Key="BoolNegationConverter" />
@@ -197,7 +201,7 @@
                         </StackPanel>
                         <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="scaling" />
                         <TextBlock Style="{StaticResource SettingsTextStyle}" Text="Use this option whenever you have Espera displayed on a TV or any other big screen" />
-                        <StackPanel Orientation="Horizontal" Margin="0, 5, 0, 0">
+                        <StackPanel Margin="0, 5, 0, 0" Orientation="Horizontal">
                             <Slider Width="200"
                                     VerticalAlignment="Center"
                                     Maximum="2"
@@ -217,8 +221,8 @@
                 <ScrollViewer Padding="0, 0, 10, 10" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <TextBlock Margin="0, 15, 0, 0"
-                                   Style="{StaticResource SettingsTextStyle}"
                                    FontSize="18"
+                                   Style="{StaticResource SettingsTextStyle}"
                                    Text="The party mode allows you to lock Espera, so your guests cannot interrupt the playback or change the volume"
                                    TextWrapping="Wrap" />
                         <Controls:ToggleSwitch Margin="0, 20, 0, 0"
@@ -275,8 +279,8 @@
             <TabItem Header="my music">
                 <StackPanel Orientation="Vertical">
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="song source" />
-                    <TextBlock Style="{StaticResource SettingsTextStyle}"
-                               Margin="0, 10, 0, 0"
+                    <TextBlock Margin="0, 10, 0, 0"
+                               Style="{StaticResource SettingsTextStyle}"
                                Text="The path where Espera searches for songs" />
                     <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
                         <TextBox Width="325"
@@ -294,31 +298,33 @@
                     </StackPanel>
                     <Controls:ToggleSwitch Header="Update library automatically" IsChecked="{Binding Path=EnableAutomaticLibraryUpdates}" />
                     <StackPanel Margin="30, 5, 0, 0"
-                                Orientation="Horizontal"
-                                IsEnabled="{Binding Path=EnableAutomaticLibraryUpdates}">
-                        <TextBlock Text="Update interval" VerticalAlignment="Center" />
+                                IsEnabled="{Binding Path=EnableAutomaticLibraryUpdates}"
+                                Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="Update interval" />
                         <Slider Width="200"
-                                Style="{StaticResource FlatSlider}"
-                                VerticalAlignment="Center"
                                 Margin="5, 0, 0, 0"
+                                VerticalAlignment="Center"
+                                IsSnapToTickEnabled="True"
                                 Maximum="12"
                                 Minimum="0.5"
-                                IsSnapToTickEnabled="True"
+                                Style="{StaticResource FlatSlider}"
                                 TickFrequency="0.5"
                                 Value="{Binding Path=SongSourceUpdateInterval}" />
-                        <TextBlock Margin="5, 0, 0, 0" Text="{Binding Path=SongSourceUpdateInterval, StringFormat=\{0\} Hours}" VerticalAlignment="Center" />
+                        <TextBlock Margin="5, 0, 0, 0"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding Path=SongSourceUpdateInterval,
+                                                  StringFormat=\{0\} Hours}" />
                     </StackPanel>
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="playback" />
-                    <TextBlock Style="{StaticResource SettingsTextStyle}"
-                               Margin="0, 10, 0, 0"
+                    <TextBlock Margin="0, 10, 0, 0"
+                               Style="{StaticResource SettingsTextStyle}"
                                Text="Default double click action" />
                     <ComboBox Width="200"
                               Margin="0, 10, 0, 0"
                               HorizontalAlignment="Left"
                               ItemsSource="{Binding Path=DefaultPlaybackActionStrings}"
-                              SelectedItem="{Binding Path=DefaultPlaybackActionString}">
-                    </ComboBox>
-                    <TextBlock Style="{StaticResource SettingsTextStyle}" Margin="0, 20, 0, 0">
+                              SelectedItem="{Binding Path=DefaultPlaybackActionString}" />
+                    <TextBlock Margin="0, 20, 0, 0" Style="{StaticResource SettingsTextStyle}">
                         Playback engine
                         <LineBreak />
                         Change the playback engine if you experience any sound issues
@@ -327,8 +333,7 @@
                               Margin="0, 10, 0, 0"
                               HorizontalAlignment="Left"
                               ItemsSource="{Binding Path=DefaultPlaybackEngineStrings}"
-                              SelectedItem="{Binding Path=DefaultPlaybackEngineString}">
-                    </ComboBox>
+                              SelectedItem="{Binding Path=DefaultPlaybackEngineString}" />
                 </StackPanel>
             </TabItem>
             <TabItem Header="youtube">
@@ -367,45 +372,56 @@
             <TabItem Header="remote control">
                 <StackPanel>
                     <Controls:ToggleSwitch Header="Enable remote control" IsChecked="{Binding Path=EnableRemoteControl}" />
-                    <StackPanel Margin="15, 0, 0, 0" Orientation="Vertical" IsEnabled="{Binding Path=EnableRemoteControl}">
+                    <StackPanel Margin="15, 0, 0, 0"
+                                IsEnabled="{Binding Path=EnableRemoteControl}"
+                                Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Port (49152 - 65535)" VerticalAlignment="Center" />
-                            <TextBox Margin="10, 0, 0, 0" Width="50" Text="{Binding Path=Port, UpdateSourceTrigger=PropertyChanged}" />
-                            <Button Margin="10, 0, 0, 0" Content="Change port" Command="{Binding Path=ChangePortCommand}" />
+                            <TextBlock VerticalAlignment="Center" Text="Port (49152 - 65535)" />
+                            <TextBox Width="50"
+                                     Margin="10, 0, 0, 0"
+                                     Text="{Binding Path=Port,
+                                                    UpdateSourceTrigger=PropertyChanged}" />
+                            <Button Margin="10, 0, 0, 0"
+                                    Command="{Binding Path=ChangePortCommand}"
+                                    Content="Change port" />
                         </StackPanel>
-                        <TextBlock Text="Port is occupied, you may want to choose a different one"
-                                   Visibility="{Binding Path=IsPortOccupied, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                   Foreground="{StaticResource ControlsValidationBrush}" />
+                        <TextBlock Foreground="{StaticResource ControlsValidationBrush}"
+                                   Text="Port is occupied, you may want to choose a different one"
+                                   Visibility="{Binding Path=IsPortOccupied,
+                                                        Converter={StaticResource BooleanToVisibilityConverter}}" />
                     </StackPanel>
                     <Controls:ToggleSwitch Header="Lock remote control with password" IsChecked="{Binding Path=LockRemoteControl}" />
-                    <StackPanel IsEnabled="{Binding Path=LockRemoteControl}" Margin="15, 0, 0, 0" Orientation="Horizontal">
-                        <TextBlock Text="Password" VerticalAlignment="Center" />
-                        <PasswordBox Margin="10, 0, 0, 0"
+                    <StackPanel Margin="15, 0, 0, 0"
+                                IsEnabled="{Binding Path=LockRemoteControl}"
+                                Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="Password" />
+                        <PasswordBox Name="RemotePasswordBox"
                                      Width="200"
-                                     Name="RemotePasswordBox"
+                                     Margin="10, 0, 0, 0"
                                      VerticalContentAlignment="Center"
                                      Controls:TextboxHelper.Watermark="Enter a password"
                                      PasswordChanged="RemotePasswordChanged"
                                      x:FieldModifier="private" />
                         <Button Margin="10, 0, 0, 0"
-                                Content="Change password"
-                                Command="{Binding Path=ChangeRemoteControlPasswordCommand}" />
+                                Command="{Binding Path=ChangeRemoteControlPasswordCommand}"
+                                Content="Change password" />
                     </StackPanel>
                     <Controls:ToggleSwitch Header="Enable voting system" IsChecked="{Binding Path=EnableVotingSystem}" />
                     <TextBlock Margin="0, 50, 0, 0"
-                               Style="{StaticResource SettingsTextStyle}"
                                HorizontalAlignment="Center"
-                               Text="Coming soon for Android"
-                               FontSize="40" />
+                               FontSize="40"
+                               Style="{StaticResource SettingsTextStyle}"
+                               Text="Coming soon for Android" />
                 </StackPanel>
             </TabItem>
             <TabItem Header="about">
                 <StackPanel>
                     <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="espera" />
                     <TextBlock Margin="0, 10, 0, 0"
-                               Text="{Binding Path=Version, StringFormat=Version \{0\}}"
-                               Style="{StaticResource AboutInfoStyle}" />
-                    <TextBlock Text="Author: Dennis Daume" Style="{StaticResource AboutInfoStyle}" />
+                               Style="{StaticResource AboutInfoStyle}"
+                               Text="{Binding Path=Version,
+                                              StringFormat=Version \{0\}}" />
+                    <TextBlock Style="{StaticResource AboutInfoStyle}" Text="Author: Dennis Daume" />
                     <TextBlock Margin="0, 10, 0, 0" Style="{StaticResource AboutInfoStyle}">
                         <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=Homepage}">
                             <Run Foreground="#FF00B7C0" Text="Project Website" />
@@ -430,9 +446,9 @@
                                            Header="Enable anonymous crash/error/usage reporting"
                                            IsChecked="{Binding Path=EnableAutomaticReports}" />
                     <TextBlock Margin="10, 5, 0, 0"
+                               FontSize="15"
                                Style="{StaticResource SettingsTextStyle}"
-                               Text="Espera will NEVER collect any personal identifiable information"
-                               FontSize="15" />
+                               Text="Espera will NEVER collect any personal identifiable information" />
                     <Controls:ToggleSwitch Margin="0, 30, 0, 0"
                                            Header="Show the changlog after an update"
                                            IsChecked="{Binding Path=EnableChangelog}" />

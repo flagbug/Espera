@@ -28,16 +28,20 @@
         <TextBlock Style="{StaticResource DescriptionHeaderStyle}" Text="Report a bug" />
         <TextBlock Style="{StaticResource DescriptionHeaderStyle2}" Text="You can send a bug report to help improving Espera" />
         <DockPanel Margin="0, 10, 0, 0">
-            <TextBlock Text="Email (optional)" VerticalAlignment="Center" DockPanel.Dock="Left" />
-            <TextBox Margin="10, 0, 0, 0" Text="{Binding Path=Email}" DockPanel.Dock="Right" />
+            <TextBlock VerticalAlignment="Center"
+                       DockPanel.Dock="Left"
+                       Text="Email (optional)" />
+            <TextBox Margin="10, 0, 0, 0"
+                     DockPanel.Dock="Right"
+                     Text="{Binding Path=Email}" />
         </DockPanel>
         <TextBox Height="225"
-                 TextWrapping="Wrap"
-                 AcceptsReturn="True"
                  Margin="0, 10, 0, 0"
+                 AcceptsReturn="True"
                  Controls:TextboxHelper.Watermark="Please enter a detailed description of the bug you encountered."
                  Text="{Binding Path=Message,
-                                UpdateSourceTrigger=PropertyChanged}" />
+                                UpdateSourceTrigger=PropertyChanged}"
+                 TextWrapping="Wrap" />
         <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
             <Button Command="{Binding Path=SubmitBugReport}" Content="Send" />
             <Button Margin="10, 0, 0, 0" Click="CancelButtonClick">
