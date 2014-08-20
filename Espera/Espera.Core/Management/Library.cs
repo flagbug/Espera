@@ -28,7 +28,6 @@ namespace Espera.Core.Management
 
         private readonly AccessControl accessControl;
         private readonly AudioPlayer audioPlayer;
-        private readonly Subject<Playlist> currentPlaylistChanged;
         private readonly IFileSystem fileSystem;
         private readonly CompositeDisposable globalSubscriptions;
         private readonly BehaviorSubject<bool> isUpdating;
@@ -44,6 +43,7 @@ namespace Espera.Core.Management
         private readonly Subject<Unit> songsUpdated;
         private readonly ObservableAsPropertyHelper<float> volume;
         private Playlist currentPlayingPlaylist;
+        private Playlist currentPlaylist;
         private IDisposable currentSongFinderSubscription;
         private DateTime lastSongAddTime;
 
@@ -61,9 +61,6 @@ namespace Espera.Core.Management
             this.songLock = new ReaderWriterLockSlim();
             this.songs = new HashSet<LocalSong>();
             this.playlists = new ReactiveList<Playlist>();
-            this.currentPlaylistChanged = new Subject<Playlist>();
-            this.CanPlayNextSong = this.currentPlaylistChanged.Select(x => x.CanPlayNextSong).Switch();
-            this.CanPlayPreviousSong = this.currentPlaylistChanged.Select(x => x.CanPlayPreviousSong).Switch();
             this.songSourcePath = new BehaviorSubject<string>(null);
             this.songsUpdated = new Subject<Unit>();
             this.audioPlayer = new AudioPlayer();
@@ -74,7 +71,7 @@ namespace Espera.Core.Management
             this.TotalTime = this.audioPlayer.TotalTime;
             this.PlaybackState = this.audioPlayer.PlaybackState;
 
-            this.CanPlayNextSong.SampleAndCombineLatest(this.audioPlayer.PlaybackState
+            this.WhenAnyValue(x => x.CurrentPlaylist.CanPlayNextSong).SampleAndCombineLatest(this.audioPlayer.PlaybackState
                     .Where(p => p == AudioPlayerState.Finished), (canPlayNextSong, _) => canPlayNextSong)
                 .SelectMany(x => this.HandleSongFinishAsync(x).ToObservable())
                 .Subscribe();
@@ -85,25 +82,12 @@ namespace Espera.Core.Management
                 .ToProperty(this, x => x.Volume);
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the next song in the playlist can be played.
-        /// </summary>
-        /// <value>true if the next song in the playlist can be played; otherwise, false.</value>
-        public IObservable<bool> CanPlayNextSong { get; private set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the previous song in the playlist can be played.
-        /// </summary>
-        /// <value>true if the previous song in the playlist can be played; otherwise, false.</value>
-        public IObservable<bool> CanPlayPreviousSong { get; private set; }
-
         public IObservable<TimeSpan> CurrentPlaybackTime { get; private set; }
 
-        public Playlist CurrentPlaylist { get; private set; }
-
-        public IObservable<Playlist> CurrentPlaylistChanged
+        public Playlist CurrentPlaylist
         {
-            get { return this.currentPlaylistChanged.AsObservable(); }
+            get { return this.currentPlaylist; }
+            set { this.RaiseAndSetIfChanged(ref this.currentPlaylist, value); }
         }
 
         /// <summary>
@@ -128,7 +112,8 @@ namespace Espera.Core.Management
         public IObservable<AudioPlayerState> PlaybackState { get; private set; }
 
         /// <summary>
-        /// Returns an enumeration of playlists that implements <see cref="INotifyCollectionChanged" />.
+        /// Returns an enumeration of playlists that implements
+        /// <see cref="INotifyCollectionChanged" /> .
         /// </summary>
         public IReadOnlyReactiveList<Playlist> Playlists
         {
@@ -397,7 +382,7 @@ namespace Espera.Core.Management
         /// </summary>
         public async Task PlayPreviousSongAsync(Guid accessToken)
         {
-            this.accessControl.VerifyAccess(accessToken, await this.CurrentPlaylist.CanPlayPreviousSong.FirstAsync());
+            this.accessControl.VerifyAccess(accessToken, this.CurrentPlaylist.CanPlayPreviousSong);
 
             if (!this.CurrentPlaylist.CurrentSongIndex.HasValue)
                 throw new InvalidOperationException("The previous song can't be played as there is no current playlist index.");
@@ -536,7 +521,6 @@ namespace Espera.Core.Management
             this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylist);
 
             this.CurrentPlaylist = playlist;
-            this.currentPlaylistChanged.OnNext(playlist);
         }
 
         /// <summary>
@@ -558,7 +542,7 @@ namespace Espera.Core.Management
 
         private async Task HandleSongCorruptionAsync()
         {
-            if (!await this.CurrentPlaylist.CanPlayNextSong.FirstAsync())
+            if (!this.CurrentPlaylist.CanPlayNextSong)
             {
                 this.CurrentPlaylist.CurrentSongIndex = null;
             }
@@ -584,7 +568,7 @@ namespace Espera.Core.Management
 
         private async Task InternPlayNextSongAsync()
         {
-            if (!await this.CurrentPlaylist.CanPlayNextSong.FirstAsync() || !this.CurrentPlaylist.CurrentSongIndex.HasValue)
+            if (!this.CurrentPlaylist.CanPlayNextSong || !this.CurrentPlaylist.CurrentSongIndex.HasValue)
                 throw new InvalidOperationException("The next song couldn't be played.");
 
             int nextIndex = this.CurrentPlaylist.CurrentSongIndex.Value + 1;

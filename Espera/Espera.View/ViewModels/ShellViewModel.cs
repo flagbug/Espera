@@ -57,7 +57,7 @@ namespace Espera.View.ViewModels
             this.library.Initialize();
             this.accessToken = this.library.LocalAccessControl.RegisterLocalAccessToken();
 
-            this.library.CurrentPlaylistChanged.Subscribe(x => this.RaisePropertyChanged("CurrentPlaylist"));
+            this.library.WhenAnyValue(x => x.CurrentPlaylist).Subscribe(x => this.RaisePropertyChanged("CurrentPlaylist"));
 
             this.canChangeTime = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockTime))
                 .ToProperty(this, x => x.CanChangeTime);
@@ -75,12 +75,12 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.IsAdmin);
 
             this.NextSongCommand = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
-                .CombineLatest(this.library.CanPlayNextSong, (x1, x2) => x1 && x2)
+                .CombineLatest(this.library.WhenAnyValue(x => x.CurrentPlaylist.CanPlayNextSong), (x1, x2) => x1 && x2)
                 .ToCommand();
             this.NextSongCommand.RegisterAsyncTask(_ => this.library.PlayNextSongAsync(this.accessToken));
 
             this.PreviousSongCommand = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
-                .CombineLatest(this.library.CanPlayPreviousSong, (x1, x2) => x1 && x2)
+                .CombineLatest(this.library.WhenAnyValue(x => x.CurrentPlaylist.CanPlayPreviousSong), (x1, x2) => x1 && x2)
                 .ToCommand();
             this.PreviousSongCommand.RegisterAsyncTask(_ => this.library.PlayPreviousSongAsync(this.accessToken));
 

@@ -859,8 +859,7 @@ namespace Espera.Core.Tests
 
                 using (Library library = new LibraryBuilder().WithPlaylist().WithSettings(settings).Build())
                 {
-                    var coll = library.CurrentPlaylistChanged.StartWith(library.CurrentPlaylist)
-                        .Select(x => x.WhenAnyValue(y => y.CurrentSongIndex)).Switch().CreateCollection();
+                    var coll = library.WhenAnyValue(x => x.CurrentPlaylist.CurrentSongIndex).CreateCollection();
 
                     Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 

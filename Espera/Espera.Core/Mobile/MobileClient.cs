@@ -604,13 +604,11 @@ namespace Espera.Core.Mobile
 
         private void SetupPushNotifications()
         {
-            this.library.CurrentPlaylistChanged
-                .Merge(this.library.CurrentPlaylistChanged
-                    .StartWith(this.library.CurrentPlaylist)
+            this.library.WhenAnyValue(x => x.CurrentPlaylist).Skip(1)
+                .Merge(this.library.WhenAnyValue(x => x.CurrentPlaylist)
                     .Select(x => x.Changed().Select(y => x))
                     .Switch())
-                .Merge(this.library.CurrentPlaylistChanged
-                    .StartWith(this.library.CurrentPlaylist)
+                .Merge(this.library.WhenAnyValue(x => x.CurrentPlaylist)
                     .Select(x => x.WhenAnyValue(y => y.CurrentSongIndex).Skip(1).Select(y => x))
                     .Switch())
                 .CombineLatest(this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken),
