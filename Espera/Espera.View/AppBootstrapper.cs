@@ -21,7 +21,6 @@ using Espera.Core.Management;
 using Espera.Core.Mobile;
 using Espera.Core.Settings;
 using Espera.View.ViewModels;
-using Ninject;
 using NLog.Config;
 using NLog.Targets;
 using ReactiveUI;
@@ -36,9 +35,11 @@ namespace Espera.View
         private static readonly string LogFilePath;
         private static readonly string Version;
         private readonly WindowManager windowManager;
-        private IKernel kernel;
+        private CoreSettings coreSettings;
         private MobileApi mobileApi;
         private IDisposable updateSubscription;
+
+        private ViewSettings viewSettings;
 
         static AppBootstrapper()
         {
@@ -75,32 +76,37 @@ namespace Espera.View
 
         protected override void Configure()
         {
-            this.kernel = new StandardKernel();
-            this.kernel.Settings.AllowNullInjection = true;
-            this.kernel.Bind<ILibraryReader>().To<LibraryFileReader>().WithConstructorArgument("sourcePath", LibraryFilePath);
-            this.kernel.Bind<ILibraryWriter>().To<LibraryFileWriter>().WithConstructorArgument("targetPath", LibraryFilePath);
-            this.kernel.Bind<ViewSettings>().To<ViewSettings>().InSingletonScope();
-            this.kernel.Bind<CoreSettings>().To<CoreSettings>().InSingletonScope();
-            this.kernel.Bind<IFileSystem>().To<FileSystem>();
-            this.kernel.Bind<Library>().To<Library>().InSingletonScope();
-            this.kernel.Bind<IWindowManager>().To<WindowManager>();
+            this.viewSettings = new ViewSettings();
+            Locator.CurrentMutable.RegisterConstant(this.viewSettings, typeof(ViewSettings));
+
+            this.coreSettings = new CoreSettings();
+
+            var library = new Library(new LibraryFileReader(LibraryFilePath),
+                new LibraryFileWriter(LibraryFilePath), this.coreSettings, new FileSystem());
+            Locator.CurrentMutable.RegisterConstant(library, typeof(Library));
+
+            Locator.CurrentMutable.RegisterConstant(this.windowManager, typeof(IWindowManager));
+
+            Locator.CurrentMutable.Register(() =>
+                new ShellViewModel(library, this.viewSettings, this.coreSettings, this.windowManager, Locator.Current.GetService<MobileApiInfo>()),
+                typeof(ShellViewModel));
 
             this.ConfigureLogging();
         }
 
         protected override IEnumerable<object> GetAllInstances(Type serviceType)
         {
-            return this.kernel.GetAll(serviceType);
+            return Locator.Current.GetServices(serviceType);
         }
 
         protected override object GetInstance(Type serviceType, string key)
         {
-            return this.kernel.Get(serviceType, key);
+            return Locator.Current.GetService(serviceType, key);
         }
 
         protected override void OnExit(object sender, EventArgs e)
         {
-            this.kernel.Dispose();
+            Locator.Current.GetService<Library>().Dispose();
 
             BlobCache.Shutdown().Wait();
 
@@ -193,16 +199,14 @@ namespace Espera.View
 
         private async Task SetupAnalyticsClient()
         {
-            var coreSettings = this.kernel.Get<CoreSettings>();
-            await AnalyticsClient.Instance.InitializeAsync(coreSettings);
+            await AnalyticsClient.Instance.InitializeAsync(this.coreSettings);
         }
 
         private void SetupLager()
         {
             this.Log().Info("Initializing Lager settings storages...");
 
-            var coreSettings = this.kernel.Get<CoreSettings>();
-            coreSettings.InitializeAsync().Wait();
+            this.coreSettings.InitializeAsync().Wait();
 
             // If we don't have a path or it doesn't exist anymore, restore it.
             if (coreSettings.YoutubeDownloadPath == String.Empty || !Directory.Exists(coreSettings.YoutubeDownloadPath))
@@ -214,21 +218,20 @@ namespace Espera.View
             coreSettings.EnableAutomaticReports = false;
 #endif
 
-            this.kernel.Get<ViewSettings>().InitializeAsync().Wait();
+            this.viewSettings.InitializeAsync().Wait();
 
             this.Log().Info("Settings storages initialized.");
         }
 
         private void SetupMobileApi()
         {
-            var coreSettings = this.kernel.Get<CoreSettings>();
-            var library = this.kernel.Get<Library>();
+            var library = Locator.Current.GetService<Library>();
 
-            this.Log().Info("Remote control is {0}", coreSettings.EnableRemoteControl ? "enabled" : "disabled");
-            this.Log().Info("Port is set to {0}", coreSettings.Port);
+            this.Log().Info("Remote control is {0}", this.coreSettings.EnableRemoteControl ? "enabled" : "disabled");
+            this.Log().Info("Port is set to {0}", this.coreSettings.Port);
 
-            IObservable<MobileApi> apiChanged = coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged()
-                .CombineLatest(coreSettings.WhenAnyValue(x => x.EnableRemoteControl), Tuple.Create)
+            IObservable<MobileApi> apiChanged = this.coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged()
+                .CombineLatest(this.coreSettings.WhenAnyValue(x => x.EnableRemoteControl), Tuple.Create)
                 .Where(x => x.Item2)
                 .Select(x => x.Item1)
                 .Do(_ =>
@@ -255,9 +258,9 @@ namespace Espera.View
 
             var apiStats = new MobileApiInfo(connectedClients, isPortOccupied);
 
-            this.kernel.Bind<MobileApiInfo>().ToConstant(apiStats);
+            Locator.CurrentMutable.RegisterConstant(apiStats, typeof(MobileApiInfo));
 
-            coreSettings.WhenAnyValue(x => x.EnableRemoteControl)
+            this.coreSettings.WhenAnyValue(x => x.EnableRemoteControl)
                 .Where(x => !x && this.mobileApi != null)
                 .Subscribe(x => this.mobileApi.Dispose());
         }
@@ -308,8 +311,7 @@ namespace Espera.View
 
                 await changelogFetchTask;
 
-                var settings = this.kernel.Get<ViewSettings>();
-                settings.IsUpdated = true;
+                this.viewSettings.IsUpdated = true;
             }
 
             else
