@@ -1,3 +1,12 @@
+# v2.5.1
+
+## Improvements
+- Improved the application startup time.
+- Improved the network availability discovery.
+
+## Bugfixes
+- Fix the song corruption state not resetting if the song can be played.
+
 # v2.5.0
 
 ## Features
