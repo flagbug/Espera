@@ -2,7 +2,7 @@
 using System.Net.NetworkInformation;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using ReactiveUI;
+using Splat;
 
 namespace Espera.View
 {
