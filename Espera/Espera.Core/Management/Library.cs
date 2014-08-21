@@ -566,14 +566,14 @@ namespace Espera.Core.Management
             }
         }
 
-        private async Task InternPlayNextSongAsync()
+        private Task InternPlayNextSongAsync()
         {
             if (!this.CurrentPlaylist.CanPlayNextSong || !this.CurrentPlaylist.CurrentSongIndex.HasValue)
                 throw new InvalidOperationException("The next song couldn't be played.");
 
             int nextIndex = this.CurrentPlaylist.CurrentSongIndex.Value + 1;
 
-            await this.InternPlaySongAsync(nextIndex);
+            return this.InternPlaySongAsync(nextIndex);
         }
 
         private async Task InternPlaySongAsync(int playlistIndex)
