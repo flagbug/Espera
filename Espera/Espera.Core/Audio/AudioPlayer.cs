@@ -17,13 +17,13 @@ namespace Espera.Core.Audio
     public sealed class AudioPlayer : IEnableLogger
     {
         private readonly Subject<TimeSpan> currentTimeChangedFromOuter;
+        private readonly SerialDisposable finishSubscription;
         private readonly SemaphoreSlim gate;
         private readonly BehaviorSubject<Song> loadedSong;
         private readonly BehaviorSubject<AudioPlayerState> playbackState;
         private IMediaPlayerCallback audioPlayerCallback;
         private IMediaPlayerCallback currentCallback;
         private bool disposeCurrentAudioCallback;
-        private SerialDisposable finishSubscription;
         private IMediaPlayerCallback videoPlayerCallback;
 
         internal AudioPlayer()
@@ -182,8 +182,7 @@ namespace Espera.Core.Audio
         }
 
         /// <summary>
-        /// Plays the loaded song asynchronously and sets the <see cref="PlaybackState" /> to <see
-        /// cref="AudioPlayerState.Playing" />
+        /// Plays the loaded song asynchronously and sets the <see cref="PlaybackState" /> to <see cref="AudioPlayerState.Playing" />
         /// </summary>
         /// <exception cref="PlaybackException">An error occured while playing the song.</exception>
         internal async Task PlayAsync()
