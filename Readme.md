@@ -28,7 +28,7 @@ If your guests also install the Android app, they can send songs from their phon
 
 ### YouTube
 
-Espera can search songs at YouTube, add them to the playlist and stream the video. This workes completely seamless and songs on your local harddrive can be mixed with YouTube videos.
+Espera can search songs at YouTube, add them to the playlist and stream the video. This works completely seamless and songs on your local harddrive can be mixed with YouTube videos.
 
 ### Metro (Modern UI)-Style
 
