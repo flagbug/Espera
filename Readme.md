@@ -30,6 +30,10 @@ If your guests also install the Android app, they can send songs from their phon
 
 Espera can search songs at YouTube, add them to the playlist and stream the video. This works completely seamless and songs on your local harddrive can be mixed with YouTube videos.
 
+### SoundCloud
+
+Just as with YouTube, you can seamlessly add songs from SoundCloud to your playlist.
+
 ### Metro (Modern UI)-Style
 
 Espera uses [MahApps.Metro](http://github.com/MahApps/MahApps.Metro) for theming. This gives Espera a beautiful and 
