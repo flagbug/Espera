@@ -4,6 +4,8 @@ namespace Espera.Core.Management
 {
     public interface IRemoteAccessControl
     {
+        bool IsRemoteAccessReallyLocked();
+
         bool IsVoteRegistered(Guid accessToken, PlaylistEntry entry);
 
         IObservable<AccessPermission> ObserveAccessPermission(Guid accessToken);

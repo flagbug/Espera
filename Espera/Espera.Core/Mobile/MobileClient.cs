@@ -272,18 +272,21 @@ namespace Espera.Core.Mobile
             this.accessToken = this.library.RemoteAccessControl.RegisterRemoteAccessToken(deviceId);
             this.Log().Info("Registering new mobile client with access token {0}", this.accessToken);
 
-            string password = parameters["password"].Value<string>();
-
-            if (password != null)
+            if (this.library.RemoteAccessControl.IsRemoteAccessReallyLocked())
             {
-                try
-                {
-                    this.library.RemoteAccessControl.UpgradeRemoteAccess(this.accessToken, password);
-                }
+                var password = parameters["password"].Value<string>();
 
-                catch (WrongPasswordException)
+                if (password != null)
                 {
-                    return CreateResponse(ResponseStatus.WrongPassword);
+                    try
+                    {
+                        this.library.RemoteAccessControl.UpgradeRemoteAccess(this.accessToken, password);
+                    }
+
+                    catch (WrongPasswordException)
+                    {
+                        return CreateResponse(ResponseStatus.WrongPassword);
+                    }
                 }
             }
 

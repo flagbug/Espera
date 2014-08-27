@@ -53,6 +53,15 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
+        /// Returns a value indicating whether the remote control is set to locked and there is a
+        /// password set.
+        /// </summary>
+        public bool IsRemoteAccessReallyLocked()
+        {
+            return this.coreSettings.LockRemoteControl && !String.IsNullOrWhiteSpace(this.coreSettings.RemoteControlPassword);
+        }
+
+        /// <summary>
         /// Returns whether a vote for the given access token and entry is already registered.
         /// </summary>
         public bool IsVoteRegistered(Guid accessToken, PlaylistEntry entry)
@@ -74,7 +83,7 @@ namespace Espera.Core.Management
 
         /// <summary>
         /// Gets the remaining votes for a given access token. Returns the current value immediately
-        /// and then any changes to the remaining votes, or <c>null</c>, if voting isn't supported.
+        /// and then any changes to the remaining votes, or <c>null</c> , if voting isn't supported.
         /// </summary>
         public IObservable<int?> ObserveRemainingVotes(Guid accessToken)
         {
@@ -97,8 +106,8 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Registers a new remote access token which's default reights depend on the <see
-        /// cref="CoreSettings.LockRemoteControl" /> setting.
+        /// Registers a new remote access token which's default reights depend on the
+        /// <see cref="CoreSettings.LockRemoteControl" /> setting.
         /// </summary>
         public Guid RegisterRemoteAccessToken(Guid deviceId)
         {
@@ -258,11 +267,6 @@ namespace Espera.Core.Management
         {
             return this.IsRemoteAccessReallyLocked() ?
                 AccessPermission.Guest : AccessPermission.Admin;
-        }
-
-        private bool IsRemoteAccessReallyLocked()
-        {
-            return this.coreSettings.LockRemoteControl && !String.IsNullOrWhiteSpace(this.coreSettings.RemoteControlPassword);
         }
 
         private Guid RegisterToken(AccessType accessType, AccessPermission permission, Guid? deviceId = null)
