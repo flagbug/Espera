@@ -874,6 +874,8 @@ namespace Espera.Core.Management
                     }
                 }, () =>
                 {
+                    this.Save();
+
                     this.StartOnlineArtworkLookup();
 
                     this.songLock.EnterReadLock();
