@@ -1098,7 +1098,7 @@ namespace Espera.Core.Tests
             {
                 var settings = new CoreSettings
                 {
-                    EnableVotingSystem = true,
+                    EnableGuestSystem = true,
                     LockRemoteControl = true,
                     RemoteControlPassword = "Password",
                     MaxVoteCount = 2,
@@ -1123,11 +1123,11 @@ namespace Espera.Core.Tests
             }
 
             [Fact]
-            public void ThrowsInvalidOperationExceptionIfVotingIsDisabled()
+            public void ThrowsInvalidOperationExceptionIfGuestSystemIsDisabled()
             {
                 var settings = new CoreSettings
                 {
-                    EnableVotingSystem = false
+                    EnableGuestSystem = false
                 };
 
                 using (var library = new LibraryBuilder().WithPlaylist().WithSettings(settings).Build())

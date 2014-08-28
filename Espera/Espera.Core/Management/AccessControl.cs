@@ -91,8 +91,8 @@ namespace Espera.Core.Management
 
             return endPoint.EntryCountObservable.CombineLatest(
                     this.coreSettings.WhenAnyValue(x => x.MaxVoteCount),
-                    this.coreSettings.WhenAnyValue(x => x.EnableVotingSystem),
-                (entryCount, maxVoteCount, enableVoting) => enableVoting ? maxVoteCount - entryCount : (int?)null);
+                    this.coreSettings.WhenAnyValue(x => x.EnableGuestSystem),
+                (entryCount, maxVoteCount, enableGuestSystem) => enableGuestSystem ? maxVoteCount - entryCount : (int?)null);
         }
 
         /// <summary>
@@ -241,7 +241,7 @@ namespace Espera.Core.Management
         /// </exception>
         public void VerifyVotingPreconditions(Guid accessToken)
         {
-            if (!this.coreSettings.EnableVotingSystem)
+            if (!this.coreSettings.EnableGuestSystem)
                 throw new InvalidOperationException("Voting isn't enabled.");
 
             AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);

@@ -276,6 +276,12 @@ namespace Espera.View.ViewModels
             set { this.viewSettings.EnableChangelog = value; }
         }
 
+        public bool EnableGuestSystem
+        {
+            get { return this.coreSettings.EnableGuestSystem; }
+            set { this.coreSettings.EnableGuestSystem = value; }
+        }
+
         public bool EnableRemoteControl
         {
             get { return this.coreSettings.EnableRemoteControl; }
@@ -284,12 +290,6 @@ namespace Espera.View.ViewModels
                 this.coreSettings.EnableRemoteControl = value;
                 this.RaisePropertyChanged();
             }
-        }
-
-        public bool EnableVotingSystem
-        {
-            get { return this.coreSettings.EnableVotingSystem; }
-            set { this.coreSettings.EnableVotingSystem = value; }
         }
 
         public bool GoFullScreenOnLock

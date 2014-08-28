@@ -55,13 +55,13 @@ namespace Espera.Core.Settings
             set { this.SetOrCreate(value); }
         }
 
-        public bool EnableRemoteControl
+        public bool EnableGuestSystem
         {
             get { return this.GetOrCreate(true); }
             set { this.SetOrCreate(value); }
         }
 
-        public bool EnableVotingSystem
+        public bool EnableRemoteControl
         {
             get { return this.GetOrCreate(true); }
             set { this.SetOrCreate(value); }

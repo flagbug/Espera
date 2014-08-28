@@ -391,7 +391,8 @@
                                 Command="{Binding Path=ChangeRemoteControlPasswordCommand}"
                                 Content="Change password" />
                     </StackPanel>
-                    <Controls:ToggleSwitch Header="Enable voting system" IsChecked="{Binding Path=EnableVotingSystem}" />
+                    <Controls:ToggleSwitch Header="Enable guest system" IsChecked="{Binding Path=EnableGuestSystem}" />
+                    <TextBlock Style="{StaticResource SettingsTextStyle}" Text="The guest system lets your guests vote for songs and add new songs to the playlist." />
                     <TextBlock Margin="0, 50, 0, 0"
                                HorizontalAlignment="Center"
                                FontSize="40"

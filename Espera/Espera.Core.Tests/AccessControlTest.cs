@@ -134,7 +134,7 @@ namespace Espera.Core.Tests
             [Fact]
             public void SmokeTest()
             {
-                var settings = new CoreSettings { EnableVotingSystem = true };
+                var settings = new CoreSettings { EnableGuestSystem = true };
                 var accessControl = new AccessControl(settings);
                 Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
 
@@ -230,7 +230,7 @@ namespace Espera.Core.Tests
             {
                 var settings = new CoreSettings
                 {
-                    EnableVotingSystem = true,
+                    EnableGuestSystem = true,
                     MaxVoteCount = 2
                 };
                 var accessControl = new AccessControl(settings);
@@ -242,9 +242,9 @@ namespace Espera.Core.Tests
             }
 
             [Fact]
-            public void ThrowsInvalidOperationExceptionIfVotingIsDisabled()
+            public void ThrowsInvalidOperationExceptionIfGuestSystemIsDisabled()
             {
-                var settings = new CoreSettings { EnableVotingSystem = false };
+                var settings = new CoreSettings { EnableGuestSystem = false };
 
                 var accessControl = new AccessControl(settings);
                 Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
@@ -257,7 +257,7 @@ namespace Espera.Core.Tests
             {
                 var settings = new CoreSettings
                 {
-                    EnableVotingSystem = true,
+                    EnableGuestSystem = true,
                     MaxVoteCount = 0
                 };
                 var accessControl = new AccessControl(settings);

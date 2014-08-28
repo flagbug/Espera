@@ -64,8 +64,8 @@ namespace Espera.View.ViewModels
             this.canAlterPlaylist = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlaylist))
                 .ToProperty(this, x => x.CanAlterPlaylist);
 
-            this.showVotes = this.coreSettings.WhenAnyValue(x => x.EnableVotingSystem)
-                .CombineLatest(mobileApiInfo.ConnectedClientCount, (enableVoting, connectedClients) => enableVoting && connectedClients > 0)
+            this.showVotes = this.coreSettings.WhenAnyValue(x => x.EnableGuestSystem)
+                .CombineLatest(mobileApiInfo.ConnectedClientCount, (enableGuestSystem, connectedClients) => enableGuestSystem && connectedClients > 0)
                 .ToProperty(this, x => x.ShowVotes);
 
             this.isAdmin = this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken)
