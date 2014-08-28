@@ -46,7 +46,7 @@ namespace Espera.View.ViewModels
 
                 else
                 {
-                    this.library.AddSongToPlaylist(this.SelectedSongs.Select(song => song.Model).Single());
+                    this.library.AddGuestSongToPlaylist(this.SelectedSongs.Select(song => song.Model).Single(), accessToken);
                 }
             });
 

@@ -183,6 +183,35 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
+        /// Adds the specified song to the end of the playlist as guest.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method is intended only for guest access tokens.
+        /// </para>
+        /// <para>
+        /// As soon as the song is added to the playlist, the entry is marked as "shadow voted".
+        /// This means that it won't be favoured over other songs, like a regular vote, but stays at the end of the playlist.
+        /// </para>
+        /// <para>
+        /// Shadow votes still decrease the available votes of the guest like regular votes, this prevents guests from spamming songs to the playlist.
+        /// </para>
+        /// </remarks>
+        /// <param name="song">The song to add to the end of the playlist.</param>
+        /// <param name="accessToken">The access token. Must have guest permission.</param>
+        /// <exception cref="InvalidOperationException">The guest system is disabled.</exception>
+        /// <exception cref="AccessException">The access token isn't a guest token.</exception>
+        public void AddGuestSongToPlaylist(Song song, Guid accessToken)
+        {
+            if (song == null)
+                Throw.ArgumentNullException(() => song);
+
+            this.accessControl.VerifyVotingPreconditions(accessToken);
+
+            this.CurrentPlaylist.AddSongs(new[] { song });
+        }
+
+        /// <summary>
         /// Adds a new playlist with the specified name to the library.
         /// </summary>
         /// <param name="name">
@@ -217,18 +246,6 @@ namespace Espera.Core.Management
             this.accessControl.VerifyAccess(accessToken);
 
             this.CurrentPlaylist.AddSongs(songList.ToList()); // Copy the sequence to a list, so that the enumeration doesn't gets modified
-        }
-
-        /// <summary>
-        /// Adds the song to the end of the playlist.
-        /// </summary>
-        /// <param name="song">The song to add to the end of the playlist.</param>
-        public void AddSongToPlaylist(Song song)
-        {
-            if (song == null)
-                Throw.ArgumentNullException(() => song);
-
-            this.CurrentPlaylist.AddSongs(new[] { song });
         }
 
         public void ChangeSongSourcePath(string path, Guid accessToken)

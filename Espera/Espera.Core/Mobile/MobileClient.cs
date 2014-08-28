@@ -557,7 +557,7 @@ namespace Espera.Core.Mobile
 
             var song = MobileSong.Create(transferInfo.Metadata, data);
 
-            this.library.AddSongToPlaylist(song);
+            this.library.AddGuestSongToPlaylist(song, this.accessToken);
 
             return Task.FromResult(CreateResponse(ResponseStatus.Success));
         }

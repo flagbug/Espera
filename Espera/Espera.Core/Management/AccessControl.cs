@@ -126,7 +126,7 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Registers a vote for the given access token and decrements the count of the remaing votes.
+        /// Registers a vote for the given access token and decrements the count of the remainig votes.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// There are no votes left for the given access token, or a the same entry is registered twice.
@@ -144,6 +144,33 @@ namespace Espera.Core.Management
             {
                 throw new InvalidOperationException("Entry already registered");
             }
+        }
+
+        /// <summary>
+        /// Registers a vote for the given access token and decrements the count of the remainig votes.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// There are no votes left for the given access token, or a the same entry is registered twice.
+        /// 
+        /// --or--
+        /// 
+        /// The access token isn't a guest token.
+        /// </exception>
+        public void RegisterShadowVote(Guid accessToken, PlaylistEntry entry)
+        {
+            if (entry == null)
+                throw new ArgumentNullException("entry");
+
+            this.VerifyVotingPreconditions(accessToken);
+
+            AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
+
+            if(endPoint.AccessPermission.FirstAsync().Wait() != AccessPermission.Guest)
+            {
+                throw new InvalidOperationException("Access token has to be a guest token.");
+            }
+
+            endPoint.RegisterEntry(entry);
         }
 
         public void SetLocalPassword(Guid accessToken, string password)
@@ -246,6 +273,11 @@ namespace Espera.Core.Management
 
             AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
 
+            if(endPoint.AccessType == AccessType.Local)
+            {
+                return;
+            }
+
             if (endPoint.EntryCount == this.coreSettings.MaxVoteCount)
             {
                 throw new InvalidOperationException("No votes left");
@@ -304,7 +336,7 @@ namespace Espera.Core.Management
         {
             private readonly BehaviorSubject<AccessPermission> accessPermission;
             private readonly BehaviorSubject<int> entryCount;
-            private readonly HashSet<PlaylistEntry> registredEntries;
+            private readonly HashSet<PlaylistEntry> registeredEntries;
 
             public AccessEndPoint(Guid accessToken, AccessType accessType, AccessPermission accessPermission, Guid? deviceId = null)
             {
@@ -313,7 +345,7 @@ namespace Espera.Core.Management
                 this.accessPermission = new BehaviorSubject<AccessPermission>(accessPermission);
                 this.DeviceId = deviceId;
 
-                this.registredEntries = new HashSet<PlaylistEntry>();
+                this.registeredEntries = new HashSet<PlaylistEntry>();
                 this.entryCount = new BehaviorSubject<int>(0);
             }
 
@@ -330,7 +362,7 @@ namespace Espera.Core.Management
 
             public int EntryCount
             {
-                get { return this.registredEntries.Count; }
+                get { return this.registeredEntries.Count; }
             }
 
             public IObservable<int> EntryCountObservable
@@ -350,20 +382,22 @@ namespace Espera.Core.Management
 
             public bool IsRegistered(PlaylistEntry entry)
             {
-                return this.registredEntries.Contains(entry);
+                return this.registeredEntries.Contains(entry);
             }
 
             public bool RegisterEntry(PlaylistEntry entry)
             {
-                if (this.registredEntries.Add(entry))
+                if (this.registeredEntries.Add(entry))
                 {
-                    this.entryCount.OnNext(this.registredEntries.Count);
-                    entry.WhenAnyValue(x => x.Votes)
-                        .FirstAsync(x => x == 0)
+                    this.entryCount.OnNext(this.registeredEntries.Count);
+
+                    // We remove the entry if it has no votes no a shadow vote
+                    entry.WhenAnyValue(x => x.Votes, x => x.IsShadowVoted, (votes, isShadowVoted) => votes == 0 && !isShadowVoted)
+                        .FirstAsync(x => x)
                         .Subscribe(x =>
                         {
-                            this.registredEntries.Remove(entry);
-                            this.entryCount.OnNext(this.registredEntries.Count);
+                            this.registeredEntries.Remove(entry);
+                            this.entryCount.OnNext(this.registeredEntries.Count);
                         });
 
                     return true;
