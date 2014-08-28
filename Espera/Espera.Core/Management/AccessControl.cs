@@ -19,11 +19,13 @@ namespace Espera.Core.Management
     /// access token similiar to a Web API. This access token can be upgraded by providing the
     /// password that the administrator has specified.
     /// </remarks>
-    internal class AccessControl : IEnableLogger, ILocalAccessControl, IRemoteAccessControl
+    internal class AccessControl : ReactiveObject, ILocalAccessControl, IRemoteAccessControl
     {
         private readonly CoreSettings coreSettings;
         private readonly ReaderWriterLockSlim endPointLock;
         private readonly HashSet<AccessEndPoint> endPoints;
+        private readonly ObservableAsPropertyHelper<bool> isGuestSystemReallyEnabled;
+        private readonly ObservableAsPropertyHelper<bool> isRemoteAccessReallyLocked;
 
         private string localPassword;
 
@@ -37,9 +39,31 @@ namespace Espera.Core.Management
             this.endPoints = new HashSet<AccessEndPoint>();
             this.endPointLock = new ReaderWriterLockSlim();
 
-            this.coreSettings.WhenAnyValue(x => x.LockRemoteControl)
-                .Select(_ => this.IsRemoteAccessReallyLocked() ? AccessPermission.Guest : AccessPermission.Admin)
+            this.isRemoteAccessReallyLocked = this.coreSettings.WhenAnyValue(x => x.LockRemoteControl, x => x.RemoteControlPassword,
+               (lockRemoteControl, password) => lockRemoteControl && !String.IsNullOrWhiteSpace(password))
+               .ToProperty(this, x => x.IsRemoteAccessReallyLocked);
+
+            this.isGuestSystemReallyEnabled = this.WhenAnyValue(x => x.IsRemoteAccessReallyLocked, x => x.coreSettings.EnableGuestSystem,
+                (isLocked, enableGuestSystem) => isLocked && enableGuestSystem)
+                .ToProperty(this, x => x.IsGuestSystemReallyEnabled);
+
+            this.WhenAnyValue(x => x.IsRemoteAccessReallyLocked)
+                .Select(x => x ? AccessPermission.Guest : AccessPermission.Admin)
                 .Subscribe(this.UpdateRemoteAccessPermissions);
+        }
+
+        public bool IsGuestSystemReallyEnabled
+        {
+            get { return this.isGuestSystemReallyEnabled.Value; }
+        }
+
+        /// <summary>
+        /// Returns a value indicating whether the remote control is set to locked and there is a
+        /// password set.
+        /// </summary>
+        public bool IsRemoteAccessReallyLocked
+        {
+            get { return this.isRemoteAccessReallyLocked.Value; }
         }
 
         public void DowngradeLocalAccess(Guid accessToken)
@@ -50,15 +74,6 @@ namespace Espera.Core.Management
                 throw new InvalidOperationException("Local password is not set");
 
             endPoint.SetAccessPermission(AccessPermission.Guest);
-        }
-
-        /// <summary>
-        /// Returns a value indicating whether the remote control is set to locked and there is a
-        /// password set.
-        /// </summary>
-        public bool IsRemoteAccessReallyLocked()
-        {
-            return this.coreSettings.LockRemoteControl && !String.IsNullOrWhiteSpace(this.coreSettings.RemoteControlPassword);
         }
 
         /// <summary>
@@ -91,7 +106,7 @@ namespace Espera.Core.Management
 
             return endPoint.EntryCountObservable.CombineLatest(
                     this.coreSettings.WhenAnyValue(x => x.MaxVoteCount),
-                    this.coreSettings.WhenAnyValue(x => x.EnableGuestSystem),
+                    this.WhenAnyValue(x => x.IsGuestSystemReallyEnabled),
                 (entryCount, maxVoteCount, enableGuestSystem) => enableGuestSystem ? maxVoteCount - entryCount : (int?)null);
         }
 
@@ -130,6 +145,33 @@ namespace Espera.Core.Management
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// There are no votes left for the given access token, or a the same entry is registered twice.
+        ///
+        /// --or--
+        ///
+        /// The access token isn't a guest token.
+        /// </exception>
+        public void RegisterShadowVote(Guid accessToken, PlaylistEntry entry)
+        {
+            if (entry == null)
+                throw new ArgumentNullException("entry");
+
+            this.VerifyVotingPreconditions(accessToken);
+
+            AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
+
+            if (endPoint.AccessPermission.FirstAsync().Wait() != AccessPermission.Guest)
+            {
+                throw new InvalidOperationException("Access token has to be a guest token.");
+            }
+
+            endPoint.RegisterEntry(entry);
+        }
+
+        /// <summary>
+        /// Registers a vote for the given access token and decrements the count of the remainig votes.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// There are no votes left for the given access token, or a the same entry is registered twice.
         /// </exception>
         public void RegisterVote(Guid accessToken, PlaylistEntry entry)
         {
@@ -144,33 +186,6 @@ namespace Espera.Core.Management
             {
                 throw new InvalidOperationException("Entry already registered");
             }
-        }
-
-        /// <summary>
-        /// Registers a vote for the given access token and decrements the count of the remainig votes.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// There are no votes left for the given access token, or a the same entry is registered twice.
-        /// 
-        /// --or--
-        /// 
-        /// The access token isn't a guest token.
-        /// </exception>
-        public void RegisterShadowVote(Guid accessToken, PlaylistEntry entry)
-        {
-            if (entry == null)
-                throw new ArgumentNullException("entry");
-
-            this.VerifyVotingPreconditions(accessToken);
-
-            AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
-
-            if(endPoint.AccessPermission.FirstAsync().Wait() != AccessPermission.Guest)
-            {
-                throw new InvalidOperationException("Access token has to be a guest token.");
-            }
-
-            endPoint.RegisterEntry(entry);
         }
 
         public void SetLocalPassword(Guid accessToken, string password)
@@ -273,7 +288,7 @@ namespace Espera.Core.Management
 
             AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
 
-            if(endPoint.AccessType == AccessType.Local)
+            if (endPoint.AccessType == AccessType.Local)
             {
                 return;
             }
@@ -297,7 +312,7 @@ namespace Espera.Core.Management
 
         private AccessPermission GetDefaultRemoteAccessPermission()
         {
-            return this.IsRemoteAccessReallyLocked() ?
+            return this.IsRemoteAccessReallyLocked ?
                 AccessPermission.Guest : AccessPermission.Admin;
         }
 

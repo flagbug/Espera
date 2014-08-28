@@ -39,6 +39,7 @@ namespace Espera.View.ViewModels
 
         private readonly ObservableAsPropertyHelper<bool> enableChangelog;
         private readonly ObservableAsPropertyHelper<bool> isPortOccupied;
+        private readonly ObservableAsPropertyHelper<bool> isRemoteAccessReallyLocked;
         private readonly Library library;
         private readonly ObservableAsPropertyHelper<string> librarySource;
         private readonly ViewSettings viewSettings;
@@ -156,6 +157,9 @@ namespace Espera.View.ViewModels
                 .ToCommand();
             this.ChangeRemoteControlPasswordCommand.Subscribe(x =>
                 this.library.RemoteAccessControl.SetRemotePassword(this.accessToken, this.RemoteControlPassword));
+
+            this.isRemoteAccessReallyLocked = this.library.RemoteAccessControl.WhenAnyValue(x => x.IsRemoteAccessReallyLocked)
+                .ToProperty(this, x => x.IsRemoteAccessReallyLocked);
 
             this.isPortOccupied = mobileApiInfo.IsPortOccupied.ToProperty(this, x => x.IsPortOccupied);
 
@@ -306,6 +310,11 @@ namespace Espera.View.ViewModels
         public bool IsPortOccupied
         {
             get { return this.isPortOccupied.Value; }
+        }
+
+        public bool IsRemoteAccessReallyLocked
+        {
+            get { return this.isRemoteAccessReallyLocked.Value; }
         }
 
         public bool IsWrongPassword
