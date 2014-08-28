@@ -376,20 +376,24 @@
                                                         Converter={StaticResource BooleanToVisibilityConverter}}" />
                     </StackPanel>
                     <Controls:ToggleSwitch Header="Lock remote control with password" IsChecked="{Binding Path=LockRemoteControl}" />
-                    <StackPanel Margin="15, 0, 0, 0"
-                                IsEnabled="{Binding Path=LockRemoteControl}"
-                                Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Text="Password" />
-                        <PasswordBox Name="RemotePasswordBox"
-                                     Width="200"
-                                     Margin="10, 0, 0, 0"
-                                     VerticalContentAlignment="Center"
-                                     Controls:TextboxHelper.Watermark="Enter a password"
-                                     PasswordChanged="RemotePasswordChanged"
-                                     x:FieldModifier="private" />
-                        <Button Margin="10, 0, 0, 0"
-                                Command="{Binding Path=ChangeRemoteControlPasswordCommand}"
-                                Content="Change password" />
+                    <StackPanel Margin="15, 0, 0, 0" Orientation="Vertical">
+                        <StackPanel IsEnabled="{Binding Path=LockRemoteControl}" Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="Password" />
+                            <PasswordBox Name="RemotePasswordBox"
+                                         Width="200"
+                                         Margin="10, 0, 0, 0"
+                                         VerticalContentAlignment="Center"
+                                         Controls:TextboxHelper.Watermark="Enter a password"
+                                         PasswordChanged="RemotePasswordChanged"
+                                         x:FieldModifier="private" />
+                            <Button Margin="10, 0, 0, 0"
+                                    Command="{Binding Path=ChangeRemoteControlPasswordCommand}"
+                                    Content="Change password" />
+                        </StackPanel>
+                        <TextBlock Foreground="{StaticResource ControlsValidationBrush}"
+                                   Text="You must enter a password"
+                                   Visibility="{Binding Path=ShowRemoteControlPasswordError,
+                                                        Converter={StaticResource BooleanToVisibilityConverter}}" />
                     </StackPanel>
                     <StackPanel Margin="30, 0, 0, 0"
                                 IsEnabled="{Binding Path=IsRemoteAccessReallyLocked}"
