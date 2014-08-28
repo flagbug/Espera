@@ -27,6 +27,22 @@ namespace Espera.Core.Tests
         }
 
         [Fact]
+        public void RegisteredShadowVoteUnregistersAutomaticallyWhenEntryVoteCountIsReset()
+        {
+            var settings = new CoreSettings { MaxVoteCount = 2 };
+            var accessControl = new AccessControl(settings);
+            Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+
+            var entry = new PlaylistEntry(0, Helpers.SetupSongMock());
+
+            accessControl.RegisterShadowVote(token, entry);
+
+            entry.ResetVotes();
+
+            Assert.False(entry.IsShadowVoted);
+        }
+
+        [Fact]
         public void RegisteredVoteUnregistersAutomaticallyWhenEntryVoteCountIsReset()
         {
             var settings = new CoreSettings { MaxVoteCount = 2 };
@@ -42,22 +58,6 @@ namespace Espera.Core.Tests
             entry.ResetVotes();
 
             Assert.Equal(new int?[] { 2, 1, 2 }, votes);
-        }
-
-        [Fact]
-        public void RegisteredShadowVoteUnregistersAutomaticallyWhenEntryVoteCountIsReset()
-        {
-            var settings = new CoreSettings { MaxVoteCount = 2 };
-            var accessControl = new AccessControl(settings);
-            Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
-
-            var entry = new PlaylistEntry(0, Helpers.SetupSongMock());
-
-            accessControl.RegisterShadowVote(token, entry);
-
-            entry.ResetVotes();
-
-            Assert.False(entry.IsShadowVoted);
         }
 
         [Fact]
@@ -239,7 +239,6 @@ namespace Espera.Core.Tests
             }
         }
 
-
         public class TheRegisterShadowVoteMethod
         {
             [Fact]
@@ -260,6 +259,17 @@ namespace Espera.Core.Tests
                 accessControl.RegisterShadowVote(token, SetupVotedEntry());
 
                 Assert.Equal(settings.MaxVoteCount - 1, await accessControl.ObserveRemainingVotes(token).FirstAsync());
+            }
+
+            [Fact]
+            public void ThrowsAccessExceptionWithoutGuestAccessToken()
+            {
+                var settings = new CoreSettings();
+                var accessControl = new AccessControl(settings);
+
+                Guid token = accessControl.RegisterLocalAccessToken();
+
+                Assert.Throws<AccessException>(() => accessControl.RegisterShadowVote(token, SetupVotedEntry()));
             }
 
             [Fact]
@@ -293,22 +303,25 @@ namespace Espera.Core.Tests
                 Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
 
                 Assert.Throws<InvalidOperationException>(() => accessControl.RegisterShadowVote(token, new PlaylistEntry(0, Helpers.SetupSongMock())));
-            } 
-
-            [Fact]
-            public void ThrowsAccessExceptionWithoutGuestAccessToken()
-            {
-                var settings = new CoreSettings();
-                var accessControl = new AccessControl(settings);
-
-                Guid token = accessControl.RegisterLocalAccessToken();
-
-                Assert.Throws<AccessException>(() => accessControl.RegisterShadowVote(token, SetupVotedEntry()));
             }
         }
 
         public class TheRegisterVoteMethod
         {
+            [Fact]
+            public void CanVoteOnShadowVotedEntry()
+            {
+                var settings = new CoreSettings();
+
+                var accessControl = new AccessControl(settings);
+                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+
+                PlaylistEntry entry = SetupVotedEntry();
+
+                accessControl.RegisterShadowVote(token, entry);
+                accessControl.RegisterVote(token, entry);
+            }
+
             [Fact]
             public async Task SmokeTest()
             {
@@ -348,20 +361,6 @@ namespace Espera.Core.Tests
                 Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
 
                 Assert.Throws<InvalidOperationException>(() => accessControl.RegisterVote(token, new PlaylistEntry(0, Helpers.SetupSongMock())));
-            }
-
-            [Fact]
-            public void CanVoteOnShadowVotedEntry()
-            {
-                var settings = new CoreSettings();
-
-                var accessControl = new AccessControl(settings);
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
-
-                PlaylistEntry entry = SetupVotedEntry();
-
-                accessControl.RegisterShadowVote(token, entry);
-                accessControl.RegisterVote(token, entry);
             }
         }
 
@@ -572,6 +571,18 @@ namespace Espera.Core.Tests
         public class TheVerifyVotingPreconditionsMethod
         {
             [Fact]
+            public void LocalAccessTokenIgnoresVoteCount()
+            {
+                var settings = new CoreSettings { MaxVoteCount = 0 };
+
+                var accessControl = new AccessControl(settings);
+
+                Guid accessToken = accessControl.RegisterLocalAccessToken();
+
+                accessControl.VerifyVotingPreconditions(accessToken);
+            }
+
+            [Fact]
             public void ThrowsInvalidOperationExceptionIfGuestSystemIsDisabled()
             {
                 var settings = new CoreSettings { EnableGuestSystem = false };
@@ -581,18 +592,6 @@ namespace Espera.Core.Tests
                 Guid accessToken = accessControl.RegisterLocalAccessToken();
 
                 Assert.Throws<InvalidOperationException>(() => accessControl.VerifyVotingPreconditions(accessToken));
-            }
-
-            [Fact]
-            public void LocalAccessTokenIgnoresVoteCount()
-            {
-                var settings = new CoreSettings { MaxVoteCount = 0 };
-
-                var accessControl = new AccessControl(settings);
-
-                Guid accessToken = accessControl.RegisterLocalAccessToken();
-
-                accessControl.VerifyVotingPreconditions(accessToken); 
             }
         }
     }

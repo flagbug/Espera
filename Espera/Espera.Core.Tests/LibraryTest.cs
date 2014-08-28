@@ -97,6 +97,19 @@ namespace Espera.Core.Tests
             }
 
             [Fact]
+            public void ThrowsInvalidOperationExceptionIfAccessTokenIsNotGuestToken()
+            {
+                var settings = new CoreSettings { EnableGuestSystem = false };
+
+                using (Library library = new LibraryBuilder().WithSettings(settings).WithPlaylist().Build())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    Assert.Throws<InvalidOperationException>(() => library.AddGuestSongToPlaylist(Helpers.SetupSongMock(), accessToken));
+                }
+            }
+
+            [Fact]
             public void ThrowsInvalidOperationExceptionIfGuestSystemIsDisabled()
             {
                 var settings = new CoreSettings { EnableGuestSystem = false };
@@ -106,19 +119,6 @@ namespace Espera.Core.Tests
                     Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
                     library.LocalAccessControl.SetLocalPassword(accessToken, "Password");
                     library.LocalAccessControl.DowngradeLocalAccess(accessToken);
-
-                    Assert.Throws<InvalidOperationException>(() => library.AddGuestSongToPlaylist(Helpers.SetupSongMock(), accessToken));
-                }
-            }
-
-            [Fact]
-            public void ThrowsInvalidOperationExceptionIfAccessTokenIsNotGuestToken()
-            {
-                var settings = new CoreSettings { EnableGuestSystem = false };
-
-                using (Library library = new LibraryBuilder().WithSettings(settings).WithPlaylist().Build())
-                {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
                     Assert.Throws<InvalidOperationException>(() => library.AddGuestSongToPlaylist(Helpers.SetupSongMock(), accessToken));
                 }

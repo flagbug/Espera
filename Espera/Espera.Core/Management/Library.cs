@@ -186,15 +186,15 @@ namespace Espera.Core.Management
         /// Adds the specified song to the end of the playlist as guest.
         /// </summary>
         /// <remarks>
-        /// <para>
-        /// This method is intended only for guest access tokens.
-        /// </para>
+        /// <para>This method is intended only for guest access tokens.</para>
         /// <para>
         /// As soon as the song is added to the playlist, the entry is marked as "shadow voted".
-        /// This means that it won't be favoured over other songs, like a regular vote, but stays at the end of the playlist.
+        /// This means that it won't be favoured over other songs, like a regular vote, but stays at
+        /// the end of the playlist.
         /// </para>
         /// <para>
-        /// Shadow votes still decrease the available votes of the guest like regular votes, this prevents guests from spamming songs to the playlist.
+        /// Shadow votes still decrease the available votes of the guest like regular votes, this
+        /// prevents guests from spamming songs to the playlist.
         /// </para>
         /// </remarks>
         /// <param name="song">The song to add to the end of the playlist.</param>
