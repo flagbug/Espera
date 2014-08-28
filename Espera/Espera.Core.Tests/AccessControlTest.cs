@@ -44,7 +44,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void RegisteredVoteUnregistersAutomaticallyWhenEntryVoteCountIsReset()
         {
-            var accessControl = SetupVotableAccessControl();
+            var accessControl = SetupVotableAccessControl(2);
             Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
 
             var entry = new PlaylistEntry(0, Helpers.SetupSongMock());
@@ -61,8 +61,7 @@ namespace Espera.Core.Tests
         [Fact]
         public void RegisterVoteForSameEntryThrowsInvalidOperationException()
         {
-            var settings = new CoreSettings { MaxVoteCount = 2 };
-            var accessControl = new AccessControl(settings);
+            var accessControl = SetupVotableAccessControl(2);
             Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
 
             var entry = SetupVotedEntry();
@@ -221,7 +220,7 @@ namespace Espera.Core.Tests
             [Fact]
             public void SmokeTest()
             {
-                var accessControl = SetupVotableAccessControl();
+                var accessControl = SetupVotableAccessControl(2);
                 Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
 
                 var votes = accessControl.ObserveRemainingVotes(token).CreateCollection();
