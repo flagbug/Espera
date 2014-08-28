@@ -120,16 +120,6 @@ namespace Espera.Core.Management
             get { return this.playlists; }
         }
 
-        public TimeSpan RemainingPlaylistTimeout
-        {
-            get
-            {
-                return this.lastSongAddTime + this.settings.PlaylistTimeout <= DateTime.Now
-                           ? TimeSpan.Zero
-                           : this.lastSongAddTime - DateTime.Now + this.settings.PlaylistTimeout;
-            }
-        }
-
         public IRemoteAccessControl RemoteAccessControl
         {
             get { return this.accessControl; }
@@ -230,25 +220,15 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Adds the song to the end of the playlist. This method throws an exception, if there is
-        /// an outstanding timeout.
+        /// Adds the song to the end of the playlist.
         /// </summary>
         /// <param name="song">The song to add to the end of the playlist.</param>
-        /// <exception cref="InvalidOperationException">There is an outstanding playlist timeout.</exception>
         public void AddSongToPlaylist(Song song)
         {
             if (song == null)
                 Throw.ArgumentNullException(() => song);
 
-            if (this.settings.EnablePlaylistTimeout && this.RemainingPlaylistTimeout > TimeSpan.Zero)
-                throw new InvalidOperationException("Current playlist has a remaining timeout.");
-
             this.CurrentPlaylist.AddSongs(new[] { song });
-
-            if (this.settings.EnablePlaylistTimeout)
-            {
-                this.lastSongAddTime = DateTime.Now;
-            }
         }
 
         public void ChangeSongSourcePath(string path, Guid accessToken)

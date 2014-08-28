@@ -276,16 +276,6 @@ namespace Espera.View.ViewModels
             set { this.viewSettings.EnableChangelog = value; }
         }
 
-        public bool EnablePlaylistTimeout
-        {
-            get { return this.coreSettings.EnablePlaylistTimeout; }
-            set
-            {
-                this.coreSettings.EnablePlaylistTimeout = value;
-                this.RaisePropertyChanged();
-            }
-        }
-
         public bool EnableRemoteControl
         {
             get { return this.coreSettings.EnableRemoteControl; }
@@ -385,12 +375,6 @@ namespace Espera.View.ViewModels
         }
 
         public IReactiveCommand OpenLinkCommand { get; private set; }
-
-        public int PlaylistTimeout
-        {
-            get { return (int)this.coreSettings.PlaylistTimeout.TotalSeconds; }
-            set { this.coreSettings.PlaylistTimeout = TimeSpan.FromSeconds(value); }
-        }
 
         public int Port
         {

@@ -16,7 +16,6 @@ namespace Espera.View.ViewModels
     {
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly Library library;
-        private readonly Subject<Unit> timeoutWarning;
         private SortOrder durationOrder;
         private string searchText;
         private IEnumerable<T> selectableSongs;
@@ -29,21 +28,12 @@ namespace Espera.View.ViewModels
 
             this.searchText = String.Empty;
             this.selectableSongs = Enumerable.Empty<T>();
-            this.timeoutWarning = new Subject<Unit>();
 
             this.ApplyOrder(SortHelpers.GetOrderByTitle<T>, ref this.titleOrder);
 
             this.AddToPlaylistCommand = this.WhenAnyValue(x => x.SelectedSongs, x => x != null && x.Any()).ToCommand();
             this.AddToPlaylistCommand.Subscribe(x =>
             {
-                if (this.library.RemainingPlaylistTimeout > TimeSpan.Zero)
-                {
-                    // Trigger the animation
-                    this.timeoutWarning.OnNext(Unit.Default);
-
-                    return;
-                }
-
                 if (this.IsAdmin)
                 {
                     this.library.AddSongsToPlaylist(this.SelectedSongs.Select(song => song.Model), accessToken);
@@ -110,11 +100,6 @@ namespace Espera.View.ViewModels
         }
 
         public ReactiveCommand SelectionChangedCommand { get; set; }
-
-        public IObservable<Unit> TimeoutWarning
-        {
-            get { return this.timeoutWarning.AsObservable(); }
-        }
 
         protected Library Library
         {

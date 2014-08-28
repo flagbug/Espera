@@ -17,7 +17,5 @@ namespace Espera.View.ViewModels
         string SearchText { get; set; }
 
         IEnumerable<ISongViewModelBase> SelectedSongs { get; set; }
-
-        IObservable<Unit> TimeoutWarning { get; }
     }
 }

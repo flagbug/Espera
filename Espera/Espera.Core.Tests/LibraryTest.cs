@@ -141,45 +141,6 @@ namespace Espera.Core.Tests
         public class TheAddSongToPlaylistMethod
         {
             [Fact]
-            public void DisabledTimeoutSmokeTest()
-            {
-                var settings = new CoreSettings
-                {
-                    EnablePlaylistTimeout = false
-                };
-
-                using (Library library = new LibraryBuilder().WithPlaylist().WithSettings(settings).Build())
-                {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
-                    library.LocalAccessControl.SetLocalPassword(accessToken, "password");
-                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
-
-                    Song song = Helpers.SetupSongMock();
-
-                    library.AddSongToPlaylist(song);
-                    library.AddSongToPlaylist(song);
-
-                    Assert.Equal(2, library.CurrentPlaylist.Count());
-                }
-            }
-
-            [Fact]
-            public void PlaylistTimeoutThrowsInvalidOperationException()
-            {
-                using (Library library = new LibraryBuilder().WithPlaylist().Build())
-                {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
-                    library.LocalAccessControl.SetLocalPassword(accessToken, "password");
-                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
-
-                    Song song = Helpers.SetupSongMock();
-
-                    library.AddSongToPlaylist(song);
-                    Assert.Throws<InvalidOperationException>(() => library.AddSongToPlaylist(song));
-                }
-            }
-
-            [Fact]
             public void ThrowsArgumentNullExceptionIfSongIsNull()
             {
                 using (Library library = Helpers.CreateLibrary())
@@ -852,12 +813,7 @@ namespace Espera.Core.Tests
             [Fact(Skip = "Different outcome when running alone or in a group")]
             public async Task SetsCurrentSongIndexIfChangingToOtherPlaylistAndPlayingFirstSong()
             {
-                var settings = new CoreSettings
-                {
-                    EnablePlaylistTimeout = false
-                };
-
-                using (Library library = new LibraryBuilder().WithPlaylist().WithSettings(settings).Build())
+                using (Library library = new LibraryBuilder().WithPlaylist().Build())
                 {
                     var coll = library.WhenAnyValue(x => x.CurrentPlaylist.CurrentSongIndex).CreateCollection();
 
@@ -1146,7 +1102,6 @@ namespace Espera.Core.Tests
                     LockRemoteControl = true,
                     RemoteControlPassword = "Password",
                     MaxVoteCount = 2,
-                    EnablePlaylistTimeout = false
                 };
 
                 using (var library = new LibraryBuilder().WithPlaylist().WithSettings(settings).Build())
