@@ -549,8 +549,20 @@ namespace Espera.Core.Mobile
             await this.SendMessage(message);
         }
 
-        private Task<ResponseInfo> QueueRemoteSong(JToken parameters)
+        private async Task<ResponseInfo> QueueRemoteSong(JToken parameters)
         {
+            int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
+
+            if (remainingVotes == null)
+            {
+                return CreateResponse(ResponseStatus.NotSupported, "Voting isn't supported");
+            }
+
+            if (remainingVotes == 0)
+            {
+                return CreateResponse(ResponseStatus.Rejected, "Not enough votes left");
+            }
+
             var transferInfo = parameters.ToObject<SongTransferInfo>();
 
             IObservable<byte[]> data = this.songTransfers.FirstAsync(x => x.TransferId == transferInfo.TransferId).Select(x => x.Data);
@@ -559,7 +571,7 @@ namespace Espera.Core.Mobile
 
             this.library.AddGuestSongToPlaylist(song, this.accessToken);
 
-            return Task.FromResult(CreateResponse(ResponseStatus.Success));
+            return CreateResponse(ResponseStatus.Success);
         }
 
         private async Task SendMessage(NetworkMessage content)
