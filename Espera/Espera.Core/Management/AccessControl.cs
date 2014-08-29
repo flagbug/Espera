@@ -155,6 +155,9 @@ namespace Espera.Core.Management
             if (entry == null)
                 throw new ArgumentNullException("entry");
 
+            if (!entry.IsShadowVoted)
+                throw new ArgumentException("Entry must be shadow voted");
+
             this.VerifyVotingPreconditions(accessToken);
 
             AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
@@ -182,7 +185,7 @@ namespace Espera.Core.Management
 
             AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
 
-            if (!endPoint.RegisterEntry(entry))
+            if (!endPoint.RegisterEntry(entry) && !entry.IsShadowVoted)
             {
                 throw new InvalidOperationException("Entry already registered");
             }

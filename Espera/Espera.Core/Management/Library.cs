@@ -208,7 +208,9 @@ namespace Espera.Core.Management
 
             this.accessControl.VerifyVotingPreconditions(accessToken);
 
-            this.CurrentPlaylist.AddSongs(new[] { song });
+            PlaylistEntry entry = this.CurrentPlaylist.AddShadowVotedSong(song);
+
+            this.accessControl.RegisterShadowVote(accessToken, entry);
         }
 
         /// <summary>
