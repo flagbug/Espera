@@ -157,7 +157,9 @@ namespace Espera.Core.Mobile
                     }
 
                     return Unit.Default;
-                }).Subscribe(_ => { }, ex => this.disconnected.OnNext(Unit.Default), () => this.disconnected.OnNext(Unit.Default))
+                })
+                .Finally(() => this.disconnected.OnNext(Unit.Default))
+                .Subscribe()
                 .DisposeWith(this.disposable);
 
             var transfers = Observable.FromAsync(() => this.fileSocket.GetStream().ReadNextFileTransferMessageAsync())
