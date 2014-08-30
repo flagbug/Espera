@@ -545,7 +545,7 @@ namespace Espera.Core.Mobile
 
             NetworkMessage message = CreatePushMessage(PushAction.UpdateGuestSystemInfo, JObject.FromObject(guestSystemInfo));
 
-            return Task.FromResult(message);
+            return this.SendMessage(message);
         }
 
         private async Task PushPlaybackState(AudioPlayerState state)
