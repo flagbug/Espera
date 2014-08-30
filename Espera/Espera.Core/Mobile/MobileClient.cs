@@ -568,16 +568,21 @@ namespace Espera.Core.Mobile
 
         private async Task<ResponseInfo> QueueRemoteSong(JToken parameters)
         {
-            int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
+            AccessPermission permission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken);
 
-            if (remainingVotes == null)
+            if (permission == AccessPermission.Guest)
             {
-                return CreateResponse(ResponseStatus.NotSupported, "Voting isn't supported");
-            }
+                int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
 
-            if (remainingVotes == 0)
-            {
-                return CreateResponse(ResponseStatus.Rejected, "Not enough votes left");
+                if (remainingVotes == null)
+                {
+                    return CreateResponse(ResponseStatus.NotSupported, "Voting isn't supported");
+                }
+
+                if (remainingVotes == 0)
+                {
+                    return CreateResponse(ResponseStatus.Rejected, "Not enough votes left");
+                }
             }
 
             var transferInfo = parameters.ToObject<SongTransferInfo>();
