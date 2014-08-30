@@ -153,18 +153,16 @@ namespace Espera.Core.Tests
         public class TheAddSongsToPlaylistMethod
         {
             [Fact]
-            public void ThrowsAccessExceptionWithGuestTokenAndMultipleSongs()
+            public void RequiresAdminPermission()
             {
                 var songs = new[]
                 {
-                    Substitute.For<Song>("TestPath", TimeSpan.Zero),
                     Substitute.For<Song>("TestPath", TimeSpan.Zero)
                 };
 
                 using (Library library = new LibraryBuilder().WithPlaylist().Build())
                 {
                     Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
-
                     library.LocalAccessControl.SetLocalPassword(token, "Password");
                     library.LocalAccessControl.DowngradeLocalAccess(token);
 

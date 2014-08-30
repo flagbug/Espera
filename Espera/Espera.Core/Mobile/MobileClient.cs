@@ -200,7 +200,7 @@ namespace Espera.Core.Mobile
             };
         }
 
-        private Task<ResponseInfo> AddPlaylistSongs(JToken parameters)
+        private async Task<ResponseInfo> AddPlaylistSongs(JToken parameters)
         {
             IEnumerable<Song> songs;
             ResponseInfo response;
@@ -209,20 +209,42 @@ namespace Espera.Core.Mobile
 
             if (areValid)
             {
-                try
+                AccessPermission permission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken);
+
+                if (permission == AccessPermission.Guest)
+                {
+                    int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
+
+                    if (remainingVotes == null)
+                    {
+                        return CreateResponse(ResponseStatus.NotSupported, "Voting isn't supported");
+                    }
+
+                    if (remainingVotes == 0)
+                    {
+                        return CreateResponse(ResponseStatus.Rejected, "Not enough votes left");
+                    }
+                }
+
+                if (permission == AccessPermission.Admin)
                 {
                     this.library.AddSongsToPlaylist(songs, this.accessToken);
                 }
 
-                catch (AccessException)
+                else
                 {
-                    return Task.FromResult(CreateResponse(ResponseStatus.Unauthorized));
+                    if (songs.Count() > 1)
+                    {
+                        return CreateResponse(ResponseStatus.Unauthorized, "Guests can't add more than one song");
+                    }
+
+                    this.library.AddGuestSongToPlaylist(songs.First(), this.accessToken);
                 }
 
-                return Task.FromResult(CreateResponse(ResponseStatus.Success));
+                return CreateResponse(ResponseStatus.Success);
             }
 
-            return Task.FromResult(response);
+            return response;
         }
 
         private async Task<ResponseInfo> AddPlaylistSongsNow(JToken parameters)
