@@ -44,7 +44,7 @@
     </Reference>
     <Reference Include="Espera.Network, Version=1.0.21.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Espera-Network.1.0.21\lib\portable-net45+monoandroid\Espera.Network.dll</HintPath>
+      <HintPath>..\packages\Espera-Network.1.0.24\lib\portable-net45+monoandroid\Espera.Network.dll</HintPath>
     </Reference>
     <Reference Include="Google.GData.Client, Version=2.2.0.0, Culture=neutral, PublicKeyToken=04a59ca9b0273830, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

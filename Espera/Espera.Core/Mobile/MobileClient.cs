@@ -58,6 +58,7 @@ namespace Espera.Core.Mobile
             this.messageActionMap = new Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>>
             {
                 {RequestAction.GetConnectionInfo, this.GetConnectionInfo},
+                {RequestAction.GetGuestSystemInfo, this.GetGuestSystemInfo},
                 {RequestAction.GetLibraryContent, this.GetLibraryContent},
                 {RequestAction.AddPlaylistSongs, this.AddPlaylistSongs},
                 {RequestAction.AddPlaylistSongsNow, this.AddPlaylistSongsNow},
@@ -310,14 +311,30 @@ namespace Espera.Core.Mobile
         private async Task<ResponseInfo> GetCurrentPlaylist(JToken dontCare)
         {
             Playlist playlist = this.library.CurrentPlaylist;
-            int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
             AudioPlayerState playbackState = await this.library.PlaybackState.FirstAsync();
 
             TimeSpan currentTime = await this.library.CurrentPlaybackTime.FirstAsync();
             TimeSpan totalTime = await this.library.TotalTime.FirstAsync();
-            JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes, playbackState, currentTime, totalTime);
+            JObject content = MobileHelper.SerializePlaylist(playlist, playbackState, currentTime, totalTime);
 
             return CreateResponse(ResponseStatus.Success, null, content);
+        }
+
+        private async Task<ResponseInfo> GetGuestSystemInfo(JToken arg)
+        {
+            int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
+
+            var guestSystemInfo = new GuestSystemInfo
+            {
+                IsEnabled = remainingVotes.HasValue,
+            };
+
+            if (remainingVotes.HasValue)
+            {
+                guestSystemInfo.RemainingVotes = remainingVotes.Value;
+            }
+
+            return CreateResponse(ResponseStatus.Success, JObject.FromObject(guestSystemInfo));
         }
 
         private Task<ResponseInfo> GetLibraryContent(JToken dontCare)
@@ -514,6 +531,23 @@ namespace Espera.Core.Mobile
             return this.SendMessage(message);
         }
 
+        private Task PushGuestSystemInfo(int? remainingVotes)
+        {
+            var guestSystemInfo = new GuestSystemInfo
+            {
+                IsEnabled = remainingVotes.HasValue,
+            };
+
+            if (remainingVotes.HasValue)
+            {
+                guestSystemInfo.RemainingVotes = remainingVotes.Value;
+            }
+
+            NetworkMessage message = CreatePushMessage(PushAction.UpdateGuestSystemInfo, JObject.FromObject(guestSystemInfo));
+
+            return Task.FromResult(message);
+        }
+
         private async Task PushPlaybackState(AudioPlayerState state)
         {
             var content = JObject.FromObject(new
@@ -526,9 +560,9 @@ namespace Espera.Core.Mobile
             await this.SendMessage(message);
         }
 
-        private async Task PushPlaylist(Playlist playlist, int? remainingVotes, AudioPlayerState state)
+        private async Task PushPlaylist(Playlist playlist, AudioPlayerState state)
         {
-            JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes, state,
+            JObject content = MobileHelper.SerializePlaylist(playlist, state,
                 await this.library.CurrentPlaybackTime.FirstAsync(),
                 await this.library.TotalTime.FirstAsync());
 
@@ -626,10 +660,9 @@ namespace Espera.Core.Mobile
                 .Merge(this.library.WhenAnyValue(x => x.CurrentPlaylist)
                     .Select(x => x.WhenAnyValue(y => y.CurrentSongIndex).Skip(1).Select(y => x))
                     .Switch())
-                .CombineLatest(this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken),
-                    this.library.PlaybackState, Tuple.Create)
+                .CombineLatest(this.library.PlaybackState, Tuple.Create)
                 .ObserveOn(RxApp.TaskpoolScheduler)
-                .Subscribe(x => this.PushPlaylist(x.Item1, x.Item2, x.Item3))
+                .Subscribe(x => this.PushPlaylist(x.Item1, x.Item2))
                 .DisposeWith(this.disposable);
 
             this.library.PlaybackState.Skip(1)
@@ -660,6 +693,11 @@ namespace Espera.Core.Mobile
                 .ObserveOn(RxApp.TaskpoolScheduler)
                 .Subscribe(x => this.PushCurrentPlaybackTime(x))
                 .DisposeWith(this.disposable);
+
+            this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken)
+                .Skip(1)
+                .ObserveOn(RxApp.TaskpoolScheduler)
+                .Subscribe(x => this.PushGuestSystemInfo(x));
         }
 
         private Task<ResponseInfo> SetVolume(JToken parameters)
