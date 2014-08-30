@@ -571,18 +571,6 @@ namespace Espera.Core.Mobile
             await this.SendMessage(message);
         }
 
-        private async Task PushRemainingVotes(int? remainingVotes)
-        {
-            var content = JObject.FromObject(new
-            {
-                remainingVotes
-            });
-
-            NetworkMessage message = CreatePushMessage(PushAction.UpdateRemainingVotes, content);
-
-            await this.SendMessage(message);
-        }
-
         private async Task<ResponseInfo> QueueRemoteSong(JToken parameters)
         {
             int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
@@ -679,7 +667,7 @@ namespace Espera.Core.Mobile
             this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken)
                 .Skip(1)
                 .ObserveOn(RxApp.TaskpoolScheduler)
-                .Subscribe(x => this.PushRemainingVotes(x))
+                .Subscribe(x => this.PushGuestSystemInfo(x))
                 .DisposeWith(this.disposable);
 
             TimeSpan lastTime = TimeSpan.Zero;
@@ -693,11 +681,6 @@ namespace Espera.Core.Mobile
                 .ObserveOn(RxApp.TaskpoolScheduler)
                 .Subscribe(x => this.PushCurrentPlaybackTime(x))
                 .DisposeWith(this.disposable);
-
-            this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken)
-                .Skip(1)
-                .ObserveOn(RxApp.TaskpoolScheduler)
-                .Subscribe(x => this.PushGuestSystemInfo(x));
         }
 
         private Task<ResponseInfo> SetVolume(JToken parameters)
