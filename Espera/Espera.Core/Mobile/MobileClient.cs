@@ -58,7 +58,6 @@ namespace Espera.Core.Mobile
             this.messageActionMap = new Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>>
             {
                 {RequestAction.GetConnectionInfo, this.GetConnectionInfo},
-                {RequestAction.GetGuestSystemInfo, this.GetGuestSystemInfo},
                 {RequestAction.GetLibraryContent, this.GetLibraryContent},
                 {RequestAction.AddPlaylistSongs, this.AddPlaylistSongs},
                 {RequestAction.AddPlaylistSongsNow, this.AddPlaylistSongsNow},
@@ -297,10 +296,23 @@ namespace Espera.Core.Mobile
             // This is stupid
             NetworkAccessPermission permission = accessPermission == AccessPermission.Admin ? NetworkAccessPermission.Admin : NetworkAccessPermission.Guest;
 
+            int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
+
+            var guestSystemInfo = new GuestSystemInfo
+            {
+                IsEnabled = remainingVotes.HasValue,
+            };
+
+            if (remainingVotes.HasValue)
+            {
+                guestSystemInfo.RemainingVotes = remainingVotes.Value;
+            }
+
             var connectionInfo = new ConnectionInfo
             {
                 AccessPermission = permission,
-                ServerVersion = serverVersion
+                ServerVersion = serverVersion,
+                GuestSystemInfo = guestSystemInfo
             };
 
             this.SetupPushNotifications();
@@ -318,23 +330,6 @@ namespace Espera.Core.Mobile
             JObject content = MobileHelper.SerializePlaylist(playlist, playbackState, currentTime, totalTime);
 
             return CreateResponse(ResponseStatus.Success, null, content);
-        }
-
-        private async Task<ResponseInfo> GetGuestSystemInfo(JToken arg)
-        {
-            int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
-
-            var guestSystemInfo = new GuestSystemInfo
-            {
-                IsEnabled = remainingVotes.HasValue,
-            };
-
-            if (remainingVotes.HasValue)
-            {
-                guestSystemInfo.RemainingVotes = remainingVotes.Value;
-            }
-
-            return CreateResponse(ResponseStatus.Success, JObject.FromObject(guestSystemInfo));
         }
 
         private Task<ResponseInfo> GetLibraryContent(JToken dontCare)
