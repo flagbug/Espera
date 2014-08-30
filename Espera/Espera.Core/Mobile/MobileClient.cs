@@ -209,7 +209,7 @@ namespace Espera.Core.Mobile
 
             if (areValid)
             {
-                AccessPermission permission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken);
+                AccessPermission permission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken).FirstAsync();
 
                 if (permission == AccessPermission.Guest)
                 {
@@ -590,7 +590,7 @@ namespace Espera.Core.Mobile
 
         private async Task<ResponseInfo> QueueRemoteSong(JToken parameters)
         {
-            AccessPermission permission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken);
+            AccessPermission permission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken).FirstAsync();
 
             if (permission == AccessPermission.Guest)
             {
