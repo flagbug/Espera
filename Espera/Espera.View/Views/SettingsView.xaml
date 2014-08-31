@@ -406,7 +406,9 @@
                             <Hyperlink Command="{Binding Path=OpenLinkCommand}"
                                        CommandParameter="{Binding PlayStoreLink}"
                                        TextDecorations="None">
-                                <Image Source="../Images/AndroidBadge.png" Stretch="None" />
+                                <Image Width="250"
+                                       Source="../Images/AndroidBadge.png"
+                                       Stretch="Uniform" />
                             </Hyperlink>
                         </TextBlock>
                     </StackPanel>
