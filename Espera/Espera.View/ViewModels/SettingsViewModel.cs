@@ -392,6 +392,11 @@ namespace Espera.View.ViewModels
 
         public IReactiveCommand OpenLinkCommand { get; private set; }
 
+        public string PlayStoreLink
+        {
+            get { return "http://play.google.com/store/apps/details?id=com.flagbug.esperamobile"; }
+        }
+
         public int Port
         {
             get { return this.port; }

@@ -402,11 +402,13 @@
                         <TextBlock Style="{StaticResource SettingsTextStyle}"
                                    Text="The guest system lets your guests vote for songs and add new songs to the playlist."
                                    TextWrapping="Wrap" />
-                        <TextBlock Margin="0, 50, 0, 0"
-                                   HorizontalAlignment="Center"
-                                   FontSize="40"
-                                   Style="{StaticResource SettingsTextStyle}"
-                                   Text="Coming soon for Android" />
+                        <TextBlock Margin="0, 50, 0, 0" HorizontalAlignment="Center">
+                            <Hyperlink Command="{Binding Path=OpenLinkCommand}"
+                                       CommandParameter="{Binding PlayStoreLink}"
+                                       TextDecorations="None">
+                                <Image Source="../Images/AndroidBadge.png" Stretch="None" />
+                            </Hyperlink>
+                        </TextBlock>
                     </StackPanel>
                 </StackPanel>
             </TabItem>
