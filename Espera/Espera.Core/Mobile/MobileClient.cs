@@ -202,7 +202,7 @@ namespace Espera.Core.Mobile
             };
         }
 
-        private Task<ResponseInfo> AddPlaylistSongs(JToken parameters)
+        private async Task<ResponseInfo> AddPlaylistSongs(JToken parameters)
         {
             IEnumerable<Song> songs;
             ResponseInfo response;
@@ -211,20 +211,42 @@ namespace Espera.Core.Mobile
 
             if (areValid)
             {
-                try
+                AccessPermission permission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken).FirstAsync();
+
+                if (permission == AccessPermission.Guest)
+                {
+                    int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
+
+                    if (remainingVotes == null)
+                    {
+                        return CreateResponse(ResponseStatus.NotSupported, "Voting isn't supported");
+                    }
+
+                    if (remainingVotes == 0)
+                    {
+                        return CreateResponse(ResponseStatus.Rejected, "Not enough votes left");
+                    }
+                }
+
+                if (permission == AccessPermission.Admin)
                 {
                     this.library.AddSongsToPlaylist(songs, this.accessToken);
                 }
 
-                catch (AccessException)
+                else
                 {
-                    return Task.FromResult(CreateResponse(ResponseStatus.Unauthorized));
+                    if (songs.Count() > 1)
+                    {
+                        return CreateResponse(ResponseStatus.Unauthorized, "Guests can't add more than one song");
+                    }
+
+                    this.library.AddGuestSongToPlaylist(songs.First(), this.accessToken);
                 }
 
-                return Task.FromResult(CreateResponse(ResponseStatus.Success));
+                return CreateResponse(ResponseStatus.Success);
             }
 
-            return Task.FromResult(response);
+            return response;
         }
 
         private async Task<ResponseInfo> AddPlaylistSongsNow(JToken parameters)
@@ -274,7 +296,7 @@ namespace Espera.Core.Mobile
             this.accessToken = this.library.RemoteAccessControl.RegisterRemoteAccessToken(deviceId);
             this.Log().Info("Registering new mobile client with access token {0}", this.accessToken);
 
-            if (this.library.RemoteAccessControl.IsRemoteAccessReallyLocked())
+            if (this.library.RemoteAccessControl.IsRemoteAccessReallyLocked)
             {
                 var password = parameters["password"].Value<string>();
 
@@ -298,10 +320,23 @@ namespace Espera.Core.Mobile
             // This is stupid
             NetworkAccessPermission permission = accessPermission == AccessPermission.Admin ? NetworkAccessPermission.Admin : NetworkAccessPermission.Guest;
 
+            int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
+
+            var guestSystemInfo = new GuestSystemInfo
+            {
+                IsEnabled = remainingVotes.HasValue,
+            };
+
+            if (remainingVotes.HasValue)
+            {
+                guestSystemInfo.RemainingVotes = remainingVotes.Value;
+            }
+
             var connectionInfo = new ConnectionInfo
             {
                 AccessPermission = permission,
-                ServerVersion = serverVersion
+                ServerVersion = serverVersion,
+                GuestSystemInfo = guestSystemInfo
             };
 
             this.SetupPushNotifications();
@@ -312,12 +347,11 @@ namespace Espera.Core.Mobile
         private async Task<ResponseInfo> GetCurrentPlaylist(JToken dontCare)
         {
             Playlist playlist = this.library.CurrentPlaylist;
-            int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
             AudioPlayerState playbackState = await this.library.PlaybackState.FirstAsync();
 
             TimeSpan currentTime = await this.library.CurrentPlaybackTime.FirstAsync();
             TimeSpan totalTime = await this.library.TotalTime.FirstAsync();
-            JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes, playbackState, currentTime, totalTime);
+            JObject content = MobileHelper.SerializePlaylist(playlist, playbackState, currentTime, totalTime);
 
             return CreateResponse(ResponseStatus.Success, null, content);
         }
@@ -516,6 +550,23 @@ namespace Espera.Core.Mobile
             return this.SendMessage(message);
         }
 
+        private Task PushGuestSystemInfo(int? remainingVotes)
+        {
+            var guestSystemInfo = new GuestSystemInfo
+            {
+                IsEnabled = remainingVotes.HasValue,
+            };
+
+            if (remainingVotes.HasValue)
+            {
+                guestSystemInfo.RemainingVotes = remainingVotes.Value;
+            }
+
+            NetworkMessage message = CreatePushMessage(PushAction.UpdateGuestSystemInfo, JObject.FromObject(guestSystemInfo));
+
+            return this.SendMessage(message);
+        }
+
         private async Task PushPlaybackState(AudioPlayerState state)
         {
             var content = JObject.FromObject(new
@@ -528,9 +579,9 @@ namespace Espera.Core.Mobile
             await this.SendMessage(message);
         }
 
-        private async Task PushPlaylist(Playlist playlist, int? remainingVotes, AudioPlayerState state)
+        private async Task PushPlaylist(Playlist playlist, AudioPlayerState state)
         {
-            JObject content = MobileHelper.SerializePlaylist(playlist, remainingVotes, state,
+            JObject content = MobileHelper.SerializePlaylist(playlist, state,
                 await this.library.CurrentPlaybackTime.FirstAsync(),
                 await this.library.TotalTime.FirstAsync());
 
@@ -539,29 +590,42 @@ namespace Espera.Core.Mobile
             await this.SendMessage(message);
         }
 
-        private async Task PushRemainingVotes(int? remainingVotes)
+        private async Task<ResponseInfo> QueueRemoteSong(JToken parameters)
         {
-            var content = JObject.FromObject(new
+            AccessPermission permission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken).FirstAsync();
+
+            if (permission == AccessPermission.Guest)
             {
-                remainingVotes
-            });
+                int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
 
-            NetworkMessage message = CreatePushMessage(PushAction.UpdateRemainingVotes, content);
+                if (remainingVotes == null)
+                {
+                    return CreateResponse(ResponseStatus.NotSupported, "Voting isn't supported");
+                }
 
-            await this.SendMessage(message);
-        }
+                if (remainingVotes == 0)
+                {
+                    return CreateResponse(ResponseStatus.Rejected, "Not enough votes left");
+                }
+            }
 
-        private Task<ResponseInfo> QueueRemoteSong(JToken parameters)
-        {
             var transferInfo = parameters.ToObject<SongTransferInfo>();
 
             IObservable<byte[]> data = this.songTransfers.FirstAsync(x => x.TransferId == transferInfo.TransferId).Select(x => x.Data);
 
             var song = MobileSong.Create(transferInfo.Metadata, data);
 
-            this.library.AddSongToPlaylist(song);
+            if (permission == AccessPermission.Guest)
+            {
+                this.library.AddGuestSongToPlaylist(song, this.accessToken);
+            }
 
-            return Task.FromResult(CreateResponse(ResponseStatus.Success));
+            else
+            {
+                this.library.AddSongsToPlaylist(new[] { song }, this.accessToken);
+            }
+
+            return CreateResponse(ResponseStatus.Success);
         }
 
         private async Task SendMessage(NetworkMessage content)
@@ -616,10 +680,9 @@ namespace Espera.Core.Mobile
                 .Merge(this.library.WhenAnyValue(x => x.CurrentPlaylist)
                     .Select(x => x.WhenAnyValue(y => y.CurrentSongIndex).Skip(1).Select(y => x))
                     .Switch())
-                .CombineLatest(this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken),
-                    this.library.PlaybackState, Tuple.Create)
+                .CombineLatest(this.library.PlaybackState, Tuple.Create)
                 .ObserveOn(RxApp.TaskpoolScheduler)
-                .Subscribe(x => this.PushPlaylist(x.Item1, x.Item2, x.Item3))
+                .Subscribe(x => this.PushPlaylist(x.Item1, x.Item2))
                 .DisposeWith(this.disposable);
 
             this.library.PlaybackState.Skip(1)
@@ -636,7 +699,7 @@ namespace Espera.Core.Mobile
             this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken)
                 .Skip(1)
                 .ObserveOn(RxApp.TaskpoolScheduler)
-                .Subscribe(x => this.PushRemainingVotes(x))
+                .Subscribe(x => this.PushGuestSystemInfo(x))
                 .DisposeWith(this.disposable);
 
             TimeSpan lastTime = TimeSpan.Zero;

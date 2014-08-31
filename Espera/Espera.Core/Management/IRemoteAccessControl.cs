@@ -1,10 +1,13 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace Espera.Core.Management
 {
-    public interface IRemoteAccessControl
+    public interface IRemoteAccessControl : INotifyPropertyChanged
     {
-        bool IsRemoteAccessReallyLocked();
+        bool IsGuestSystemReallyEnabled { get; }
+
+        bool IsRemoteAccessReallyLocked { get; }
 
         bool IsVoteRegistered(Guid accessToken, PlaylistEntry entry);
 

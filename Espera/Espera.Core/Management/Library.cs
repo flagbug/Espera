@@ -120,16 +120,6 @@ namespace Espera.Core.Management
             get { return this.playlists; }
         }
 
-        public TimeSpan RemainingPlaylistTimeout
-        {
-            get
-            {
-                return this.lastSongAddTime + this.settings.PlaylistTimeout <= DateTime.Now
-                           ? TimeSpan.Zero
-                           : this.lastSongAddTime - DateTime.Now + this.settings.PlaylistTimeout;
-            }
-        }
-
         public IRemoteAccessControl RemoteAccessControl
         {
             get { return this.accessControl; }
@@ -193,6 +183,37 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
+        /// Adds the specified song to the end of the playlist as guest.
+        /// </summary>
+        /// <remarks>
+        /// <para>This method is intended only for guest access tokens.</para>
+        /// <para>
+        /// As soon as the song is added to the playlist, the entry is marked as "shadow voted".
+        /// This means that it won't be favoured over other songs, like a regular vote, but stays at
+        /// the end of the playlist.
+        /// </para>
+        /// <para>
+        /// Shadow votes still decrease the available votes of the guest like regular votes, this
+        /// prevents guests from spamming songs to the playlist.
+        /// </para>
+        /// </remarks>
+        /// <param name="song">The song to add to the end of the playlist.</param>
+        /// <param name="accessToken">The access token. Must have guest permission.</param>
+        /// <exception cref="InvalidOperationException">The guest system is disabled.</exception>
+        /// <exception cref="AccessException">The access token isn't a guest token.</exception>
+        public void AddGuestSongToPlaylist(Song song, Guid accessToken)
+        {
+            if (song == null)
+                Throw.ArgumentNullException(() => song);
+
+            this.accessControl.VerifyVotingPreconditions(accessToken);
+
+            PlaylistEntry entry = this.CurrentPlaylist.AddShadowVotedSong(song);
+
+            this.accessControl.RegisterShadowVote(accessToken, entry);
+        }
+
+        /// <summary>
         /// Adds a new playlist with the specified name to the library.
         /// </summary>
         /// <param name="name">
@@ -227,28 +248,6 @@ namespace Espera.Core.Management
             this.accessControl.VerifyAccess(accessToken);
 
             this.CurrentPlaylist.AddSongs(songList.ToList()); // Copy the sequence to a list, so that the enumeration doesn't gets modified
-        }
-
-        /// <summary>
-        /// Adds the song to the end of the playlist. This method throws an exception, if there is
-        /// an outstanding timeout.
-        /// </summary>
-        /// <param name="song">The song to add to the end of the playlist.</param>
-        /// <exception cref="InvalidOperationException">There is an outstanding playlist timeout.</exception>
-        public void AddSongToPlaylist(Song song)
-        {
-            if (song == null)
-                Throw.ArgumentNullException(() => song);
-
-            if (this.settings.EnablePlaylistTimeout && this.RemainingPlaylistTimeout > TimeSpan.Zero)
-                throw new InvalidOperationException("Current playlist has a remaining timeout.");
-
-            this.CurrentPlaylist.AddSongs(new[] { song });
-
-            if (this.settings.EnablePlaylistTimeout)
-            {
-                this.lastSongAddTime = DateTime.Now;
-            }
         }
 
         public void ChangeSongSourcePath(string path, Guid accessToken)

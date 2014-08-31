@@ -29,12 +29,10 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
         private readonly ObservableAsPropertyHelper<string> currentTime;
         private readonly ObservableAsPropertyHelper<IReactiveCommand> defaultPlaybackCommand;
-        private readonly ObservableAsPropertyHelper<bool> displayTimeoutWarning;
         private readonly CompositeDisposable disposable;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly ObservableAsPropertyHelper<bool> isPlaying;
         private readonly Library library;
-        private readonly ObservableAsPropertyHelper<bool> showPlaylistTimeout;
         private readonly ObservableAsPropertyHelper<bool> showVotes;
         private readonly ObservableAsPropertyHelper<int> totalSeconds;
         private readonly ObservableAsPropertyHelper<string> totalTime;
@@ -66,8 +64,8 @@ namespace Espera.View.ViewModels
             this.canAlterPlaylist = this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlaylist))
                 .ToProperty(this, x => x.CanAlterPlaylist);
 
-            this.showVotes = this.coreSettings.WhenAnyValue(x => x.EnableVotingSystem)
-                .CombineLatest(mobileApiInfo.ConnectedClientCount, (enableVoting, connectedClients) => enableVoting && connectedClients > 0)
+            this.showVotes = this.library.RemoteAccessControl.WhenAnyValue(x => x.IsGuestSystemReallyEnabled)
+                .CombineLatest(mobileApiInfo.ConnectedClientCount, (enableGuestSystem, connectedClients) => enableGuestSystem && connectedClients > 0)
                 .ToProperty(this, x => x.ShowVotes);
 
             this.isAdmin = this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken)
@@ -101,11 +99,6 @@ namespace Espera.View.ViewModels
             this.SoundCloudViewModel = new SoundCloudViewModel(this.library, accessToken, this.coreSettings, this.ViewSettings);
             this.DirectYoutubeViewModel = new DirectYoutubeViewModel(this.library, accessToken);
 
-            Observable.Interval(TimeSpan.FromMilliseconds(300), RxApp.TaskpoolScheduler)
-                .Where(_ => this.RemainingPlaylistTimeout > TimeSpan.Zero)
-                .Subscribe(x => this.RaisePropertyChanged("RemainingPlaylistTimeout"))
-                .DisposeWith(this.disposable);
-
             this.currentSongSource = this.WhenAnyValue(x => x.IsLocal, x => x.IsYoutube, x => x.IsSoundCloud,
                 (local, youtube, soundcloud) =>
                 {
@@ -127,14 +120,6 @@ namespace Espera.View.ViewModels
                     return this.LocalViewModel;
                 })
                 .ToProperty(this, x => x.CurrentSongSource, null, ImmediateScheduler.Instance);
-
-            this.displayTimeoutWarning = Observable.Merge(this.LocalViewModel.TimeoutWarning, this.YoutubeViewModel.TimeoutWarning, this.DirectYoutubeViewModel.TimeoutWarning, this.SoundCloudViewModel.TimeoutWarning)
-                .SelectMany(x => new[] { true, false }.ToObservable())
-                .ToProperty(this, x => x.DisplayTimeoutWarning);
-
-            this.showPlaylistTimeout = this.WhenAnyValue(x => x.IsAdmin)
-                .CombineLatest(this.WhenAnyValue(x => x.SettingsViewModel.EnablePlaylistTimeout), (isAdmin, enableTimeout) => !isAdmin && enableTimeout)
-                .ToProperty(this, x => x.ShowPlaylistTimeout);
 
             this.MuteCommand = new ReactiveCommand(this.WhenAnyValue(x => x.IsAdmin));
             this.MuteCommand.Subscribe(x => this.Volume = 0);
@@ -368,11 +353,6 @@ namespace Espera.View.ViewModels
 
         public DirectYoutubeViewModel DirectYoutubeViewModel { get; private set; }
 
-        public bool DisplayTimeoutWarning
-        {
-            get { return this.displayTimeoutWarning.Value; }
-        }
-
         public IReactiveCommand EditPlaylistNameCommand { get; private set; }
 
         public bool IsAdmin
@@ -448,11 +428,6 @@ namespace Espera.View.ViewModels
         /// </summary>
         public IReactiveCommand PreviousSongCommand { get; private set; }
 
-        public TimeSpan RemainingPlaylistTimeout
-        {
-            get { return this.library.RemainingPlaylistTimeout; }
-        }
-
         public IReactiveCommand RemovePlaylistCommand { get; private set; }
 
         public IReactiveCommand RemoveSelectedPlaylistEntriesCommand { get; private set; }
@@ -464,11 +439,6 @@ namespace Espera.View.ViewModels
         }
 
         public SettingsViewModel SettingsViewModel { get; private set; }
-
-        public bool ShowPlaylistTimeout
-        {
-            get { return this.showPlaylistTimeout.Value; }
-        }
 
         public IReactiveCommand ShowSettingsCommand { get; private set; }
 

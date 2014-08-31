@@ -11,6 +11,7 @@ using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Mobile;
 using Espera.Core.Settings;
+using Rareform.Reflection;
 using Rareform.Validation;
 using ReactiveUI;
 
@@ -39,8 +40,10 @@ namespace Espera.View.ViewModels
 
         private readonly ObservableAsPropertyHelper<bool> enableChangelog;
         private readonly ObservableAsPropertyHelper<bool> isPortOccupied;
+        private readonly ObservableAsPropertyHelper<bool> isRemoteAccessReallyLocked;
         private readonly Library library;
         private readonly ObservableAsPropertyHelper<string> librarySource;
+        private readonly ObservableAsPropertyHelper<bool> showRemoteControlPasswordError;
         private readonly ViewSettings viewSettings;
         private readonly IWindowManager windowManager;
         private string creationPassword;
@@ -156,6 +159,12 @@ namespace Espera.View.ViewModels
                 .ToCommand();
             this.ChangeRemoteControlPasswordCommand.Subscribe(x =>
                 this.library.RemoteAccessControl.SetRemotePassword(this.accessToken, this.RemoteControlPassword));
+            this.showRemoteControlPasswordError = this.WhenAnyValue(x => x.RemoteControlPassword, x => x.LockRemoteControl,
+                    (password, lockRemoteControl) => String.IsNullOrWhiteSpace(password) && lockRemoteControl)
+                .ToProperty(this, x => x.ShowRemoteControlPasswordError);
+
+            this.isRemoteAccessReallyLocked = this.library.RemoteAccessControl.WhenAnyValue(x => x.IsRemoteAccessReallyLocked)
+                .ToProperty(this, x => x.IsRemoteAccessReallyLocked);
 
             this.isPortOccupied = mobileApiInfo.IsPortOccupied.ToProperty(this, x => x.IsPortOccupied);
 
@@ -276,14 +285,10 @@ namespace Espera.View.ViewModels
             set { this.viewSettings.EnableChangelog = value; }
         }
 
-        public bool EnablePlaylistTimeout
+        public bool EnableGuestSystem
         {
-            get { return this.coreSettings.EnablePlaylistTimeout; }
-            set
-            {
-                this.coreSettings.EnablePlaylistTimeout = value;
-                this.RaisePropertyChanged();
-            }
+            get { return this.coreSettings.EnableGuestSystem; }
+            set { this.coreSettings.EnableGuestSystem = value; }
         }
 
         public bool EnableRemoteControl
@@ -296,11 +301,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public bool EnableVotingSystem
-        {
-            get { return this.coreSettings.EnableVotingSystem; }
-            set { this.coreSettings.EnableVotingSystem = value; }
-        }
+        public string Error { get; private set; }
 
         public bool GoFullScreenOnLock
         {
@@ -316,6 +317,11 @@ namespace Espera.View.ViewModels
         public bool IsPortOccupied
         {
             get { return this.isPortOccupied.Value; }
+        }
+
+        public bool IsRemoteAccessReallyLocked
+        {
+            get { return this.isRemoteAccessReallyLocked.Value; }
         }
 
         public bool IsWrongPassword
@@ -386,12 +392,6 @@ namespace Espera.View.ViewModels
 
         public IReactiveCommand OpenLinkCommand { get; private set; }
 
-        public int PlaylistTimeout
-        {
-            get { return (int)this.coreSettings.PlaylistTimeout.TotalSeconds; }
-            set { this.coreSettings.PlaylistTimeout = TimeSpan.FromSeconds(value); }
-        }
-
         public int Port
         {
             get { return this.port; }
@@ -425,6 +425,11 @@ namespace Espera.View.ViewModels
         {
             get { return this.showLogin; }
             set { this.RaiseAndSetIfChanged(ref this.showLogin, value); }
+        }
+
+        public bool ShowRemoteControlPasswordError
+        {
+            get { return this.showRemoteControlPasswordError.Value; }
         }
 
         public bool ShowSettings

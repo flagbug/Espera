@@ -149,6 +149,16 @@ namespace Espera.Core.Management
             return GetEnumerator();
         }
 
+        internal PlaylistEntry AddShadowVotedSong(Song song)
+        {
+            this.AddSongs(new[] { song });
+
+            PlaylistEntry entry = this.Last();
+            entry.ShadowVote();
+
+            return entry;
+        }
+
         /// <summary>
         /// Adds the specified songs to end of the playlist.
         /// </summary>

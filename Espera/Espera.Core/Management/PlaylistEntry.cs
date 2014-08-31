@@ -7,6 +7,7 @@ namespace Espera.Core.Management
 {
     public class PlaylistEntry : IComparable<PlaylistEntry>, INotifyPropertyChanged, IEquatable<PlaylistEntry>
     {
+        private bool isShadowVoted;
         private int votes;
 
         internal PlaylistEntry(int index, Song song)
@@ -28,6 +29,16 @@ namespace Espera.Core.Management
         public Guid Guid { get; private set; }
 
         public int Index { get; internal set; }
+
+        public bool IsShadowVoted
+        {
+            get { return this.isShadowVoted; }
+            private set
+            {
+                this.isShadowVoted = value;
+                this.OnPropertyChanged();
+            }
+        }
 
         public Song Song { get; private set; }
 
@@ -73,6 +84,12 @@ namespace Espera.Core.Management
         internal void ResetVotes()
         {
             this.Votes = 0;
+            this.IsShadowVoted = false;
+        }
+
+        internal void ShadowVote()
+        {
+            this.IsShadowVoted = true;
         }
 
         internal void Vote()

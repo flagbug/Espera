@@ -81,6 +81,50 @@ namespace Espera.Core.Tests
             }
         }
 
+        public class TheAddGuestSongToPlaylistMethod
+        {
+            [Fact]
+            public void ThrowsArgumentNullExceptionIfSongIsNull()
+            {
+                using (Library library = new LibraryBuilder().WithPlaylist().Build())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.LocalAccessControl.SetLocalPassword(accessToken, "Password");
+                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
+
+                    Assert.Throws<ArgumentNullException>(() => library.AddGuestSongToPlaylist(null, accessToken));
+                }
+            }
+
+            [Fact]
+            public void ThrowsInvalidOperationExceptionIfAccessTokenIsNotGuestToken()
+            {
+                var settings = new CoreSettings { EnableGuestSystem = false };
+
+                using (Library library = new LibraryBuilder().WithSettings(settings).WithPlaylist().Build())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    Assert.Throws<InvalidOperationException>(() => library.AddGuestSongToPlaylist(Helpers.SetupSongMock(), accessToken));
+                }
+            }
+
+            [Fact]
+            public void ThrowsInvalidOperationExceptionIfGuestSystemIsDisabled()
+            {
+                var settings = new CoreSettings { EnableGuestSystem = false };
+
+                using (Library library = new LibraryBuilder().WithSettings(settings).WithPlaylist().Build())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.LocalAccessControl.SetLocalPassword(accessToken, "Password");
+                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
+
+                    Assert.Throws<InvalidOperationException>(() => library.AddGuestSongToPlaylist(Helpers.SetupSongMock(), accessToken));
+                }
+            }
+        }
+
         public class TheAddPlaylistMethod
         {
             [Fact]
@@ -109,18 +153,16 @@ namespace Espera.Core.Tests
         public class TheAddSongsToPlaylistMethod
         {
             [Fact]
-            public void ThrowsAccessExceptionWithGuestTokenAndMultipleSongs()
+            public void RequiresAdminPermission()
             {
                 var songs = new[]
                 {
-                    Substitute.For<Song>("TestPath", TimeSpan.Zero),
                     Substitute.For<Song>("TestPath", TimeSpan.Zero)
                 };
 
                 using (Library library = new LibraryBuilder().WithPlaylist().Build())
                 {
                     Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
-
                     library.LocalAccessControl.SetLocalPassword(token, "Password");
                     library.LocalAccessControl.DowngradeLocalAccess(token);
 
@@ -134,57 +176,6 @@ namespace Espera.Core.Tests
                 using (Library library = Helpers.CreateLibrary())
                 {
                     Assert.Throws<ArgumentNullException>(() => library.AddSongsToPlaylist(null, library.LocalAccessControl.RegisterLocalAccessToken()));
-                }
-            }
-        }
-
-        public class TheAddSongToPlaylistMethod
-        {
-            [Fact]
-            public void DisabledTimeoutSmokeTest()
-            {
-                var settings = new CoreSettings
-                {
-                    EnablePlaylistTimeout = false
-                };
-
-                using (Library library = new LibraryBuilder().WithPlaylist().WithSettings(settings).Build())
-                {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
-                    library.LocalAccessControl.SetLocalPassword(accessToken, "password");
-                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
-
-                    Song song = Helpers.SetupSongMock();
-
-                    library.AddSongToPlaylist(song);
-                    library.AddSongToPlaylist(song);
-
-                    Assert.Equal(2, library.CurrentPlaylist.Count());
-                }
-            }
-
-            [Fact]
-            public void PlaylistTimeoutThrowsInvalidOperationException()
-            {
-                using (Library library = new LibraryBuilder().WithPlaylist().Build())
-                {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
-                    library.LocalAccessControl.SetLocalPassword(accessToken, "password");
-                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
-
-                    Song song = Helpers.SetupSongMock();
-
-                    library.AddSongToPlaylist(song);
-                    Assert.Throws<InvalidOperationException>(() => library.AddSongToPlaylist(song));
-                }
-            }
-
-            [Fact]
-            public void ThrowsArgumentNullExceptionIfSongIsNull()
-            {
-                using (Library library = Helpers.CreateLibrary())
-                {
-                    Assert.Throws<ArgumentNullException>(() => library.AddSongToPlaylist(null));
                 }
             }
         }
@@ -248,7 +239,7 @@ namespace Espera.Core.Tests
 
                     Song song = Helpers.SetupSongMock();
 
-                    library.AddSongToPlaylist(song);
+                    library.AddSongsToPlaylist(new[] { song }, token);
 
                     await library.PlaySongAsync(0, token);
 
@@ -369,11 +360,11 @@ namespace Espera.Core.Tests
 
                 using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(audioPlayerCallback).Build())
                 {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
                     Song song = Helpers.SetupSongMock();
 
-                    library.AddSongToPlaylist(song);
-
-                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.AddSongsToPlaylist(new[] { song }, token);
 
                     await library.PlaySongAsync(0, token);
 
@@ -562,11 +553,12 @@ namespace Espera.Core.Tests
 
                 using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(audioPlayerCallback).Build())
                 {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+
                     Song song = Helpers.SetupSongMock();
 
-                    library.AddSongToPlaylist(song);
+                    library.AddSongsToPlaylist(new[] { song }, accessToken);
 
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
                     await library.PlaySongAsync(0, accessToken);
 
                     audioPlayerCallback.LoadAsync(Arg.Any<Uri>()).Returns(_ => Task.Delay(0));
@@ -585,11 +577,13 @@ namespace Espera.Core.Tests
 
                 using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(audioPlayerCallback).Build())
                 {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+
                     Song song = Helpers.SetupSongMock();
 
-                    library.AddSongToPlaylist(song);
+                    library.AddSongsToPlaylist(new[] { song }, accessToken);
 
-                    await library.PlaySongAsync(0, library.LocalAccessControl.RegisterLocalAccessToken());
+                    await library.PlaySongAsync(0, accessToken);
 
                     Assert.True(song.IsCorrupted);
                 }
@@ -603,11 +597,13 @@ namespace Espera.Core.Tests
 
                 using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(audioPlayerCallback).Build())
                 {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+
                     Song song = Helpers.SetupSongMock();
 
-                    library.AddSongToPlaylist(song);
+                    library.AddSongsToPlaylist(new[] { song }, accessToken);
 
-                    await library.PlaySongAsync(0, library.LocalAccessControl.RegisterLocalAccessToken());
+                    await library.PlaySongAsync(0, accessToken);
 
                     Assert.True(song.IsCorrupted);
                 }
@@ -739,10 +735,11 @@ namespace Espera.Core.Tests
                 using (Library library = new LibraryBuilder().WithPlaylist().WithSettings(settings).Build())
                 {
                     Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    library.AddSongsToPlaylist(new[] { songMock }, token);
+
                     library.LocalAccessControl.SetLocalPassword(token, "Password");
                     library.LocalAccessControl.DowngradeLocalAccess(token);
-
-                    library.AddSongToPlaylist(songMock);
 
                     Assert.Throws<AccessException>(() => library.RemoveFromPlaylist(new[] { 0 }, token));
                 }
@@ -852,24 +849,19 @@ namespace Espera.Core.Tests
             [Fact(Skip = "Different outcome when running alone or in a group")]
             public async Task SetsCurrentSongIndexIfChangingToOtherPlaylistAndPlayingFirstSong()
             {
-                var settings = new CoreSettings
-                {
-                    EnablePlaylistTimeout = false
-                };
-
-                using (Library library = new LibraryBuilder().WithPlaylist().WithSettings(settings).Build())
+                using (Library library = new LibraryBuilder().WithPlaylist().Build())
                 {
                     var coll = library.WhenAnyValue(x => x.CurrentPlaylist.CurrentSongIndex).CreateCollection();
 
                     Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                    library.AddSongToPlaylist(Helpers.SetupSongMock());
+                    library.AddSongsToPlaylist(new[] { Helpers.SetupSongMock() }, token);
 
                     await library.PlaySongAsync(0, token);
 
                     library.AddPlaylist("Playlist 2", token);
                     library.SwitchToPlaylist(library.Playlists.Last(), token);
-                    library.AddSongToPlaylist(Helpers.SetupSongMock());
+                    library.AddSongsToPlaylist(new[] { Helpers.SetupSongMock() }, token);
 
                     await library.PlaySongAsync(0, token);
 
@@ -1142,45 +1134,45 @@ namespace Espera.Core.Tests
             {
                 var settings = new CoreSettings
                 {
-                    EnableVotingSystem = true,
+                    EnableGuestSystem = true,
                     LockRemoteControl = true,
                     RemoteControlPassword = "Password",
                     MaxVoteCount = 2,
-                    EnablePlaylistTimeout = false
                 };
 
                 using (var library = new LibraryBuilder().WithPlaylist().WithSettings(settings).Build())
                 {
-                    library.Initialize();
-                    library.AddSongToPlaylist(Helpers.SetupSongMock());
-                    library.AddSongToPlaylist(Helpers.SetupSongMock());
+                    Guid localToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                    Guid accessToken = library.RemoteAccessControl.RegisterRemoteAccessToken(Guid.NewGuid());
+                    library.AddSongsToPlaylist(new[] { Helpers.SetupSongMock() }, localToken);
+                    library.AddSongsToPlaylist(new[] { Helpers.SetupSongMock() }, localToken);
+
+                    Guid remoteToken = library.RemoteAccessControl.RegisterRemoteAccessToken(Guid.NewGuid());
 
                     // Guests can vote
-                    library.VoteForPlaylistEntry(0, accessToken);
+                    library.VoteForPlaylistEntry(0, remoteToken);
 
-                    library.RemoteAccessControl.UpgradeRemoteAccess(accessToken, "Password");
+                    library.RemoteAccessControl.UpgradeRemoteAccess(remoteToken, "Password");
 
                     // Admins can vote
-                    library.VoteForPlaylistEntry(1, accessToken);
+                    library.VoteForPlaylistEntry(1, remoteToken);
                 }
             }
 
             [Fact]
-            public void ThrowsInvalidOperationExceptionIfVotingIsDisabled()
+            public void ThrowsInvalidOperationExceptionIfGuestSystemIsDisabled()
             {
                 var settings = new CoreSettings
                 {
-                    EnableVotingSystem = false
+                    EnableGuestSystem = false
                 };
 
                 using (var library = new LibraryBuilder().WithPlaylist().WithSettings(settings).Build())
                 {
-                    library.Initialize();
-                    library.AddSongToPlaylist(Helpers.SetupSongMock());
-
                     Guid accessToken = library.RemoteAccessControl.RegisterRemoteAccessToken(Guid.NewGuid());
+
+                    library.Initialize();
+                    library.AddSongsToPlaylist(new[] { Helpers.SetupSongMock() }, accessToken);
 
                     Assert.Throws<InvalidOperationException>(() => library.VoteForPlaylistEntry(0, accessToken));
                 }
