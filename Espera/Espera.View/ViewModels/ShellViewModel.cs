@@ -130,6 +130,7 @@ namespace Espera.View.ViewModels
 
             this.isPlaying = this.library.PlaybackState
                 .Select(x => x == AudioPlayerState.Playing)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .ToProperty(this, x => x.IsPlaying);
 
             this.currentTime = this.library.CurrentPlaybackTime
