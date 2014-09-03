@@ -31,7 +31,6 @@ namespace Espera.Core.Management
         private readonly AudioPlayer audioPlayer;
         private readonly IFileSystem fileSystem;
         private readonly CompositeDisposable globalSubscriptions;
-        private readonly BehaviorSubject<bool> isUpdating;
         private readonly ILibraryReader libraryReader;
         private readonly ILibraryWriter libraryWriter;
         private readonly Func<string, ILocalSongFinder> localSongFinderFunc;
@@ -46,6 +45,7 @@ namespace Espera.Core.Management
         private Playlist currentPlayingPlaylist;
         private Playlist currentPlaylist;
         private IDisposable currentSongFinderSubscription;
+        private bool isUpdating;
         private DateTime lastSongAddTime;
 
         public Library(ILibraryReader libraryReader, ILibraryWriter libraryWriter, CoreSettings settings,
@@ -66,7 +66,6 @@ namespace Espera.Core.Management
             this.songsUpdated = new Subject<Unit>();
             this.audioPlayer = new AudioPlayer();
             this.manualUpdateTrigger = new Subject<Unit>();
-            this.isUpdating = new BehaviorSubject<bool>(false);
 
             this.LoadedSong = this.audioPlayer.LoadedSong;
             this.TotalTime = this.audioPlayer.TotalTime;
@@ -92,12 +91,13 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Gets an observable that reports whether the library is currently looking for new songs
-        /// at the song source or removing songs that don't exist anymore.
+        /// Gets a property that reports whether the library is currently looking for new songs at
+        /// the song source or removing songs that don't exist anymore.
         /// </summary>
-        public IObservable<bool> IsUpdating
+        public bool IsUpdating
         {
-            get { return this.isUpdating.DistinctUntilChanged(); }
+            get { return this.isUpdating; }
+            private set { this.RaiseAndSetIfChanged(ref this.isUpdating, value); }
         }
 
         /// <summary>
@@ -825,7 +825,7 @@ namespace Espera.Core.Management
                 this.currentSongFinderSubscription = null;
             }
 
-            this.isUpdating.OnNext(true);
+            this.IsUpdating = true;
 
             await this.RemoveMissingSongsAsync(path);
 
@@ -884,7 +884,7 @@ namespace Espera.Core.Management
 
                     AnalyticsClient.Instance.RecordLibrarySizeAsync(songCount);
 
-                    this.isUpdating.OnNext(false);
+                    this.IsUpdating = false;
                 });
         }
     }

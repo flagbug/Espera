@@ -140,8 +140,8 @@ namespace Espera.View.ViewModels
             this.ChangeAppThemeCommand = ReactiveCommand.Create();
             this.ChangeAppThemeCommand.Subscribe(x => this.viewSettings.AppTheme = (string)x);
 
-            this.UpdateLibraryCommand = ReactiveCommand.Create(this.library.IsUpdating
-                .Select(x => !x)
+            this.UpdateLibraryCommand = ReactiveCommand.Create(this.library.WhenAnyValue(x => x.IsUpdating, x => !x)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .CombineLatest(this.library.SongSourcePath.Select(x => !String.IsNullOrEmpty(x)), (x1, x2) => x1 && x2));
             this.UpdateLibraryCommand.Subscribe(_ => this.library.UpdateNow());
 

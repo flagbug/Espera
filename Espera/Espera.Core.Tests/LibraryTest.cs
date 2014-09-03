@@ -214,7 +214,7 @@ namespace Espera.Core.Tests
                 {
                     library.Initialize();
 
-                    var updated = library.IsUpdating.FirstAsync(x => x).PublishLast();
+                    var updated = library.WhenAnyValue(x => x.IsUpdating).FirstAsync(x => x).PublishLast();
                     updated.Connect();
 
                     Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
@@ -310,7 +310,7 @@ namespace Espera.Core.Tests
 
                     library.ChangeSongSourcePath("C://Test", token);
 
-                    var isUpdating = library.IsUpdating.FirstAsync(x => x).Select(x => 2).PublishLast();
+                    var isUpdating = library.WhenAnyValue(x => x.IsUpdating).FirstAsync(x => x).Select(x => 2).PublishLast();
                     isUpdating.Connect();
 
                     var first = readerFired.Amb(isUpdating).FirstAsync().PublishLast();
@@ -337,9 +337,9 @@ namespace Espera.Core.Tests
 
                     library.ChangeSongSourcePath("C://Test", token);
 
-                    var isUpdating = library.IsUpdating.CreateCollection();
+                    var isUpdating = library.WhenAnyValue(x => x.IsUpdating).CreateCollection();
 
-                    var last = library.IsUpdating.Where(x => !x).ElementAt(1).PublishLast();
+                    var last = library.WhenAnyValue(x => x.IsUpdating).Where(x => !x).ElementAt(1).PublishLast();
                     last.Connect();
 
                     library.Initialize();
@@ -963,7 +963,7 @@ namespace Espera.Core.Tests
                 {
                     library.Initialize();
 
-                    var updateFinished = library.IsUpdating.FirstAsync(x => !x).PublishLast();
+                    var updateFinished = library.WhenAnyValue(x => x.IsUpdating).FirstAsync(x => !x).PublishLast();
                     updateFinished.Connect();
 
                     library.UpdateNow();
@@ -1108,7 +1108,7 @@ namespace Espera.Core.Tests
                 {
                     library.Initialize();
 
-                    var firstUpdateFinished = library.IsUpdating.Where(x => !x).ElementAt(1).PublishLast();
+                    var firstUpdateFinished = library.WhenAnyValue(x => x.IsUpdating).Where(x => !x).ElementAt(1).PublishLast();
                     firstUpdateFinished.Connect();
 
                     Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
@@ -1117,7 +1117,7 @@ namespace Espera.Core.Tests
 
                     await firstUpdateFinished.Timeout(TimeSpan.FromSeconds(5));
 
-                    var updated = library.IsUpdating.FirstAsync(x => x).PublishLast();
+                    var updated = library.WhenAnyValue(x => x.IsUpdating).FirstAsync(x => x).PublishLast();
                     updated.Connect();
 
                     library.UpdateNow();

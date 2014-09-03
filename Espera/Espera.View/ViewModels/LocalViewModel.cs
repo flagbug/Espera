@@ -87,7 +87,8 @@ namespace Espera.View.ViewModels
                 .Concat(Observable.Return(false))
                 .ToProperty(this, x => x.ShowAddSongsHelperMessage);
 
-            this.isUpdating = this.Library.IsUpdating.ToProperty(this, x => x.IsUpdating);
+            this.isUpdating = this.Library.WhenAnyValue(x => x.IsUpdating)
+                .ToProperty(this, x => x.IsUpdating);
         }
 
         public IReactiveDerivedList<ArtistViewModel> Artists { get; private set; }
