@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 using Espera.Core.Management;
 using Xunit;
 
@@ -106,88 +104,88 @@ namespace Espera.Core.Tests
         public class TheCanPlayNextSongProperty
         {
             [Fact]
-            public async Task ReturnsFalseIfCurrentSongIndexIsLastSong()
+            public void ReturnsFalseIfCurrentSongIndexIsLastSong()
             {
                 Song[] songs = Helpers.SetupSongMocks(4);
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.CurrentSongIndex = 3;
 
-                Assert.False(await playlist.CanPlayNextSong.FirstAsync());
+                Assert.False(playlist.CanPlayNextSong);
             }
 
             [Fact]
-            public async Task ReturnsFalseIfCurrentSongIndexIsNull()
+            public void ReturnsFalseIfCurrentSongIndexIsNull()
             {
                 Song[] songs = Helpers.SetupSongMocks(4);
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.CurrentSongIndex = null;
 
-                Assert.False(await playlist.CanPlayNextSong.FirstAsync());
+                Assert.False(playlist.CanPlayNextSong);
             }
 
             [Fact]
-            public async Task ReturnsFalseIfPlaylistIsEmpty()
+            public void ReturnsFalseIfPlaylistIsEmpty()
             {
                 var playlist = new Playlist("Playlist");
 
-                Assert.False(await playlist.CanPlayNextSong.FirstAsync());
+                Assert.False(playlist.CanPlayNextSong);
             }
 
             [Fact]
-            public async Task ReturnsTrueIfCurrentSongIndexIsZero()
+            public void ReturnsTrueIfCurrentSongIndexIsZero()
             {
                 Song[] songs = Helpers.SetupSongMocks(4);
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.CurrentSongIndex = 0;
 
-                Assert.True(await playlist.CanPlayNextSong.FirstAsync());
+                Assert.True(playlist.CanPlayNextSong);
             }
         }
 
         public class TheCanPlayPreviousSongProperty
         {
             [Fact]
-            public async Task ReturnsFalseIfCurrentSongIndexIsNull()
+            public void ReturnsFalseIfCurrentSongIndexIsNull()
             {
                 Song[] songs = Helpers.SetupSongMocks(4);
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.CurrentSongIndex = null;
 
-                Assert.False(await playlist.CanPlayPreviousSong.FirstAsync());
+                Assert.False(playlist.CanPlayPreviousSong);
             }
 
             [Fact]
-            public async Task ReturnsFalseIfCurrentSongIndexIsZero()
+            public void ReturnsFalseIfCurrentSongIndexIsZero()
             {
                 Song[] songs = Helpers.SetupSongMocks(4);
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.CurrentSongIndex = 0;
 
-                Assert.False(await playlist.CanPlayPreviousSong.FirstAsync());
+                Assert.False(playlist.CanPlayPreviousSong);
             }
 
             [Fact]
-            public async Task ReturnsFalseIfPlaylistIsEmpty()
+            public void ReturnsFalseIfPlaylistIsEmpty()
             {
                 var playlist = new Playlist("Playlist");
 
-                Assert.False(await playlist.CanPlayPreviousSong.FirstAsync());
+                Assert.False(playlist.CanPlayPreviousSong);
             }
 
             [Fact]
-            public async Task ReturnsTrueIfCurrentSongIndexIsLastSong()
+            public void ReturnsTrueIfCurrentSongIndexIsLastSong()
             {
                 Song[] songs = Helpers.SetupSongMocks(4);
                 Playlist playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.CurrentSongIndex = 3;
 
-                Assert.True(await playlist.CanPlayPreviousSong.FirstAsync());
+                Assert.True(playlist.CanPlayPreviousSong);
             }
         }
 

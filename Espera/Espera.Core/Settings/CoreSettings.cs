@@ -55,19 +55,13 @@ namespace Espera.Core.Settings
             set { this.SetOrCreate(value); }
         }
 
-        public bool EnablePlaylistTimeout
+        public bool EnableGuestSystem
         {
             get { return this.GetOrCreate(true); }
             set { this.SetOrCreate(value); }
         }
 
         public bool EnableRemoteControl
-        {
-            get { return this.GetOrCreate(true); }
-            set { this.SetOrCreate(value); }
-        }
-
-        public bool EnableVotingSystem
         {
             get { return this.GetOrCreate(true); }
             set { this.SetOrCreate(value); }
@@ -106,12 +100,6 @@ namespace Espera.Core.Settings
         public int MaxVoteCount
         {
             get { return this.GetOrCreate(2); }
-            set { this.SetOrCreate(value); }
-        }
-
-        public TimeSpan PlaylistTimeout
-        {
-            get { return this.GetOrCreate(TimeSpan.FromSeconds(30)); }
             set { this.SetOrCreate(value); }
         }
 

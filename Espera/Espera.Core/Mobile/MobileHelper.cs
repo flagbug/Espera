@@ -10,14 +10,13 @@ namespace Espera.Core.Mobile
 {
     public static class MobileHelper
     {
-        public static JObject SerializePlaylist(Playlist playlist, int? remainingVotes, AudioPlayerState playbackState, TimeSpan currentTime, TimeSpan totalTime)
+        public static JObject SerializePlaylist(Playlist playlist, AudioPlayerState playbackState, TimeSpan currentTime, TimeSpan totalTime)
         {
             var networkPlaylist = new NetworkPlaylist
             {
                 Name = playlist.Name,
                 CurrentIndex = playlist.CurrentSongIndex,
                 Songs = playlist.Select(x => x.Song.ToNetworkSong(x.Guid)).ToList().AsReadOnly(),
-                RemainingVotes = remainingVotes,
                 PlaybackState = (NetworkPlaybackState)Enum.ToObject(typeof(NetworkPlaybackState), (int)playbackState),
                 CurrentTime = currentTime,
                 TotalTime = totalTime

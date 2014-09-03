@@ -43,9 +43,9 @@
     <Reference Include="Castle.Core">
       <HintPath>..\packages\Castle.Core.3.2.0\lib\net45\Castle.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Espera.Network, Version=1.0.21.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Espera.Network, Version=1.0.26.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Espera-Network.1.0.21\lib\portable-net45+monoandroid\Espera.Network.dll</HintPath>
+      <HintPath>..\packages\Espera-Network.1.0.26\lib\portable-net45+monoandroid\Espera.Network.dll</HintPath>
     </Reference>
     <Reference Include="Google.GData.Client, Version=2.2.0.0, Culture=neutral, PublicKeyToken=04a59ca9b0273830, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -137,9 +137,9 @@
       <HintPath>..\packages\taglib.2.1.0.0\lib\taglib-sharp.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
-    <Reference Include="YoutubeExtractor">
-      <HintPath>..\packages\YoutubeExtractor.0.10.3\lib\net35\YoutubeExtractor.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="YoutubeExtractor, Version=0.10.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\YoutubeExtractor.0.10.4.1\lib\net35\YoutubeExtractor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

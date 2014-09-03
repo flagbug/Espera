@@ -37,9 +37,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\akavache.core.4.0.1\lib\net45\Akavache.dll</HintPath>
     </Reference>
-    <Reference Include="Espera.Network, Version=1.0.21.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Espera.Network, Version=1.0.26.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Espera-Network.1.0.21\lib\portable-net45+monoandroid\Espera.Network.dll</HintPath>
+      <HintPath>..\packages\Espera-Network.1.0.26\lib\portable-net45+monoandroid\Espera.Network.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Lager, Version=0.4.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

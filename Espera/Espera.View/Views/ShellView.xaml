@@ -868,7 +868,6 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0"
                                Style="{StaticResource PlaylistsHeaderStyle}"
@@ -1168,35 +1167,6 @@
                         <TextBlock Text=" remaining, with " />
                         <TextBlock Text="{Binding Path=CurrentPlaylist.TimeRemaining.TotalMinutes, FallbackValue=0, StringFormat=\{0:0.0\}}" />
                         <TextBlock Text=" minutes play time" />
-                    </StackPanel>
-                    <StackPanel Grid.Row="4"
-                                Margin="0, 5, 0, 0"
-                                HorizontalAlignment="Center"
-                                Orientation="Horizontal"
-                                Visibility="{Binding Path=ShowPlaylistTimeout,
-                                                     Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <StackPanel.Style>
-                            <Style TargetType="{x:Type StackPanel}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=DisplayTimeoutWarning}" Value="True">
-                                        <DataTrigger.EnterActions>
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
-                                                        <LinearDoubleKeyFrame KeyTime="0:0:1" Value="0" />
-                                                        <LinearDoubleKeyFrame KeyTime="0:0:2" Value="1" />
-                                                        <LinearDoubleKeyFrame KeyTime="0:0:3" Value="0" />
-                                                        <LinearDoubleKeyFrame KeyTime="0:0:4" Value="1" />
-                                                    </DoubleAnimationUsingKeyFrames>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.EnterActions>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-                        <TextBlock Text="Remaining playlist timeout: " />
-                        <TextBlock Text="{Binding Path=RemainingPlaylistTimeout, StringFormat=hh\\:mm\\:ss}" />
                     </StackPanel>
                 </Grid>
             </Grid>

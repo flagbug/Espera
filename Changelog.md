@@ -1,3 +1,12 @@
+# v2.6.0
+
+## Features
+- The Android remote control is now available in the Google Play Store.
+- The library now saves as soon as the update is finished.
+
+## Bugfixes
+- Fixed a problem with the automatic artwork download.
+
 # v2.5.1
 
 ## Improvements

@@ -73,6 +73,8 @@ namespace Espera.Core
         {
             using (var client = new HttpClient())
             {
+                client.DefaultRequestHeaders.Add("user-agent", "Espera/2.0 (http://getespera.com)");
+
                 string searchRequestUrl = string.Format(SearchEndpoint, artist, album);
 
                 string searchResponse;

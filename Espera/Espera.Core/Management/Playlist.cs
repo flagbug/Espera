@@ -15,6 +15,8 @@ namespace Espera.Core.Management
     /// </summary>
     public sealed class Playlist : ReactiveObject, IEnumerable<PlaylistEntry>, INotifyCollectionChanged
     {
+        private readonly ObservableAsPropertyHelper<bool> canPlayNextSong;
+        private readonly ObservableAsPropertyHelper<bool> canPlayPreviousSong;
         private readonly ReactiveList<PlaylistEntry> playlist;
         private int? currentSongIndex;
         private string name;
@@ -31,17 +33,13 @@ namespace Espera.Core.Management
                 this.ResetVotesBeforeIndex(x.Value);
             });
 
-            var canPlayNextSong = this.WhenAnyValue(x => x.CurrentSongIndex)
+            this.canPlayNextSong = this.WhenAnyValue(x => x.CurrentSongIndex)
                 .CombineLatest(this.playlist.Changed, (i, args) => i.HasValue && this.ContainsIndex(i.Value + 1))
-                .Publish(false);
-            canPlayNextSong.Connect();
-            this.CanPlayNextSong = canPlayNextSong;
+                .ToProperty(this, x => x.CanPlayNextSong);
 
-            var canPlayPeviousSong = this.WhenAnyValue(x => x.CurrentSongIndex)
+            this.canPlayPreviousSong = this.WhenAnyValue(x => x.CurrentSongIndex)
                 .CombineLatest(this.playlist.Changed, (i, args) => i.HasValue && this.ContainsIndex(i.Value - 1))
-                .Publish(false);
-            canPlayPeviousSong.Connect();
-            this.CanPlayPreviousSong = canPlayPeviousSong;
+                .ToProperty(this, x => x.CanPlayPreviousSong);
         }
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
@@ -50,19 +48,25 @@ namespace Espera.Core.Management
         /// Gets a value indicating whether the next song in the playlist can be played.
         /// </summary>
         /// <value>true if the next song in the playlist can be played; otherwise, false.</value>
-        public IObservable<bool> CanPlayNextSong { get; private set; }
+        public bool CanPlayNextSong
+        {
+            get { return this.canPlayNextSong.Value; }
+        }
 
         /// <summary>
         /// Gets a value indicating whether the previous song in the playlist can be played.
         /// </summary>
         /// <value>true if the previous song in the playlist can be played; otherwise, false.</value>
-        public IObservable<bool> CanPlayPreviousSong { get; private set; }
+        public bool CanPlayPreviousSong
+        {
+            get { return this.canPlayPreviousSong.Value; }
+        }
 
         /// <summary>
         /// Gets or sets the index of the currently played song in the playlist.
         /// </summary>
         /// <value>
-        /// The index of the currently played song in the playlist. <c>null</c>, if no song is
+        /// The index of the currently played song in the playlist. <c>null</c> , if no song is
         /// currently played.
         /// </value>
         /// <exception cref="ArgumentOutOfRangeException">
@@ -145,6 +149,16 @@ namespace Espera.Core.Management
             return GetEnumerator();
         }
 
+        internal PlaylistEntry AddShadowVotedSong(Song song)
+        {
+            this.AddSongs(new[] { song });
+
+            PlaylistEntry entry = this.Last();
+            entry.ShadowVote();
+
+            return entry;
+        }
+
         /// <summary>
         /// Adds the specified songs to end of the playlist.
         /// </summary>
@@ -188,7 +202,7 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Removes the songs with the specified indexes from the <see cref="Playlist" />.
+        /// Removes the songs with the specified indexes from the <see cref="Playlist" /> .
         /// </summary>
         /// <param name="indexes">The indexes of the songs to remove.</param>
         internal void RemoveSongs(IEnumerable<int> indexes)
