@@ -126,9 +126,9 @@ namespace Espera.Core.Mobile
                         try
                         {
                             ResponseInfo response = await action(request.Parameters);
-
                             response.RequestId = request.RequestId;
-                            responseMessage.Payload = JObject.FromObject(response);
+
+                            responseMessage.Payload = await Task.Run(() => JObject.FromObject(response));
 
                             await this.SendMessage(responseMessage);
                         }
