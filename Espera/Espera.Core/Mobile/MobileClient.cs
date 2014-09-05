@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Reactive;
@@ -95,6 +96,7 @@ namespace Espera.Core.Mobile
         {
             Observable.FromAsync(() => this.socket.GetStream().ReadNextMessageAsync())
                 .Repeat()
+                .LoggedCatch(this, null, "Connection was closed by the remote device or the connection failed")
                 .TakeWhile(x => x != null)
                 // If we don't do this, the application will throw up whenever we are manipulating a
                 // collection that is surfaced to the UI Yes, this is astoundingly stupid
