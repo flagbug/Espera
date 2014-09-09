@@ -25,7 +25,7 @@ namespace Espera.Core.Mobile
             return JObject.FromObject(networkPlaylist);
         }
 
-        public static JObject SerializeSongs(IEnumerable<LocalSong> songs)
+        public static JObject SerializeSongs(IEnumerable<Song> songs)
         {
             var serialized = JObject.FromObject(new
             {
