@@ -56,6 +56,7 @@ namespace Espera.Core.Mobile
             this.disposable = new CompositeDisposable();
             this.gate = new SemaphoreSlim(1, 1);
             this.disconnected = new Subject<Unit>();
+            this.lastSoundCloudRequest = new List<SoundCloudSong>();
 
             this.messageActionMap = new Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>>
             {
@@ -785,7 +786,7 @@ namespace Espera.Core.Mobile
                 }
             }
 
-            Dictionary<Guid, Song> dic = this.library.Songs.Concat(this.lastSoundCloudRequest ?? Enumerable.Empty<Song>()).ToDictionary(x => x.Guid);
+            Dictionary<Guid, Song> dic = this.library.Songs.Concat(this.lastSoundCloudRequest.Cast<Song>()).ToDictionary(x => x.Guid);
 
             List<Song> songs = guids.Select(x =>
             {
