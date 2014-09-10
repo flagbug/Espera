@@ -389,7 +389,7 @@ namespace Espera.Core.Mobile
 
             catch (NetworkSongFinderException)
             {
-                return CreateResponse(ResponseStatus.Rejected);
+                return CreateResponse(ResponseStatus.Failed, "Couldn't retrieve any SoundCloud songs");
             }
         }
 
