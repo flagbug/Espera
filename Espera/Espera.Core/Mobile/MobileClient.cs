@@ -358,11 +358,11 @@ namespace Espera.Core.Mobile
             return CreateResponse(ResponseStatus.Success, null, content);
         }
 
-        private Task<ResponseInfo> GetLibraryContent(JToken dontCare)
+        private async Task<ResponseInfo> GetLibraryContent(JToken dontCare)
         {
-            JObject content = MobileHelper.SerializeSongs(this.library.Songs);
+            JObject content = await Task.Run(() => MobileHelper.SerializeSongs(this.library.Songs));
 
-            return Task.FromResult(CreateResponse(ResponseStatus.Success, null, content));
+            return CreateResponse(ResponseStatus.Success, null, content);
         }
 
         private Task<ResponseInfo> GetVolume(JToken dontCare)
