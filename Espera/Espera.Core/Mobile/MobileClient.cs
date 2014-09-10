@@ -378,6 +378,8 @@ namespace Espera.Core.Mobile
             {
                 IReadOnlyList<SoundCloudSong> songs = await soundCloudfinder.GetSongsAsync(searchTerm);
 
+                // Cache the latest SoundCloud search request, so we can find the songs by GUID when
+                // we add one to the playlist later
                 this.lastSoundCloudRequest = songs;
 
                 JObject content = MobileHelper.SerializeSongs(songs);
