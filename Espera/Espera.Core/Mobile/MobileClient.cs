@@ -96,7 +96,7 @@ namespace Espera.Core.Mobile
         {
             Observable.FromAsync(() => this.socket.GetStream().ReadNextMessageAsync())
                 .Repeat()
-                .LoggedCatch(this, null, "Connection was closed by the remote device or the connection failed")
+                .LoggedCatch(this, null, "Message connection was closed by the remote device or the connection failed")
                 .TakeWhile(x => x != null)
                 // If we don't do this, the application will throw up whenever we are manipulating a
                 // collection that is surfaced to the UI Yes, this is astoundingly stupid
@@ -166,7 +166,7 @@ namespace Espera.Core.Mobile
 
             var transfers = Observable.FromAsync(() => this.fileSocket.GetStream().ReadNextFileTransferMessageAsync())
                 .Repeat()
-                .Retry()
+                .LoggedCatch(this, null, "File transfer connection was closed by the remote device or the connection failed")
                 .TakeWhile(x => x != null)
                 .Publish();
             transfers.Connect().DisposeWith(this.disposable);
