@@ -35,6 +35,7 @@ namespace Espera.Core.Mobile
         private readonly Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>> messageActionMap;
         private readonly TcpClient socket;
         private Guid accessToken;
+        private IReadOnlyList<SoundCloudSong> lastSoundCloudRequest;
         private IObservable<SongTransferMessage> songTransfers;
 
         public MobileClient(TcpClient socket, TcpClient fileSocket, Library library)
@@ -55,11 +56,13 @@ namespace Espera.Core.Mobile
             this.disposable = new CompositeDisposable();
             this.gate = new SemaphoreSlim(1, 1);
             this.disconnected = new Subject<Unit>();
+            this.lastSoundCloudRequest = new List<SoundCloudSong>();
 
             this.messageActionMap = new Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>>
             {
                 {RequestAction.GetConnectionInfo, this.GetConnectionInfo},
                 {RequestAction.GetLibraryContent, this.GetLibraryContent},
+                {RequestAction.GetSoundCloudSongs, this.GetSoundCloudSongs},
                 {RequestAction.AddPlaylistSongs, this.AddPlaylistSongs},
                 {RequestAction.AddPlaylistSongsNow, this.AddPlaylistSongsNow},
                 {RequestAction.GetCurrentPlaylist, this.GetCurrentPlaylist},
@@ -363,6 +366,31 @@ namespace Espera.Core.Mobile
             JObject content = await Task.Run(() => MobileHelper.SerializeSongs(this.library.Songs));
 
             return CreateResponse(ResponseStatus.Success, null, content);
+        }
+
+        private async Task<ResponseInfo> GetSoundCloudSongs(JToken parameters)
+        {
+            var searchTerm = parameters["searchTerm"].ToObject<string>();
+
+            var soundCloudfinder = new SoundCloudSongFinder();
+
+            try
+            {
+                IReadOnlyList<SoundCloudSong> songs = await soundCloudfinder.GetSongsAsync(searchTerm);
+
+                // Cache the latest SoundCloud search request, so we can find the songs by GUID when
+                // we add one to the playlist later
+                this.lastSoundCloudRequest = songs;
+
+                JObject content = MobileHelper.SerializeSongs(songs);
+
+                return CreateResponse(ResponseStatus.Success, content);
+            }
+
+            catch (NetworkSongFinderException)
+            {
+                return CreateResponse(ResponseStatus.Failed, "Couldn't retrieve any SoundCloud songs");
+            }
         }
 
         private Task<ResponseInfo> GetVolume(JToken dontCare)
@@ -760,11 +788,11 @@ namespace Espera.Core.Mobile
                 }
             }
 
-            Dictionary<Guid, LocalSong> dic = this.library.Songs.ToDictionary(x => x.Guid);
+            Dictionary<Guid, Song> dic = this.library.Songs.Concat(this.lastSoundCloudRequest.Cast<Song>()).ToDictionary(x => x.Guid);
 
-            List<LocalSong> songs = guids.Select(x =>
+            List<Song> songs = guids.Select(x =>
             {
-                LocalSong song;
+                Song song;
 
                 dic.TryGetValue(x, out song);
 
