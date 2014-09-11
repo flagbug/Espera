@@ -37,16 +37,26 @@ namespace Espera.Core.Mobile
 
         private static NetworkSong ToNetworkSong(this Song song, Guid guid)
         {
+            var soundCloudSong = song as SoundCloudSong;
+
+            string artworkKey = null;
+
+            if (soundCloudSong != null && soundCloudSong.ArtworkUrl != null)
+            {
+                artworkKey = soundCloudSong.ArtworkUrl.ToString();
+            }
+
             return new NetworkSong
             {
                 Album = song.Album,
                 Artist = song.Artist,
+                ArtworkKey = artworkKey,
                 Duration = song.Duration,
                 Genre = song.Genre,
                 Title = song.Title,
                 TrackNumber = song.TrackNumber,
                 Source = song.NetworkSongSource,
-                Guid = guid
+                Guid = guid,
             };
         }
     }
