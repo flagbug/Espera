@@ -36,6 +36,7 @@ namespace Espera.Core.Mobile
         private readonly TcpClient socket;
         private Guid accessToken;
         private IReadOnlyList<SoundCloudSong> lastSoundCloudRequest;
+        private IReadOnlyList<YoutubeSong> lastYoutubeRequest;
         private IObservable<SongTransferMessage> songTransfers;
 
         public MobileClient(TcpClient socket, TcpClient fileSocket, Library library)
@@ -57,12 +58,14 @@ namespace Espera.Core.Mobile
             this.gate = new SemaphoreSlim(1, 1);
             this.disconnected = new Subject<Unit>();
             this.lastSoundCloudRequest = new List<SoundCloudSong>();
+            this.lastYoutubeRequest = new List<YoutubeSong>();
 
             this.messageActionMap = new Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>>
             {
                 {RequestAction.GetConnectionInfo, this.GetConnectionInfo},
                 {RequestAction.GetLibraryContent, this.GetLibraryContent},
                 {RequestAction.GetSoundCloudSongs, this.GetSoundCloudSongs},
+                {RequestAction.GetYoutubeSongs, this.GetYoutubeSongs},
                 {RequestAction.AddPlaylistSongs, this.AddPlaylistSongs},
                 {RequestAction.AddPlaylistSongsNow, this.AddPlaylistSongsNow},
                 {RequestAction.GetCurrentPlaylist, this.GetCurrentPlaylist},
@@ -403,6 +406,31 @@ namespace Espera.Core.Mobile
             });
 
             return Task.FromResult(CreateResponse(ResponseStatus.Success, response));
+        }
+
+        private async Task<ResponseInfo> GetYoutubeSongs(JToken parameters)
+        {
+            var searchTerm = parameters["searchTerm"].ToObject<string>();
+
+            var youtubeSongFinder = new YoutubeSongFinder();
+
+            try
+            {
+                IReadOnlyList<YoutubeSong> songs = await youtubeSongFinder.GetSongsAsync(searchTerm);
+
+                // Cache the latest YouTube search request, so we can find the songs by GUID when we
+                // add one to the playlist later
+                this.lastYoutubeRequest = songs;
+
+                JObject content = MobileHelper.SerializeSongs(songs);
+
+                return CreateResponse(ResponseStatus.Success, content);
+            }
+
+            catch (NetworkSongFinderException)
+            {
+                return CreateResponse(ResponseStatus.Failed, "Couldn't retrieve any YouTube songs");
+            };
         }
 
         private Task<ResponseInfo> MovePlaylistSongDown(JToken parameters)
