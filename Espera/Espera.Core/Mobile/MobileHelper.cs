@@ -38,17 +38,20 @@ namespace Espera.Core.Mobile
         private static NetworkSong ToNetworkSong(this Song song, Guid guid)
         {
             string artworkKey = null;
+            int playbackCount = 0;
 
             var soundCloudSong = song as SoundCloudSong;
             if (soundCloudSong != null && soundCloudSong.ArtworkUrl != null)
             {
                 artworkKey = soundCloudSong.ArtworkUrl.ToString();
+                playbackCount = soundCloudSong.PlaybackCount.GetValueOrDefault();
             }
 
             var youtubeSong = song as YoutubeSong;
             if (youtubeSong != null && youtubeSong.ThumbnailSource != null)
             {
                 artworkKey = youtubeSong.ThumbnailSource.ToString();
+                playbackCount = youtubeSong.Views;
             }
 
             return new NetworkSong
@@ -62,6 +65,7 @@ namespace Espera.Core.Mobile
                 TrackNumber = song.TrackNumber,
                 Source = song.NetworkSongSource,
                 Guid = guid,
+                PlaybackCount = playbackCount
             };
         }
     }
