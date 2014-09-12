@@ -816,7 +816,12 @@ namespace Espera.Core.Mobile
                 }
             }
 
-            Dictionary<Guid, Song> dic = this.library.Songs.Concat(this.lastSoundCloudRequest.Cast<Song>()).ToDictionary(x => x.Guid);
+            // Look if any song in our local library or any song of the last SoundCloud or YouTube
+            // requests has the requested Guid
+            Dictionary<Guid, Song> dic = this.library.Songs
+                .Concat(this.lastSoundCloudRequest.Cast<Song>())
+                .Concat(this.lastYoutubeRequest)
+                .ToDictionary(x => x.Guid);
 
             List<Song> songs = guids.Select(x =>
             {
