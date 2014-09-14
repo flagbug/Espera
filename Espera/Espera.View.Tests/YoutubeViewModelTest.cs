@@ -138,7 +138,7 @@ namespace Espera.View.Tests
             networkStatus.GetIsAvailableAsync().Returns(isAvailable);
 
             var songFinder = Substitute.For<IYoutubeSongFinder>();
-            songFinder.GetSongsAsync(Arg.Any<string>()).Returns(x => { throw new Exception(); });
+            songFinder.GetSongsAsync(Arg.Any<string>()).Returns(x => { throw new NetworkSongFinderException("Blabla", null); });
 
             using (var library = Helpers.CreateLibrary())
             {
