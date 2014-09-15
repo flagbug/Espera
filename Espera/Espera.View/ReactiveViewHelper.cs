@@ -16,7 +16,8 @@ namespace Espera.View
 
                 style.Setters.Add(eventSetter);
 
-                return () => style.Setters.Remove(eventSetter);
+                // We can't remove the setter anymore as the setter collection gets sealed
+                return () => { };
             });
         }
     }
