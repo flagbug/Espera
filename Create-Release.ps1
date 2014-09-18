@@ -5,8 +5,7 @@ if (Test-Path .\Release) {
 }
 
 mkdir .\Release
-mkdir .\Release\Portable
-mkdir .\Release\Publish
+mkdir .\Release\EsperaPortable
 
 # Build the portable version
 Write-Host "Building Portable Version"
