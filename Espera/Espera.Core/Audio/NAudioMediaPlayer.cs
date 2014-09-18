@@ -1,4 +1,5 @@
-﻿using NAudio.Wave;
+﻿using NAudio;
+using NAudio.Wave;
 using ReactiveMarrow;
 using System;
 using System.Reactive;
@@ -55,7 +56,14 @@ namespace Espera.Core.Audio
 
             if (this.currentReader != null)
             {
-                this.currentReader.Dispose();
+                try
+                {
+                    this.currentReader.Dispose();
+                }
+
+                // Another wierd exception
+                catch (MmException)
+                { }
             }
         }
 
