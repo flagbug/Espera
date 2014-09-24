@@ -41,6 +41,7 @@ namespace Espera.Core
 
                     var song = new YoutubeSong(url, duration)
                     {
+                        Artist = video.Uploader,
                         Title = video.Title,
                         Description = video.Description,
                         Rating = video.RatingAverage >= 1 ? video.RatingAverage : (double?)null,

@@ -25,7 +25,7 @@ namespace Espera.Core.Mobile
             return JObject.FromObject(networkPlaylist);
         }
 
-        public static JObject SerializeSongs(IEnumerable<LocalSong> songs)
+        public static JObject SerializeSongs(IEnumerable<Song> songs)
         {
             var serialized = JObject.FromObject(new
             {
@@ -37,16 +37,35 @@ namespace Espera.Core.Mobile
 
         private static NetworkSong ToNetworkSong(this Song song, Guid guid)
         {
+            string artworkKey = null;
+            int playbackCount = 0;
+
+            var soundCloudSong = song as SoundCloudSong;
+            if (soundCloudSong != null && soundCloudSong.ArtworkUrl != null)
+            {
+                artworkKey = soundCloudSong.ArtworkUrl.ToString();
+                playbackCount = soundCloudSong.PlaybackCount.GetValueOrDefault();
+            }
+
+            var youtubeSong = song as YoutubeSong;
+            if (youtubeSong != null && youtubeSong.ThumbnailSource != null)
+            {
+                artworkKey = youtubeSong.ThumbnailSource.ToString();
+                playbackCount = youtubeSong.Views;
+            }
+
             return new NetworkSong
             {
                 Album = song.Album,
                 Artist = song.Artist,
+                ArtworkKey = artworkKey,
                 Duration = song.Duration,
                 Genre = song.Genre,
                 Title = song.Title,
                 TrackNumber = song.TrackNumber,
                 Source = song.NetworkSongSource,
-                Guid = guid
+                Guid = guid,
+                PlaybackCount = playbackCount
             };
         }
     }

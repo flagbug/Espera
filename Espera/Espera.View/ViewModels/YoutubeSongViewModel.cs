@@ -226,7 +226,11 @@ namespace Espera.View.ViewModels
             {
                 try
                 {
-                    byte[] imageBytes = await client.GetByteArrayAsync(((YoutubeSong)this.Model).ThumbnailSource);
+                    Uri thumbnailUrl = ((YoutubeSong)this.Model).ThumbnailSource;
+
+                    thumbnailUrl = new Uri(thumbnailUrl.ToString().Replace("default", "hqdefault"));
+
+                    byte[] imageBytes = await client.GetByteArrayAsync(thumbnailUrl);
 
                     if (imageBytes == null)
                     {

@@ -32,6 +32,7 @@ namespace Espera.Core
             this.Artist = String.Empty;
             this.Genre = String.Empty;
             this.Title = String.Empty;
+            this.Guid = Guid.NewGuid();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -45,9 +46,14 @@ namespace Espera.Core
         public string Genre { get; set; }
 
         /// <summary>
+        /// A runtime identifier for interaction with the mobile API.
+        /// </summary>
+        public Guid Guid { get; private set; }
+
+        /// <summary>
         /// Gets a value indicating whether the song is corrupted and can't be played.
         /// </summary>
-        /// <value><c>true</c> if the song is corrupted; otherwise, <c>false</c>.</value>
+        /// <value><c>true</c> if the song is corrupted; otherwise, <c>false</c> .</value>
         public bool IsCorrupted
         {
             get { return this.isCorrupted; }

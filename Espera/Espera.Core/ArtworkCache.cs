@@ -48,7 +48,7 @@ namespace Espera.Core
         /// Fetches an artwork for the specified combination of artist and album.
         /// </summary>
         /// <returns>
-        /// The cache key of the fetched artwork, or <c>null</c>, if no artwork could be found.
+        /// The cache key of the fetched artwork, or <c>null</c> , if no artwork could be found.
         /// </returns>
         /// <exception cref="ArtworkCacheException">
         /// An error occured while fetching or storing the artwork.
@@ -182,6 +182,7 @@ namespace Espera.Core
 
             if (await this.cache.GetCreatedAt(key) != null)
             {
+                this.storageSemaphore.Release(key);
                 return key;
             }
 

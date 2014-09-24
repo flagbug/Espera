@@ -129,7 +129,7 @@ namespace Espera.View.ViewModels
                 return songs.Select(x => this.modelToViewModelConverter(x)).ToList();
             }
 
-            catch (Exception)
+            catch (NetworkSongFinderException)
             {
                 this.connectionError.OnNext(Unit.Default);
 

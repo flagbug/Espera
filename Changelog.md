@@ -1,3 +1,12 @@
+# v2.7.0
+
+## Features
+- Added mobile support for SoundCloud and YouTube.
+
+## Bugfixes
+- Fixed a sorting bug for artists that begin with "An".
+- Fixed a crash when disconnecting a mobile client.
+
 # v2.6.0
 
 ## Features

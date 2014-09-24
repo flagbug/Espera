@@ -26,8 +26,6 @@ namespace Espera.Core
                 Throw.ArgumentException("Artwork key cannot be an empty string", () => artworkKey);
 
             this.artworkKey = new BehaviorSubject<string>(artworkKey);
-
-            this.Guid = Guid.NewGuid();
         }
 
         /// <summary>
@@ -47,11 +45,6 @@ namespace Espera.Core
         {
             get { return this.artworkKey.Value; }
         }
-
-        /// <summary>
-        /// A runtime identifier for interaction with the mobile API.
-        /// </summary>
-        public Guid Guid { get; private set; }
 
         public override bool IsVideo
         {

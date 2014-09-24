@@ -85,6 +85,10 @@ namespace Espera.View.ViewModels
                     if (artworkUrl == null)
                         return;
 
+                    // Get a non-shitty resolution <c>
+                    // https://developers.soundcloud.com/docs/api/reference#tracks <c/>
+                    artworkUrl = new Uri(artworkUrl.ToString().Replace("large", "t300x300"));
+
                     byte[] imageBytes = await client.GetByteArrayAsync(artworkUrl);
 
                     if (imageBytes == null)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Reactive;
@@ -35,7 +36,10 @@ namespace Espera.Core.Mobile
         private readonly Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>> messageActionMap;
         private readonly TcpClient socket;
         private Guid accessToken;
+        private IReadOnlyList<SoundCloudSong> lastSoundCloudRequest;
+        private IReadOnlyList<YoutubeSong> lastYoutubeRequest;
         private IObservable<SongTransferMessage> songTransfers;
+        private Subject<Unit> videoPlayerToggleRequest;
 
         public MobileClient(TcpClient socket, TcpClient fileSocket, Library library)
         {
@@ -55,11 +59,17 @@ namespace Espera.Core.Mobile
             this.disposable = new CompositeDisposable();
             this.gate = new SemaphoreSlim(1, 1);
             this.disconnected = new Subject<Unit>();
+            this.lastSoundCloudRequest = new List<SoundCloudSong>();
+            this.lastYoutubeRequest = new List<YoutubeSong>();
+            this.videoPlayerToggleRequest = new Subject<Unit>();
 
             this.messageActionMap = new Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>>
             {
                 {RequestAction.GetConnectionInfo, this.GetConnectionInfo},
+                {RequestAction.ToggleYoutubePlayer, this.ToggleVideoPlayer},
                 {RequestAction.GetLibraryContent, this.GetLibraryContent},
+                {RequestAction.GetSoundCloudSongs, this.GetSoundCloudSongs},
+                {RequestAction.GetYoutubeSongs, this.GetYoutubeSongs},
                 {RequestAction.AddPlaylistSongs, this.AddPlaylistSongs},
                 {RequestAction.AddPlaylistSongsNow, this.AddPlaylistSongsNow},
                 {RequestAction.GetCurrentPlaylist, this.GetCurrentPlaylist},
@@ -84,6 +94,14 @@ namespace Espera.Core.Mobile
             get { return this.disconnected.AsObservable(); }
         }
 
+        /// <summary>
+        /// Signals when the mobile client wants to toggle the visibility of the video player.
+        /// </summary>
+        public IObservable<Unit> VideoPlayerToggleRequest
+        {
+            get { return this.videoPlayerToggleRequest.AsObservable(); }
+        }
+
         public void Dispose()
         {
             this.socket.Close();
@@ -96,6 +114,7 @@ namespace Espera.Core.Mobile
         {
             Observable.FromAsync(() => this.socket.GetStream().ReadNextMessageAsync())
                 .Repeat()
+                .LoggedCatch(this, null, "Message connection was closed by the remote device or the connection failed")
                 .TakeWhile(x => x != null)
                 // If we don't do this, the application will throw up whenever we are manipulating a
                 // collection that is surfaced to the UI Yes, this is astoundingly stupid
@@ -125,9 +144,9 @@ namespace Espera.Core.Mobile
                         try
                         {
                             ResponseInfo response = await action(request.Parameters);
-
                             response.RequestId = request.RequestId;
-                            responseMessage.Payload = JObject.FromObject(response);
+
+                            responseMessage.Payload = await Task.Run(() => JObject.FromObject(response));
 
                             await this.SendMessage(responseMessage);
                         }
@@ -165,7 +184,7 @@ namespace Espera.Core.Mobile
 
             var transfers = Observable.FromAsync(() => this.fileSocket.GetStream().ReadNextFileTransferMessageAsync())
                 .Repeat()
-                .Retry()
+                .LoggedCatch(this, null, "File transfer connection was closed by the remote device or the connection failed")
                 .TakeWhile(x => x != null)
                 .Publish();
             transfers.Connect().DisposeWith(this.disposable);
@@ -357,11 +376,36 @@ namespace Espera.Core.Mobile
             return CreateResponse(ResponseStatus.Success, null, content);
         }
 
-        private Task<ResponseInfo> GetLibraryContent(JToken dontCare)
+        private async Task<ResponseInfo> GetLibraryContent(JToken dontCare)
         {
-            JObject content = MobileHelper.SerializeSongs(this.library.Songs);
+            JObject content = await Task.Run(() => MobileHelper.SerializeSongs(this.library.Songs));
 
-            return Task.FromResult(CreateResponse(ResponseStatus.Success, null, content));
+            return CreateResponse(ResponseStatus.Success, null, content);
+        }
+
+        private async Task<ResponseInfo> GetSoundCloudSongs(JToken parameters)
+        {
+            var searchTerm = parameters["searchTerm"].ToObject<string>();
+
+            var soundCloudfinder = new SoundCloudSongFinder();
+
+            try
+            {
+                IReadOnlyList<SoundCloudSong> songs = await soundCloudfinder.GetSongsAsync(searchTerm);
+
+                // Cache the latest SoundCloud search request, so we can find the songs by GUID when
+                // we add one to the playlist later
+                this.lastSoundCloudRequest = songs;
+
+                JObject content = MobileHelper.SerializeSongs(songs);
+
+                return CreateResponse(ResponseStatus.Success, content);
+            }
+
+            catch (NetworkSongFinderException)
+            {
+                return CreateResponse(ResponseStatus.Failed, "Couldn't retrieve any SoundCloud songs");
+            }
         }
 
         private Task<ResponseInfo> GetVolume(JToken dontCare)
@@ -374,6 +418,31 @@ namespace Espera.Core.Mobile
             });
 
             return Task.FromResult(CreateResponse(ResponseStatus.Success, response));
+        }
+
+        private async Task<ResponseInfo> GetYoutubeSongs(JToken parameters)
+        {
+            var searchTerm = parameters["searchTerm"].ToObject<string>();
+
+            var youtubeSongFinder = new YoutubeSongFinder();
+
+            try
+            {
+                IReadOnlyList<YoutubeSong> songs = await youtubeSongFinder.GetSongsAsync(searchTerm);
+
+                // Cache the latest YouTube search request, so we can find the songs by GUID when we
+                // add one to the playlist later
+                this.lastYoutubeRequest = songs;
+
+                JObject content = MobileHelper.SerializeSongs(songs);
+
+                return CreateResponse(ResponseStatus.Success, content);
+            }
+
+            catch (NetworkSongFinderException)
+            {
+                return CreateResponse(ResponseStatus.Failed, "Couldn't retrieve any YouTube songs");
+            };
         }
 
         private Task<ResponseInfo> MovePlaylistSongDown(JToken parameters)
@@ -736,6 +805,13 @@ namespace Espera.Core.Mobile
             return Task.FromResult(CreateResponse(ResponseStatus.Success));
         }
 
+        private Task<ResponseInfo> ToggleVideoPlayer(JToken arg)
+        {
+            this.videoPlayerToggleRequest.OnNext(Unit.Default);
+
+            return Task.FromResult(CreateResponse(ResponseStatus.Success));
+        }
+
         private bool TryValidateSongGuids(IEnumerable<string> guidStrings, out IEnumerable<Song> foundSongs, out ResponseInfo responseInfo)
         {
             var guids = new List<Guid>();
@@ -759,11 +835,16 @@ namespace Espera.Core.Mobile
                 }
             }
 
-            Dictionary<Guid, LocalSong> dic = this.library.Songs.ToDictionary(x => x.Guid);
+            // Look if any song in our local library or any song of the last SoundCloud or YouTube
+            // requests has the requested Guid
+            Dictionary<Guid, Song> dic = this.library.Songs
+                .Concat(this.lastSoundCloudRequest.Cast<Song>())
+                .Concat(this.lastYoutubeRequest)
+                .ToDictionary(x => x.Guid);
 
-            List<LocalSong> songs = guids.Select(x =>
+            List<Song> songs = guids.Select(x =>
             {
-                LocalSong song;
+                Song song;
 
                 dic.TryGetValue(x, out song);
 

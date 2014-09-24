@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 
 namespace Espera.Core.Mobile
 {
@@ -8,20 +12,24 @@ namespace Espera.Core.Mobile
     /// </summary>
     public class MobileApiInfo
     {
-        public MobileApiInfo(IObservable<int> connectedClientCount, IObservable<bool> isPortOccupied)
+        public MobileApiInfo(IObservable<IReadOnlyList<MobileClient>> connectedClients, IObservable<bool> isPortOccupied)
         {
-            if (connectedClientCount == null)
-                throw new ArgumentNullException("connectedClientCount");
+            if (connectedClients == null)
+                throw new ArgumentNullException("connectedClients");
 
             if (isPortOccupied == null)
                 throw new ArgumentNullException("isPortOccupied");
 
-            this.ConnectedClientCount = connectedClientCount;
             this.IsPortOccupied = isPortOccupied;
+
+            this.VideoPlayerToggleRequest = connectedClients.Select(x => x.Select(y => y.VideoPlayerToggleRequest).Merge()).Switch();
+            this.ConnectedClientCount = connectedClients.Select(x => x.Count);
         }
 
         public IObservable<int> ConnectedClientCount { get; private set; }
 
         public IObservable<bool> IsPortOccupied { get; private set; }
+
+        public IObservable<Unit> VideoPlayerToggleRequest { get; private set; }
     }
 }

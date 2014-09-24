@@ -49,9 +49,9 @@ namespace Espera.Core.Mobile
             this.listenerSubscriptions = new CompositeDisposable();
         }
 
-        public IObservable<int> ConnectedClients
+        public IObservable<IReadOnlyList<MobileClient>> ConnectedClients
         {
-            get { return this.clients.CountChanged; }
+            get { return this.clients.Changed.Select(_ => this.clients.ToList()); }
         }
 
         public IObservable<bool> IsPortOccupied

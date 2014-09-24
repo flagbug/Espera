@@ -14,29 +14,29 @@ namespace Espera.Core
         {
             IReadOnlyList<SoundCloudSong> songs;
 
-            if (string.IsNullOrWhiteSpace(searchTerm))
-            {
-                var api = RestService.For<ISoundCloudApi>("http://api-v2.soundcloud.com");
-
-                songs = (await api.GetPopularTracks(50)).Tracks;
-            }
-
-            else
-            {
-                var api = RestService.For<ISoundCloudApi>("http://api.soundcloud.com");
-
-                songs = await api.Search(searchTerm, ClientId);
-            }
-
             try
             {
-                songs = songs.Where(x => x.IsStreamable).ToList();
+                if (string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    var api = RestService.For<ISoundCloudApi>("http://api-v2.soundcloud.com");
+
+                    songs = (await api.GetPopularTracks(50)).Tracks;
+                }
+
+                else
+                {
+                    var api = RestService.For<ISoundCloudApi>("http://api.soundcloud.com");
+
+                    songs = await api.Search(searchTerm, ClientId);
+                }
             }
 
             catch (Exception ex)
             {
                 throw new NetworkSongFinderException("SoundCloud search failed", ex);
             }
+
+            songs = songs.Where(x => x.IsStreamable).ToList();
 
             foreach (SoundCloudSong song in songs)
             {

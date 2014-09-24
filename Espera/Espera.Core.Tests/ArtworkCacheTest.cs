@@ -87,6 +87,24 @@ namespace Espera.Core.Tests
         public class TheStoreMethod
         {
             [Fact]
+            public void CanStoreMulipleArtworksIfArtworksExistsInCache()
+            {
+                var blobCache = new TestBlobCache();
+                var data = new byte[] { 0, 1 };
+                string key = BlobCacheKeys.GetKeyForArtwork(data);
+                blobCache.Insert(key, data);
+                var fixture = new ArtworkCache(blobCache);
+
+                Task firstTask = fixture.Store(data);
+                Task secondTask = fixture.Store(data);
+                Task thrirdTask = fixture.Store(data);
+
+                Assert.True(firstTask.IsCompleted);
+                Assert.True(secondTask.IsCompleted);
+                Assert.True(thrirdTask.IsCompleted);
+            }
+
+            [Fact]
             public async Task DoesntStoreArtworkIfAlreadyInLocalCache()
             {
                 var blobCache = Substitute.For<IBlobCache>();
