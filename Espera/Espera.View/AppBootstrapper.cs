@@ -247,7 +247,7 @@ namespace Espera.View
                 x.StartClientDiscovery();
             });
 
-            IConnectableObservable<int> connectedClients = apiChanged.Select(x => x.ConnectedClients).Switch().Publish(0);
+            IConnectableObservable<IReadOnlyList<MobileClient>> connectedClients = apiChanged.Select(x => x.ConnectedClients).Switch().Publish(new List<MobileClient>());
             connectedClients.Connect();
 
             IConnectableObservable<bool> isPortOccupied = apiChanged.Select(x => x.IsPortOccupied).Switch().Publish(false);

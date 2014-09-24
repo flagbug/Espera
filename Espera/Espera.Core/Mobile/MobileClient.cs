@@ -38,6 +38,7 @@ namespace Espera.Core.Mobile
         private IReadOnlyList<SoundCloudSong> lastSoundCloudRequest;
         private IReadOnlyList<YoutubeSong> lastYoutubeRequest;
         private IObservable<SongTransferMessage> songTransfers;
+        private Subject<Unit> videoPlayerToggleRequest;
 
         public MobileClient(TcpClient socket, TcpClient fileSocket, Library library)
         {
@@ -59,10 +60,12 @@ namespace Espera.Core.Mobile
             this.disconnected = new Subject<Unit>();
             this.lastSoundCloudRequest = new List<SoundCloudSong>();
             this.lastYoutubeRequest = new List<YoutubeSong>();
+            this.videoPlayerToggleRequest = new Subject<Unit>();
 
             this.messageActionMap = new Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>>
             {
                 {RequestAction.GetConnectionInfo, this.GetConnectionInfo},
+                {RequestAction.ToggleYoutubePlayer, this.ToggleVideoPlayer},
                 {RequestAction.GetLibraryContent, this.GetLibraryContent},
                 {RequestAction.GetSoundCloudSongs, this.GetSoundCloudSongs},
                 {RequestAction.GetYoutubeSongs, this.GetYoutubeSongs},
@@ -88,6 +91,14 @@ namespace Espera.Core.Mobile
         public IObservable<Unit> Disconnected
         {
             get { return this.disconnected.AsObservable(); }
+        }
+
+        /// <summary>
+        /// Signals when the mobile client wants to toggle the visibility of the video player.
+        /// </summary>
+        public IObservable<Unit> VideoPlayerToggleRequest
+        {
+            get { return this.videoPlayerToggleRequest.AsObservable(); }
         }
 
         public void Dispose()
@@ -789,6 +800,13 @@ namespace Espera.Core.Mobile
             {
                 return Task.FromResult(CreateResponse(ResponseStatus.Unauthorized));
             }
+
+            return Task.FromResult(CreateResponse(ResponseStatus.Success));
+        }
+
+        private Task<ResponseInfo> ToggleVideoPlayer(JToken arg)
+        {
+            this.videoPlayerToggleRequest.OnNext(Unit.Default);
 
             return Task.FromResult(CreateResponse(ResponseStatus.Success));
         }

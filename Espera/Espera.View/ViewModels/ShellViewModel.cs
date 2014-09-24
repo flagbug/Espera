@@ -68,6 +68,8 @@ namespace Espera.View.ViewModels
                 .CombineLatest(mobileApiInfo.ConnectedClientCount, (enableGuestSystem, connectedClients) => enableGuestSystem && connectedClients > 0)
                 .ToProperty(this, x => x.ShowVotes);
 
+            mobileApiInfo.VideoPlayerToggleRequest.Subscribe(_ => this.ShowVideoPlayer = !this.ShowVideoPlayer);
+
             this.isAdmin = this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken)
                 .Select(x => x == AccessPermission.Admin)
                 .ToProperty(this, x => x.IsAdmin);

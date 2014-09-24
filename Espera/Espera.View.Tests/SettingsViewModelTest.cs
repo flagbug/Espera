@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reactive.Linq;
 using Caliburn.Micro;
@@ -24,7 +25,7 @@ namespace Espera.View.Tests
             Library library = new LibraryBuilder().WithFileSystem(fileSystem).Build();
             Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
             var vm = new SettingsViewModel(library, new ViewSettings(), new CoreSettings(), Substitute.For<IWindowManager>(), token,
-                new MobileApiInfo(Observable.Return(0), Observable.Return(false)));
+                new MobileApiInfo(Observable.Return(new List<MobileClient>()), Observable.Return(false)));
 
             var coll = vm.UpdateLibraryCommand.CanExecuteObservable.CreateCollection();
 
