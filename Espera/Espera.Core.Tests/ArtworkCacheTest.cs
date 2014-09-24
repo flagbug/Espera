@@ -89,7 +89,7 @@ namespace Espera.Core.Tests
             [Fact]
             public void CanStoreMulipleArtworksIfArtworksExistsInCache()
             {
-                var blobCache = new TestBlobCache();
+                var blobCache = new InMemoryBlobCache();
                 var data = new byte[] { 0, 1 };
                 string key = BlobCacheKeys.GetKeyForArtwork(data);
                 blobCache.Insert(key, data);
