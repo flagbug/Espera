@@ -75,11 +75,13 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.IsAdmin);
 
             this.NextSongCommand = ReactiveCommand.CreateAsyncTask(this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
-                    .CombineLatest(this.library.WhenAnyValue(x => x.CurrentPlaylist.CanPlayNextSong), (x1, x2) => x1 && x2),
+                    .CombineLatest(this.library.WhenAnyValue(x => x.CurrentPlaylist.CanPlayNextSong), (x1, x2) => x1 && x2)
+                    .ObserveOn(RxApp.MainThreadScheduler),
                 _ => this.library.PlayNextSongAsync(this.accessToken));
 
             this.PreviousSongCommand = ReactiveCommand.CreateAsyncTask(this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
-                    .CombineLatest(this.library.WhenAnyValue(x => x.CurrentPlaylist.CanPlayPreviousSong), (x1, x2) => x1 && x2),
+                    .CombineLatest(this.library.WhenAnyValue(x => x.CurrentPlaylist.CanPlayPreviousSong), (x1, x2) => x1 && x2)
+                    .ObserveOn(RxApp.MainThreadScheduler),
                 _ => this.library.PlayPreviousSongAsync(this.accessToken));
 
             if (!this.library.Playlists.Any())
@@ -216,11 +218,13 @@ namespace Espera.View.ViewModels
                 .Select(x => x ? this.PauseCommand : this.PlayCommand).Publish(null);
             pauseOrContinueCommand.Connect();
 
-            this.PauseContinueCommand = ReactiveCommand.CreateAsyncTask(pauseOrContinueCommand.Select(x => x.CanExecuteObservable).Switch(), async _ =>
-            {
-                IReactiveCommand<Unit> command = await pauseOrContinueCommand.FirstAsync();
-                await command.ExecuteAsync();
-            });
+            this.PauseContinueCommand = ReactiveCommand.CreateAsyncTask(
+                pauseOrContinueCommand.Select(x => x.CanExecuteObservable).Switch().ObserveOn(RxApp.MainThreadScheduler),
+                async _ =>
+                {
+                    IReactiveCommand<Unit> command = await pauseOrContinueCommand.FirstAsync();
+                    await command.ExecuteAsync();
+                });
 
             this.EditPlaylistNameCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.CanAlterPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 && !x2.Model.IsTemporary));
             this.EditPlaylistNameCommand.Subscribe(x => this.CurrentPlaylist.EditName = true);
