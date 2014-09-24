@@ -11,10 +11,10 @@ mkdir .\Release\EsperaPortable
 Write-Host "Building Portable Version"
 & "$MSBuildLocation\MSBuild.exe" /t:Rebuild /p:Configuration=Release /p:Platform="x86" /v:quiet ".\Espera\Espera.sln"
 
-cp ".\Espera\Espera.View\bin\Release\*.dll" ".\Release\Portable\"
-cp ".\Espera\Espera.View\bin\Release\Espera.exe" ".\Release\Portable\"
-cp ".\Espera\Espera.View\bin\Release\Espera.exe.config" ".\Release\Portable\"
-cp ".\Changelog.md" ".\Release\Portable\Changelog.txt"
+cp ".\Espera\Espera.View\bin\Release\*.dll" ".\Release\EsperaPortable\"
+cp ".\Espera\Espera.View\bin\Release\Espera.exe" ".\Release\EsperaPortable\"
+cp ".\Espera\Espera.View\bin\Release\Espera.exe.config" ".\Release\EsperaPortable\"
+cp ".\Changelog.md" ".\Release\EsperaPortable\Changelog.txt"
 
 # Build the ClickOnce version
 Write-Host "Building ClickOnce version"
@@ -25,5 +25,3 @@ Write-Host "Building ClickOnce version"
 
 cp -r ".\Espera\Espera.View\bin\Release\app.publish\" ".\Release\"
 Rename-Item ".\Release\app.publish\setup.exe" "EsperaSetup.exe"
-
-
