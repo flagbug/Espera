@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Rareform.Validation;
+using ReactiveMarrow;
 using ReactiveUI;
 
 namespace Espera.Core.Management
@@ -34,11 +36,11 @@ namespace Espera.Core.Management
             });
 
             this.canPlayNextSong = this.WhenAnyValue(x => x.CurrentSongIndex)
-                .CombineLatest(this.playlist.Changed, (i, args) => i.HasValue && this.ContainsIndex(i.Value + 1))
+                .CombineLatest(this.playlist.Changed.ToUnit().StartWith(Unit.Default), (i, _) => i.HasValue && this.ContainsIndex(i.Value + 1))
                 .ToProperty(this, x => x.CanPlayNextSong);
 
             this.canPlayPreviousSong = this.WhenAnyValue(x => x.CurrentSongIndex)
-                .CombineLatest(this.playlist.Changed, (i, args) => i.HasValue && this.ContainsIndex(i.Value - 1))
+                .CombineLatest(this.playlist.Changed.ToUnit().StartWith(Unit.Default), (i, _) => i.HasValue && this.ContainsIndex(i.Value - 1))
                 .ToProperty(this, x => x.CanPlayPreviousSong);
         }
 
