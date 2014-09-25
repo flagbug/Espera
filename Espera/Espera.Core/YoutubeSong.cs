@@ -20,6 +20,8 @@ namespace Espera.Core
                 { YoutubeStreamingQuality.Low, new HashSet<int> { 360, 240 } }
             };
 
+        private string playbackPath;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="YoutubeSong" /> class.
         /// </summary>
@@ -45,10 +47,15 @@ namespace Espera.Core
             get { return NetworkSongSource.Youtube; }
         }
 
+        public override string PlaybackPath
+        {
+            get { return this.playbackPath; }
+        }
+
         /// <summary>
         /// Gets or sets the average rating.
         /// </summary>
-        /// <value>The average rating. <c>null</c>, if the rating is unknown.</value>
+        /// <value>The average rating. <c>null</c> , if the rating is unknown.</value>
         public double? Rating { get; set; }
 
         /// <summary>
@@ -109,7 +116,7 @@ namespace Espera.Core
                 throw new SongPreparationException("No suitable video found");
             }
 
-            this.PlaybackPath = video.DownloadUrl;
+            this.playbackPath = video.DownloadUrl;
         }
 
         private static async Task DownloadFromYoutube(Downloader downloader, IEnumerable<Type> exceptionTypes, IObserver<double> progress)
