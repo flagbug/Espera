@@ -25,7 +25,6 @@ namespace Espera.Core
                 Throw.ArgumentNullException(() => path);
 
             this.OriginalPath = path;
-            this.PlaybackPath = path;
             this.Duration = duration;
 
             this.Album = String.Empty;
@@ -79,7 +78,7 @@ namespace Espera.Core
         /// <summary>
         /// Gets the path to stream the audio from.
         /// </summary>
-        public string PlaybackPath { get; protected set; }
+        public abstract string PlaybackPath { get; }
 
         public string Title { get; set; }
 

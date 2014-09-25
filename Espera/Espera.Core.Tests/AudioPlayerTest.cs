@@ -80,7 +80,7 @@ namespace Espera.Core.Tests
                 var mediaPlayerCallback = Substitute.For<IMediaPlayerCallback>();
                 audioPlayer.RegisterAudioPlayerCallback(mediaPlayerCallback);
 
-                var song = Substitute.For<Song>("C://", TimeSpan.Zero);
+                var song = Helpers.SetupSongMock("C://", TimeSpan.Zero);
                 song.IsVideo.Returns(false);
 
                 await audioPlayer.LoadAsync(song);
@@ -95,7 +95,7 @@ namespace Espera.Core.Tests
                 var mediaPlayerCallback = Substitute.For<IMediaPlayerCallback>();
                 audioPlayer.RegisterVideoPlayerCallback(mediaPlayerCallback);
 
-                var song = Substitute.For<Song>("C://", TimeSpan.Zero);
+                var song = Helpers.SetupSongMock("C://", TimeSpan.Zero);
                 song.IsVideo.Returns(true);
 
                 await audioPlayer.LoadAsync(song);

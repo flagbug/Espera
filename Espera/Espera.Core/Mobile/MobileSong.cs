@@ -31,6 +31,11 @@ namespace Espera.Core.Mobile
             get { return NetworkSongSource.Mobile; }
         }
 
+        public override string PlaybackPath
+        {
+            get { return this.OriginalPath; }
+        }
+
         internal static MobileSong Create(NetworkSong metaData, IObservable<byte[]> data, IFileSystem fileSystem = null)
         {
             fileSystem = fileSystem ?? new FileSystem();

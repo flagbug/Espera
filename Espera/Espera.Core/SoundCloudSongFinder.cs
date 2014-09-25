@@ -36,11 +36,19 @@ namespace Espera.Core
                 throw new NetworkSongFinderException("SoundCloud search failed", ex);
             }
 
-            songs = songs.Where(x => x.IsStreamable).ToList();
+            songs = songs.Where(x => x.IsStreamable || x.IsDownloadable).ToList();
 
             foreach (SoundCloudSong song in songs)
             {
-                song.StreamUrl = new Uri(song.StreamUrl + "?client_id=" + ClientId);
+                if (song.IsStreamable)
+                {
+                    song.StreamUrl = new Uri(song.StreamUrl + "?client_id=" + ClientId);
+                }
+
+                if (song.IsDownloadable)
+                {
+                    song.DownloadUrl = new Uri(song.DownloadUrl + "?client_id=" + ClientId);
+                }
             }
 
             return songs;

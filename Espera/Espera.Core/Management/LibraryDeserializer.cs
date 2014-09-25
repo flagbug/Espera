@@ -85,19 +85,22 @@ namespace Espera.Core.Management
 
                     if (entry.Type == typeof(SoundCloudSong))
                     {
-                        return new SoundCloudSong
+                        return new SoundCloudSong(entry.OriginalPath, entry.PlaybackPath)
                         {
-                            PermaLinkUrl = new Uri(entry.OriginalPath),
-                            StreamUrl = new Uri(entry.PlaybackPath),
                             Artist = entry.Artist,
                             Title = entry.Title,
                             Duration = entry.Duration.Value
                         };
                     }
 
-                    // We search for the path locally, so we don't have to serialize data about
-                    // local songs
-                    return songs.First(song => song.OriginalPath == entry.OriginalPath);
+                    if (entry.Type == typeof(LocalSong))
+                    {
+                        // We search for the path locally, so we don't have to serialize data about
+                        // local songs
+                        return songs.First(song => song.OriginalPath == entry.OriginalPath);
+                    }
+
+                    throw new NotImplementedException();
                 });
 
                 playlist.AddSongs(s);
