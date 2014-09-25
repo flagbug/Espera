@@ -13,13 +13,16 @@ namespace Espera.Core
         private const string ApiKey =
             "AI39si5_zcffmO_ErRSZ9xUkfy_XxPZLWuxTOzI_1RH9HhXDI-GaaQ-j6MONkl2JiF01yBDgBFPbC8-mn6U9Qo4Ek50nKcqH5g";
 
+        private const int RequestLimit = 50;
+
         public async Task<IReadOnlyList<YoutubeSong>> GetSongsAsync(string searchTerm)
         {
             var query = new YouTubeQuery(YouTubeQuery.DefaultVideoUri)
             {
                 OrderBy = "relevance",
                 Query = searchTerm,
-                SafeSearch = YouTubeQuery.SafeSearchValues.None
+                SafeSearch = YouTubeQuery.SafeSearchValues.None,
+                NumberToRetrieve = RequestLimit
             };
 
             try // The API gives no clue what can throw, wrap it all up
