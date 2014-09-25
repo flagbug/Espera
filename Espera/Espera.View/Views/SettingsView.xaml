@@ -438,6 +438,11 @@
                         </Hyperlink>
                     </TextBlock>
                     <TextBlock Style="{StaticResource AboutInfoStyle}">
+                        <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=LogFilePath}">
+                            <Run Foreground="#FF00B7C0" Text="Open debug log" />
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource AboutInfoStyle}">
                         <Hyperlink Command="{Binding Path=OpenLinkCommand}" CommandParameter="{Binding Path=DonationPage}">
                             <Run Foreground="#FF00B7C0" Text="Donate :)" />
                         </Hyperlink>

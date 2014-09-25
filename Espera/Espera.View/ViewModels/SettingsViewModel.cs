@@ -382,6 +382,11 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public string LogFilePath
+        {
+            get { return AppBootstrapper.LogFilePath; }
+        }
+
         public IReactiveCommand LoginCommand { get; private set; }
 
         public string LoginPassword
