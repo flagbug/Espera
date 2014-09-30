@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>Espera</id>
+        <version>3.0</version>
+        <title>Espera</title>
+        <authors>Dennis Daume</authors>
+        <owners>Dennis Daume</owners>
+        <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+        <projectUrl>http://github.com/flagbug/Espera</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Espera is a media player that plays your music, YouTube videos, SoundCloud songs and has a special "party mode".</description>
+        <tags></tags>
+    </metadata>
+    <files>
+        <file src="Espera.View\bin\Release\*.dll" target="lib\net45\" />
+        <file src="Espera.View\bin\Release\*.exe" target="lib\net45\" />
+    </files>
+</package>
