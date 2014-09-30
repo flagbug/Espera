@@ -15,13 +15,13 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Akavache;
-using Akavache.Deprecated;
 using Caliburn.Micro;
 using Espera.Core;
 using Espera.Core.Analytics;
 using Espera.Core.Management;
 using Espera.Core.Mobile;
 using Espera.Core.Settings;
+using Espera.View.CacheMigration;
 using Espera.View.ViewModels;
 using NLog.Config;
 using NLog.Targets;
@@ -67,7 +67,7 @@ namespace Espera.View
 #if DEBUG
             if (overrideBasePath != null)
             {
-                BlobCache.LocalMachine = new PersistentBlobCache(BlobCachePath);
+                BlobCache.LocalMachine = new DeprecatedBlobCache(BlobCachePath);
             }
 #endif
         }
@@ -141,7 +141,7 @@ namespace Espera.View
 
             Directory.CreateDirectory(DirectoryPath);
 
-            var oldBlobCache = new PersistentBlobCache(BlobCachePath);
+            var oldBlobCache = new DeprecatedBlobCache(BlobCachePath);
             var newBlobCache = BlobCache.LocalMachine;
             var migration = new AkavacheToSqlite3Migration(oldBlobCache, newBlobCache);
 

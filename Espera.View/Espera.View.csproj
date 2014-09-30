@@ -242,7 +242,7 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AkavacheSqliteLinkerOverride.cs" />
-    <Compile Include="AkavacheToSqlite3Migration.cs" />
+    <Compile Include="CacheMigration\AkavacheToSqlite3Migration.cs" />
     <Compile Include="AppBootstrapper.cs" />
     <Compile Include="Changelog.cs" />
     <Compile Include="ChangelogEntry.cs" />
@@ -251,7 +251,7 @@
     <Compile Include="DragDropExtension.cs" />
     <Compile Include="INetworkStatus.cs" />
     <Compile Include="NLogLogger.cs" />
-    <Compile Include="OldBlobCache.cs" />
+    <Compile Include="CacheMigration\DeprecatedBlobCache.cs" />
     <Compile Include="ReactiveViewHelper.cs" />
     <Compile Include="ReleaseEntry.cs" />
     <Compile Include="SearchEngine.cs" />

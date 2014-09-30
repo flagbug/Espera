@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -10,32 +11,17 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Security.Cryptography;
 using System.Text;
+using Akavache;
 using Newtonsoft.Json;
 using Splat;
-using System.Collections.Concurrent;
 
-namespace Akavache.Deprecated
+namespace Espera.View.CacheMigration
 {
-    public class CacheIndexEntry
-    {
-        public CacheIndexEntry(DateTimeOffset createdAt, DateTimeOffset? expiresAt)
-        {
-            CreatedAt = createdAt;
-            ExpiresAt = expiresAt;
-        }
-
-        public DateTimeOffset CreatedAt { get; protected set; }
-
-        public DateTimeOffset? ExpiresAt { get; protected set; }
-    }
-
     /// <summary>
-    /// This class represents an asynchronous key-value store backed by a directory. It stores the
-    /// last 'n' key requests in memory.
+    /// The deprecated, file-system based BlobCache, used for migrating to the new BlobCache.
     /// </summary>
-    public class PersistentBlobCache : IBlobCache, IEnableLogger
+    public class DeprecatedBlobCache : IBlobCache, IEnableLogger
     {
-        internal ConcurrentDictionary<string, CacheIndexEntry> CacheIndex = new ConcurrentDictionary<string, CacheIndexEntry>();
         protected readonly string CacheDirectory;
         private const string BlobCacheIndexKey = "__THISISTHEINDEX__FFS_DONT_NAME_A_FILE_THIS™";
         private readonly Subject<Unit> actionTaken = new Subject<Unit>();
@@ -43,9 +29,10 @@ namespace Akavache.Deprecated
         private readonly IDisposable flushThreadSubscription;
         private readonly MemoizingMRUCache<string, AsyncSubject<byte[]>> memoizedRequests;
         private readonly AsyncSubject<Unit> shutdown = new AsyncSubject<Unit>();
+        private ConcurrentDictionary<string, CacheIndexEntry> CacheIndex = new ConcurrentDictionary<string, CacheIndexEntry>();
         private bool disposed;
 
-        public PersistentBlobCache(
+        public DeprecatedBlobCache(
             string cacheDirectory = null,
             IFilesystemProvider filesystemProvider = null,
             IScheduler scheduler = null,
@@ -60,84 +47,84 @@ namespace Akavache.Deprecated
                 throw new Exception("No IFilesystemProvider available. This should never happen, your DependencyResolver is broken");
             }
 
-            this.CacheDirectory = cacheDirectory ?? filesystem.GetDefaultRoamingCacheDirectory();
+            this.CacheDirectory = cacheDirectory ?? this.filesystem.GetDefaultRoamingCacheDirectory();
             this.Scheduler = scheduler ?? BlobCache.TaskpoolScheduler;
 
             // Here, we're not actually caching the requests directly (i.e. as byte[]s), but as the
             // "replayed result of the request", in the AsyncSubject - this makes the code
             // infinitely simpler because we don't have to keep a separate list of "in-flight reads"
             // vs "already completed and cached reads"
-            memoizedRequests = new MemoizingMRUCache<string, AsyncSubject<byte[]>>(
-                (x, c) => FetchOrWriteBlobFromDisk(x, c, false), 20, invalidateCallback);
+            this.memoizedRequests = new MemoizingMRUCache<string, AsyncSubject<byte[]>>(
+                (x, c) => this.FetchOrWriteBlobFromDisk(x, c, false), 20, invalidateCallback);
 
-            var cacheIndex = FetchOrWriteBlobFromDisk(BlobCacheIndexKey, null, true)
+            var cacheIndex = this.FetchOrWriteBlobFromDisk(BlobCacheIndexKey, null, true)
                 .Catch(Observable.Return(new byte[0]))
                 .Select(x => Encoding.UTF8.GetString(x, 0, x.Length).Split('\n')
-                     .SelectMany(ParseCacheIndexEntry)
+                     .SelectMany(this.ParseCacheIndexEntry)
                      .ToDictionary(y => y.Key, y => y.Value))
                 .Select(x => new ConcurrentDictionary<string, CacheIndexEntry>(x));
 
-            cacheIndex.Subscribe(x => CacheIndex = x);
+            cacheIndex.Subscribe(x => this.CacheIndex = x);
 
-            flushThreadSubscription = Disposable.Empty;
+            this.flushThreadSubscription = Disposable.Empty;
 
             if (!ModeDetector.InUnitTestRunner())
             {
-                flushThreadSubscription = actionTaken
-                    .Where(_ => CacheIndex != null)
-                    .Throttle(TimeSpan.FromSeconds(30), Scheduler)
-                    .SelectMany(_ => FlushCacheIndex(true))
+                this.flushThreadSubscription = this.actionTaken
+                    .Where(_ => this.CacheIndex != null)
+                    .Throttle(TimeSpan.FromSeconds(30), this.Scheduler)
+                    .SelectMany(_ => this.FlushCacheIndex(true))
                     .Subscribe(_ => this.Log().Debug("Flushing cache"));
             }
 
-            this.Log().Info("{0} entries in blob cache index", CacheIndex.Count);
+            this.Log().Info("{0} entries in blob cache index", this.CacheIndex.Count);
         }
 
         public IScheduler Scheduler { get; protected set; }
 
-        public IObservable<Unit> Shutdown { get { return shutdown; } }
+        public IObservable<Unit> Shutdown { get { return this.shutdown; } }
 
         public void Dispose()
         {
-            if (disposed) return;
-            lock (memoizedRequests)
+            if (this.disposed) return;
+            lock (this.memoizedRequests)
             {
-                if (disposed) return;
-                disposed = true;
+                if (this.disposed) return;
+                this.disposed = true;
 
-                actionTaken.OnCompleted();
-                flushThreadSubscription.Dispose();
+                this.actionTaken.OnCompleted();
+                this.flushThreadSubscription.Dispose();
 
-                var waitOnAllInflight = memoizedRequests.CachedValues()
+                var waitOnAllInflight = this.memoizedRequests.CachedValues()
                     .Select(x => x.Catch(Observable.Return(new byte[0])))
                     .Merge(8)
                     .Concat(Observable.Return(new byte[0]))
                     .Aggregate(Unit.Default, (acc, x) => acc);
 
                 waitOnAllInflight
-                    .SelectMany(FlushCacheIndex(true))
-                    .Multicast(shutdown)
+                    .SelectMany(this.FlushCacheIndex(true))
+                    .Multicast(this.shutdown)
                     .PermaRef();
             }
         }
 
         public IObservable<Unit> Flush()
         {
-            return FlushCacheIndex(false);
+            return this.FlushCacheIndex(false);
         }
 
         public IObservable<byte[]> Get(string key)
         {
-            if (disposed) return Observable.Throw<byte[]>(new ObjectDisposedException("PersistentBlobCache"));
+            if (this.disposed) return Observable.Throw<byte[]>(new ObjectDisposedException("PersistentBlobCache"));
 
-            if (IsKeyStale(key))
+            if (this.IsKeyStale(key))
             {
-                Invalidate(key);
+                this.Invalidate(key);
                 return ExceptionHelper.ObservableThrowKeyNotFoundException<byte[]>(key);
             }
 
             AsyncSubject<byte[]> ret;
-            lock (memoizedRequests)
+            lock (this.memoizedRequests)
             {
                 // There are three scenarios here, and we handle all of them with aplomb and elegance:
                 //
@@ -151,27 +138,27 @@ namespace Akavache.Deprecated
                 // 3. The key isn't in memory and isn't being fetched - in this case,
                 //    FetchOrWriteBlobFromDisk will be called which will immediately return an
                 //    AsyncSubject representing the queued disk read.
-                ret = memoizedRequests.Get(key);
+                ret = this.memoizedRequests.Get(key);
             }
 
             // If we fail trying to fetch/write the key on disk, we want to try again instead of
             // replaying the same failure
             ret.LogErrors("Get")
-               .Subscribe(x => { }, ex => Invalidate(key));
+               .Subscribe(x => { }, ex => this.Invalidate(key));
 
             return ret;
         }
 
         public IObservable<IEnumerable<string>> GetAllKeys()
         {
-            if (disposed) throw new ObjectDisposedException("PersistentBlobCache");
-            return Observable.Return(CacheIndex.ToList().Where(x => x.Value.ExpiresAt == null || x.Value.ExpiresAt >= BlobCache.TaskpoolScheduler.Now).Select(x => x.Key).ToList());
+            if (this.disposed) throw new ObjectDisposedException("PersistentBlobCache");
+            return Observable.Return(this.CacheIndex.ToList().Where(x => x.Value.ExpiresAt == null || x.Value.ExpiresAt >= BlobCache.TaskpoolScheduler.Now).Select(x => x.Key).ToList());
         }
 
         public IObservable<DateTimeOffset?> GetCreatedAt(string key)
         {
             CacheIndexEntry value;
-            if (!CacheIndex.TryGetValue(key, out value))
+            if (!this.CacheIndex.TryGetValue(key, out value))
             {
                 return Observable.Return<DateTimeOffset?>(null);
             }
@@ -189,39 +176,39 @@ namespace Akavache.Deprecated
             // NB: Since FetchOrWriteBlobFromDisk is guaranteed to not block, we never sit on this
             // lock for any real length of time
             AsyncSubject<byte[]> err;
-            lock (memoizedRequests)
+            lock (this.memoizedRequests)
             {
-                if (disposed) return Observable.Throw<Unit>(new ObjectDisposedException("PersistentBlobCache"));
+                if (this.disposed) return Observable.Throw<Unit>(new ObjectDisposedException("PersistentBlobCache"));
 
-                memoizedRequests.Invalidate(key);
-                err = memoizedRequests.Get(key, data);
+                this.memoizedRequests.Invalidate(key);
+                err = this.memoizedRequests.Get(key, data);
             }
 
             // If we fail trying to fetch/write the key on disk, we want to try again instead of
             // replaying the same failure
             err.LogErrors("Insert").Subscribe(
-                x => CacheIndex[key] = new CacheIndexEntry(Scheduler.Now, absoluteExpiration),
-                ex => Invalidate(key));
+                x => this.CacheIndex[key] = new CacheIndexEntry(this.Scheduler.Now, absoluteExpiration),
+                ex => this.Invalidate(key));
 
             return err.Select(_ => Unit.Default);
         }
 
         public IObservable<Unit> Invalidate(string key)
         {
-            lock (memoizedRequests)
+            lock (this.memoizedRequests)
             {
-                if (disposed) return Observable.Throw<Unit>(new ObjectDisposedException("PersistentBlobCache"));
+                if (this.disposed) return Observable.Throw<Unit>(new ObjectDisposedException("PersistentBlobCache"));
                 this.Log().Debug("Invalidating {0}", key);
-                memoizedRequests.Invalidate(key);
+                this.memoizedRequests.Invalidate(key);
             }
 
             CacheIndexEntry dontcare;
-            CacheIndex.TryRemove(key, out dontcare);
+            this.CacheIndex.TryRemove(key, out dontcare);
 
-            var path = GetPathForKey(key);
-            var ret = Observable.Defer(() => filesystem.Delete(path))
+            var path = this.GetPathForKey(key);
+            var ret = Observable.Defer(() => this.filesystem.Delete(path))
                     .Retry(2)
-                    .Do(_ => actionTaken.OnNext(Unit.Default));
+                    .Do(_ => this.actionTaken.OnNext(Unit.Default));
 
             return ret.Multicast(new AsyncSubject<Unit>()).PermaRef();
         }
@@ -229,14 +216,14 @@ namespace Akavache.Deprecated
         public IObservable<Unit> InvalidateAll()
         {
             string[] keys;
-            lock (memoizedRequests)
+            lock (this.memoizedRequests)
             {
-                if (disposed) return Observable.Throw<Unit>(new ObjectDisposedException("PersistentBlobCache"));
-                keys = CacheIndex.Keys.ToArray();
+                if (this.disposed) return Observable.Throw<Unit>(new ObjectDisposedException("PersistentBlobCache"));
+                keys = this.CacheIndex.Keys.ToArray();
             }
 
             var ret = keys.ToObservable()
-                .Select(x => Observable.Defer(() => Invalidate(x)))
+                .Select(x => Observable.Defer(() => this.Invalidate(x)))
                 .Merge(8)
                 .Aggregate(Unit.Default, (acc, x) => acc)
                 .Multicast(new AsyncSubject<Unit>());
@@ -286,14 +273,14 @@ namespace Akavache.Deprecated
             // 'context' variable from MemoizingMRUCache here a bit)
             if (byteData != null)
             {
-                return WriteBlobToDisk(key, (byte[])byteData, synchronous);
+                return this.WriteBlobToDisk(key, (byte[])byteData, synchronous);
             }
 
             var ret = new AsyncSubject<byte[]>();
             var ms = new MemoryStream();
 
-            var scheduler = synchronous ? System.Reactive.Concurrency.Scheduler.Immediate : Scheduler;
-            if (disposed)
+            var scheduler = synchronous ? System.Reactive.Concurrency.Scheduler.Immediate : this.Scheduler;
+            if (this.disposed)
             {
                 Observable.Throw<byte[]>(new ObjectDisposedException("PersistentBlobCache"))
                     .Multicast(ret)
@@ -303,16 +290,16 @@ namespace Akavache.Deprecated
 
             Func<IObservable<byte[]>> readResult = () =>
                 Observable.Defer(() =>
-                    filesystem.OpenFileForReadAsync(GetPathForKey(key), scheduler))
+                    this.filesystem.OpenFileForReadAsync(this.GetPathForKey(key), scheduler))
                 .Retry(1)
                 .SelectMany(x => x.CopyToAsync(ms, scheduler))
-                .SelectMany(x => AfterReadFromDiskFilter(ms.ToArray(), scheduler))
+                .SelectMany(x => this.AfterReadFromDiskFilter(ms.ToArray(), scheduler))
                 .Catch<byte[], Exception>(ex => ExceptionHelper.ObservableThrowKeyNotFoundException<byte[]>(key, ex))
                 .Do(_ =>
                 {
                     if (!synchronous && key != BlobCacheIndexKey)
                     {
-                        actionTaken.OnNext(Unit.Default);
+                        this.actionTaken.OnNext(Unit.Default);
                     }
                 });
 
@@ -322,9 +309,9 @@ namespace Akavache.Deprecated
 
         private IObservable<Unit> FlushCacheIndex(bool synchronous)
         {
-            var index = CacheIndex.Select(x => JsonConvert.SerializeObject(x));
+            var index = this.CacheIndex.Select(x => JsonConvert.SerializeObject(x));
 
-            return WriteBlobToDisk(BlobCacheIndexKey, Encoding.UTF8.GetBytes(String.Join("\n", index)), synchronous)
+            return this.WriteBlobToDisk(BlobCacheIndexKey, Encoding.UTF8.GetBytes(String.Join("\n", index)), synchronous)
                 .Select(_ => Unit.Default)
                 .Catch<Unit, Exception>(ex =>
                 {
@@ -335,13 +322,13 @@ namespace Akavache.Deprecated
 
         private string GetPathForKey(string key)
         {
-            return Path.Combine(CacheDirectory, Utility.GetMd5Hash(key));
+            return Path.Combine(this.CacheDirectory, Utility.GetMd5Hash(key));
         }
 
         private bool IsKeyStale(string key)
         {
             CacheIndexEntry value;
-            return (CacheIndex.TryGetValue(key, out value) && value.ExpiresAt != null && value.ExpiresAt < Scheduler.Now);
+            return (this.CacheIndex.TryGetValue(key, out value) && value.ExpiresAt != null && value.ExpiresAt < this.Scheduler.Now);
         }
 
         private IEnumerable<KeyValuePair<string, CacheIndexEntry>> ParseCacheIndexEntry(string s)
@@ -365,30 +352,43 @@ namespace Akavache.Deprecated
         private AsyncSubject<byte[]> WriteBlobToDisk(string key, byte[] byteData, bool synchronous)
         {
             var ret = new AsyncSubject<byte[]>();
-            var scheduler = synchronous ? System.Reactive.Concurrency.Scheduler.Immediate : Scheduler;
+            var scheduler = synchronous ? System.Reactive.Concurrency.Scheduler.Immediate : this.Scheduler;
 
-            var path = GetPathForKey(key);
+            var path = this.GetPathForKey(key);
 
             // NB: The fact that our writing AsyncSubject waits until the write actually completes
             // means that an Insert immediately followed by a Get will take longer to process -
             // however, this also means that failed writes will disappear from the cache, which is A
             // Good Thing.
 
-            Func<IObservable<byte[]>> writeResult = () => BeforeWriteToDiskFilter(byteData, scheduler)
+            Func<IObservable<byte[]>> writeResult = () => this.BeforeWriteToDiskFilter(byteData, scheduler)
                 .Select(x => new MemoryStream(x))
                 .Zip(Observable.Defer(() =>
-                        filesystem.OpenFileForWriteAsync(path, scheduler))
+                        this.filesystem.OpenFileForWriteAsync(path, scheduler))
                         .Retry(1),
                     (from, to) => new { from, to })
                 .SelectMany(x => x.from.CopyToAsync(x.to, scheduler))
                 .Select(_ => byteData)
                 .Do(_ =>
                 {
-                    if (!synchronous && key != BlobCacheIndexKey) actionTaken.OnNext(Unit.Default);
+                    if (!synchronous && key != BlobCacheIndexKey) this.actionTaken.OnNext(Unit.Default);
                 }, ex => LogHost.Default.WarnException("Failed to write out file: " + path, ex));
 
             writeResult().Multicast(ret).Connect();
             return ret;
+        }
+
+        private class CacheIndexEntry
+        {
+            public CacheIndexEntry(DateTimeOffset createdAt, DateTimeOffset? expiresAt)
+            {
+                this.CreatedAt = createdAt;
+                this.ExpiresAt = expiresAt;
+            }
+
+            public DateTimeOffset CreatedAt { get; protected set; }
+
+            public DateTimeOffset? ExpiresAt { get; protected set; }
         }
     }
 
