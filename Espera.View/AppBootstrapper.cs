@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Akavache;
+using Akavache.Sqlite3;
 using Caliburn.Micro;
 using Espera.Core;
 using Espera.Core.Analytics;
@@ -67,7 +68,7 @@ namespace Espera.View
 #if DEBUG
             if (overrideBasePath != null)
             {
-                BlobCache.LocalMachine = new DeprecatedBlobCache(BlobCachePath);
+                BlobCache.LocalMachine = new SQLitePersistentBlobCache(BlobCachePath);
             }
 #endif
         }
