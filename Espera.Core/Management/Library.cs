@@ -46,7 +46,6 @@ namespace Espera.Core.Management
         private Playlist currentPlaylist;
         private IDisposable currentSongFinderSubscription;
         private bool isUpdating;
-        private DateTime lastSongAddTime;
 
         public Library(ILibraryReader libraryReader, ILibraryWriter libraryWriter, CoreSettings settings,
             IFileSystem fileSystem, Func<string, ILocalSongFinder> localSongFinderFunc = null)
