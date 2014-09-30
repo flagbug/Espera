@@ -280,7 +280,7 @@ namespace Espera.View
                     updateInfo = await updateManager.CheckForUpdate();
                 }
 
-                catch (Exception)
+                catch (Exception ex)
                 {
                     this.Log().ErrorException("Error while checking for updates", ex);
                     return;
