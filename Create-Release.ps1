@@ -1,27 +1,103 @@
-$MSBuildLocation = "C:\Program Files (x86)\MSBuild\12.0\bin"
+Set-StrictMode -version Latest
+$ErrorActionPreference = "Stop"
 
-if (Test-Path .\Release) {
-    rmdir -r -force .\Release
+Write-Host "Building Espera..." -ForegroundColor Green
+
+# ==================================== Functions
+
+Function GetMSBuildExe {
+	[CmdletBinding()]
+	$DotNetVersion = "4.0"
+	$RegKey = "HKLM:\software\Microsoft\MSBuild\ToolsVersions\$DotNetVersion"
+	$RegProperty = "MSBuildToolsPath"
+	$MSBuildExe = Join-Path -Path (Get-ItemProperty $RegKey).$RegProperty -ChildPath "msbuild.exe"
+	Return $MSBuildExe
 }
 
-mkdir .\Release
-mkdir .\Release\EsperaPortable
+Function ZipFiles($Filename, $Source)
+{
+   Add-Type -Assembly System.IO.Compression.FileSystem
+   $CompressionLevel = [System.IO.Compression.CompressionLevel]::Optimal
+   [System.IO.Compression.ZipFile]::CreateFromDirectory($Source, $Filename, $CompressionLevel, $false)
+}
 
-# Build the portable version
-Write-Host "Building Portable Version"
-& "$MSBuildLocation\MSBuild.exe" /t:Rebuild /p:Configuration=Release /p:Platform="x86" /v:quiet ".\Espera\Espera.sln"
+# ==================================== Variables
 
-cp ".\Espera\Espera.View\bin\Release\*.dll" ".\Release\EsperaPortable\"
-cp ".\Espera\Espera.View\bin\Release\Espera.exe" ".\Release\EsperaPortable\"
-cp ".\Espera\Espera.View\bin\Release\Espera.exe.config" ".\Release\EsperaPortable\"
-cp ".\Changelog.md" ".\Release\EsperaPortable\Changelog.txt"
+$NuGet = "$PSScriptRoot\.nuget\NuGet.exe"
+$Squirrel = Join-Path  (ls .\packages\squirrel.windows.*)[0] "tools\Squirrel.com"
 
-# Build the ClickOnce version
-Write-Host "Building ClickOnce version"
+$BuildPath = "$PSScriptRoot\Espera.View\bin\Release"
+$NuSpecPath = "$PSScriptRoot\Espera.nuspec"
+$ReleasesFolder = "$PSScriptRoot\Releases"
 
-# We explicitely clean the solution, as rebuilding and publish somehow won't work together
-& "$MSBuildLocation\MSBuild.exe" /t:clean /p:Configuration=Release /p:Platform="x86" /v:quiet ".\Espera\Espera.sln"
-& "$MSBuildLocation\MSBuild.exe" /t:publish /p:Configuration=Release /p:Platform="x86" /v:quiet ".\Espera\Espera.sln"
+# ==================================== NuSpec Metadata
 
-cp -r ".\Espera\Espera.View\bin\Release\app.publish\" ".\Release\"
-Rename-Item ".\Release\app.publish\setup.exe" "EsperaSetup.exe"
+$NuSpecXml = [xml](Get-Content $NuSpecPath)
+$Version = $NuSpecXml.package.metadata.version
+
+# ==================================== Build
+
+If(Test-Path -Path $BuildPath) {
+	Remove-Item -Confirm:$false "$BuildPath\*.*"
+}
+
+&(GetMSBuildExe) Espera.sln `
+	/t:Clean`;Rebuild `
+	/p:Configuration=Release `
+	/p:AllowedReferenceRelatedFileExtensions=- `
+	/p:DebugSymbols=false `
+	/p:DebugType=None `
+	/clp:ErrorsOnly `
+	/v:m
+
+# ==================================== Portable
+
+$ReleaseZip = "$ReleasesFolder\EsperaPortable.zip"
+
+If(!(Test-Path -Path $ReleasesFolder )){
+    New-Item -ItemType directory -Path $ReleasesFolder
+}
+
+If(Test-Path -Path $ReleaseZip) {
+	Remove-Item -Confirm:$false $ReleaseZip
+}
+
+ZipFiles $ReleaseZip $BuildPath
+
+# ==================================== Squirrel
+
+$NuPkgPath = "$PSScriptRoot\Espera.$Version.nupkg"
+
+&($NuGet) pack $NuSpecPath
+
+$SquirrelFullNuPkgOutputPath = "$PSScriptRoot\Releases\Espera-$Version-full.nupkg"
+If(Test-Path -Path $SquirrelFullNuPkgOutputPath) {
+	Remove-Item -Confirm:$false $SquirrelFullNuPkgOutputPath
+}
+
+$SquirrelDeltaNuPkgOutputPath = "$PSScriptRoot\Releases\Espera-$Version-delta.nupkg"
+If(Test-Path -Path $SquirrelDeltaNuPkgOutputPath) {
+	Remove-Item -Confirm:$false $SquirrelDeltaNuPkgOutputPath
+}
+
+$OutputSetupExe = "$ReleasesFolder\Espera.Setup.$Version.exe"
+If(Test-Path -Path $OutputSetupExe) {
+	Remove-Item -Confirm:$false $OutputSetupExe
+}
+
+&($Squirrel) --releasify $NuPkgPath
+
+$SquirrelSetupExe = "$ReleasesFolder\Setup.exe"
+If(Test-Path -Path $SquirrelSetupExe) {
+	Rename-Item $SquirrelSetupExe $OutputSetupExe
+}
+
+# ==================================== Cleanup
+
+If(Test-Path -Path $NuPkgPath) {
+	Remove-Item -Confirm:$false $NuPkgPath
+}
+
+# ==================================== Complete
+
+Write-Host "Build $Version complete: $ReleasesFolder" -ForegroundColor Green
