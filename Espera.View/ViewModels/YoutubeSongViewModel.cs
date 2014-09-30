@@ -35,20 +35,6 @@ namespace Espera.View.ViewModels
         public YoutubeSongViewModel(YoutubeSong wrapped, Func<string> downloadPathFunc)
             : base(wrapped)
         {
-            this.OpenPathCommand = ReactiveCommand.Create();
-            this.OpenPathCommand.Subscribe(x =>
-            {
-                try
-                {
-                    Process.Start(this.Path);
-                }
-
-                catch (Win32Exception ex)
-                {
-                    this.Log().ErrorException(string.Format("Could not open YouTube link {0}", this.Path), ex);
-                }
-            });
-
             this.hasThumbnail = this.WhenAnyValue(x => x.Thumbnail)
                 .Select(x => x != null)
                 .ToProperty(this, x => x.HasThumbnail);
@@ -126,8 +112,6 @@ namespace Espera.View.ViewModels
             get { return this.isLoadingThumbnail; }
             private set { this.RaiseAndSetIfChanged(ref this.isLoadingThumbnail, value); }
         }
-
-        public ReactiveCommand<object> OpenPathCommand { get; private set; }
 
         public double? Rating
         {

@@ -56,6 +56,11 @@ namespace Espera.Core
             get { return NetworkSongSource.Local; }
         }
 
+        public override string PlaybackPath
+        {
+            get { return this.OriginalPath; }
+        }
+
         /// <summary>
         /// Notifies the <see cref="LocalSong" /> that the artwork has been stored to the permanent storage.
         /// </summary>

@@ -87,6 +87,7 @@ namespace Espera.Core.Tests
             var mock = Substitute.For<Song>(Path.Combine("C://", Guid.NewGuid().ToString(), ".mp3"), duration);
             mock.Title = name;
             mock.PrepareAsync(Arg.Any<YoutubeStreamingQuality>()).Returns(Task.Delay(0));
+            mock.PlaybackPath.Returns(mock.OriginalPath);
 
             return mock;
         }

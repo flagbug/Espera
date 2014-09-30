@@ -1,3 +1,14 @@
+# v2.8.0
+
+## Features
+- Added mobile support for opening and closing the video player.
+- Espera now tries to get a SoundCloud stream with higher quality, if available.
+- Added an option to open the debug log in the "about" section.
+
+## Bugfixes
+- Fixed a crash when closing the application.
+- Fixed a crash when changing the audio player.
+
 # v2.7.0
 
 ## Features

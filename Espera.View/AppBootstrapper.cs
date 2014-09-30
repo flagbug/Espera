@@ -32,10 +32,10 @@ namespace Espera.View
 {
     internal class AppBootstrapper : BootstrapperBase, IEnableLogger
     {
-        private static readonly string DirectoryPath;
-        private static readonly string LibraryFilePath;
-        private static readonly string LogFilePath;
-        private static readonly string Version;
+        public static readonly string DirectoryPath;
+        public static readonly string LibraryFilePath;
+        public static readonly string LogFilePath;
+        public static readonly string Version;
         private readonly WindowManager windowManager;
         private CoreSettings coreSettings;
         private MobileApi mobileApi;

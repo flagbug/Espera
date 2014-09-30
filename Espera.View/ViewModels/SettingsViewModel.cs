@@ -380,7 +380,16 @@ namespace Espera.View.ViewModels
             }
         }
 
+<<<<<<< .merge_file_a09920
         public ReactiveCommand<object> LoginCommand { get; private set; }
+=======
+        public string LogFilePath
+        {
+            get { return AppBootstrapper.LogFilePath; }
+        }
+
+        public IReactiveCommand LoginCommand { get; private set; }
+>>>>>>> .merge_file_a02436
 
         public string LoginPassword
         {

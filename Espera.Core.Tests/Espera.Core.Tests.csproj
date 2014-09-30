@@ -132,6 +132,7 @@
     <Compile Include="PlaylistTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SongTest.cs" />
+    <Compile Include="SoundCloudSongTest.cs" />
     <Compile Include="TagSanitizerTest.cs" />
   </ItemGroup>
   <ItemGroup>
