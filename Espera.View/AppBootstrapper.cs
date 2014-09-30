@@ -142,11 +142,15 @@ namespace Espera.View
 
             Directory.CreateDirectory(DirectoryPath);
 
-            var oldBlobCache = new DeprecatedBlobCache(BlobCachePath);
             var newBlobCache = BlobCache.LocalMachine;
-            var migration = new AkavacheToSqlite3Migration(oldBlobCache, newBlobCache);
 
-            migration.Run();
+            if (AkavacheToSqlite3Migration.NeedsMigration(newBlobCache))
+            {
+                var oldBlobCache = new DeprecatedBlobCache(BlobCachePath);
+                var migration = new AkavacheToSqlite3Migration(oldBlobCache, newBlobCache);
+
+                migration.Run();
+            }
 
             this.SetupLager();
 

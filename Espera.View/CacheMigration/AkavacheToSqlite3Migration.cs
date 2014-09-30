@@ -29,14 +29,20 @@ namespace Espera.View.CacheMigration
             this.newBlobCache = newBlobCache;
         }
 
+        public static bool NeedsMigration(IBlobCache blobCache)
+        {
+            return blobCache.GetCreatedAt(MigratedKey).Wait() == null;
+        }
+
         public void Run()
         {
-            if (this.AlreadyMigrated())
+            this.Log().Info("Starting migration from deprecated BlobCache to new SqliteBlobCache");
+
+            if (!this.oldBlobCache.GetAllKeys().Wait().Any())
             {
+                this.Log().Info("Nothing to migrate, returning.");
                 return;
             }
-
-            this.Log().Info("Starting migration from deprecated BlobCache to new SqliteBlobCache");
 
             try
             {
@@ -56,11 +62,6 @@ namespace Espera.View.CacheMigration
             this.oldBlobCache.InvalidateAll().Wait();
 
             this.Log().Info("Finished BlobCache migration");
-        }
-
-        private bool AlreadyMigrated()
-        {
-            return this.newBlobCache.GetCreatedAt(MigratedKey).Wait() != null;
         }
 
         private void MigrateArtworks()
