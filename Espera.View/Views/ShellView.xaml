@@ -337,6 +337,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0"
+                         Name="SearchTextBox"
                          Margin="10, 0, 0, 0"
                          VerticalAlignment="Center"
                          VerticalContentAlignment="Center"

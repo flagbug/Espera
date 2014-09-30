@@ -60,8 +60,7 @@ namespace Espera.View.Views
                                               "or another application that requested the global hooks", ex);
                 }
 
-                this.Events().KeyUp.Where(x => x.Key == Key.Space)
-                    .InvokeCommand(this.shellViewModel, x => x.PauseContinueCommand);
+                this.WireShortcuts();
 
                 this.shellViewModel.WhenAnyObservable(x => x.CurrentPlaylist.CurrentPlayingEntry)
                     .ObserveOn(RxApp.MainThreadScheduler)
@@ -435,6 +434,15 @@ namespace Espera.View.Views
                 HwndSource source = HwndSource.FromHwnd(helper.Handle);
                 source.AddHook(HandleWindowMove);
             });
+        }
+
+        private void WireShortcuts()
+        {
+            this.Events().KeyUp.Where(x => x.Key == Key.Space)
+                .InvokeCommand(this.shellViewModel, x => x.PauseContinueCommand);
+
+            this.Events().KeyDown.Where(x => x.Key == Key.F && (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)))
+                .Subscribe(_ => this.SearchTextBox.Focus());
         }
 
         private void WireTaskbarButtons()
