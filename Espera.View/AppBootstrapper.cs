@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Akavache;
+using Akavache.Deprecated;
 using Caliburn.Micro;
 using Espera.Core;
 using Espera.Core.Analytics;
@@ -32,6 +33,7 @@ namespace Espera.View
 {
     internal class AppBootstrapper : BootstrapperBase, IEnableLogger
     {
+        public static readonly string BlobCachePath;
         public static readonly string DirectoryPath;
         public static readonly string LibraryFilePath;
         public static readonly string LogFilePath;
@@ -40,7 +42,6 @@ namespace Espera.View
         private CoreSettings coreSettings;
         private MobileApi mobileApi;
         private IDisposable updateSubscription;
-
         private ViewSettings viewSettings;
 
         static AppBootstrapper()
@@ -57,6 +58,7 @@ namespace Espera.View
 #endif
 
             DirectoryPath = Path.Combine(overrideBasePath ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appName);
+            BlobCachePath = Path.Combine(DirectoryPath, "BlobCache");
             LibraryFilePath = Path.Combine(DirectoryPath, "Library.json");
             LogFilePath = Path.Combine(DirectoryPath, "Log.txt");
             Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -65,7 +67,7 @@ namespace Espera.View
 #if DEBUG
             if (overrideBasePath != null)
             {
-                BlobCache.LocalMachine = new DebugBlobCache(Path.Combine(DirectoryPath, "BlobCache"));
+                BlobCache.LocalMachine = new PersistentBlobCache(BlobCachePath);
             }
 #endif
         }
@@ -138,6 +140,12 @@ namespace Espera.View
             this.Log().Info("Current culture: " + CultureInfo.InstalledUICulture.Name);
 
             Directory.CreateDirectory(DirectoryPath);
+
+            var oldBlobCache = new PersistentBlobCache(BlobCachePath);
+            var newBlobCache = BlobCache.LocalMachine;
+            var migration = new AkavacheToSqlite3Migration(oldBlobCache, newBlobCache);
+
+            migration.Run();
 
             this.SetupLager();
 
@@ -318,15 +326,4 @@ namespace Espera.View
             }
         }
     }
-
-#if DEBUG
-
-    internal class DebugBlobCache : Akavache.Deprecated.PersistentBlobCache
-    {
-        public DebugBlobCache(string path)
-            : base(path)
-        { }
-    }
-
-#endif
 }

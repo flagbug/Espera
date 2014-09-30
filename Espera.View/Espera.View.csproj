@@ -18,7 +18,7 @@
     <WarningLevel>4</WarningLevel>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <_ResolveReferenceDependencies>true</_ResolveReferenceDependencies>
-    <NuGetPackageImportStamp>e9c28398</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>556551d3</NuGetPackageImportStamp>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
@@ -98,9 +98,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\akavache.core.4.0.3.2\lib\net45\Akavache.dll</HintPath>
     </Reference>
-    <Reference Include="Akavache.Deprecated, Version=4.0.3.2, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\akavache.deprecated.4.0.3.2\lib\Portable-Net45+Win8+WP8+Wpa81\Akavache.Deprecated.dll</HintPath>
+    <Reference Include="Akavache.Sqlite3">
+      <HintPath>..\packages\akavache.sqlite3.4.0.3.2\lib\Portable-Net45+Win8+WP8+Wpa81\Akavache.Sqlite3.dll</HintPath>
     </Reference>
     <Reference Include="Caliburn.Micro, Version=2.0.1.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -242,6 +241,8 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="AkavacheSqliteLinkerOverride.cs" />
+    <Compile Include="AkavacheToSqlite3Migration.cs" />
     <Compile Include="AppBootstrapper.cs" />
     <Compile Include="Changelog.cs" />
     <Compile Include="ChangelogEntry.cs" />
@@ -250,6 +251,7 @@
     <Compile Include="DragDropExtension.cs" />
     <Compile Include="INetworkStatus.cs" />
     <Compile Include="NLogLogger.cs" />
+    <Compile Include="OldBlobCache.cs" />
     <Compile Include="ReactiveViewHelper.cs" />
     <Compile Include="ReleaseEntry.cs" />
     <Compile Include="SearchEngine.cs" />
@@ -390,6 +392,13 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
+  <Import Project="..\packages\SQLitePCL.raw_basic.0.6.1\build\net45\SQLitePCL.raw_basic.targets" Condition="Exists('..\packages\SQLitePCL.raw_basic.0.6.1\build\net45\SQLitePCL.raw_basic.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\SQLitePCL.raw_basic.0.6.1\build\net45\SQLitePCL.raw_basic.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCL.raw_basic.0.6.1\build\net45\SQLitePCL.raw_basic.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
