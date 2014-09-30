@@ -9,8 +9,8 @@ namespace Espera.Core.Settings
 {
     public class CoreSettings : SettingsStorage
     {
-        public CoreSettings()
-            : base("__CoreSettings__", ModeDetector.InUnitTestRunner() ? new InMemoryBlobCache() : BlobCache.LocalMachine)
+        public CoreSettings(IBlobCache blobCache = null)
+            : base("__CoreSettings__", blobCache ?? (ModeDetector.InUnitTestRunner() ? new InMemoryBlobCache() : BlobCache.LocalMachine))
         { }
 
         public string AnalyticsToken
