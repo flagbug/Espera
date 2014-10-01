@@ -12,7 +12,7 @@ Bitcoin: 1PHaQ2Qg6rR3Qo2FfLqjG6se529dQTCEAD
 
 ## Overview
 
-Espera is an open-source media player that plays audio files and YouTube videos and has a special "party mode".
+Espera is an open-source media player that plays audio files, YouTube videos, SoundCloud songs and has a special "party mode".
 
 ## Features
 
