@@ -1,3 +1,16 @@
+# v2.9.0
+
+## Features
+- Added the Ctrl-F shortcut to focus the search box.
+
+## Improvements
+- Raised the YouTube request limit to 50 items.
+- Added an explanation for the remote control in the settings menu.
+
+## Changes
+- The initial library update is now performed after 5 minutes instead of
+  immediately after startup, to improve the startup time and responsiveness.
+
 # v2.8.0
 
 ## Features
