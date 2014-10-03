@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
@@ -49,6 +50,7 @@ namespace Espera.View.CacheMigration
                 this.MigrateArtworks();
                 this.MigrateCoreSettings();
                 this.MigrateViewSettings();
+                this.MigrateChangelog();
             }
 
             catch (Exception ex)
@@ -73,6 +75,19 @@ namespace Espera.View.CacheMigration
 
                 this.newBlobCache.Insert(key, oldData).Wait();
             }
+        }
+
+        private void MigrateChangelog()
+        {
+            try
+            {
+                var oldChangelog = this.oldBlobCache.GetObject<Changelog>(BlobCacheKeys.Changelog).Wait();
+
+                this.newBlobCache.InsertObject(BlobCacheKeys.Changelog, oldChangelog).Wait();
+            }
+
+            catch (KeyNotFoundException)
+            { }
         }
 
         private void MigrateCoreSettings()
