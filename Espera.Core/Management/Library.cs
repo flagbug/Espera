@@ -25,8 +25,8 @@ namespace Espera.Core.Management
 {
     public sealed class Library : ReactiveObject, IDisposable
     {
+        public static readonly TimeSpan InitialUpdateDelay = TimeSpan.FromMinutes(5);
         public static readonly TimeSpan PreparationTimeout = TimeSpan.FromSeconds(10);
-
         private readonly AccessControl accessControl;
         private readonly AudioPlayer audioPlayer;
         private readonly IFileSystem fileSystem;
@@ -39,13 +39,14 @@ namespace Espera.Core.Management
         private readonly CoreSettings settings;
         private readonly ReaderWriterLockSlim songLock;
         private readonly HashSet<LocalSong> songs;
-        private readonly BehaviorSubject<string> songSourcePath;
         private readonly Subject<Unit> songsUpdated;
         private readonly ObservableAsPropertyHelper<float> volume;
         private Playlist currentPlayingPlaylist;
         private Playlist currentPlaylist;
         private IDisposable currentSongFinderSubscription;
         private bool isUpdating;
+
+        private string songSourcePath;
 
         public Library(ILibraryReader libraryReader, ILibraryWriter libraryWriter, CoreSettings settings,
             IFileSystem fileSystem, Func<string, ILocalSongFinder> localSongFinderFunc = null)
@@ -61,7 +62,6 @@ namespace Espera.Core.Management
             this.songLock = new ReaderWriterLockSlim();
             this.songs = new HashSet<LocalSong>();
             this.playlists = new ReactiveList<Playlist>();
-            this.songSourcePath = new BehaviorSubject<string>(null);
             this.songsUpdated = new Subject<Unit>();
             this.audioPlayer = new AudioPlayer();
             this.manualUpdateTrigger = new Subject<Unit>();
@@ -142,9 +142,10 @@ namespace Espera.Core.Management
             }
         }
 
-        public IObservable<string> SongSourcePath
+        public string SongSourcePath
         {
-            get { return this.songSourcePath.AsObservable(); }
+            get { return this.songSourcePath; }
+            private set { this.RaiseAndSetIfChanged(ref this.songSourcePath, value); }
         }
 
         /// <summary>
@@ -257,7 +258,8 @@ namespace Espera.Core.Management
             if (!this.fileSystem.Directory.Exists(path))
                 throw new ArgumentException("Directory does't exist.");
 
-            this.songSourcePath.OnNext(path);
+            this.SongSourcePath = path;
+            this.UpdateNow();
         }
 
         /// <summary>
@@ -295,15 +297,18 @@ namespace Espera.Core.Management
                 this.Load();
             }
 
-            IObservable<Unit> update = this.settings.WhenAnyValue(x => x.SongSourceUpdateInterval)
-                .Select(x => Observable.Interval(x, RxApp.TaskpoolScheduler))
-                .Switch()
-                .Select(_ => Unit.Default)
-                .Where(_ => this.settings.EnableAutomaticLibraryUpdates)
-                .Merge(this.manualUpdateTrigger)
-                .StartWith(Unit.Default);
+            IObservable<Unit> updateTrigger = Observable.Return(Unit.Default)
+                // Delay the initial library update so we don't thrash the CPU and disk when the
+                // user is doing the important things
+                .Delay(InitialUpdateDelay, RxApp.TaskpoolScheduler)
+                .Concat(this.settings.WhenAnyValue(x => x.SongSourceUpdateInterval)
+                    .Select(x => Observable.Interval(x, RxApp.TaskpoolScheduler))
+                    .Switch()
+                    .Select(_ => Unit.Default)
+                    .Where(_ => this.settings.EnableAutomaticLibraryUpdates))
+                .Merge(this.manualUpdateTrigger);
 
-            update.CombineLatest(this.songSourcePath, (_, path) => path)
+            updateTrigger.Select(_ => this.SongSourcePath)
                 .Where(path => !String.IsNullOrEmpty(path))
                 .Do(_ => this.Log().Info("Triggering library update."))
                 // Abort the update if the song source doesn't exist.
@@ -469,7 +474,7 @@ namespace Espera.Core.Management
 
             IReadOnlyList<LocalSong> songsToSave = this.Songs;
             IReadOnlyList<Playlist> playlistsToSave = this.playlists.Where(playlist => !playlist.IsTemporary).ToList();
-            string pathToSave = this.songSourcePath.Value;
+            string pathToSave = this.SongSourcePath;
 
             try
             {
@@ -696,7 +701,7 @@ namespace Espera.Core.Management
                 this.playlists.Add(playlist);
             }
 
-            this.songSourcePath.OnNext(songsPath);
+            this.SongSourcePath = songsPath;
 
             stopWatch.Stop();
             this.Log().Info("Library load took {0}ms", stopWatch.ElapsedMilliseconds);

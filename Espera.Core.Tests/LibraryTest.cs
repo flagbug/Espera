@@ -191,7 +191,7 @@ namespace Espera.Core.Tests
                 using (Library library = new LibraryBuilder().WithFileSystem(fileSystem).Build())
                 {
                     library.ChangeSongSourcePath("C://Test", library.LocalAccessControl.RegisterLocalAccessToken());
-                    Assert.Equal("C://Test", await library.SongSourcePath.FirstAsync());
+                    Assert.Equal("C://Test", library.SongSourcePath);
                 }
             }
 
@@ -342,9 +342,7 @@ namespace Espera.Core.Tests
                     var last = library.WhenAnyValue(x => x.IsUpdating).Where(x => !x).ElementAt(1).PublishLast();
                     last.Connect();
 
-                    library.Initialize();
-
-                    await last.Timeout(TimeSpan.FromSeconds(5));
+                    await library.AwaitInitializationAndUpdate();
 
                     Assert.Equal(new[] { false, true, false }, isUpdating);
                 }

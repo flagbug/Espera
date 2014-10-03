@@ -142,10 +142,11 @@ namespace Espera.View.ViewModels
 
             this.UpdateLibraryCommand = ReactiveCommand.Create(this.library.WhenAnyValue(x => x.IsUpdating, x => !x)
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .CombineLatest(this.library.SongSourcePath.Select(x => !String.IsNullOrEmpty(x)), (x1, x2) => x1 && x2));
+                .CombineLatest(this.library.WhenAnyValue(x => x.SongSourcePath).Select(x => !String.IsNullOrEmpty(x)), (x1, x2) => x1 && x2));
             this.UpdateLibraryCommand.Subscribe(_ => this.library.UpdateNow());
 
-            this.librarySource = this.library.SongSourcePath.ToProperty(this, x => x.LibrarySource);
+            this.librarySource = this.library.WhenAnyValue(x => x.SongSourcePath)
+                .ToProperty(this, x => x.LibrarySource);
 
             this.port = this.coreSettings.Port;
             this.ChangePortCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.Port)

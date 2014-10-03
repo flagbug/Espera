@@ -8,8 +8,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Espera.Core.Management;
 using Espera.Core.Settings;
+using Microsoft.Reactive.Testing;
 using NSubstitute;
 using ReactiveUI;
+using ReactiveUI.Testing;
 using Xunit;
 
 namespace Espera.Core.Tests
@@ -56,7 +58,12 @@ namespace Espera.Core.Tests
         {
             var updateCompleted = library.WhenAnyValue(x => x.IsUpdating).Where(x => !x).Skip(1).FirstAsync().Timeout(TimeSpan.FromSeconds(5)).ToTask();
 
-            library.Initialize();
+            new TestScheduler().With(sched =>
+            {
+                library.Initialize();
+
+                sched.AdvanceByMs(Library.InitialUpdateDelay.TotalMilliseconds + 1);
+            });
 
             await updateCompleted;
         }
