@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Abstractions;
-using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -28,7 +27,6 @@ using NLog.Config;
 using NLog.Targets;
 using ReactiveUI;
 using Splat;
-using Squirrel;
 
 namespace Espera.View
 {
@@ -285,50 +283,54 @@ namespace Espera.View
         {
             this.Log().Info("Looking for application updates");
 
-            using (var updateManager = new UpdateManager("http://getespera.com/releases/squirrel/", "Espera", FrameworkVersion.Net45))
+            ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
+
+            UpdateCheckInfo updateInfo;
+
+            try
             {
-                UpdateInfo updateInfo;
+                updateInfo = await Task.Run(() => deployment.CheckForDetailedUpdate());
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Error while checking for updates", ex);
+                return;
+            }
+
+            if (updateInfo.UpdateAvailable)
+            {
+                this.Log().Info("New version available: {0}", updateInfo.AvailableVersion);
+
+                Task changelogFetchTask = ChangelogFetcher.FetchAsync().ToObservable()
+                    .SelectMany(x => BlobCache.LocalMachine.InsertObject(BlobCacheKeys.Changelog, x))
+                    .LoggedCatch(this, null, "Could not to fetch changelog")
+                    .ToTask();
+
+                this.Log().Info("Applying updates...");
 
                 try
                 {
-                    updateInfo = await updateManager.CheckForUpdate();
+                    await Task.Run(() => deployment.Update());
                 }
 
                 catch (Exception ex)
                 {
-                    this.Log().ErrorException("Error while checking for updates", ex);
+                    this.Log().Fatal("Failed to apply updates.", ex);
+                    AnalyticsClient.Instance.RecordErrorAsync(ex);
                     return;
                 }
 
-                if (updateInfo.ReleasesToApply.Any())
-                {
-                    this.Log().Info("New version available: {0}", updateInfo.FutureReleaseEntry.Version);
+                this.Log().Info("Updates applied.");
 
-                    Task changelogFetchTask = ChangelogFetcher.FetchAsync().ToObservable()
-                        .SelectMany(x => BlobCache.LocalMachine.InsertObject(BlobCacheKeys.Changelog, x))
-                        .LoggedCatch(this, null, "Could not to fetch changelog")
-                        .ToTask();
+                await changelogFetchTask;
 
-                    this.Log().Info("Applying updates...");
+                this.viewSettings.IsUpdated = true;
+            }
 
-                    try
-                    {
-                        await updateManager.ApplyReleases(updateInfo);
-                    }
-
-                    catch (Exception ex)
-                    {
-                        this.Log().Fatal("Failed to apply updates.", ex);
-                        AnalyticsClient.Instance.RecordErrorAsync(ex);
-                        return;
-                    }
-
-                    this.Log().Info("Updates applied.");
-
-                    await changelogFetchTask;
-
-                    this.viewSettings.IsUpdated = true;
-                }
+            else
+            {
+                this.Log().Info("No updates found.");
             }
         }
     }
