@@ -1,3 +1,8 @@
+# v2.9.1
+
+## Bugfixes
+- Fixed a bug that caused the changelog to be empty after an update.
+
 # v2.9.0
 
 ## Features
