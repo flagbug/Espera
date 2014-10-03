@@ -28,7 +28,7 @@ $Squirrel = Join-Path  (ls .\packages\squirrel.windows.*)[0] "tools\Squirrel.com
 
 $BuildPath = "$PSScriptRoot\Espera.View\bin\Release"
 $NuSpecPath = "$PSScriptRoot\Espera.nuspec"
-$ReleasesFolder = "$PSScriptRoot\Releases"
+$ReleasesFolder = "$PSScriptRoot\SquirrelReleases"
 
 # ==================================== NuSpec Metadata
 

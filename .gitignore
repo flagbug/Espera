@@ -1,4 +1,6 @@
-# Releases folder for Squirrel.Windows
+# Releases folder for Squirrel.Windows and ClickOnce
+/ClickOnceReleases
+/SquirrelReleases
 /Releases
 
 # Build Folders (you can keep bin if you'd like, to store dlls and pdbs)
