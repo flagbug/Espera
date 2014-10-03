@@ -356,6 +356,14 @@
             </TabItem>
             <TabItem Header="remote control">
                 <StackPanel>
+                    <TextBlock Margin="0, 15, 0, 0"
+                               FontSize="18"
+                               Style="{StaticResource SettingsTextStyle}"
+                               TextWrapping="Wrap">
+                        Control the playback, volume and playlist with the Android remote control app.
+                        <LineBreak />
+                        You can also let your guests vote on songs and and let them add music from their phones directly to the playlist.
+                    </TextBlock>
                     <Controls:ToggleSwitch Header="Enable remote control" IsChecked="{Binding Path=EnableRemoteControl}" />
                     <StackPanel Margin="15, 0, 0, 0"
                                 IsEnabled="{Binding Path=EnableRemoteControl}"
