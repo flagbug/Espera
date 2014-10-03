@@ -39,7 +39,6 @@ namespace Espera.View
         public static readonly string LibraryFilePath;
         public static readonly string LogFilePath;
         public static readonly string Version;
-        private readonly WindowManager windowManager;
         private CoreSettings coreSettings;
         private MobileApi mobileApi;
         private IDisposable updateSubscription;
@@ -75,7 +74,6 @@ namespace Espera.View
 
         public AppBootstrapper()
         {
-            this.windowManager = new WindowManager();
             this.Initialize();
         }
 
@@ -86,14 +84,16 @@ namespace Espera.View
 
             this.coreSettings = new CoreSettings();
 
-            var library = new Library(new LibraryFileReader(LibraryFilePath),
-                new LibraryFileWriter(LibraryFilePath), this.coreSettings, new FileSystem());
-            Locator.CurrentMutable.RegisterConstant(library, typeof(Library));
+            Locator.CurrentMutable.RegisterLazySingleton(() => new Library(new LibraryFileReader(LibraryFilePath),
+                new LibraryFileWriter(LibraryFilePath), this.coreSettings, new FileSystem()), typeof(Library));
 
-            Locator.CurrentMutable.RegisterConstant(this.windowManager, typeof(IWindowManager));
+            Locator.CurrentMutable.RegisterLazySingleton(() => new WindowManager(), typeof(IWindowManager));
 
-            Locator.CurrentMutable.Register(() =>
-                new ShellViewModel(library, this.viewSettings, this.coreSettings, this.windowManager, Locator.Current.GetService<MobileApiInfo>()),
+            Locator.CurrentMutable.RegisterLazySingleton(() =>
+                new ShellViewModel(Locator.Current.GetService<Library>(),
+                    this.viewSettings, this.coreSettings,
+                    Locator.Current.GetService<IWindowManager>(),
+                    Locator.Current.GetService<MobileApiInfo>()),
                 typeof(ShellViewModel));
 
             this.ConfigureLogging();
@@ -187,7 +187,8 @@ namespace Espera.View
                 this.Application.MainWindow.Hide();
             }
 
-            this.windowManager.ShowDialog(new CrashViewModel(e.Exception));
+            var windowManager = Locator.Current.GetService<IWindowManager>();
+            windowManager.ShowDialog(new CrashViewModel(e.Exception));
 
             e.Handled = true;
 
