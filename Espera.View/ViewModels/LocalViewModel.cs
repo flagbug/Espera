@@ -16,14 +16,14 @@ namespace Espera.View.ViewModels
     {
         private readonly ReactiveList<ArtistViewModel> allArtists;
         private readonly ArtistViewModel allArtistsViewModel;
+        private readonly SortOrder artistOrder;
         private readonly Subject<Unit> artistUpdateSignal;
+        private readonly CoreSettings coreSettings;
         private readonly object gate;
         private readonly ObservableAsPropertyHelper<bool> isUpdating;
         private readonly ReactiveCommand<Unit> playNowCommand;
         private readonly ObservableAsPropertyHelper<bool> showAddSongsHelperMessage;
         private readonly ViewSettings viewSettings;
-        private SortOrder artistOrder;
-        private CoreSettings coreSettings;
         private ILookup<string, Song> filteredSongs;
         private ArtistViewModel selectedArtist;
 
