@@ -16,76 +16,85 @@ namespace Espera.View.Tests
 {
     public class LocalViewModelTest
     {
-        [Fact]
-        public void HasAllArtistsForEmptyLibrary()
+        public class TheArtistsProperty
         {
-            using (Library library = Helpers.CreateLibrary())
+            [Fact]
+            public void HasAllArtistsForEmptyLibrary()
             {
-                Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                var vm = new LocalViewModel(library, new ViewSettings(), new CoreSettings(), accessToken);
+                    var vm = new LocalViewModel(library, new ViewSettings(), new CoreSettings(), accessToken);
 
-                Assert.Equal(1, vm.Artists.Count);
-                Assert.True(vm.Artists[0].IsAllArtists);
-                Assert.Equal(vm.Artists[0], vm.SelectedArtist);
+                    Assert.Equal(1, vm.Artists.Count);
+                    Assert.True(vm.Artists[0].IsAllArtists);
+                    Assert.Equal(vm.Artists[0], vm.SelectedArtist);
+                }
             }
         }
 
-        [Fact]
-        public void PlayNowCommandCanExecuteSmokeTest()
+        public class ThePlayNowCommand
         {
-            var settings = new CoreSettings();
-
-            using (Library library = Helpers.CreateLibrary(settings))
+            [Fact]
+            public void PlayNowCommandCanExecuteSmokeTest()
             {
-                Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                var settings = new CoreSettings();
 
-                var vm = new LocalViewModel(library, new ViewSettings(), settings, accessToken);
+                using (Library library = Helpers.CreateLibrary(settings))
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                var canExecuteColl = vm.PlayNowCommand.CanExecuteObservable.CreateCollection();
+                    var vm = new LocalViewModel(library, new ViewSettings(), settings, accessToken);
 
-                library.LocalAccessControl.SetLocalPassword(accessToken, "Password");
-                library.LocalAccessControl.DowngradeLocalAccess(accessToken);
+                    var canExecuteColl = vm.PlayNowCommand.CanExecuteObservable.CreateCollection();
 
-                Assert.Equal(new[] { true, false }, canExecuteColl);
+                    library.LocalAccessControl.SetLocalPassword(accessToken, "Password");
+                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
+
+                    Assert.Equal(new[] { true, false }, canExecuteColl);
+                }
             }
         }
 
-        [Fact]
-        public void ShowSongHelperMessageIsTrueForEmptyLibrary()
+        public class TheShowAddSongsHelperMessage
         {
-            using (Library library = Helpers.CreateLibrary())
+            [Fact]
+            public void IsTrueForEmptyLibrary()
             {
-                Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                using (Library library = Helpers.CreateLibrary())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                var vm = new LocalViewModel(library, new ViewSettings(), new CoreSettings(), accessToken);
+                    var vm = new LocalViewModel(library, new ViewSettings(), new CoreSettings(), accessToken);
 
-                Assert.True(vm.ShowAddSongsHelperMessage);
+                    Assert.True(vm.ShowAddSongsHelperMessage);
+                }
             }
-        }
 
-        [Fact]
-        public async Task ShowSongHelperMessageIsTrueForUpdatedLibrary()
-        {
-            var song = new LocalSong("C://Song.mp3", TimeSpan.Zero);
-
-            var songFinder = Substitute.For<ILocalSongFinder>();
-            songFinder.GetSongsAsync().Returns(Observable.Return(Tuple.Create(song, (byte[])null)));
-
-            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { "C://Song.mp3", new MockFileData("Bla") } });
-
-            using (Library library = new LibraryBuilder().WithFileSystem(fileSystem).WithSongFinder(songFinder).Build())
+            [Fact]
+            public async Task IsTrueForUpdatedLibrary()
             {
-                Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                var song = new LocalSong("C://Song.mp3", TimeSpan.Zero);
 
-                // NB: System.IO.Abstractions only likes backslashes
-                library.ChangeSongSourcePath("C:\\", accessToken);
+                var songFinder = Substitute.For<ILocalSongFinder>();
+                songFinder.GetSongsAsync().Returns(Observable.Return(Tuple.Create(song, (byte[])null)));
 
-                var vm = new LocalViewModel(library, new ViewSettings(), new CoreSettings(), accessToken);
+                var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { "C://Song.mp3", new MockFileData("Bla") } });
 
-                await library.AwaitInitializationAndUpdate();
+                using (Library library = new LibraryBuilder().WithFileSystem(fileSystem).WithSongFinder(songFinder).Build())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                Assert.False(vm.ShowAddSongsHelperMessage);
+                    // NB: System.IO.Abstractions only likes backslashes
+                    library.ChangeSongSourcePath("C:\\", accessToken);
+
+                    var vm = new LocalViewModel(library, new ViewSettings(), new CoreSettings(), accessToken);
+
+                    await library.AwaitInitializationAndUpdate();
+
+                    Assert.False(vm.ShowAddSongsHelperMessage);
+                }
             }
         }
     }
