@@ -148,6 +148,13 @@ namespace Espera.View
                 var migration = new AkavacheToSqlite3Migration(oldBlobCache, newBlobCache);
 
                 migration.Run();
+
+                this.Log().Info("Removing all items from old BlobCache");
+                oldBlobCache.InvalidateAll().Wait();
+
+                this.Log().Info("Shutting down old BlobCache");
+                oldBlobCache.Dispose();
+                this.Log().Info("BlobCache shutdown finished");
             }
 
             this.SetupLager();

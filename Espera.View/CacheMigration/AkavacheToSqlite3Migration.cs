@@ -61,8 +61,6 @@ namespace Espera.View.CacheMigration
 
             this.newBlobCache.InsertObject(MigratedKey, true).Wait();
 
-            this.oldBlobCache.InvalidateAll().Wait();
-
             this.Log().Info("Finished BlobCache migration");
         }
 
