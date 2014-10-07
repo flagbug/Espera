@@ -71,12 +71,12 @@ $NuPkgPath = "$PSScriptRoot\Espera.$Version.nupkg"
 
 &($NuGet) pack $NuSpecPath
 
-$SquirrelFullNuPkgOutputPath = "$PSScriptRoot\Releases\Espera-$Version-full.nupkg"
+$SquirrelFullNuPkgOutputPath = "$PSScriptRoot\$ReleasesFolder\Espera-$Version-full.nupkg"
 If(Test-Path -Path $SquirrelFullNuPkgOutputPath) {
 	Remove-Item -Confirm:$false $SquirrelFullNuPkgOutputPath
 }
 
-$SquirrelDeltaNuPkgOutputPath = "$PSScriptRoot\Releases\Espera-$Version-delta.nupkg"
+$SquirrelDeltaNuPkgOutputPath = "$PSScriptRoot\$ReleasesFolder\Espera-$Version-delta.nupkg"
 If(Test-Path -Path $SquirrelDeltaNuPkgOutputPath) {
 	Remove-Item -Confirm:$false $SquirrelDeltaNuPkgOutputPath
 }
@@ -86,7 +86,7 @@ If(Test-Path -Path $OutputSetupExe) {
 	Remove-Item -Confirm:$false $OutputSetupExe
 }
 
-&($Squirrel) --releasify $NuPkgPath
+&($Squirrel) --releasify $NuPkgPath -r $ReleasesFolder
 
 $SquirrelSetupExe = "$ReleasesFolder\Setup.exe"
 If(Test-Path -Path $SquirrelSetupExe) {
