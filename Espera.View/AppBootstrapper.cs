@@ -109,14 +109,20 @@ namespace Espera.View
 
         protected override void OnExit(object sender, EventArgs e)
         {
+            this.Log().Info("Starting Espera shutdown");
+
+            this.Log().Info("Shutting down the library");
             Locator.Current.GetService<Library>().Dispose();
 
+            this.Log().Info("Shutting down BlobCache");
             BlobCache.Shutdown().Wait();
 
+            this.Log().Info("Shutting down NLog");
             NLog.LogManager.Shutdown();
 
             if (this.mobileApi != null)
             {
+                this.Log().Info("Shutting down mobile API");
                 this.mobileApi.Dispose();
             }
 
@@ -124,6 +130,8 @@ namespace Espera.View
             {
                 this.updateSubscription.Dispose();
             }
+
+            this.Log().Info("Shutdown finished");
         }
 
         protected override void OnStartup(object sender, StartupEventArgs e)
