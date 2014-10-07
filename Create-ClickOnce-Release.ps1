@@ -16,6 +16,7 @@ Function ZipFiles($Filename, $Source)
 
 # ==================================== Variables
 
+$NuGet = "$PSScriptRoot\.nuget\NuGet.exe"
 $BuildPath = "$PSScriptRoot\Espera.View\bin\Release"
 $ReleasesFolder = "$PSScriptRoot\ClickOnceReleases"
 $PortableTempFolder = "$ReleasesFolder\EsperaPortable"
@@ -25,6 +26,8 @@ $PortableTempFolder = "$ReleasesFolder\EsperaPortable"
 If(Test-Path -Path $BuildPath) {
 	Remove-Item -Confirm:$false "$BuildPath\*.*"
 }
+
+&($Nuget) restore Espera.sln
 
 & $MSBuild Espera.sln `
 	/t:Clean`;Publish `

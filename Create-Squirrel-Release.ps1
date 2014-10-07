@@ -24,6 +24,7 @@ Function ZipFiles($Filename, $Source)
 # ==================================== Variables
 
 $NuGet = "$PSScriptRoot\.nuget\NuGet.exe"
+&($Nuget) restore Espera.sln
 $Squirrel = Join-Path  (ls .\packages\squirrel.windows.*)[0] "tools\Squirrel.com"
 
 $BuildPath = "$PSScriptRoot\Espera.View\bin\Release"
