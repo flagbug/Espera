@@ -253,8 +253,6 @@ namespace Espera.View
 
             IObservable<MobileApi> apiChanged = this.coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged()
                 .CombineLatest(this.coreSettings.WhenAnyValue(x => x.EnableRemoteControl), Tuple.Create)
-                .Where(x => x.Item2)
-                .Select(x => x.Item1)
                 .Do(_ =>
                 {
                     if (this.mobileApi != null)
@@ -262,6 +260,8 @@ namespace Espera.View
                         this.mobileApi.Dispose();
                     }
                 })
+                .Where(x => x.Item2)
+                .Select(x => x.Item1)
                 .Select(x => new MobileApi(x, library)).Publish(null).RefCount().Where(x => x != null);
 
             apiChanged.Subscribe(x =>
