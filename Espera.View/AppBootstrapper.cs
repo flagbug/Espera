@@ -37,6 +37,7 @@ namespace Espera.View
         public static readonly string LibraryFilePath;
         public static readonly string LogFilePath;
         public static readonly string Version;
+        private static readonly string overrideBasePath;
         private CoreSettings coreSettings;
         private MobileApi mobileApi;
         private IDisposable updateSubscription;
@@ -44,7 +45,6 @@ namespace Espera.View
 
         static AppBootstrapper()
         {
-            string overrideBasePath = null;
             string appName = "Espera";
 
 #if DEBUG
@@ -61,13 +61,6 @@ namespace Espera.View
             LogFilePath = Path.Combine(DirectoryPath, "Log.txt");
             Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             BlobCache.ApplicationName = appName;
-
-#if DEBUG
-            if (overrideBasePath != null)
-            {
-                BlobCache.LocalMachine = new SQLitePersistentBlobCache(BlobCachePath);
-            }
-#endif
         }
 
         public AppBootstrapper()
@@ -147,6 +140,14 @@ namespace Espera.View
             this.Log().Info("Current culture: " + CultureInfo.InstalledUICulture.Name);
 
             Directory.CreateDirectory(DirectoryPath);
+
+#if DEBUG
+            if (overrideBasePath != null)
+            {
+                Directory.CreateDirectory(BlobCachePath);
+                BlobCache.LocalMachine = new SQLitePersistentBlobCache(Path.Combine(BlobCachePath, "blobs.db"));
+            }
+#endif
 
             var newBlobCache = BlobCache.LocalMachine;
 
