@@ -41,7 +41,10 @@ namespace Espera.View.CacheMigration
 
             if (!this.oldBlobCache.GetAllKeys().Wait().Any())
             {
+                this.newBlobCache.InsertObject(MigratedKey, true).Wait();
+
                 this.Log().Info("Nothing to migrate, returning.");
+
                 return;
             }
 
