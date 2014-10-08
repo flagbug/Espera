@@ -886,7 +886,7 @@ namespace Espera.Core.Management
                     int songCount = this.songs.Count;
                     this.songLock.ExitReadLock();
 
-                    AnalyticsClient.Instance.RecordLibrarySizeAsync(songCount);
+                    AnalyticsClient.Instance.RecordLibrarySize(songCount);
 
                     this.IsUpdating = false;
                 });

@@ -227,9 +227,9 @@ namespace Espera.View
             Locator.CurrentMutable.RegisterConstant(new NLogLogger(NLog.LogManager.GetCurrentClassLogger()), typeof(ILogger));
         }
 
-        private async Task SetupAnalyticsClient()
+        private void SetupAnalyticsClient()
         {
-            await AnalyticsClient.Instance.InitializeAsync(this.coreSettings);
+            AnalyticsClient.Instance.Initialize(this.coreSettings);
         }
 
         private void SetupLager()
@@ -330,7 +330,7 @@ namespace Espera.View
                 catch (Exception ex)
                 {
                     this.Log().Fatal("Failed to apply updates.", ex);
-                    AnalyticsClient.Instance.RecordErrorAsync(ex);
+                    AnalyticsClient.Instance.RecordError(ex);
                     return;
                 }
 
