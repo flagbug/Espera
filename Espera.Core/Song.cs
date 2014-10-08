@@ -96,7 +96,7 @@ namespace Espera.Core
 
         public override int GetHashCode()
         {
-            return new { this.OriginalPath, this.Duration }.GetHashCode();
+            return this.OriginalPath.GetHashCode();
         }
 
         public override string ToString()
