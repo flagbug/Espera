@@ -321,6 +321,21 @@ namespace Espera.Core.Tests
                     Assert.Equal(1, await first.Timeout(TimeSpan.FromSeconds(5)));
                 }
             }
+
+            [Fact]
+            public void RetriesLibraryLoadThreeTimesBeforeGivingUp()
+            {
+                var reader = Substitute.For<ILibraryReader>();
+                reader.LibraryExists.Returns(true);
+                reader.ReadSongs().Returns(_ => { throw new LibraryReadException("Yadda", null); });
+
+                using (Library library = new LibraryBuilder().WithReader(reader).Build())
+                {
+                    library.Initialize();
+                }
+
+                reader.Received(3).ReadSongs();
+            }
         }
 
         public class TheIsUpdatingProperty
@@ -810,6 +825,21 @@ namespace Espera.Core.Tests
                 }
 
                 libraryWriter.Received(1).Write(Arg.Any<IEnumerable<LocalSong>>(), Arg.Is<IEnumerable<Playlist>>(x => x.Count() == 1), Arg.Any<string>());
+            }
+
+            [Fact]
+            public void RetriesThreeTimesBeforeGivingUp()
+            {
+                var libraryWriter = Substitute.For<ILibraryWriter>();
+                libraryWriter.When(x => x.Write(Arg.Any<IEnumerable<LocalSong>>(), Arg.Any<IEnumerable<Playlist>>(), Arg.Any<string>()))
+                    .Do(x => { throw new LibraryWriteException("Yadda", null); });
+
+                using (Library library = new LibraryBuilder().WithWriter(libraryWriter).Build())
+                {
+                    library.Save();
+                }
+
+                libraryWriter.ReceivedWithAnyArgs(3).Write(Arg.Any<IEnumerable<LocalSong>>(), Arg.Any<IEnumerable<Playlist>>(), Arg.Any<string>());
             }
         }
 
