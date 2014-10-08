@@ -267,6 +267,7 @@ namespace Espera.View
                     if (this.mobileApi != null)
                     {
                         this.mobileApi.Dispose();
+                        this.mobileApi = null;
                     }
                 })
                 .Where(x => x.Item2)
