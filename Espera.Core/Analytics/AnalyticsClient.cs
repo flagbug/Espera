@@ -46,7 +46,7 @@ namespace Espera.Core.Analytics
             if (!this.coreSettings.EnableAutomaticReports)
                 return;
 
-            Insights.Initialize(null, Assembly.GetExecutingAssembly().GetName().Version.ToString(), "Espera");
+            Insights.Initialize("ed4fea5ffb4fa2a1d36acfeb3df4203153d92acf", Assembly.GetExecutingAssembly().GetName().Version.ToString(), "Espera");
         }
 
         /// <summary>
@@ -96,21 +96,11 @@ namespace Espera.Core.Analytics
             }
         }
 
-        public void RecordError(Exception exception)
-        {
-            try
-            {
-                Insights.Report(exception);
-            }
-
-            catch (Exception ex)
-            {
-                this.Log().ErrorException("Couldn't send error report", ex);
-            }
-        }
-
         public void RecordLibrarySize(int songCount)
         {
+            if (!this.coreSettings.EnableAutomaticReports)
+                return;
+
             try
             {
             }
@@ -123,6 +113,9 @@ namespace Espera.Core.Analytics
 
         public void RecordMobileUsage()
         {
+            if (!this.coreSettings.EnableAutomaticReports)
+                return;
+
             try
             {
             }
@@ -130,6 +123,22 @@ namespace Espera.Core.Analytics
             catch (Exception ex)
             {
                 this.Log().InfoException("Could not log mobile usage", ex);
+            }
+        }
+
+        public void RecordNonFatalError(Exception exception)
+        {
+            if (!this.coreSettings.EnableAutomaticReports)
+                return;
+
+            try
+            {
+                Insights.Report(exception);
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Couldn't send error report", ex);
             }
         }
     }

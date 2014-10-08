@@ -27,6 +27,7 @@ using NLog.Config;
 using NLog.Targets;
 using ReactiveUI;
 using Splat;
+using Xamarin;
 
 namespace Espera.View
 {
@@ -118,6 +119,9 @@ namespace Espera.View
                 this.Log().Info("Shutting down mobile API");
                 this.mobileApi.Dispose();
             }
+
+            this.Log().Info("Shutting down Xamarin Insights");
+            Insights.Terminate();
 
             if (this.updateSubscription != null)
             {
@@ -245,7 +249,7 @@ namespace Espera.View
             }
 
 #if DEBUG
-            coreSettings.EnableAutomaticReports = false;
+            //coreSettings.EnableAutomaticReports = false;
 #endif
 
             this.viewSettings.InitializeAsync().Wait();
@@ -330,7 +334,7 @@ namespace Espera.View
                 catch (Exception ex)
                 {
                     this.Log().Fatal("Failed to apply updates.", ex);
-                    AnalyticsClient.Instance.RecordError(ex);
+                    AnalyticsClient.Instance.RecordNonFatalError(ex);
                     return;
                 }
 
