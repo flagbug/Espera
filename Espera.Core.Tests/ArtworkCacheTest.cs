@@ -82,6 +82,16 @@ namespace Espera.Core.Tests
 
                 await Helpers.ThrowsAsync<ArgumentNullException>(() => artworkCache.Retrieve(null, 100, 100));
             }
+
+            [Fact]
+            public async Task ThrowsArgumentOutOfRangeExceptionIfSizeIsLessThanZero()
+            {
+                var blobCache = new InMemoryBlobCache();
+                var artworkCache = new ArtworkCache(blobCache);
+
+                await Helpers.ThrowsAsync<ArgumentOutOfRangeException>(() => artworkCache.Retrieve("somekey", -1, 0));
+                await Helpers.ThrowsAsync<ArgumentOutOfRangeException>(() => artworkCache.Retrieve("somekey", 0, -1));
+            }
         }
 
         public class TheStoreMethod
