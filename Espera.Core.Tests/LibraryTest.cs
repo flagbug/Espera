@@ -919,6 +919,34 @@ namespace Espera.Core.Tests
                 }
             }
         }
+
+        public class TheShufflePlaylistMethod
+        {
+            [Fact]
+            public void VerifiesAccessRights()
+            {
+                var settings = new CoreSettings
+                {
+                    LockPlaylist = false
+                };
+
+                using (Library library = new LibraryBuilder().WithSettings(settings).WithPlaylist().Build())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.LocalAccessControl.SetLocalPassword(accessToken, "Password");
+                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
+
+                    library.ShufflePlaylist(accessToken);
+
+                    library.LocalAccessControl.UpgradeLocalAccess(accessToken, "Password");
+                    settings.LockPlaylist = true;
+                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
+
+                    Assert.Throws<AccessException>(() => library.ShufflePlaylist(accessToken));
+                }
+            }
+        }
+
         public class TheSwitchToPlaylistMethod
         {
             [Fact]
