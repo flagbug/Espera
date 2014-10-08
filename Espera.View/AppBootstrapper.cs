@@ -289,10 +289,6 @@ namespace Espera.View
             var apiStats = new MobileApiInfo(connectedClients, isPortOccupied);
 
             Locator.CurrentMutable.RegisterConstant(apiStats, typeof(MobileApiInfo));
-
-            this.coreSettings.WhenAnyValue(x => x.EnableRemoteControl)
-                .Where(x => !x && this.mobileApi != null)
-                .Subscribe(x => this.mobileApi.Dispose());
         }
 
         private async Task UpdateSilentlyAsync()
