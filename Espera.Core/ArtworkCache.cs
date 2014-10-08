@@ -17,6 +17,12 @@ namespace Espera.Core
     /// </summary>
     public class ArtworkCache : IEnableLogger
     {
+        /// <summary>
+        /// Used to mark online artwork lookups as failed, so we don't try to retrieve it again for
+        /// some time.
+        /// </summary>
+        public static readonly string OnlineFailMark = "FAILED";
+
         private static readonly Lazy<ArtworkCache> instance;
         private readonly IArtworkFetcher artworkFetcher;
         private readonly IBlobCache cache;
@@ -76,7 +82,7 @@ namespace Espera.Core
             }
 
             // Previously failed lookups are marked as failed, it doesn't make sense to let it fail again
-            if (artworkCacheKey == "FAILED")
+            if (artworkCacheKey == OnlineFailMark)
             {
                 this.Log().Debug("Key {0} is marked as failed, returning.", lookupKey);
 
@@ -244,7 +250,7 @@ namespace Espera.Core
 
             // If we can't retrieve an artwork, mark the lookup key as failed and don't look again
             // for the next 7 days.
-            return this.queue.EnqueueObservableOperation(1, () => this.cache.InsertObject(lookupKey, "FAILED", TimeSpan.FromDays(7))).ToTask();
+            return this.queue.EnqueueObservableOperation(1, () => this.cache.InsertObject(lookupKey, OnlineFailMark, TimeSpan.FromDays(7))).ToTask();
         }
 
         private async Task SaveImageToBlobCacheAsync(string key, IBitmap bitmap)
