@@ -497,14 +497,14 @@ namespace Espera.Core.Management
 
         public void SetCurrentTime(TimeSpan currentTime, Guid accessToken)
         {
-            this.accessControl.VerifyAccess(accessToken);
+            this.accessControl.VerifyAccess(accessToken, this.settings.LockTime);
 
             this.audioPlayer.CurrentTime = currentTime;
         }
 
         public void SetVolume(float volume, Guid accessToken)
         {
-            this.accessControl.VerifyAccess(accessToken);
+            this.accessControl.VerifyAccess(accessToken, this.settings.LockVolume);
 
             this.settings.Volume = volume;
             this.audioPlayer.SetVolume(volume);

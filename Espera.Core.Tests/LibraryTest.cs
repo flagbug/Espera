@@ -813,6 +813,112 @@ namespace Espera.Core.Tests
             }
         }
 
+        public class TheSetCurrentTimeMethod
+        {
+            [Fact]
+            public async Task PropagatesToMediaPlayer()
+            {
+                var audioPlayer = Substitute.For<IMediaPlayerCallback>();
+                var timeSpan = TimeSpan.FromMinutes(1);
+
+                using (Library library = new LibraryBuilder().WithAudioPlayer(audioPlayer).WithPlaylist().Build())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    await library.PlayInstantlyAsync(Helpers.SetupSongMocks(1), accessToken);
+
+                    library.SetCurrentTime(timeSpan, accessToken);
+                }
+
+                Assert.Equal(timeSpan, audioPlayer.CurrentTime);
+            }
+
+            [Fact]
+            public void VerifiesAccessRights()
+            {
+                var settings = new CoreSettings
+                {
+                    LockTime = false
+                };
+
+                using (Library library = new LibraryBuilder().WithSettings(settings).Build())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.LocalAccessControl.SetLocalPassword(accessToken, "Password");
+                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
+
+                    library.SetCurrentTime(TimeSpan.FromMinutes(1), accessToken);
+
+                    library.LocalAccessControl.UpgradeLocalAccess(accessToken, "Password");
+                    settings.LockTime = true;
+                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
+
+                    Assert.Throws<AccessException>(() => library.SetCurrentTime(TimeSpan.FromMinutes(1), accessToken));
+                }
+            }
+        }
+
+        public class TheSetVolumeMethod
+        {
+            [Fact]
+            public async Task PropagatesToMediaPlayer()
+            {
+                var audioPlayer = Substitute.For<IMediaPlayerCallback>();
+
+                using (Library library = new LibraryBuilder().WithAudioPlayer(audioPlayer).WithPlaylist().Build())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    await library.PlayInstantlyAsync(Helpers.SetupSongMocks(1), accessToken);
+
+                    library.SetVolume(0.5f, accessToken);
+                }
+
+                audioPlayer.Received().SetVolume(0.5f);
+            }
+
+            [Fact]
+            public void PropagatesToSettings()
+            {
+                var settings = new CoreSettings
+                {
+                    Volume = 0.0f
+                };
+
+                using (Library library = new LibraryBuilder().WithSettings(settings).Build())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+
+                    library.SetVolume(0.5f, accessToken);
+                }
+
+                Assert.Equal(0.5f, settings.Volume);
+            }
+
+            [Fact]
+            public void VerifiesAccessRights()
+            {
+                var settings = new CoreSettings
+                {
+                    LockVolume = false
+                };
+
+                using (Library library = new LibraryBuilder().WithSettings(settings).Build())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.LocalAccessControl.SetLocalPassword(accessToken, "Password");
+                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
+
+                    library.SetVolume(0.5f, accessToken);
+
+                    library.LocalAccessControl.UpgradeLocalAccess(accessToken, "Password");
+                    settings.LockVolume = true;
+                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
+
+                    Assert.Throws<AccessException>(() => library.SetVolume(0.5f, accessToken));
+                }
+            }
+        }
         public class TheSwitchToPlaylistMethod
         {
             [Fact]
