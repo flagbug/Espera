@@ -1,3 +1,9 @@
+# v2.9.2
+
+## Bugfixes
+- Fixed the remote control not shutting down properly when disabling it.
+- Fixed an unnecessary cache startup.
+
 # v2.9.1
 
 ## Bugfixes
