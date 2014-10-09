@@ -116,7 +116,17 @@ namespace Espera.Core.Mobile
 
                             if (client == null)
                             {
-                                client = new UdpClient(new IPEndPoint(ipAddress, this.port));
+                                try
+                                {
+                                    client = new UdpClient(new IPEndPoint(ipAddress, this.port));
+                                }
+
+                                catch (SocketException ex)
+                                {
+                                    this.Log().ErrorException(string.Format("Failed to bind UDP client at IP address {0} and port {1}", ipAddress, this.port), ex);
+                                    continue;
+                                }
+
                                 clientCache.Add(client);
                                 clientDisposable.Add(client);
                             }
