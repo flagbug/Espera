@@ -9,7 +9,6 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -32,12 +31,6 @@ namespace Espera.View
 {
     internal class AppBootstrapper : BootstrapperBase, IEnableLogger
     {
-        public static readonly string BlobCachePath;
-        public static readonly string DirectoryPath;
-        public static readonly string LibraryFilePath;
-        public static readonly string LogFilePath;
-        public static readonly string Version;
-        private static readonly string overrideBasePath;
         private CoreSettings coreSettings;
         private MobileApi mobileApi;
         private IDisposable updateSubscription;
@@ -45,22 +38,7 @@ namespace Espera.View
 
         static AppBootstrapper()
         {
-            string appName = "Espera";
-
-#if DEBUG
-            // Set and uncomment this if you want to change the app data folder for debugging
-
-            // overrideBasePath = "D://AppData";
-
-            appName = "EsperaDebug";
-#endif
-
-            DirectoryPath = Path.Combine(overrideBasePath ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appName);
-            BlobCachePath = Path.Combine(DirectoryPath, "BlobCache");
-            LibraryFilePath = Path.Combine(DirectoryPath, "Library.json");
-            LogFilePath = Path.Combine(DirectoryPath, "Log.txt");
-            Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            BlobCache.ApplicationName = appName;
+            BlobCache.ApplicationName = AppInfo.AppName;
         }
 
         public AppBootstrapper()
@@ -75,8 +53,8 @@ namespace Espera.View
 
             this.coreSettings = new CoreSettings();
 
-            Locator.CurrentMutable.RegisterLazySingleton(() => new Library(new LibraryFileReader(LibraryFilePath),
-                new LibraryFileWriter(LibraryFilePath), this.coreSettings, new FileSystem()), typeof(Library));
+            Locator.CurrentMutable.RegisterLazySingleton(() => new Library(new LibraryFileReader(AppInfo.LibraryFilePath),
+                new LibraryFileWriter(AppInfo.LibraryFilePath), this.coreSettings, new FileSystem()), typeof(Library));
 
             Locator.CurrentMutable.RegisterLazySingleton(() => new WindowManager(), typeof(IWindowManager));
 
@@ -119,6 +97,9 @@ namespace Espera.View
                 this.mobileApi.Dispose();
             }
 
+            this.Log().Info("Shutting down analytics client");
+            AnalyticsClient.Instance.Dispose();
+
             if (this.updateSubscription != null)
             {
                 this.updateSubscription.Dispose();
@@ -135,17 +116,17 @@ namespace Espera.View
             this.Log().Info("**          Espera          **");
             this.Log().Info("**                          **");
             this.Log().Info("******************************");
-            this.Log().Info("Application version: " + Version);
+            this.Log().Info("Application version: " + AppInfo.Version);
             this.Log().Info("OS Version: " + Environment.OSVersion.VersionString);
             this.Log().Info("Current culture: " + CultureInfo.InstalledUICulture.Name);
 
-            Directory.CreateDirectory(DirectoryPath);
+            Directory.CreateDirectory(AppInfo.DirectoryPath);
 
 #if DEBUG
-            if (overrideBasePath != null)
+            if (AppInfo.OverridenBasePath != null)
             {
-                Directory.CreateDirectory(BlobCachePath);
-                BlobCache.LocalMachine = new SQLitePersistentBlobCache(Path.Combine(BlobCachePath, "blobs.db"));
+                Directory.CreateDirectory(AppInfo.BlobCachePath);
+                BlobCache.LocalMachine = new SQLitePersistentBlobCache(Path.Combine(AppInfo.BlobCachePath, "blobs.db"));
             }
 #endif
 
@@ -153,7 +134,7 @@ namespace Espera.View
 
             if (AkavacheToSqlite3Migration.NeedsMigration(newBlobCache))
             {
-                var oldBlobCache = new DeprecatedBlobCache(BlobCachePath);
+                var oldBlobCache = new DeprecatedBlobCache(AppInfo.BlobCachePath);
                 var migration = new AkavacheToSqlite3Migration(oldBlobCache, newBlobCache);
 
                 migration.Run();
@@ -215,7 +196,7 @@ namespace Espera.View
 
             var target = new FileTarget
             {
-                FileName = LogFilePath,
+                FileName = AppInfo.LogFilePath,
                 Layout = @"${longdate}|${logger}|${level}|${message} ${exception:format=ToString,StackTrace}",
                 ArchiveAboveSize = 1024 * 1024 * 2, // 2 MB
                 ArchiveNumbering = ArchiveNumberingMode.Sequence
@@ -227,9 +208,9 @@ namespace Espera.View
             Locator.CurrentMutable.RegisterConstant(new NLogLogger(NLog.LogManager.GetCurrentClassLogger()), typeof(ILogger));
         }
 
-        private async Task SetupAnalyticsClient()
+        private void SetupAnalyticsClient()
         {
-            await AnalyticsClient.Instance.InitializeAsync(this.coreSettings);
+            AnalyticsClient.Instance.Initialize(this.coreSettings);
         }
 
         private void SetupLager()
@@ -245,7 +226,7 @@ namespace Espera.View
             }
 
 #if DEBUG
-            coreSettings.EnableAutomaticReports = false;
+            //coreSettings.EnableAutomaticReports = false;
 #endif
 
             this.viewSettings.InitializeAsync().Wait();
@@ -330,7 +311,7 @@ namespace Espera.View
                 catch (Exception ex)
                 {
                     this.Log().Fatal("Failed to apply updates.", ex);
-                    AnalyticsClient.Instance.RecordErrorAsync(ex);
+                    AnalyticsClient.Instance.RecordNonFatalError(ex);
                     return;
                 }
 

@@ -13,8 +13,9 @@ namespace Espera.View.ViewModels
         {
             this.ReportContent = exception.ToString();
 
-            this.SubmitCrashReport = ReactiveCommand.CreateAsyncTask(this.WhenAnyValue(x => x.SendingSucceeded)
-                .Select(x => x == null || !x.Value), _ => AnalyticsClient.Instance.RecordCrashAsync(exception));
+            this.SubmitCrashReport = ReactiveCommand.CreateAsyncObservable(this.WhenAnyValue(x => x.SendingSucceeded)
+                .Select(x => x == null || !x.Value), _ =>
+                    Observable.Start(() => AnalyticsClient.Instance.RecordCrash(exception), RxApp.TaskpoolScheduler).Select(__ => true));
 
             this.sendingSucceeded = this.SubmitCrashReport
                 .Select(x => new bool?(x))

@@ -13,12 +13,6 @@ namespace Espera.Core.Settings
             : base("__CoreSettings__", blobCache ?? (ModeDetector.InUnitTestRunner() ? new InMemoryBlobCache() : BlobCache.LocalMachine))
         { }
 
-        public string AnalyticsToken
-        {
-            get { return this.GetOrCreate((string)null); }
-            set { this.SetOrCreate(value); }
-        }
-
         /// <summary>
         /// Have we upgraded to the Buddy v2 client yet?
         /// </summary>
@@ -127,6 +121,12 @@ namespace Espera.Core.Settings
         public bool StreamHighestYoutubeQuality
         {
             get { return this.GetOrCreate(true); }
+            set { this.SetOrCreate(value); }
+        }
+
+        public Guid UniqueId
+        {
+            get { return this.GetOrCreate(Guid.NewGuid()); }
             set { this.SetOrCreate(value); }
         }
 

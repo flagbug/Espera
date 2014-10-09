@@ -383,7 +383,7 @@ namespace Espera.View.ViewModels
 
         public string LogFilePath
         {
-            get { return AppBootstrapper.LogFilePath; }
+            get { return AppInfo.LogFilePath; }
         }
 
         public ReactiveCommand<object> LoginCommand { get; private set; }

@@ -334,7 +334,6 @@ namespace Espera.Core.Mobile
                 }
             }
 
-            Version serverVersion = Assembly.GetExecutingAssembly().GetName().Version;
             AccessPermission accessPermission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken).FirstAsync();
 
             // This is stupid
@@ -355,7 +354,7 @@ namespace Espera.Core.Mobile
             var connectionInfo = new ConnectionInfo
             {
                 AccessPermission = permission,
-                ServerVersion = serverVersion,
+                ServerVersion = AppInfo.Version,
                 GuestSystemInfo = guestSystemInfo
             };
 

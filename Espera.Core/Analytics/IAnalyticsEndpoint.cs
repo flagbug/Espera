@@ -1,64 +1,22 @@
 ﻿using System;
-using System.Deployment.Application;
-using System.Globalization;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Espera.Core.Analytics
 {
-    public interface IAnalyticsEndpoint
+    public interface IAnalyticsEndpoint : IDisposable
     {
-        Task AuthenticateUserAsync(string analyticsToken);
+        void Identify(string id, IDictionary<string, string> traits = null);
 
-        /// <summary>
-        /// Creates a new user and returns a unique authentication token. This method also
-        /// authenticates the with the returned token.
-        /// </summary>
-        /// <returns>A unique token used for the next authentication.</returns>
-        Task<string> CreateUserAsync();
+        void Initialize();
 
-        /// <summary>
-        /// Increments the value of the specified key by 1.
-        /// </summary>
-        Task IncrementMetadataAsync(string key);
+        void ReportBug(string message);
 
-        /// <summary>
-        /// Records runtime information about this device and application.
-        /// </summary>
-        Task RecordDeviceInformationAsync();
+        void ReportFatalException(Exception exception);
 
-        Task RecordErrorAsync(Exception ex, string message = null);
+        void ReportNonFatalException(Exception exception);
 
-        Task RecordMetaDataAsync(string key, string value);
+        void Track(string key, IDictionary<string, string> traits = null);
 
-        Task UpdateUserEmailAsync(string email);
-    }
-
-    public static class AnalyticsEndpointMixin
-    {
-        public static Task RecordDeploymentType(this IAnalyticsEndpoint endpoint)
-        {
-            return endpoint.RecordMetaDataAsync("deployment-type", ApplicationDeployment.IsNetworkDeployed ?
-                "clickonce" : "portable");
-        }
-
-        public static Task RecordLanguageAsync(this IAnalyticsEndpoint endpoint)
-        {
-            return endpoint.RecordMetaDataAsync("language", CultureInfo.InstalledUICulture.TwoLetterISOLanguageName);
-        }
-
-        public static Task RecordLibrarySizeAsync(this IAnalyticsEndpoint endpoint, int songCount)
-        {
-            return endpoint.RecordMetaDataAsync("library-size", songCount.ToString(CultureInfo.InvariantCulture));
-        }
-
-        public static Task RecordLogin(this IAnalyticsEndpoint endpoint)
-        {
-            return endpoint.IncrementMetadataAsync("logins");
-        }
-
-        public static Task RecordMobileUsageAsync(this IAnalyticsEndpoint endpoint)
-        {
-            return endpoint.RecordMetaDataAsync("uses-mobile", "true");
-        }
+        void UpdateEmail(string email);
     }
 }
