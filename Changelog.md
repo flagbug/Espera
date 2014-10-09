@@ -1,3 +1,8 @@
+# v2.9.3
+
+## Bugfixes
+- Fixed a crash when sending a bug report with an email address attached.
+
 # v2.9.2
 
 ## Bugfixes
