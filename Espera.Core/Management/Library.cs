@@ -486,6 +486,7 @@ namespace Espera.Core.Management
 
             catch (LibraryWriteException ex)
             {
+                AnalyticsClient.Instance.RecordNonFatalError(ex);
                 this.Log().FatalException("Couldn't write the library file", ex);
             }
 
@@ -687,7 +688,9 @@ namespace Espera.Core.Management
 
             catch (LibraryReadException ex)
             {
+                AnalyticsClient.Instance.RecordNonFatalError(ex);
                 this.Log().FatalException("Failed to load the library file.", ex);
+
                 return;
             }
 
