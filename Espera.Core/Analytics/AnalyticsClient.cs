@@ -65,7 +65,10 @@ namespace Espera.Core.Analytics
 
             this.endpoint.Initialize();
 
-            if (EnableAutomaticReports)
+            this.Log().Info("Initialized the analytics and crash report provider");
+            this.Log().Info("Automatic analytics are", this.EnableAutomaticReports ? "Enabled" : "Disabled");
+
+            if (this.EnableAutomaticReports)
             {
                 var traits = new Dictionary<string, string>
                 {
