@@ -315,11 +315,11 @@ namespace Espera.View
                     return;
                 }
 
-                this.Log().Info("Updates applied.");
-
                 await changelogFetchTask;
 
                 this.viewSettings.IsUpdated = true;
+
+                this.Log().Info("Updates applied.");
             }
 
             else
