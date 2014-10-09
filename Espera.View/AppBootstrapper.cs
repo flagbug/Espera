@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Abstractions;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -297,8 +298,9 @@ namespace Espera.View
                 this.Log().Info("New version available: {0}", updateInfo.AvailableVersion);
 
                 Task changelogFetchTask = ChangelogFetcher.FetchAsync().ToObservable()
+                    .Timeout(TimeSpan.FromSeconds(30))
                     .SelectMany(x => BlobCache.LocalMachine.InsertObject(BlobCacheKeys.Changelog, x))
-                    .LoggedCatch(this, null, "Could not to fetch changelog")
+                    .LoggedCatch(this, Observable.Return(Unit.Default), "Could not to fetch changelog")
                     .ToTask();
 
                 this.Log().Info("Applying updates...");
