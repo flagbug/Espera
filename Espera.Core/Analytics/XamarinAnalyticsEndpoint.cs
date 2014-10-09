@@ -6,6 +6,7 @@ namespace Espera.Core.Analytics
 {
     internal class XamarinAnalyticsEndpoint : IAnalyticsEndpoint
     {
+        private Guid id;
         private bool isInitialized;
 
         public void Dispose()
@@ -24,8 +25,10 @@ namespace Espera.Core.Analytics
             Insights.Identify(id, traits);
         }
 
-        public void Initialize()
+        public void Initialize(Guid id)
         {
+            this.id = id;
+
             Insights.Initialize("ed4fea5ffb4fa2a1d36acfeb3df4203153d92acf", AppInfo.Version.ToString(), "Espera", AppInfo.BlobCachePath);
 
             this.isInitialized = true;
@@ -55,7 +58,7 @@ namespace Espera.Core.Analytics
 
         public void UpdateEmail(string email)
         {
-            throw new NotImplementedException();
+            Insights.Identify(id.ToString(), Insights.Traits.Email, email);
         }
     }
 }

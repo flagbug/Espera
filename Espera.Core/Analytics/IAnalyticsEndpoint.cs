@@ -7,7 +7,7 @@ namespace Espera.Core.Analytics
     {
         void Identify(string id, IDictionary<string, string> traits = null);
 
-        void Initialize();
+        void Initialize(Guid id);
 
         void ReportBug(string message);
 

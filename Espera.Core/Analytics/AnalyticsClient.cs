@@ -63,7 +63,7 @@ namespace Espera.Core.Analytics
 
             this.coreSettings = settings;
 
-            this.endpoint.Initialize();
+            this.endpoint.Initialize(this.coreSettings.UniqueId);
 
             this.Log().Info("Initialized the analytics and crash report provider");
             this.Log().Info("Automatic analytics are {0}", this.EnableAutomaticReports ? "Enabled" : "Disabled");

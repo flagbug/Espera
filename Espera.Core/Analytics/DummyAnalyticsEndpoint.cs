@@ -13,7 +13,7 @@ namespace Espera.Core.Analytics
         {
         }
 
-        public void Initialize()
+        public void Initialize(Guid id)
         {
         }
 
