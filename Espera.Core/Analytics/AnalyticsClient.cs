@@ -1,6 +1,6 @@
 using System;
-using System.Reactive.Subjects;
-using System.Reflection;
+using System.Collections.Generic;
+using System.Globalization;
 using Espera.Core.Settings;
 using Splat;
 using Xamarin;
@@ -13,12 +13,11 @@ namespace Espera.Core.Analytics
     /// methods. This also affects the authentication, meaning that if the initial authentication to
     /// the analytics provider fails, calls to the analytics methods will return immediately.
     /// </summary>
-    public class AnalyticsClient : IEnableLogger
+    public class AnalyticsClient : IEnableLogger, IDisposable
     {
         private static readonly Lazy<AnalyticsClient> instance;
-        private readonly BehaviorSubject<bool> isAuthenticating;
         private CoreSettings coreSettings;
-        private bool isAuthenticated;
+        private bool isStarted;
 
         static AnalyticsClient()
         {
@@ -35,6 +34,18 @@ namespace Espera.Core.Analytics
             get { return this.coreSettings.EnableAutomaticReports; }
         }
 
+        public void Dispose()
+        {
+            // Xamarin Insights can only be terminated if it has been started before, otherwise it
+            // throws an exception
+            if (this.isStarted)
+            {
+                Insights.Terminate();
+            }
+
+            this.isStarted = false;
+        }
+
         public void Initialize(CoreSettings settings)
         {
             if (settings == null)
@@ -42,11 +53,9 @@ namespace Espera.Core.Analytics
 
             this.coreSettings = settings;
 
-            // If we don't have permission to send things, do nothing
-            if (!this.coreSettings.EnableAutomaticReports)
-                return;
+            Insights.Initialize("ed4fea5ffb4fa2a1d36acfeb3df4203153d92acf", AppInfo.Version.ToString(), "Espera", AppInfo.BlobCachePath);
 
-            Insights.Initialize("ed4fea5ffb4fa2a1d36acfeb3df4203153d92acf", Assembly.GetExecutingAssembly().GetName().Version.ToString(), "Espera");
+            this.isStarted = true;
         }
 
         /// <summary>
@@ -60,12 +69,12 @@ namespace Espera.Core.Analytics
         {
             if (!String.IsNullOrWhiteSpace(email))
             {
-                //Insights.Identify(Insights.T);
+                Insights.Identify(email, Insights.Traits.Email, email);
             }
 
             try
             {
-                // The new Xamarin insights API only accepts exceptions, so we wrap the user message
+                // The Xamarin insights API only accepts exceptions, so we wrap the user message
                 // into an exception as a workaround
                 var exception = new Exception(message);
 
@@ -98,11 +107,17 @@ namespace Espera.Core.Analytics
 
         public void RecordLibrarySize(int songCount)
         {
-            if (!this.coreSettings.EnableAutomaticReports)
+            if (!this.EnableAutomaticReports)
                 return;
 
             try
             {
+                var traits = new Dictionary<string, string>
+                {
+                    { "size", songCount.ToString(CultureInfo.InvariantCulture) }
+                };
+
+                Insights.Track("Library Lookup", traits);
             }
 
             catch (Exception ex)
@@ -113,11 +128,12 @@ namespace Espera.Core.Analytics
 
         public void RecordMobileUsage()
         {
-            if (!this.coreSettings.EnableAutomaticReports)
+            if (!this.EnableAutomaticReports)
                 return;
 
             try
             {
+                Insights.Track("Connected Mobile API");
             }
 
             catch (Exception ex)
@@ -128,7 +144,7 @@ namespace Espera.Core.Analytics
 
         public void RecordNonFatalError(Exception exception)
         {
-            if (!this.coreSettings.EnableAutomaticReports)
+            if (!this.EnableAutomaticReports)
                 return;
 
             try
