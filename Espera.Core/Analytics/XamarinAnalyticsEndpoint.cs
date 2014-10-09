@@ -56,6 +56,11 @@ namespace Espera.Core.Analytics
             Insights.Track(key, traits);
         }
 
+        public IDisposable TrackTime(string key, IDictionary<string, string> traits = null)
+        {
+            return Insights.TrackTime(key, traits);
+        }
+
         public void UpdateEmail(string email)
         {
             Insights.Identify(id.ToString(), Insights.Traits.Email, email);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Deployment.Application;
 using System.Globalization;
+using System.Reactive.Disposables;
 using Akavache;
 using Espera.Core.Settings;
 using Splat;
@@ -174,6 +175,14 @@ namespace Espera.Core.Analytics
             {
                 this.Log().ErrorException("Couldn't send error report", ex);
             }
+        }
+
+        public IDisposable RecordTime(string key, IDictionary<string, string> traits = null)
+        {
+            if (!this.EnableAutomaticReports)
+                return Disposable.Empty;
+
+            return this.endpoint.TrackTime(key, traits);
         }
     }
 }

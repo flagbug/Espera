@@ -17,6 +17,8 @@ namespace Espera.Core.Analytics
 
         void Track(string key, IDictionary<string, string> traits = null);
 
+        IDisposable TrackTime(string key, IDictionary<string, string> traits = null);
+
         void UpdateEmail(string email);
     }
 }

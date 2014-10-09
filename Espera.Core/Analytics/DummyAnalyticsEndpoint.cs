@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive.Disposables;
 
 namespace Espera.Core.Analytics
 {
@@ -31,6 +32,11 @@ namespace Espera.Core.Analytics
 
         public void Track(string key, IDictionary<string, string> traits = null)
         {
+        }
+
+        public IDisposable TrackTime(string key, IDictionary<string, string> traits = null)
+        {
+            return Disposable.Empty;
         }
 
         public void UpdateEmail(string email)
