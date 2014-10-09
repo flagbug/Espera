@@ -226,7 +226,7 @@ namespace Espera.View
             }
 
 #if DEBUG
-            //coreSettings.EnableAutomaticReports = false;
+            coreSettings.EnableAutomaticReports = false;
 #endif
 
             this.viewSettings.InitializeAsync().Wait();
