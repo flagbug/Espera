@@ -35,11 +35,11 @@ namespace Espera.Core.Mobile
         private readonly Library library;
         private readonly Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>> messageActionMap;
         private readonly TcpClient socket;
+        private readonly Subject<Unit> videoPlayerToggleRequest;
         private Guid accessToken;
         private IReadOnlyList<SoundCloudSong> lastSoundCloudRequest;
         private IReadOnlyList<YoutubeSong> lastYoutubeRequest;
         private IObservable<SongTransferMessage> songTransfers;
-        private Subject<Unit> videoPlayerToggleRequest;
 
         public MobileClient(TcpClient socket, TcpClient fileSocket, Library library)
         {
