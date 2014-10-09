@@ -132,7 +132,7 @@ namespace Espera.Core.Analytics
             {
                 var traits = new Dictionary<string, string>
                 {
-                    { "size", songCount.ToString(CultureInfo.InvariantCulture) }
+                    { "Size", songCount.ToString(CultureInfo.InvariantCulture) }
                 };
 
                 this.endpoint.Track("Library Lookup", traits);
