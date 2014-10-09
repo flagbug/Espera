@@ -148,6 +148,9 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Analytics\AnalyticsClient.cs" />
+    <Compile Include="Analytics\DummyAnalyticsEndpoint.cs" />
+    <Compile Include="Analytics\IAnalyticsEndpoint.cs" />
+    <Compile Include="Analytics\XamarinAnalyticsEndpoint.cs" />
     <Compile Include="AppInfo.cs" />
     <Compile Include="ArtworkCache.cs" />
     <Compile Include="ArtworkCacheException.cs" />

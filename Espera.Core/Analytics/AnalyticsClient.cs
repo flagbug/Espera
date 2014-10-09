@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Deployment.Application;
 using System.Globalization;
+using Akavache;
 using Espera.Core.Settings;
 using Splat;
 using Xamarin;
@@ -16,17 +18,32 @@ namespace Espera.Core.Analytics
     public class AnalyticsClient : IEnableLogger, IDisposable
     {
         private static readonly Lazy<AnalyticsClient> instance;
+        private readonly IAnalyticsEndpoint endpoint;
         private CoreSettings coreSettings;
-        private bool isStarted;
 
         static AnalyticsClient()
         {
             instance = new Lazy<AnalyticsClient>(() => new AnalyticsClient());
         }
 
+        public AnalyticsClient(IAnalyticsEndpoint endpoint = null)
+        {
+            this.endpoint = endpoint ?? new XamarinAnalyticsEndpoint();
+        }
+
         public static AnalyticsClient Instance
         {
-            get { return instance.Value; }
+            get
+            {
+                if (ModeDetector.InUnitTestRunner())
+                {
+                    var client = new AnalyticsClient(new DummyAnalyticsEndpoint());
+                    client.Initialize(new CoreSettings(new InMemoryBlobCache()) { EnableAutomaticReports = false });
+                    return client;
+                }
+
+                return instance.Value;
+            }
         }
 
         public bool EnableAutomaticReports
@@ -36,14 +53,7 @@ namespace Espera.Core.Analytics
 
         public void Dispose()
         {
-            // Xamarin Insights can only be terminated if it has been started before, otherwise it
-            // throws an exception
-            if (this.isStarted)
-            {
-                Insights.Terminate();
-            }
-
-            this.isStarted = false;
+            this.endpoint.Dispose();
         }
 
         public void Initialize(CoreSettings settings)
@@ -53,9 +63,18 @@ namespace Espera.Core.Analytics
 
             this.coreSettings = settings;
 
-            Insights.Initialize("ed4fea5ffb4fa2a1d36acfeb3df4203153d92acf", AppInfo.Version.ToString(), "Espera", AppInfo.BlobCachePath);
+            this.endpoint.Initialize();
 
-            this.isStarted = true;
+            if (EnableAutomaticReports)
+            {
+                var traits = new Dictionary<string, string>
+                {
+                    { "Deployment Type", ApplicationDeployment.IsNetworkDeployed ? "ClickOnce" : "Portable"},
+                    { "Language", CultureInfo.InstalledUICulture.TwoLetterISOLanguageName }
+                };
+
+                this.endpoint.Identify(this.coreSettings.UniqueId.ToString(), traits);
+            }
         }
 
         /// <summary>
@@ -69,16 +88,12 @@ namespace Espera.Core.Analytics
         {
             if (!String.IsNullOrWhiteSpace(email))
             {
-                Insights.Identify(email, Insights.Traits.Email, email);
+                this.endpoint.UpdateEmail(email);
             }
 
             try
             {
-                // The Xamarin insights API only accepts exceptions, so we wrap the user message
-                // into an exception as a workaround
-                var exception = new Exception(message);
-
-                Insights.Report(exception);
+                this.endpoint.ReportBug(message);
             }
 
             catch (Exception ex)
@@ -96,7 +111,7 @@ namespace Espera.Core.Analytics
         {
             try
             {
-                Insights.Report(exception, ReportSeverity.Error);
+                this.endpoint.ReportFatalException(exception);
             }
 
             catch (Exception ex)
@@ -117,7 +132,7 @@ namespace Espera.Core.Analytics
                     { "size", songCount.ToString(CultureInfo.InvariantCulture) }
                 };
 
-                Insights.Track("Library Lookup", traits);
+                this.endpoint.Track("Library Lookup", traits);
             }
 
             catch (Exception ex)
@@ -133,7 +148,7 @@ namespace Espera.Core.Analytics
 
             try
             {
-                Insights.Track("Connected Mobile API");
+                this.endpoint.Track("Connected Mobile API");
             }
 
             catch (Exception ex)
@@ -149,7 +164,7 @@ namespace Espera.Core.Analytics
 
             try
             {
-                Insights.Report(exception);
+                this.endpoint.ReportNonFatalException(exception);
             }
 
             catch (Exception ex)
