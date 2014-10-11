@@ -102,8 +102,8 @@ namespace Espera.Core.Mobile
                 {
                     await Task.Run(() =>
                     {
-                        // Look up all IP addresses with every loop, incase we have a new network
-                        // adapter is added
+                        // Look up all IP addresses in every loop, incase a new network adapter was
+                        // added in the meantime
                         IPAddress[] addresses = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
                         IEnumerable<IPAddress> localSubnets = addresses.Where(x => x.AddressFamily == AddressFamily.InterNetwork);
 
