@@ -2,7 +2,6 @@
 using System.Net.Http;
 using Refit;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Linq;
 
 /* ******** Hey You! *********
@@ -41,18 +40,20 @@ namespace Espera.Core
             Client = client;
         }
 
-        public virtual Task<ExploreResponse> GetPopularTracks(int limit)
+        public virtual IObservable<ExploreResponse> GetPopularTracks(int limit)
         {
             var arguments = new object[] { limit };
-            return (Task<ExploreResponse>) methodImpls["GetPopularTracks"](Client, arguments);
+            return (IObservable<ExploreResponse>) methodImpls["GetPopularTracks"](Client, arguments);
         }
 
-        public virtual Task<IReadOnlyList<SoundCloudSong>> Search(string searchTerm,string clientId)
+        public virtual IObservable<IReadOnlyList<SoundCloudSong>> Search(string searchTerm,string clientId)
         {
             var arguments = new object[] { searchTerm,clientId };
-            return (Task<IReadOnlyList<SoundCloudSong>>) methodImpls["Search"](Client, arguments);
+            return (IObservable<IReadOnlyList<SoundCloudSong>>) methodImpls["Search"](Client, arguments);
         }
 
     }
 }
+
+
 

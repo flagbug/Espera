@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Espera.Core
 {
@@ -9,6 +9,6 @@ namespace Espera.Core
         /// Searches songs with the specified search term.
         /// </summary>
         /// <exception cref="NetworkSongFinderException">The search failed.</exception>
-        Task<IReadOnlyList<T>> GetSongsAsync(string searchTerm);
+        IObservable<IReadOnlyList<T>> GetSongsAsync(string searchTerm);
     }
 }

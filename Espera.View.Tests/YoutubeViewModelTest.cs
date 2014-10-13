@@ -28,7 +28,7 @@ namespace Espera.View.Tests
 
             var songFinder = Substitute.For<IYoutubeSongFinder>();
             songFinder.GetSongsAsync(Arg.Any<string>())
-                .Returns(Task.FromResult((IReadOnlyList<YoutubeSong>)new List<YoutubeSong>()));
+                .Returns(Observable.Return(new List<YoutubeSong>()));
 
             using (var library = Helpers.CreateLibrary())
             {
@@ -54,8 +54,8 @@ namespace Espera.View.Tests
                     var songs = new[] { new YoutubeSong("http://blabla.com", TimeSpan.Zero) };
 
                     // Define that the old request takes longer than the new request
-                    var firstReturn = Observable.Timer(TimeSpan.FromSeconds(2000), scheduler).Select(x => (IReadOnlyList<YoutubeSong>)new List<YoutubeSong>()).ToTask();
-                    var secondReturn = Task.FromResult((IReadOnlyList<YoutubeSong>)new List<YoutubeSong>(songs));
+                    var firstReturn = Observable.Timer(TimeSpan.FromSeconds(2000), scheduler).Select(x => new List<YoutubeSong>());
+                    var secondReturn = Observable.Return(new List<YoutubeSong>(songs));
 
                     var songFinder = Substitute.For<IYoutubeSongFinder>();
                     songFinder.GetSongsAsync(Arg.Any<string>()).Returns(firstReturn, secondReturn);
@@ -85,7 +85,7 @@ namespace Espera.View.Tests
             networkStatus.GetIsAvailableAsync().Returns(Observable.Return(true));
 
             var songFinder = Substitute.For<IYoutubeSongFinder>();
-            songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Task.FromResult((IReadOnlyList<YoutubeSong>)new List<YoutubeSong>()));
+            songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Observable.Return(new List<YoutubeSong>()));
 
             using (var library = Helpers.CreateLibrary())
             {
@@ -117,7 +117,7 @@ namespace Espera.View.Tests
             networkStatus.GetIsAvailableAsync().Returns(Observable.Return(true));
 
             var songFinder = Substitute.For<IYoutubeSongFinder>();
-            songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Task.FromResult(songs));
+            songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Observable.Return(songs));
 
             using (var library = Helpers.CreateLibrary())
             {
@@ -161,7 +161,7 @@ namespace Espera.View.Tests
             networkStatus.GetIsAvailableAsync().Returns(isAvailable);
 
             var songFinder = Substitute.For<IYoutubeSongFinder>();
-            songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Task.FromResult((IReadOnlyList<YoutubeSong>)new List<YoutubeSong>()));
+            songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Observable.Return(new List<YoutubeSong>()));
 
             using (var library = Helpers.CreateLibrary())
             {
@@ -185,7 +185,7 @@ namespace Espera.View.Tests
                 networkStatus.GetIsAvailableAsync().Returns(Observable.Return(false), Observable.Return(true));
 
                 var songFinder = Substitute.For<IYoutubeSongFinder>();
-                songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Task.FromResult((IReadOnlyList<YoutubeSong>)new List<YoutubeSong>()));
+                songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Observable.Return(new List<YoutubeSong>()));
 
                 using (var library = Helpers.CreateLibrary())
                 {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Google.GData.Client;
 using Google.GData.YouTube;
@@ -15,7 +16,7 @@ namespace Espera.Core
 
         private const int RequestLimit = 50;
 
-        public async Task<IReadOnlyList<YoutubeSong>> GetSongsAsync(string searchTerm)
+        public IObservable<IReadOnlyList<YoutubeSong>> GetSongsAsync(string searchTerm)
         {
             var query = new YouTubeQuery(YouTubeQuery.DefaultVideoUri)
             {
@@ -25,11 +26,12 @@ namespace Espera.Core
                 NumberToRetrieve = RequestLimit
             };
 
-            try // The API gives no clue what can throw, wrap it all up
+            // NB: I have no idea where this API blocks exactly
+            var settings = new YouTubeRequestSettings("Espera", ApiKey);
+            var request = new YouTubeRequest(settings);
+
+            return Observable.FromAsync(async () =>
             {
-                // NB: I have no idea where this API blocks exactly
-                var settings = new YouTubeRequestSettings("Espera", ApiKey);
-                var request = new YouTubeRequest(settings);
                 Feed<Video> feed = await Task.Run(() => request.Get<Video>(query));
                 List<Video> entries = await Task.Run(() => feed.Entries.ToList());
 
@@ -56,12 +58,9 @@ namespace Espera.Core
                 }
 
                 return songs;
-            }
-
-            catch (Exception ex)
-            {
-                throw new NetworkSongFinderException("YoutubeSongFinder search failed", ex);
-            }
+            })
+                // The API gives no clue what can throw, wrap it all up
+            .Catch<IReadOnlyList<YoutubeSong>, Exception>(ex => Observable.Throw<IReadOnlyList<YoutubeSong>>(new NetworkSongFinderException("YoutubeSongFinder search failed", ex)));
         }
 
         public async Task<YoutubeSong> ResolveYoutubeSongFromUrl(Uri url)

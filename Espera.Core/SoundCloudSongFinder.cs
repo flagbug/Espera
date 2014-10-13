@@ -1,8 +1,8 @@
-﻿using Refit;
+﻿using System.Reactive.Linq;
+using Refit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Espera.Core
 {
@@ -10,34 +10,20 @@ namespace Espera.Core
     {
         private const string ClientId = "0367b2f7000481e0d1e0815e70c81379";
 
-        public async Task<IReadOnlyList<SoundCloudSong>> GetSongsAsync(string searchTerm)
+        public IObservable<IReadOnlyList<SoundCloudSong>> GetSongsAsync(string searchTerm)
         {
-            IReadOnlyList<SoundCloudSong> songs;
+            IObservable<IReadOnlyList<SoundCloudSong>> retrievalFunc = string.IsNullOrWhiteSpace(searchTerm) ?
+                RestService.For<ISoundCloudApi>("http://api-v2.soundcloud.com").GetPopularTracks(50).Select(x => x.Tracks) :
+                RestService.For<ISoundCloudApi>("http://api.soundcloud.com").Search(searchTerm, ClientId);
 
-            try
-            {
-                if (string.IsNullOrWhiteSpace(searchTerm))
-                {
-                    var api = RestService.For<ISoundCloudApi>("http://api-v2.soundcloud.com");
+            return retrievalFunc.Catch<IReadOnlyList<SoundCloudSong>, Exception>(ex =>
+                    Observable.Throw<IReadOnlyList<SoundCloudSong>>(new NetworkSongFinderException("SoundCloud search failed", ex)))
+                .Select(x => x.Where(y => y.IsStreamable || y.IsDownloadable).ToList())
+                .Do(SetupSongUrls);
+        }
 
-                    songs = (await api.GetPopularTracks(50)).Tracks;
-                }
-
-                else
-                {
-                    var api = RestService.For<ISoundCloudApi>("http://api.soundcloud.com");
-
-                    songs = await api.Search(searchTerm, ClientId);
-                }
-            }
-
-            catch (Exception ex)
-            {
-                throw new NetworkSongFinderException("SoundCloud search failed", ex);
-            }
-
-            songs = songs.Where(x => x.IsStreamable || x.IsDownloadable).ToList();
-
+        private static void SetupSongUrls(IEnumerable<SoundCloudSong> songs)
+        {
             foreach (SoundCloudSong song in songs)
             {
                 if (song.IsStreamable)
@@ -50,8 +36,6 @@ namespace Espera.Core
                     song.DownloadUrl = new Uri(song.DownloadUrl + "?client_id=" + ClientId);
                 }
             }
-
-            return songs;
         }
     }
 }

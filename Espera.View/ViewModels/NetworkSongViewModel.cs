@@ -77,7 +77,7 @@ namespace Espera.View.ViewModels
             this.WhenAnyValue(x => x.SearchText, x => x.Trim()).DistinctUntilChanged().Skip(1)
                 .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler).Select(_ => Unit.Default)
                 .Merge(networkAvailable.Where(x => x).DistinctUntilChanged().ToUnit())
-                .Select(_ => this.StartSearchAsync().ToObservable().LoggedCatch(this, Observable.Empty<IReadOnlyList<TViewModel>>()))
+                .Select(_ => this.StartSearchAsync())
                 // We don't use SelectMany, because we only care about the latest invocation and
                 // don't want an old, still running request to override a request that is newer and faster
                 .Switch()
@@ -117,29 +117,22 @@ namespace Espera.View.ViewModels
             get { return this.selectedSong.Value; }
         }
 
-        private async Task<IReadOnlyList<TViewModel>> StartSearchAsync()
+        private IObservable<IReadOnlyList<TViewModel>> StartSearchAsync()
         {
-            this.IsSearching = true;
-            this.SelectedSongs = null;
-
-            try
+            return Observable.Defer(() =>
             {
-                IReadOnlyList<TSong> songs = await this.songFinder.GetSongsAsync(this.SearchText);
+                this.IsSearching = true;
+                this.SelectedSongs = null;
 
-                return songs.Select(x => this.modelToViewModelConverter(x)).ToList();
-            }
-
-            catch (NetworkSongFinderException)
+                return this.songFinder.GetSongsAsync(this.SearchText);
+            })
+            .Select(x => x.Select(y => this.modelToViewModelConverter(y)).ToList())
+            .Catch<IReadOnlyList<TViewModel>, NetworkSongFinderException>(ex =>
             {
                 this.connectionError.OnNext(Unit.Default);
-
-                return new List<TViewModel>();
-            }
-
-            finally
-            {
-                this.IsSearching = false;
-            }
+                return Observable.Return(new List<TViewModel>());
+            })
+            .Finally(() => this.IsSearching = false);
         }
     }
 }
