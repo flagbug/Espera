@@ -227,8 +227,8 @@ namespace Espera.Core
 
             catch (KeyNotFoundException)
             {
-                // Akavache has a bug that can GetCreatedAt to rarely throw a KeyNotFoundException,
-                // even if the contract says it should return null in this case.
+                // Akavache has a bug that can cause GetCreatedAt to rarely throw a
+                // KeyNotFoundException, even if the contract says it should return null in this case.
             }
 
             if (resizedExists)
