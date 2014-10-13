@@ -129,6 +129,7 @@ namespace Espera.View.ViewModels
             .Select(x => x.Select(y => this.modelToViewModelConverter(y)).ToList())
             .Catch<IReadOnlyList<TViewModel>, NetworkSongFinderException>(ex =>
             {
+                this.Log().ErrorException("Failed to load songs from the network", ex);
                 this.connectionError.OnNext(Unit.Default);
                 return Observable.Return(new List<TViewModel>());
             })
