@@ -1,8 +1,8 @@
-﻿using System;
+﻿﻿using System;
 using System.Net.Http;
-using Refit;
 using System.Collections.Generic;
 using System.Linq;
+using Refit;
 
 /* ******** Hey You! *********
  *
@@ -54,6 +54,5 @@ namespace Espera.Core
 
     }
 }
-
 
 

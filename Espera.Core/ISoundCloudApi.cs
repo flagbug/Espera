@@ -1,7 +1,6 @@
 ﻿using System;
 using Refit;
 using System.Collections.Generic;
-using System.Linq; // Temporary workaround for a bug in Refit where it doesn't include System.Linq and makes the build fail
 
 namespace Espera.Core
 {
