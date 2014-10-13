@@ -123,7 +123,7 @@ namespace Espera.Core.Mobile
 
                                 catch (SocketException ex)
                                 {
-                                    this.Log().ErrorException(string.Format("Failed to bind UDP client at IP address {0} and port {1}", ipAddress, this.port), ex);
+                                    //this.Log().ErrorException(string.Format("Failed to bind UDP client at IP address {0} and port {1}", ipAddress, this.port), ex);
                                     continue;
                                 }
 
