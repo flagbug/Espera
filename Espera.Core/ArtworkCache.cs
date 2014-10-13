@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -217,7 +218,18 @@ namespace Espera.Core
 
             string keyWithSize = BlobCacheKeys.GetArtworkKeyWithSize(key, size);
 
-            bool resizedExists = await this.cache.GetCreatedAt(keyWithSize) != null;
+            bool resizedExists = false;
+
+            try
+            {
+                resizedExists = await this.cache.GetCreatedAt(keyWithSize) != null;
+            }
+
+            catch (KeyNotFoundException)
+            {
+                // Akavache has a bug that can GetCreatedAt to rarely throw a KeyNotFoundException,
+                // even if the contract says it should return null in this case.
+            }
 
             if (resizedExists)
             {
