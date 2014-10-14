@@ -40,7 +40,7 @@ namespace Espera.Core
         /// </param>
         public YoutubeSongFinder(IBlobCache blobCache)
         {
-            if (cache == null)
+            if (blobCache == null)
                 throw new ArgumentNullException("blobCache");
 
             this.cache = blobCache;
