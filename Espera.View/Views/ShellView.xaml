@@ -741,6 +741,33 @@
                                         <Rectangle.Fill>
                                             <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_refresh}" />
                                         </Rectangle.Fill>
+                                        <Rectangle.RenderTransform>
+                                            <RotateTransform CenterX="10" CenterY="10" />
+                                        </Rectangle.RenderTransform>
+                                        <Rectangle.Resources>
+                                            <Storyboard x:Key="RotateNetworkAvailabilityStoryboard">
+                                                <DoubleAnimation
+                                                    Storyboard.TargetProperty="RenderTransform.Angle"
+                                                    From="0"
+                                                    To="360"
+                                                    Duration="0:0:1"
+                                                    RepeatBehavior="Forever" />
+                                            </Storyboard>
+                                        </Rectangle.Resources>
+                                        <Rectangle.Style>
+                                            <Style>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=IsRefreshingNetworkAvailability}" Value="True">
+                                                        <DataTrigger.EnterActions>
+                                                            <BeginStoryboard x:Name="BeginRotateNetworkAvailabilityStoryboard" Storyboard="{StaticResource RotateNetworkAvailabilityStoryboard}" />
+                                                        </DataTrigger.EnterActions>
+                                                        <DataTrigger.ExitActions>
+                                                            <StopStoryboard BeginStoryboardName="BeginRotateNetworkAvailabilityStoryboard" />
+                                                        </DataTrigger.ExitActions>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
                                     </Rectangle>
                                 </Button>
                             </StackPanel>
@@ -858,6 +885,33 @@
                                         <Rectangle.Fill>
                                             <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_refresh}" />
                                         </Rectangle.Fill>
+                                        <Rectangle.RenderTransform>
+                                            <RotateTransform CenterX="10" CenterY="10" />
+                                        </Rectangle.RenderTransform>
+                                        <Rectangle.Resources>
+                                            <Storyboard x:Key="RotateNetworkAvailabilityStoryboard">
+                                                <DoubleAnimation
+                                                    Storyboard.TargetProperty="RenderTransform.Angle"
+                                                    From="0"
+                                                    To="360"
+                                                    Duration="0:0:1"
+                                                    RepeatBehavior="Forever" />
+                                            </Storyboard>
+                                        </Rectangle.Resources>
+                                        <Rectangle.Style>
+                                            <Style>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=IsRefreshingNetworkAvailability}" Value="True">
+                                                        <DataTrigger.EnterActions>
+                                                            <BeginStoryboard x:Name="BeginRotateNetworkAvailabilityStoryboard" Storyboard="{StaticResource RotateNetworkAvailabilityStoryboard}" />
+                                                        </DataTrigger.EnterActions>
+                                                        <DataTrigger.ExitActions>
+                                                            <StopStoryboard BeginStoryboardName="BeginRotateNetworkAvailabilityStoryboard" />
+                                                        </DataTrigger.ExitActions>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
                                     </Rectangle>
                                 </Button>
                             </StackPanel>

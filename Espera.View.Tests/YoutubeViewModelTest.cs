@@ -176,6 +176,32 @@ namespace Espera.View.Tests
             }
         }
 
+        public class TheIsRefreshingNetworkAvailabilityProperty
+        {
+            [Fact]
+            public void SmokeTest()
+            {
+                var networkStatusSubject = new Subject<bool>();
+                var networkStatus = Substitute.For<INetworkStatus>();
+                networkStatus.GetIsAvailableAsync().Returns(networkStatusSubject);
+
+                var songFinder = Substitute.For<IYoutubeSongFinder>();
+                songFinder.GetSongsAsync(Arg.Any<string>()).Returns(Observable.Return(new List<YoutubeSong>()));
+
+                using (var library = Helpers.CreateLibrary())
+                {
+                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var fixture = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, networkStatus, songFinder);
+
+                    Assert.True(fixture.IsRefreshingNetworkAvailability);
+
+                    networkStatusSubject.OnNext(true);
+
+                    Assert.False(fixture.IsRefreshingNetworkAvailability);
+                }
+            }
+        }
+
         public class TheRefreshNetworkAvailabilityCommand
         {
             [Fact]

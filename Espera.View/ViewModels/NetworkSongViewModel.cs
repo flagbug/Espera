@@ -30,6 +30,7 @@ namespace Espera.View.ViewModels
         private readonly ReactiveCommand<Unit> playNowCommand;
         private readonly ObservableAsPropertyHelper<ISongViewModelBase> selectedSong;
         private readonly INetworkSongFinder<TSong> songFinder;
+        private bool isRefreshingNetworkAvailability;
         private bool isSearching;
 
         protected NetworkSongViewModel(Library library, Guid accessToken, CoreSettings coreSettings,
@@ -63,11 +64,17 @@ namespace Espera.View.ViewModels
             var status = (networkstatus ?? new NetworkStatus());
             IObservable<bool> networkAvailable = this.RefreshNetworkAvailabilityCommand.ToUnit()
                 .StartWith(Unit.Default)
-                .Do(_ => this.Log().Info("Refreshing network availability"))
-                .Select(_ => status.GetIsAvailableAsync().Do(x => this.Log().Info("Network available: {0}", x)))
-                .Switch()
-                .Replay(1)
-                .RefCount();
+                .Do(_ =>
+                {
+                    this.IsRefreshingNetworkAvailability = true;
+                    this.Log().Info("Refreshing network availability");
+                })
+                .Select(_ => status.GetIsAvailableAsync().Do(x =>
+                    {
+                        this.IsRefreshingNetworkAvailability = false;
+                        this.Log().Info("Network available: {0}", x);
+                    }))
+                .Switch();
 
             this.isNetworkUnavailable = networkAvailable
                 .Select(x => !x)
@@ -97,6 +104,12 @@ namespace Espera.View.ViewModels
         public bool IsNetworkUnavailable
         {
             get { return this.isNetworkUnavailable.Value; }
+        }
+
+        public bool IsRefreshingNetworkAvailability
+        {
+            get { return this.isRefreshingNetworkAvailability; }
+            private set { this.RaiseAndSetIfChanged(ref this.isRefreshingNetworkAvailability, value); }
         }
 
         public bool IsSearching
