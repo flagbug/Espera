@@ -106,7 +106,6 @@ namespace Espera.Core.Mobile
         {
             this.socket.Close();
             this.gate.Dispose();
-            this.disconnected.Dispose();
             this.disposable.Dispose();
         }
 
