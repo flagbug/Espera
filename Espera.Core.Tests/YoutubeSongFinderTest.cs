@@ -14,9 +14,9 @@ namespace Espera.Core.Tests
             public async Task NullSearchTermDefaultsToEmptyString()
             {
                 var songs = new[] { new YoutubeSong("http://blabla", TimeSpan.Zero) };
-                BlobCache.LocalMachine.InsertObject(BlobCacheKeys.GetKeyForYoutubeCache(string.Empty), songs);
-
-                var finder = new YoutubeSongFinder();
+                var cache = new InMemoryBlobCache();
+                cache.InsertObject(BlobCacheKeys.GetKeyForYoutubeCache(string.Empty), songs);
+                var finder = new YoutubeSongFinder(cache);
 
                 var result = await finder.GetSongsAsync();
 
@@ -28,9 +28,9 @@ namespace Espera.Core.Tests
             {
                 const string searchTerm = "Foo";
                 var songs = new[] { new YoutubeSong("http://blabla", TimeSpan.Zero) };
-                BlobCache.LocalMachine.InsertObject(BlobCacheKeys.GetKeyForYoutubeCache(searchTerm), songs);
-
-                var finder = new YoutubeSongFinder();
+                var cache = new InMemoryBlobCache();
+                cache.InsertObject(BlobCacheKeys.GetKeyForYoutubeCache(searchTerm), songs);
+                var finder = new YoutubeSongFinder(cache);
 
                 var result = await finder.GetSongsAsync(searchTerm);
 
