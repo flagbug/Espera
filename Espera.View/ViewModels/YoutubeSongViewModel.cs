@@ -13,6 +13,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Akavache;
 using Splat;
 using YoutubeExtractor;
 using ReactiveCommand = ReactiveUI.ReactiveCommand;
@@ -204,48 +205,24 @@ namespace Espera.View.ViewModels
 
         private async Task GetThumbnailAsync()
         {
+            Uri thumbnailUrl = ((YoutubeSong)this.Model).ThumbnailSource;
+            thumbnailUrl = new Uri(thumbnailUrl.ToString().Replace("default", "hqdefault"));
+
             this.IsLoadingThumbnail = true;
 
-            using (var client = new HttpClient())
+            try
             {
-                try
-                {
-                    Uri thumbnailUrl = ((YoutubeSong)this.Model).ThumbnailSource;
+                IBitmap image = await BlobCache.LocalMachine.LoadImageFromUrl(thumbnailUrl.ToString(), absoluteExpiration: DateTime.Now + TimeSpan.FromMinutes(60));
 
-                    thumbnailUrl = new Uri(thumbnailUrl.ToString().Replace("default", "hqdefault"));
-
-                    byte[] imageBytes = await client.GetByteArrayAsync(thumbnailUrl);
-
-                    if (imageBytes == null)
-                    {
-                        return;
-                    }
-
-                    using (var imageStream = new MemoryStream(imageBytes))
-                    {
-                        var image = new BitmapImage();
-
-                        image.BeginInit();
-                        image.StreamSource = imageStream;
-                        image.CacheOption = BitmapCacheOption.OnLoad;
-                        image.EndInit();
-
-                        image.Freeze();
-
-                        this.Thumbnail = image;
-                    }
-                }
-
-                catch (HttpRequestException ex)
-                {
-                    this.Log().ErrorException("Failed to download YouTube artwork", ex);
-                }
-
-                finally
-                {
-                    this.IsLoadingThumbnail = false;
-                }
+                this.Thumbnail = image.ToNative();
             }
+
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Failed to download YouTube artwork", ex);
+            }
+
+            this.IsLoadingThumbnail = false;
         }
     }
 }

@@ -8,11 +8,12 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Akavache;
 using Splat;
 
 namespace Espera.View.ViewModels
 {
-    internal class SoundCloudSongViewModel : SongViewModelBase, IEnableLogger
+    internal class SoundCloudSongViewModel : SongViewModelBase
     {
         private readonly ObservableAsPropertyHelper<bool> hasThumbnail;
         private bool isLoadingThumbnail;
@@ -74,53 +75,30 @@ namespace Espera.View.ViewModels
 
         private async Task GetThumbnailAsync()
         {
+            Uri artworkUrl = ((SoundCloudSong)this.Model).ArtworkUrl;
+
+            if (artworkUrl == null)
+                return;
+
+            // Get a non-shitty resolution <c>
+            // https: //developers.soundcloud.com/docs/api/reference#tracks <c/>
+            artworkUrl = new Uri(artworkUrl.ToString().Replace("large", "t300x300"));
+
             this.IsLoadingThumbnail = true;
 
-            using (var client = new HttpClient())
+            try
             {
-                try
-                {
-                    Uri artworkUrl = ((SoundCloudSong)this.Model).ArtworkUrl;
+                IBitmap image = await BlobCache.InMemory.LoadImageFromUrl(artworkUrl.ToString(), absoluteExpiration: DateTime.Now + TimeSpan.FromMinutes(60));
 
-                    if (artworkUrl == null)
-                        return;
-
-                    // Get a non-shitty resolution <c>
-                    // https://developers.soundcloud.com/docs/api/reference#tracks <c/>
-                    artworkUrl = new Uri(artworkUrl.ToString().Replace("large", "t300x300"));
-
-                    byte[] imageBytes = await client.GetByteArrayAsync(artworkUrl);
-
-                    if (imageBytes == null)
-                    {
-                        return;
-                    }
-
-                    using (var imageStream = new MemoryStream(imageBytes))
-                    {
-                        var image = new BitmapImage();
-
-                        image.BeginInit();
-                        image.StreamSource = imageStream;
-                        image.CacheOption = BitmapCacheOption.OnLoad;
-                        image.EndInit();
-
-                        image.Freeze();
-
-                        this.Thumbnail = image;
-                    }
-                }
-
-                catch (HttpRequestException ex)
-                {
-                    this.Log().ErrorException("Failed to download SoundCloud artwork", ex);
-                }
-
-                finally
-                {
-                    this.IsLoadingThumbnail = false;
-                }
+                this.Thumbnail = image.ToNative();
             }
+
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Failed to download SoundCloud artwork", ex);
+            }
+
+            this.IsLoadingThumbnail = false;
         }
     }
 }
