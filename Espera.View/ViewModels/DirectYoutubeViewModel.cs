@@ -20,7 +20,7 @@ namespace Espera.View.ViewModels
         public DirectYoutubeViewModel(Library library, Guid accessToken, IYoutubeSongFinder youtubeSongFinder = null)
             : base(library, accessToken)
         {
-            this.youtubeSongFinder = youtubeSongFinder ?? new YoutubeSongFinder();
+            this.youtubeSongFinder = youtubeSongFinder ?? YoutubeSongFinder.CachingInstance;
         }
 
         public override DefaultPlaybackAction DefaultPlaybackAction

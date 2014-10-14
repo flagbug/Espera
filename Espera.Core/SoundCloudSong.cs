@@ -6,7 +6,7 @@ namespace Espera.Core
 {
     public class SoundCloudSong : Song
     {
-        private string playbackPath;
+        private readonly string playbackPath;
         private User user;
 
         public SoundCloudSong()
@@ -101,7 +101,7 @@ namespace Espera.Core
             set
             {
                 this.user = value;
-                this.Artist = value.Username;
+                this.Artist = value == null ? string.Empty : value.Username;
             }
         }
     }

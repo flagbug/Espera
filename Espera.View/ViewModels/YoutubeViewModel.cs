@@ -17,7 +17,7 @@ namespace Espera.View.ViewModels
             : base(library, accessToken, coreSettings,
                 song => new YoutubeSongViewModel(song, () => coreSettings.YoutubeDownloadPath),
                 networkstatus,
-                songFinder ?? new YoutubeSongFinder())
+                songFinder ?? YoutubeSongFinder.CachingInstance)
         {
             if (viewSettings == null)
                 Throw.ArgumentNullException(() => viewSettings);
