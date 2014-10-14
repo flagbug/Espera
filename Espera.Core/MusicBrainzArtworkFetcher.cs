@@ -73,13 +73,12 @@ namespace Espera.Core
 
         private static async Task<IReadOnlyList<string>> GetReleaseIdsAsync(string artist, string album)
         {
+            string searchRequestUrl = string.Format(SearchEndpoint, artist, album);
+            string searchResponse;
+
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("user-agent", "Espera/2.0 (http://getespera.com)");
-
-                string searchRequestUrl = string.Format(SearchEndpoint, artist, album);
-
-                string searchResponse;
 
                 try
                 {
@@ -90,18 +89,18 @@ namespace Espera.Core
                 {
                     throw new ArtworkFetchException(string.Format("Error while requesting the release id for artist {0} and album {1}", artist, album), ex);
                 }
-
-                XNamespace ns = "http://musicbrainz.org/ns/mmd-2.0#";
-                var releases = XDocument.Parse(searchResponse).Descendants(ns + "release");
-
-                XNamespace scoreNs = "http://musicbrainz.org/ns/ext#-2.0";
-
-                List<string> releaseIds = releases.Where(x => (int?)x.Attribute(scoreNs + "score") >= 95)
-                    .Select(x => x.Attribute("id").Value)
-                    .ToList();
-
-                return releaseIds;
             }
+
+            XNamespace ns = "http://musicbrainz.org/ns/mmd-2.0#";
+            var releases = XDocument.Parse(searchResponse).Descendants(ns + "release");
+
+            XNamespace scoreNs = "http://musicbrainz.org/ns/ext#-2.0";
+
+            List<string> releaseIds = releases.Where(x => (int?)x.Attribute(scoreNs + "score") >= 95)
+                .Select(x => x.Attribute("id").Value)
+                .ToList();
+
+            return releaseIds;
         }
 
         private async Task<Uri> GetArtworkLinkAsync(IReadOnlyList<string> releaseIds)
