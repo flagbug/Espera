@@ -21,12 +21,26 @@ namespace Espera.Core
 
         public const string OnlineArtwork = "artwork-online-lookup-";
 
+        public const string SoundCloudPrefix = "soundcloud-search-";
+
+        public const string YoutubePrefix = "youtube-search-";
+
+        public static string GetKeyForYoutubeCache(string searchTerm)
+        {
+            return YoutubePrefix + searchTerm.ToLowerInvariant();
+        }
+
         /// <summary>
         /// Gets the artwork key for the specified artwork hash and size.
         /// </summary>
         public static string GetArtworkKeyWithSize(string key, int size)
         {
             return String.Format("{0}-{1}x{1}", key, size);
+        }
+
+        public static string GetKeyForSoundCloudCache(string searchTerm)
+        {
+            return SoundCloudPrefix + searchTerm.ToLowerInvariant();
         }
 
         public static string GetKeyForArtwork(byte[] artworkData)

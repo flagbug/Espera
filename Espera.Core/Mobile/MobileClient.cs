@@ -386,11 +386,9 @@ namespace Espera.Core.Mobile
         {
             var searchTerm = parameters["searchTerm"].ToObject<string>();
 
-            var soundCloudfinder = new SoundCloudSongFinder();
-
             try
             {
-                IReadOnlyList<SoundCloudSong> songs = await soundCloudfinder.GetSongsAsync(searchTerm);
+                IReadOnlyList<SoundCloudSong> songs = await SoundCloudSongFinder.CachingInstance.GetSongsAsync(searchTerm);
 
                 // Cache the latest SoundCloud search request, so we can find the songs by GUID when
                 // we add one to the playlist later
@@ -423,11 +421,9 @@ namespace Espera.Core.Mobile
         {
             var searchTerm = parameters["searchTerm"].ToObject<string>();
 
-            var youtubeSongFinder = new YoutubeSongFinder();
-
             try
             {
-                IReadOnlyList<YoutubeSong> songs = await youtubeSongFinder.GetSongsAsync(searchTerm);
+                IReadOnlyList<YoutubeSong> songs = await YoutubeSongFinder.CachingInstance.GetSongsAsync(searchTerm);
 
                 // Cache the latest YouTube search request, so we can find the songs by GUID when we
                 // add one to the playlist later

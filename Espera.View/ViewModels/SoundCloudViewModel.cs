@@ -15,7 +15,7 @@ namespace Espera.View.ViewModels
 
         public SoundCloudViewModel(Library library, Guid accessToken, CoreSettings coreSettings, ViewSettings viewSettings, INetworkStatus networkStatus = null, INetworkSongFinder<SoundCloudSong> songFinder = null)
             : base(library, accessToken, coreSettings,
-                song => new SoundCloudSongViewModel(song), networkStatus, songFinder ?? new SoundCloudSongFinder())
+                song => new SoundCloudSongViewModel(song), networkStatus, songFinder ?? SoundCloudSongFinder.CachingInstance)
         {
             if (viewSettings == null)
                 Throw.ArgumentNullException(() => viewSettings);

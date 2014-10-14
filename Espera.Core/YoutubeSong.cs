@@ -25,11 +25,11 @@ namespace Espera.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="YoutubeSong" /> class.
         /// </summary>
-        /// <param name="path">The path of the song.</param>
+        /// <param name="originalPath">The original (YouTube URL) path of the song.</param>
         /// <param name="duration">The duration of the song.</param>
         /// <exception cref="ArgumentNullException"><paramref name="path" /> is null.</exception>
-        public YoutubeSong(string path, TimeSpan duration)
-            : base(path, duration)
+        public YoutubeSong(string originalPath, TimeSpan duration)
+            : base(originalPath, duration)
         { }
 
         /// <summary>
