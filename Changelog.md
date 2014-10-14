@@ -1,3 +1,13 @@
+# v2.9.4
+
+## Improvements
+- Improved the SoundCloud and YouTube search time for Espera and the remote control in some cases.
+- The network refresh button now indicates its progress.
+
+## Bugfixes
+- Fixed the remote control discovery sometimes not working.
+- Fixed a bug that caused some album artworks to not display properly.
+
 # v2.9.3
 
 ## Bugfixes
