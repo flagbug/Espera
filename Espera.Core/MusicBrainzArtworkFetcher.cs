@@ -21,7 +21,9 @@ namespace Espera.Core
 
         public MusicBrainzArtworkFetcher()
         {
-            this.queue = new RateLimitedOperationQueue(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler);
+            // The MusicBraint search service allows us to perform onme request per second on
+            // average, make sure we don't exceed that.
+            this.queue = new RateLimitedOperationQueue(TimeSpan.FromSeconds(1.5), RxApp.TaskpoolScheduler);
         }
 
         public async Task<Uri> RetrieveAsync(string artist, string album)
