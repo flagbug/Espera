@@ -20,6 +20,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
+using Espera.Core;
 using YoutubeExtractor;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using ListView = System.Windows.Controls.ListView;
@@ -168,6 +169,17 @@ namespace Espera.View.Views
             {
                 e.Cancel = true;
             }
+        }
+
+        private void OpenTagEditor(object sender, RoutedEventArgs e)
+        {
+            var songs = this.shellViewModel.LocalViewModel.SelectedSongs.Select(x => (LocalSong)x.Model).ToList();
+            this.TagEditor.Content = new TagEditorView
+            {
+                DataContext = new TagEditorViewModel(songs)
+            };
+
+            this.TagEditorFlyout.IsOpen = true;
         }
 
         private void PlaylistContextMenuOpening(object sender, ContextMenuEventArgs e)

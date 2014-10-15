@@ -3,6 +3,8 @@ using Espera.Network;
 using Rareform.Validation;
 using System;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
+using TagLib;
 
 namespace Espera.Core
 {
@@ -59,6 +61,21 @@ namespace Espera.Core
         public override string PlaybackPath
         {
             get { return this.OriginalPath; }
+        }
+
+        public async Task SaveTagsToDisk()
+        {
+            using (var file = await Task.Run(() => File.Create(this.OriginalPath)))
+            {
+                Tag tag = file.Tag;
+
+                tag.Album = this.Album;
+                tag.Performers = new[] { this.Artist };
+                tag.Genres = new[] { this.Genre };
+                tag.Title = this.Title;
+
+                await Task.Run(() => file.Save());
+            }
         }
 
         /// <summary>

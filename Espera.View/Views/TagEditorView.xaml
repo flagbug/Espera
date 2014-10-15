@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="Espera.View.Views.TagEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:Espera.View.ViewModels"
+             d:DataContext="{d:DesignInstance viewModels:DesignTimeTagEditorViewModel,
+                                              IsDesignTimeCreatable=True}"
+             d:DesignHeight="600"
+             d:DesignWidth="600"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
+    <StackPanel Margin="15, 0, 15, 0">
+        <TextBlock Text="Title" Visibility="{Binding Path=IsSingleSong, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <TextBox Margin="0, 0, 0, 10"
+                 Text="{Binding Path=Title}"
+                 Visibility="{Binding Path=IsSingleSong,
+                                      Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <TextBlock Text="Artist" />
+        <TextBox Text="{Binding Path=Artist}" />
+        <TextBlock Margin="0, 10, 0, 0" Text="Album" />
+        <TextBox Text="{Binding Path=Album}" />
+        <TextBlock Margin="0, 10, 0, 0" Text="Genre" />
+        <TextBox Text="{Binding Path=Genre}" />
+        <Button Width="75"
+                Margin="0, 10, 0, 0"
+                HorizontalAlignment="Right"
+                Command="{Binding Path=Save}"
+                Content="Save"
+                Style="{StaticResource AccentedSquareButtonStyle}" />
+    </StackPanel>
+</UserControl>
