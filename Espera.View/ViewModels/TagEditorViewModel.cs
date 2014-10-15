@@ -58,12 +58,7 @@ namespace Espera.View.ViewModels
                     return this.album;
                 }
 
-                if (songs.Count > 1 && songs.Select(x => x.Album).Distinct().Count() > 1)
-                {
-                    return string.Empty;
-                }
-
-                return songs[0].Album;
+                return songs.All(x => x.Album == songs[0].Album) ? songs[0].Album : string.Empty;
             }
 
             set { this.album = value; }
@@ -78,12 +73,7 @@ namespace Espera.View.ViewModels
                     return this.artist;
                 }
 
-                if (songs.Count > 1 && songs.Select(x => x.Artist).Distinct().Count() > 1)
-                {
-                    return string.Empty;
-                }
-
-                return songs[0].Artist;
+                return songs.All(x => x.Artist == songs[0].Artist) ? songs[0].Artist : string.Empty;
             }
 
             set { this.artist = value; }
@@ -104,13 +94,9 @@ namespace Espera.View.ViewModels
                     return this.genre;
                 }
 
-                if (songs.Count > 1 && songs.Select(x => x.Genre).Distinct().Count() > 1)
-                {
-                    return string.Empty;
-                }
-
-                return songs[0].Genre;
+                return songs.All(x => x.Genre == songs[0].Genre) ? songs[0].Genre : string.Empty;
             }
+
             set { this.genre = value; }
         }
 
