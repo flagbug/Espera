@@ -14,6 +14,7 @@ namespace Espera.View.ViewModels
     public class TagEditorViewModel : ReactiveObject
     {
         private readonly ObservableAsPropertyHelper<bool> isSaving;
+        private readonly ObservableAsPropertyHelper<bool> saveFailed;
         private readonly IReadOnlyList<LocalSong> songs;
         private string album;
         private string artist;
@@ -33,6 +34,12 @@ namespace Espera.View.ViewModels
             this.Save = ReactiveCommand.CreateAsyncTask(_ => this.SaveTags());
             this.isSaving = this.Save.IsExecuting
                 .ToProperty(this, x => x.IsSaving);
+
+            this.DismissFailure = ReactiveCommand.Create();
+
+            this.saveFailed = this.Save.ThrownExceptions.Select(_ => true)
+                .Merge(this.DismissFailure.Select(_ => false))
+                .ToProperty(this, x => x.SaveFailed);
 
             this.Cancel = ReactiveCommand.Create();
 
@@ -84,6 +91,8 @@ namespace Espera.View.ViewModels
 
         public ReactiveCommand<object> Cancel { get; private set; }
 
+        public ReactiveCommand<object> DismissFailure { get; private set; }
+
         public IObservable<Unit> Finished { get; private set; }
 
         public string Genre
@@ -116,6 +125,11 @@ namespace Espera.View.ViewModels
         }
 
         public ReactiveCommand<Unit> Save { get; private set; }
+
+        public bool SaveFailed
+        {
+            get { return this.saveFailed.Value; }
+        }
 
         public string Title
         {

@@ -40,18 +40,47 @@
                         Style="{StaticResource SquareButtonStyle}" />
             </StackPanel>
         </StackPanel>
-        <Grid Visibility="{Binding Path=IsSaving, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid>
+            <Grid.Style>
+                <Style TargetType="{x:Type Grid}">
+                    <Setter Property="Visibility" Value="Hidden" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=IsSaving}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=SaveFailed}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
             <Grid HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
                   Background="{DynamicResource FlyoutBackgroundBrush}"
-                  Opacity="0.8" />
+                  Opacity="0.9" />
             <StackPanel HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Orientation="Vertical">
+                        Orientation="Vertical"
+                        Visibility="{Binding Path=IsSaving,
+                                             Converter={StaticResource BooleanToVisibilityConverter}}">
                 <controls:ProgressRing IsActive="True" />
                 <TextBlock Margin="0, 5, 0, 0"
                            HorizontalAlignment="Center"
                            Text="Saving..." />
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Visibility="{Binding Path=SaveFailed,
+                                             Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock FontSize="{StaticResource SubHeaderFontSize}"
+                           Foreground="{DynamicResource ValidationSummaryColor1}"
+                           Text="Failed to save metadata" />
+                <Button Width="75"
+                        Margin="0, 15, 0, 0"
+                        HorizontalAlignment="Right"
+                        Command="{Binding Path=DismissFailure}"
+                        Content="Ok"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
             </StackPanel>
         </Grid>
     </Grid>
