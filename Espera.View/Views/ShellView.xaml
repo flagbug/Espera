@@ -139,20 +139,26 @@
             <dialogs:SimpleDialog x:Key="PortableUpdateMessage"
                                   Title="Update available"
                                   Height="250">
-                <StackPanel Margin="10" Orientation="Vertical" VerticalAlignment="Center">
-                    <TextBlock FontSize="15" TextWrapping="Wrap" Text="An update is available. Would you like to download it now?" />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0, 15, 0, 0">
+                <StackPanel Margin="10"
+                            VerticalAlignment="Center"
+                            Orientation="Vertical">
+                    <TextBlock FontSize="15"
+                               Text="An update is available. Would you like to download it now?"
+                               TextWrapping="Wrap" />
+                    <StackPanel Margin="0, 15, 0, 0"
+                                HorizontalAlignment="Right"
+                                Orientation="Horizontal">
                         <Button Width="75"
-                            Height="35"
-                            MinWidth="80"
-                            Margin="10, 0, 0, 0"
-                            Content="Download"
-                            Style="{DynamicResource AccentedDialogSquareButton}" />
+                                Height="35"
+                                MinWidth="80"
+                                Margin="10, 0, 0, 0"
+                                Content="Download"
+                                Style="{DynamicResource AccentedDialogSquareButton}" />
                         <Button Width="75"
-                            Height="35"
-                            MinWidth="80"
-                            Margin="10, 0, 0, 0"
-                            Content="Not Now" />
+                                Height="35"
+                                MinWidth="80"
+                                Margin="10, 0, 0, 0"
+                                Content="Not Now" />
                     </StackPanel>
                 </StackPanel>
             </dialogs:SimpleDialog>
@@ -227,11 +233,12 @@
                               LoadedBehavior="Manual" />
             </Controls:Flyout>
             <Controls:Flyout x:Name="TagEditorFlyout"
-                             CloseCommand="{Binding ElementName=TagEditor, Path=Content.DataContext.Cancel}"
+                             CloseCommand="{Binding ElementName=TagEditor,
+                                                    Path=Content.DataContext.Cancel}"
                              Header="Tag Editor"
                              Position="Right"
                              Theme="Adapt">
-                <ContentControl Width="500" x:Name="TagEditor" />
+                <ContentControl x:Name="TagEditor" Width="500" />
             </Controls:Flyout>
         </Controls:FlyoutsControl>
     </Controls:MetroWindow.Flyouts>
@@ -528,7 +535,10 @@
                                                   Visibility="{Binding Path=IsAdmin,
                                                                        Converter={StaticResource BooleanToVisibilityConverter}}" />
                                         <MenuItem Command="{Binding Path=AddToPlaylistCommand}" Header="Add to playlist" />
-                                        <MenuItem Header="Edit tags" Visibility="{Binding Path=IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}" Click="OpenTagEditor" />
+                                        <MenuItem Click="OpenTagEditor"
+                                                  Header="Edit tags"
+                                                  Visibility="{Binding Path=IsAdmin,
+                                                                       Converter={StaticResource BooleanToVisibilityConverter}}" />
                                     </ContextMenu>
                                 </ListView.ContextMenu>
                                 <ListView.ItemContainerStyle>
@@ -774,12 +784,11 @@
                                         </Rectangle.RenderTransform>
                                         <Rectangle.Resources>
                                             <Storyboard x:Key="RotateNetworkAvailabilityStoryboard">
-                                                <DoubleAnimation
-                                                    Storyboard.TargetProperty="RenderTransform.Angle"
-                                                    From="0"
-                                                    To="360"
-                                                    Duration="0:0:1"
-                                                    RepeatBehavior="Forever" />
+                                                <DoubleAnimation Duration="0:0:1"
+                                                                 From="0"
+                                                                 RepeatBehavior="Forever"
+                                                                 Storyboard.TargetProperty="RenderTransform.Angle"
+                                                                 To="360" />
                                             </Storyboard>
                                         </Rectangle.Resources>
                                         <Rectangle.Style>
@@ -918,12 +927,11 @@
                                         </Rectangle.RenderTransform>
                                         <Rectangle.Resources>
                                             <Storyboard x:Key="RotateNetworkAvailabilityStoryboard">
-                                                <DoubleAnimation
-                                                    Storyboard.TargetProperty="RenderTransform.Angle"
-                                                    From="0"
-                                                    To="360"
-                                                    Duration="0:0:1"
-                                                    RepeatBehavior="Forever" />
+                                                <DoubleAnimation Duration="0:0:1"
+                                                                 From="0"
+                                                                 RepeatBehavior="Forever"
+                                                                 Storyboard.TargetProperty="RenderTransform.Angle"
+                                                                 To="360" />
                                             </Storyboard>
                                         </Rectangle.Resources>
                                         <Rectangle.Style>
