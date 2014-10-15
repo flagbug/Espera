@@ -28,14 +28,14 @@
                     HorizontalAlignment="Right"
                     Orientation="Horizontal">
             <Button Width="75"
-                    Margin="0, 0, 10, 0"
-                    Content="Cancel"
-                    Command="{Binding Path=Cancel}"
-                    Style="{StaticResource SquareButtonStyle}" />
-            <Button Width="75"
                     Command="{Binding Path=Save}"
                     Content="Save"
                     Style="{StaticResource AccentedSquareButtonStyle}" />
+            <Button Width="75"
+                    Margin="15, 0, 0, 0"
+                    Command="{Binding Path=Cancel}"
+                    Content="Cancel"
+                    Style="{StaticResource SquareButtonStyle}" />
         </StackPanel>
     </StackPanel>
 </UserControl>
