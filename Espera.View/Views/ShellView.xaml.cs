@@ -22,7 +22,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Espera.Core;
-using ReactiveMarrow;
 using YoutubeExtractor;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using ListView = System.Windows.Controls.ListView;
@@ -78,6 +77,17 @@ namespace Espera.View.Views
                 {
                     var dialog = (SimpleDialog)this.Resources["Changelog"];
                     await this.ShowMetroDialogAsync(dialog);
+                }
+
+                if (AppInfo.IsPortable)
+                {
+                    Observable.StartAsync(UpdateHelper.CheckForPortableUpdate)
+                        .Where(x => x)
+                        .Delay(TimeSpan.FromSeconds(5))
+                        .ObserveOn(RxApp.MainThreadScheduler)
+                        .Select(_ => (SimpleDialog)this.Resources["PortableUpdateMessage"])
+                        .SelectMany(dialog => this.ShowMetroDialogAsync(dialog).ToObservable())
+                        .Subscribe();
                 }
             };
         }
