@@ -203,7 +203,22 @@ namespace Espera.View.ViewModels
             // Ignore redundant song updates.
             if (!selectableSongs.SequenceEqual(this.SelectableSongs))
             {
+                // Scratch the old viewmodels
+                foreach (var viewModel in this.SelectableSongs)
+                {
+                    viewModel.Dispose();
+                }
+
                 this.SelectableSongs = selectableSongs;
+            }
+
+            else
+            {
+                // We don't have to update the selectable songs, get rid of the redundant ones we've created
+                foreach (LocalSongViewModel viewModel in selectableSongs)
+                {
+                    viewModel.Dispose();
+                }
             }
 
             if (this.SelectedSongs == null)

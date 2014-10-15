@@ -76,6 +76,10 @@ namespace Espera.Core
 
                 await Task.Run(() => file.Save());
             }
+
+            // Notify that all of the song metadata has changed, even if may not be really true, we
+            // just want to update the UI
+            this.OnPropertyChanged(string.Empty);
         }
 
         /// <summary>
