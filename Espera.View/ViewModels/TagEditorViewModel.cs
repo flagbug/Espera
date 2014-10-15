@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Espera.Core;
+using Espera.View.CacheMigration;
+using ReactiveMarrow;
 using ReactiveUI;
 
 namespace Espera.View.ViewModels
@@ -27,6 +30,12 @@ namespace Espera.View.ViewModels
             this.songs = songs;
 
             this.Save = ReactiveCommand.CreateAsyncTask(_ => this.SaveTags());
+            this.Cancel = ReactiveCommand.Create();
+
+            this.Finished = this.Save.Merge(this.Cancel.ToUnit())
+                .FirstAsync()
+                .PublishLast()
+                .PermaRef();
         }
 
         public string Album
@@ -68,6 +77,10 @@ namespace Espera.View.ViewModels
 
             set { this.artist = value; }
         }
+
+        public ReactiveCommand<object> Cancel { get; private set; }
+
+        public IObservable<Unit> Finished { get; private set; }
 
         public string Genre
         {

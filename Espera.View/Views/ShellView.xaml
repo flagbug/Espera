@@ -207,6 +207,7 @@
                               LoadedBehavior="Manual" />
             </Controls:Flyout>
             <Controls:Flyout x:Name="TagEditorFlyout"
+                             CloseCommand="{Binding ElementName=TagEditor, Path=Content.DataContext.Cancel}"
                              Header="Tag Editor"
                              Position="Right"
                              Theme="Adapt">

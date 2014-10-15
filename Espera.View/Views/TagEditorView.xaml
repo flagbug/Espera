@@ -1,7 +1,6 @@
 ﻿<UserControl x:Class="Espera.View.Views.TagEditorView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:Espera.View.ViewModels"
@@ -25,11 +24,18 @@
         <TextBox Text="{Binding Path=Album}" />
         <TextBlock Margin="0, 10, 0, 0" Text="Genre" />
         <TextBox Text="{Binding Path=Genre}" />
-        <Button Width="75"
-                Margin="0, 10, 0, 0"
-                HorizontalAlignment="Right"
-                Command="{Binding Path=Save}"
-                Content="Save"
-                Style="{StaticResource AccentedSquareButtonStyle}" />
+        <StackPanel Margin="0, 10, 0, 0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+            <Button Width="75"
+                    Margin="0, 0, 10, 0"
+                    Content="Cancel"
+                    Command="{Binding Path=Cancel}"
+                    Style="{StaticResource SquareButtonStyle}" />
+            <Button Width="75"
+                    Command="{Binding Path=Save}"
+                    Content="Save"
+                    Style="{StaticResource AccentedSquareButtonStyle}" />
+        </StackPanel>
     </StackPanel>
 </UserControl>

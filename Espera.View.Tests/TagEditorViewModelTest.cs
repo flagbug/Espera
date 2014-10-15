@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Espera.Core;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
+using ReactiveUI;
 using Xunit;
 
 namespace Espera.View.Tests
@@ -109,6 +112,22 @@ namespace Espera.View.Tests
                 var fixture = new TagEditorViewModel(songs);
 
                 Assert.Equal(Helpers.LocalSong1.Artist, fixture.Artist);
+            }
+        }
+
+        public class TheFinishedProperty
+        {
+            [Fact]
+            public async Task FiresWhenCancelCommandInvoked()
+            {
+                var songs = new[] { Helpers.LocalSong1 };
+                var fixture = new TagEditorViewModel(songs);
+
+                var finished = fixture.Finished.CreateCollection();
+
+                await fixture.Cancel.ExecuteAsync();
+
+                Assert.Equal(1, finished.Count);
             }
         }
 
