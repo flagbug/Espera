@@ -15,6 +15,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -174,8 +175,16 @@ namespace Espera.View.Views
 
         private void OpenTagEditor(object sender, RoutedEventArgs e)
         {
+            Func<Task<bool>> multipleEditWarning = async () =>
+            {
+                MessageDialogResult result = await this.ShowMessageAsync("Save Metadata", "Do you really want to change the metadata of multiple songs?",
+                    MessageDialogStyle.AffirmativeAndNegative, new MetroDialogSettings { AffirmativeButtonText = "Save", NegativeButtonText = "Cancel" });
+
+                return result == MessageDialogResult.Affirmative;
+            };
+
             var songs = this.shellViewModel.LocalViewModel.SelectedSongs.Select(x => (LocalSong)x.Model).ToList();
-            var editorViewModel = new TagEditorViewModel(songs);
+            var editorViewModel = new TagEditorViewModel(songs, multipleEditWarning);
             this.TagEditor.Content = new TagEditorView
             {
                 DataContext = editorViewModel

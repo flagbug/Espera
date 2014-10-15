@@ -17,7 +17,7 @@ namespace Espera.View.Tests
             public void MultipleSongsWithDifferentAlbumReturnsEmptyString()
             {
                 var songs = new[] { Helpers.LocalSong1, Helpers.LocalSong2 };
-                var fixture = new TagEditorViewModel(songs);
+                var fixture = new TagEditorViewModel(songs, () => Task.FromResult(true));
 
                 Assert.Equal(string.Empty, fixture.Album);
             }
@@ -36,7 +36,7 @@ namespace Espera.View.Tests
                 };
 
                 var songs = new[] { song1, song2 };
-                var fixture = new TagEditorViewModel(songs);
+                var fixture = new TagEditorViewModel(songs, () => Task.FromResult(true));
 
                 Assert.Equal(song1.Album, fixture.Album);
             }
@@ -45,7 +45,7 @@ namespace Espera.View.Tests
             public void ReturnsCustomValueIfSet()
             {
                 var songs = new[] { Helpers.LocalSong1 };
-                var fixture = new TagEditorViewModel(songs)
+                var fixture = new TagEditorViewModel(songs, () => Task.FromResult(true))
                 {
                     Album = "Custom Album"
                 };
@@ -57,7 +57,7 @@ namespace Espera.View.Tests
             public void SingleSongReturnsSongAlbum()
             {
                 var songs = new[] { Helpers.LocalSong1 };
-                var fixture = new TagEditorViewModel(songs);
+                var fixture = new TagEditorViewModel(songs, () => Task.FromResult(true));
 
                 Assert.Equal(Helpers.LocalSong1.Album, fixture.Album);
             }
@@ -69,7 +69,7 @@ namespace Espera.View.Tests
             public void MultipleSongsWithDifferentArtistReturnsEmptyString()
             {
                 var songs = new[] { Helpers.LocalSong1, Helpers.LocalSong2 };
-                var fixture = new TagEditorViewModel(songs);
+                var fixture = new TagEditorViewModel(songs, () => Task.FromResult(true));
 
                 Assert.Equal(string.Empty, fixture.Artist);
             }
@@ -88,7 +88,7 @@ namespace Espera.View.Tests
                 };
 
                 var songs = new[] { song1, song2 };
-                var fixture = new TagEditorViewModel(songs);
+                var fixture = new TagEditorViewModel(songs, () => Task.FromResult(true));
 
                 Assert.Equal(song1.Artist, fixture.Artist);
             }
@@ -97,7 +97,7 @@ namespace Espera.View.Tests
             public void ReturnsCustomValueIfSet()
             {
                 var songs = new[] { Helpers.LocalSong1 };
-                var fixture = new TagEditorViewModel(songs)
+                var fixture = new TagEditorViewModel(songs, () => Task.FromResult(true))
                 {
                     Artist = "Custom Artist"
                 };
@@ -109,7 +109,7 @@ namespace Espera.View.Tests
             public void SingleSongReturnsSongArtist()
             {
                 var songs = new[] { Helpers.LocalSong1 };
-                var fixture = new TagEditorViewModel(songs);
+                var fixture = new TagEditorViewModel(songs, () => Task.FromResult(true));
 
                 Assert.Equal(Helpers.LocalSong1.Artist, fixture.Artist);
             }
@@ -121,7 +121,7 @@ namespace Espera.View.Tests
             public async Task FiresWhenCancelCommandInvoked()
             {
                 var songs = new[] { Helpers.LocalSong1 };
-                var fixture = new TagEditorViewModel(songs);
+                var fixture = new TagEditorViewModel(songs, () => Task.FromResult(true));
 
                 var finished = fixture.Finished.CreateCollection();
 
@@ -137,7 +137,7 @@ namespace Espera.View.Tests
             public void MultipleSongsWithDifferentAlbumReturnsEmptyString()
             {
                 var songs = new[] { Helpers.LocalSong1, Helpers.LocalSong2 };
-                var fixture = new TagEditorViewModel(songs);
+                var fixture = new TagEditorViewModel(songs, () => Task.FromResult(true));
 
                 Assert.Equal(string.Empty, fixture.Genre);
             }
@@ -156,7 +156,7 @@ namespace Espera.View.Tests
                 };
 
                 var songs = new[] { song1, song2 };
-                var fixture = new TagEditorViewModel(songs);
+                var fixture = new TagEditorViewModel(songs, () => Task.FromResult(true));
 
                 Assert.Equal(song1.Genre, fixture.Genre);
             }
@@ -165,7 +165,7 @@ namespace Espera.View.Tests
             public void ReturnsCustomValueIfSet()
             {
                 var songs = new[] { Helpers.LocalSong1 };
-                var fixture = new TagEditorViewModel(songs)
+                var fixture = new TagEditorViewModel(songs, () => Task.FromResult(true))
                 {
                     Genre = "Custom Genre"
                 };
@@ -177,9 +177,28 @@ namespace Espera.View.Tests
             public void SingleSongReturnsSongAlbum()
             {
                 var songs = new[] { Helpers.LocalSong1 };
-                var fixture = new TagEditorViewModel(songs);
+                var fixture = new TagEditorViewModel(songs, () => Task.FromResult(true));
 
                 Assert.Equal(Helpers.LocalSong1.Genre, fixture.Genre);
+            }
+        }
+
+        public class TheSaveCommand
+        {
+            [Fact]
+            public async Task InvokesWarningIfMoreThanOneSong()
+            {
+                bool called = false;
+                var songs = new[] { Helpers.LocalSong1, Helpers.LocalSong2 };
+                var fixture = new TagEditorViewModel(songs, () => Task.Run(() =>
+                {
+                    called = true;
+                    return false;
+                }));
+
+                await fixture.Save.ExecuteAsync();
+
+                Assert.True(called);
             }
         }
 
@@ -189,7 +208,7 @@ namespace Espera.View.Tests
             public void ReturnsCustomValueIfSet()
             {
                 var songs = new[] { Helpers.LocalSong1 };
-                var fixture = new TagEditorViewModel(songs)
+                var fixture = new TagEditorViewModel(songs, () => Task.FromResult(true))
                 {
                     Title = "Custom Title"
                 };
@@ -201,7 +220,7 @@ namespace Espera.View.Tests
             public void SingleSongReturnsSongTitle()
             {
                 var songs = new[] { Helpers.LocalSong1 };
-                var fixture = new TagEditorViewModel(songs);
+                var fixture = new TagEditorViewModel(songs, () => Task.FromResult(true));
 
                 Assert.Equal(Helpers.LocalSong1.Title, fixture.Title);
             }

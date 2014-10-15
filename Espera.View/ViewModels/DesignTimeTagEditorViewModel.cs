@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Espera.Core;
 
 namespace Espera.View.ViewModels
@@ -16,7 +17,7 @@ namespace Espera.View.ViewModels
                     Title = "The Title",
                     TrackNumber = 1
                 }
-            })
+            }, () => Task.FromResult(false))
         { }
     }
 }

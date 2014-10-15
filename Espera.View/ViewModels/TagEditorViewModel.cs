@@ -21,7 +21,15 @@ namespace Espera.View.ViewModels
         private string genre;
         private string title;
 
-        public TagEditorViewModel(IReadOnlyList<LocalSong> songs)
+        /// <summary>
+        /// The viewmodel for the song metadata editor.
+        /// </summary>
+        /// <param name="songs">The metadata for the songs to edit.</param>
+        /// <param name="multipleSongSaveWarning">
+        /// A warning that is displayed when an attempt is made to save the metadata for more than
+        /// one song.
+        /// </param>
+        public TagEditorViewModel(IReadOnlyList<LocalSong> songs, Func<Task<bool>> multipleSongSaveWarning)
         {
             if (songs == null)
                 throw new ArgumentNullException("songs");
@@ -31,7 +39,20 @@ namespace Espera.View.ViewModels
 
             this.songs = songs;
 
-            this.Save = ReactiveCommand.CreateAsyncTask(_ => this.SaveTags());
+            this.Save = ReactiveCommand.CreateAsyncTask(async _ =>
+            {
+                bool shouldSave = true;
+
+                if (songs.Count > 1)
+                {
+                    shouldSave = await multipleSongSaveWarning();
+                }
+
+                if (shouldSave)
+                {
+                    await this.SaveTags();
+                }
+            });
             this.isSaving = this.Save.IsExecuting
                 .ToProperty(this, x => x.IsSaving);
 
