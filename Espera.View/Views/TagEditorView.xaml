@@ -1,0 +1,87 @@
+﻿<UserControl x:Class="Espera.View.Views.TagEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:Espera.View.ViewModels"
+             d:DataContext="{d:DesignInstance viewModels:DesignTimeTagEditorViewModel,
+                                              IsDesignTimeCreatable=True}"
+             d:DesignHeight="600"
+             d:DesignWidth="600"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <StackPanel Margin="15, 0, 15, 0">
+            <TextBlock Text="Title" Visibility="{Binding Path=IsSingleSong, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBox Margin="0, 0, 0, 10"
+                     Text="{Binding Path=Title}"
+                     Visibility="{Binding Path=IsSingleSong,
+                                          Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBlock Text="Artist" />
+            <TextBox Text="{Binding Path=Artist}" />
+            <TextBlock Margin="0, 10, 0, 0" Text="Album" />
+            <TextBox Text="{Binding Path=Album}" />
+            <TextBlock Margin="0, 10, 0, 0" Text="Genre" />
+            <TextBox Text="{Binding Path=Genre}" />
+            <StackPanel Margin="0, 10, 0, 0"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                <Button Width="75"
+                        Command="{Binding Path=Save}"
+                        Content="Save"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
+                <Button Width="75"
+                        Margin="15, 0, 0, 0"
+                        Command="{Binding Path=Cancel}"
+                        Content="Cancel"
+                        Style="{StaticResource SquareButtonStyle}" />
+            </StackPanel>
+        </StackPanel>
+        <Grid>
+            <Grid.Style>
+                <Style TargetType="{x:Type Grid}">
+                    <Setter Property="Visibility" Value="Hidden" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=IsSaving}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=SaveFailed}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <Grid HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  Background="{DynamicResource FlyoutBackgroundBrush}"
+                  Opacity="0.9" />
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Vertical"
+                        Visibility="{Binding Path=IsSaving,
+                                             Converter={StaticResource BooleanToVisibilityConverter}}">
+                <controls:ProgressRing IsActive="True" />
+                <TextBlock Margin="0, 5, 0, 0"
+                           HorizontalAlignment="Center"
+                           Text="Saving..." />
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Visibility="{Binding Path=SaveFailed,
+                                             Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock FontSize="{StaticResource SubHeaderFontSize}"
+                           Foreground="{DynamicResource ValidationSummaryColor1}"
+                           Text="Failed to save metadata" />
+                <Button Width="75"
+                        Margin="0, 15, 0, 0"
+                        HorizontalAlignment="Right"
+                        Command="{Binding Path=DismissFailure}"
+                        Content="Ok"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

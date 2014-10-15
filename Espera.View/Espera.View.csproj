@@ -258,6 +258,7 @@
     <Compile Include="ViewModels\BugReportViewModel.cs" />
     <Compile Include="ViewModels\CrashViewModel.cs" />
     <Compile Include="ViewModels\DesignTimeShellViewModel.cs" />
+    <Compile Include="ViewModels\DesignTimeTagEditorViewModel.cs" />
     <Compile Include="ViewModels\DirectYoutubeViewModel.cs" />
     <Compile Include="ViewModels\ISongSourceViewModel.cs" />
     <Compile Include="ViewModels\ISongViewModelBase.cs" />
@@ -271,6 +272,7 @@
     <Compile Include="ViewModels\SongViewModelBase.cs" />
     <Compile Include="ViewModels\SoundCloudSongViewModel.cs" />
     <Compile Include="ViewModels\SoundCloudViewModel.cs" />
+    <Compile Include="ViewModels\TagEditorViewModel.cs" />
     <Compile Include="ViewModels\UpdateViewModel.cs" />
     <Compile Include="ViewModels\YoutubeSongViewModel.cs" />
     <Compile Include="ViewModels\YoutubeViewModel.cs" />
@@ -292,6 +294,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Compile Include="Views\TagEditorView.xaml.cs">
+      <DependentUpon>TagEditorView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfMediaPlayer.cs" />
     <Page Include="Resources\Icons.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -312,6 +317,10 @@
     <Page Include="Views\ShellView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\TagEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

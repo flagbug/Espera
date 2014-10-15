@@ -200,6 +200,7 @@
     <Compile Include="SoundCloudSong.cs" />
     <Compile Include="SoundCloudSongFinder.cs" />
     <Compile Include="TagSanitizer.cs" />
+    <Compile Include="TagsSaveException.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="YoutubeDownloadException.cs" />
     <Compile Include="YoutubeSong.cs" />

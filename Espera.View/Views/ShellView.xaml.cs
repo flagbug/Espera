@@ -15,11 +15,14 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
+using Espera.Core;
+using ReactiveMarrow;
 using YoutubeExtractor;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using ListView = System.Windows.Controls.ListView;
@@ -168,6 +171,29 @@ namespace Espera.View.Views
             {
                 e.Cancel = true;
             }
+        }
+
+        private void OpenTagEditor(object sender, RoutedEventArgs e)
+        {
+            Func<Task<bool>> multipleEditWarning = async () =>
+            {
+                MessageDialogResult result = await this.ShowMessageAsync("Save Metadata", "Do you really want to change the metadata of multiple songs?",
+                    MessageDialogStyle.AffirmativeAndNegative, new MetroDialogSettings { AffirmativeButtonText = "Save", NegativeButtonText = "Cancel" });
+
+                return result == MessageDialogResult.Affirmative;
+            };
+
+            var songs = this.shellViewModel.LocalViewModel.SelectedSongs.Select(x => (LocalSong)x.Model).ToList();
+            var editorViewModel = new TagEditorViewModel(songs, multipleEditWarning);
+            this.TagEditor.Content = new TagEditorView
+            {
+                DataContext = editorViewModel
+            };
+
+            editorViewModel.Finished.FirstAsync()
+                .Subscribe(_ => this.TagEditorFlyout.IsOpen = false);
+
+            this.TagEditorFlyout.IsOpen = true;
         }
 
         private void PlaylistContextMenuOpening(object sender, ContextMenuEventArgs e)

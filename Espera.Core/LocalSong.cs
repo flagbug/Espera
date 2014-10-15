@@ -3,10 +3,14 @@ using Espera.Network;
 using Rareform.Validation;
 using System;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
+using Espera.Core.Analytics;
+using Splat;
+using TagLib;
 
 namespace Espera.Core
 {
-    public sealed class LocalSong : Song
+    public sealed class LocalSong : Song, IEnableLogger
     {
         private readonly BehaviorSubject<string> artworkKey;
 
@@ -59,6 +63,41 @@ namespace Espera.Core
         public override string PlaybackPath
         {
             get { return this.OriginalPath; }
+        }
+
+        /// <summary>
+        /// Saves the metadata of this song to the disk.
+        /// </summary>
+        /// <exception cref="TagsSaveException">The saving of the metadata failed.</exception>
+        public async Task SaveTagsToDisk()
+        {
+            try
+            {
+                using (var file = await Task.Run(() => File.Create(this.OriginalPath)))
+                {
+                    Tag tag = file.Tag;
+
+                    tag.Album = this.Album;
+                    tag.Performers = new[] { this.Artist };
+                    tag.Genres = new[] { this.Genre };
+                    tag.Title = this.Title;
+
+                    await Task.Run(() => file.Save());
+                }
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Failed to save metadata for song " + this.OriginalPath, ex);
+
+                AnalyticsClient.Instance.RecordNonFatalError(ex);
+
+                throw new TagsSaveException("Failed to save tags", ex);
+            }
+
+            // Notify that all of the song metadata has changed, even if may not be really true, we
+            // just want to update the UI
+            this.OnPropertyChanged(string.Empty);
         }
 
         /// <summary>

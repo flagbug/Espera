@@ -206,6 +206,13 @@
                                               Path=ActualWidth}"
                               LoadedBehavior="Manual" />
             </Controls:Flyout>
+            <Controls:Flyout x:Name="TagEditorFlyout"
+                             CloseCommand="{Binding ElementName=TagEditor, Path=Content.DataContext.Cancel}"
+                             Header="Tag Editor"
+                             Position="Right"
+                             Theme="Adapt">
+                <ContentControl Width="500" x:Name="TagEditor" />
+            </Controls:Flyout>
         </Controls:FlyoutsControl>
     </Controls:MetroWindow.Flyouts>
     <Grid x:Name="mainGrid" Margin="10">
@@ -336,8 +343,8 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0"
-                         Name="SearchTextBox"
+                <TextBox Name="SearchTextBox"
+                         Grid.Column="0"
                          Margin="10, 0, 0, 0"
                          VerticalAlignment="Center"
                          VerticalContentAlignment="Center"
@@ -501,6 +508,7 @@
                                                   Visibility="{Binding Path=IsAdmin,
                                                                        Converter={StaticResource BooleanToVisibilityConverter}}" />
                                         <MenuItem Command="{Binding Path=AddToPlaylistCommand}" Header="Add to playlist" />
+                                        <MenuItem Header="Edit tags" Visibility="{Binding Path=IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}" Click="OpenTagEditor" />
                                     </ContextMenu>
                                 </ListView.ContextMenu>
                                 <ListView.ItemContainerStyle>
