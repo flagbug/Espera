@@ -141,6 +141,7 @@
                                   Height="250">
                 <StackPanel Margin="10"
                             VerticalAlignment="Center"
+                            DataContext="{Binding Path=UpdateViewModel}"
                             Orientation="Vertical">
                     <TextBlock FontSize="15"
                                Text="An update is available. Would you like to download it now?"
@@ -148,16 +149,16 @@
                     <StackPanel Margin="0, 15, 0, 0"
                                 HorizontalAlignment="Right"
                                 Orientation="Horizontal">
-                        <Button Width="75"
-                                Height="35"
+                        <Button Height="35"
                                 MinWidth="80"
                                 Margin="10, 0, 0, 0"
                                 Content="Download"
+                                Click="OpenPortableDownloadLink"
                                 Style="{DynamicResource AccentedDialogSquareButton}" />
-                        <Button Width="75"
-                                Height="35"
+                        <Button Height="35"
                                 MinWidth="80"
                                 Margin="10, 0, 0, 0"
+                                Click="ClosePortableUpdateNotification"
                                 Content="Not Now" />
                     </StackPanel>
                 </StackPanel>

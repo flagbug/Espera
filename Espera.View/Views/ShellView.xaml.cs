@@ -114,6 +114,13 @@ namespace Espera.View.Views
             updateViewModel.ChangelogShown();
         }
 
+        private async void ClosePortableUpdateNotification(object sender, RoutedEventArgs e)
+        {
+            var dialog = (SimpleDialog)this.Resources["PortableUpdateMessage"];
+
+            await this.HideMetroDialogAsync(dialog);
+        }
+
         private void ExternalPathLeftMouseButtonDown(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;
@@ -181,6 +188,18 @@ namespace Espera.View.Views
             {
                 e.Cancel = true;
             }
+        }
+
+        private async void OpenPortableDownloadLink(object sender, RoutedEventArgs e)
+        {
+            if (this.shellViewModel.UpdateViewModel.OpenPortableDownloadLink.CanExecute(null))
+            {
+                this.shellViewModel.UpdateViewModel.OpenPortableDownloadLink.Execute(null);
+            }
+
+            var dialog = (SimpleDialog)this.Resources["PortableUpdateMessage"];
+
+            await this.HideMetroDialogAsync(dialog);
         }
 
         private void OpenTagEditor(object sender, RoutedEventArgs e)
