@@ -22,7 +22,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Espera.Core;
-using ReactiveMarrow;
 using YoutubeExtractor;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using ListView = System.Windows.Controls.ListView;
@@ -79,6 +78,17 @@ namespace Espera.View.Views
                     var dialog = (SimpleDialog)this.Resources["Changelog"];
                     await this.ShowMetroDialogAsync(dialog);
                 }
+
+                if (AppInfo.IsPortable)
+                {
+                    Observable.StartAsync(UpdateHelper.CheckForPortableUpdate)
+                        .Where(x => x)
+                        .Delay(TimeSpan.FromSeconds(5))
+                        .ObserveOn(RxApp.MainThreadScheduler)
+                        .Select(_ => (SimpleDialog)this.Resources["PortableUpdateMessage"])
+                        .SelectMany(dialog => this.ShowMetroDialogAsync(dialog).ToObservable())
+                        .Subscribe();
+                }
             };
         }
 
@@ -102,6 +112,13 @@ namespace Espera.View.Views
 
             var updateViewModel = this.shellViewModel.UpdateViewModel;
             updateViewModel.ChangelogShown();
+        }
+
+        private async void ClosePortableUpdateNotification(object sender, RoutedEventArgs e)
+        {
+            var dialog = (SimpleDialog)this.Resources["PortableUpdateMessage"];
+
+            await this.HideMetroDialogAsync(dialog);
         }
 
         private void ExternalPathLeftMouseButtonDown(object sender, MouseButtonEventArgs e)
@@ -171,6 +188,18 @@ namespace Espera.View.Views
             {
                 e.Cancel = true;
             }
+        }
+
+        private async void OpenPortableDownloadLink(object sender, RoutedEventArgs e)
+        {
+            if (this.shellViewModel.UpdateViewModel.OpenPortableDownloadLink.CanExecute(null))
+            {
+                this.shellViewModel.UpdateViewModel.OpenPortableDownloadLink.Execute(null);
+            }
+
+            var dialog = (SimpleDialog)this.Resources["PortableUpdateMessage"];
+
+            await this.HideMetroDialogAsync(dialog);
         }
 
         private void OpenTagEditor(object sender, RoutedEventArgs e)
