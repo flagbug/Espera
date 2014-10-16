@@ -121,9 +121,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Lager.0.4.1\lib\portable-net45+wp8+win8+monoandroid+monotouch\Lager.dll</HintPath>
     </Reference>
-    <Reference Include="MahApps.Metro, Version=0.14.0.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
+    <Reference Include="MahApps.Metro, Version=0.15.0.45, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MahApps.Metro.0.14.0.0\lib\net45\MahApps.Metro.dll</HintPath>
+      <HintPath>..\packages\MahApps.Metro.0.15.0-ALPHA45\lib\net45\MahApps.Metro.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.XmlTransform">
       <HintPath>..\packages\Microsoft.Web.Xdt.2.1.1\lib\net40\Microsoft.Web.XmlTransform.dll</HintPath>
@@ -214,7 +214,7 @@
     </Reference>
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Caliburn.Micro.2.0.1\lib\net45\System.Windows.Interactivity.dll</HintPath>
+      <HintPath>..\packages\MahApps.Metro.0.15.0-ALPHA45\lib\net45\System.Windows.Interactivity.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
