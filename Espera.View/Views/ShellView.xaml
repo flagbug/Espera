@@ -37,6 +37,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/FlatSlider.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml " />
                 <ResourceDictionary Source="/Resources/Icons.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
@@ -56,19 +57,19 @@
             </Style>
             <Style x:Key="ArtistsHeaderStyle" TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="48" />
-                <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
+                <Setter Property="FontFamily" Value="{StaticResource HeaderFontFamily}" />
             </Style>
             <Style x:Key="VideoInfoHeaderStyle" TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="48" />
-                <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
+                <Setter Property="FontFamily" Value="{StaticResource HeaderFontFamily}" />
             </Style>
             <Style x:Key="PlaylistsHeaderStyle" TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="48" />
-                <Setter Property="FontFamily" Value="{DynamicResource HeaderFontFamily}" />
+                <Setter Property="FontFamily" Value="{StaticResource HeaderFontFamily}" />
             </Style>
             <Style x:Key="ArtistInfoStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="{DynamicResource ContentFontSize}" />
-                <Setter Property="FontFamily" Value="{DynamicResource ContentFontFamily}" />
+                <Setter Property="FontSize" Value="{StaticResource ContentFontSize}" />
+                <Setter Property="FontFamily" Value="{StaticResource ContentFontFamily}" />
                 <Setter Property="Opacity" Value="0.6" />
             </Style>
             <Style x:Key="VirtualisedListView"
@@ -106,7 +107,7 @@
                                                             <ItemsControl.ItemTemplate>
                                                                 <DataTemplate>
                                                                     <TextBlock Margin="10, 5, 0, 0"
-                                                                               FontSize="15"
+                                                                               FontSize="{StaticResource DialogMessageFontSize}"
                                                                                Text="{Binding}"
                                                                                TextWrapping="Wrap" />
                                                                 </DataTemplate>
@@ -143,7 +144,7 @@
                             VerticalAlignment="Center"
                             DataContext="{Binding Path=UpdateViewModel}"
                             Orientation="Vertical">
-                    <TextBlock FontSize="15"
+                    <TextBlock FontSize="{StaticResource DialogMessageFontSize}"
                                Text="An update is available. Would you like to download it now?"
                                TextWrapping="Wrap" />
                     <StackPanel Margin="0, 15, 0, 0"
