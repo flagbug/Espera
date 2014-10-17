@@ -52,7 +52,7 @@ namespace Espera.Core
 
             IObservable<IReadOnlyList<SoundCloudSong>> retrievalFunc = Observable.Defer(() =>
                 cache.GetOrFetchObject(BlobCacheKeys.GetKeyForSoundCloudCache(searchTerm), () =>
-                    string.IsNullOrWhiteSpace(searchTerm) ? GetPopularSongs() : SearchSongs(searchTerm), DateTime.Now + CacheDuration));
+                    string.IsNullOrWhiteSpace(searchTerm) ? GetPopularSongs() : SearchSongs(searchTerm), DateTimeOffset.Now + CacheDuration));
 
             return retrievalFunc.Catch<IReadOnlyList<SoundCloudSong>, Exception>(ex =>
                     Observable.Throw<IReadOnlyList<SoundCloudSong>>(new NetworkSongFinderException("SoundCloud search failed", ex)))

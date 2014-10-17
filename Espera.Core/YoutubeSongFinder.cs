@@ -59,7 +59,7 @@ namespace Espera.Core
             searchTerm = searchTerm ?? string.Empty;
 
             return Observable.Defer(() => cache.GetOrFetchObject(BlobCacheKeys.GetKeyForYoutubeCache(searchTerm),
-                () => RealSearch(searchTerm), DateTime.Now + CacheDuration));
+                () => RealSearch(searchTerm), DateTimeOffset.Now + CacheDuration));
         }
 
         public async Task<YoutubeSong> ResolveYoutubeSongFromUrl(Uri url)

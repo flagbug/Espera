@@ -88,7 +88,7 @@ namespace Espera.View.ViewModels
 
             try
             {
-                IBitmap image = await BlobCache.InMemory.LoadImageFromUrl(artworkUrl.ToString(), absoluteExpiration: DateTime.Now + TimeSpan.FromMinutes(60));
+                IBitmap image = await BlobCache.InMemory.LoadImageFromUrl(artworkUrl.ToString(), absoluteExpiration: DateTimeOffset.Now + TimeSpan.FromMinutes(60));
 
                 this.Thumbnail = image.ToNative();
             }

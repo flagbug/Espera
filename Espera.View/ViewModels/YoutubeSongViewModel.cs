@@ -212,7 +212,7 @@ namespace Espera.View.ViewModels
 
             try
             {
-                IBitmap image = await BlobCache.LocalMachine.LoadImageFromUrl(thumbnailUrl.ToString(), absoluteExpiration: DateTime.Now + TimeSpan.FromMinutes(60));
+                IBitmap image = await BlobCache.LocalMachine.LoadImageFromUrl(thumbnailUrl.ToString(), absoluteExpiration: DateTimeOffset.Now + TimeSpan.FromMinutes(60));
 
                 this.Thumbnail = image.ToNative();
             }
