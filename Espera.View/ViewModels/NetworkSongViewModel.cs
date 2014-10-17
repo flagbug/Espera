@@ -4,8 +4,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
@@ -61,20 +59,20 @@ namespace Espera.View.ViewModels
 
             this.RefreshNetworkAvailabilityCommand = ReactiveCommand.Create();
 
-            var status = (networkstatus ?? new NetworkStatus());
+            var status = (networkstatus ?? NetworkStatus.CachingInstance);
             IObservable<bool> networkAvailable = this.RefreshNetworkAvailabilityCommand.ToUnit()
                 .StartWith(Unit.Default)
                 .Do(_ =>
                 {
                     this.IsRefreshingNetworkAvailability = true;
-                    this.Log().Info("Refreshing network availability");
                 })
                 .Select(_ => status.GetIsAvailableAsync().Do(x =>
                     {
                         this.IsRefreshingNetworkAvailability = false;
-                        this.Log().Info("Network available: {0}", x);
                     }))
-                .Switch();
+                .Switch()
+                .Replay(1)
+                .RefCount();
 
             this.isNetworkUnavailable = networkAvailable
                 .Select(x => !x)

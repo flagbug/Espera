@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Net.NetworkInformation;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
+using Akavache;
 using Splat;
 
 namespace Espera.View
@@ -17,13 +19,36 @@ namespace Espera.View
 
     public class NetworkStatus : INetworkStatus, IEnableLogger
     {
+        private static readonly Lazy<NetworkStatus> cachingInstance;
+        private readonly InMemoryBlobCache cache;
+
+        static NetworkStatus()
+        {
+            cachingInstance = new Lazy<NetworkStatus>(() => new NetworkStatus());
+        }
+
+        private NetworkStatus()
+        {
+            this.cache = new InMemoryBlobCache();
+        }
+
+        public static INetworkStatus CachingInstance
+        {
+            get { return cachingInstance.Value; }
+        }
+
         public IObservable<bool> GetIsAvailableAsync()
         {
-            return Observable.FromAsync(PingGoogleAsync)
+            return this.cache.GetOrFetchObject("networkavailable", () =>
+            {
+                this.Log().Info("Refreshing network availability");
+                return Observable.FromAsync(PingGoogleAsync);
+            }, DateTimeOffset.Now + TimeSpan.FromSeconds(2))
                 .Concat(Observable.FromEventPattern<NetworkAvailabilityChangedEventHandler, NetworkAvailabilityEventArgs>(
                     h => NetworkChange.NetworkAvailabilityChanged += h,
                     h => NetworkChange.NetworkAvailabilityChanged -= h)
                 .Select(x => x.EventArgs.IsAvailable))
+                .Do(x => this.Log().Info("Network available: {0}", x))
                 .DistinctUntilChanged();
         }
 
