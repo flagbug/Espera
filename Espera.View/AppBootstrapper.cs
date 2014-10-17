@@ -154,18 +154,7 @@ namespace Espera.View
 
             this.SetupMobileApi();
 
-            if (ApplicationDeployment.IsNetworkDeployed)
-            {
-                this.updateSubscription = Observable.Interval(TimeSpan.FromHours(2), RxApp.TaskpoolScheduler)
-                    .StartWith(0) // Trigger an initial update check
-                    .SelectMany(x => this.UpdateSilentlyAsync().ToObservable())
-                    .Subscribe();
-            }
-
-            else
-            {
-                this.updateSubscription = Disposable.Empty;
-            }
+            this.SetupClickOnceUpdates();
 
             this.DisplayRootViewFor<ShellViewModel>();
         }
@@ -212,6 +201,22 @@ namespace Espera.View
         private void SetupAnalyticsClient()
         {
             AnalyticsClient.Instance.Initialize(this.coreSettings);
+        }
+
+        private void SetupClickOnceUpdates()
+        {
+            if (!AppInfo.IsPortable)
+            {
+                this.updateSubscription = Observable.Interval(TimeSpan.FromHours(2), RxApp.TaskpoolScheduler)
+                    .StartWith(0) // Trigger an initial update check
+                    .SelectMany(x => this.UpdateSilentlyAsync().ToObservable())
+                    .Subscribe();
+            }
+
+            else
+            {
+                this.updateSubscription = Disposable.Empty;
+            }
         }
 
         private void SetupLager()
