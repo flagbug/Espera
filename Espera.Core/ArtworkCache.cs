@@ -210,7 +210,7 @@ namespace Espera.Core
             return key;
         }
 
-        private async Task<IBitmap> LoadImageFromCache(string key, int size)
+        private Task<IBitmap> LoadImageFromCache(string key, int size)
         {
             // If we don't have the small version of an artwork, resize it, save it and return it.
             // This saves us a bunch of memory at the next startup, because BitmapImage has some
@@ -218,42 +218,23 @@ namespace Espera.Core
 
             string keyWithSize = BlobCacheKeys.GetArtworkKeyWithSize(key, size);
 
-            bool resizedExists = false;
-
-            try
-            {
-                resizedExists = await this.cache.GetCreatedAt(keyWithSize) != null;
-            }
-
-            catch (KeyNotFoundException)
-            {
-                // Akavache has a bug that can cause GetCreatedAt to rarely throw a
-                // KeyNotFoundException, even if the contract says it should return null in this case.
-            }
-
-            if (resizedExists)
-            {
-                return await this.LoadImageFromCacheSave(keyWithSize);
-            }
-
-            IBitmap resized = await this.LoadImageFromCacheSave(key, size);
-
-            await this.SaveImageToBlobCacheAsync(key, resized);
-
-            return resized;
+            return this.LoadImageFromCacheSave(keyWithSize)
+                .Catch<IBitmap, KeyNotFoundException>(ex => 
+                    this.LoadImageFromCacheSave(key, size)
+                    .SelectMany(async resized =>
+                    {
+                        await this.SaveImageToBlobCacheAsync(key, resized);
+                        return resized ;
+                    }))
+                .ToTask();
         }
 
-        private async Task<IBitmap> LoadImageFromCacheSave(string key, int? size = null)
+        private IObservable<IBitmap> LoadImageFromCacheSave(string key, int? size = null)
         {
-            try
-            {
-                return await this.cache.LoadImage(key, size, size);
-            }
 
-            catch (NotSupportedException ex)
-            {
-                throw new ArtworkCacheException("Couldn't load artwork", ex);
-            }
+            return this.cache.LoadImage(key, size, size)
+               .Catch<IBitmap, NotSupportedException>(ex => 
+                   Observable.Throw<IBitmap>(new ArtworkCacheException("Couldn't load artwork", ex)));
         }
 
         private Task MarkOnlineLookupKeyAsFailed(string lookupKey)
