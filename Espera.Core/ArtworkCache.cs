@@ -219,21 +219,20 @@ namespace Espera.Core
             string keyWithSize = BlobCacheKeys.GetArtworkKeyWithSize(key, size);
 
             return this.LoadImageFromCacheSave(keyWithSize)
-                .Catch<IBitmap, KeyNotFoundException>(ex => 
+                .Catch<IBitmap, KeyNotFoundException>(ex =>
                     this.LoadImageFromCacheSave(key, size)
                     .SelectMany(async resized =>
                     {
                         await this.SaveImageToBlobCacheAsync(key, resized);
-                        return resized ;
+                        return resized;
                     }))
                 .ToTask();
         }
 
         private IObservable<IBitmap> LoadImageFromCacheSave(string key, int? size = null)
         {
-
             return this.cache.LoadImage(key, size, size)
-               .Catch<IBitmap, NotSupportedException>(ex => 
+               .Catch<IBitmap, NotSupportedException>(ex =>
                    Observable.Throw<IBitmap>(new ArtworkCacheException("Couldn't load artwork", ex)));
         }
 
