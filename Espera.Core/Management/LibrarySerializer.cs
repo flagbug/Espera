@@ -25,7 +25,7 @@ namespace Espera.Core.Management
                     path = song.OriginalPath,
                     title = song.Title,
                     trackNumber = song.TrackNumber,
-                    artworkKey = song.ArtworkKeyProperty
+                    artworkKey = song.ArtworkKey
                 }),
                 playlists = playlists.Select(playlist => new
                 {

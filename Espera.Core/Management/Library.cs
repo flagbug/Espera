@@ -721,13 +721,13 @@ namespace Espera.Core.Management
             // the same artwork key so we don't delete artwork keys that still have a corresponding
             // song in the library
             Dictionary<string, int> artworkKeys = this.Songs
-                .Select(x => x.ArtworkKeyProperty)
+                .Select(x => x.ArtworkKey)
                 .Where(x => x != null)
                 .GroupBy(x => x)
                 .ToDictionary(x => x.Key, x => x.Count());
 
             var artworkKeysToDelete = enumerable
-                .GroupBy(x => x.ArtworkKeyProperty)
+                .GroupBy(x => x.ArtworkKey)
                 .Where(x => x != null && x.Key != null && artworkKeys[x.Key] == x.Count())
                 .Select(x => x.Key)
                 .ToList();
@@ -797,7 +797,7 @@ namespace Espera.Core.Management
         {
             this.Log().Info("Starting online artwork lookup");
 
-            List<LocalSong> songsWithoutArtwork = this.Songs.Where(x => x.ArtworkKeyProperty == null).ToList();
+            List<LocalSong> songsWithoutArtwork = this.Songs.Where(x => x.ArtworkKey == null).ToList();
 
             this.Log().Info("{0} songs don't have an artwork", songsWithoutArtwork.Count);
 
@@ -817,7 +817,7 @@ namespace Espera.Core.Management
 
                 if (key != null)
                 {
-                    song.NotifyArtworkStored(key);
+                    song.ArtworkKey = key;
                 }
             }
 
@@ -874,7 +874,7 @@ namespace Espera.Core.Management
                         if (artworkData != null)
                         {
                             ArtworkCache.Instance.Store(artworkData).ToObservable()
-                                .Subscribe(song.NotifyArtworkStored);
+                                .Subscribe(x => song.ArtworkKey = x);
                         }
 
                         this.songsUpdated.OnNext(Unit.Default);

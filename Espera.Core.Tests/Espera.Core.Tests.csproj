@@ -130,6 +130,7 @@
     <Compile Include="LibraryTest.cs" />
     <Compile Include="LibrarySerializerTest.cs" />
     <Compile Include="LocalSongFinderTest.cs" />
+    <Compile Include="LocalSongTest.cs" />
     <Compile Include="MobileApiTest.cs" />
     <Compile Include="MobileSongTest.cs" />
     <Compile Include="PlaylistTest.cs" />

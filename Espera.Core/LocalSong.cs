@@ -1,8 +1,6 @@
-﻿using System.Reactive.Linq;
-using Espera.Network;
+﻿using Espera.Network;
 using Rareform.Validation;
 using System;
-using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Espera.Core.Analytics;
 using Splat;
@@ -12,7 +10,7 @@ namespace Espera.Core
 {
     public sealed class LocalSong : Song, IEnableLogger
     {
-        private readonly BehaviorSubject<string> artworkKey;
+        private string artworkKey;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalSong" /> class.
@@ -29,25 +27,23 @@ namespace Espera.Core
             if (artworkKey == String.Empty)
                 Throw.ArgumentException("Artwork key cannot be an empty string", () => artworkKey);
 
-            this.artworkKey = new BehaviorSubject<string>(artworkKey);
+            this.ArtworkKey = artworkKey;
         }
 
         /// <summary>
         /// Gets the key of the artwork for Akavache to retrieve. Null, if there is no album cover.
         /// </summary>
-        public IObservable<string> ArtworkKey
+        public string ArtworkKey
         {
-            get { return this.artworkKey.AsObservable(); }
-        }
-
-        /// <summary>
-        /// Gets the key of the artwork for Akavache to retrieve. Null, if there is no album cover.
-        ///
-        /// This property ensures fast access without change notification.
-        /// </summary>
-        public string ArtworkKeyProperty
-        {
-            get { return this.artworkKey.Value; }
+            get { return this.artworkKey; }
+            internal set
+            {
+                if (this.artworkKey != value)
+                {
+                    this.artworkKey = value;
+                    this.OnPropertyChanged();
+                }
+            }
         }
 
         public override bool IsVideo
@@ -98,15 +94,6 @@ namespace Espera.Core
             // Notify that all of the song metadata has changed, even if may not be really true, we
             // just want to update the UI
             this.OnPropertyChanged(string.Empty);
-        }
-
-        /// <summary>
-        /// Notifies the <see cref="LocalSong" /> that the artwork has been stored to the permanent storage.
-        /// </summary>
-        /// <param name="key">The key of the artwork for Akavache to be retrieved.</param>
-        internal void NotifyArtworkStored(string key)
-        {
-            this.artworkKey.OnNext(key);
         }
     }
 }

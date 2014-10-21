@@ -37,7 +37,7 @@ namespace Espera.View.ViewModels
                 .Merge()
                 .Where(x => x != null)
                 .Distinct() // Ignore duplicate artworks
-                .Select(key => LoadArtworkAsync(key).ToObservable())
+                .Select(LoadArtworkAsync)
                 .Concat()
                 .FirstOrDefaultAsync(pic => pic != null)
                 .ToProperty(this, x => x.Cover);
