@@ -21,14 +21,14 @@ namespace Espera.Core
 
         public const string OnlineArtwork = "artwork-online-lookup-";
 
+        /// <summary>
+        /// Contract for Splat to locate the request cache.
+        /// </summary>
+        public const string RequestCacheContract = "requestCache";
+
         public const string SoundCloudPrefix = "soundcloud-search-";
 
         public const string YoutubePrefix = "youtube-search-";
-
-        public static string GetKeyForYoutubeCache(string searchTerm)
-        {
-            return YoutubePrefix + searchTerm.ToLowerInvariant();
-        }
 
         /// <summary>
         /// Gets the artwork key for the specified artwork hash and size.
@@ -36,11 +36,6 @@ namespace Espera.Core
         public static string GetArtworkKeyWithSize(string key, int size)
         {
             return String.Format("{0}-{1}x{1}", key, size);
-        }
-
-        public static string GetKeyForSoundCloudCache(string searchTerm)
-        {
-            return SoundCloudPrefix + searchTerm.ToLowerInvariant();
         }
 
         public static string GetKeyForArtwork(byte[] artworkData)
@@ -58,6 +53,16 @@ namespace Espera.Core
         public static string GetKeyForOnlineArtwork(string artist, string album)
         {
             return string.Format(OnlineArtwork + "{0}-{1}", artist.ToLowerInvariant(), album.ToLowerInvariant());
+        }
+
+        public static string GetKeyForSoundCloudCache(string searchTerm)
+        {
+            return SoundCloudPrefix + searchTerm.ToLowerInvariant();
+        }
+
+        public static string GetKeyForYoutubeCache(string searchTerm)
+        {
+            return YoutubePrefix + searchTerm.ToLowerInvariant();
         }
     }
 }

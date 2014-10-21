@@ -22,43 +22,28 @@ namespace Espera.Core
 
         private const int RequestLimit = 50;
 
-        private static readonly Lazy<YoutubeSongFinder> cachingInstance;
-
-        private readonly IBlobCache cache;
-
-        static YoutubeSongFinder()
-        {
-            cachingInstance = new Lazy<YoutubeSongFinder>(() => new YoutubeSongFinder(BlobCache.LocalMachine));
-        }
+        private readonly IBlobCache requestCache;
 
         /// <summary>
         /// Creates a new instance of the <see cref="YoutubeSongFinder" /> class.
         /// </summary>
-        /// <param name="blobCache">
+        /// <param name="requestCache">
         /// A <see cref="IBlobCache" /> to cache the search requests. Requests with the same search
         /// term are considered the same.
         /// </param>
-        public YoutubeSongFinder(IBlobCache blobCache)
+        public YoutubeSongFinder(IBlobCache requestCache)
         {
-            if (blobCache == null)
-                throw new ArgumentNullException("blobCache");
+            if (requestCache == null)
+                throw new ArgumentNullException("requestCache");
 
-            this.cache = blobCache;
-        }
-
-        /// <summary>
-        /// Gets a <see cref="YoutubeSongFinder" /> instance that caches the requests globally.
-        /// </summary>
-        public static YoutubeSongFinder CachingInstance
-        {
-            get { return cachingInstance.Value; }
+            this.requestCache = requestCache;
         }
 
         public IObservable<IReadOnlyList<YoutubeSong>> GetSongsAsync(string searchTerm = null)
         {
             searchTerm = searchTerm ?? string.Empty;
 
-            return Observable.Defer(() => cache.GetOrFetchObject(BlobCacheKeys.GetKeyForYoutubeCache(searchTerm),
+            return Observable.Defer(() => requestCache.GetOrFetchObject(BlobCacheKeys.GetKeyForYoutubeCache(searchTerm),
                 () => RealSearch(searchTerm), DateTimeOffset.Now + CacheDuration));
         }
 

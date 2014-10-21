@@ -2,8 +2,10 @@
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using System;
+using Akavache;
 using Rareform.Validation;
 using ReactiveUI;
+using Splat;
 
 namespace Espera.View.ViewModels
 {
@@ -15,7 +17,7 @@ namespace Espera.View.ViewModels
 
         public SoundCloudViewModel(Library library, Guid accessToken, CoreSettings coreSettings, ViewSettings viewSettings, INetworkSongFinder<SoundCloudSong> songFinder = null)
             : base(library, accessToken, coreSettings,
-                song => new SoundCloudSongViewModel(song), songFinder ?? SoundCloudSongFinder.CachingInstance)
+                song => new SoundCloudSongViewModel(song), songFinder ?? new SoundCloudSongFinder(Locator.Current.GetService<IBlobCache>(BlobCacheKeys.RequestCacheContract)))
         {
             if (viewSettings == null)
                 Throw.ArgumentNullException(() => viewSettings);

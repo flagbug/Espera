@@ -1,9 +1,11 @@
 ﻿using System;
+using Akavache;
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Rareform.Validation;
 using ReactiveUI;
+using Splat;
 
 namespace Espera.View.ViewModels
 {
@@ -16,7 +18,7 @@ namespace Espera.View.ViewModels
         public YoutubeViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, Guid accessToken, IYoutubeSongFinder songFinder = null)
             : base(library, accessToken, coreSettings,
                 song => new YoutubeSongViewModel(song, () => coreSettings.YoutubeDownloadPath),
-                songFinder ?? YoutubeSongFinder.CachingInstance)
+                songFinder ?? new YoutubeSongFinder(Locator.Current.GetService<IBlobCache>(BlobCacheKeys.RequestCacheContract)))
         {
             if (viewSettings == null)
                 Throw.ArgumentNullException(() => viewSettings);

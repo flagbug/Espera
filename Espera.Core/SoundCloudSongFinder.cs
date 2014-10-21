@@ -15,35 +15,21 @@ namespace Espera.Core
         public static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(60);
 
         private const string ClientId = "0367b2f7000481e0d1e0815e70c81379";
-        private static readonly Lazy<SoundCloudSongFinder> cachingInstance;
-        private readonly IBlobCache cache;
-
-        static SoundCloudSongFinder()
-        {
-            cachingInstance = new Lazy<SoundCloudSongFinder>(() => new SoundCloudSongFinder(BlobCache.LocalMachine));
-        }
+        private readonly IBlobCache requestCache;
 
         /// <summary>
         /// Creates a new instance of the <see cref="SoundCloudSongFinder" /> class.
         /// </summary>
-        /// <param name="blobCache">
+        /// <param name="requestCache">
         /// A <see cref="IBlobCache" /> to cache the search requests. Requests with the same search
         /// term are considered the same.
         /// </param>
-        public SoundCloudSongFinder(IBlobCache blobCache)
+        public SoundCloudSongFinder(IBlobCache requestCache)
         {
-            if (blobCache == null)
-                throw new ArgumentNullException("blobCache");
+            if (requestCache == null)
+                throw new ArgumentNullException("requestCache");
 
-            this.cache = blobCache;
-        }
-
-        /// <summary>
-        /// Gets a <see cref="SoundCloudSongFinder" /> instance that caches the requests globally.
-        /// </summary>
-        public static SoundCloudSongFinder CachingInstance
-        {
-            get { return cachingInstance.Value; }
+            this.requestCache = requestCache;
         }
 
         public IObservable<IReadOnlyList<SoundCloudSong>> GetSongsAsync(string searchTerm = null)
@@ -51,7 +37,7 @@ namespace Espera.Core
             searchTerm = searchTerm ?? string.Empty;
 
             IObservable<IReadOnlyList<SoundCloudSong>> retrievalFunc = Observable.Defer(() =>
-                cache.GetOrFetchObject(BlobCacheKeys.GetKeyForSoundCloudCache(searchTerm), () =>
+                requestCache.GetOrFetchObject(BlobCacheKeys.GetKeyForSoundCloudCache(searchTerm), () =>
                     string.IsNullOrWhiteSpace(searchTerm) ? GetPopularSongs() : SearchSongs(searchTerm), DateTimeOffset.Now + CacheDuration));
 
             return retrievalFunc.Catch<IReadOnlyList<SoundCloudSong>, Exception>(ex =>

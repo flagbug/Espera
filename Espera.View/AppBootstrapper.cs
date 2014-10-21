@@ -59,6 +59,9 @@ namespace Espera.View
 
             Locator.CurrentMutable.RegisterLazySingleton(() => new WindowManager(), typeof(IWindowManager));
 
+            Locator.CurrentMutable.RegisterLazySingleton(() => new SQLitePersistentBlobCache(Path.Combine(AppInfo.BlobCachePath, "api-requests.cache.db")),
+                typeof(IBlobCache), BlobCacheKeys.RequestCacheContract);
+
             Locator.CurrentMutable.RegisterLazySingleton(() =>
                 new ShellViewModel(Locator.Current.GetService<Library>(),
                     this.viewSettings, this.coreSettings,
@@ -86,8 +89,12 @@ namespace Espera.View
             this.Log().Info("Shutting down the library");
             Locator.Current.GetService<Library>().Dispose();
 
-            this.Log().Info("Shutting down BlobCache");
+            this.Log().Info("Shutting down BlobCaches");
             BlobCache.Shutdown().Wait();
+            var requestCache = Locator.Current.GetService<IBlobCache>(BlobCacheKeys.RequestCacheContract);
+            requestCache.InvalidateAll().Wait();
+            requestCache.Dispose();
+            requestCache.Shutdown.Wait();
 
             this.Log().Info("Shutting down NLog");
             NLog.LogManager.Shutdown();

@@ -11,6 +11,7 @@ using System.Reactive.Subjects;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Akavache;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Network;
@@ -387,7 +388,10 @@ namespace Espera.Core.Mobile
 
             try
             {
-                IReadOnlyList<SoundCloudSong> songs = await SoundCloudSongFinder.CachingInstance.GetSongsAsync(searchTerm);
+                var requestCache = Locator.Current.GetService<IBlobCache>(BlobCacheKeys.RequestCacheContract);
+                var songFinder = new SoundCloudSongFinder(requestCache);
+
+                IReadOnlyList<SoundCloudSong> songs = await songFinder.GetSongsAsync(searchTerm);
 
                 // Cache the latest SoundCloud search request, so we can find the songs by GUID when
                 // we add one to the playlist later
@@ -422,7 +426,10 @@ namespace Espera.Core.Mobile
 
             try
             {
-                IReadOnlyList<YoutubeSong> songs = await YoutubeSongFinder.CachingInstance.GetSongsAsync(searchTerm);
+                var requestCache = Locator.Current.GetService<IBlobCache>(BlobCacheKeys.RequestCacheContract);
+                var songFinder = new YoutubeSongFinder(requestCache);
+
+                IReadOnlyList<YoutubeSong> songs = await songFinder.GetSongsAsync(searchTerm);
 
                 // Cache the latest YouTube search request, so we can find the songs by GUID when we
                 // add one to the playlist later

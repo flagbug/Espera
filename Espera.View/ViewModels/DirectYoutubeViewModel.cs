@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive;
 using System.Threading.Tasks;
+using Akavache;
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
@@ -20,7 +21,7 @@ namespace Espera.View.ViewModels
         public DirectYoutubeViewModel(Library library, Guid accessToken, IYoutubeSongFinder youtubeSongFinder = null)
             : base(library, accessToken)
         {
-            this.youtubeSongFinder = youtubeSongFinder ?? YoutubeSongFinder.CachingInstance;
+            this.youtubeSongFinder = youtubeSongFinder ?? new YoutubeSongFinder(Locator.Current.GetService<IBlobCache>(BlobCacheKeys.RequestCacheContract));
         }
 
         public override DefaultPlaybackAction DefaultPlaybackAction
