@@ -1,3 +1,13 @@
+# v2.10.0
+
+## Features
+- Added a basic MP3 tag editor.
+- Added an update notification for the portable version.
+
+## Bugfixes
+- Fixed some issues with the Internet connection checks.
+- Fixed some problems with the artwork loading.
+
 # v2.9.4
 
 ## Improvements
