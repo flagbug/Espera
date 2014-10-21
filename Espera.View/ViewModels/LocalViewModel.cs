@@ -151,6 +151,11 @@ namespace Espera.View.ViewModels
 
             this.allArtists.RemoveAll(artistsToRemove);
 
+            foreach (ArtistViewModel artistViewModel in artistsToRemove)
+            {
+                artistViewModel.Dispose();
+            }
+
             // We use this reverse ordered list of artists so we can priorize the loading of album
             // covers of artists that we display first in the artist list. This way we can "fake" a
             // fast loading of all covers, as the user doesn't see most of the artists down the

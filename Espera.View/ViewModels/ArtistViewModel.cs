@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using Espera.Core;
@@ -11,7 +10,7 @@ using Splat;
 
 namespace Espera.View.ViewModels
 {
-    public sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>
+    public sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>, IDisposable
     {
         private readonly Subject<IObservable<string>> artworkKeys;
         private readonly ObservableAsPropertyHelper<BitmapSource> cover;
@@ -82,6 +81,11 @@ namespace Espera.View.ViewModels
             }
 
             return String.Compare(SortHelpers.RemoveArtistPrefixes(this.Name), SortHelpers.RemoveArtistPrefixes(other.Name), StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        public void Dispose()
+        {
+            this.cover.Dispose();
         }
 
         public bool Equals(ArtistViewModel other)
