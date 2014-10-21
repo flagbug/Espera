@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
@@ -21,18 +20,16 @@ namespace Espera.View.ViewModels
         where TViewModel : ISongViewModelBase
         where TSong : Song
     {
-        private readonly Subject<Unit> connectionError;
         private readonly CoreSettings coreSettings;
-        private readonly ObservableAsPropertyHelper<bool> isNetworkUnavailable;
         private readonly Func<TSong, TViewModel> modelToViewModelConverter;
         private readonly ReactiveCommand<Unit> playNowCommand;
         private readonly ObservableAsPropertyHelper<ISongViewModelBase> selectedSong;
         private readonly INetworkSongFinder<TSong> songFinder;
-        private bool isRefreshingNetworkAvailability;
         private bool isSearching;
+        private bool searchFailed;
 
         protected NetworkSongViewModel(Library library, Guid accessToken, CoreSettings coreSettings,
-                Func<TSong, TViewModel> modelToViewModelConverter, INetworkStatus networkstatus = null,
+                Func<TSong, TViewModel> modelToViewModelConverter,
                 INetworkSongFinder<TSong> songFinder = null)
             : base(library, accessToken)
         {
@@ -46,8 +43,6 @@ namespace Espera.View.ViewModels
             this.modelToViewModelConverter = modelToViewModelConverter;
             this.songFinder = songFinder;
 
-            this.connectionError = new Subject<Unit>();
-
             IObservable<bool> canPlayNow = this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
                 .Select(x => x == AccessPermission.Admin || !this.coreSettings.LockPlayPause);
             this.playNowCommand = ReactiveCommand.CreateAsyncTask(canPlayNow,
@@ -57,34 +52,13 @@ namespace Espera.View.ViewModels
                 .Select(x => x == null ? null : this.SelectedSongs.FirstOrDefault())
                 .ToProperty(this, x => x.SelectedSong);
 
-            this.RefreshNetworkAvailabilityCommand = ReactiveCommand.Create();
-
-            var status = (networkstatus ?? NetworkStatus.CachingInstance);
-            IObservable<bool> networkAvailable = this.RefreshNetworkAvailabilityCommand.ToUnit()
-                .StartWith(Unit.Default)
-                .Do(_ =>
-                {
-                    this.IsRefreshingNetworkAvailability = true;
-                })
-                .Select(_ => status.GetIsAvailableAsync().Do(x =>
-                    {
-                        this.IsRefreshingNetworkAvailability = false;
-                    }))
-                .Switch()
-                .Replay(1)
-                .RefCount();
-
-            this.isNetworkUnavailable = networkAvailable
-                .Select(x => !x)
-                .Merge(this.connectionError.Select(x => true))
-                .ToProperty(this, x => x.IsNetworkUnavailable);
+            this.Search = ReactiveCommand.Create();
 
             this.WhenAnyValue(x => x.SearchText, x => x.Trim()).DistinctUntilChanged().Skip(1)
                 .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler).Select(_ => Unit.Default)
-                .Merge(networkAvailable.Where(x => x).DistinctUntilChanged().ToUnit())
+                .Merge(this.Search.ToUnit())
+                .StartWith(Unit.Default)
                 .Select(_ => this.StartSearchAsync())
-                // We don't use SelectMany, because we only care about the latest invocation and
-                // don't want an old, still running request to override a request that is newer and faster
                 .Switch()
                 .Select(x => x.OrderBy(this.SongOrderFunc).ToList())
                 .Subscribe(x =>
@@ -99,17 +73,6 @@ namespace Espera.View.ViewModels
             get { return DefaultPlaybackAction.AddToPlaylist; }
         }
 
-        public bool IsNetworkUnavailable
-        {
-            get { return this.isNetworkUnavailable.Value; }
-        }
-
-        public bool IsRefreshingNetworkAvailability
-        {
-            get { return this.isRefreshingNetworkAvailability; }
-            private set { this.RaiseAndSetIfChanged(ref this.isRefreshingNetworkAvailability, value); }
-        }
-
         public bool IsSearching
         {
             get { return this.isSearching; }
@@ -121,7 +84,16 @@ namespace Espera.View.ViewModels
             get { return this.playNowCommand; }
         }
 
-        public ReactiveCommand<object> RefreshNetworkAvailabilityCommand { get; private set; }
+        /// <summary>
+        /// Performs a manual search, instead of an automatic search when the search text has changed.
+        /// </summary>
+        public ReactiveCommand<object> Search { get; private set; }
+
+        public bool SearchFailed
+        {
+            get { return this.searchFailed; }
+            private set { this.RaiseAndSetIfChanged(ref this.searchFailed, value); }
+        }
 
         public ISongViewModelBase SelectedSong
         {
@@ -134,16 +106,17 @@ namespace Espera.View.ViewModels
             {
                 this.IsSearching = true;
                 this.SelectedSongs = null;
+                this.SearchFailed = false;
 
                 return this.songFinder.GetSongsAsync(this.SearchText);
             })
-            .Select(x => x.Select(y => this.modelToViewModelConverter(y)).ToList())
-            .Catch<IReadOnlyList<TViewModel>, NetworkSongFinderException>(ex =>
+            .Catch<IReadOnlyList<TSong>, NetworkSongFinderException>(ex =>
             {
                 this.Log().ErrorException("Failed to load songs from the network", ex);
-                this.connectionError.OnNext(Unit.Default);
-                return Observable.Return(new List<TViewModel>());
+                this.SearchFailed = true;
+                return Observable.Return(new List<TSong>());
             })
+            .Select(x => x.Select(y => this.modelToViewModelConverter(y)).ToList())
             .Finally(() => this.IsSearching = false);
         }
     }

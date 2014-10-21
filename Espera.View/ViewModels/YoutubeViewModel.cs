@@ -13,10 +13,9 @@ namespace Espera.View.ViewModels
         private SortOrder ratingOrder;
         private SortOrder viewsOrder;
 
-        public YoutubeViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, Guid accessToken, INetworkStatus networkstatus = null, IYoutubeSongFinder songFinder = null)
+        public YoutubeViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, Guid accessToken, IYoutubeSongFinder songFinder = null)
             : base(library, accessToken, coreSettings,
                 song => new YoutubeSongViewModel(song, () => coreSettings.YoutubeDownloadPath),
-                networkstatus,
                 songFinder ?? YoutubeSongFinder.CachingInstance)
         {
             if (viewSettings == null)
