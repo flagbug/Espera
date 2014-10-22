@@ -51,7 +51,16 @@ namespace Espera.Core.Mobile
 
         public IObservable<IReadOnlyList<MobileClient>> ConnectedClients
         {
-            get { return this.clients.Changed.Select(_ => this.clients.ToList()); }
+            get
+            {
+                return this.clients.Changed.Select(_ =>
+                {
+                    lock (this.clientListGate)
+                    {
+                        return this.clients.ToList();
+                    }
+                });
+            }
         }
 
         public IObservable<bool> IsPortOccupied
@@ -78,12 +87,12 @@ namespace Espera.Core.Mobile
 
             lock (this.clientListGate)
             {
-                foreach (MobileClient client in clients)
+                // Snapshot the clients, as disposing a client causes it to be removed automatically
+                // from the clients list and we don't want to end up with an collection modfied error
+                foreach (MobileClient client in this.clients.ToList())
                 {
                     client.Dispose();
                 }
-
-                this.clients.Clear();
             }
         }
 
