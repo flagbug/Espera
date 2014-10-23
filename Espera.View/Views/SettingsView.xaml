@@ -463,7 +463,7 @@
                                Style="{StaticResource SettingsTextStyle}"
                                Text="Espera will NEVER collect any personal identifiable information" />
                     <Controls:ToggleSwitch Margin="0, 30, 0, 0"
-                                           Header="Show the changlog after an update"
+                                           Header="Show the changelog after an update"
                                            IsChecked="{Binding Path=EnableChangelog}" />
                 </StackPanel>
             </TabItem>
