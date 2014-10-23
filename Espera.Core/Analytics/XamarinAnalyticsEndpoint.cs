@@ -7,16 +7,14 @@ namespace Espera.Core.Analytics
     internal class XamarinAnalyticsEndpoint : IAnalyticsEndpoint
     {
         private Guid id;
-        private bool isInitialized;
 
         public void Dispose()
         {
             // Xamarin Insights can only be terminated if it has been started before, otherwise it
             // throws an exception
-            if (this.isInitialized)
+            if (Insights.IsInitialized)
             {
                 Insights.Terminate();
-                this.isInitialized = false;
             }
         }
 
@@ -32,8 +30,6 @@ namespace Espera.Core.Analytics
             this.id = id;
 
             Insights.Initialize("ed4fea5ffb4fa2a1d36acfeb3df4203153d92acf", AppInfo.Version.ToString(), "Espera", AppInfo.BlobCachePath);
-
-            this.isInitialized = true;
         }
 
         public void ReportBug(string message)
