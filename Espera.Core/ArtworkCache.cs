@@ -145,7 +145,8 @@ namespace Espera.Core
                 }
             }
 
-            artworkCacheKey = await this.Store(imageData);
+            artworkCacheKey = BlobCacheKeys.GetKeyForArtwork(imageData);
+            await this.Store(artworkCacheKey, imageData);
 
             await this.queue.EnqueueObservableOperation(1, () => this.cache.InsertObject(lookupKey, artworkCacheKey));
 
@@ -178,19 +179,17 @@ namespace Espera.Core
         /// <summary>
         /// Stores the artwork and returns a key to retrieve the artwork again.
         /// </summary>
-        public async Task<string> Store(byte[] data)
+        public async Task Store(string key, byte[] data)
         {
             if (data == null)
                 throw new ArgumentNullException("data");
-
-            string key = BlobCacheKeys.GetKeyForArtwork(data);
 
             await this.storageSemaphore.Wait(key);
 
             if (await this.cache.GetCreatedAt(key) != null)
             {
                 this.storageSemaphore.Release(key);
-                return key;
+                return;
             }
 
             this.Log().Info("Adding new artwork {0} to the BlobCache", key);
@@ -206,8 +205,6 @@ namespace Espera.Core
             {
                 this.storageSemaphore.Release(key);
             }
-
-            return key;
         }
 
         private Task<IBitmap> LoadImageFromCache(string key, int size)

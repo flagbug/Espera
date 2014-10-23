@@ -848,35 +848,44 @@ namespace Espera.Core.Management
 
                     bool added = this.songs.Add(song);
 
-                    // Inverse the condition, as this case happens way more often and we want to
-                    // release the lock as soon as possible We also keep the write lock open so we
-                    // can be sure we find the song and it isn't removed in the meanwhile
-                    if (!added)
+                    LocalSong realSong;
+                    bool needsUpdate = false;
+
+                    if (added)
                     {
-                        Song existing = this.songs.First(x => x.OriginalPath == song.OriginalPath);
-
-                        bool changed = existing.UpdateMetadataFrom(song);
-
-                        this.songLock.ExitWriteLock();
-
-                        if (changed)
-                        {
-                            this.songsUpdated.OnNext(Unit.Default);
-                        }
+                        realSong = song;
+                        needsUpdate = true;
                     }
 
                     else
                     {
-                        this.songLock.ExitWriteLock();
+                        LocalSong existing = this.songs.First(x => x.OriginalPath == song.OriginalPath);
 
-                        byte[] artworkData = t.Item2;
-
-                        if (artworkData != null)
+                        if (existing.UpdateMetadataFrom(song))
                         {
-                            ArtworkCache.Instance.Store(artworkData).ToObservable()
-                                .Subscribe(x => song.ArtworkKey = x);
+                            needsUpdate = true;
                         }
 
+                        realSong = existing;
+                    }
+
+                    this.songLock.ExitWriteLock();
+
+                    byte[] artworkData = t.Item2;
+
+                    if (artworkData != null)
+                    {
+                        string key = BlobCacheKeys.GetKeyForArtwork(artworkData);
+
+                        if (realSong.ArtworkKey != key)
+                        {
+                            ArtworkCache.Instance.Store(key, artworkData).ToObservable()
+                                .Subscribe(x => realSong.ArtworkKey = key);
+                        }
+                    }
+
+                    if (needsUpdate)
+                    {
                         this.songsUpdated.OnNext(Unit.Default);
                     }
                 }, () =>

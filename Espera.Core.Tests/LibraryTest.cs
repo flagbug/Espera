@@ -1081,8 +1081,23 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task ExternalTagChangesArePropagated()
             {
-                var song = new LocalSong("C://Song.mp3", TimeSpan.Zero) { Title = "A" };
-                var updatedSong = new LocalSong("C://Song.mp3", TimeSpan.Zero) { Title = "B" };
+                var artworkKey = BlobCacheKeys.GetKeyForArtwork(new byte[] { 0, 1 });
+                var song = new LocalSong("C://Song.mp3", TimeSpan.Zero, artworkKey)
+                {
+                    Album = "Album-A",
+                    Artist = "Artist-A",
+                    Title = "Title-A",
+                    Genre = "Genre-A"
+                };
+
+                byte[] updatedArtworkData = { 1, 0 };
+                var updatedSong = new LocalSong("C://Song.mp3", TimeSpan.Zero)
+                {
+                    Album = "Album-B",
+                    Artist = "Artist-B",
+                    Title = "Title-B",
+                    Genre = "Genre-B"
+                };
 
                 var libraryReader = Substitute.For<ILibraryReader>();
                 libraryReader.LibraryExists.Returns(true);
@@ -1093,13 +1108,87 @@ namespace Espera.Core.Tests
                 var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { song.OriginalPath, new MockFileData("DontCare") } });
 
                 var songFinder = Substitute.For<ILocalSongFinder>();
-                songFinder.GetSongsAsync().Returns(Observable.Return(Tuple.Create(updatedSong, (byte[])null)));
+                songFinder.GetSongsAsync().Returns(Observable.Return(Tuple.Create(updatedSong, updatedArtworkData)));
 
                 using (Library library = new LibraryBuilder().WithFileSystem(fileSystem).WithReader(libraryReader).WithSongFinder(songFinder).Build())
                 {
                     await library.AwaitInitializationAndUpdate();
 
-                    Assert.Equal("B", library.Songs[0].Title);
+                    Assert.True(ReferenceEquals(song, library.Songs[0]));
+
+                    Assert.Equal(updatedSong.Album, song.Album);
+                    Assert.Equal(updatedSong.Artist, song.Artist);
+                    Assert.Equal(BlobCacheKeys.GetKeyForArtwork(updatedArtworkData), song.ArtworkKey);
+                    Assert.Equal(updatedSong.Genre, song.Genre);
+                    Assert.Equal(updatedSong.Title, song.Title);
+                }
+            }
+
+            [Fact]
+            public async Task InvokesSongsUpdatedObservableWhenSongAdded()
+            {
+                var song = new LocalSong("C://Song.mp3", TimeSpan.Zero);
+
+                var libraryReader = Substitute.For<ILibraryReader>();
+                libraryReader.LibraryExists.Returns(true);
+                libraryReader.ReadSongSourcePath().Returns("C://");
+                libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+                libraryReader.ReadSongs().Returns(new List<LocalSong>());
+
+                var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { song.OriginalPath, new MockFileData("DontCare") } });
+
+                var songFinder = Substitute.For<ILocalSongFinder>();
+                songFinder.GetSongsAsync().Returns(Observable.Return(Tuple.Create(song, (byte[])null)));
+
+                using (Library library = new LibraryBuilder().WithFileSystem(fileSystem).WithReader(libraryReader).WithSongFinder(songFinder).Build())
+                {
+                    var update = library.SongsUpdated.CreateCollection();
+
+                    await library.AwaitInitializationAndUpdate();
+
+                    Assert.Equal(1, update.Count);
+                }
+            }
+
+            [Fact]
+            public async Task InvokesSongsUpdatedObservableWhenSongMetadataChanged()
+            {
+                var artworkKey = BlobCacheKeys.GetKeyForArtwork(new byte[] { 0, 1 });
+                var song = new LocalSong("C://Song.mp3", TimeSpan.Zero, artworkKey)
+                {
+                    Album = "Album-A",
+                    Artist = "Artist-A",
+                    Title = "Title-A",
+                    Genre = "Genre-A"
+                };
+
+                byte[] updatedArtworkData = { 1, 0 };
+                var updatedSong = new LocalSong("C://Song.mp3", TimeSpan.Zero)
+                {
+                    Album = "Album-B",
+                    Artist = "Artist-B",
+                    Title = "Title-B",
+                    Genre = "Genre-B"
+                };
+
+                var libraryReader = Substitute.For<ILibraryReader>();
+                libraryReader.LibraryExists.Returns(true);
+                libraryReader.ReadSongSourcePath().Returns("C://");
+                libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+                libraryReader.ReadSongs().Returns(new[] { song });
+
+                var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { song.OriginalPath, new MockFileData("DontCare") } });
+
+                var songFinder = Substitute.For<ILocalSongFinder>();
+                songFinder.GetSongsAsync().Returns(Observable.Return(Tuple.Create(updatedSong, updatedArtworkData)));
+
+                using (Library library = new LibraryBuilder().WithFileSystem(fileSystem).WithReader(libraryReader).WithSongFinder(songFinder).Build())
+                {
+                    var update = library.SongsUpdated.CreateCollection();
+
+                    await library.AwaitInitializationAndUpdate();
+
+                    Assert.Equal(1, update.Count); ;
                 }
             }
 
