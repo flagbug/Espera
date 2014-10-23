@@ -1,3 +1,9 @@
+# v2.10.2
+
+## Bugfixes
+- Fixed an bug that caused some files in the AppData folder to never be removed.
+- Changes to the artwork of the song file on the disk are now updated in the library.
+
 # v2.10.1
 
 ## Bugfixes
