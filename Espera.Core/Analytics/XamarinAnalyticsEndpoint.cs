@@ -22,6 +22,8 @@ namespace Espera.Core.Analytics
 
         public void Identify(string id, IDictionary<string, string> traits = null)
         {
+            traits.Add(Insights.Traits.Name, id);
+
             Insights.Identify(id, traits);
         }
 
