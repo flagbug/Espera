@@ -1,3 +1,9 @@
+# v2.10.1
+
+## Bugfixes
+- Fixed the remote control server not starting after being shut down and started again.
+- Fixed a memory leak when songs are removed from the library.
+
 # v2.10.0
 
 ## Features
