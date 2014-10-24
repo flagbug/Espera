@@ -4,8 +4,9 @@ using System.Reactive.Linq;
 using Caliburn.Micro;
 using Espera.Core.Mobile;
 using Espera.Core.Settings;
+using Espera.View.ViewModels;
 
-namespace Espera.View.ViewModels
+namespace Espera.View.DesignTime
 {
     internal class DesignTimeSettingsViewModel : SettingsViewModel
     {

@@ -1,10 +1,10 @@
-﻿using Espera.Core.Management;
-using Espera.Core.Settings;
-using System;
+﻿using System;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
+using Espera.Core.Management;
+using Espera.Core.Settings;
 
-namespace Espera.View
+namespace Espera.View.DesignTime
 {
     internal static class DesignTime
     {

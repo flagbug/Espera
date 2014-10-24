@@ -1,6 +1,7 @@
 ﻿using Espera.Core.Settings;
+using Espera.View.ViewModels;
 
-namespace Espera.View.ViewModels
+namespace Espera.View.DesignTime
 {
     internal class DesignTimeSoundCloudViewModel : SoundCloudViewModel
     {

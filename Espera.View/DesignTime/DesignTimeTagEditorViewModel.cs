@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Espera.Core;
+using Espera.View.ViewModels;
 
-namespace Espera.View.ViewModels
+namespace Espera.View.DesignTime
 {
     public class DesignTimeTagEditorViewModel : TagEditorViewModel
     {

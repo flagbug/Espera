@@ -4,8 +4,8 @@
              xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:viewModels="clr-namespace:Espera.View.ViewModels"
-             d:DataContext="{d:DesignInstance viewModels:DesignTimeTagEditorViewModel,
+             xmlns:designTime="clr-namespace:Espera.View.DesignTime"
+             d:DataContext="{d:DesignInstance designTime:DesignTimeTagEditorViewModel,
                                               IsDesignTimeCreatable=True}"
              d:DesignHeight="600"
              d:DesignWidth="600"

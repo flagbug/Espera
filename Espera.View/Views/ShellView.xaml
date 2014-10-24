@@ -2,13 +2,12 @@
                       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-                      xmlns:ViewModels="clr-namespace:Espera.View.ViewModels"
                       xmlns:Views="clr-namespace:Espera.View.Views"
                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                       xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
-                      xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                       xmlns:view="clr-namespace:Espera.View"
+                      xmlns:designTime="clr-namespace:Espera.View.DesignTime"
                       Title="Espera"
                       Width="1024"
                       Height="768"
@@ -20,7 +19,7 @@
                       ShowMaxRestoreButton="{Binding Path=CanModifyWindow}"
                       ShowMinButton="{Binding Path=CanModifyWindow}"
                       WindowState="Maximized"
-                      d:DataContext="{d:DesignInstance ViewModels:DesignTimeShellViewModel,
+                      d:DataContext="{d:DesignInstance designTime:DesignTimeShellViewModel,
                                                        IsDesignTimeCreatable=True}"
                       mc:Ignorable="d">
     <Controls:MetroWindow.Style>
