@@ -1,0 +1,52 @@
+﻿<UserControl x:Class="Espera.View.Views.NetworkSongDetailView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:designTime="clr-namespace:Espera.View.DesignTime"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Name="This"
+             d:DataContext="{d:DesignInstance designTime:DesignTimeSoundCloudViewModel,
+                                              IsDesignTimeCreatable=True}"
+             d:DesignHeight="300"
+             d:DesignWidth="300"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="CommonResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0"
+                   Style="{StaticResource SongDetailHeaderStyle}"
+                   Text="{Binding ElementName=This,
+                                  Path=Header}" />
+        <Grid Grid.Row="1"
+              Margin="5"
+              DataContext="{Binding Path=SelectedSong}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <controls:ProgressRing Margin="0, 35, 0, 0" IsActive="{Binding Path=IsLoadingThumbnail}" />
+                <Image Grid.Row="0"
+                       Source="{Binding Path=Thumbnail}"
+                       Visibility="{Binding Path=HasThumbnail,
+                                            Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </Grid>
+            <ScrollViewer Grid.Row="1"
+                          Margin="0, 10, 0, 0"
+                          VerticalScrollBarVisibility="Auto">
+                <TextBlock Text="{Binding Path=Description}" TextWrapping="Wrap" />
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -11,19 +11,12 @@
              d:DesignWidth="600"
              mc:Ignorable="d">
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <Style x:Key="VirtualisedListView"
-                   BasedOn="{StaticResource VirtualisedMetroListView}"
-                   TargetType="{x:Type ListView}">
-            <Setter Property="VirtualizingPanel.IsVirtualizingWhenGrouping" Value="True" />
-            <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="False" />
-            <Setter Property="VirtualizingPanel.IsContainerVirtualizable" Value="True" />
-            <Style.Triggers>
-                <Trigger Property="IsGrouping" Value="true">
-                    <Setter Property="ScrollViewer.CanContentScroll" Value="true" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="CommonResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
         <Grid.Resources>

@@ -38,6 +38,7 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/FlatSlider.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml " />
                 <ResourceDictionary Source="/Resources/Icons.xaml" />
+                <ResourceDictionary Source="CommonResources.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <Style x:Key="VolumeButtonStyle" TargetType="{x:Type Button}">
@@ -54,14 +55,6 @@
                 </Setter>
                 <Setter Property="IsTabStop" Value="False" />
             </Style>
-            <Style x:Key="ArtistsHeaderStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="48" />
-                <Setter Property="FontFamily" Value="{StaticResource HeaderFontFamily}" />
-            </Style>
-            <Style x:Key="VideoInfoHeaderStyle" TargetType="{x:Type TextBlock}">
-                <Setter Property="FontSize" Value="48" />
-                <Setter Property="FontFamily" Value="{StaticResource HeaderFontFamily}" />
-            </Style>
             <Style x:Key="PlaylistsHeaderStyle" TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="48" />
                 <Setter Property="FontFamily" Value="{StaticResource HeaderFontFamily}" />
@@ -70,18 +63,6 @@
                 <Setter Property="FontSize" Value="{StaticResource ContentFontSize}" />
                 <Setter Property="FontFamily" Value="{StaticResource ContentFontFamily}" />
                 <Setter Property="Opacity" Value="0.6" />
-            </Style>
-            <Style x:Key="VirtualisedListView"
-                   BasedOn="{StaticResource VirtualisedMetroListView}"
-                   TargetType="{x:Type ListView}">
-                <Setter Property="VirtualizingPanel.IsVirtualizingWhenGrouping" Value="True" />
-                <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="False" />
-                <Setter Property="VirtualizingPanel.IsContainerVirtualizable" Value="True" />
-                <Style.Triggers>
-                    <Trigger Property="IsGrouping" Value="true">
-                        <Setter Property="ScrollViewer.CanContentScroll" Value="true" />
-                    </Trigger>
-                </Style.Triggers>
             </Style>
             <dialogs:SimpleDialog x:Key="Changelog"
                                   Title="Espera has been updated!"
@@ -401,98 +382,13 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0" Visibility="{Binding Path=IsLocal, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" Orientation="Horizontal">
-                    <TextBlock Style="{StaticResource ArtistsHeaderStyle}" Text="artists" />
-                    <Controls:ProgressRing Width="35"
-                                           Height="35"
-                                           Margin="20, 15, 0, 0"
-                                           IsActive="{Binding Path=LocalViewModel.IsUpdating,
-                                                              Mode=OneWay}" />
-                </StackPanel>
-                <ListBox Grid.Row="1"
-                         DataContext="{Binding Path=LocalViewModel}"
-                         FocusVisualStyle="{x:Null}"
-                         ItemsSource="{Binding Path=Artists}"
-                         SelectedItem="{Binding Path=SelectedArtist}"
-                         Style="{StaticResource VirtualisedMetroListBox}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Margin="0, 3, 0, 3" Orientation="Horizontal">
-                                <Image Width="35"
-                                       Height="35"
-                                       Source="{Binding Path=Cover}" />
-                                <TextBlock Margin="10, 0, 0, 0"
-                                           VerticalAlignment="Center"
-                                           Text="{Binding Path=Name}" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                <Views:ArtistsView DataContext="{Binding Path=LocalViewModel}" />
             </Grid>
             <Grid Grid.Column="0" Visibility="{Binding Path=IsYoutube, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0"
-                           Style="{StaticResource VideoInfoHeaderStyle}"
-                           Text="video info" />
-                <Grid Grid.Row="1"
-                      Margin="5"
-                      DataContext="{Binding Path=YoutubeViewModel.SelectedSong}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Row="0">
-                        <Controls:ProgressRing Margin="0, 35, 0, 0" IsActive="{Binding Path=IsLoadingThumbnail}" />
-                        <Image Grid.Row="0"
-                               Source="{Binding Path=Thumbnail}"
-                               Visibility="{Binding Path=HasThumbnail,
-                                                    Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    </Grid>
-                    <ScrollViewer Grid.Row="1"
-                                  Margin="0, 10, 0, 0"
-                                  VerticalScrollBarVisibility="Auto">
-                        <TextBlock Text="{Binding Path=Description}" TextWrapping="Wrap" />
-                    </ScrollViewer>
-                </Grid>
+                <Views:NetworkSongDetailView Header="video info" DataContext="{Binding Path=YoutubeViewModel}" />
             </Grid>
             <Grid Grid.Column="0" Visibility="{Binding Path=IsSoundCloud, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0"
-                           Style="{StaticResource VideoInfoHeaderStyle}"
-                           Text="song info" />
-                <Grid Grid.Row="1"
-                      Margin="5"
-                      DataContext="{Binding Path=SoundCloudViewModel.SelectedSong}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Row="0">
-                        <Controls:ProgressRing Margin="0, 35, 0, 0"
-                                               IsActive="{Binding Path=IsLoadingThumbnail}"
-                                               Visibility="{Binding Path=IsLoadingThumbnail,
-                                                                    Converter={StaticResource BooleanToVisibilityConverter}}" />
-                        <Image Grid.Row="0"
-                               Source="{Binding Path=Thumbnail}"
-                               Visibility="{Binding Path=HasThumbnail,
-                                                    Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    </Grid>
-                    <ScrollViewer Grid.Row="1"
-                                  Margin="0, 10, 0, 0"
-                                  VerticalScrollBarVisibility="Auto">
-                        <TextBlock Text="{Binding Path=Description}" TextWrapping="Wrap" />
-                    </ScrollViewer>
-                </Grid>
+                <Views:NetworkSongDetailView Header="song info" DataContext="{Binding Path=SoundCloudViewModel}" />
             </Grid>
             <Grid Grid.Column="1">
                 <Grid.ColumnDefinitions>
