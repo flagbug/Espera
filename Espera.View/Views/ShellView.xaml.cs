@@ -365,15 +365,13 @@ namespace Espera.View.Views
 
         private void WireDragAndDrop()
         {
-            Observable.Merge(
-                this.YoutubeSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)),
-                this.SoundCloudSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)))
-                .Where(x => x.Item2.LeftButton == MouseButtonState.Pressed)
-                .Subscribe(x =>
-                {
-                    x.Item2.Handled = true;
-                    DragDrop.DoDragDrop((ListViewItem)x.Item1, DragDropHelper.SongSourceFormat, DragDropEffects.Link);
-                });
+            this.SoundCloudSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x))
+            .Where(x => x.Item2.LeftButton == MouseButtonState.Pressed)
+            .Subscribe(x =>
+            {
+                x.Item2.Handled = true;
+                DragDrop.DoDragDrop((ListViewItem)x.Item1, DragDropHelper.SongSourceFormat, DragDropEffects.Link);
+            });
 
             var playlistDropEvent = this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
                 .Merge(this.PlaylistListBox.Events().Drop.Select(x => Tuple.Create((object)null, x)));

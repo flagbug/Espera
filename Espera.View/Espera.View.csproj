@@ -260,6 +260,7 @@
     <Compile Include="ViewModels\CrashViewModel.cs" />
     <Compile Include="ViewModels\DesignTimeShellViewModel.cs" />
     <Compile Include="ViewModels\DesignTimeTagEditorViewModel.cs" />
+    <Compile Include="ViewModels\DesignTimeYoutubeViewModel.cs" />
     <Compile Include="ViewModels\DirectYoutubeViewModel.cs" />
     <Compile Include="ViewModels\ISongSourceViewModel.cs" />
     <Compile Include="ViewModels\ISongViewModelBase.cs" />
@@ -301,6 +302,9 @@
     <Compile Include="Views\TagEditorView.xaml.cs">
       <DependentUpon>TagEditorView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\YoutubeView.xaml.cs">
+      <DependentUpon>YoutubeView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfMediaPlayer.cs" />
     <Page Include="Resources\Icons.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -327,6 +331,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\TagEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\YoutubeView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
