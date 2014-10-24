@@ -88,6 +88,8 @@ namespace Espera.View.ViewModels
 
             this.isUpdating = this.Library.WhenAnyValue(x => x.IsUpdating)
                 .ToProperty(this, x => x.IsUpdating);
+
+            this.OpenTagEditor = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedSongs, x => x.Any()));
         }
 
         public IReactiveDerivedList<ArtistViewModel> Artists { get; private set; }
@@ -113,6 +115,8 @@ namespace Espera.View.ViewModels
         {
             get { return this.isUpdating.Value; }
         }
+
+        public ReactiveCommand<object> OpenTagEditor { get; private set; }
 
         public override ReactiveCommand<Unit> PlayNowCommand
         {

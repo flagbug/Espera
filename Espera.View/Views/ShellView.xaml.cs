@@ -65,6 +65,8 @@ namespace Espera.View.Views
                 this.shellViewModel.WhenAnyObservable(x => x.CurrentPlaylist.CurrentPlayingEntry)
                     .ObserveOn(RxApp.MainThreadScheduler)
                     .Subscribe(x => this.PlaylistListBox.ScrollIntoView(x));
+
+                this.shellViewModel.LocalViewModel.OpenTagEditor.Subscribe(_ => this.OpenTagEditor());
             };
 
             this.Loaded += async (sender, args) =>
@@ -188,7 +190,7 @@ namespace Espera.View.Views
             await this.HideMetroDialogAsync(dialog);
         }
 
-        private void OpenTagEditor(object sender, RoutedEventArgs e)
+        private void OpenTagEditor()
         {
             Func<Task<bool>> multipleEditWarning = async () =>
             {

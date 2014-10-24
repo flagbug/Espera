@@ -2,9 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:designTime="clr-namespace:Espera.View.DesignTime"
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:designTime="clr-namespace:Espera.View.DesignTime"
              d:DataContext="{d:DesignInstance designTime:DesignTimeLocalViewModel,
                                               IsDesignTimeCreatable=True}"
              d:DesignHeight="600"
@@ -52,12 +52,10 @@
                               Visibility="{Binding Path=IsAdmin,
                                                    Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <MenuItem Command="{Binding Path=AddToPlaylistCommand}" Header="Add to playlist" />
-                    <!--
-                    <MenuItem Click="OpenTagEditor"
+                    <MenuItem Command="{Binding Path=OpenTagEditor}"
                               Header="Edit tags"
                               Visibility="{Binding Path=IsAdmin,
                                                    Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    -->
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.ItemContainerStyle>

@@ -107,13 +107,13 @@ namespace Espera.View.ViewModels
 
         public IEnumerable<T> SelectableSongs
         {
-            get { return this.selectableSongs; }
+            get { return this.selectableSongs ?? Enumerable.Empty<T>(); }
             protected set { this.RaiseAndSetIfChanged(ref this.selectableSongs, value); }
         }
 
         public IEnumerable<ISongViewModelBase> SelectedSongs
         {
-            get { return this.selectedSongs; }
+            get { return this.selectedSongs ?? Enumerable.Empty<ISongViewModelBase>(); }
             set { this.RaiseAndSetIfChanged(ref this.selectedSongs, value); }
         }
 
