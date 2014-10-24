@@ -18,13 +18,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Espera.Core;
 using YoutubeExtractor;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
-using ListView = System.Windows.Controls.ListView;
 using TextBox = System.Windows.Controls.TextBox;
 
 namespace Espera.View.Views
@@ -328,7 +326,7 @@ namespace Espera.View.Views
                 .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Item2.Data.GetData(DataFormats.StringFormat) == DragDropHelper.SongSourceFormat)
                 .Subscribe(x =>
                 {
-                    int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
+                    int? targetIndex = ((PlaylistEntryViewModel)((ListBoxItem)x.Item1).DataContext).Index;
 
                     var addCommand = this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
                     if (addCommand.CanExecute(null))
@@ -377,7 +375,7 @@ namespace Espera.View.Views
                 {
                     if (this.shellViewModel.MovePlaylistSongCommand.CanExecute(null))
                     {
-                        int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
+                        int? targetIndex = ((PlaylistEntryViewModel)((ListBoxItem)x.Item1).DataContext).Index;
 
                         this.shellViewModel.MovePlaylistSongCommand.Execute(targetIndex);
                     }
