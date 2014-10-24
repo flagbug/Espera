@@ -8,9 +8,6 @@ using Espera.View.ViewModels;
 
 namespace Espera.View.Views
 {
-    /// <summary>
-    /// Interaction logic for SoundCloudView.xaml
-    /// </summary>
     public partial class SoundCloudView
     {
         public SoundCloudView()

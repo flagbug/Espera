@@ -7,9 +7,6 @@ using Espera.View.ViewModels;
 
 namespace Espera.View.Views
 {
-    /// <summary>
-    /// Interaction logic for LocalView.xaml
-    /// </summary>
     public partial class LocalView
     {
         public LocalView()

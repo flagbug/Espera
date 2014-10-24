@@ -8,9 +8,6 @@ using Espera.View.ViewModels;
 
 namespace Espera.View.Views
 {
-    /// <summary>
-    /// Interaction logic for YoutubeView.xaml
-    /// </summary>
     public partial class YoutubeView
     {
         public YoutubeView()
