@@ -27,7 +27,7 @@
             <controls:ProgressRing Width="35"
                                    Height="35"
                                    Margin="20, 15, 0, 0"
-                                   IsActive="{Binding Path=LocalViewModel.IsUpdating,
+                                   IsActive="{Binding Path=IsUpdating,
                                                       Mode=OneWay}" />
         </StackPanel>
         <ListBox Grid.Row="1"
