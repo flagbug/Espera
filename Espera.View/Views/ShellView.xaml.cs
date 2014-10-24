@@ -365,16 +365,14 @@ namespace Espera.View.Views
 
         private void WireDragAndDrop()
         {
-            const string songSourceFormat = "SongSource";
-
-            Observable.Merge(this.LocalSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)),
+            Observable.Merge(
                 this.YoutubeSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)),
                 this.SoundCloudSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)))
                 .Where(x => x.Item2.LeftButton == MouseButtonState.Pressed)
                 .Subscribe(x =>
                 {
                     x.Item2.Handled = true;
-                    DragDrop.DoDragDrop((ListViewItem)x.Item1, songSourceFormat, DragDropEffects.Link);
+                    DragDrop.DoDragDrop((ListViewItem)x.Item1, DragDropHelper.SongSourceFormat, DragDropEffects.Link);
                 });
 
             var playlistDropEvent = this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
@@ -382,7 +380,7 @@ namespace Espera.View.Views
 
             // Local, YouTube and SoundCloud songs
             playlistDropEvent
-                .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Item2.Data.GetData(DataFormats.StringFormat) == songSourceFormat)
+                .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Item2.Data.GetData(DataFormats.StringFormat) == DragDropHelper.SongSourceFormat)
                 .Subscribe(x =>
                 {
                     int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;

@@ -13,7 +13,7 @@ using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
-    internal sealed class PlaylistViewModel : ReactiveObject, IDataErrorInfo, IDisposable
+    public class PlaylistViewModel : ReactiveObject, IDataErrorInfo, IDisposable
     {
         private readonly CompositeDisposable disposable;
         private readonly IReactiveDerivedList<PlaylistEntryViewModel> entries;

@@ -244,6 +244,7 @@
     <Compile Include="ChangelogFetcher.cs" />
     <Compile Include="DesignTime.cs" />
     <Compile Include="DragDropExtension.cs" />
+    <Compile Include="DragDropHelper.cs" />
     <Compile Include="NLogLogger.cs" />
     <Compile Include="CacheMigration\DeprecatedBlobCache.cs" />
     <Compile Include="ReactiveViewHelper.cs" />
@@ -253,6 +254,7 @@
     <Compile Include="SortOrder.cs" />
     <Compile Include="TimeSpanHelper.cs" />
     <Compile Include="ViewModels\ArtistViewModel.cs" />
+    <Compile Include="ViewModels\DesignTimeLocalViewModel.cs" />
     <Compile Include="ViewModels\DesignTimeSettingsViewModel.cs" />
     <Compile Include="ViewModels\BugReportViewModel.cs" />
     <Compile Include="ViewModels\CrashViewModel.cs" />
@@ -276,6 +278,9 @@
     <Compile Include="ViewModels\YoutubeSongViewModel.cs" />
     <Compile Include="ViewModels\YoutubeViewModel.cs" />
     <Compile Include="ViewSettings.cs" />
+    <Compile Include="Views\LocalView.xaml.cs">
+      <DependentUpon>LocalView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
@@ -300,6 +305,10 @@
     <Page Include="Resources\Icons.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LocalView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\SettingsView.xaml">
       <SubType>Designer</SubType>

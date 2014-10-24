@@ -20,6 +20,8 @@ namespace Espera.View
 
                 library = new Library(new LibraryFileReader(filePath), new LibraryFileWriter(filePath),
                     new CoreSettings(), new MockFileSystem());
+
+                library.Initialize();
             }
 
             return library;
