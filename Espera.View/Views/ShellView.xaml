@@ -575,9 +575,9 @@
                         <ListBox.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Command="{Binding Path=PlayOverrideCommand}" Header="Play" />
-                                <MenuItem Command="{Binding Path=RemoveSelectedPlaylistEntriesCommand}" Header="Remove" />
-                                <MenuItem Command="{Binding Path=MovePlaylistSongUpCommand}" Header="Move Up" />
-                                <MenuItem Command="{Binding Path=MovePlaylistSongDownCommand}" Header="Move Down" />
+                                <MenuItem Command="{Binding Path=CurrentPlaylist.RemoveSelectedPlaylistEntriesCommand}" Header="Remove" />
+                                <MenuItem Command="{Binding Path=CurrentPlaylist.MovePlaylistSongUpCommand}" Header="Move Up" />
+                                <MenuItem Command="{Binding Path=CurrentPlaylist.MovePlaylistSongDownCommand}" Header="Move Down" />
                             </ContextMenu>
                         </ListBox.ContextMenu>
                         <ListBox.ItemContainerStyle>
