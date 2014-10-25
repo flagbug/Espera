@@ -9,7 +9,6 @@ using Rareform.Extensions;
 using Rareform.Validation;
 using ReactiveUI;
 using Splat;
-using Rareform;
 
 namespace Espera.Core.Management
 {

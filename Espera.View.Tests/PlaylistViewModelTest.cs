@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Espera.Core.Management;
+using Espera.Core.Settings;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
 using Xunit;
@@ -20,7 +21,7 @@ namespace Espera.View.Tests
                     library.AddPlaylist("Existing", accessToken);
                     library.AddPlaylist("New", accessToken);
 
-                    var fixture = new PlaylistViewModel(library.Playlists.Single(x => x.Name == "New"), library);
+                    var fixture = new PlaylistViewModel(library.Playlists.Single(x => x.Name == "New"), library, accessToken, new CoreSettings());
 
                     fixture.EditName = true;
                     fixture.Name = "Existing";
