@@ -506,7 +506,7 @@ namespace Espera.View.ViewModels
 
         private PlaylistViewModel CreatePlaylistViewModel(Playlist playlist)
         {
-            return new PlaylistViewModel(playlist, name => this.Playlists.Count(p => p.Name == name) == 1);
+            return new PlaylistViewModel(playlist, this.library);
         }
 
         private string GetNewPlaylistName()

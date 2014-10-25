@@ -17,25 +17,23 @@ namespace Espera.View.ViewModels
     {
         private readonly CompositeDisposable disposable;
         private readonly IReactiveDerivedList<PlaylistEntryViewModel> entries;
+        private readonly Library library;
         private readonly Playlist playlist;
-        private readonly Func<string, bool> renameRequest;
         private readonly ObservableAsPropertyHelper<int> songsRemaining;
         private readonly ObservableAsPropertyHelper<TimeSpan?> timeRemaining;
         private bool editName;
         private string saveName;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PlaylistViewModel" /> class.
-        /// </summary>
-        /// <param name="playlist">The playlist info.</param>
-        /// <param name="renameRequest">
-        /// A function that requests the rename of the playlist. Return true, if the rename is
-        /// granted, otherwise false.
-        /// </param>
-        public PlaylistViewModel(Playlist playlist, Func<string, bool> renameRequest)
+        public PlaylistViewModel(Playlist playlist, Library library)
         {
+            if (playlist == null)
+                throw new ArgumentNullException("playlist");
+
+            if (library == null)
+                throw new ArgumentNullException("library");
+
             this.playlist = playlist;
-            this.renameRequest = renameRequest;
+            this.library = library;
 
             this.disposable = new CompositeDisposable();
 
@@ -146,7 +144,7 @@ namespace Espera.View.ViewModels
 
                 if (columnName == Reflector.GetMemberName(() => this.Name))
                 {
-                    if (!this.renameRequest(this.Name))
+                    if (this.library.Playlists.Any(p => p.Name == this.Name))
                     {
                         error = "Name already exists.";
                     }
