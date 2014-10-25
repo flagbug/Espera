@@ -328,7 +328,7 @@ namespace Espera.View.Views
                 .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Item2.Data.GetData(DataFormats.StringFormat) == DragDropHelper.SongSourceFormat)
                 .Subscribe(x =>
                 {
-                    int? targetIndex = ((PlaylistEntryViewModel)((ListBoxItem)x.Item1).DataContext).Index;
+                    int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
 
                     var addCommand = this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
                     if (addCommand.CanExecute(null))
@@ -355,7 +355,7 @@ namespace Espera.View.Views
                 .SelectMany(async x =>
                 {
                     var url = (string)x.Item2.Data.GetData(DataFormats.StringFormat);
-                    int? targetIndex = ((PlaylistEntryViewModel)((ListBoxItem)x.Item1).DataContext).Index;
+                    int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
 
                     await this.shellViewModel.DirectYoutubeViewModel.AddDirectYoutubeUrlToPlaylist(new Uri(url), targetIndex);
 
@@ -377,7 +377,7 @@ namespace Espera.View.Views
                 {
                     if (this.shellViewModel.CurrentPlaylist.MovePlaylistSongCommand.CanExecute(null))
                     {
-                        int? targetIndex = ((PlaylistEntryViewModel)((ListBoxItem)x.Item1).DataContext).Index;
+                        int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
 
                         this.shellViewModel.CurrentPlaylist.MovePlaylistSongCommand.Execute(targetIndex);
                     }
