@@ -9,7 +9,7 @@ using Splat;
 
 namespace Espera.View.ViewModels
 {
-    internal class SoundCloudViewModel : NetworkSongViewModel<SoundCloudSongViewModel, SoundCloudSong>
+    public class SoundCloudViewModel : NetworkSongViewModel<SoundCloudSongViewModel, SoundCloudSong>
     {
         private readonly ViewSettings viewSettings;
         private SortOrder playbacksOrder;

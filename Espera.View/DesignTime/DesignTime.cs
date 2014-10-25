@@ -1,6 +1,5 @@
-﻿using System;
-using System.IO;
-using System.IO.Abstractions.TestingHelpers;
+﻿using System.IO.Abstractions.TestingHelpers;
+using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 
@@ -14,11 +13,7 @@ namespace Espera.View.DesignTime
         {
             if (library == null)
             {
-                string directoryPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Espera\");
-                string filePath = Path.Combine(directoryPath, "Library.json");
-
-                library = new Library(new LibraryFileReader(filePath), new LibraryFileWriter(filePath),
+                library = new Library(new LibraryFileReader(AppInfo.LibraryFilePath), new LibraryFileWriter(AppInfo.LibraryFilePath),
                     new CoreSettings(), new MockFileSystem());
 
                 library.Initialize();

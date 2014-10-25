@@ -233,9 +233,9 @@ namespace Espera.View.Views
         {
             if (e.Key == Key.Delete)
             {
-                if (this.shellViewModel.RemoveSelectedPlaylistEntriesCommand.CanExecute(null))
+                if (this.shellViewModel.CurrentPlaylist.RemoveSelectedPlaylistEntriesCommand.CanExecute(null))
                 {
-                    this.shellViewModel.RemoveSelectedPlaylistEntriesCommand.Execute(null);
+                    this.shellViewModel.CurrentPlaylist.RemoveSelectedPlaylistEntriesCommand.Execute(null);
                 }
 
                 e.Handled = true;
@@ -281,7 +281,7 @@ namespace Espera.View.Views
 
         private void PlaylistSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            this.shellViewModel.SelectedPlaylistEntries = ((ListBox)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
+            this.shellViewModel.CurrentPlaylist.SelectedEntries = ((ListBox)sender).SelectedItems.Cast<PlaylistEntryViewModel>();
         }
 
         private void RegisterGlobalHotKeys()
@@ -328,7 +328,7 @@ namespace Espera.View.Views
                 .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Item2.Data.GetData(DataFormats.StringFormat) == DragDropHelper.SongSourceFormat)
                 .Subscribe(x =>
                 {
-                    int? targetIndex = ((PlaylistEntryViewModel)((ListBoxItem)x.Item1).DataContext).Index;
+                    int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
 
                     var addCommand = this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
                     if (addCommand.CanExecute(null))
@@ -355,7 +355,7 @@ namespace Espera.View.Views
                 .SelectMany(async x =>
                 {
                     var url = (string)x.Item2.Data.GetData(DataFormats.StringFormat);
-                    int? targetIndex = ((PlaylistEntryViewModel)((ListBoxItem)x.Item1).DataContext).Index;
+                    int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
 
                     await this.shellViewModel.DirectYoutubeViewModel.AddDirectYoutubeUrlToPlaylist(new Uri(url), targetIndex);
 
@@ -368,18 +368,18 @@ namespace Espera.View.Views
             const string movePlaylistSongFormat = "MovePlaylistSong";
 
             this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x))
-                .Where(x => x.Item2.LeftButton == MouseButtonState.Pressed && this.shellViewModel.SelectedPlaylistEntries.Any())
+                .Where(x => x.Item2.LeftButton == MouseButtonState.Pressed && this.shellViewModel.CurrentPlaylist.SelectedEntries.Any())
                 .Subscribe(x => DragDrop.DoDragDrop((ListBoxItem)x.Item1, movePlaylistSongFormat, DragDropEffects.Move));
 
             playlistDropEvent
                 .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Item2.Data.GetData(DataFormats.StringFormat) == movePlaylistSongFormat)
                 .Subscribe(x =>
                 {
-                    if (this.shellViewModel.MovePlaylistSongCommand.CanExecute(null))
+                    if (this.shellViewModel.CurrentPlaylist.MovePlaylistSongCommand.CanExecute(null))
                     {
-                        int? targetIndex = ((PlaylistEntryViewModel)((ListBoxItem)x.Item1).DataContext).Index;
+                        int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
 
-                        this.shellViewModel.MovePlaylistSongCommand.Execute(targetIndex);
+                        this.shellViewModel.CurrentPlaylist.MovePlaylistSongCommand.Execute(targetIndex);
                     }
 
                     x.Item2.Handled = true;

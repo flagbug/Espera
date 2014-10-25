@@ -21,7 +21,6 @@
     </UserControl.Resources>
     <Grid>
         <ListView x:Name="SoundCloudSongs"
-                  ContextMenuOpening="SongListContextMenuOpening"
                   IsSynchronizedWithCurrentItem="True"
                   ItemsSource="{Binding Path=SelectableSongs}">
             <i:Interaction.Triggers>
