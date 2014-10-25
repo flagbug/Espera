@@ -1,10 +1,10 @@
-﻿using Espera.Core.Management;
-using Espera.Core.Settings;
-using System;
+﻿using System;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
+using Espera.Core.Management;
+using Espera.Core.Settings;
 
-namespace Espera.View
+namespace Espera.View.DesignTime
 {
     internal static class DesignTime
     {
@@ -20,6 +20,8 @@ namespace Espera.View
 
                 library = new Library(new LibraryFileReader(filePath), new LibraryFileWriter(filePath),
                     new CoreSettings(), new MockFileSystem());
+
+                library.Initialize();
             }
 
             return library;

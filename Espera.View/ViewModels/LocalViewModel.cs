@@ -12,14 +12,13 @@ using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
-    public sealed class LocalViewModel : SongSourceViewModel<LocalSongViewModel>
+    public class LocalViewModel : SongSourceViewModel<LocalSongViewModel>
     {
         private readonly ReactiveList<ArtistViewModel> allArtists;
         private readonly ArtistViewModel allArtistsViewModel;
         private readonly SortOrder artistOrder;
         private readonly Subject<Unit> artistUpdateSignal;
         private readonly CoreSettings coreSettings;
-        private readonly object gate;
         private readonly ObservableAsPropertyHelper<bool> isUpdating;
         private readonly ReactiveCommand<Unit> playNowCommand;
         private readonly ObservableAsPropertyHelper<bool> showAddSongsHelperMessage;
@@ -40,7 +39,6 @@ namespace Espera.View.ViewModels
             this.coreSettings = coreSettings;
 
             this.artistUpdateSignal = new Subject<Unit>();
-            this.gate = new object();
 
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
             this.allArtists = new ReactiveList<ArtistViewModel> { this.allArtistsViewModel };
@@ -53,13 +51,14 @@ namespace Espera.View.ViewModels
 
             this.SelectedArtist = this.allArtistsViewModel;
 
+            var gate = new object();
             this.Library.SongsUpdated
                 .Buffer(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
                 .Where(x => x.Any())
                 .Select(_ => Unit.Default)
                 .Merge(this.WhenAny(x => x.SearchText, _ => Unit.Default)
                     .Do(_ => this.SelectedArtist = this.allArtistsViewModel))
-                .Synchronize(this.gate)
+                .Synchronize(gate)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ =>
                 {
@@ -69,7 +68,7 @@ namespace Espera.View.ViewModels
 
             this.WhenAnyValue(x => x.SelectedArtist)
                 .Skip(1)
-                .Synchronize(this.gate)
+                .Synchronize(gate)
                 .Subscribe(_ => this.UpdateSelectableSongs());
 
             this.playNowCommand = ReactiveCommand.CreateAsyncTask(this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
@@ -89,6 +88,8 @@ namespace Espera.View.ViewModels
 
             this.isUpdating = this.Library.WhenAnyValue(x => x.IsUpdating)
                 .ToProperty(this, x => x.IsUpdating);
+
+            this.OpenTagEditor = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedSongs, x => x.Any()));
         }
 
         public IReactiveDerivedList<ArtistViewModel> Artists { get; private set; }
@@ -114,6 +115,8 @@ namespace Espera.View.ViewModels
         {
             get { return this.isUpdating.Value; }
         }
+
+        public ReactiveCommand<object> OpenTagEditor { get; private set; }
 
         public override ReactiveCommand<Unit> PlayNowCommand
         {

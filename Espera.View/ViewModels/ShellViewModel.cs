@@ -4,7 +4,6 @@ using Espera.Core.Management;
 using Espera.Core.Mobile;
 using Espera.Core.Settings;
 using Rareform.Extensions;
-using ReactiveMarrow;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -28,7 +27,6 @@ namespace Espera.View.ViewModels
         private readonly ObservableAsPropertyHelper<int> currentSeconds;
         private readonly ObservableAsPropertyHelper<ISongSourceViewModel> currentSongSource;
         private readonly ObservableAsPropertyHelper<string> currentTime;
-        private readonly ObservableAsPropertyHelper<IReactiveCommand> defaultPlaybackCommand;
         private readonly CompositeDisposable disposable;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly ObservableAsPropertyHelper<bool> isPlaying;
@@ -200,16 +198,6 @@ namespace Espera.View.ViewModels
                     hasAccess && (selectedPlaylistEntries != null && selectedPlaylistEntries.Count() == 1)),
                 _ => this.library.PlaySongAsync(this.SelectedPlaylistEntries.First().Index, this.accessToken));
 
-            // The default play command differs whether we are in party mode or not and depends on
-            // the selected setting in administrator mode and the song source.
-            //
-            // In party mode, it is always "Add To Playlist", in administrator mode we look at the
-            // value that the song source returns
-            this.defaultPlaybackCommand = this.WhenAnyValue(x => x.CurrentSongSource, x => x.IsAdmin,
-                    (songSource, isAdmin) => !isAdmin || songSource.DefaultPlaybackAction == DefaultPlaybackAction.AddToPlaylist ?
-                        (IReactiveCommand)songSource.AddToPlaylistCommand : songSource.PlayNowCommand)
-                .ToProperty(this, x => x.DefaultPlaybackCommand);
-
             this.PauseCommand = ReactiveCommand.CreateAsyncTask(this.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause))
                 .CombineLatest(this.WhenAnyValue(x => x.IsPlaying), (hasAccess, isPlaying) => hasAccess && isPlaying),
                 _ => this.library.PauseSongAsync(this.accessToken));
@@ -342,11 +330,6 @@ namespace Espera.View.ViewModels
         public string CurrentTime
         {
             get { return this.currentTime.Value; }
-        }
-
-        public IReactiveCommand DefaultPlaybackCommand
-        {
-            get { return this.defaultPlaybackCommand.Value; }
         }
 
         public DirectYoutubeViewModel DirectYoutubeViewModel { get; private set; }

@@ -242,8 +242,9 @@
     <Compile Include="Changelog.cs" />
     <Compile Include="ChangelogEntry.cs" />
     <Compile Include="ChangelogFetcher.cs" />
-    <Compile Include="DesignTime.cs" />
+    <Compile Include="DesignTime\DesignTime.cs" />
     <Compile Include="DragDropExtension.cs" />
+    <Compile Include="DragDropHelper.cs" />
     <Compile Include="NLogLogger.cs" />
     <Compile Include="CacheMigration\DeprecatedBlobCache.cs" />
     <Compile Include="ReactiveViewHelper.cs" />
@@ -253,11 +254,14 @@
     <Compile Include="SortOrder.cs" />
     <Compile Include="TimeSpanHelper.cs" />
     <Compile Include="ViewModels\ArtistViewModel.cs" />
-    <Compile Include="ViewModels\DesignTimeSettingsViewModel.cs" />
+    <Compile Include="DesignTime\DesignTimeLocalViewModel.cs" />
+    <Compile Include="DesignTime\DesignTimeSettingsViewModel.cs" />
     <Compile Include="ViewModels\BugReportViewModel.cs" />
     <Compile Include="ViewModels\CrashViewModel.cs" />
-    <Compile Include="ViewModels\DesignTimeShellViewModel.cs" />
-    <Compile Include="ViewModels\DesignTimeTagEditorViewModel.cs" />
+    <Compile Include="DesignTime\DesignTimeShellViewModel.cs" />
+    <Compile Include="DesignTime\DesignTimeSoundCloudViewModel.cs" />
+    <Compile Include="DesignTime\DesignTimeTagEditorViewModel.cs" />
+    <Compile Include="DesignTime\DesignTimeYoutubeViewModel.cs" />
     <Compile Include="ViewModels\DirectYoutubeViewModel.cs" />
     <Compile Include="ViewModels\ISongSourceViewModel.cs" />
     <Compile Include="ViewModels\ISongViewModelBase.cs" />
@@ -276,6 +280,15 @@
     <Compile Include="ViewModels\YoutubeSongViewModel.cs" />
     <Compile Include="ViewModels\YoutubeViewModel.cs" />
     <Compile Include="ViewSettings.cs" />
+    <Compile Include="Views\ArtistsView.xaml.cs">
+      <DependentUpon>ArtistsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LocalView.xaml.cs">
+      <DependentUpon>LocalView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NetworkSongDetailView.xaml.cs">
+      <DependentUpon>NetworkSongDetailView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
@@ -293,13 +306,35 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Compile Include="Views\SoundCloudView.xaml.cs">
+      <DependentUpon>SoundCloudView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\TagEditorView.xaml.cs">
       <DependentUpon>TagEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\YoutubeView.xaml.cs">
+      <DependentUpon>YoutubeView.xaml</DependentUpon>
     </Compile>
     <Compile Include="WpfMediaPlayer.cs" />
     <Page Include="Resources\Icons.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\CommonResources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ArtistsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LocalView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\NetworkSongDetailView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\SettingsView.xaml">
       <SubType>Designer</SubType>
@@ -317,7 +352,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\SoundCloudView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\TagEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\YoutubeView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

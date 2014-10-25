@@ -18,13 +18,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Espera.Core;
 using YoutubeExtractor;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
-using ListView = System.Windows.Controls.ListView;
 using TextBox = System.Windows.Controls.TextBox;
 
 namespace Espera.View.Views
@@ -67,6 +65,8 @@ namespace Espera.View.Views
                 this.shellViewModel.WhenAnyObservable(x => x.CurrentPlaylist.CurrentPlayingEntry)
                     .ObserveOn(RxApp.MainThreadScheduler)
                     .Subscribe(x => this.PlaylistListBox.ScrollIntoView(x));
+
+                this.shellViewModel.LocalViewModel.OpenTagEditor.Subscribe(_ => this.OpenTagEditor());
             };
 
             this.Loaded += async (sender, args) =>
@@ -119,18 +119,6 @@ namespace Espera.View.Views
             var dialog = (SimpleDialog)this.Resources["PortableUpdateMessage"];
 
             await this.HideMetroDialogAsync(dialog);
-        }
-
-        private void ExternalPathLeftMouseButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            e.Handled = true;
-        }
-
-        private void ExternalPathLeftMouseButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            ((SongViewModelBase)((Hyperlink)sender).DataContext).OpenPathCommand.Execute(null);
-
-            e.Handled = true;
         }
 
         private IntPtr HandleWindowMove(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -202,7 +190,7 @@ namespace Espera.View.Views
             await this.HideMetroDialogAsync(dialog);
         }
 
-        private void OpenTagEditor(object sender, RoutedEventArgs e)
+        private void OpenTagEditor()
         {
             Func<Task<bool>> multipleEditWarning = async () =>
             {
@@ -319,39 +307,6 @@ namespace Espera.View.Views
             e.Handled = true;
         }
 
-        private void SongDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            ICommand command = this.shellViewModel.DefaultPlaybackCommand;
-
-            if (e.LeftButton == MouseButtonState.Pressed && command.CanExecute(null))
-            {
-                command.Execute(null);
-            }
-        }
-
-        private void SongKeyPressed(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                ICommand command = this.shellViewModel.DefaultPlaybackCommand;
-
-                if (command.CanExecute(null))
-                {
-                    command.Execute(null);
-                }
-
-                e.Handled = true;
-            }
-        }
-
-        private void SongListContextMenuOpening(object sender, ContextMenuEventArgs e)
-        {
-            if (((ListView)sender).Items.IsEmpty)
-            {
-                e.Handled = true;
-            }
-        }
-
         private void WireDataContext()
         {
             this.shellViewModel = (ShellViewModel)this.DataContext;
@@ -365,27 +320,15 @@ namespace Espera.View.Views
 
         private void WireDragAndDrop()
         {
-            const string songSourceFormat = "SongSource";
-
-            Observable.Merge(this.LocalSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)),
-                this.YoutubeSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)),
-                this.SoundCloudSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x)))
-                .Where(x => x.Item2.LeftButton == MouseButtonState.Pressed)
-                .Subscribe(x =>
-                {
-                    x.Item2.Handled = true;
-                    DragDrop.DoDragDrop((ListViewItem)x.Item1, songSourceFormat, DragDropEffects.Link);
-                });
-
             var playlistDropEvent = this.PlaylistListBox.ItemContainerStyle.RegisterEventSetter<DragEventArgs>(DropEvent, x => new DragEventHandler(x))
                 .Merge(this.PlaylistListBox.Events().Drop.Select(x => Tuple.Create((object)null, x)));
 
             // Local, YouTube and SoundCloud songs
             playlistDropEvent
-                .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Item2.Data.GetData(DataFormats.StringFormat) == songSourceFormat)
+                .Where(x => x.Item2.Data.GetDataPresent(DataFormats.StringFormat) && (string)x.Item2.Data.GetData(DataFormats.StringFormat) == DragDropHelper.SongSourceFormat)
                 .Subscribe(x =>
                 {
-                    int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
+                    int? targetIndex = ((PlaylistEntryViewModel)((ListBoxItem)x.Item1).DataContext).Index;
 
                     var addCommand = this.shellViewModel.CurrentSongSource.AddToPlaylistCommand;
                     if (addCommand.CanExecute(null))
@@ -412,7 +355,7 @@ namespace Espera.View.Views
                 .SelectMany(async x =>
                 {
                     var url = (string)x.Item2.Data.GetData(DataFormats.StringFormat);
-                    int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
+                    int? targetIndex = ((PlaylistEntryViewModel)((ListBoxItem)x.Item1).DataContext).Index;
 
                     await this.shellViewModel.DirectYoutubeViewModel.AddDirectYoutubeUrlToPlaylist(new Uri(url), targetIndex);
 
@@ -434,7 +377,7 @@ namespace Espera.View.Views
                 {
                     if (this.shellViewModel.MovePlaylistSongCommand.CanExecute(null))
                     {
-                        int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
+                        int? targetIndex = ((PlaylistEntryViewModel)((ListBoxItem)x.Item1).DataContext).Index;
 
                         this.shellViewModel.MovePlaylistSongCommand.Execute(targetIndex);
                     }

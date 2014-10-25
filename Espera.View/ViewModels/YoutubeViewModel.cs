@@ -9,7 +9,7 @@ using Splat;
 
 namespace Espera.View.ViewModels
 {
-    public sealed class YoutubeViewModel : NetworkSongViewModel<YoutubeSongViewModel, YoutubeSong>
+    public class YoutubeViewModel : NetworkSongViewModel<YoutubeSongViewModel, YoutubeSong>
     {
         private readonly ViewSettings viewSettings;
         private SortOrder ratingOrder;

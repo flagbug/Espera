@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using ReactiveUI;
@@ -14,6 +13,7 @@ namespace Espera.View.ViewModels
     public abstract class SongSourceViewModel<T> : ReactiveObject, ISongSourceViewModel
         where T : ISongViewModelBase
     {
+        private readonly ObservableAsPropertyHelper<IReactiveCommand> defaultPlaybackCommand;
         private readonly ObservableAsPropertyHelper<bool> isAdmin;
         private readonly Library library;
         private SortOrder durationOrder;
@@ -24,6 +24,9 @@ namespace Espera.View.ViewModels
 
         protected SongSourceViewModel(Library library, Guid accessToken)
         {
+            if (library == null)
+                throw new ArgumentNullException("library");
+
             this.library = library;
 
             this.searchText = String.Empty;
@@ -59,6 +62,16 @@ namespace Espera.View.ViewModels
                 .Select(x => x == AccessPermission.Admin)
                 .ToProperty(this, x => x.IsAdmin);
 
+            // The default play command differs whether we are in party mode or not and depends on
+            // the selected setting in administrator mode and the song source.
+            //
+            // In party mode, it is always "Add To Playlist", in administrator mode we look at the
+            // value that the song source returns
+            this.defaultPlaybackCommand = this.WhenAnyValue(x => x.IsAdmin,
+                isAdmin => !isAdmin || this.DefaultPlaybackAction == DefaultPlaybackAction.AddToPlaylist ?
+                    (IReactiveCommand)this.AddToPlaylistCommand : this.PlayNowCommand)
+            .ToProperty(this, x => x.DefaultPlaybackCommand);
+
             this.OrderByDurationCommand = ReactiveCommand.Create();
             this.OrderByDurationCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByDuration<T>, ref this.durationOrder));
 
@@ -69,6 +82,11 @@ namespace Espera.View.ViewModels
         public ReactiveCommand<object> AddToPlaylistCommand { get; private set; }
 
         public abstract DefaultPlaybackAction DefaultPlaybackAction { get; }
+
+        public IReactiveCommand DefaultPlaybackCommand
+        {
+            get { return this.defaultPlaybackCommand.Value; }
+        }
 
         public bool IsAdmin
         {
@@ -89,13 +107,13 @@ namespace Espera.View.ViewModels
 
         public IEnumerable<T> SelectableSongs
         {
-            get { return this.selectableSongs; }
+            get { return this.selectableSongs ?? Enumerable.Empty<T>(); }
             protected set { this.RaiseAndSetIfChanged(ref this.selectableSongs, value); }
         }
 
         public IEnumerable<ISongViewModelBase> SelectedSongs
         {
-            get { return this.selectedSongs; }
+            get { return this.selectedSongs ?? Enumerable.Empty<ISongViewModelBase>(); }
             set { this.RaiseAndSetIfChanged(ref this.selectedSongs, value); }
         }
 

@@ -6,7 +6,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:valueConverters="clr-namespace:Rareform.ValueConverters;assembly=Rareform"
-             d:DataContext="{d:DesignInstance ViewModels:DesignTimeSettingsViewModel,
+             xmlns:designTime="clr-namespace:Espera.View.DesignTime"
+             d:DataContext="{d:DesignInstance designTime:DesignTimeSettingsViewModel,
                                               IsDesignTimeCreatable=True}"
              d:DesignHeight="800"
              d:DesignWidth="800"

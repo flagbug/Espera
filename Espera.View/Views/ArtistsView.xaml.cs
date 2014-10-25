@@ -1,8 +1,8 @@
 ﻿namespace Espera.View.Views
 {
-    public partial class TagEditorView
+    public partial class ArtistsView
     {
-        public TagEditorView()
+        public ArtistsView()
         {
             InitializeComponent();
         }
