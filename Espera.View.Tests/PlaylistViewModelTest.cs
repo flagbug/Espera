@@ -29,6 +29,24 @@ namespace Espera.View.Tests
                     Assert.NotNull(fixture["Name"]);
                 }
             }
+
+            [Fact]
+            public void UniqueNameDoesValidate()
+            {
+                using (Library library = new LibraryBuilder().Build())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.AddPlaylist("Existing", accessToken);
+                    library.AddPlaylist("New", accessToken);
+
+                    var fixture = new PlaylistViewModel(library.Playlists.Single(x => x.Name == "New"), library, accessToken, new CoreSettings());
+
+                    fixture.EditName = true;
+                    fixture.Name = "Unique";
+
+                    Assert.Null(fixture["Name"]);
+                }
+            }
         }
     }
 }

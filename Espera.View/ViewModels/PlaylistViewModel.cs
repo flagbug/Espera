@@ -223,7 +223,7 @@ namespace Espera.View.ViewModels
 
                 if (columnName == Reflector.GetMemberName(() => this.Name))
                 {
-                    if (this.library.Playlists.Any(p => p.Name == this.Name))
+                    if (this.library.Playlists.Count(p => p.Name == this.Name) > 1)
                     {
                         error = "Name already exists.";
                     }
