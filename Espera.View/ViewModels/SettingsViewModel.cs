@@ -11,6 +11,7 @@ using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Mobile;
 using Espera.Core.Settings;
+using Espera.Network;
 using Rareform.Reflection;
 using Rareform.Validation;
 using ReactiveUI;
@@ -149,8 +150,7 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.LibrarySource);
 
             this.port = this.coreSettings.Port;
-            this.ChangePortCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.Port)
-                .Select(x => x > 49152 && x < 65535));
+            this.ChangePortCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.Port, NetworkHelpers.IsPortValid));
             this.ChangePortCommand.Subscribe(_ => this.coreSettings.Port = this.Port);
 
             this.remoteControlPassword = this.coreSettings.RemoteControlPassword;
