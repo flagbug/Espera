@@ -73,7 +73,8 @@ namespace Espera.View.ViewModels
             this.CurrentPlayingEntry = this.Model.WhenAnyValue(x => x.CurrentSongIndex).Select(x => x == null ? null : this.entries[x.Value]);
 
             this.canAlterPlaylist = this.library.LocalAccessControl.HasAccess(coreSettings.WhenAnyValue(x => x.LockPlaylist), accessToken)
-                .ToProperty(this, x => x.CanAlterPlaylist);
+                .ToProperty(this, x => x.CanAlterPlaylist)
+                .DisposeWith(disposable);
 
             // We re-evaluate the selected entries after each up or down move here, because WPF
             // doesn't send us proper updates about the selection
