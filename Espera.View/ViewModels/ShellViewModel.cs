@@ -167,12 +167,12 @@ namespace Espera.View.ViewModels
             this.ShufflePlaylistCommand.Subscribe(x => this.library.ShufflePlaylist(this.accessToken));
 
             IObservable<bool> canPlay = this.WhenAnyValue(x => x.CurrentPlaylist.SelectedEntries)
-                .CombineLatest(this.WhenAnyValue(x => x.IsAdmin), this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.library.LoadedSong, this.library.PlaybackState,
-                    (selectedPlaylistEntries, isAdmin, lockPlayPause, loadedSong, playBackState) =>
+                .CombineLatest(this.library.LocalAccessControl.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.accessToken), this.library.LoadedSong, this.library.PlaybackState,
+                    (selectedPlaylistEntries, hasPlayAccess, loadedSong, playBackState) =>
 
                         // The admin can always play, but if we are in party mode, we have to check
                         // whether it is allowed to play
-                        (isAdmin || !lockPlayPause) &&
+                        hasPlayAccess &&
 
                         // If exactly one song is selected, the command can be executed
                         (selectedPlaylistEntries != null && selectedPlaylistEntries.Count() == 1 ||
