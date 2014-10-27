@@ -38,15 +38,12 @@ namespace Espera.View.ViewModels
         /// <summary>
         /// Resolves the given YouTube URL and adds the song to the playlist.
         ///
-        /// This method will only execute if the <see cref="SongSourceViewModel{T}.AddToPlaylistCommand"/> command can execute.
+        /// This method will only execute successfuly if the <see cref="SongSourceViewModel{T}.AddToPlaylistCommand"/> command can execute.
         /// </summary>
         public async Task AddDirectYoutubeUrlToPlaylist(Uri url, int? targetIndex)
         {
             if (url == null)
                 Throw.ArgumentNullException(() => url);
-
-            if (!this.AddToPlaylistCommand.CanExecute(null))
-                return;
 
             YoutubeSong song = await this.youtubeSongFinder.ResolveYoutubeSongFromUrl(url);
 
