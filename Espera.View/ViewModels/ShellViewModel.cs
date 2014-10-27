@@ -96,7 +96,7 @@ namespace Espera.View.ViewModels
             this.LocalViewModel = new LocalViewModel(this.library, this.ViewSettings, this.coreSettings, accessToken);
             this.YoutubeViewModel = new YoutubeViewModel(this.library, this.ViewSettings, this.coreSettings, accessToken);
             this.SoundCloudViewModel = new SoundCloudViewModel(this.library, accessToken, this.coreSettings, this.ViewSettings);
-            this.DirectYoutubeViewModel = new DirectYoutubeViewModel(this.library, accessToken);
+            this.DirectYoutubeViewModel = new DirectYoutubeViewModel(this.library, this.coreSettings, accessToken);
 
             this.currentSongSource = this.WhenAnyValue(x => x.IsLocal, x => x.IsYoutube, x => x.IsSoundCloud,
                 (local, youtube, soundcloud) =>

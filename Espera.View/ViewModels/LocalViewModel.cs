@@ -18,7 +18,6 @@ namespace Espera.View.ViewModels
         private readonly ArtistViewModel allArtistsViewModel;
         private readonly SortOrder artistOrder;
         private readonly Subject<Unit> artistUpdateSignal;
-        private readonly CoreSettings coreSettings;
         private readonly ObservableAsPropertyHelper<bool> isUpdating;
         private readonly ReactiveCommand<Unit> playNowCommand;
         private readonly ObservableAsPropertyHelper<bool> showAddSongsHelperMessage;
@@ -27,16 +26,12 @@ namespace Espera.View.ViewModels
         private ArtistViewModel selectedArtist;
 
         public LocalViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, Guid accessToken)
-            : base(library, accessToken)
+            : base(library, coreSettings, accessToken)
         {
             if (viewSettings == null)
                 Throw.ArgumentNullException(() => viewSettings);
 
-            if (coreSettings == null)
-                Throw.ArgumentNullException(() => coreSettings);
-
             this.viewSettings = viewSettings;
-            this.coreSettings = coreSettings;
 
             this.artistUpdateSignal = new Subject<Unit>();
 
@@ -96,7 +91,7 @@ namespace Espera.View.ViewModels
 
         public override DefaultPlaybackAction DefaultPlaybackAction
         {
-            get { return this.coreSettings.DefaultPlaybackAction; }
+            get { return this.CoreSettings.DefaultPlaybackAction; }
         }
 
         public int DurationColumnWidth

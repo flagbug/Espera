@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Akavache;
 using Espera.Core;
@@ -18,15 +19,15 @@ namespace Espera.View.ViewModels
     {
         private readonly IYoutubeSongFinder youtubeSongFinder;
 
-        public DirectYoutubeViewModel(Library library, Guid accessToken, IYoutubeSongFinder youtubeSongFinder = null)
-            : base(library, accessToken)
+        public DirectYoutubeViewModel(Library library, CoreSettings coreSettings, Guid accessToken, IYoutubeSongFinder youtubeSongFinder = null)
+            : base(library, coreSettings, accessToken)
         {
             this.youtubeSongFinder = youtubeSongFinder ?? new YoutubeSongFinder(Locator.Current.GetService<IBlobCache>(BlobCacheKeys.RequestCacheContract));
         }
 
         public override DefaultPlaybackAction DefaultPlaybackAction
         {
-            get { throw new NotImplementedException(); }
+            get { return DefaultPlaybackAction.AddToPlaylist; }
         }
 
         public override ReactiveCommand<Unit> PlayNowCommand
@@ -36,11 +37,16 @@ namespace Espera.View.ViewModels
 
         /// <summary>
         /// Resolves the given YouTube URL and adds the song to the playlist.
+        ///
+        /// This method will only execute if the <see cref="SongSourceViewModel{T}.AddToPlaylistCommand"/> command can execute.
         /// </summary>
         public async Task AddDirectYoutubeUrlToPlaylist(Uri url, int? targetIndex)
         {
             if (url == null)
                 Throw.ArgumentNullException(() => url);
+
+            if (!this.AddToPlaylistCommand.CanExecute(null))
+                return;
 
             YoutubeSong song = await this.youtubeSongFinder.ResolveYoutubeSongFromUrl(url);
 
@@ -52,7 +58,7 @@ namespace Espera.View.ViewModels
 
             this.SelectedSongs = new[] { new YoutubeSongViewModel(song, () => { throw new NotImplementedException(); }) };
 
-            this.AddToPlaylistCommand.Execute(targetIndex);
+            await this.AddToPlaylistCommand.ExecuteAsync(targetIndex);
         }
     }
 }

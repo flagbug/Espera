@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
+using Espera.Core;
+using Espera.Core.Management;
+using Espera.Core.Settings;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
 using NSubstitute;
@@ -11,29 +14,90 @@ namespace Espera.View.Tests
 {
     public class SongSourceViewModelTest
     {
-        [Fact]
-        public async Task PartyModeTriggersTimeoutMessage()
+        public class TheAddToPlaylistCommand
         {
-            using (var library = new LibraryBuilder().WithPlaylist().Build())
+            [Fact]
+            public void CanExecuteWhenAdmin()
             {
-                Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
-                library.LocalAccessControl.SetLocalPassword(accessToken, "password");
-                library.LocalAccessControl.DowngradeLocalAccess(accessToken);
+                Song song = Helpers.SetupSongMock();
 
-                var fixture = Substitute.For<SongSourceViewModel<ISongViewModelBase>>(library, accessToken);
+                using (Library library = new LibraryBuilder().WithPlaylist("ThePlaylist").Build())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
-                var timeoutTriggers = fixture.TimeoutWarning.CreateCollection();
+                    var vm = new SongSourceViewModelMock(library, accessToken);
+                    var songVm = Substitute.For<ISongViewModelBase>();
+                    songVm.Model.Returns(song);
+                    vm.SelectedSongs = new[] { songVm };
 
-                var songVm = Substitute.For<ISongViewModelBase>();
-                var song = Helpers.SetupSongMock();
-                songVm.Model.Returns(song);
+                    Assert.True(vm.AddToPlaylistCommand.CanExecute(null));
+                }
+            }
 
-                fixture.SelectedSongs = new[] { songVm };
+            [Fact]
+            public void CanExecuteWhenGuestWithDisabledPlaylistLock()
+            {
+                var settings = new CoreSettings
+                {
+                    LockPlaylist = false
+                };
 
-                await fixture.AddToPlaylistCommand.ExecuteAsync();
-                await fixture.AddToPlaylistCommand.ExecuteAsync();
+                Song song = Helpers.SetupSongMock();
 
-                Assert.Equal(1, timeoutTriggers.Count);
+                using (Library library = new LibraryBuilder().WithPlaylist("ThePlaylist").Build())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.LocalAccessControl.SetLocalPassword(accessToken, "Password");
+                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
+
+                    var vm = new SongSourceViewModelMock(library, accessToken, settings);
+                    var songVm = Substitute.For<ISongViewModelBase>();
+                    songVm.Model.Returns(song);
+                    vm.SelectedSongs = new[] { songVm };
+
+                    Assert.True(vm.AddToPlaylistCommand.CanExecute(null));
+                }
+            }
+
+            [Fact]
+            public void CantExecuteWhenGuest()
+            {
+                Song song = Helpers.SetupSongMock();
+
+                using (Library library = new LibraryBuilder().WithPlaylist("ThePlaylist").Build())
+                {
+                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    library.LocalAccessControl.SetLocalPassword(accessToken, "Password");
+                    library.LocalAccessControl.DowngradeLocalAccess(accessToken);
+
+                    var vm = new SongSourceViewModelMock(library, accessToken);
+                    var songVm = Substitute.For<ISongViewModelBase>();
+                    songVm.Model.Returns(song);
+                    vm.SelectedSongs = new[] { songVm };
+
+                    Assert.False(vm.AddToPlaylistCommand.CanExecute(null));
+                }
+            }
+
+            private class SongSourceViewModelMock : SongSourceViewModel<ISongViewModelBase>
+            {
+                private readonly ReactiveCommand<Unit> playNowCommand;
+
+                public SongSourceViewModelMock(Library library, Guid accessToken, CoreSettings settings = null)
+                    : base(library, settings ?? new CoreSettings(), accessToken)
+                {
+                    this.playNowCommand = ReactiveCommand.CreateAsyncObservable(_ => Observable.Return(Unit.Default));
+                }
+
+                public override DefaultPlaybackAction DefaultPlaybackAction
+                {
+                    get { return DefaultPlaybackAction.AddToPlaylist; }
+                }
+
+                public override ReactiveCommand<Unit> PlayNowCommand
+                {
+                    get { return this.playNowCommand; }
+                }
             }
         }
     }

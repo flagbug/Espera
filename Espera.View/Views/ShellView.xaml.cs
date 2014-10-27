@@ -357,7 +357,10 @@ namespace Espera.View.Views
                     var url = (string)x.Item2.Data.GetData(DataFormats.StringFormat);
                     int? targetIndex = x.Item1 == null ? (int?)null : ((PlaylistEntryViewModel)((ListBoxItem)(x.Item1)).DataContext).Index;
 
-                    await this.shellViewModel.DirectYoutubeViewModel.AddDirectYoutubeUrlToPlaylist(new Uri(url), targetIndex);
+                    if (this.shellViewModel.DirectYoutubeViewModel.AddToPlaylistCommand.CanExecute(null))
+                    {
+                        await this.shellViewModel.DirectYoutubeViewModel.AddDirectYoutubeUrlToPlaylist(new Uri(url), targetIndex);
+                    }
 
                     x.Item2.Handled = true;
 

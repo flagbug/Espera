@@ -20,7 +20,6 @@ namespace Espera.View.ViewModels
         where TViewModel : ISongViewModelBase
         where TSong : Song
     {
-        private readonly CoreSettings coreSettings;
         private readonly Func<TSong, TViewModel> modelToViewModelConverter;
         private readonly ReactiveCommand<Unit> playNowCommand;
         private readonly ObservableAsPropertyHelper<ISongViewModelBase> selectedSong;
@@ -31,20 +30,16 @@ namespace Espera.View.ViewModels
         protected NetworkSongViewModel(Library library, Guid accessToken, CoreSettings coreSettings,
                 Func<TSong, TViewModel> modelToViewModelConverter,
                 INetworkSongFinder<TSong> songFinder = null)
-            : base(library, accessToken)
+            : base(library, coreSettings, accessToken)
         {
-            if (coreSettings == null)
-                Throw.ArgumentNullException(() => coreSettings);
-
             if (modelToViewModelConverter == null)
                 Throw.ArgumentNullException(() => modelToViewModelConverter);
 
-            this.coreSettings = coreSettings;
             this.modelToViewModelConverter = modelToViewModelConverter;
             this.songFinder = songFinder;
 
             IObservable<bool> canPlayNow = this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
-                .Select(x => x == AccessPermission.Admin || !this.coreSettings.LockPlayPause);
+                .Select(x => x == AccessPermission.Admin || !this.CoreSettings.LockPlayPause);
             this.playNowCommand = ReactiveCommand.CreateAsyncTask(canPlayNow,
                 _ => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model), accessToken));
 

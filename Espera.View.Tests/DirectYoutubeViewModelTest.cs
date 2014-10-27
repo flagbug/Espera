@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Espera.Core;
+using Espera.Core.Settings;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
 using NSubstitute;
@@ -28,7 +29,7 @@ namespace Espera.View.Tests
                     var playlist = library.Playlists.First();
                     library.SwitchToPlaylist(playlist, accessToken);
 
-                    var fixture = new DirectYoutubeViewModel(library, accessToken, songFinder);
+                    var fixture = new DirectYoutubeViewModel(library, new CoreSettings(), accessToken, songFinder);
 
                     await Helpers.ThrowsAsync<ArgumentNullException>(() => fixture.AddDirectYoutubeUrlToPlaylist(null, null));
                 }
@@ -47,7 +48,7 @@ namespace Espera.View.Tests
                     var playlist = library.Playlists.First();
                     library.SwitchToPlaylist(playlist, accessToken);
 
-                    var fixture = new DirectYoutubeViewModel(library, accessToken, songFinder);
+                    var fixture = new DirectYoutubeViewModel(library, new CoreSettings(), accessToken, songFinder);
 
                     await fixture.AddDirectYoutubeUrlToPlaylist(new Uri("http://youtube.com?v=yadda"), null);
 
@@ -70,7 +71,7 @@ namespace Espera.View.Tests
                     var playlist = library.Playlists.First();
                     library.SwitchToPlaylist(playlist, accessToken);
 
-                    var fixture = new DirectYoutubeViewModel(library, accessToken, songFinder);
+                    var fixture = new DirectYoutubeViewModel(library, new CoreSettings(), accessToken, songFinder);
 
                     await fixture.AddDirectYoutubeUrlToPlaylist(new Uri(youtubePath), null);
 

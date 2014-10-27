@@ -130,6 +130,7 @@
     <Compile Include="PlaylistViewModelTest.cs" />
     <Compile Include="SettingsViewModelTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SongSourceViewModelTest.cs" />
     <Compile Include="TagEditorViewModelTest.cs" />
     <Compile Include="TimeSpanHelperTest.cs" />
     <Compile Include="UpdateViewModelTest.cs" />

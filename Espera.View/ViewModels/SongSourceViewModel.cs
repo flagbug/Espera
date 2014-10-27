@@ -22,19 +22,26 @@ namespace Espera.View.ViewModels
         private IEnumerable<ISongViewModelBase> selectedSongs;
         private SortOrder titleOrder;
 
-        protected SongSourceViewModel(Library library, Guid accessToken)
+        protected SongSourceViewModel(Library library, CoreSettings coreSettings, Guid accessToken)
         {
             if (library == null)
                 throw new ArgumentNullException("library");
 
+            if (coreSettings == null)
+                throw new ArgumentNullException("coreSettings");
+
             this.library = library;
+            this.CoreSettings = coreSettings;
 
             this.searchText = String.Empty;
             this.selectableSongs = Enumerable.Empty<T>();
 
             this.ApplyOrder(SortHelpers.GetOrderByTitle<T>, ref this.titleOrder);
 
-            this.AddToPlaylistCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedSongs, x => x != null && x.Any()));
+            IObservable<bool> canAddToPlaylist = this.WhenAnyValue(x => x.SelectedSongs, x => x.Any())
+                .CombineLatest(this.Library.LocalAccessControl.HasAccess(this.CoreSettings.WhenAnyValue(x => x.LockPlaylist), accessToken), (songsSelected, hasAccess) => songsSelected && hasAccess);
+
+            this.AddToPlaylistCommand = ReactiveCommand.Create(canAddToPlaylist);
             this.AddToPlaylistCommand.Subscribe(x =>
             {
                 if (this.IsAdmin)
@@ -118,6 +125,8 @@ namespace Espera.View.ViewModels
         }
 
         public ReactiveCommand<object> SelectionChangedCommand { get; set; }
+
+        protected CoreSettings CoreSettings { get; private set; }
 
         protected Library Library
         {
