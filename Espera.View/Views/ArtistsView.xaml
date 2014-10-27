@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:designTime="clr-namespace:Espera.View.DesignTime"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:p="clr-namespace:Espera.View.Properties"
              d:DataContext="{d:DesignInstance designTime:DesignTimeLocalViewModel,
                                               IsDesignTimeCreatable=True}"
              d:DesignHeight="300"
@@ -23,7 +24,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <TextBlock Style="{StaticResource SongDetailHeaderStyle}" Text="artists" />
+            <TextBlock Style="{StaticResource SongDetailHeaderStyle}" Text="{x:Static p:Resources.ArtistsViewHeader}" />
             <controls:ProgressRing Width="35"
                                    Height="35"
                                    Margin="20, 15, 0, 0"
