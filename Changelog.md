@@ -1,3 +1,8 @@
+# v2.10.3
+
+## Bugfixes
+- Fixed a bug that allowed the adding of songs to the playlist even when Espera was locked down in the party mode.
+
 # v2.10.2
 
 ## Bugfixes
