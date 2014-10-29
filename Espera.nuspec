@@ -15,5 +15,6 @@
     <files>
         <file src="Espera.View\bin\Release\*.dll" target="lib\net45\" />
         <file src="Espera.View\bin\Release\*.exe" target="lib\net45\" />
+		<file src="Espera.View\bin\Release\*.exe.config" target="lib\net45\" />
     </files>
 </package>
