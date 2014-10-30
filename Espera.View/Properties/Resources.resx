@@ -180,4 +180,26 @@
   <data name="CrashViewTitle" xml:space="preserve">
     <value>Espera crashed</value>
   </data>
+  <data name="LocalViewAddSongHelperMessage" xml:space="preserve">
+    <value>Add songs to the library by going to the Settings (right upper corner, next to the window minimize button) -&amp;gt; Library -&amp;gt; Change Library Path</value>
+    <comment>The message that is displayed when the library contains no songs</comment>
+  </data>
+  <data name="LocalViewContextMenuAddToPlaylist" xml:space="preserve">
+    <value>Add to playlist</value>
+  </data>
+  <data name="LocalViewContextMenuEditTags" xml:space="preserve">
+    <value>Edit tags</value>
+  </data>
+  <data name="LocalViewContextMenuPlayNow" xml:space="preserve">
+    <value>Play Now</value>
+  </data>
+  <data name="LocalViewListViewHeaderDuration" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+  <data name="LocalViewListViewHeaderGenre" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="LocalViewListViewHeaderTitle" xml:space="preserve">
+    <value>Title</value>
+  </data>
 </root>

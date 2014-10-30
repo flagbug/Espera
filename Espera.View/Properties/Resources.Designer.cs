@@ -248,5 +248,68 @@ namespace Espera.View.Properties {
                 return ResourceManager.GetString("CrashViewTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add songs to the library by going to the Settings (right upper corner, next to the window minimize button) -&amp;gt; Library -&amp;gt; Change Library Path.
+        /// </summary>
+        public static string LocalViewAddSongHelperMessage {
+            get {
+                return ResourceManager.GetString("LocalViewAddSongHelperMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add to playlist.
+        /// </summary>
+        public static string LocalViewContextMenuAddToPlaylist {
+            get {
+                return ResourceManager.GetString("LocalViewContextMenuAddToPlaylist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit tags.
+        /// </summary>
+        public static string LocalViewContextMenuEditTags {
+            get {
+                return ResourceManager.GetString("LocalViewContextMenuEditTags", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Play Now.
+        /// </summary>
+        public static string LocalViewContextMenuPlayNow {
+            get {
+                return ResourceManager.GetString("LocalViewContextMenuPlayNow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Duration.
+        /// </summary>
+        public static string LocalViewListViewHeaderDuration {
+            get {
+                return ResourceManager.GetString("LocalViewListViewHeaderDuration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Genre.
+        /// </summary>
+        public static string LocalViewListViewHeaderGenre {
+            get {
+                return ResourceManager.GetString("LocalViewListViewHeaderGenre", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Title.
+        /// </summary>
+        public static string LocalViewListViewHeaderTitle {
+            get {
+                return ResourceManager.GetString("LocalViewListViewHeaderTitle", resourceCulture);
+            }
+        }
     }
 }

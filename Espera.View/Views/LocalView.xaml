@@ -5,6 +5,7 @@
              xmlns:designTime="clr-namespace:Espera.View.DesignTime"
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:p="clr-namespace:Espera.View.Properties"
              d:DataContext="{d:DesignInstance designTime:DesignTimeLocalViewModel,
                                               IsDesignTimeCreatable=True}"
              d:DesignHeight="600"
@@ -46,12 +47,12 @@
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Command="{Binding Path=PlayNowCommand}"
-                              Header="Play Now"
+                              Header="{x:Static p:Resources.LocalViewContextMenuPlayNow}"
                               Visibility="{Binding Path=IsAdmin,
                                                    Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <MenuItem Command="{Binding Path=AddToPlaylistCommand}" Header="Add to playlist" />
+                    <MenuItem Command="{Binding Path=AddToPlaylistCommand}" Header="{x:Static p:Resources.LocalViewContextMenuAddToPlaylist}" />
                     <MenuItem Command="{Binding Path=OpenTagEditor}"
-                              Header="Edit tags"
+                              Header="{x:Static p:Resources.LocalViewContextMenuEditTags}"
                               Visibility="{Binding Path=IsAdmin,
                                                    Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </ContextMenu>
@@ -77,7 +78,7 @@
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="{Binding Path=TitleColumnWidth, Mode=TwoWay}">
-                        <GridViewColumnHeader Content="Title" />
+                        <GridViewColumnHeader Content="{x:Static p:Resources.LocalViewListViewHeaderTitle}" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
@@ -87,7 +88,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Width="{Binding Path=DurationColumnWidth, Mode=TwoWay}">
-                        <GridViewColumnHeader Content="Duration" />
+                        <GridViewColumnHeader Content="{x:Static p:Resources.LocalViewListViewHeaderDuration}" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Path=FormattedDuration}" TextTrimming="CharacterEllipsis" />
@@ -95,7 +96,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Width="{Binding Path=GenreColumnWidth, Mode=TwoWay}">
-                        <GridViewColumnHeader Content="Genre" />
+                        <GridViewColumnHeader Content="{x:Static p:Resources.LocalViewListViewHeaderGenre}" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Path=Genre}" TextTrimming="CharacterEllipsis" />
@@ -109,7 +110,7 @@
                    VerticalAlignment="Center"
                    FontSize="16"
                    Foreground="{StaticResource GrayBrush3}"
-                   Text="Add songs to the library by going to the Settings (right upper corner, next to the window minimize button) -&gt; Library -&gt; Change Library Path"
+                   Text="{x:Static p:Resources.LocalViewAddSongHelperMessage}"
                    TextAlignment="Center"
                    TextWrapping="Wrap"
                    Visibility="{Binding Path=ShowAddSongsHelperMessage,
