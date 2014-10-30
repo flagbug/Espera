@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
@@ -137,7 +136,7 @@ namespace Espera.Core
                     imageData = await client.GetByteArrayAsync(artworkLink);
                 }
 
-                catch (WebException ex)
+                catch (HttpRequestException ex)
                 {
                     this.keyedMemoizingSemaphore.Release(lookupKey);
 
