@@ -4,9 +4,10 @@
              xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:ViewModels="clr-namespace:Espera.View.ViewModels"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:valueConverters="clr-namespace:Rareform.ValueConverters;assembly=Rareform"
              xmlns:designTime="clr-namespace:Espera.View.DesignTime"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:p="clr-namespace:Espera.View.Properties"
+             xmlns:valueConverters="clr-namespace:Rareform.ValueConverters;assembly=Rareform"
              d:DataContext="{d:DesignInstance designTime:DesignTimeSettingsViewModel,
                                               IsDesignTimeCreatable=True}"
              d:DesignHeight="800"
@@ -59,8 +60,8 @@
             </Style>
             <Style BasedOn="{StaticResource {x:Type Controls:ToggleSwitch}}" TargetType="{x:Type Controls:ToggleSwitch}">
                 <Setter Property="Margin" Value="0, 10, 0, 0" />
-                <Setter Property="OnLabel" Value="Yes" />
-                <Setter Property="OffLabel" Value="No" />
+                <Setter Property="OnLabel" Value="{x:Static p:Resources.SettingsViewToggleYes}" />
+                <Setter Property="OffLabel" Value="{x:Static p:Resources.SettingsViewToggleNo}" />
             </Style>
             <Style x:Key="AboutInfoStyle"
                    BasedOn="{StaticResource {x:Type TextBlock}}"
@@ -73,10 +74,10 @@
     </UserControl.Resources>
     <Grid>
         <TabControl Padding="15, 0, 15, 0">
-            <TabItem Header="appearance">
+            <TabItem Header="{x:Static p:Resources.SettingsViewAppearanceHeader}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="accent color" />
+                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="{x:Static p:Resources.SettingsViewAccentColorHeader}" />
                         <StackPanel Margin="0, 10, 0, 0"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Top">
@@ -186,7 +187,7 @@
                                         Style="{StaticResource AccentPickerButtonStyle}" />
                             </StackPanel>
                         </StackPanel>
-                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="theme" />
+                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="{x:Static p:Resources.SettingsViewThemeHeader}" />
                         <StackPanel Margin="0, 10, 0, 0"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Top"
@@ -200,8 +201,8 @@
                                     CommandParameter="BaseLight"
                                     Style="{StaticResource ThemePickerButtonStyle}" />
                         </StackPanel>
-                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="scaling" />
-                        <TextBlock Style="{StaticResource SettingsTextStyle}" Text="Use this option whenever you have Espera displayed on a TV or any other big screen" />
+                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="{x:Static p:Resources.SettingsViewScalingHeader}" />
+                        <TextBlock Style="{StaticResource SettingsTextStyle}" Text="{x:Static p:Resources.SettingsViewScalingDescription}" />
                         <StackPanel Margin="0, 5, 0, 0" Orientation="Horizontal">
                             <Slider Width="200"
                                     VerticalAlignment="Center"
@@ -218,56 +219,56 @@
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
-            <TabItem Header="party mode">
+            <TabItem Header="{x:Static p:Resources.SettingsViewPartyModeHeader}">
                 <ScrollViewer Padding="0, 0, 10, 10" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <TextBlock Margin="0, 15, 0, 0"
                                    FontSize="18"
                                    Style="{StaticResource SettingsTextStyle}"
-                                   Text="The party mode allows you to lock Espera, so your guests cannot interrupt the playback or change the volume"
+                                   Text="{x:Static p:Resources.SettingsViewPartyModeInfo}"
                                    TextWrapping="Wrap" />
                         <Controls:ToggleSwitch Margin="0, 20, 0, 0"
-                                               Header="Lock play/pause"
+                                               Header="{x:Static p:Resources.SettingsViewPartyModeLockPlayPause}"
                                                IsChecked="{Binding Path=LockPlayPause}" />
-                        <Controls:ToggleSwitch Header="Lock volume" IsChecked="{Binding Path=LockVolume}" />
-                        <Controls:ToggleSwitch Header="Lock time" IsChecked="{Binding Path=LockTime}" />
-                        <Controls:ToggleSwitch Header="Lock playlist" IsChecked="{Binding Path=LockPlaylist}" />
-                        <Controls:ToggleSwitch Header="Lock window (minimize, maximize, close)" IsChecked="{Binding Path=LockWindow}" />
+                        <Controls:ToggleSwitch Header="{x:Static p:Resources.SettingsViewPartyModeLockVolume}" IsChecked="{Binding Path=LockVolume}" />
+                        <Controls:ToggleSwitch Header="{x:Static p:Resources.SettingsViewPartyModeLockTime}" IsChecked="{Binding Path=LockTime}" />
+                        <Controls:ToggleSwitch Header="{x:Static p:Resources.SettingsViewPartyModeLockPlaylist}" IsChecked="{Binding Path=LockPlaylist}" />
+                        <Controls:ToggleSwitch Header="{x:Static p:Resources.SettingsViewPartyModeLockWindow}" IsChecked="{Binding Path=LockWindow}" />
                         <Controls:ToggleSwitch Margin="30, 0, 0, 0"
-                                               Header="Make window fullscreen"
+                                               Header="{x:Static p:Resources.SettingsViewPartyModeLockWindowFullscreen}"
                                                IsChecked="{Binding Path=GoFullScreenOnLock}"
                                                IsEnabled="{Binding Path=LockWindow}" />
                         <StackPanel Margin="0, 30, 0, 0">
-                            <TextBlock FontSize="16" Text="Before you can enter the party mode,&#10;you have to select a password." />
+                            <TextBlock FontSize="16" Text="{x:Static p:Resources.SettingsViewPartyModePasswordInfo}" />
                             <PasswordBox Name="AdminPasswordBox"
                                          Width="200"
                                          Margin="0, 10, 0, 0"
                                          HorizontalAlignment="Left"
                                          VerticalContentAlignment="Center"
-                                         Controls:TextboxHelper.Watermark="Enter a password"
+                                         Controls:TextboxHelper.Watermark="{x:Static p:Resources.SettingsViewPartyModePasswordWatermark}"
                                          PasswordChanged="CreationPasswordChanged"
                                          x:FieldModifier="private" />
                             <Button Width="200"
                                     Margin="0, 5, 0, 0"
                                     HorizontalAlignment="Left"
                                     Click="CreateAdminButtonClick"
-                                    Content="Create Administrator"
+                                    Content="{x:Static p:Resources.SettingsViewPartyModeCreateAdministrator}"
                                     IsEnabled="{Binding Path=CanCreateAdmin}" />
                             <Button Width="200"
                                     Margin="0, 15, 0, 0"
                                     HorizontalAlignment="Left"
                                     Command="{Binding Path=ChangeToPartyCommand}"
-                                    Content="Enter party mode" />
+                                    Content="{x:Static p:Resources.SettingsViewPartyModeEnterPartyMode}" />
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
-            <TabItem Header="my music">
+            <TabItem Header="{x:Static p:Resources.SettingsViewMyMusicHeader}">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="song source" />
+                    <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="{x:Static p:Resources.SettingsViewMyMusicSongSourceHeader}" />
                     <TextBlock Margin="0, 10, 0, 0"
                                Style="{StaticResource SettingsTextStyle}"
-                               Text="The path where Espera searches for songs" />
+                               Text="{x:Static p:Resources.SettingsViewMyMusicSongSourceInfo}" />
                     <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
                         <TextBox Width="325"
                                  VerticalAlignment="Top"
@@ -276,17 +277,17 @@
                                                 Mode=OneWay}" />
                         <Button Margin="10, 0, 0, 0"
                                 Click="AddSongSourceButtonClick"
-                                Content="Change library path" />
+                                Content="{x:Static p:Resources.SettingsViewMyMusicSongSourceChangePath}" />
                         <Button Margin="5, 0, 0, 0"
                                 VerticalAlignment="Center"
                                 Command="{Binding Path=UpdateLibraryCommand}"
                                 Content="Update Now" />
                     </StackPanel>
-                    <Controls:ToggleSwitch Header="Update library automatically" IsChecked="{Binding Path=EnableAutomaticLibraryUpdates}" />
+                    <Controls:ToggleSwitch Header="{x:Static p:Resources.SettingsViewMyMusicLibraryUpdateHeader}" IsChecked="{Binding Path=EnableAutomaticLibraryUpdates}" />
                     <StackPanel Margin="30, 5, 0, 0"
                                 IsEnabled="{Binding Path=EnableAutomaticLibraryUpdates}"
                                 Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Text="Update interval" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Static p:Resources.SettingsViewMyMusicLibraryUpdateInterval}" />
                         <Slider Width="200"
                                 Margin="5, 0, 0, 0"
                                 VerticalAlignment="Center"
@@ -297,24 +298,25 @@
                                 TickFrequency="0.5"
                                 Value="{Binding Path=SongSourceUpdateInterval}" />
                         <TextBlock Margin="5, 0, 0, 0"
-                                   VerticalAlignment="Center"
-                                   Text="{Binding Path=SongSourceUpdateInterval,
-                                                  StringFormat=\{0\} Hours}" />
+                                   VerticalAlignment="Center">
+                            <TextBlock.Text>
+                                <MultiBinding  StringFormat="{}{0} {1}">
+                                    <Binding Path="SongSourceUpdateInterval" />
+                                    <Binding Source="{x:Static p:Resources.SettingsViewMyMusicLibraryUpdateIntervalHours}" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
                     </StackPanel>
-                    <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="playback" />
+                    <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="{x:Static p:Resources.SettingsViewMyMusicPlaybackHeader}" />
                     <TextBlock Margin="0, 10, 0, 0"
                                Style="{StaticResource SettingsTextStyle}"
-                               Text="Default double click action" />
+                               Text="{x:Static p:Resources.SettingsViewMyMusicPlaybackDefaultAction}" />
                     <ComboBox Width="200"
                               Margin="0, 10, 0, 0"
                               HorizontalAlignment="Left"
                               ItemsSource="{Binding Path=DefaultPlaybackActionStrings}"
                               SelectedItem="{Binding Path=DefaultPlaybackActionString}" />
-                    <TextBlock Margin="0, 20, 0, 0" Style="{StaticResource SettingsTextStyle}">
-                        Playback engine
-                        <LineBreak />
-                        Change the playback engine if you experience any sound issues
-                    </TextBlock>
+                    <TextBlock Margin="0, 20, 0, 0" Style="{StaticResource SettingsTextStyle}" Text="{x:Static p:Resources.SettingsViewMyMusicPlaybackEngine}" />
                     <ComboBox Width="200"
                               Margin="0, 10, 0, 0"
                               HorizontalAlignment="Left"
@@ -322,17 +324,17 @@
                               SelectedItem="{Binding Path=DefaultPlaybackEngineString}" />
                 </StackPanel>
             </TabItem>
-            <TabItem Header="youtube">
+            <TabItem Header="{x:Static p:Resources.SettingsViewYoutubeHeader}">
                 <StackPanel>
-                    <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="streaming" />
+                    <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="{x:Static p:Resources.SettingsViewYoutubeStreamingHeader}" />
                     <Controls:ToggleSwitch Margin="10, 5, 0, 0"
-                                           Header="Always stream highest quality"
+                                           Header="{x:Static p:Resources.SettingsViewYoutubeStreamingHighQualityHeader}"
                                            IsChecked="{Binding Path=StreamHighestYoutubeQuality}" />
                     <StackPanel Margin="20, 0, 0, 0"
                                 IsEnabled="{Binding Path=StreamHighestYoutubeQuality,
                                                     Converter={StaticResource BoolNegationConverter}}"
                                 Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Text="Streaming quality" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Static p:Resources.SettingsViewYoutubeStreamingQuality}" />
                         <ComboBox Width="100"
                                   Margin="10, 0, 0, 0"
                                   ItemsSource="{Binding Path=YoutubeStreamingQualities}"
@@ -340,8 +342,8 @@
                                   SelectedItem="{Binding Path=YoutubeStreamingQuality}" />
                     </StackPanel>
                     <StackPanel Orientation="Vertical">
-                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="download path" />
-                        <TextBlock Style="{StaticResource SettingsTextStyle}" Text="The path where Espera downloads the YouTube videos and audio tracks" />
+                        <TextBlock Style="{StaticResource SettingsHeaderStyle}" Text="{x:Static p:Resources.SettingsViewYoutubeDownloadPathHeader}" />
+                        <TextBlock Style="{StaticResource SettingsTextStyle}" Text="{x:Static p:Resources.SettingsViewYoutubeDownloadPathDescription}" />
                         <StackPanel Margin="0, 10, 0, 0" Orientation="Horizontal">
                             <TextBox Width="350"
                                      VerticalAlignment="Top"
@@ -350,21 +352,17 @@
                                                     Mode=OneWay}" />
                             <Button Margin="10, 0, 0, 0"
                                     Click="ChangeYoutubeDownloadPath"
-                                    Content="Change download path" />
+                                    Content="{x:Static p:Resources.SettingsViewYoutubeDownloadPathButtonText}" />
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </TabItem>
-            <TabItem Header="remote control">
+            <TabItem Header="{x:Static p:Resources.SettingsViewRemoteControlHeader}">
                 <StackPanel>
                     <TextBlock Margin="0, 15, 0, 0"
                                FontSize="18"
                                Style="{StaticResource SettingsTextStyle}"
-                               TextWrapping="Wrap">
-                        Control the playback, volume and playlist with the Android remote control app.
-                        <LineBreak />
-                        You can also let your guests vote on songs and and let them add music from their phones directly to the playlist.
-                    </TextBlock>
+                               TextWrapping="Wrap" Text="{x:Static p:Resources.SettingsViewRemoteControlDescription}" />
                     <Controls:ToggleSwitch Header="Enable remote control" IsChecked="{Binding Path=EnableRemoteControl}" />
                     <StackPanel Margin="15, 0, 0, 0"
                                 IsEnabled="{Binding Path=EnableRemoteControl}"

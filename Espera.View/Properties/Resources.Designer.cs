@@ -311,5 +311,347 @@ namespace Espera.View.Properties {
                 return ResourceManager.GetString("LocalViewListViewHeaderTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to accent color.
+        /// </summary>
+        public static string SettingsViewAccentColorHeader {
+            get {
+                return ResourceManager.GetString("SettingsViewAccentColorHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to appearance.
+        /// </summary>
+        public static string SettingsViewAppearanceHeader {
+            get {
+                return ResourceManager.GetString("SettingsViewAppearanceHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to my music.
+        /// </summary>
+        public static string SettingsViewMyMusicHeader {
+            get {
+                return ResourceManager.GetString("SettingsViewMyMusicHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update library automatically.
+        /// </summary>
+        public static string SettingsViewMyMusicLibraryUpdateHeader {
+            get {
+                return ResourceManager.GetString("SettingsViewMyMusicLibraryUpdateHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update interval.
+        /// </summary>
+        public static string SettingsViewMyMusicLibraryUpdateInterval {
+            get {
+                return ResourceManager.GetString("SettingsViewMyMusicLibraryUpdateInterval", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to hours.
+        /// </summary>
+        public static string SettingsViewMyMusicLibraryUpdateIntervalHours {
+            get {
+                return ResourceManager.GetString("SettingsViewMyMusicLibraryUpdateIntervalHours", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Default double click action.
+        /// </summary>
+        public static string SettingsViewMyMusicPlaybackDefaultAction {
+            get {
+                return ResourceManager.GetString("SettingsViewMyMusicPlaybackDefaultAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Playback engine\nChange the playback engine if you experience any sound issues.
+        /// </summary>
+        public static string SettingsViewMyMusicPlaybackEngine {
+            get {
+                return ResourceManager.GetString("SettingsViewMyMusicPlaybackEngine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to playback.
+        /// </summary>
+        public static string SettingsViewMyMusicPlaybackHeader {
+            get {
+                return ResourceManager.GetString("SettingsViewMyMusicPlaybackHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Change library path.
+        /// </summary>
+        public static string SettingsViewMyMusicSongSourceChangePath {
+            get {
+                return ResourceManager.GetString("SettingsViewMyMusicSongSourceChangePath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to song source.
+        /// </summary>
+        public static string SettingsViewMyMusicSongSourceHeader {
+            get {
+                return ResourceManager.GetString("SettingsViewMyMusicSongSourceHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The path where Espera searches for songs.
+        /// </summary>
+        public static string SettingsViewMyMusicSongSourceInfo {
+            get {
+                return ResourceManager.GetString("SettingsViewMyMusicSongSourceInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create administrator.
+        /// </summary>
+        public static string SettingsViewPartyModeCreateAdministrator {
+            get {
+                return ResourceManager.GetString("SettingsViewPartyModeCreateAdministrator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter party mode.
+        /// </summary>
+        public static string SettingsViewPartyModeEnterPartyMode {
+            get {
+                return ResourceManager.GetString("SettingsViewPartyModeEnterPartyMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to party mode.
+        /// </summary>
+        public static string SettingsViewPartyModeHeader {
+            get {
+                return ResourceManager.GetString("SettingsViewPartyModeHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The party mode allows you to lock Espera, so your guests cannot interrupt the playback or change the volume.
+        /// </summary>
+        public static string SettingsViewPartyModeInfo {
+            get {
+                return ResourceManager.GetString("SettingsViewPartyModeInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lock playlist.
+        /// </summary>
+        public static string SettingsViewPartyModeLockPlaylist {
+            get {
+                return ResourceManager.GetString("SettingsViewPartyModeLockPlaylist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lock play/pause.
+        /// </summary>
+        public static string SettingsViewPartyModeLockPlayPause {
+            get {
+                return ResourceManager.GetString("SettingsViewPartyModeLockPlayPause", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lock time.
+        /// </summary>
+        public static string SettingsViewPartyModeLockTime {
+            get {
+                return ResourceManager.GetString("SettingsViewPartyModeLockTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lock volume.
+        /// </summary>
+        public static string SettingsViewPartyModeLockVolume {
+            get {
+                return ResourceManager.GetString("SettingsViewPartyModeLockVolume", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lock window (minimize, maximize, close).
+        /// </summary>
+        public static string SettingsViewPartyModeLockWindow {
+            get {
+                return ResourceManager.GetString("SettingsViewPartyModeLockWindow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Make window fullscreen.
+        /// </summary>
+        public static string SettingsViewPartyModeLockWindowFullscreen {
+            get {
+                return ResourceManager.GetString("SettingsViewPartyModeLockWindowFullscreen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Before you can enter the party mode,&amp;#10;you have to select a password..
+        /// </summary>
+        public static string SettingsViewPartyModePasswordInfo {
+            get {
+                return ResourceManager.GetString("SettingsViewPartyModePasswordInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter a password.
+        /// </summary>
+        public static string SettingsViewPartyModePasswordWatermark {
+            get {
+                return ResourceManager.GetString("SettingsViewPartyModePasswordWatermark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Control the playback, volume and playlist with the Android remote control app.\nYou can also let your guests vote on songs and and let them add music from their phones directly to the playlist..
+        /// </summary>
+        public static string SettingsViewRemoteControlDescription {
+            get {
+                return ResourceManager.GetString("SettingsViewRemoteControlDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to remote control.
+        /// </summary>
+        public static string SettingsViewRemoteControlHeader {
+            get {
+                return ResourceManager.GetString("SettingsViewRemoteControlHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use this option whenever you have Espera displayed on a TV or any other big screen.
+        /// </summary>
+        public static string SettingsViewScalingDescription {
+            get {
+                return ResourceManager.GetString("SettingsViewScalingDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to scaling.
+        /// </summary>
+        public static string SettingsViewScalingHeader {
+            get {
+                return ResourceManager.GetString("SettingsViewScalingHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to theme.
+        /// </summary>
+        public static string SettingsViewThemeHeader {
+            get {
+                return ResourceManager.GetString("SettingsViewThemeHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No.
+        /// </summary>
+        public static string SettingsViewToggleNo {
+            get {
+                return ResourceManager.GetString("SettingsViewToggleNo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yes.
+        /// </summary>
+        public static string SettingsViewToggleYes {
+            get {
+                return ResourceManager.GetString("SettingsViewToggleYes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Change download path.
+        /// </summary>
+        public static string SettingsViewYoutubeDownloadPathButtonText {
+            get {
+                return ResourceManager.GetString("SettingsViewYoutubeDownloadPathButtonText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The path where Espera downloads the YouTube videos and audio tracks.
+        /// </summary>
+        public static string SettingsViewYoutubeDownloadPathDescription {
+            get {
+                return ResourceManager.GetString("SettingsViewYoutubeDownloadPathDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to download path.
+        /// </summary>
+        public static string SettingsViewYoutubeDownloadPathHeader {
+            get {
+                return ResourceManager.GetString("SettingsViewYoutubeDownloadPathHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to youtube.
+        /// </summary>
+        public static string SettingsViewYoutubeHeader {
+            get {
+                return ResourceManager.GetString("SettingsViewYoutubeHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to streaming.
+        /// </summary>
+        public static string SettingsViewYoutubeStreamingHeader {
+            get {
+                return ResourceManager.GetString("SettingsViewYoutubeStreamingHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Always stream highest quality.
+        /// </summary>
+        public static string SettingsViewYoutubeStreamingHighQualityHeader {
+            get {
+                return ResourceManager.GetString("SettingsViewYoutubeStreamingHighQualityHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Streaming quality.
+        /// </summary>
+        public static string SettingsViewYoutubeStreamingQuality {
+            get {
+                return ResourceManager.GetString("SettingsViewYoutubeStreamingQuality", resourceCulture);
+            }
+        }
     }
 }

@@ -202,4 +202,118 @@
   <data name="LocalViewListViewHeaderTitle" xml:space="preserve">
     <value>Title</value>
   </data>
+  <data name="SettingsViewAccentColorHeader" xml:space="preserve">
+    <value>accent color</value>
+  </data>
+  <data name="SettingsViewAppearanceHeader" xml:space="preserve">
+    <value>appearance</value>
+  </data>
+  <data name="SettingsViewMyMusicHeader" xml:space="preserve">
+    <value>my music</value>
+  </data>
+  <data name="SettingsViewMyMusicLibraryUpdateHeader" xml:space="preserve">
+    <value>Update library automatically</value>
+  </data>
+  <data name="SettingsViewMyMusicLibraryUpdateInterval" xml:space="preserve">
+    <value>Update interval</value>
+  </data>
+  <data name="SettingsViewMyMusicSongSourceChangePath" xml:space="preserve">
+    <value>Change library path</value>
+  </data>
+  <data name="SettingsViewMyMusicSongSourceHeader" xml:space="preserve">
+    <value>song source</value>
+  </data>
+  <data name="SettingsViewMyMusicSongSourceInfo" xml:space="preserve">
+    <value>The path where Espera searches for songs</value>
+  </data>
+  <data name="SettingsViewPartyModeCreateAdministrator" xml:space="preserve">
+    <value>Create administrator</value>
+  </data>
+  <data name="SettingsViewPartyModeEnterPartyMode" xml:space="preserve">
+    <value>Enter party mode</value>
+  </data>
+  <data name="SettingsViewPartyModeHeader" xml:space="preserve">
+    <value>party mode</value>
+  </data>
+  <data name="SettingsViewPartyModeInfo" xml:space="preserve">
+    <value>The party mode allows you to lock Espera, so your guests cannot interrupt the playback or change the volume</value>
+  </data>
+  <data name="SettingsViewPartyModeLockPlaylist" xml:space="preserve">
+    <value>Lock playlist</value>
+  </data>
+  <data name="SettingsViewPartyModeLockPlayPause" xml:space="preserve">
+    <value>Lock play/pause</value>
+  </data>
+  <data name="SettingsViewPartyModeLockTime" xml:space="preserve">
+    <value>Lock time</value>
+  </data>
+  <data name="SettingsViewPartyModeLockVolume" xml:space="preserve">
+    <value>Lock volume</value>
+  </data>
+  <data name="SettingsViewPartyModeLockWindow" xml:space="preserve">
+    <value>Lock window (minimize, maximize, close)</value>
+  </data>
+  <data name="SettingsViewPartyModeLockWindowFullscreen" xml:space="preserve">
+    <value>Make window fullscreen</value>
+  </data>
+  <data name="SettingsViewPartyModePasswordInfo" xml:space="preserve">
+    <value>Before you can enter the party mode,&amp;#10;you have to select a password.</value>
+  </data>
+  <data name="SettingsViewPartyModePasswordWatermark" xml:space="preserve">
+    <value>Enter a password</value>
+  </data>
+  <data name="SettingsViewScalingDescription" xml:space="preserve">
+    <value>Use this option whenever you have Espera displayed on a TV or any other big screen</value>
+  </data>
+  <data name="SettingsViewScalingHeader" xml:space="preserve">
+    <value>scaling</value>
+  </data>
+  <data name="SettingsViewThemeHeader" xml:space="preserve">
+    <value>theme</value>
+  </data>
+  <data name="SettingsViewMyMusicLibraryUpdateIntervalHours" xml:space="preserve">
+    <value>hours</value>
+  </data>
+  <data name="SettingsViewToggleNo" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="SettingsViewToggleYes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="SettingsViewMyMusicPlaybackDefaultAction" xml:space="preserve">
+    <value>Default double click action</value>
+  </data>
+  <data name="SettingsViewMyMusicPlaybackEngine" xml:space="preserve">
+    <value>Playback engine\nChange the playback engine if you experience any sound issues</value>
+  </data>
+  <data name="SettingsViewMyMusicPlaybackHeader" xml:space="preserve">
+    <value>playback</value>
+  </data>
+  <data name="SettingsViewRemoteControlDescription" xml:space="preserve">
+    <value>Control the playback, volume and playlist with the Android remote control app.\nYou can also let your guests vote on songs and and let them add music from their phones directly to the playlist.</value>
+  </data>
+  <data name="SettingsViewRemoteControlHeader" xml:space="preserve">
+    <value>remote control</value>
+  </data>
+  <data name="SettingsViewYoutubeDownloadPathButtonText" xml:space="preserve">
+    <value>Change download path</value>
+  </data>
+  <data name="SettingsViewYoutubeDownloadPathDescription" xml:space="preserve">
+    <value>The path where Espera downloads the YouTube videos and audio tracks</value>
+  </data>
+  <data name="SettingsViewYoutubeDownloadPathHeader" xml:space="preserve">
+    <value>download path</value>
+  </data>
+  <data name="SettingsViewYoutubeHeader" xml:space="preserve">
+    <value>youtube</value>
+  </data>
+  <data name="SettingsViewYoutubeStreamingHeader" xml:space="preserve">
+    <value>streaming</value>
+  </data>
+  <data name="SettingsViewYoutubeStreamingHighQualityHeader" xml:space="preserve">
+    <value>Always stream highest quality</value>
+  </data>
+  <data name="SettingsViewYoutubeStreamingQuality" xml:space="preserve">
+    <value>Streaming quality</value>
+  </data>
 </root>
