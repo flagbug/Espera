@@ -48,7 +48,7 @@ namespace Espera.Core
             var song = new LocalSong(filePath, duration)
             {
                 Album = PrepareTag(tag.Album, String.Empty),
-                Artist = PrepareTag(tag.FirstPerformer ?? tag.FirstAlbumArtist, "Unknown Artist"), //HACK: In the future retrieve the string for an unkown artist from the view if we want to localize it
+                Artist = PrepareTag(tag.FirstAlbumArtist ?? tag.FirstPerformer, "Unknown Artist"), //HACK: In the future retrieve the string for an unkown artist from the view if we want to localize it
                 Genre = PrepareTag(tag.FirstGenre, String.Empty),
                 Title = PrepareTag(tag.Title, Path.GetFileNameWithoutExtension(filePath)),
                 TrackNumber = (int)tag.Track
