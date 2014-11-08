@@ -131,7 +131,7 @@ namespace Espera.Core
 
                 this.Name = path;
 
-                Stream stream = fileSystem.File.Open(path, FileMode.Open, FileAccess.ReadWrite);
+                Stream stream = fileSystem.File.OpenRead(path);
 
                 this.ReadStream = stream;
                 this.WriteStream = stream;
