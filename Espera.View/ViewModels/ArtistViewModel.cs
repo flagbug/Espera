@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace Espera.View.ViewModels
 {
     public sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>, IDisposable
     {
-        private readonly Subject<IObservable<string>> artworkKeys;
+        private readonly ReactiveList<LocalSong> songs; 
         private readonly ObservableAsPropertyHelper<BitmapSource> cover;
         private readonly int orderHint;
 
@@ -20,19 +21,19 @@ namespace Espera.View.ViewModels
         /// The constructor.
         /// </summary>
         /// <param name="artistName"></param>
-        /// <param name="artworkKeys"></param>
+        /// <param name="songs"></param>
         /// <param name="orderHint">
         /// A hint that tells this instance which position it has in the artist list. This helps for
         /// priorizing the album cover loading. The higher the number, the earlier it is in the list
         /// (Think of a reversed sorted list).
         /// </param>
-        public ArtistViewModel(string artistName, IEnumerable<IObservable<string>> artworkKeys, int orderHint = 1)
+        public ArtistViewModel(string artistName, IEnumerable<LocalSong> songs, int orderHint = 1)
         {
-            this.artworkKeys = new Subject<IObservable<string>>();
+            this.songs = new ReactiveList<LocalSong>();
 
             this.orderHint = orderHint;
 
-            this.cover = this.artworkKeys
+            this.cover = this.songs.ItemsAdded.Select(x => x.WhenAnyValue(y => y.ArtworkKey))
                 .Merge()
                 .Where(x => x != null)
                 .Distinct() // Ignore duplicate artworks
@@ -42,7 +43,7 @@ namespace Espera.View.ViewModels
                 .ToProperty(this, x => x.Cover);
             var connect = this.Cover; // Connect the property to the source observable immediately
 
-            this.UpdateArtwork(artworkKeys);
+            this.UpdateSongs(songs);
 
             this.Name = artistName;
             this.IsAllArtists = false;
@@ -93,11 +94,14 @@ namespace Espera.View.ViewModels
             return this.Name == other.Name;
         }
 
-        public void UpdateArtwork(IEnumerable<IObservable<string>> keys)
+        public void UpdateSongs(IEnumerable<LocalSong> songs)
         {
-            foreach (IObservable<string> key in keys)
+            var songsToAdd = songs.Where(x => !this.songs.Contains(x)).ToList();
+
+            // Can't use AddRange here, ReactiveList resets the list on big changes and we don't get the add notification
+            foreach (LocalSong song in songsToAdd)
             {
-                this.artworkKeys.OnNext(key);
+                this.songs.Add(song);
             }
         }
 

@@ -166,19 +166,15 @@ namespace Espera.View.ViewModels
             {
                 ArtistViewModel model = this.allArtists.FirstOrDefault(x => x.Name.Equals(songs.Key, StringComparison.InvariantCultureIgnoreCase));
 
-                List<IObservable<string>> artworkKeys = songs
-                    .Select(x => x.WhenAnyValue(y => y.ArtworkKey))
-                    .ToList();
-
                 if (model == null)
                 {
                     int priority = orderedArtists.IndexOf(songs.Key) + 1;
-                    this.allArtists.Add(new ArtistViewModel(songs.Key, artworkKeys, priority));
+                    this.allArtists.Add(new ArtistViewModel(songs.Key, songs, priority));
                 }
 
                 else
                 {
-                    model.UpdateArtwork(artworkKeys);
+                    model.UpdateSongs(songs);
                 }
             }
         }
