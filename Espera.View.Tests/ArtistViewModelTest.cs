@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Espera.Core;
 using Xunit;
 
 namespace Espera.View.Tests
@@ -12,7 +13,7 @@ namespace Espera.View.Tests
         public void AllArtistViewModelIsSortedFirst()
         {
             var allArtists = new ArtistViewModel("All Artists");
-            var otherArtist = new ArtistViewModel("Aaa", Enumerable.Empty<IObservable<string>>());
+            var otherArtist = new ArtistViewModel("Aaa", Enumerable.Empty<LocalSong>());
 
             var list = new List<ArtistViewModel> { otherArtist, allArtists };
             list.Sort();
@@ -24,12 +25,12 @@ namespace Espera.View.Tests
         [Fact]
         public void CertainPrefixesAreSortedCorrectly()
         {
-            var aPrefixBig = new ArtistViewModel("A b", Enumerable.Empty<IObservable<string>>());
-            var aPrefixSmall = new ArtistViewModel("a c", Enumerable.Empty<IObservable<string>>());
-            var thePrefixBig = new ArtistViewModel("The d", Enumerable.Empty<IObservable<string>>());
-            var thePrefixSmall = new ArtistViewModel("the e", Enumerable.Empty<IObservable<string>>());
-            var firstArtist = new ArtistViewModel("Aa", Enumerable.Empty<IObservable<string>>());
-            var lastArtist = new ArtistViewModel("Zz", Enumerable.Empty<IObservable<string>>());
+            var aPrefixBig = new ArtistViewModel("A b", Enumerable.Empty<LocalSong>());
+            var aPrefixSmall = new ArtistViewModel("a c", Enumerable.Empty<LocalSong>());
+            var thePrefixBig = new ArtistViewModel("The d", Enumerable.Empty<LocalSong>());
+            var thePrefixSmall = new ArtistViewModel("the e", Enumerable.Empty<LocalSong>());
+            var firstArtist = new ArtistViewModel("Aa", Enumerable.Empty<LocalSong>());
+            var lastArtist = new ArtistViewModel("Zz", Enumerable.Empty<LocalSong>());
 
             var correctList = new List<ArtistViewModel> { firstArtist, aPrefixBig, aPrefixSmall, thePrefixBig, thePrefixSmall, lastArtist };
 
