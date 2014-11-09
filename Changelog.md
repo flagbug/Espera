@@ -1,5 +1,6 @@
 # v2.10.4
-# Bugfixes
+
+## Bugfixes
 - Fixed an issue with the artwork loading.
 - Fixed a bug that caused increasing memory consumption when searching the local music library.
 - Fixed a bug that caused read-only music files not being added to the library.
