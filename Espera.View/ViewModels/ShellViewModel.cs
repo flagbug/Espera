@@ -157,8 +157,7 @@ namespace Espera.View.ViewModels
             this.AddPlaylistCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.CanAlterPlaylist));
             this.AddPlaylistCommand.Subscribe(x => this.AddPlaylist());
 
-            this.Playlists = this.library.Playlists.CreateDerivedCollection(this.CreatePlaylistViewModel);
-            this.Playlists.ItemsRemoved.Subscribe(x => x.Dispose());
+            this.Playlists = this.library.Playlists.CreateDerivedCollection(this.CreatePlaylistViewModel, x => x.Dispose());
 
             this.ShowSettingsCommand = ReactiveCommand.Create();
             this.ShowSettingsCommand.Subscribe(x => this.SettingsViewModel.HandleSettings());

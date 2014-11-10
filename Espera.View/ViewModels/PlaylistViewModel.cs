@@ -46,9 +46,8 @@ namespace Espera.View.ViewModels
             this.disposable = new CompositeDisposable();
 
             this.entries = playlist
-                .CreateDerivedCollection(entry => new PlaylistEntryViewModel(entry))
+                .CreateDerivedCollection(entry => new PlaylistEntryViewModel(entry), x => x.Dispose())
                 .DisposeWith(this.disposable);
-            this.entries.ItemsRemoved.Subscribe(x => x.Dispose());
 
             this.playlist.WhenAnyValue(x => x.CurrentSongIndex).ToUnit()
                 .Merge(this.entries.Changed.ToUnit())
