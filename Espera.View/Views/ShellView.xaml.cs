@@ -1,3 +1,4 @@
+using Espera.Core;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
@@ -18,9 +19,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
-using Espera.Core;
 using YoutubeExtractor;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using TextBox = System.Windows.Controls.TextBox;
@@ -301,12 +302,6 @@ namespace Espera.View.Views
             keyPressed.Where(x => x == Key.MediaPlayPause).InvokeCommand(this.shellViewModel, x => x.PauseContinueCommand);
         }
 
-        private void SearchTextBoxKeyUp(object sender, KeyEventArgs e)
-        {
-            // Prevent all keys from bubbling up
-            e.Handled = true;
-        }
-
         private void WireDataContext()
         {
             this.shellViewModel = (ShellViewModel)this.DataContext;
@@ -439,7 +434,7 @@ namespace Espera.View.Views
 
         private void WireShortcuts()
         {
-            this.Events().KeyUp.Where(x => x.Key == Key.Space)
+            this.Events().KeyUp.Where(x => !(x.OriginalSource is TextBoxBase) && x.Key == Key.Space)
                 .InvokeCommand(this.shellViewModel, x => x.PauseContinueCommand);
 
             this.Events().KeyDown.Where(x => x.Key == Key.F && (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)))
