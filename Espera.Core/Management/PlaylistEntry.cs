@@ -16,7 +16,7 @@ namespace Espera.Core.Management
                 Throw.ArgumentOutOfRangeException(() => index, 0);
 
             if (song == null)
-                Throw.ArgumentNullException(() => song);
+                throw new ArgumentNullException(nameof(song));
 
             this.Index = index;
             this.Song = song;
@@ -26,7 +26,7 @@ namespace Espera.Core.Management
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public Guid Guid { get; private set; }
+        public Guid Guid { get; }
 
         public int Index { get; internal set; }
 
@@ -55,30 +55,17 @@ namespace Espera.Core.Management
             }
         }
 
-        public int CompareTo(PlaylistEntry other)
-        {
-            return this.Index.CompareTo(other.Index);
-        }
+        public int CompareTo(PlaylistEntry other) => this.Index.CompareTo(other.Index);
 
-        public bool Equals(PlaylistEntry other)
-        {
-            return other != null && this.Guid == other.Guid;
-        }
+        public bool Equals(PlaylistEntry other) => other != null && this.Guid == other.Guid;
 
-        public override bool Equals(object obj)
-        {
-            return this.Equals(obj as PlaylistEntry);
-        }
+        public override bool Equals(object obj) => this.Equals(obj as PlaylistEntry);
 
-        public override int GetHashCode()
-        {
-            return new { this.Guid }.GetHashCode();
-        }
+        public override int GetHashCode() => new { this.Guid }.GetHashCode();
 
         public override string ToString()
         {
-            return string.Format("Index = {0}, Votes = {1}, Guid = {2}",
-                this.Index, this.Votes, this.Guid.ToString().Substring(0, 8));
+            return string.Format("Index = \{this.Index}, Votes = \{this.votes}, Guid = \{this.Guid}");
         }
 
         internal void ResetVotes()
@@ -87,22 +74,13 @@ namespace Espera.Core.Management
             this.IsShadowVoted = false;
         }
 
-        internal void ShadowVote()
-        {
-            this.IsShadowVoted = true;
-        }
+        internal void ShadowVote() => this.IsShadowVoted = true;
 
-        internal void Vote()
-        {
-            this.Votes++;
-        }
+        internal void Vote() => this.Votes++;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChangedEventHandler handler = this.PropertyChanged;
-
-            if (handler != null)
-                handler(this, new PropertyChangedEventArgs(propertyName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

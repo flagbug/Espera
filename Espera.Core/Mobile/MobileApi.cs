@@ -39,7 +39,7 @@ namespace Espera.Core.Mobile
                 Throw.ArgumentOutOfRangeException(() => port);
 
             if (library == null)
-                Throw.ArgumentNullException(() => library);
+                throw new ArgumentNullException(nameof(library));
 
             this.port = port;
             this.library = library;
@@ -63,10 +63,7 @@ namespace Espera.Core.Mobile
             }
         }
 
-        public IObservable<bool> IsPortOccupied
-        {
-            get { return this.isPortOccupied; }
-        }
+        public IObservable<bool> IsPortOccupied => this.isPortOccupied.AsObservable();
 
         public void Dispose()
         {

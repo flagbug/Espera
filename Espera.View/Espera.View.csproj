@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.CodeAnalysis.CSharp.FxCopAnalyzers.1.0.0-beta1-20141031-01\build\Microsoft.CodeAnalysis.CSharp.FxCopAnalyzers.props" Condition="Exists('..\packages\Microsoft.CodeAnalysis.CSharp.FxCopAnalyzers.1.0.0-beta1-20141031-01\build\Microsoft.CodeAnalysis.CSharp.FxCopAnalyzers.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -20,7 +21,7 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <_ResolveReferenceDependencies>true</_ResolveReferenceDependencies>
     <NuGetPackageImportStamp>556551d3</NuGetPackageImportStamp>
-    <NuGetPackageImportStamp>8a89f963</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>fab82871</NuGetPackageImportStamp>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
@@ -434,6 +435,10 @@
   <ItemGroup>
     <Resource Include="Images\AndroidBadge.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.CSharp.FxCopAnalyzers.1.0.0-beta1-20141031-01\tools\analyzers\Microsoft.CodeAnalysis.CSharp.FxCopAnalyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.CSharp.FxCopAnalyzers.1.0.0-beta1-20141031-01\tools\analyzers\Microsoft.CodeAnalysis.FxCopAnalyzers.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
@@ -450,6 +455,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\SQLitePCL.raw_basic.0.6.1\build\net45\SQLitePCL.raw_basic.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCL.raw_basic.0.6.1\build\net45\SQLitePCL.raw_basic.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.CodeAnalysis.CSharp.FxCopAnalyzers.1.0.0-beta1-20141031-01\build\Microsoft.CodeAnalysis.CSharp.FxCopAnalyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeAnalysis.CSharp.FxCopAnalyzers.1.0.0-beta1-20141031-01\build\Microsoft.CodeAnalysis.CSharp.FxCopAnalyzers.props'))" />
   </Target>
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
