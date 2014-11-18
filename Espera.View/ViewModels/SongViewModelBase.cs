@@ -27,7 +27,7 @@ namespace Espera.View.ViewModels
 
                 catch (Win32Exception ex)
                 {
-                    this.Log().ErrorException(string.Format("Could not open link {0}", this.Path), ex);
+                    this.Log().ErrorException("Could not open link \{this.Path}", ex);
                 }
             });
         }

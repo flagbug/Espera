@@ -83,7 +83,7 @@ namespace Espera.Core
 
             catch (Exception ex)
             {
-                this.Log().ErrorException(string.Format("Couldn't read song file \{filePath}"), ex);
+                this.Log().ErrorException("Couldn't read song file \{filePath}", ex);
                 return null;
             }
         }
@@ -100,7 +100,7 @@ namespace Espera.Core
 
             catch (Exception ex)
             {
-                this.Log().ErrorException(string.Format("Couldn't get files from directory \{rootPath}"), ex);
+                this.Log().ErrorException("Couldn't get files from directory \{rootPath}", ex);
             }
 
             IEnumerable<string> directories = Enumerable.Empty<string>();
@@ -112,7 +112,7 @@ namespace Espera.Core
 
             catch (Exception ex)
             {
-                this.Log().ErrorException(string.Format("Couldn't get directories from directory \{rootPath}"), ex);
+                this.Log().ErrorException("Couldn't get directories from directory \{rootPath}", ex);
             }
 
             return files.Concat(directories.SelectMany(ScanDirectoryForValidPaths));

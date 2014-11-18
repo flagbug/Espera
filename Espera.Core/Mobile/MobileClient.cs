@@ -124,7 +124,7 @@ namespace Espera.Core.Mobile
 
                     catch (JsonException ex)
                     {
-                        this.Log().ErrorException("Mobile client with access token {0} sent a malformed request", ex);
+                        this.Log().ErrorException("Mobile client with access token \{this.accessToken} sent a malformed request", ex);
                         return Unit.Default;
                     }
 
@@ -147,8 +147,7 @@ namespace Espera.Core.Mobile
 
                         catch (Exception ex)
                         {
-                            this.Log().ErrorException(string.Format(
-                                "Mobile client with access token {0} sent a request that caused an exception", this.accessToken), ex);
+                            this.Log().ErrorException("Mobile client with access token \{this.accessToken} sent a request that caused an exception", ex);
                             if (Debugger.IsAttached)
                             {
                                 Debugger.Break();

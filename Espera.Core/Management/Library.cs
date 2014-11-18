@@ -788,7 +788,7 @@ namespace Espera.Core.Management
 
                 catch (ArtworkCacheException ex)
                 {
-                    this.Log().ErrorException(string.Format("Error while fetching artwork for {0} - {1}", song.Artist, song.Album), ex);
+                    this.Log().ErrorException("Error while fetching artwork for \{song.Artist} - \{song.Album}", ex);
                 }
 
                 if (key != null)
