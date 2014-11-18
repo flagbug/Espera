@@ -60,16 +60,16 @@ namespace Espera.View.ViewModels
         public SettingsViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, IWindowManager windowManager, Guid accessToken, MobileApiInfo mobileApiInfo)
         {
             if (library == null)
-                Throw.ArgumentNullException(() => library);
+                throw new ArgumentNullException(nameof(library));
 
             if (viewSettings == null)
-                Throw.ArgumentNullException(() => viewSettings);
+                throw new ArgumentNullException(nameof(viewSettings));
 
             if (coreSettings == null)
-                Throw.ArgumentNullException(() => coreSettings);
+                throw new ArgumentNullException(nameof(coreSettings));
 
             if (mobileApiInfo == null)
-                throw new ArgumentNullException("mobileApiInfo");
+                throw new ArgumentNullException(nameof(mobileApiInfo));
 
             this.library = library;
             this.viewSettings = viewSettings;
@@ -184,27 +184,21 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public bool CanCreateAdmin
-        {
-            get { return this.canCreateAdmin.Value; }
-        }
+        public bool CanCreateAdmin => this.canCreateAdmin.Value;
 
-        public bool CanLogin
-        {
-            get { return this.canLogin.Value; }
-        }
+        public bool CanLogin => this.canLogin.Value;
 
-        public ReactiveCommand<object> ChangeAccentColorCommand { get; private set; }
+        public ReactiveCommand<object> ChangeAccentColorCommand { get; }
 
-        public ReactiveCommand<object> ChangeAppThemeCommand { get; private set; }
+        public ReactiveCommand<object> ChangeAppThemeCommand { get; }
 
-        public ReactiveCommand<object> ChangePortCommand { get; private set; }
+        public ReactiveCommand<object> ChangePortCommand { get; }
 
-        public ReactiveCommand<object> ChangeRemoteControlPasswordCommand { get; private set; }
+        public ReactiveCommand<object> ChangeRemoteControlPasswordCommand { get; }
 
-        public ReactiveCommand<object> ChangeToPartyCommand { get; private set; }
+        public ReactiveCommand<object> ChangeToPartyCommand { get; }
 
-        public ReactiveCommand<object> CreateAdminCommand { get; private set; }
+        public ReactiveCommand<object> CreateAdminCommand { get; }
 
         public string CreationPassword
         {
@@ -232,10 +226,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public DefaultPlaybackEngine DefaultPlaybackEngine
-        {
-            get { return this.defaultPlaybackEngine.Value; }
-        }
+        public DefaultPlaybackEngine DefaultPlaybackEngine => this.defaultPlaybackEngine.Value;
 
         public string DefaultPlaybackEngineString
         {
@@ -257,10 +248,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public string DonationPage
-        {
-            get { return "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=K5AWR8EDG9QJY"; }
-        }
+        public string DonationPage => "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=K5AWR8EDG9QJY";
 
         public bool EnableAutomaticLibraryUpdates
         {
@@ -308,20 +296,11 @@ namespace Espera.View.ViewModels
             set { this.viewSettings.GoFullScreenOnLock = value; }
         }
 
-        public string Homepage
-        {
-            get { return "http://getespera.com"; }
-        }
+        public string Homepage => "http://getespera.com";
 
-        public bool IsPortOccupied
-        {
-            get { return this.isPortOccupied.Value; }
-        }
+        public bool IsPortOccupied => this.isPortOccupied.Value;
 
-        public bool IsRemoteAccessReallyLocked
-        {
-            get { return this.isRemoteAccessReallyLocked.Value; }
-        }
+        public bool IsRemoteAccessReallyLocked => this.isRemoteAccessReallyLocked.Value;
 
         public bool IsWrongPassword
         {
@@ -329,10 +308,7 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.isWrongPassword, value); }
         }
 
-        public string LibrarySource
-        {
-            get { return this.librarySource.Value; }
-        }
+        public string LibrarySource => this.librarySource.Value;
 
         public bool LockPlaylist
         {
@@ -381,12 +357,9 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public string LogFilePath
-        {
-            get { return AppInfo.LogFilePath; }
-        }
+        public string LogFilePath => AppInfo.LogFilePath;
 
-        public ReactiveCommand<object> LoginCommand { get; private set; }
+        public ReactiveCommand<object> LoginCommand { get; }
 
         public string LoginPassword
         {
@@ -394,12 +367,9 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.loginPassword, value); }
         }
 
-        public ReactiveCommand<object> OpenLinkCommand { get; private set; }
+        public ReactiveCommand<object> OpenLinkCommand { get; }
 
-        public string PlayStoreLink
-        {
-            get { return "http://play.google.com/store/apps/details?id=com.flagbug.esperamobile"; }
-        }
+        public string PlayStoreLink => "http://play.google.com/store/apps/details?id=com.flagbug.esperamobile";
 
         public int Port
         {
@@ -407,10 +377,7 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref port, value); }
         }
 
-        public string ReleaseNotes
-        {
-            get { return "http://getespera.com/release-notes"; }
-        }
+        public string ReleaseNotes => "http://getespera.com/release-notes";
 
         public string RemoteControlPassword
         {
@@ -418,7 +385,7 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.remoteControlPassword, value); }
         }
 
-        public ReactiveCommand<object> ReportBugCommand { get; private set; }
+        public ReactiveCommand<object> ReportBugCommand { get; }
 
         public double Scaling
         {
@@ -436,10 +403,7 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.showLogin, value); }
         }
 
-        public bool ShowRemoteControlPasswordError
-        {
-            get { return this.showRemoteControlPasswordError.Value; }
-        }
+        public bool ShowRemoteControlPasswordError => this.showRemoteControlPasswordError.Value;
 
         public bool ShowSettings
         {
@@ -469,15 +433,15 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public ReactiveCommand<object> UpdateLibraryCommand { get; private set; }
+        public ReactiveCommand<object> UpdateLibraryCommand { get; }
 
         public string Version
         {
             get
             {
-                Version version = Assembly.GetExecutingAssembly().GetName().Version;
+                Version v = AppInfo.Version;
 
-                return "\{version.Major}.\{version.Minor}.\{version.Revision}";
+                return "\{v.Major}.\{v.Minor}.\{v.Revision}";
             }
         }
 
@@ -501,10 +465,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public void ChangeLibrarySource(string source)
-        {
-            this.library.ChangeSongSourcePath(source, this.accessToken);
-        }
+        public void ChangeLibrarySource(string source) => this.library.ChangeSongSourcePath(source, this.accessToken);
 
         public void HandleSettings()
         {

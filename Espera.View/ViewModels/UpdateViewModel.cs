@@ -19,7 +19,7 @@ namespace Espera.View.ViewModels
         public UpdateViewModel(ViewSettings settings)
         {
             if (settings == null)
-                throw new ArgumentNullException("settings");
+                throw new ArgumentNullException(nameof(settings));
 
             this.settings = settings;
 
@@ -42,12 +42,9 @@ namespace Espera.View.ViewModels
         /// </summary>
         public bool DisableChangelog { get; set; }
 
-        public ReactiveCommand<Unit> OpenPortableDownloadLink { get; private set; }
+        public ReactiveCommand<Unit> OpenPortableDownloadLink { get; }
 
-        public string PortableDownloadLink
-        {
-            get { return "http://getespera.com/EsperaPortable.zip"; }
-        }
+        public string PortableDownloadLink => "http://getespera.com/EsperaPortable.zip";
 
         public IEnumerable<ChangelogReleaseEntry> ReleaseEntries
         {
@@ -59,10 +56,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public bool ShowChangelog
-        {
-            get { return this.settings.IsUpdated && this.settings.EnableChangelog; }
-        }
+        public bool ShowChangelog => this.settings.IsUpdated && this.settings.EnableChangelog;
 
         public void ChangelogShown()
         {

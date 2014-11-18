@@ -21,7 +21,7 @@ namespace Espera.View.ViewModels
                 songFinder ?? new YoutubeSongFinder(Locator.Current.GetService<IBlobCache>(BlobCacheKeys.RequestCacheContract)))
         {
             if (viewSettings == null)
-                Throw.ArgumentNullException(() => viewSettings);
+                throw new ArgumentNullException(nameof(viewSettings));
 
             this.viewSettings = viewSettings;
 
@@ -44,9 +44,9 @@ namespace Espera.View.ViewModels
             set { this.viewSettings.YoutubeLinkColumnWidth = value; }
         }
 
-        public ReactiveCommand<object> OrderByRatingCommand { get; private set; }
+        public ReactiveCommand<object> OrderByRatingCommand { get; }
 
-        public ReactiveCommand<object> OrderByViewsCommand { get; private set; }
+        public ReactiveCommand<object> OrderByViewsCommand { get; }
 
         public int RatingColumnWidth
         {

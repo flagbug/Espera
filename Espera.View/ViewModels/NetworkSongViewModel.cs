@@ -33,7 +33,7 @@ namespace Espera.View.ViewModels
             : base(library, coreSettings, accessToken)
         {
             if (modelToViewModelConverter == null)
-                Throw.ArgumentNullException(() => modelToViewModelConverter);
+                throw new ArgumentNullException(nameof(modelToViewModelConverter));
 
             this.modelToViewModelConverter = modelToViewModelConverter;
             this.songFinder = songFinder;
@@ -63,10 +63,7 @@ namespace Espera.View.ViewModels
                 });
         }
 
-        public override DefaultPlaybackAction DefaultPlaybackAction
-        {
-            get { return DefaultPlaybackAction.AddToPlaylist; }
-        }
+        public override DefaultPlaybackAction DefaultPlaybackAction => DefaultPlaybackAction.AddToPlaylist;
 
         public bool IsSearching
         {
@@ -74,15 +71,12 @@ namespace Espera.View.ViewModels
             private set { this.RaiseAndSetIfChanged(ref this.isSearching, value); }
         }
 
-        public override ReactiveCommand<Unit> PlayNowCommand
-        {
-            get { return this.playNowCommand; }
-        }
+        public override ReactiveCommand<Unit> PlayNowCommand => this.playNowCommand;
 
         /// <summary>
         /// Performs a manual search, instead of an automatic search when the search text has changed.
         /// </summary>
-        public ReactiveCommand<object> Search { get; private set; }
+        public ReactiveCommand<object> Search { get; }
 
         public bool SearchFailed
         {
@@ -90,10 +84,7 @@ namespace Espera.View.ViewModels
             private set { this.RaiseAndSetIfChanged(ref this.searchFailed, value); }
         }
 
-        public ISongViewModelBase SelectedSong
-        {
-            get { return this.selectedSong.Value; }
-        }
+        public ISongViewModelBase SelectedSong => this.selectedSong.Value;
 
         private IObservable<IReadOnlyList<TViewModel>> StartSearchAsync()
         {

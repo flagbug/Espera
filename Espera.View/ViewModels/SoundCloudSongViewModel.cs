@@ -16,26 +16,23 @@ namespace Espera.View.ViewModels
     public class SoundCloudSongViewModel : SongViewModelBase
     {
         private readonly ObservableAsPropertyHelper<bool> hasThumbnail;
+        private readonly SoundCloudSong soundCloudModel;
         private bool isLoadingThumbnail;
         private ImageSource thumbnail;
 
         public SoundCloudSongViewModel(SoundCloudSong model)
             : base(model)
         {
+            this.soundCloudModel = model;
+
             this.hasThumbnail = this.WhenAnyValue(x => x.Thumbnail)
                 .Select(x => x != null)
                 .ToProperty(this, x => x.HasThumbnail);
         }
 
-        public string Description
-        {
-            get { return ((SoundCloudSong)this.Model).Description; }
-        }
+        public string Description => this.soundCloudModel.Description;
 
-        public bool HasThumbnail
-        {
-            get { return this.hasThumbnail.Value; }
-        }
+        public bool HasThumbnail => this.hasThumbnail.Value;
 
         public bool IsLoadingThumbnail
         {
@@ -43,10 +40,7 @@ namespace Espera.View.ViewModels
             private set { this.RaiseAndSetIfChanged(ref this.isLoadingThumbnail, value); }
         }
 
-        public int PlaybackCount
-        {
-            get { return ((SoundCloudSong)this.Model).PlaybackCount.GetValueOrDefault(); }
-        }
+        public int PlaybackCount => this.soundCloudModel.PlaybackCount.GetValueOrDefault();
 
         public string Playbacks
         {
@@ -68,14 +62,11 @@ namespace Espera.View.ViewModels
             private set { this.RaiseAndSetIfChanged(ref this.thumbnail, value); }
         }
 
-        public string Uploader
-        {
-            get { return ((SoundCloudSong)this.Model).User.Username; }
-        }
+        public string Uploader => this.soundCloudModel.User.Username;
 
         private async Task GetThumbnailAsync()
         {
-            Uri artworkUrl = ((SoundCloudSong)this.Model).ArtworkUrl;
+            Uri artworkUrl = this.soundCloudModel.ArtworkUrl;
 
             if (artworkUrl == null)
                 return;
