@@ -7,7 +7,7 @@ Write-Host "Building Espera..." -ForegroundColor Green
 
 Function GetMSBuildExe {
 	[CmdletBinding()]
-	$DotNetVersion = "4.0"
+	$DotNetVersion = "14.0"
 	$RegKey = "HKLM:\software\Microsoft\MSBuild\ToolsVersions\$DotNetVersion"
 	$RegProperty = "MSBuildToolsPath"
 	$MSBuildExe = Join-Path -Path (Get-ItemProperty $RegKey).$RegProperty -ChildPath "msbuild.exe"

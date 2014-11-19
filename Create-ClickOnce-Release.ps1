@@ -5,7 +5,14 @@ Write-Host "Building Espera..." -ForegroundColor Green
 
 # ==================================== Functions
 
-$MSBuild = "C:\Program Files (x86)\MSBuild\12.0\bin\MSBuild.exe"
+Function GetMSBuildExe {
+  [CmdletBinding()]
+  $DotNetVersion = "14.0"
+  $RegKey = "HKLM:\software\Microsoft\MSBuild\ToolsVersions\$DotNetVersion"
+  $RegProperty = "MSBuildToolsPath"
+  $MSBuildExe = Join-Path -Path (Get-ItemProperty $RegKey).$RegProperty -ChildPath "msbuild.exe"
+  Return $MSBuildExe
+}
 
 Function ZipFiles($Filename, $Source)
 {
@@ -29,7 +36,7 @@ If(Test-Path -Path $BuildPath) {
 
 &($Nuget) restore Espera.sln
 
-& $MSBuild Espera.sln `
+&(GetMSBuildExe) Espera.sln `
 	/t:Clean`;Publish `
 	/p:Platform="x86" `
 	/p:Configuration=Release `
