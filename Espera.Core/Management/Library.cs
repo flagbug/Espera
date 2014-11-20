@@ -868,9 +868,12 @@ namespace Espera.Core.Management
                     this.songLock.ExitReadLock();
 
                     AnalyticsClient.Instance.RecordLibrarySize(songCount);
-
+                })
+                .Select(_ => Unit.Default)
+                .Finally(() =>
+                {
                     this.IsUpdating = false;
-                }).Select(_ => Unit.Default));
+                }));
         }
     }
 }
