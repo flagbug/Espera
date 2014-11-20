@@ -53,19 +53,13 @@ namespace Espera.Core.Management
                 .Subscribe(this.UpdateRemoteAccessPermissions);
         }
 
-        public bool IsGuestSystemReallyEnabled
-        {
-            get { return this.isGuestSystemReallyEnabled.Value; }
-        }
+        public bool IsGuestSystemReallyEnabled => this.isGuestSystemReallyEnabled.Value;
 
         /// <summary>
         /// Returns a value indicating whether the remote control is set to locked and there is a
         /// password set.
         /// </summary>
-        public bool IsRemoteAccessReallyLocked
-        {
-            get { return this.isRemoteAccessReallyLocked.Value; }
-        }
+        public bool IsRemoteAccessReallyLocked => this.isRemoteAccessReallyLocked.Value;
 
         public void DowngradeLocalAccess(Guid accessToken)
         {
@@ -368,26 +362,17 @@ namespace Espera.Core.Management
                 this.entryCount = new BehaviorSubject<int>(0);
             }
 
-            public IObservable<AccessPermission> AccessPermission
-            {
-                get { return this.accessPermission.DistinctUntilChanged(); }
-            }
+            public IObservable<AccessPermission> AccessPermission => this.accessPermission.DistinctUntilChanged();
 
-            public Guid AccessToken { get; private set; }
+            public Guid AccessToken { get; }
 
-            public AccessType AccessType { get; private set; }
+            public AccessType AccessType { get; }
 
-            public Guid? DeviceId { get; private set; }
+            public Guid? DeviceId { get; }
 
-            public int EntryCount
-            {
-                get { return this.registeredEntries.Count; }
-            }
+            public int EntryCount => this.registeredEntries.Count;
 
-            public IObservable<int> EntryCountObservable
-            {
-                get { return this.entryCount; }
-            }
+            public IObservable<int> EntryCountObservable => this.entryCount;
 
             public bool Equals(AccessEndPoint other)
             {

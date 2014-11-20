@@ -21,20 +21,11 @@ namespace Espera.Core.Mobile
             this.dataGate = new AsyncSubject<Unit>();
         }
 
-        public override bool IsVideo
-        {
-            get { return false; }
-        }
+        public override bool IsVideo => false;
 
-        public override NetworkSongSource NetworkSongSource
-        {
-            get { return NetworkSongSource.Mobile; }
-        }
+        public override NetworkSongSource NetworkSongSource => NetworkSongSource.Mobile;
 
-        public override string PlaybackPath
-        {
-            get { return this.OriginalPath; }
-        }
+        public override string PlaybackPath => this.OriginalPath;
 
         internal static MobileSong Create(NetworkSong metaData, IObservable<byte[]> data, IFileSystem fileSystem = null)
         {
@@ -64,9 +55,6 @@ namespace Espera.Core.Mobile
             return song;
         }
 
-        internal override Task PrepareAsync(YoutubeStreamingQuality qualityHint)
-        {
-            return this.dataGate.ToTask();
-        }
+        internal override Task PrepareAsync(YoutubeStreamingQuality qualityHint) => this.dataGate.ToTask();
     }
 }

@@ -222,35 +222,20 @@ namespace Espera.View.ViewModels
             this.IsLocal = true;
         }
 
-        public ReactiveCommand<object> AddPlaylistCommand { get; private set; }
+        public ReactiveCommand<object> AddPlaylistCommand { get; }
 
-        public bool CanAlterPlaylist
-        {
-            get { return this.canAlterPlaylist.Value; }
-        }
+        public bool CanAlterPlaylist => this.canAlterPlaylist.Value;
 
-        public bool CanChangeTime
-        {
-            get { return this.canChangeTime.Value; }
-        }
+        public bool CanChangeTime => this.canChangeTime.Value;
 
-        public bool CanChangeVolume
-        {
-            get { return this.canChangeVolume.Value; }
-        }
+        public bool CanChangeVolume => this.canChangeVolume.Value;
 
         /// <summary>
         /// Gets a value indicating whether the window can be minimized, maximized or closed
         /// </summary>
-        public bool CanModifyWindow
-        {
-            get { return this.canModifyWindow.Value; }
-        }
+        public bool CanModifyWindow => this.canModifyWindow.Value;
 
-        public PlaylistViewModel CurrentEditedPlaylist
-        {
-            get { return this.Playlists.SingleOrDefault(playlist => playlist.EditName); }
-        }
+        public PlaylistViewModel CurrentEditedPlaylist => this.Playlists.SingleOrDefault(playlist => playlist.EditName);
 
         public PlaylistViewModel CurrentPlaylist
         {
@@ -271,24 +256,15 @@ namespace Espera.View.ViewModels
             set { this.library.SetCurrentTime(TimeSpan.FromSeconds(value), this.accessToken); }
         }
 
-        public ISongSourceViewModel CurrentSongSource
-        {
-            get { return this.currentSongSource.Value; }
-        }
+        public ISongSourceViewModel CurrentSongSource => this.currentSongSource.Value;
 
-        public string CurrentTime
-        {
-            get { return this.currentTime.Value; }
-        }
+        public string CurrentTime => this.currentTime.Value;
 
-        public DirectYoutubeViewModel DirectYoutubeViewModel { get; private set; }
+        public DirectYoutubeViewModel DirectYoutubeViewModel { get; }
 
-        public ReactiveCommand<object> EditPlaylistNameCommand { get; private set; }
+        public ReactiveCommand<object> EditPlaylistNameCommand { get; }
 
-        public bool IsAdmin
-        {
-            get { return this.isAdmin.Value; }
-        }
+        public bool IsAdmin => this.isAdmin.Value;
 
         public bool IsLocal
         {
@@ -296,10 +272,7 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.isLocal, value); }
         }
 
-        public bool IsPlaying
-        {
-            get { return this.isPlaying.Value; }
-        }
+        public bool IsPlaying => this.isPlaying.Value;
 
         public bool IsSoundCloud
         {
@@ -313,50 +286,50 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.isYoutube, value); }
         }
 
-        public LocalViewModel LocalViewModel { get; private set; }
+        public LocalViewModel LocalViewModel { get; }
 
         /// <summary>
         /// Sets the volume to the lowest possible value.
         /// </summary>
-        public ReactiveCommand<object> MuteCommand { get; private set; }
+        public ReactiveCommand<object> MuteCommand { get; }
 
         /// <summary>
         /// Plays the next song in the playlist.
         /// </summary>
-        public ReactiveCommand<Unit> NextSongCommand { get; private set; }
+        public ReactiveCommand<Unit> NextSongCommand { get; }
 
         /// <summary>
         /// Pauses the currently played song.
         /// </summary>
-        public ReactiveCommand<Unit> PauseCommand { get; private set; }
+        public ReactiveCommand<Unit> PauseCommand { get; }
 
         /// <summary>
         /// A command that decides whether the songs should be paused or continued.
         /// </summary>
-        public ReactiveCommand<Unit> PauseContinueCommand { get; private set; }
+        public ReactiveCommand<Unit> PauseContinueCommand { get; }
 
         /// <summary>
         /// Plays the song that is currently selected in the playlist or continues the song if it is paused.
         /// </summary>
-        public ReactiveCommand<Unit> PlayCommand { get; private set; }
+        public ReactiveCommand<Unit> PlayCommand { get; }
 
-        public IReactiveDerivedList<PlaylistViewModel> Playlists { get; private set; }
+        public IReactiveDerivedList<PlaylistViewModel> Playlists { get; }
 
         /// <summary>
         /// Overrides the currently played song.
         /// </summary>
-        public ReactiveCommand<Unit> PlayOverrideCommand { get; private set; }
+        public ReactiveCommand<Unit> PlayOverrideCommand { get; }
 
         /// <summary>
         /// Plays the song that is before the currently played song in the playlist.
         /// </summary>
-        public ReactiveCommand<Unit> PreviousSongCommand { get; private set; }
+        public ReactiveCommand<Unit> PreviousSongCommand { get; }
 
-        public ReactiveCommand<object> RemovePlaylistCommand { get; private set; }
+        public ReactiveCommand<object> RemovePlaylistCommand { get; }
 
-        public SettingsViewModel SettingsViewModel { get; private set; }
+        public SettingsViewModel SettingsViewModel { get; }
 
-        public ReactiveCommand<object> ShowSettingsCommand { get; private set; }
+        public ReactiveCommand<object> ShowSettingsCommand { get; }
 
         public bool ShowVideoPlayer
         {
@@ -364,29 +337,20 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.showVideoPlayer, value); }
         }
 
-        public bool ShowVotes
-        {
-            get { return this.showVotes.Value; }
-        }
+        public bool ShowVotes => this.showVotes.Value;
 
-        public ReactiveCommand<object> ShufflePlaylistCommand { get; private set; }
+        public ReactiveCommand<object> ShufflePlaylistCommand { get; }
 
-        public SoundCloudViewModel SoundCloudViewModel { get; private set; }
+        public SoundCloudViewModel SoundCloudViewModel { get; }
 
-        public int TotalSeconds
-        {
-            get { return this.totalSeconds.Value; }
-        }
+        public int TotalSeconds => this.totalSeconds.Value;
 
-        public string TotalTime
-        {
-            get { return this.totalTime.Value; }
-        }
+        public string TotalTime => this.totalTime.Value;
 
         /// <summary>
         /// Sets the volume to the highest possible value.
         /// </summary>
-        public ReactiveCommand<object> UnMuteCommand { get; private set; }
+        public ReactiveCommand<object> UnMuteCommand { get; }
 
         /// <summary>
         /// Occurs when the view should update the screen state to maximized state or restore it to
@@ -397,9 +361,9 @@ namespace Espera.View.ViewModels
             get { return this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken); }
         }
 
-        public UpdateViewModel UpdateViewModel { get; private set; }
+        public UpdateViewModel UpdateViewModel { get; }
 
-        public ViewSettings ViewSettings { get; private set; }
+        public ViewSettings ViewSettings { get; }
 
         public double Volume
         {
@@ -411,7 +375,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public YoutubeViewModel YoutubeViewModel { get; private set; }
+        public YoutubeViewModel YoutubeViewModel { get; }
 
         public void Dispose()
         {

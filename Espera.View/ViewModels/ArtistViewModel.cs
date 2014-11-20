@@ -13,9 +13,9 @@ namespace Espera.View.ViewModels
 {
     public sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>, IDisposable
     {
-        private readonly ReactiveList<LocalSong> songs; 
         private readonly ObservableAsPropertyHelper<BitmapSource> cover;
         private readonly int orderHint;
+        private readonly ReactiveList<LocalSong> songs;
 
         /// <summary>
         /// The constructor.
@@ -55,14 +55,11 @@ namespace Espera.View.ViewModels
             this.IsAllArtists = true;
         }
 
-        public BitmapSource Cover
-        {
-            get { return this.cover == null ? null : this.cover.Value; }
-        }
+        public BitmapSource Cover => this.cover?.Value;
 
-        public bool IsAllArtists { get; private set; }
+        public bool IsAllArtists { get; }
 
-        public string Name { get; private set; }
+        public string Name { get; }
 
         public int CompareTo(ArtistViewModel other)
         {
@@ -81,18 +78,12 @@ namespace Espera.View.ViewModels
                 return 1;
             }
 
-            return String.Compare(SortHelpers.RemoveArtistPrefixes(this.Name), SortHelpers.RemoveArtistPrefixes(other.Name), StringComparison.InvariantCultureIgnoreCase);
+            return String.Compare(SortHelpers.RemoveArtistPrefixes(this.Name), SortHelpers.RemoveArtistPrefixes(other.Name), StringComparison.OrdinalIgnoreCase);
         }
 
-        public void Dispose()
-        {
-            this.cover.Dispose();
-        }
+        public void Dispose() => this.cover.Dispose();
 
-        public bool Equals(ArtistViewModel other)
-        {
-            return this.Name == other.Name;
-        }
+        public bool Equals(ArtistViewModel other) => this.Name == other.Name;
 
         public void UpdateSongs(IEnumerable<LocalSong> songs)
         {
@@ -116,21 +107,21 @@ namespace Espera.View.ViewModels
 
             catch (KeyNotFoundException ex)
             {
-                this.Log().WarnException(string.Format("Could not find key {0} of album cover. This reeks like a threading problem", key), ex);
+                this.Log().WarnException("Could not find key \{key} of album cover. This reeks like a threading problem", ex);
 
                 return null;
             }
 
             catch (ArtworkCacheException ex)
             {
-                this.Log().ErrorException(string.Format("Unable to load artwork with key {0} from cache", key), ex);
+                this.Log().ErrorException("Unable to load artwork with key \{key} from cache", ex);
 
                 return null;
             }
 
             catch (Exception ex)
             {
-                this.Log().InfoException(string.Format("Akavache threw an error on artist cover loading for key {0}", key), ex);
+                this.Log().InfoException("Akavache threw an error on artist cover loading for key \{key}", ex);
 
                 return null;
             }

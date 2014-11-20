@@ -67,12 +67,9 @@ namespace Espera.Core.Audio
 
         public IObservable<TimeSpan> CurrentTimeChanged { get; private set; }
 
-        public IObservable<Song> LoadedSong
-        {
-            get { return this.loadedSong.AsObservable(); }
-        }
+        public IObservable<Song> LoadedSong => this.loadedSong.AsObservable();
 
-        public IObservable<AudioPlayerState> PlaybackState { get; private set; }
+        public IObservable<AudioPlayerState> PlaybackState { get; }
 
         public IObservable<TimeSpan> TotalTime { get; private set; }
 
@@ -88,10 +85,7 @@ namespace Espera.Core.Audio
             this.disposeCurrentAudioCallback = true;
         }
 
-        public void RegisterVideoPlayerCallback(IMediaPlayerCallback videoPlayerCallback)
-        {
-            this.videoPlayerCallback = videoPlayerCallback;
-        }
+        public void RegisterVideoPlayerCallback(IMediaPlayerCallback callback) => this.videoPlayerCallback = callback;
 
         public void SetVolume(float volume)
         {

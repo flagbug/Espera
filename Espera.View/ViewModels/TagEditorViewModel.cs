@@ -32,7 +32,7 @@ namespace Espera.View.ViewModels
         public TagEditorViewModel(IReadOnlyList<LocalSong> songs, Func<Task<bool>> multipleSongSaveWarning)
         {
             if (songs == null)
-                throw new ArgumentNullException("songs");
+                throw new ArgumentNullException(nameof(songs));
 
             if (!songs.Any())
                 throw new ArgumentException("Tag editor requires at least 1 song");
@@ -100,11 +100,11 @@ namespace Espera.View.ViewModels
             set { this.artist = value; }
         }
 
-        public ReactiveCommand<object> Cancel { get; private set; }
+        public ReactiveCommand<object> Cancel { get; }
 
-        public ReactiveCommand<object> DismissFailure { get; private set; }
+        public ReactiveCommand<object> DismissFailure { get; }
 
-        public IObservable<Unit> Finished { get; private set; }
+        public IObservable<Unit> Finished { get; }
 
         public string Genre
         {
@@ -121,22 +121,13 @@ namespace Espera.View.ViewModels
             set { this.genre = value; }
         }
 
-        public bool IsSaving
-        {
-            get { return this.isSaving.Value; }
-        }
+        public bool IsSaving => this.isSaving.Value;
 
-        public bool IsSingleSong
-        {
-            get { return this.songs.Count == 1; }
-        }
+        public bool IsSingleSong => this.songs.Count == 1;
 
-        public ReactiveCommand<Unit> Save { get; private set; }
+        public ReactiveCommand<Unit> Save { get; }
 
-        public bool SaveFailed
-        {
-            get { return this.saveFailed.Value; }
-        }
+        public bool SaveFailed => this.saveFailed.Value;
 
         public string Title
         {

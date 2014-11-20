@@ -20,10 +20,7 @@ namespace Espera.Core.Management
             this.sourcePath = sourcePath;
         }
 
-        public bool LibraryExists
-        {
-            get { return File.Exists(this.sourcePath); }
-        }
+        public bool LibraryExists => File.Exists(this.sourcePath);
 
         public void InvalidateCache()
         {
@@ -40,14 +37,9 @@ namespace Espera.Core.Management
                 return LibraryDeserializer.DeserializePlaylists(this.cache, this.songCache);
             }
 
-            catch (Exception ex)
+            catch (Exception ex) if (ex is JsonException || ex is IOException)
             {
-                if (ex is JsonException || ex is IOException)
-                {
-                    throw new LibraryReadException("Failed to read playlists.", ex);
-                }
-
-                throw;
+                throw new LibraryReadException("Failed to read playlists.", ex);
             }
         }
 
@@ -62,14 +54,9 @@ namespace Espera.Core.Management
                 songs = LibraryDeserializer.DeserializeSongs(this.cache);
             }
 
-            catch (Exception ex)
+            catch (Exception ex) if (ex is JsonException || ex is IOException)
             {
-                if (ex is JsonException || ex is IOException)
-                {
-                    throw new LibraryReadException("Failed to read songs.", ex);
-                }
-
-                throw;
+                throw new LibraryReadException("Failed to read songs.", ex);
             }
 
             this.songCache = songs;
@@ -85,14 +72,9 @@ namespace Espera.Core.Management
                 return LibraryDeserializer.DeserializeSongSourcePath(this.cache);
             }
 
-            catch (Exception ex)
+            catch (Exception ex) if (ex is JsonException || ex is IOException)
             {
-                if (ex is JsonException || ex is IOException)
-                {
-                    throw new LibraryReadException("Failed to read song source path.", ex);
-                }
-
-                throw;
+                throw new LibraryReadException("Failed to read song source path.", ex);
             }
         }
 

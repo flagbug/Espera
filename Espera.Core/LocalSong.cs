@@ -1,5 +1,4 @@
 ﻿using Espera.Network;
-using Rareform.Validation;
 using System;
 using System.Threading.Tasks;
 using Espera.Core.Analytics;
@@ -25,7 +24,7 @@ namespace Espera.Core
             : base(path, duration)
         {
             if (artworkKey == String.Empty)
-                Throw.ArgumentException("Artwork key cannot be an empty string", () => artworkKey);
+                throw new ArgumentException("Artwork key cannot be an empty string", nameof(artworkKey));
 
             this.ArtworkKey = artworkKey;
         }
@@ -46,20 +45,11 @@ namespace Espera.Core
             }
         }
 
-        public override bool IsVideo
-        {
-            get { return false; }
-        }
+        public override bool IsVideo => false;
 
-        public override NetworkSongSource NetworkSongSource
-        {
-            get { return NetworkSongSource.Local; }
-        }
+        public override NetworkSongSource NetworkSongSource => NetworkSongSource.Local;
 
-        public override string PlaybackPath
-        {
-            get { return this.OriginalPath; }
-        }
+        public override string PlaybackPath => this.OriginalPath;
 
         /// <summary>
         /// Saves the metadata of this song to the disk.

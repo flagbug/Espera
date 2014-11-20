@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Akavache;
 using Punchclock;
 using Splat;
+using Rareform.Validation;
 
 namespace Espera.Core
 {
@@ -45,10 +46,7 @@ namespace Espera.Core
             this.keyedMemoizingSemaphore = new KeyedMemoizingSemaphore();
         }
 
-        public static ArtworkCache Instance
-        {
-            get { return instance.Value; }
-        }
+        public static ArtworkCache Instance => instance.Value;
 
         /// <summary>
         /// Fetches an artwork for the specified combination of artist and album.
@@ -62,10 +60,10 @@ namespace Espera.Core
         public async Task<string> FetchOnline(string artist, string album)
         {
             if (artist == null)
-                throw new ArgumentNullException("artist");
+                throw new ArgumentNullException(nameof(artist));
 
             if (album == null)
-                throw new ArgumentNullException("album");
+                throw new ArgumentNullException(nameof(album));
 
             string lookupKey = BlobCacheKeys.GetKeyForOnlineArtwork(artist, album);
 
@@ -84,7 +82,7 @@ namespace Espera.Core
             // Previously failed lookups are marked as failed, it doesn't make sense to let it fail again
             if (artworkCacheKey == OnlineFailMark)
             {
-                this.Log().Debug("Key {0} is marked as failed, returning.", lookupKey);
+                this.Log().Debug("Key \{lookupKey} is marked as failed, returning.");
 
                 this.keyedMemoizingSemaphore.Release(lookupKey);
 
@@ -100,7 +98,7 @@ namespace Espera.Core
                 return artworkCacheKey;
             }
 
-            this.Log().Info("Fetching online link for artwork {0} - {1}", artist, album);
+            this.Log().Info("Fetching online link for artwork \{artist} - \{album}");
 
             Uri artworkLink;
 
@@ -129,7 +127,7 @@ namespace Espera.Core
 
             using (var client = new HttpClient())
             {
-                this.Log().Info("Downloading artwork data for {0} - {1} from {2}", artist, album, artworkLink);
+                this.Log().Info("Downloading artwork data for \{artist} - \{album} from \{artworkLink}");
 
                 try
                 {
@@ -140,7 +138,7 @@ namespace Espera.Core
                 {
                     this.keyedMemoizingSemaphore.Release(lookupKey);
 
-                    throw new ArtworkCacheException(string.Format("Unable to download artwork from {0}", artworkLink), ex);
+                    throw new ArtworkCacheException("Unable to download artwork from \{artworkLink}", ex);
                 }
             }
 
@@ -162,15 +160,15 @@ namespace Espera.Core
         public Task<IBitmap> Retrieve(string artworkKey, int size, int priority)
         {
             if (artworkKey == null)
-                throw new ArgumentNullException("artworkKey");
+                throw new ArgumentNullException(nameof(artworkKey));
 
-            if (size < 0)
-                throw new ArgumentOutOfRangeException("size", "Size must be greater than zero");
+            if (size < 1)
+                throw new ArgumentOutOfRangeException(nameof(size), "\{nameof(size)} must be greater than zero");
 
             if (priority < 1)
-                throw new ArgumentOutOfRangeException("priority", "Priority must be greater than zero");
+                throw new ArgumentOutOfRangeException(nameof(priority), "\{nameof(priority)} must be greater than zero");
 
-            this.Log().Info("Requesting artwork with key {0} and size {1} from the cache", artworkKey, size);
+            this.Log().Info("Requesting artwork with key \{artworkKey} and size \{size} from the cache");
 
             return this.queue.Enqueue(priority + 1, () => this.LoadImageFromCache(artworkKey, size));
         }
@@ -181,7 +179,7 @@ namespace Espera.Core
         public async Task Store(string key, byte[] data)
         {
             if (data == null)
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
 
             await this.storageSemaphore.Wait(key);
 
@@ -191,13 +189,13 @@ namespace Espera.Core
                 return;
             }
 
-            this.Log().Info("Adding new artwork {0} to the BlobCache", key);
+            this.Log().Info("Adding new artwork \{key} to the BlobCache");
 
             try
             {
                 await queue.EnqueueObservableOperation(1, () => cache.Insert(key, data));
 
-                this.Log().Debug("Added artwork {0} to the BlobCache", key);
+                this.Log().Debug("Added artwork \{key} to the BlobCache");
             }
 
             finally
@@ -234,7 +232,7 @@ namespace Espera.Core
 
         private Task MarkOnlineLookupKeyAsFailed(string lookupKey)
         {
-            this.Log().Info("Could not fetch artwork, marking key {0} as failed", lookupKey);
+            this.Log().Info("Could not fetch artwork, marking key \{lookupKey} as failed");
 
             // If we can't retrieve an artwork, mark the lookup key as failed and don't look again
             // for the next 7 days.

@@ -19,6 +19,7 @@ namespace Espera.View.ViewModels
     {
         private readonly ObservableAsPropertyHelper<bool> hasThumbnail;
         private readonly ObservableAsPropertyHelper<bool> isDownloading;
+        private readonly YoutubeSong youtubeModel;
         private IEnumerable<VideoInfo> audioToDownload;
         private bool downloadFailed;
         private int downloadProgress;
@@ -31,6 +32,8 @@ namespace Espera.View.ViewModels
         public YoutubeSongViewModel(YoutubeSong wrapped, Func<string> downloadPathFunc)
             : base(wrapped)
         {
+            this.youtubeModel = wrapped;
+
             this.hasThumbnail = this.WhenAnyValue(x => x.Thumbnail)
                 .Select(x => x != null)
                 .ToProperty(this, x => x.HasThumbnail);
@@ -60,12 +63,9 @@ namespace Espera.View.ViewModels
             private set { this.RaiseAndSetIfChanged(ref this.audioToDownload, value); }
         }
 
-        public string Description
-        {
-            get { return ((YoutubeSong)this.Model).Description; }
-        }
+        public string Description => this.youtubeModel.Description;
 
-        public ReactiveCommand<Unit> DownloadAudioCommand { get; private set; }
+        public ReactiveCommand<Unit> DownloadAudioCommand { get; }
 
         public bool DownloadFailed
         {
@@ -79,12 +79,9 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.downloadProgress, value); }
         }
 
-        public ReactiveCommand<Unit> DownloadVideoCommand { get; private set; }
+        public ReactiveCommand<Unit> DownloadVideoCommand { get; }
 
-        public bool HasThumbnail
-        {
-            get { return this.hasThumbnail.Value; }
-        }
+        public bool HasThumbnail => this.hasThumbnail.Value;
 
         public bool IsContextMenuOpen
         {
@@ -92,10 +89,7 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.isContextMenuOpen, value); }
         }
 
-        public bool IsDownloading
-        {
-            get { return this.isDownloading.Value; }
-        }
+        public bool IsDownloading => this.isDownloading.Value;
 
         public bool IsLoadingContextMenu
         {
@@ -109,10 +103,7 @@ namespace Espera.View.ViewModels
             private set { this.RaiseAndSetIfChanged(ref this.isLoadingThumbnail, value); }
         }
 
-        public double? Rating
-        {
-            get { return ((YoutubeSong)this.Model).Rating; }
-        }
+        public double? Rating => this.youtubeModel.Rating;
 
         public ImageSource Thumbnail
         {
@@ -137,12 +128,12 @@ namespace Espera.View.ViewModels
 
         public int ViewCount
         {
-            get { return ((YoutubeSong)this.Model).Views; }
+            get { return this.youtubeModel.Views; }
         }
 
         public string Views
         {
-            get { return String.Format(NumberFormatInfo.InvariantInfo, "{0:N0}", ((YoutubeSong)this.Model).Views); }
+            get { return String.Format(NumberFormatInfo.InvariantInfo, "{0:N0}", this.youtubeModel.Views); }
         }
 
         public async Task LoadContextMenu()

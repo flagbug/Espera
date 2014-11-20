@@ -1,5 +1,4 @@
-﻿using Rareform.Validation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -12,7 +11,7 @@ namespace Espera.Core.Management
         public LibraryFileWriter(string targetPath)
         {
             if (targetPath == null)
-                Throw.ArgumentNullException(() => targetPath);
+                throw new ArgumentNullException(nameof(targetPath));
 
             this.targetPath = targetPath;
         }
@@ -35,14 +34,9 @@ namespace Espera.Core.Management
                 File.Move(tempFilePath, this.targetPath);
             }
 
-            catch (Exception ex)
+            catch (Exception ex) if (ex is IOException || ex is UnauthorizedAccessException)
             {
-                if (ex is IOException || ex is UnauthorizedAccessException)
-                {
-                    throw new LibraryWriteException("An error occured while writing the library file.", ex);
-                }
-
-                throw;
+                throw new LibraryWriteException("An error occured while writing the library file.", ex);
             }
         }
     }

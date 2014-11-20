@@ -81,7 +81,7 @@ namespace Espera.Core.Management
                 .ToProperty(this, x => x.Volume);
         }
 
-        public IObservable<TimeSpan> CurrentPlaybackTime { get; private set; }
+        public IObservable<TimeSpan> CurrentPlaybackTime { get; }
 
         public Playlist CurrentPlaylist
         {
@@ -102,28 +102,19 @@ namespace Espera.Core.Management
         /// <summary>
         /// Gets the song that is currently loaded.
         /// </summary>
-        public IObservable<Song> LoadedSong { get; private set; }
+        public IObservable<Song> LoadedSong { get; }
 
-        public ILocalAccessControl LocalAccessControl
-        {
-            get { return this.accessControl; }
-        }
+        public ILocalAccessControl LocalAccessControl => this.accessControl;
 
-        public IObservable<AudioPlayerState> PlaybackState { get; private set; }
+        public IObservable<AudioPlayerState> PlaybackState { get; }
 
         /// <summary>
         /// Returns an enumeration of playlists that implements
         /// <see cref="INotifyCollectionChanged" /> .
         /// </summary>
-        public IReadOnlyReactiveList<Playlist> Playlists
-        {
-            get { return this.playlists; }
-        }
+        public IReadOnlyReactiveList<Playlist> Playlists => this.playlists;
 
-        public IRemoteAccessControl RemoteAccessControl
-        {
-            get { return this.accessControl; }
-        }
+        public IRemoteAccessControl RemoteAccessControl => this.accessControl;
 
         /// <summary>
         /// Gets all songs that are currently in the library.
@@ -151,20 +142,14 @@ namespace Espera.Core.Management
         /// <summary>
         /// Occurs when a song has been added to the library.
         /// </summary>
-        public IObservable<Unit> SongsUpdated
-        {
-            get { return this.songsUpdated.AsObservable(); }
-        }
+        public IObservable<Unit> SongsUpdated => this.songsUpdated.AsObservable();
 
         /// <summary>
         /// Gets the duration of the current song.
         /// </summary>
-        public IObservable<TimeSpan> TotalTime { get; private set; }
+        public IObservable<TimeSpan> TotalTime { get; }
 
-        public float Volume
-        {
-            get { return this.volume.Value; }
-        }
+        public float Volume => this.volume.Value;
 
         /// <summary>
         /// Adds a new playlist to the library and immediately sets it as the current playlist.
@@ -274,10 +259,7 @@ namespace Espera.Core.Management
 
         public void Dispose()
         {
-            if (this.currentSongFinderSubscription != null)
-            {
-                this.currentSongFinderSubscription.Dispose();
-            }
+            this.currentSongFinderSubscription?.Dispose();
 
             this.globalSubscriptions.Dispose();
         }
@@ -531,10 +513,7 @@ namespace Espera.Core.Management
         /// <summary>
         /// Triggers an update of the library, so it searches the library path for new songs.
         /// </summary>
-        public void UpdateNow()
-        {
-            this.manualUpdateTrigger.OnNext(Unit.Default);
-        }
+        public void UpdateNow() => this.manualUpdateTrigger.OnNext(Unit.Default);
 
         public void VoteForPlaylistEntry(int index, Guid accessToken)
         {
@@ -607,7 +586,7 @@ namespace Espera.Core.Management
             {
                 this.Log().ErrorException("Failed to prepare song", ex);
 
-                this.HandleSongCorruptionAsync();
+                await this.HandleSongCorruptionAsync();
 
                 return;
             }
@@ -616,7 +595,7 @@ namespace Espera.Core.Management
             {
                 this.Log().ErrorException("Song preparation timeout", ex);
 
-                this.HandleSongCorruptionAsync();
+                await this.HandleSongCorruptionAsync();
 
                 return;
             }
@@ -631,7 +610,7 @@ namespace Espera.Core.Management
                 this.Log().ErrorException("Failed to load song", ex);
                 song.IsCorrupted = true;
 
-                this.HandleSongCorruptionAsync();
+                await this.HandleSongCorruptionAsync();
 
                 return;
             }
@@ -648,7 +627,7 @@ namespace Espera.Core.Management
                 this.Log().ErrorException("Failed to play song", ex);
                 song.IsCorrupted = true;
 
-                this.HandleSongCorruptionAsync();
+                await this.HandleSongCorruptionAsync();
 
                 return;
             }
@@ -713,7 +692,7 @@ namespace Espera.Core.Management
         private async Task RemoveFromLibrary(IEnumerable<LocalSong> songList)
         {
             if (songList == null)
-                Throw.ArgumentNullException(() => songList);
+                throw new ArgumentNullException(nameof(songList));
 
             List<LocalSong> enumerable = songList.ToList();
 
@@ -728,7 +707,7 @@ namespace Espera.Core.Management
 
             var artworkKeysToDelete = enumerable
                 .GroupBy(x => x.ArtworkKey)
-                .Where(x => x != null && x.Key != null && artworkKeys[x.Key] == x.Count())
+                .Where(x => x?.Key != null && artworkKeys[x.Key] == x.Count())
                 .Select(x => x.Key)
                 .ToList();
 
@@ -761,10 +740,7 @@ namespace Espera.Core.Management
             }
         }
 
-        private void RemoveFromPlaylist(Playlist playlist, IEnumerable<Song> songList)
-        {
-            this.RemoveFromPlaylist(playlist, playlist.GetIndexes(songList));
-        }
+        private void RemoveFromPlaylist(Playlist playlist, IEnumerable<Song> songList) => this.RemoveFromPlaylist(playlist, playlist.GetIndexes(songList));
 
         private async Task RemoveMissingSongsAsync(string currentPath)
         {
@@ -812,7 +788,7 @@ namespace Espera.Core.Management
 
                 catch (ArtworkCacheException ex)
                 {
-                    this.Log().ErrorException(string.Format("Error while fetching artwork for {0} - {1}", song.Artist, song.Album), ex);
+                    this.Log().ErrorException("Error while fetching artwork for \{song.Artist} - \{song.Album}", ex);
                 }
 
                 if (key != null)

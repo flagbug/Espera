@@ -45,13 +45,13 @@ namespace Espera.Core.Mobile
         public MobileClient(TcpClient socket, TcpClient fileSocket, Library library)
         {
             if (socket == null)
-                Throw.ArgumentNullException(() => socket);
+                throw new ArgumentNullException(nameof(socket));
 
             if (fileSocket == null)
-                Throw.ArgumentNullException(() => socket);
+                throw new ArgumentNullException(nameof(fileSocket));
 
             if (library == null)
-                Throw.ArgumentNullException(() => library);
+                throw new ArgumentNullException(nameof(library));
 
             this.socket = socket;
             this.fileSocket = fileSocket;
@@ -90,18 +90,12 @@ namespace Espera.Core.Mobile
             };
         }
 
-        public IObservable<Unit> Disconnected
-        {
-            get { return this.disconnected.AsObservable(); }
-        }
+        public IObservable<Unit> Disconnected => this.disconnected.AsObservable();
 
         /// <summary>
         /// Signals when the mobile client wants to toggle the visibility of the video player.
         /// </summary>
-        public IObservable<Unit> VideoPlayerToggleRequest
-        {
-            get { return this.videoPlayerToggleRequest.AsObservable(); }
-        }
+        public IObservable<Unit> VideoPlayerToggleRequest => this.videoPlayerToggleRequest.AsObservable();
 
         public void Dispose()
         {
@@ -130,7 +124,7 @@ namespace Espera.Core.Mobile
 
                     catch (JsonException ex)
                     {
-                        this.Log().ErrorException("Mobile client with access token {0} sent a malformed request", ex);
+                        this.Log().ErrorException("Mobile client with access token \{this.accessToken} sent a malformed request", ex);
                         return Unit.Default;
                     }
 
@@ -153,8 +147,7 @@ namespace Espera.Core.Mobile
 
                         catch (Exception ex)
                         {
-                            this.Log().ErrorException(string.Format(
-                                "Mobile client with access token {0} sent a request that caused an exception", this.accessToken), ex);
+                            this.Log().ErrorException("Mobile client with access token \{this.accessToken} sent a request that caused an exception", ex);
                             if (Debugger.IsAttached)
                             {
                                 Debugger.Break();
@@ -207,10 +200,7 @@ namespace Espera.Core.Mobile
             return message;
         }
 
-        private static ResponseInfo CreateResponse(ResponseStatus status, JObject content = null)
-        {
-            return CreateResponse(status, null, content);
-        }
+        private static ResponseInfo CreateResponse(ResponseStatus status, JObject content = null) => CreateResponse(status, null, content);
 
         private static ResponseInfo CreateResponse(ResponseStatus status, string message, JObject content = null)
         {

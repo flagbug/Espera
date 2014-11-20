@@ -39,29 +39,14 @@ namespace Espera.Core.Analytics
             Insights.Report(exception);
         }
 
-        public void ReportFatalException(Exception exception)
-        {
-            Insights.Report(exception, ReportSeverity.Error);
-        }
+        public void ReportFatalException(Exception exception) => Insights.Report(exception, ReportSeverity.Error);
 
-        public void ReportNonFatalException(Exception exception)
-        {
-            Insights.Report(exception);
-        }
+        public void ReportNonFatalException(Exception exception) => Insights.Report(exception);
 
-        public void Track(string key, IDictionary<string, string> traits = null)
-        {
-            Insights.Track(key, traits);
-        }
+        public void Track(string key, IDictionary<string, string> traits = null) => Insights.Track(key, traits);
 
-        public IDisposable TrackTime(string key, IDictionary<string, string> traits = null)
-        {
-            return Insights.TrackTime(key, traits);
-        }
+        public IDisposable TrackTime(string key, IDictionary<string, string> traits = null) => Insights.TrackTime(key, traits);
 
-        public void UpdateEmail(string email)
-        {
-            Insights.Identify(id.ToString(), Insights.Traits.Email, email);
-        }
+        public void UpdateEmail(string email) => Insights.Identify(id.ToString(), Insights.Traits.Email, email);
     }
 }
