@@ -53,7 +53,7 @@ namespace Espera.Core.Analytics
         public void Initialize(CoreSettings settings)
         {
             if (settings == null)
-                throw new ArgumentNullException("settings");
+                throw new ArgumentNullException(nameof(settings));
 
             this.coreSettings = settings;
 

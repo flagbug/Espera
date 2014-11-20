@@ -104,7 +104,7 @@ namespace Espera.Core.Audio
         internal async Task LoadAsync(Song song)
         {
             if (song == null)
-                throw new ArgumentNullException("song");
+                throw new ArgumentNullException(nameof(song));
 
             await this.gate.WaitAsync();
 

@@ -77,7 +77,7 @@ namespace Espera.Core.Management
         public bool IsVoteRegistered(Guid accessToken, PlaylistEntry entry)
         {
             if (entry == null)
-                throw new ArgumentNullException("entry");
+                throw new ArgumentNullException(nameof(entry));
 
             AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
 
@@ -148,7 +148,7 @@ namespace Espera.Core.Management
         public void RegisterShadowVote(Guid accessToken, PlaylistEntry entry)
         {
             if (entry == null)
-                throw new ArgumentNullException("entry");
+                throw new ArgumentNullException(nameof(entry));
 
             if (!entry.IsShadowVoted)
                 throw new ArgumentException("Entry must be shadow voted");
@@ -174,7 +174,7 @@ namespace Espera.Core.Management
         public void RegisterVote(Guid accessToken, PlaylistEntry entry)
         {
             if (entry == null)
-                throw new ArgumentNullException("entry");
+                throw new ArgumentNullException(nameof(entry));
 
             this.VerifyVotingPreconditions(accessToken);
 
@@ -196,10 +196,10 @@ namespace Espera.Core.Management
             this.VerifyAccess(accessToken);
 
             if (password == null)
-                throw new ArgumentNullException("password");
+                throw new ArgumentNullException(nameof(password));
 
             if (string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Password is invalid");
+                throw new ArgumentException("Password is invalid", nameof(password));
 
             this.localPassword = password;
         }
@@ -214,10 +214,10 @@ namespace Espera.Core.Management
             this.VerifyAccess(accessToken);
 
             if (password == null)
-                throw new ArgumentNullException("password");
+                throw new ArgumentNullException(nameof(password));
 
             if (string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Password is invalid");
+                throw new ArgumentException("Password is invalid", nameof(password));
 
             this.coreSettings.RemoteControlPassword = password;
 

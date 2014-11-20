@@ -21,10 +21,10 @@ namespace Espera.View.CacheMigration
         public AkavacheToSqlite3Migration(IBlobCache oldBlobCache, IBlobCache newBlobCache)
         {
             if (oldBlobCache == null)
-                throw new ArgumentNullException("oldBlobCache");
+                throw new ArgumentNullException(nameof(oldBlobCache));
 
             if (newBlobCache == null)
-                throw new ArgumentNullException("newBlobCache");
+                throw new ArgumentNullException(nameof(newBlobCache));
 
             this.oldBlobCache = oldBlobCache;
             this.newBlobCache = newBlobCache;

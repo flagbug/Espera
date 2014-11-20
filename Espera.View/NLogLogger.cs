@@ -12,7 +12,7 @@ namespace Espera.View
         public NLogLogger(Logger logger)
         {
             if (logger == null)
-                throw new ArgumentNullException("logger");
+                throw new ArgumentNullException(nameof(logger));
 
             this.logger = logger;
         }
