@@ -8,7 +8,6 @@ using ReactiveMarrow;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Linq;
@@ -43,7 +42,6 @@ namespace Espera.Core.Management
         private readonly ObservableAsPropertyHelper<float> volume;
         private Playlist currentPlayingPlaylist;
         private Playlist currentPlaylist;
-        private IDisposable currentSongFinderSubscription;
         private bool isUpdating;
 
         private string songSourcePath;
@@ -259,8 +257,6 @@ namespace Espera.Core.Management
 
         public void Dispose()
         {
-            this.currentSongFinderSubscription?.Dispose();
-
             this.globalSubscriptions.Dispose();
         }
 
@@ -308,7 +304,9 @@ namespace Espera.Core.Management
 
                     return exists;
                 })
-                .Subscribe(path => this.UpdateSongsAsync(path))
+                .Select(path => this.UpdateSongsAsync(path))
+                .Switch()
+                .Subscribe()
                 .DisposeWith(this.globalSubscriptions);
         }
 
@@ -800,23 +798,18 @@ namespace Espera.Core.Management
             this.Log().Info("Finished online artwork lookup");
         }
 
-        private async Task UpdateSongsAsync(string path)
+        private IObservable<Unit> UpdateSongsAsync(string path)
         {
-            if (this.currentSongFinderSubscription != null)
+            return Observable.FromAsync(async _ =>
             {
-                this.currentSongFinderSubscription.Dispose();
-                this.currentSongFinderSubscription = null;
-            }
+                this.IsUpdating = true;
 
-            this.IsUpdating = true;
-
-            await this.RemoveMissingSongsAsync(path);
-
-            ILocalSongFinder songFinder = this.localSongFinderFunc(path);
-
-            this.currentSongFinderSubscription = songFinder.GetSongsAsync()
+                await this.RemoveMissingSongsAsync(path);
+            })
+            .Concat(this.localSongFinderFunc(path)
+                .GetSongsAsync()
                 .ObserveOn(RxApp.TaskpoolScheduler)
-                .Subscribe(t =>
+                .Do(t =>
                 {
                     LocalSong song = t.Item1;
 
@@ -877,7 +870,7 @@ namespace Espera.Core.Management
                     AnalyticsClient.Instance.RecordLibrarySize(songCount);
 
                     this.IsUpdating = false;
-                });
+                }).Select(_ => Unit.Default));
         }
     }
 }
