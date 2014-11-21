@@ -4,10 +4,10 @@
                       xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                       xmlns:Views="clr-namespace:Espera.View.Views"
                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                      xmlns:designTime="clr-namespace:Espera.View.DesignTime"
                       xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                       xmlns:view="clr-namespace:Espera.View"
-                      xmlns:designTime="clr-namespace:Espera.View.DesignTime"
                       Title="Espera"
                       Width="1024"
                       Height="768"
@@ -64,7 +64,7 @@
                 <Setter Property="FontFamily" Value="{StaticResource ContentFontFamily}" />
                 <Setter Property="Opacity" Value="0.6" />
             </Style>
-            <dialogs:SimpleDialog x:Key="Changelog"
+            <dialogs:CustomDialog x:Key="Changelog"
                                   Title="Espera has been updated!"
                                   Height="700">
                 <Grid Margin="10" DataContext="{Binding Path=UpdateViewModel}">
@@ -116,8 +116,8 @@
                                 Style="{DynamicResource AccentedDialogSquareButton}" />
                     </StackPanel>
                 </Grid>
-            </dialogs:SimpleDialog>
-            <dialogs:SimpleDialog x:Key="PortableUpdateMessage"
+            </dialogs:CustomDialog>
+            <dialogs:CustomDialog x:Key="PortableUpdateMessage"
                                   Title="Update available"
                                   Height="250">
                 <StackPanel Margin="10"
@@ -133,8 +133,8 @@
                         <Button Height="35"
                                 MinWidth="80"
                                 Margin="10, 0, 0, 0"
-                                Content="Download"
                                 Click="OpenPortableDownloadLink"
+                                Content="Download"
                                 Style="{DynamicResource AccentedDialogSquareButton}" />
                         <Button Height="35"
                                 MinWidth="80"
@@ -143,7 +143,7 @@
                                 Content="Not Now" />
                     </StackPanel>
                 </StackPanel>
-            </dialogs:SimpleDialog>
+            </dialogs:CustomDialog>
         </ResourceDictionary>
     </Window.Resources>
     <Window.TaskbarItemInfo>
@@ -189,7 +189,7 @@
                             DataContext="{Binding Path=SettingsViewModel}">
                     <PasswordBox Name="LoginPasswordBox"
                                  VerticalContentAlignment="Center"
-                                 Controls:TextboxHelper.Watermark="Administrator password"
+                                 Controls:TextBoxHelper.Watermark="Administrator password"
                                  PasswordChanged="LoginPasswordChanged"
                                  x:FieldModifier="private" />
                     <Button Margin="0, 10, 0, 0"
@@ -357,8 +357,8 @@
                          Margin="10, 0, 0, 0"
                          VerticalAlignment="Center"
                          VerticalContentAlignment="Center"
-                         Controls:TextboxHelper.ClearTextButton="True"
-                         Controls:TextboxHelper.Watermark="Search"
+                         Controls:TextBoxHelper.ClearTextButton="True"
+                         Controls:TextBoxHelper.Watermark="Search"
                          Text="{Binding Path=CurrentSongSource.SearchText,
                                         UpdateSourceTrigger=PropertyChanged}" />
                 <ToggleButton Grid.Column="1"
@@ -384,10 +384,10 @@
                 <Views:ArtistsView DataContext="{Binding Path=LocalViewModel}" />
             </Grid>
             <Grid Grid.Column="0" Visibility="{Binding Path=IsYoutube, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Views:NetworkSongDetailView Header="video info" DataContext="{Binding Path=YoutubeViewModel}" />
+                <Views:NetworkSongDetailView DataContext="{Binding Path=YoutubeViewModel}" Header="video info" />
             </Grid>
             <Grid Grid.Column="0" Visibility="{Binding Path=IsSoundCloud, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Views:NetworkSongDetailView Header="song info" DataContext="{Binding Path=SoundCloudViewModel}" />
+                <Views:NetworkSongDetailView DataContext="{Binding Path=SoundCloudViewModel}" Header="song info" />
             </Grid>
             <Grid Grid.Column="1">
                 <Grid.ColumnDefinitions>

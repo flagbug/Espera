@@ -76,7 +76,7 @@ namespace Espera.View.Views
 
                 if (updateViewModel.ShowChangelog)
                 {
-                    var dialog = (SimpleDialog)this.Resources["Changelog"];
+                    var dialog = (CustomDialog)this.Resources["Changelog"];
                     await this.ShowMetroDialogAsync(dialog);
                 }
 
@@ -86,7 +86,7 @@ namespace Espera.View.Views
                         .Where(x => x)
                         .Delay(TimeSpan.FromSeconds(5))
                         .ObserveOn(RxApp.MainThreadScheduler)
-                        .Select(_ => (SimpleDialog)this.Resources["PortableUpdateMessage"])
+                        .Select(_ => (CustomDialog)this.Resources["PortableUpdateMessage"])
                         .SelectMany(dialog => this.ShowMetroDialogAsync(dialog).ToObservable())
                         .Subscribe();
                 }
@@ -107,7 +107,7 @@ namespace Espera.View.Views
 
         private async void CloseChangelog(object sender, RoutedEventArgs e)
         {
-            var dialog = (SimpleDialog)this.Resources["Changelog"];
+            var dialog = (CustomDialog)this.Resources["Changelog"];
 
             await this.HideMetroDialogAsync(dialog);
 
@@ -117,7 +117,7 @@ namespace Espera.View.Views
 
         private async void ClosePortableUpdateNotification(object sender, RoutedEventArgs e)
         {
-            var dialog = (SimpleDialog)this.Resources["PortableUpdateMessage"];
+            var dialog = (CustomDialog)this.Resources["PortableUpdateMessage"];
 
             await this.HideMetroDialogAsync(dialog);
         }
@@ -186,7 +186,7 @@ namespace Espera.View.Views
                 this.shellViewModel.UpdateViewModel.OpenPortableDownloadLink.Execute(null);
             }
 
-            var dialog = (SimpleDialog)this.Resources["PortableUpdateMessage"];
+            var dialog = (CustomDialog)this.Resources["PortableUpdateMessage"];
 
             await this.HideMetroDialogAsync(dialog);
         }

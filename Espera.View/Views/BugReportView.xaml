@@ -38,7 +38,7 @@
         <TextBox Height="225"
                  Margin="0, 10, 0, 0"
                  AcceptsReturn="True"
-                 Controls:TextboxHelper.Watermark="Please enter a detailed description of the bug you encountered."
+                 Controls:TextBoxHelper.Watermark="Please enter a detailed description of the bug you encountered."
                  Text="{Binding Path=Message,
                                 UpdateSourceTrigger=PropertyChanged}"
                  TextWrapping="Wrap" />
