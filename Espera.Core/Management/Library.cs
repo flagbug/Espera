@@ -49,6 +49,18 @@ namespace Espera.Core.Management
         public Library(ILibraryReader libraryReader, ILibraryWriter libraryWriter, CoreSettings settings,
             IFileSystem fileSystem, Func<string, ILocalSongFinder> localSongFinderFunc = null)
         {
+            if (libraryReader == null)
+                throw new ArgumentNullException(nameof(libraryReader));
+
+            if (libraryWriter == null)
+                throw new ArgumentNullException(nameof(libraryWriter));
+
+            if (settings == null)
+                throw new ArgumentNullException(nameof(settings));
+
+            if (fileSystem == null)
+                throw new ArgumentNullException(nameof(fileSystem));
+
             this.libraryReader = libraryReader;
             this.libraryWriter = libraryWriter;
             this.settings = settings;
@@ -188,7 +200,7 @@ namespace Espera.Core.Management
         public void AddGuestSongToPlaylist(Song song, Guid accessToken)
         {
             if (song == null)
-                Throw.ArgumentNullException(() => song);
+                throw new ArgumentNullException(nameof(song));
 
             this.accessControl.VerifyVotingPreconditions(accessToken);
 
@@ -209,7 +221,7 @@ namespace Espera.Core.Management
         public void AddPlaylist(string name, Guid accessToken)
         {
             if (name == null)
-                Throw.ArgumentNullException(() => name);
+                throw new ArgumentNullException(nameof(name));
 
             if (this.GetPlaylistByName(name) != null)
                 throw new InvalidOperationException("A playlist with this name already exists.");
@@ -227,7 +239,7 @@ namespace Espera.Core.Management
         public void AddSongsToPlaylist(IEnumerable<Song> songList, Guid accessToken)
         {
             if (songList == null)
-                Throw.ArgumentNullException(() => songList);
+                throw new ArgumentNullException(nameof(songList));
 
             this.accessControl.VerifyAccess(accessToken);
 
@@ -239,7 +251,7 @@ namespace Espera.Core.Management
             this.accessControl.VerifyAccess(accessToken);
 
             if (!this.fileSystem.Directory.Exists(path))
-                throw new ArgumentException("Directory does't exist.");
+                throw new InvalidOperationException("Directory does't exist.");
 
             this.SongSourcePath = path;
             this.UpdateNow();

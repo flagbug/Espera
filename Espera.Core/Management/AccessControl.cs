@@ -6,7 +6,6 @@ using System.Reactive.Subjects;
 using System.Threading;
 using Espera.Core.Settings;
 using Rareform.Extensions;
-using Rareform.Validation;
 using ReactiveUI;
 using Splat;
 
@@ -33,7 +32,7 @@ namespace Espera.Core.Management
         public AccessControl(CoreSettings coreSettings)
         {
             if (coreSettings == null)
-                Throw.ArgumentNullException(() => coreSettings);
+                throw new ArgumentNullException(nameof(coreSettings));
 
             this.coreSettings = coreSettings;
 

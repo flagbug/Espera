@@ -1,5 +1,4 @@
 ﻿using Espera.Network;
-using Rareform.Validation;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -22,7 +21,7 @@ namespace Espera.Core
         protected Song(string path, TimeSpan duration)
         {
             if (path == null)
-                Throw.ArgumentNullException(() => path);
+                throw new ArgumentNullException(nameof(path));
 
             this.OriginalPath = path;
             this.Duration = duration;

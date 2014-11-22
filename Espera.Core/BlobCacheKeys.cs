@@ -37,6 +37,9 @@ namespace Espera.Core
 
         public static string GetKeyForArtwork(byte[] artworkData)
         {
+            if (artworkData == null)
+                throw new ArgumentNullException(nameof(artworkData));
+
             byte[] hash;
 
             using (var hashAlgorithm = MD5.Create())
@@ -49,16 +52,28 @@ namespace Espera.Core
 
         public static string GetKeyForOnlineArtwork(string artist, string album)
         {
+            if (artist == null)
+                throw new ArgumentNullException(nameof(artist));
+
+            if (album == null)
+                throw new ArgumentNullException(nameof(album));
+
             return OnlineArtwork + "\{artist.ToLowerInvariant()}-\{album.ToLowerInvariant()}";
         }
 
         public static string GetKeyForSoundCloudCache(string searchTerm)
         {
+            if (searchTerm == null)
+                throw new ArgumentNullException(nameof(searchTerm));
+
             return SoundCloudPrefix + searchTerm.ToLowerInvariant();
         }
 
         public static string GetKeyForYoutubeCache(string searchTerm)
         {
+            if (searchTerm == null)
+                throw new ArgumentNullException(nameof(searchTerm));
+
             return YoutubePrefix + searchTerm.ToLowerInvariant();
         }
     }
