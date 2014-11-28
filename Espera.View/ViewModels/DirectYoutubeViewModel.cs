@@ -6,7 +6,6 @@ using Akavache;
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
-using Rareform.Validation;
 using ReactiveUI;
 using Splat;
 
