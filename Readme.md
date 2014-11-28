@@ -14,6 +14,8 @@ Bitcoin: 1PHaQ2Qg6rR3Qo2FfLqjG6se529dQTCEAD
 
 Espera is an open-source media player that plays audio files, YouTube videos, SoundCloud songs and has a special "party mode".
 
+![Screenshot](http://getespera.com/images/screenshot.png)
+
 ## Features
 
 ## Remote control
@@ -62,7 +64,3 @@ If you want to contribute to Espera, just send a pull request!
 ### License
 
 Espera is released under the [MIT-License](http://opensource.org/licenses/mit-license.php)
-
-## Screenshot
-
-![Screenshot](http://getespera.com/images/screenshot.png)
