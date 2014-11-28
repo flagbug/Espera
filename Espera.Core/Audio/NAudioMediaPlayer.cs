@@ -45,26 +45,16 @@ namespace Espera.Core.Audio
 
         public void Dispose()
         {
+            this.outputDevice.Dispose();
+
             try
             {
-                this.outputDevice.Dispose();
+                this.currentReader?.Dispose();
             }
 
-            // NAudio does strange things in the Dispose method and can throw a NullReferenceException
-            catch (NullReferenceException)
+            // Weird exception
+            catch (MmException)
             { }
-
-            if (this.currentReader != null)
-            {
-                try
-                {
-                    this.currentReader.Dispose();
-                }
-
-                // Another wierd exception
-                catch (MmException)
-                { }
-            }
         }
 
         public Task LoadAsync(Uri uri)
