@@ -170,7 +170,7 @@
             <Button Command="{Binding Path=ShowSettingsCommand}" Content="settings" />
             <Button Command="{Binding Path=UpdateViewModel.Restart}"
                     ToolTip="Update &amp; Restart"
-                    Visibility="{Binding Path=UpdateViewModel.UpdateAvailable,
+                    Visibility="{Binding Path=UpdateViewModel.ShouldRestart,
                                          Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Rectangle Width="12" Height="12">
                     <Rectangle.Fill>

@@ -19,7 +19,7 @@ namespace Espera.View.ViewModels
     public class UpdateViewModel : ReactiveObject, IDisposable
     {
         private readonly ViewSettings settings;
-        private readonly ObservableAsPropertyHelper<bool> updateAvailable;
+        private readonly ObservableAsPropertyHelper<bool> shouldRestart;
         private readonly IUpdateManager updateManager;
 
         public UpdateViewModel(ViewSettings settings, IUpdateManager updateManager = null)
@@ -45,8 +45,8 @@ namespace Espera.View.ViewModels
 
             this.CheckForUpdate = ReactiveCommand.CreateAsyncTask(_ => this.UpdateSilentlyAsync());
 
-            this.updateAvailable = this.settings.WhenAnyValue(x => x.IsUpdated)
-                .ToProperty(this, x => x.UpdateAvailable);
+            this.shouldRestart = this.settings.WhenAnyValue(x => x.IsUpdated)
+                .ToProperty(this, x => x.ShouldRestart);
 
             this.Restart = ReactiveCommand.CreateAsyncTask(_ => Task.Run(() => UpdateManager.RestartApp()));
 
@@ -58,6 +58,9 @@ namespace Espera.View.ViewModels
             }
         }
 
+        /// <summary>
+        /// Checks the server if an update is available and applies the update if there is one.
+        /// </summary>
         public ReactiveCommand<Unit> CheckForUpdate { get; }
 
         /// <summary>
@@ -81,9 +84,9 @@ namespace Espera.View.ViewModels
 
         public ReactiveCommand<Unit> Restart { get; }
 
-        public bool ShowChangelog => this.settings.IsUpdated && this.settings.EnableChangelog;
+        public bool ShouldRestart => this.shouldRestart.Value;
 
-        public bool UpdateAvailable => this.updateAvailable.Value;
+        public bool ShowChangelog => this.settings.IsUpdated && this.settings.EnableChangelog;
 
         public void ChangelogShown()
         {
