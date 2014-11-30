@@ -5,12 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Akavache;
@@ -28,6 +23,7 @@ using NLog.Targets;
 using ReactiveUI;
 using Splat;
 using Squirrel;
+using System.Reactive.Linq;
 
 namespace Espera.View
 {
@@ -35,7 +31,6 @@ namespace Espera.View
     {
         private CoreSettings coreSettings;
         private MobileApi mobileApi;
-        private IDisposable updateSubscription;
         private ViewSettings viewSettings;
 
         static AppBootstrapper()
@@ -109,11 +104,6 @@ namespace Espera.View
             this.Log().Info("Shutting down analytics client");
             AnalyticsClient.Instance.Dispose();
 
-            if (this.updateSubscription != null)
-            {
-                this.updateSubscription.Dispose();
-            }
-
             this.Log().Info("Shutdown finished");
         }
 
@@ -162,8 +152,6 @@ namespace Espera.View
 
             this.SetupMobileApi();
 
-            this.SetupClickOnceUpdates();
-
             this.DisplayRootViewFor<ShellViewModel>();
         }
 
@@ -209,22 +197,6 @@ namespace Espera.View
         private void SetupAnalyticsClient()
         {
             AnalyticsClient.Instance.Initialize(this.coreSettings);
-        }
-
-        private void SetupClickOnceUpdates()
-        {
-            if (!AppInfo.IsPortable)
-            {
-                this.updateSubscription = Observable.Interval(TimeSpan.FromHours(2), RxApp.TaskpoolScheduler)
-                    .StartWith(0) // Trigger an initial update check
-                    .SelectMany(x => this.UpdateSilentlyAsync().ToObservable())
-                    .Subscribe();
-            }
-
-            else
-            {
-                this.updateSubscription = Disposable.Empty;
-            }
         }
 
         private void SetupLager()
@@ -285,63 +257,6 @@ namespace Espera.View
             var apiStats = new MobileApiInfo(connectedClients, isPortOccupied);
 
             Locator.CurrentMutable.RegisterConstant(apiStats, typeof(MobileApiInfo));
-        }
-
-        private async Task UpdateSilentlyAsync()
-        {
-            this.Log().Info("Looking for application updates");
-
-            using (var updateManager = new UpdateManager("http://getespera.com/releases/squirrel/", "Espera", FrameworkVersion.Net45))
-            {
-                UpdateInfo updateInfo;
-
-                try
-                {
-                    updateInfo = await updateManager.CheckForUpdate();
-                }
-
-                catch (Exception ex)
-                {
-                    this.Log().ErrorException("Error while checking for updates", ex);
-                    return;
-                }
-
-                if (updateInfo.ReleasesToApply.Any())
-                {
-                    this.Log().Info("New version available: {0}", updateInfo.FutureReleaseEntry.Version);
-
-                    Task changelogFetchTask = ChangelogFetcher.FetchAsync().ToObservable()
-                    .Timeout(TimeSpan.FromSeconds(30))
-                        .SelectMany(x => BlobCache.LocalMachine.InsertObject(BlobCacheKeys.Changelog, x))
-                    .LoggedCatch(this, Observable.Return(Unit.Default), "Could not to fetch changelog")
-                        .ToTask();
-
-                    this.Log().Info("Applying updates...");
-
-                    try
-                    {
-                        await updateManager.ApplyReleases(updateInfo);
-                    }
-
-                    catch (Exception ex)
-                    {
-                        this.Log().Fatal("Failed to apply updates.", ex);
-                        AnalyticsClient.Instance.RecordNonFatalError(ex);
-                        return;
-                    }
-
-                    await changelogFetchTask;
-
-                    this.viewSettings.IsUpdated = true;
-
-                    this.Log().Info("Updates applied.");
-                }
-
-                else
-                {
-                    this.Log().Info("No updates found");
-                }
-            }
         }
     }
 }

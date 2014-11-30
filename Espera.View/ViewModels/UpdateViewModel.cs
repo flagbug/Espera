@@ -9,19 +9,26 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using ReactiveUI;
 using Splat;
+using Squirrel;
+using System.Linq;
+using Espera.Core.Analytics;
+using System.Reactive.Threading.Tasks;
 
 namespace Espera.View.ViewModels
 {
-    public class UpdateViewModel : IEnableLogger
+    public class UpdateViewModel : ReactiveObject, IDisposable
     {
         private readonly ViewSettings settings;
+        private readonly ObservableAsPropertyHelper<bool> updateAvailable;
+        private readonly IUpdateManager updateManager;
 
-        public UpdateViewModel(ViewSettings settings)
+        public UpdateViewModel(ViewSettings settings, IUpdateManager updateManager = null)
         {
             if (settings == null)
                 throw new ArgumentNullException(nameof(settings));
 
             this.settings = settings;
+            this.updateManager = updateManager ?? new UpdateManager("http://getespera.com/releases/squirrel/", "Espera", FrameworkVersion.Net45);
 
             this.OpenPortableDownloadLink = ReactiveCommand.CreateAsyncTask(_ => Task.Run(() =>
             {
@@ -35,7 +42,23 @@ namespace Espera.View.ViewModels
                     this.Log().ErrorException("Could not open link \{this.PortableDownloadLink}", ex);
                 }
             }));
+
+            this.CheckForUpdate = ReactiveCommand.CreateAsyncTask(_ => this.UpdateSilentlyAsync());
+
+            this.updateAvailable = this.settings.WhenAnyValue(x => x.IsUpdated)
+                .ToProperty(this, x => x.UpdateAvailable);
+
+            this.Restart = ReactiveCommand.CreateAsyncTask(_ => Task.Run(() => UpdateManager.RestartApp()));
+
+            if (!AppInfo.IsPortable)
+            {
+                Observable.Interval(TimeSpan.FromHours(2), RxApp.TaskpoolScheduler)
+                    .StartWith(0) // Trigger an initial update check
+                    .InvokeCommand(this.CheckForUpdate);
+            }
         }
+
+        public ReactiveCommand<Unit> CheckForUpdate { get; }
 
         /// <summary>
         /// Used in the changelog dialog to opt-out of the automatic changelog.
@@ -56,13 +79,76 @@ namespace Espera.View.ViewModels
             }
         }
 
+        public ReactiveCommand<Unit> Restart { get; }
+
         public bool ShowChangelog => this.settings.IsUpdated && this.settings.EnableChangelog;
+
+        public bool UpdateAvailable => this.updateAvailable.Value;
 
         public void ChangelogShown()
         {
             this.settings.IsUpdated = false;
 
             this.settings.EnableChangelog = !this.DisableChangelog;
+        }
+
+        public void Dispose()
+        {
+            this.updateManager?.Dispose();
+        }
+
+        private async Task UpdateSilentlyAsync()
+        {
+            this.Log().Info("Looking for application updates");
+
+            UpdateInfo updateInfo;
+
+            try
+            {
+                updateInfo = await this.updateManager.CheckForUpdate();
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Error while checking for updates", ex);
+                return;
+            }
+
+            if (updateInfo.ReleasesToApply.Any())
+            {
+                this.Log().Info("New version available: {0}", updateInfo.FutureReleaseEntry.Version);
+
+                Task changelogFetchTask = ChangelogFetcher.FetchAsync().ToObservable()
+                    .Timeout(TimeSpan.FromSeconds(30))
+                    .SelectMany(x => BlobCache.LocalMachine.InsertObject(BlobCacheKeys.Changelog, x))
+                    .LoggedCatch(this, Observable.Return(Unit.Default), "Could not to fetch changelog")
+                    .ToTask();
+
+                this.Log().Info("Applying updates...");
+
+                try
+                {
+                    await this.updateManager.ApplyReleases(updateInfo);
+                }
+
+                catch (Exception ex)
+                {
+                    this.Log().Fatal("Failed to apply updates.", ex);
+                    AnalyticsClient.Instance.RecordNonFatalError(ex);
+                    return;
+                }
+
+                await changelogFetchTask;
+
+                this.settings.IsUpdated = true;
+
+                this.Log().Info("Updates applied.");
+            }
+
+            else
+            {
+                this.Log().Info("No updates found");
+            }
         }
     }
 }

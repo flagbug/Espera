@@ -168,6 +168,16 @@
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
             <Button Command="{Binding Path=ShowSettingsCommand}" Content="settings" />
+            <Button Command="{Binding Path=UpdateViewModel.Restart}"
+                    ToolTip="Update &amp; Restart"
+                    Visibility="{Binding Path=UpdateViewModel.UpdateAvailable,
+                                         Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Rectangle Width="12" Height="12">
+                    <Rectangle.Fill>
+                        <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_arrow_up}" />
+                    </Rectangle.Fill>
+                </Rectangle>
+            </Button>
         </Controls:WindowCommands>
     </Controls:MetroWindow.RightWindowCommands>
     <Controls:MetroWindow.Flyouts>
