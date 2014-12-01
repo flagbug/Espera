@@ -35,7 +35,11 @@ namespace Espera.Core.Analytics
         {
             get
             {
-                if (ModeDetector.InUnitTestRunner())
+                bool isDebugging = false;
+#if DEBUG
+                isDebugging = true;
+#endif
+                if (ModeDetector.InUnitTestRunner() || isDebugging)
                 {
                     var client = new AnalyticsClient(new DummyAnalyticsEndpoint());
                     client.Initialize(new CoreSettings(new InMemoryBlobCache()) { EnableAutomaticReports = false });
