@@ -127,6 +127,20 @@ namespace Espera.View.ViewModels
                     .LoggedCatch(this, Observable.Return(Unit.Default), "Could not to fetch changelog")
                     .ToTask();
 
+                this.Log().Info("Downloading updates...");
+
+                try
+                {
+                    await this.updateManager.DownloadReleases(updateInfo.ReleasesToApply);
+                }
+
+                catch (Exception ex)
+                {
+                    this.Log().Fatal("Failed to download updates.", ex);
+                    AnalyticsClient.Instance.RecordNonFatalError(ex);
+                    return;
+                }
+
                 this.Log().Info("Applying updates...");
 
                 try
