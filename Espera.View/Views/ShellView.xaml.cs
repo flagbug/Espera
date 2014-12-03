@@ -79,17 +79,6 @@ namespace Espera.View.Views
                     var dialog = (CustomDialog)this.Resources["Changelog"];
                     await this.ShowMetroDialogAsync(dialog);
                 }
-
-                if (AppInfo.IsPortable)
-                {
-                    Observable.StartAsync(UpdateHelper.CheckForPortableUpdate)
-                        .Where(x => x)
-                        .Delay(TimeSpan.FromSeconds(5))
-                        .ObserveOn(RxApp.MainThreadScheduler)
-                        .Select(_ => (CustomDialog)this.Resources["PortableUpdateMessage"])
-                        .SelectMany(dialog => this.ShowMetroDialogAsync(dialog).ToObservable())
-                        .Subscribe();
-                }
             };
         }
 
@@ -113,13 +102,6 @@ namespace Espera.View.Views
 
             var updateViewModel = this.shellViewModel.UpdateViewModel;
             updateViewModel.ChangelogShown();
-        }
-
-        private async void ClosePortableUpdateNotification(object sender, RoutedEventArgs e)
-        {
-            var dialog = (CustomDialog)this.Resources["PortableUpdateMessage"];
-
-            await this.HideMetroDialogAsync(dialog);
         }
 
         private IntPtr HandleWindowMove(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -177,18 +159,6 @@ namespace Espera.View.Views
             {
                 e.Cancel = true;
             }
-        }
-
-        private async void OpenPortableDownloadLink(object sender, RoutedEventArgs e)
-        {
-            if (this.shellViewModel.UpdateViewModel.OpenPortableDownloadLink.CanExecute(null))
-            {
-                this.shellViewModel.UpdateViewModel.OpenPortableDownloadLink.Execute(null);
-            }
-
-            var dialog = (CustomDialog)this.Resources["PortableUpdateMessage"];
-
-            await this.HideMetroDialogAsync(dialog);
         }
 
         private void OpenTagEditor()

@@ -30,19 +30,6 @@ namespace Espera.View.ViewModels
             this.settings = settings;
             this.updateManager = updateManager ?? new UpdateManager("http://getespera.com/releases/squirrel/", "Espera", FrameworkVersion.Net45, AppInfo.SquirrelUpdatePathOverride);
 
-            this.OpenPortableDownloadLink = ReactiveCommand.CreateAsyncTask(_ => Task.Run(() =>
-            {
-                try
-                {
-                    Process.Start(this.PortableDownloadLink);
-                }
-
-                catch (Win32Exception ex)
-                {
-                    this.Log().ErrorException("Could not open link \{this.PortableDownloadLink}", ex);
-                }
-            }));
-
             this.CheckForUpdate = ReactiveCommand.CreateAsyncTask(_ => this.UpdateSilentlyAsync());
 
             this.shouldRestart = this.settings.WhenAnyValue(x => x.IsUpdated)
@@ -64,10 +51,6 @@ namespace Espera.View.ViewModels
         /// Used in the changelog dialog to opt-out of the automatic changelog.
         /// </summary>
         public bool DisableChangelog { get; set; }
-
-        public ReactiveCommand<Unit> OpenPortableDownloadLink { get; }
-
-        public string PortableDownloadLink => "http://getespera.com/EsperaPortable.zip";
 
         public IEnumerable<ChangelogReleaseEntry> ReleaseEntries
         {
