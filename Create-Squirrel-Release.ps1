@@ -28,6 +28,7 @@ $NuGet = "$PSScriptRoot\.nuget\NuGet.exe"
 $Squirrel = Join-Path  (ls .\packages\squirrel.windows.*)[0] "tools\Squirrel.com"
 
 $BuildPath = "$PSScriptRoot\Espera.View\bin\Release"
+$PortableBuildPath = "$PSScriptRoot\Espera.View\bin\Portable"
 $NuSpecPath = "$PSScriptRoot\Espera.nuspec"
 $ReleasesFolder = "$PSScriptRoot\SquirrelReleases"
 
@@ -50,6 +51,15 @@ If(Test-Path -Path $BuildPath) {
 	/p:DebugType=None `
 	/clp:ErrorsOnly `
 	/v:m
+	
+&(GetMSBuildExe) Espera.sln `
+	/t:Clean`;Rebuild `
+	/p:Configuration=Portable `
+	/p:AllowedReferenceRelatedFileExtensions=- `
+	/p:DebugSymbols=false `
+	/p:DebugType=None `
+	/clp:ErrorsOnly `
+	/v:m
 
 # ==================================== Portable
 
@@ -63,7 +73,7 @@ If(Test-Path -Path $ReleaseZip) {
 	Remove-Item -Confirm:$false $ReleaseZip
 }
 
-ZipFiles $ReleaseZip $BuildPath
+ZipFiles $ReleaseZip $PortableBuildPath
 
 # ==================================== Squirrel
 

@@ -28,7 +28,7 @@ namespace Espera.View.ViewModels
                 throw new ArgumentNullException(nameof(settings));
 
             this.settings = settings;
-            this.updateManager = updateManager ?? new UpdateManager("http://getespera.com/releases/squirrel/", "Espera", FrameworkVersion.Net45);
+            this.updateManager = updateManager ?? new UpdateManager("http://getespera.com/releases/squirrel/", "Espera", FrameworkVersion.Net45, AppInfo.SquirrelUpdatePathOverride);
 
             this.OpenPortableDownloadLink = ReactiveCommand.CreateAsyncTask(_ => Task.Run(() =>
             {
@@ -50,12 +50,9 @@ namespace Espera.View.ViewModels
 
             this.Restart = ReactiveCommand.CreateAsyncTask(_ => Task.Run(() => UpdateManager.RestartApp()));
 
-            if (!AppInfo.IsPortable)
-            {
-                Observable.Interval(TimeSpan.FromHours(2), RxApp.TaskpoolScheduler)
-                    .StartWith(0) // Trigger an initial update check
-                    .InvokeCommand(this.CheckForUpdate);
-            }
+            Observable.Interval(TimeSpan.FromHours(2), RxApp.TaskpoolScheduler)
+                .StartWith(0) // Trigger an initial update check
+                .InvokeCommand(this.CheckForUpdate);
         }
 
         /// <summary>

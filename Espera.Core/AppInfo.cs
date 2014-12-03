@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Deployment.Application;
 using System.IO;
 using System.Reflection;
 
@@ -15,6 +14,8 @@ namespace Espera.Core
         public static readonly string LogFilePath;
         public static readonly string OverridenBasePath;
         public static readonly Version Version;
+        public static readonly string SquirrelUpdatePathOverride;
+        public static readonly string UpdatePath;
 
         static AppInfo()
         {
@@ -28,12 +29,23 @@ namespace Espera.Core
             AppName = "EsperaDebug";
 #endif
 
+#if PORTABLE || DEBUG
+            IsPortable = true;
+#else
+            IsPortable = false;
+#endif
+
             DirectoryPath = Path.Combine(OverridenBasePath ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
             BlobCachePath = Path.Combine(DirectoryPath, "BlobCache");
             LibraryFilePath = Path.Combine(DirectoryPath, "Library.json");
             LogFilePath = Path.Combine(DirectoryPath, "Log.txt");
+            UpdatePath = "http://getespera.com/releases/squirrel/";
             Version = Assembly.GetExecutingAssembly().GetName().Version;
-            IsPortable = !ApplicationDeployment.IsNetworkDeployed;
+            
+            if (IsPortable)
+            {
+                SquirrelUpdatePathOverride = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName;
+            }
         }
     }
 }
