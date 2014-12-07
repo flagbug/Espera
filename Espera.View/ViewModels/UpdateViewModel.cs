@@ -28,7 +28,7 @@ namespace Espera.View.ViewModels
                 throw new ArgumentNullException(nameof(settings));
 
             this.settings = settings;
-            this.updateManager = updateManager ?? new UpdateManager("http://getespera.com/releases/squirrel/", "Espera", FrameworkVersion.Net45, AppInfo.SquirrelUpdatePathOverride);
+            this.updateManager = updateManager ?? new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45, AppInfo.AppRootPath);
 
             this.CheckForUpdate = ReactiveCommand.CreateAsyncTask(_ => this.UpdateSilentlyAsync());
 

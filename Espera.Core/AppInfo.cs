@@ -6,16 +6,23 @@ namespace Espera.Core
 {
     public static class AppInfo
     {
+        private static readonly Lazy<bool> isPortable;
+
         public static readonly string AppName;
         public static readonly string BlobCachePath;
         public static readonly string DirectoryPath;
-        public static readonly bool IsPortable;
         public static readonly string LibraryFilePath;
         public static readonly string LogFilePath;
         public static readonly string OverridenBasePath;
         public static readonly Version Version;
-        public static readonly string SquirrelUpdatePathOverride;
+        public static readonly string AppRootPath;
         public static readonly string UpdatePath;
+
+        /// <summary>
+        /// Returns a value whether this application is portable or not.
+        /// The application is portable if a file with the name "PORTABLE" is present in the <see cref="AppRootPath"/> directory.
+        /// </summary>
+        public static bool IsPortable => isPortable.Value;
 
         static AppInfo()
         {
@@ -29,23 +36,15 @@ namespace Espera.Core
             AppName = "EsperaDebug";
 #endif
 
-#if PORTABLE || DEBUG
-            IsPortable = true;
-#else
-            IsPortable = false;
-#endif
-
             DirectoryPath = Path.Combine(OverridenBasePath ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
             BlobCachePath = Path.Combine(DirectoryPath, "BlobCache");
             LibraryFilePath = Path.Combine(DirectoryPath, "Library.json");
             LogFilePath = Path.Combine(DirectoryPath, "Log.txt");
             UpdatePath = "http://getespera.com/releases/squirrel/";
             Version = Assembly.GetExecutingAssembly().GetName().Version;
-            
-            if (IsPortable)
-            {
-                SquirrelUpdatePathOverride = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName;
-            }
+            AppRootPath = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName;
+
+            isPortable = new Lazy<bool>(() => File.Exists(Path.Combine(AppRootPath, "PORTABLE")));
         }
     }
 }

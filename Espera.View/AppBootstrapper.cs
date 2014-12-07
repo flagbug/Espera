@@ -40,6 +40,24 @@ namespace Espera.View
 
         public AppBootstrapper()
         {
+            using (var mgr = new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45, AppInfo.AppRootPath))
+            {
+                // We have to re-implement the things Squirrel does for normal applications, because we're marked as Squirrel-aware
+                if (!AppInfo.IsPortable)
+                {
+                    SquirrelAwareApp.HandleEvents(
+                      onInitialInstall: v => mgr.CreateShortcutForThisExe(),
+                      onAppUpdate: v => mgr.CreateShortcutForThisExe(),
+                      onAppUninstall: v => mgr.RemoveShortcutForThisExe());
+                }
+
+                else
+                {
+                    // TODO: Activate this once Squirrel lets us create a portable shortcut
+                    // SquirrelAwareApp.HandleEvents(onAppUpdate: v => mgr.CreateShortcutForThisExe());
+                }
+            }
+
             this.Initialize();
         }
 
@@ -118,6 +136,7 @@ namespace Espera.View
             this.Log().Info("Application version: " + AppInfo.Version);
             this.Log().Info("OS Version: " + Environment.OSVersion.VersionString);
             this.Log().Info("Current culture: " + CultureInfo.InstalledUICulture.Name);
+            this.Log().Info("This is a {0} application", AppInfo.IsPortable ? "portable" : "non-portable");
 
             Directory.CreateDirectory(AppInfo.DirectoryPath);
 

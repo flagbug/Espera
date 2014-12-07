@@ -28,7 +28,6 @@ $NuGet = "$PSScriptRoot\.nuget\NuGet.exe"
 $Squirrel = Join-Path  (ls .\packages\squirrel.windows.*)[0] "tools\Squirrel.com"
 
 $BuildPath = "$PSScriptRoot\Espera.View\bin\Release"
-$PortableBuildPath = "$PSScriptRoot\Espera.View\bin\Portable"
 $NuSpecPath = "$PSScriptRoot\Espera.nuspec"
 $ReleasesFolder = "$PSScriptRoot\SquirrelReleases"
 
@@ -52,28 +51,9 @@ If(Test-Path -Path $BuildPath) {
 	/clp:ErrorsOnly `
 	/v:m
 	
-&(GetMSBuildExe) Espera.sln `
-	/t:Clean`;Rebuild `
-	/p:Configuration=Portable `
-	/p:AllowedReferenceRelatedFileExtensions=- `
-	/p:DebugSymbols=false `
-	/p:DebugType=None `
-	/clp:ErrorsOnly `
-	/v:m
-
-# ==================================== Portable
-
-$ReleaseZip = "$ReleasesFolder\EsperaPortable.zip"
-
 If(!(Test-Path -Path $ReleasesFolder )){
-    New-Item -ItemType directory -Path $ReleasesFolder
+	New-Item -ItemType directory -Path $ReleasesFolder
 }
-
-If(Test-Path -Path $ReleaseZip) {
-	Remove-Item -Confirm:$false $ReleaseZip
-}
-
-ZipFiles $ReleaseZip $PortableBuildPath
 
 # ==================================== Squirrel
 
@@ -81,12 +61,12 @@ $NuPkgPath = "$PSScriptRoot\Espera.$Version.nupkg"
 
 &($NuGet) pack $NuSpecPath
 
-$SquirrelFullNuPkgOutputPath = "$PSScriptRoot\$ReleasesFolder\Espera-$Version-full.nupkg"
+$SquirrelFullNuPkgOutputPath = "$ReleasesFolder\Espera-$Version-full.nupkg"
 If(Test-Path -Path $SquirrelFullNuPkgOutputPath) {
 	Remove-Item -Confirm:$false $SquirrelFullNuPkgOutputPath
 }
 
-$SquirrelDeltaNuPkgOutputPath = "$PSScriptRoot\$ReleasesFolder\Espera-$Version-delta.nupkg"
+$SquirrelDeltaNuPkgOutputPath = "$ReleasesFolder\Espera-$Version-delta.nupkg"
 If(Test-Path -Path $SquirrelDeltaNuPkgOutputPath) {
 	Remove-Item -Confirm:$false $SquirrelDeltaNuPkgOutputPath
 }
@@ -102,6 +82,38 @@ $SquirrelSetupExe = "$ReleasesFolder\Setup.exe"
 If(Test-Path -Path $SquirrelSetupExe) {
 	Rename-Item $SquirrelSetupExe $OutputSetupExe
 }
+
+# ==================================== Portable
+
+$PortableFolder = "$ReleasesFolder\EsperaPortable"
+$ReleaseZip = "$ReleasesFolder\EsperaPortable.zip"
+
+If(Test-Path -Path $PortableFolder) {
+	Remove-Item -Confirm:$false $PortableFolder -Recurse -Force
+}
+
+If(Test-Path -Path $ReleaseZip) {
+	Remove-Item -Confirm:$false $ReleaseZip
+}
+
+New-Item -ItemType directory -Path $PortableFolder
+
+# This file tells Espera that it's a portable application
+New-Item "$PortableFolder\PORTABLE" -type file
+
+# Create a Squirrel-conforming app directory
+New-Item -ItemType directory -Path "$PortableFolder\packages"
+
+cp $SquirrelFullNuPkgOutputPath "$PortableFolder\packages"
+cp "$ReleasesFolder\RELEASES" "$PortableFolder\packages"
+cp "$BuildPath" "$PortableFolder\app-$Version" -Recurse
+
+$WshShell = New-Object -comObject WScript.Shell
+$Shortcut = $WshShell.CreateShortcut("$PortableFolder\Espera.lnk")
+$Shortcut.TargetPath = "$PortableFolder\app-$Version\Espera.exe"
+$Shortcut.Save()
+
+ZipFiles $ReleaseZip $PortableFolder
 
 # ==================================== Cleanup
 
