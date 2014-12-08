@@ -294,8 +294,8 @@ namespace Espera.Core.Management
                 .Concat(this.settings.WhenAnyValue(x => x.SongSourceUpdateInterval)
                     .Select(x => Observable.Interval(x, RxApp.TaskpoolScheduler))
                     .Switch()
-                    .Select(_ => Unit.Default)
-                    .Where(_ => this.settings.EnableAutomaticLibraryUpdates))
+                    .Select(_ => Unit.Default))
+                .Where(_ => this.settings.EnableAutomaticLibraryUpdates)
                 .Merge(this.manualUpdateTrigger);
 
             updateTrigger.Select(_ => this.SongSourcePath)

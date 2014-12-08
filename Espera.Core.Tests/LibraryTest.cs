@@ -1058,24 +1058,34 @@ namespace Espera.Core.Tests
             [Fact]
             public void DisabledAutomaticUpdatesDoesntTriggerUpdate()
             {
-                var fileSystem = Substitute.For<IFileSystem>();
-
                 var settings = new CoreSettings
                 {
                     EnableAutomaticLibraryUpdates = false
                 };
 
-                using (Library library = Helpers.CreateLibrary(settings, null, null, fileSystem))
+                var libraryReader = Substitute.For<ILibraryReader>();
+                libraryReader.LibraryExists.Returns(true);
+                libraryReader.ReadSongSourcePath().Returns("C://");
+                libraryReader.ReadPlaylists().Returns(new List<Playlist>());
+                libraryReader.ReadSongs().Returns(new List<LocalSong>());
+
+                var songFinder = Substitute.For<ILocalSongFinder>();
+                songFinder.GetSongsAsync().Returns(Observable.Empty<Tuple<LocalSong, byte[]>>());
+
+                var fileSystem = new MockFileSystem();
+                fileSystem.Directory.CreateDirectory("C://");
+
+                using (Library library = new LibraryBuilder().WithSettings(settings).WithReader(libraryReader).WithFileSystem(fileSystem).WithSongFinder(songFinder).Build())
                 {
                     (new TestScheduler()).With(scheduler =>
                     {
                         library.Initialize();
 
-                        scheduler.AdvanceByMs(settings.SongSourceUpdateInterval.TotalMilliseconds);
+                        scheduler.AdvanceByMs(settings.SongSourceUpdateInterval.TotalMilliseconds + 1);
                     });
                 }
 
-                fileSystem.Directory.DidNotReceiveWithAnyArgs().GetFiles(null);
+                songFinder.DidNotReceive().GetSongsAsync();
             }
 
             [Fact]
