@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Deployment.Application;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Reactive;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Akavache;
@@ -27,6 +23,9 @@ using NLog.Config;
 using NLog.Targets;
 using ReactiveUI;
 using Splat;
+using Squirrel;
+using System.Reactive.Linq;
+using Espera.View.InstallerMigration;
 
 namespace Espera.View
 {
@@ -34,7 +33,6 @@ namespace Espera.View
     {
         private CoreSettings coreSettings;
         private MobileApi mobileApi;
-        private IDisposable updateSubscription;
         private ViewSettings viewSettings;
 
         static AppBootstrapper()
@@ -44,6 +42,25 @@ namespace Espera.View
 
         public AppBootstrapper()
         {
+            using (var mgr = new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45, AppInfo.AppRootPath))
+            {
+                if (AppInfo.IsPortable)
+                {
+                    // The portable version only needs to rewrite the shortcut at the application root
+                    SquirrelAwareApp.HandleEvents(onAppUpdate: v => mgr.CreateShortcutsForExecutable("Espera.exe", ShortcutLocation.AppRoot, false));
+                }
+
+                else
+                {
+                    // We have to re-implement the things Squirrel does for normal applications,
+                    // because we're marked as Squirrel-aware
+                    SquirrelAwareApp.HandleEvents(
+                      onInitialInstall: v => mgr.CreateShortcutForThisExe(),
+                      onAppUpdate: v => mgr.CreateShortcutForThisExe(),
+                      onAppUninstall: v => mgr.RemoveShortcutForThisExe());
+                }
+            }
+
             this.Initialize();
         }
 
@@ -108,11 +125,6 @@ namespace Espera.View
             this.Log().Info("Shutting down analytics client");
             AnalyticsClient.Instance.Dispose();
 
-            if (this.updateSubscription != null)
-            {
-                this.updateSubscription.Dispose();
-            }
-
             this.Log().Info("Shutdown finished");
         }
 
@@ -127,6 +139,7 @@ namespace Espera.View
             this.Log().Info("Application version: " + AppInfo.Version);
             this.Log().Info("OS Version: " + Environment.OSVersion.VersionString);
             this.Log().Info("Current culture: " + CultureInfo.InstalledUICulture.Name);
+            this.Log().Info("This is a {0} application", AppInfo.IsPortable ? "portable" : "non-portable");
 
             Directory.CreateDirectory(AppInfo.DirectoryPath);
 
@@ -155,13 +168,27 @@ namespace Espera.View
                 this.Log().Info("BlobCache shutdown finished");
             }
 
+#if RELEASE
+            if (!AppInfo.IsPortable)
+            {
+                BlobCache.LocalMachine.GetObjectCreatedAt<bool>("ClickOnceToSquirrelMigration")
+                    .Where(x => x == null)
+                    .SelectMany(_ => Observable.Using(() => new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45, AppInfo.AppRootPath),
+                        mgr => Observable.StartAsync(() =>
+                        {
+                            var clickOnceUninstaller = new ClickOnceToSquirrelMigration(mgr);
+                            return clickOnceUninstaller.UninstallClickOnce();
+                        })))
+                .SelectMany(_ => BlobCache.LocalMachine.InsertObject("ClickOnceToSquirrelMigration", true))
+                .Subscribe(_ => this.Log().Info("Successfully uninstalled ClickOnce"), ex => this.Log().ErrorException("Failed to uninstall ClickOnce", ex));
+            }
+#endif
+
             this.SetupLager();
 
             this.SetupAnalyticsClient();
 
             this.SetupMobileApi();
-
-            this.SetupClickOnceUpdates();
 
             this.DisplayRootViewFor<ShellViewModel>();
         }
@@ -208,22 +235,6 @@ namespace Espera.View
         private void SetupAnalyticsClient()
         {
             AnalyticsClient.Instance.Initialize(this.coreSettings);
-        }
-
-        private void SetupClickOnceUpdates()
-        {
-            if (!AppInfo.IsPortable)
-            {
-                this.updateSubscription = Observable.Interval(TimeSpan.FromHours(2), RxApp.TaskpoolScheduler)
-                    .StartWith(0) // Trigger an initial update check
-                    .SelectMany(x => this.UpdateSilentlyAsync().ToObservable())
-                    .Subscribe();
-            }
-
-            else
-            {
-                this.updateSubscription = Disposable.Empty;
-            }
         }
 
         private void SetupLager()
@@ -284,62 +295,6 @@ namespace Espera.View
             var apiStats = new MobileApiInfo(connectedClients, isPortOccupied);
 
             Locator.CurrentMutable.RegisterConstant(apiStats, typeof(MobileApiInfo));
-        }
-
-        private async Task UpdateSilentlyAsync()
-        {
-            this.Log().Info("Looking for application updates");
-
-            ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
-
-            UpdateCheckInfo updateInfo;
-
-            try
-            {
-                updateInfo = await Task.Run(() => deployment.CheckForDetailedUpdate());
-            }
-
-            catch (Exception ex)
-            {
-                this.Log().ErrorException("Error while checking for updates", ex);
-                return;
-            }
-
-            if (updateInfo.UpdateAvailable)
-            {
-                this.Log().Info("New version available: {0}", updateInfo.AvailableVersion);
-
-                Task changelogFetchTask = ChangelogFetcher.FetchAsync().ToObservable()
-                    .Timeout(TimeSpan.FromSeconds(30))
-                    .SelectMany(x => BlobCache.LocalMachine.InsertObject(BlobCacheKeys.Changelog, x))
-                    .LoggedCatch(this, Observable.Return(Unit.Default), "Could not to fetch changelog")
-                    .ToTask();
-
-                this.Log().Info("Applying updates...");
-
-                try
-                {
-                    await Task.Run(() => deployment.Update());
-                }
-
-                catch (Exception ex)
-                {
-                    this.Log().Fatal("Failed to apply updates.", ex);
-                    AnalyticsClient.Instance.RecordNonFatalError(ex);
-                    return;
-                }
-
-                await changelogFetchTask;
-
-                this.viewSettings.IsUpdated = true;
-
-                this.Log().Info("Updates applied.");
-            }
-
-            else
-            {
-                this.Log().Info("No updates found.");
-            }
         }
     }
 }

@@ -382,6 +382,8 @@ namespace Espera.View.ViewModels
             this.library.Save();
             this.library.Dispose();
 
+            this.UpdateViewModel.Dispose();
+
             this.disposable.Dispose();
         }
 

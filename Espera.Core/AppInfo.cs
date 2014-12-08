@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Deployment.Application;
 using System.IO;
 using System.Reflection;
 
@@ -7,14 +6,21 @@ namespace Espera.Core
 {
     public static class AppInfo
     {
+        /// <summary>
+        /// Returns a value whether this application is portable or not. The application is portable
+        /// if a file with the name "PORTABLE" is present in the <see cref="AppRootPath"/> directory.
+        /// </summary>
+        public static readonly bool IsPortable;
+
         public static readonly string AppName;
         public static readonly string BlobCachePath;
         public static readonly string DirectoryPath;
-        public static readonly bool IsPortable;
         public static readonly string LibraryFilePath;
         public static readonly string LogFilePath;
         public static readonly string OverridenBasePath;
         public static readonly Version Version;
+        public static readonly string AppRootPath;
+        public static readonly string UpdatePath;
 
         static AppInfo()
         {
@@ -32,8 +38,23 @@ namespace Espera.Core
             BlobCachePath = Path.Combine(DirectoryPath, "BlobCache");
             LibraryFilePath = Path.Combine(DirectoryPath, "Library.json");
             LogFilePath = Path.Combine(DirectoryPath, "Log.txt");
+            UpdatePath = "http://getespera.com/releases/squirrel/";
             Version = Assembly.GetExecutingAssembly().GetName().Version;
-            IsPortable = !ApplicationDeployment.IsNetworkDeployed;
+
+            var baseDirectory = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+
+            // Directory.GetParent doesn't work here, it has problems when
+            // AppDomain.CurrentDomain.BaseDirectory returns a path with a backslash and returns the
+            // same directory instead of the parent
+            AppRootPath = baseDirectory.Parent.Parent.FullName;
+
+            IsPortable = File.Exists(Path.Combine(baseDirectory.Parent.FullName, "PORTABLE"));
+
+            if (!IsPortable)
+            {
+                // If we're a portable app, let Squirrel figure out the path for us
+                AppRootPath = null;
+            }
         }
     }
 }

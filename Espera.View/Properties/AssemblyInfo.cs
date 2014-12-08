@@ -4,6 +4,7 @@ using System.Windows;
 
 [assembly: AssemblyTitle("Espera")]
 [assembly: ComVisible(false)]
+[assembly: AssemblyMetadata("SquirrelAwareVersion", "1")]
 
 //In order to begin building localizable applications, set
 //<UICulture>CultureYouAreCodingWith</UICulture> in your .csproj file

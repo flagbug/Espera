@@ -117,33 +117,6 @@
                     </StackPanel>
                 </Grid>
             </dialogs:CustomDialog>
-            <dialogs:CustomDialog x:Key="PortableUpdateMessage"
-                                  Title="Update available"
-                                  Height="250">
-                <StackPanel Margin="10"
-                            VerticalAlignment="Center"
-                            DataContext="{Binding Path=UpdateViewModel}"
-                            Orientation="Vertical">
-                    <TextBlock FontSize="{StaticResource DialogMessageFontSize}"
-                               Text="An update is available. Would you like to download it now?"
-                               TextWrapping="Wrap" />
-                    <StackPanel Margin="0, 15, 0, 0"
-                                HorizontalAlignment="Right"
-                                Orientation="Horizontal">
-                        <Button Height="35"
-                                MinWidth="80"
-                                Margin="10, 0, 0, 0"
-                                Click="OpenPortableDownloadLink"
-                                Content="Download"
-                                Style="{DynamicResource AccentedDialogSquareButton}" />
-                        <Button Height="35"
-                                MinWidth="80"
-                                Margin="10, 0, 0, 0"
-                                Click="ClosePortableUpdateNotification"
-                                Content="Not Now" />
-                    </StackPanel>
-                </StackPanel>
-            </dialogs:CustomDialog>
         </ResourceDictionary>
     </Window.Resources>
     <Window.TaskbarItemInfo>
@@ -168,6 +141,29 @@
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
             <Button Command="{Binding Path=ShowSettingsCommand}" Content="settings" />
+            <Button Command="{Binding Path=UpdateViewModel.Restart}"
+                    ToolTip="Update &amp; Restart"
+                    Visibility="{Binding Path=UpdateViewModel.ShouldRestart,
+                                         Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Rectangle Width="12" Height="12">
+                    <Rectangle.Fill>
+                        <VisualBrush Stretch="Uniform">
+                            <VisualBrush.Visual>
+                                <Canvas Clip="F1 M 0,0L 76,0L 76,76L 0,76L 0,0">
+                                    <Path Canvas.Left="24"
+                                          Canvas.Top="17.75"
+                                          Width="28"
+                                          Height="39.25"
+                                          Data="F1 M 34,57L 42,57L 42,32.25L 52,42.25L 52,31.75L 38,17.75L 24,31.75L 24,42.25L 34,32.25L 34,57 Z "
+                                          Fill="{Binding Path=Foreground,
+                                                         RelativeSource={RelativeSource AncestorType=Button}}"
+                                          Stretch="Fill" />
+                                </Canvas>
+                            </VisualBrush.Visual>
+                        </VisualBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
+            </Button>
         </Controls:WindowCommands>
     </Controls:MetroWindow.RightWindowCommands>
     <Controls:MetroWindow.Flyouts>

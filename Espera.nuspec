@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Espera</id>
-        <version>3.0</version>
+        <version>3.0.0</version>
         <title>Espera</title>
         <authors>Dennis Daume</authors>
         <owners>Dennis Daume</owners>
@@ -15,5 +15,6 @@
     <files>
         <file src="Espera.View\bin\Release\*.dll" target="lib\net45\" />
         <file src="Espera.View\bin\Release\*.exe" target="lib\net45\" />
+		<file src="Espera.View\bin\Release\*.exe.config" target="lib\net45\" />
     </files>
 </package>
