@@ -10,13 +10,14 @@ using Wunder.ClickOnceUninstaller;
 namespace Espera.View.InstallerMigration
 {
     /// <summary>
-    /// A class to aid the migration from the ClickOnce based installer to the Squirrel.Windows based one.
+    /// A class to aid the migration from the ClickOnce based installer to the Squirrel.Windows
+    /// based one.
     /// </summary>
     public class ClickOnceToSquirrelMigration : IEnableLogger
     {
-        private UninstallInfo clickOnceInfo;
         private readonly IFileSystem fileSystem;
         private readonly IUpdateManager updateManager;
+        private UninstallInfo clickOnceInfo;
 
         public ClickOnceToSquirrelMigration(IUpdateManager updateManager, IFileSystem fileSystem = null)
         {
@@ -34,17 +35,34 @@ namespace Espera.View.InstallerMigration
             await this.RemoveClickOnceShortCut();
         }
 
-        private async Task<UninstallInfo> GetClickOnceInfo()
+        public async Task RemoveClickOnceShortCut()
         {
-            if (clickOnceInfo != null)
-                return this.clickOnceInfo;
+            this.Log().Info("Removing ClickOnce shortcut");
 
-            this.clickOnceInfo = await Task.Run(() => UninstallInfo.Find("Espera"));
+            UninstallInfo info = await this.GetClickOnceInfo();
 
-            return this.clickOnceInfo;
+            string programsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Programs);
+            string folder = Path.Combine(programsFolder, info.ShortcutFolderName);
+            string suiteFolder = Path.Combine(folder, info.ShortcutSuiteName ?? string.Empty);
+            string shortcut = Path.Combine(suiteFolder, info.ShortcutFileName + ".appref-ms");
+
+            this.Log().Info("ClickOnce shortcut is located at \{shortcut}");
+
+            try
+            {
+                await Task.Run(() => this.fileSystem.File.Delete(shortcut));
+            }
+
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Failed to remove ClickOnce shortcut", ex);
+                return;
+            }
+
+            this.Log().Info("Removed ClickOnce shortcut");
         }
 
-        private async Task UninstallClickOnceDeployment()
+        public async Task UninstallClickOnce()
         {
             var uninstallInfo = await this.GetClickOnceInfo();
 
@@ -53,6 +71,16 @@ namespace Espera.View.InstallerMigration
 
             var uninstaller = new Uninstaller();
             await Task.Run(() => uninstaller.Uninstall(uninstallInfo));
+        }
+
+        private async Task<UninstallInfo> GetClickOnceInfo()
+        {
+            if (clickOnceInfo != null)
+                return this.clickOnceInfo;
+
+            this.clickOnceInfo = await Task.Run(() => UninstallInfo.Find("Espera"));
+
+            return this.clickOnceInfo;
         }
 
         private async Task InstallSquirrelDeployment()
@@ -72,33 +100,6 @@ namespace Espera.View.InstallerMigration
             }
 
             this.Log().Info("Finished the install of the Squirrel version of Espera");
-        }
-
-        public async Task RemoveClickOnceShortCut()
-        {
-            this.Log().Info("Removing ClickOnce shortcut");
-
-            UninstallInfo info = await this.GetClickOnceInfo();
-
-            string programsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Programs);
-            string folder = Path.Combine(programsFolder, info.ShortcutFolderName);
-            string suiteFolder = Path.Combine(folder, info.ShortcutSuiteName ?? string.Empty);
-            string shortcut = Path.Combine(suiteFolder, info.ShortcutFileName + ".appref-ms");
-
-            this.Log().Info("ClickOnce shortcut is located at \{shortcut}");
-            
-            try
-            {
-                await Task.Run(() => this.fileSystem.File.Delete(shortcut));
-            }
-
-            catch (Exception ex)
-            {
-                this.Log().ErrorException("Failed to remove ClickOnce shortcut", ex);
-                return;
-            }
-
-            this.Log().Info("Removed ClickOnce shortcut");
         }
     }
 }

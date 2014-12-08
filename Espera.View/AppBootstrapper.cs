@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Subjects;
 using System.Windows;
 using System.Windows.Threading;
@@ -24,6 +25,7 @@ using ReactiveUI;
 using Splat;
 using Squirrel;
 using System.Reactive.Linq;
+using Espera.View.InstallerMigration;
 
 namespace Espera.View
 {
@@ -165,6 +167,22 @@ namespace Espera.View
                 oldBlobCache.Dispose();
                 this.Log().Info("BlobCache shutdown finished");
             }
+
+#if RELEASE
+            if (!AppInfo.IsPortable)
+            {
+                BlobCache.LocalMachine.GetObjectCreatedAt<bool>("ClickOnceToSquirrelMigration")
+                    .Where(x => x == null)
+                    .SelectMany(_ => Observable.Using(() => new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45, AppInfo.AppRootPath),
+                        mgr => Observable.StartAsync(() =>
+                        {
+                            var clickOnceUninstaller = new ClickOnceToSquirrelMigration(mgr);
+                            return clickOnceUninstaller.UninstallClickOnce();
+                        })))
+                .SelectMany(_ => BlobCache.LocalMachine.InsertObject("ClickOnceToSquirrelMigration", true))
+                .Subscribe(_ => this.Log().Info("Successfully uninstalled ClickOnce"), ex => this.Log().ErrorException("Failed to uninstall ClickOnce", ex));
+            }
+#endif
 
             this.SetupLager();
 
