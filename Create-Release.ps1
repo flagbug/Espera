@@ -31,7 +31,7 @@ $SquirrelUpdate = Join-Path  $SquirrelPackagePath "tools\Squirrel.exe"
 
 $BuildPath = "$PSScriptRoot\Espera.View\bin\Release"
 $NuSpecPath = "$PSScriptRoot\Espera.nuspec"
-$ReleasesFolder = "$PSScriptRoot\SquirrelReleases"
+$ReleasesFolder = "$PSScriptRoot\Releases"
 $Icon = "$PSScriptRoot\Espera.View\Images\ApplicationIcon.ico"
 
 # ==================================== NuSpec Metadata
