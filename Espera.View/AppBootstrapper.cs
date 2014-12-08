@@ -42,7 +42,8 @@ namespace Espera.View
         {
             using (var mgr = new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45, AppInfo.AppRootPath))
             {
-                // We have to re-implement the things Squirrel does for normal applications, because we're marked as Squirrel-aware
+                // We have to re-implement the things Squirrel does for normal applications, because
+                // we're marked as Squirrel-aware
                 if (!AppInfo.IsPortable)
                 {
                     SquirrelAwareApp.HandleEvents(
@@ -54,7 +55,7 @@ namespace Espera.View
                 else
                 {
                     // TODO: Activate this once Squirrel lets us create a portable shortcut
-                    // SquirrelAwareApp.HandleEvents(onAppUpdate: v => mgr.CreateShortcutForThisExe());
+                    SquirrelAwareApp.HandleEvents(onAppUpdate: v => { });
                 }
             }
 
