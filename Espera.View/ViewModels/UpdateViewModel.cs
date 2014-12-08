@@ -116,7 +116,7 @@ namespace Espera.View.ViewModels
 
                 catch (Exception ex)
                 {
-                    this.Log().Fatal("Failed to download updates.", ex);
+                    this.Log().Error("Failed to download updates.", ex);
                     AnalyticsClient.Instance.RecordNonFatalError(ex);
                     return;
                 }
@@ -130,7 +130,7 @@ namespace Espera.View.ViewModels
 
                 catch (Exception ex)
                 {
-                    this.Log().Fatal("Failed to apply updates.", ex);
+                    this.Log().Error("Failed to apply updates.", ex);
                     AnalyticsClient.Instance.RecordNonFatalError(ex);
                     return;
                 }
