@@ -42,7 +42,11 @@ namespace Espera.Core
             LogFilePath = Path.Combine(DirectoryPath, "Log.txt");
             UpdatePath = "http://getespera.com/releases/squirrel/";
             Version = Assembly.GetExecutingAssembly().GetName().Version;
-            AppRootPath = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName;
+
+            // Directory.GetParent doesn't work here, it has problems when
+            // AppDomain.CurrentDomain.BaseDirectory returns a path with a backslash and returns the
+            // same directory instead of the parent
+            AppRootPath = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory).Parent.FullName;
 
             isPortable = new Lazy<bool>(() => File.Exists(Path.Combine(AppRootPath, "PORTABLE")));
         }
