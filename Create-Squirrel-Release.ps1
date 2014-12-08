@@ -25,7 +25,9 @@ Function ZipFiles($Filename, $Source)
 
 $NuGet = "$PSScriptRoot\.nuget\NuGet.exe"
 &($Nuget) restore Espera.sln
-$Squirrel = Join-Path  (ls .\packages\squirrel.windows.*)[0] "tools\Squirrel.com"
+$SquirrelPackagePath = (ls .\packages\squirrel.windows.*)[0]
+$Squirrel = Join-Path  $SquirrelPackagePath "tools\Squirrel.com"
+$SquirrelUpdate = Join-Path  $SquirrelPackagePath "tools\Squirrel.exe"
 
 $BuildPath = "$PSScriptRoot\Espera.View\bin\Release"
 $NuSpecPath = "$PSScriptRoot\Espera.nuspec"
@@ -86,6 +88,7 @@ If(Test-Path -Path $SquirrelSetupExe) {
 # ==================================== Portable
 
 $PortableFolder = "$ReleasesFolder\EsperaPortable"
+$PortableAppPath = "$PortableFolder\Espera"
 $ReleaseZip = "$ReleasesFolder\EsperaPortable.zip"
 
 If(Test-Path -Path $PortableFolder) {
@@ -96,21 +99,30 @@ If(Test-Path -Path $ReleaseZip) {
 	Remove-Item -Confirm:$false $ReleaseZip
 }
 
-New-Item -ItemType directory -Path $PortableFolder
+New-Item -ItemType directory -Path $PortableAppPath
 
 # This file tells Espera that it's a portable application
-New-Item "$PortableFolder\PORTABLE" -type file
+New-Item "$PortableAppPath\PORTABLE" -type file
 
 # Create a Squirrel-conforming app directory
-New-Item -ItemType directory -Path "$PortableFolder\packages"
+New-Item -ItemType directory -Path "$PortableAppPath\packages"
 
-cp $SquirrelFullNuPkgOutputPath "$PortableFolder\packages"
-cp "$ReleasesFolder\RELEASES" "$PortableFolder\packages"
-cp "$BuildPath" "$PortableFolder\app-$Version" -Recurse
+cp $SquirrelFullNuPkgOutputPath "$PortableAppPath\packages"
+cp "$ReleasesFolder\RELEASES" "$PortableAppPath\packages"
+cp "$BuildPath" "$PortableAppPath\app-$Version" -Recurse
+cp $SquirrelUpdate "$PortableAppPath\Update.exe"
 
+# Create the shortcut that Squirrel will update for us
+$WshShell = New-Object -comObject WScript.Shell
+$Shortcut = $WshShell.CreateShortcut("$PortableAppPath\Espera.lnk")
+$Shortcut.TargetPath = "$PortableAppPath\app-$Version\Espera.exe"
+$Shortcut.Save()
+
+# Create a static shortcut to the shortcut we've just created, 
+# this is the one the user will use
 $WshShell = New-Object -comObject WScript.Shell
 $Shortcut = $WshShell.CreateShortcut("$PortableFolder\Espera.lnk")
-$Shortcut.TargetPath = "$PortableFolder\app-$Version\Espera.exe"
+$Shortcut.TargetPath = "$PortableAppPath\Espera.lnk"
 $Shortcut.Save()
 
 ZipFiles $ReleaseZip $PortableFolder
