@@ -6,7 +6,11 @@ namespace Espera.Core
 {
     public static class AppInfo
     {
-        private static readonly Lazy<bool> isPortable;
+        /// <summary>
+        /// Returns a value whether this application is portable or not. The application is portable
+        /// if a file with the name "PORTABLE" is present in the <see cref="AppRootPath"/> directory.
+        /// </summary>
+        public static readonly bool IsPortable;
 
         public static readonly string AppName;
         public static readonly string BlobCachePath;
@@ -17,12 +21,6 @@ namespace Espera.Core
         public static readonly Version Version;
         public static readonly string AppRootPath;
         public static readonly string UpdatePath;
-
-        /// <summary>
-        /// Returns a value whether this application is portable or not.
-        /// The application is portable if a file with the name "PORTABLE" is present in the <see cref="AppRootPath"/> directory.
-        /// </summary>
-        public static bool IsPortable => isPortable.Value;
 
         static AppInfo()
         {
@@ -46,9 +44,15 @@ namespace Espera.Core
             // Directory.GetParent doesn't work here, it has problems when
             // AppDomain.CurrentDomain.BaseDirectory returns a path with a backslash and returns the
             // same directory instead of the parent
-            AppRootPath = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory).Parent.FullName;
+            AppRootPath = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.FullName;
 
-            isPortable = new Lazy<bool>(() => File.Exists(Path.Combine(AppRootPath, "PORTABLE")));
+            IsPortable = File.Exists(Path.Combine(AppRootPath, "PORTABLE"));
+
+            if (!IsPortable)
+            {
+                // If we're a portable app, let Squirrel figure out the path for us
+                AppRootPath = null;
+            }
         }
     }
 }
