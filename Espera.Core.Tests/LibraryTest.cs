@@ -183,7 +183,7 @@ namespace Espera.Core.Tests
         public class TheChangeSongSourceMethod
         {
             [Fact]
-            public async Task SmokeTest()
+            public void SmokeTest()
             {
                 var fileSystem = new MockFileSystem();
                 fileSystem.Directory.CreateDirectory("C://Test");
@@ -196,11 +196,11 @@ namespace Espera.Core.Tests
             }
 
             [Fact]
-            public void ThrowsArgumentExceptionIfDirectoryDoesntExist()
+            public void ThrowsInvalidOperationExceptionIfDirectoryDoesntExist()
             {
                 using (Library library = Helpers.CreateLibrary())
                 {
-                    Assert.Throws<ArgumentException>(() => library.ChangeSongSourcePath("C://Test", library.LocalAccessControl.RegisterLocalAccessToken()));
+                    Assert.Throws<InvalidOperationException>(() => library.ChangeSongSourcePath("C://Test", library.LocalAccessControl.RegisterLocalAccessToken()));
                 }
             }
 
