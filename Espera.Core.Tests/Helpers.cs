@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Text;
@@ -56,7 +57,9 @@ namespace Espera.Core.Tests
 
         public static async Task AwaitInitializationAndUpdate(this Library library)
         {
-            var updateCompleted = library.WhenAnyValue(x => x.IsUpdating).Where(x => !x).Skip(1).FirstAsync().Timeout(TimeSpan.FromSeconds(5)).ToTask();
+            var updateCompleted = Observable.If(() => String.IsNullOrEmpty(library.SongSourcePath),
+                Observable.Return(Unit.Default),
+                library.WhenAnyValue(x => x.IsUpdating).Where(x => !x).Skip(1).FirstAsync().Timeout(TimeSpan.FromSeconds(5)).Select(_ => Unit.Default)).ToTask();
 
             new TestScheduler().With(sched =>
             {
