@@ -82,6 +82,9 @@ namespace Espera.View.ViewModels
 
         private async Task UpdateSilentlyAsync()
         {
+            if (ModeDetector.InUnitTestRunner())
+                return;
+
             this.Log().Info("Looking for application updates");
 
             UpdateInfo updateInfo;
