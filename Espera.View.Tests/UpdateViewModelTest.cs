@@ -11,9 +11,10 @@ namespace Espera.View.Tests
             public void DisabledChangelogIfRequested()
             {
                 var settings = new ViewSettings { IsUpdated = true, EnableChangelog = true };
-                var vm = new UpdateViewModel(settings) { DisableChangelog = true };
-
-                vm.ChangelogShown();
+                using (var vm = new UpdateViewModel(settings) { DisableChangelog = true })
+                {
+                    vm.ChangelogShown();
+                }
 
                 Assert.False(settings.EnableChangelog);
             }
@@ -22,9 +23,10 @@ namespace Espera.View.Tests
             public void SetsIsUpdatedToFalse()
             {
                 var settings = new ViewSettings { IsUpdated = true };
-                var vm = new UpdateViewModel(settings);
-
-                vm.ChangelogShown();
+                using (var vm = new UpdateViewModel(settings))
+                {
+                    vm.ChangelogShown();
+                }
 
                 Assert.False(settings.IsUpdated);
             }
@@ -36,27 +38,30 @@ namespace Espera.View.Tests
             public void IsFalseIfNotUpdated()
             {
                 var settings = new ViewSettings { IsUpdated = false };
-                var vm = new UpdateViewModel(settings);
-
-                Assert.False(vm.ShowChangelog);
+                using (var vm = new UpdateViewModel(settings))
+                {
+                    Assert.False(vm.ShowChangelog);
+                }
             }
 
             [Fact]
             public void IsFalseIfUpdatedButOptedOut()
             {
                 var settings = new ViewSettings { IsUpdated = true, EnableChangelog = false };
-                var vm = new UpdateViewModel(settings);
-
-                Assert.False(vm.ShowChangelog);
+                using (var vm = new UpdateViewModel(settings))
+                {
+                    Assert.False(vm.ShowChangelog);
+                }
             }
 
             [Fact]
             public void IsTrueIfUpdatedAndOptedIn()
             {
                 var settings = new ViewSettings { IsUpdated = true, EnableChangelog = true };
-                var vm = new UpdateViewModel(settings);
-
-                Assert.True(vm.ShowChangelog);
+                using (var vm = new UpdateViewModel(settings))
+                {
+                    Assert.True(vm.ShowChangelog);
+                }
             }
         }
     }
