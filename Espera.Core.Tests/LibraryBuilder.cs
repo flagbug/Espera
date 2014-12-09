@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
+using Akavache;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
@@ -32,7 +33,7 @@ namespace Espera.Core.Tests
             var library = new Library(
                 this.reader ?? Substitute.For<ILibraryReader>(),
                 this.writer ?? Substitute.For<ILibraryWriter>(),
-                this.settings ?? new CoreSettings(),
+                this.settings ?? new CoreSettings(new InMemoryBlobCache()),
                 this.fileSystem ?? new MockFileSystem(),
                 x => this.songFinder ?? SetupDefaultLocalSongFinder());
 
