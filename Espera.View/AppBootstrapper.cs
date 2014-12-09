@@ -141,15 +141,13 @@ namespace Espera.View
             this.Log().Info("Current culture: " + CultureInfo.InstalledUICulture.Name);
             this.Log().Info("This is a {0} application", AppInfo.IsPortable ? "portable" : "non-portable");
 
-            Directory.CreateDirectory(AppInfo.DirectoryPath);
+            Directory.CreateDirectory(AppInfo.ApplicationDataPath);
 
-#if DEBUG
-            if (AppInfo.OverridenBasePath != null)
+            if (AppInfo.IsPortable)
             {
                 Directory.CreateDirectory(AppInfo.BlobCachePath);
                 BlobCache.LocalMachine = new SQLitePersistentBlobCache(Path.Combine(AppInfo.BlobCachePath, "blobs.db"));
             }
-#endif
 
             var newBlobCache = BlobCache.LocalMachine;
 

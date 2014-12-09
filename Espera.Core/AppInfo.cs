@@ -8,16 +8,16 @@ namespace Espera.Core
     {
         /// <summary>
         /// Returns a value whether this application is portable or not. The application is portable
-        /// if a file with the name "PORTABLE" is present in the <see cref="AppRootPath"/> directory.
+        /// if a file with the name "PORTABLE" is present in the <see cref="AppRootPath" /> directory.
         /// </summary>
         public static readonly bool IsPortable;
 
         public static readonly string AppName;
         public static readonly string BlobCachePath;
-        public static readonly string DirectoryPath;
+        public static readonly string ApplicationDataPath;
         public static readonly string LibraryFilePath;
         public static readonly string LogFilePath;
-        public static readonly string OverridenBasePath;
+        public static readonly string OverridenApplicationDataPath;
         public static readonly Version Version;
         public static readonly string AppRootPath;
         public static readonly string UpdatePath;
@@ -29,26 +29,26 @@ namespace Espera.Core
 #if DEBUG
             // Set and uncomment this if you want to change the app data folder for debugging
 
-            // OverridenBasePath = "D://AppData";
+            // OverridenApplicationDataPath = "D://AppData";
 
             AppName = "EsperaDebug";
 #endif
 
-            DirectoryPath = Path.Combine(OverridenBasePath ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
-            BlobCachePath = Path.Combine(DirectoryPath, "BlobCache");
-            LibraryFilePath = Path.Combine(DirectoryPath, "Library.json");
-            LogFilePath = Path.Combine(DirectoryPath, "Log.txt");
+            var baseDirectory = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+
+            IsPortable = File.Exists(Path.Combine(baseDirectory.Parent.FullName, "PORTABLE"));
+
+            ApplicationDataPath = IsPortable ? baseDirectory.Parent.FullName : Path.Combine(OverridenApplicationDataPath ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
+            BlobCachePath = Path.Combine(ApplicationDataPath, "BlobCache");
+            LibraryFilePath = Path.Combine(ApplicationDataPath, "Library.json");
+            LogFilePath = Path.Combine(ApplicationDataPath, "Log.txt");
             UpdatePath = "http://getespera.com/releases/squirrel/";
             Version = Assembly.GetExecutingAssembly().GetName().Version;
-
-            var baseDirectory = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
 
             // Directory.GetParent doesn't work here, it has problems when
             // AppDomain.CurrentDomain.BaseDirectory returns a path with a backslash and returns the
             // same directory instead of the parent
             AppRootPath = baseDirectory.Parent.Parent.FullName;
-
-            IsPortable = File.Exists(Path.Combine(baseDirectory.Parent.FullName, "PORTABLE"));
 
             if (!IsPortable)
             {
