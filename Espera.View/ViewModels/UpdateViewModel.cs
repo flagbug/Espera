@@ -77,7 +77,7 @@ namespace Espera.View.ViewModels
 
         public void Dispose()
         {
-            this.updateManager?.Dispose();
+            this.updateManager.Dispose();
         }
 
         private async Task UpdateSilentlyAsync()
