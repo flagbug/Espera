@@ -57,13 +57,15 @@ namespace Espera.Core.Tests
 
         public static async Task AwaitInitializationAndUpdate(this Library library)
         {
-            var updateCompleted = Observable.If(() => String.IsNullOrEmpty(library.SongSourcePath),
-                Observable.Return(Unit.Default),
-                library.WhenAnyValue(x => x.IsUpdating).Where(x => !x).Skip(1).FirstAsync().Timeout(TimeSpan.FromSeconds(5)).Select(_ => Unit.Default)).ToTask();
+            Task updateCompleted = null;
 
             new TestScheduler().With(sched =>
             {
                 library.Initialize();
+
+                updateCompleted = Observable.If(() => String.IsNullOrEmpty(library.SongSourcePath),
+                    Observable.Return(Unit.Default),
+                    library.WhenAnyValue(x => x.IsUpdating).Where(x => !x).Skip(1).FirstAsync().Timeout(TimeSpan.FromSeconds(5)).Select(_ => Unit.Default)).ToTask();
 
                 sched.AdvanceByMs(Library.InitialUpdateDelay.TotalMilliseconds + 1);
             });
