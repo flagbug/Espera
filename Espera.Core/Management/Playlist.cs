@@ -151,7 +151,7 @@ namespace Espera.Core.Management
         internal void AddSongs(IEnumerable<Song> songList)
         {
             if (songList == null)
-                Throw.ArgumentNullException(() => songList);
+                throw new ArgumentNullException(nameof(songList));
 
             int index = this.playlist.Count;
 

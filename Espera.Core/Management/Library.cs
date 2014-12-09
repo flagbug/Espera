@@ -119,8 +119,8 @@ namespace Espera.Core.Management
         public IObservable<AudioPlayerState> PlaybackState { get; }
 
         /// <summary>
-        /// Returns an enumeration of playlists that implements
-        /// <see cref="INotifyCollectionChanged" /> .
+        /// Returns an enumeration of playlists that implements <see cref="INotifyCollectionChanged"
+        /// /> .
         /// </summary>
         public IReadOnlyReactiveList<Playlist> Playlists => this.playlists;
 
@@ -251,7 +251,7 @@ namespace Espera.Core.Management
             this.accessControl.VerifyAccess(accessToken);
 
             if (!this.fileSystem.Directory.Exists(path))
-                throw new InvalidOperationException("Directory does't exist.");
+                throw new InvalidOperationException("Directory doesn't exist.");
 
             this.SongSourcePath = path;
             this.UpdateNow();
@@ -275,7 +275,7 @@ namespace Espera.Core.Management
         public Playlist GetPlaylistByName(string playlistName)
         {
             if (playlistName == null)
-                Throw.ArgumentNullException(() => playlistName);
+                throw new ArgumentNullException(nameof(playlistName));
 
             return this.playlists.FirstOrDefault(playlist => playlist.Name == playlistName);
         }
@@ -302,7 +302,7 @@ namespace Espera.Core.Management
                 .Where(path => !String.IsNullOrEmpty(path))
                 .Do(_ => this.Log().Info("Triggering library update."))
                 // Abort the update if the song source doesn't exist.
-                //
+                // 
                 // The source may be a NAS that's just temporarily offline and we don't want to
                 // purge the whole library in this case.
                 .Where(path =>
@@ -342,7 +342,7 @@ namespace Espera.Core.Management
         public async Task PlayInstantlyAsync(IEnumerable<Song> songList, Guid accessToken)
         {
             if (songList == null)
-                Throw.ArgumentNullException(() => songList);
+                throw new ArgumentNullException(nameof(songList));
 
             this.accessControl.VerifyAccess(accessToken, this.settings.LockPlayPause);
 
@@ -421,7 +421,7 @@ namespace Espera.Core.Management
         public void RemoveFromPlaylist(IEnumerable<int> indexes, Guid accessToken)
         {
             if (indexes == null)
-                Throw.ArgumentNullException(() => indexes);
+                throw new ArgumentNullException(nameof(indexes));
 
             this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylist);
 
@@ -435,7 +435,7 @@ namespace Espera.Core.Management
         public void RemoveFromPlaylist(IEnumerable<Song> songList, Guid accessToken)
         {
             if (songList == null)
-                Throw.ArgumentNullException(() => songList);
+                throw new ArgumentNullException(nameof(songList));
 
             this.accessControl.VerifyAccess(accessToken);
 
@@ -449,7 +449,7 @@ namespace Espera.Core.Management
         public void RemovePlaylist(Playlist playlist, Guid accessToken)
         {
             if (playlist == null)
-                Throw.ArgumentNullException(() => playlist);
+                throw new ArgumentNullException(nameof(playlist));
 
             this.accessControl.VerifyAccess(accessToken);
 
@@ -513,7 +513,7 @@ namespace Espera.Core.Management
         public void SwitchToPlaylist(Playlist playlist, Guid accessToken)
         {
             if (playlist == null)
-                Throw.ArgumentNullException(() => playlist);
+                throw new ArgumentNullException(nameof(playlist));
 
             this.accessControl.VerifyAccess(accessToken, this.settings.LockPlaylist);
 
