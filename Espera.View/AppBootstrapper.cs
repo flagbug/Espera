@@ -25,7 +25,6 @@ using ReactiveUI;
 using Splat;
 using Squirrel;
 using System.Reactive.Linq;
-using Espera.View.InstallerMigration;
 
 namespace Espera.View
 {
@@ -174,7 +173,7 @@ namespace Espera.View
                     .SelectMany(_ => Observable.Using(() => new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45, AppInfo.AppRootPath),
                         mgr => Observable.StartAsync(() =>
                         {
-                            var clickOnceUninstaller = new ClickOnceToSquirrelMigration(mgr);
+                            var clickOnceUninstaller = new ClickOnceToSquirrelMigrator.ClickOnceToSquirrelMigrator(mgr, "Espera");
                             return clickOnceUninstaller.UninstallClickOnce();
                         })))
                 .SelectMany(_ => BlobCache.LocalMachine.InsertObject("ClickOnceToSquirrelMigration", true))

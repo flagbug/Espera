@@ -67,8 +67,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Caliburn.Micro.2.0.1\lib\net45\Caliburn.Micro.Platform.dll</HintPath>
     </Reference>
-    <Reference Include="ClickOnceUninstaller">
-      <HintPath>..\lib\ClickOnceUninstaller.dll</HintPath>
+    <Reference Include="ClickOnceToSquirrelMigrator">
+      <HintPath>..\packages\ClickOnceToSquirrelMigrator.0.1.0\lib\net45\ClickOnceToSquirrelMigrator.dll</HintPath>
     </Reference>
     <Reference Include="DeltaCompressionDotNet">
       <HintPath>..\packages\DeltaCompressionDotNet.1.0.0\lib\net45\DeltaCompressionDotNet.dll</HintPath>
@@ -216,7 +216,6 @@
     <Compile Include="Changelog.cs" />
     <Compile Include="ChangelogEntry.cs" />
     <Compile Include="ChangelogFetcher.cs" />
-    <Compile Include="InstallerMigration\ClickOnceToSquirrelMigration.cs" />
     <Compile Include="DesignTime\DesignTime.cs" />
     <Compile Include="DragDropExtension.cs" />
     <Compile Include="DragDropHelper.cs" />
