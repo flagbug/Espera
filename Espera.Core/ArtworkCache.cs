@@ -168,7 +168,7 @@ namespace Espera.Core
             if (priority < 1)
                 throw new ArgumentOutOfRangeException(nameof(priority), "\{nameof(priority)} must be greater than zero");
 
-            this.Log().Info("Requesting artwork with key \{artworkKey} and size \{size} from the cache");
+            this.Log().Debug("Requesting artwork with key \{artworkKey} and size \{size} from the cache");
 
             return this.queue.Enqueue(priority + 1, () => this.LoadImageFromCache(artworkKey, size));
         }
@@ -189,7 +189,7 @@ namespace Espera.Core
                 return;
             }
 
-            this.Log().Info("Adding new artwork \{key} to the BlobCache");
+            this.Log().Debug("Adding new artwork \{key} to the BlobCache");
 
             try
             {
