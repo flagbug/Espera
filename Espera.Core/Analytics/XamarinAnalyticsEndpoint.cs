@@ -39,7 +39,11 @@ namespace Espera.Core.Analytics
             Insights.Report(exception);
         }
 
-        public void ReportFatalException(Exception exception) => Insights.Report(exception, ReportSeverity.Error);
+        public void ReportFatalException(Exception exception)
+        {
+            Insights.Report(exception, ReportSeverity.Error);
+            Insights.Save().Wait();
+        } 
 
         public void ReportNonFatalException(Exception exception) => Insights.Report(exception);
 
