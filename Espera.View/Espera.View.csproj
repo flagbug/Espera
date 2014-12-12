@@ -67,8 +67,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Caliburn.Micro.2.0.1\lib\net45\Caliburn.Micro.Platform.dll</HintPath>
     </Reference>
-    <Reference Include="ClickOnceToSquirrelMigrator">
-      <HintPath>..\packages\ClickOnceToSquirrelMigrator.0.1.0\lib\net45\ClickOnceToSquirrelMigrator.dll</HintPath>
+    <Reference Include="ClickOnceToSquirrelMigrator, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ClickOnceToSquirrelMigrator.0.2.1\lib\net45\ClickOnceToSquirrelMigrator.dll</HintPath>
     </Reference>
     <Reference Include="DeltaCompressionDotNet">
       <HintPath>..\packages\DeltaCompressionDotNet.1.0.0\lib\net45\DeltaCompressionDotNet.dll</HintPath>

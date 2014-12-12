@@ -25,6 +25,7 @@ using ReactiveUI;
 using Splat;
 using Squirrel;
 using System.Reactive.Linq;
+using ClickOnceToSquirrelMigrator;
 
 namespace Espera.View
 {
@@ -173,8 +174,8 @@ namespace Espera.View
                     .SelectMany(_ => Observable.Using(() => new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45, AppInfo.AppRootPath),
                         mgr => Observable.StartAsync(() =>
                         {
-                            var clickOnceUninstaller = new ClickOnceToSquirrelMigrator.ClickOnceToSquirrelMigrator(mgr, "Espera");
-                            return clickOnceUninstaller.UninstallClickOnce();
+                            var clickOnceUninstaller = new InSquirrelAppMigrator("Espera");
+                            return clickOnceUninstaller.Execute();
                         })))
                 .SelectMany(_ => BlobCache.LocalMachine.InsertObject("ClickOnceToSquirrelMigration", true))
                 .Subscribe(_ => this.Log().Info("Successfully uninstalled ClickOnce"), ex => this.Log().ErrorException("Failed to uninstall ClickOnce", ex));
