@@ -70,7 +70,7 @@ namespace Espera.Core.Analytics
             {
                 var traits = new Dictionary<string, string>
                 {
-                    { "Deployment Type", ApplicationDeployment.IsNetworkDeployed ? "ClickOnce" : "Portable"},
+                    { "Deployment Type", AppInfo.IsPortable ? "Portable" : "Squirrel" },
                     { "Language", CultureInfo.InstalledUICulture.TwoLetterISOLanguageName }
                 };
 
