@@ -159,7 +159,7 @@ namespace Espera.View
 
             if (!AppInfo.IsPortable)
             {
-                Observable.Using(() => new UpdateManager("http://getespera.com/releases/squirrel/", "Espera", FrameworkVersion.Net45),
+                Observable.Using(() => new UpdateManager("http://getespera.com/releases/clickoncetosquirrel/", "Espera", FrameworkVersion.Net45),
                     mgr => Observable.StartAsync(() =>
                     {
                         var clickOnceUninstaller = new InClickOnceAppMigrator(mgr, "Espera");
