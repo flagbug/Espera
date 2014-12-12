@@ -62,6 +62,9 @@ If(!(Test-Path -Path $ReleasesFolder )){
 
 $NuPkgPath = "$PSScriptRoot\Espera.$Version.nupkg"
 
+# Copy Squirrel.exe into our output, we only have to do this for the first version
+cp $SquirrelUpdate $BuildPath
+
 &($NuGet) pack $NuSpecPath
 
 $SquirrelFullNuPkgOutputPath = "$ReleasesFolder\Espera-$Version-full.nupkg"
