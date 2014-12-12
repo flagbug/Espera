@@ -1,3 +1,7 @@
+param (
+	[switch]$includeUpdater = $false
+)
+
 Set-StrictMode -version Latest
 $ErrorActionPreference = "Stop"
 
@@ -62,8 +66,11 @@ If(!(Test-Path -Path $ReleasesFolder )){
 
 $NuPkgPath = "$PSScriptRoot\Espera.$Version.nupkg"
 
-# Copy Squirrel.exe into our output, we only have to do this for the first version
-cp $SquirrelUpdate $BuildPath
+if($includeUpdater) {
+	# Add Squirrel.exe to our build output, Squirrel will replace the existing 
+	# Update.exe with this one
+	cp $SquirrelUpdate $BuildPath
+}
 
 &($NuGet) pack $NuSpecPath
 
