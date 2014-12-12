@@ -112,6 +112,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Caliburn.Micro.2.0.1\lib\net45\Caliburn.Micro.Platform.dll</HintPath>
     </Reference>
+    <Reference Include="ClickOnceToSquirrelMigrator">
+      <HintPath>..\packages\ClickOnceToSquirrelMigrator.0.2.1\lib\net45\ClickOnceToSquirrelMigrator.dll</HintPath>
+    </Reference>
     <Reference Include="DeltaCompressionDotNet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1d14d6e5194e7f4a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\DeltaCompressionDotNet.1.0.0\lib\net45\DeltaCompressionDotNet.dll</HintPath>
@@ -195,7 +198,7 @@
     </Reference>
     <Reference Include="Squirrel, Version=0.7.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\squirrel.windows.0.7.1\lib\Net45\Squirrel.dll</HintPath>
+      <HintPath>..\lib\Squirrel.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System" />

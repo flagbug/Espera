@@ -16,6 +16,7 @@ using System.Windows.Threading;
 using Akavache;
 using Akavache.Sqlite3;
 using Caliburn.Micro;
+using ClickOnceToSquirrelMigrator;
 using Espera.Core;
 using Espera.Core.Analytics;
 using Espera.Core.Management;
@@ -27,6 +28,7 @@ using NLog.Config;
 using NLog.Targets;
 using ReactiveUI;
 using Splat;
+using Squirrel;
 
 namespace Espera.View
 {
@@ -153,6 +155,16 @@ namespace Espera.View
                 this.Log().Info("Shutting down old BlobCache");
                 oldBlobCache.Dispose();
                 this.Log().Info("BlobCache shutdown finished");
+            }
+
+            if (!AppInfo.IsPortable)
+            {
+                Observable.Using(() => new UpdateManager("http://getespera.com/releases/squirrel/", "Espera", FrameworkVersion.Net45),
+                    mgr => Observable.StartAsync(() =>
+                    {
+                        var clickOnceUninstaller = new InClickOnceAppMigrator(mgr, "Espera");
+                        return clickOnceUninstaller.Execute();
+                    })).Subscribe();
             }
 
             this.SetupLager();
