@@ -157,19 +157,29 @@ namespace Espera.View
                 this.Log().Info("BlobCache shutdown finished");
             }
 
+            this.SetupLager();
+
+            this.SetupAnalyticsClient();
+
             if (!AppInfo.IsPortable)
             {
+                this.Log().Info("Starting the migration to the Squirrel installer");
+
                 Observable.Using(() => new UpdateManager("http://getespera.com/releases/clickoncetosquirrel/", "Espera", FrameworkVersion.Net45),
                     mgr => Observable.StartAsync(() =>
                     {
                         var clickOnceUninstaller = new InClickOnceAppMigrator(mgr, "Espera");
                         return clickOnceUninstaller.Execute();
-                    })).Subscribe();
+                    })).Subscribe(_ =>
+                    {
+                        this.viewSettings.IsUpdated = true;
+                        this.Log().Info("ClickOnce to Squirrel migration successful");
+                    }, ex =>
+                    {
+                        this.Log().ErrorException("ClickOnce to Squirrel migration failed", ex);
+                        AnalyticsClient.Instance.RecordNonFatalError(ex);
+                    });
             }
-
-            this.SetupLager();
-
-            this.SetupAnalyticsClient();
 
             this.SetupMobileApi();
 
