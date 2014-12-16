@@ -114,7 +114,7 @@
     </Reference>
     <Reference Include="ClickOnceToSquirrelMigrator, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ClickOnceToSquirrelMigrator.0.2.2\lib\net45\ClickOnceToSquirrelMigrator.dll</HintPath>
+      <HintPath>..\packages\ClickOnceToSquirrelMigrator.0.3.0\lib\net45\ClickOnceToSquirrelMigrator.dll</HintPath>
     </Reference>
     <Reference Include="DeltaCompressionDotNet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1d14d6e5194e7f4a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
