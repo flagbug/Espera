@@ -38,7 +38,7 @@ namespace Espera.Core
 
             IsPortable = File.Exists(Path.Combine(baseDirectory.Parent.FullName, "PORTABLE"));
 
-            ApplicationDataPath = IsPortable ? baseDirectory.Parent.FullName : Path.Combine(OverridenApplicationDataPath ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
+            ApplicationDataPath = Path.Combine(OverridenApplicationDataPath ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
             BlobCachePath = Path.Combine(ApplicationDataPath, "BlobCache");
             LibraryFilePath = Path.Combine(ApplicationDataPath, "Library.json");
             LogFilePath = Path.Combine(ApplicationDataPath, "Log.txt");
