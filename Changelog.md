@@ -1,3 +1,17 @@
+# v2.12.0
+
+## Features
+- Added an auto-updater for the portable version.
+- Added an Update & Restart button when a new version is available.
+
+## Bugfixes
+- Fixed a bug that caused the playback to stop when pressing the spacebar in the tag editor.
+
+# v2.11.0
+
+## Changes
+- This version is an intermediate release, and migrates Espera to the new installer and updater.
+
 # v2.10.4
 
 ## Bugfixes
