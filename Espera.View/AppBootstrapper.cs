@@ -202,7 +202,7 @@ namespace Espera.View
             var target = new FileTarget
             {
                 FileName = AppInfo.LogFilePath,
-                Layout = @"${longdate}|${logger}|${level}|${message} ${exception:format=ToString,StackTrace}",
+                Layout = @"${longdate}|${level}|${message} ${exception:format=ToString,StackTrace}",
                 ArchiveAboveSize = 1024 * 1024 * 2, // 2 MB
                 ArchiveNumbering = ArchiveNumberingMode.Sequence
             };
