@@ -2,8 +2,6 @@
 using Espera.Core;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -20,7 +18,9 @@ namespace Espera.View.ViewModels
     {
         private readonly ViewSettings settings;
         private readonly ObservableAsPropertyHelper<bool> shouldRestart;
+        private readonly object updateLock;
         private readonly IUpdateManager updateManager;
+        private bool updateRun;
 
         public UpdateViewModel(ViewSettings settings, IUpdateManager updateManager = null)
         {
@@ -29,6 +29,8 @@ namespace Espera.View.ViewModels
 
             this.settings = settings;
             this.updateManager = updateManager ?? new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45, AppInfo.AppRootPath);
+
+            this.updateLock = new object();
 
             this.CheckForUpdate = ReactiveCommand.CreateAsyncTask(_ => this.UpdateSilentlyAsync());
 
@@ -70,9 +72,20 @@ namespace Espera.View.ViewModels
 
         public void ChangelogShown()
         {
-            this.settings.IsUpdated = false;
-
             this.settings.EnableChangelog = !this.DisableChangelog;
+        }
+
+        public void DismissUpdateNotification()
+        {
+            // We don't want to overwrite the update status if the update manager already downloaded
+            // the update
+            lock (this.updateLock)
+            {
+                if (!this.updateRun)
+                {
+                    this.settings.IsUpdated = false;
+                }
+            }
         }
 
         public void Dispose()
@@ -140,7 +153,12 @@ namespace Espera.View.ViewModels
 
                 await changelogFetchTask;
 
-                this.settings.IsUpdated = true;
+                lock (this.updateLock)
+                {
+                    this.updateRun = true;
+                    // Don't use the local IsUpdated property here, it's only used for the current session
+                    this.settings.IsUpdated = true;
+                }
 
                 this.Log().Info("Updates applied.");
             }

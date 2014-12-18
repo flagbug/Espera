@@ -18,14 +18,17 @@ namespace Espera.View.Tests
 
                 Assert.False(settings.EnableChangelog);
             }
+        }
 
+        public class TheDismissUpdateNotificationMethod
+        {
             [Fact]
             public void SetsIsUpdatedToFalse()
             {
                 var settings = new ViewSettings { IsUpdated = true };
                 using (var vm = new UpdateViewModel(settings))
                 {
-                    vm.ChangelogShown();
+                    vm.DismissUpdateNotification();
                 }
 
                 Assert.False(settings.IsUpdated);

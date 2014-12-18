@@ -79,6 +79,8 @@ namespace Espera.View.Views
                     var dialog = (CustomDialog)this.Resources["Changelog"];
                     await this.ShowMetroDialogAsync(dialog);
                 }
+
+                updateViewModel.DismissUpdateNotification();
             };
         }
 
@@ -99,9 +101,6 @@ namespace Espera.View.Views
             var dialog = (CustomDialog)this.Resources["Changelog"];
 
             await this.HideMetroDialogAsync(dialog);
-
-            var updateViewModel = this.shellViewModel.UpdateViewModel;
-            updateViewModel.ChangelogShown();
         }
 
         private IntPtr HandleWindowMove(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
