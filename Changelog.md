@@ -1,3 +1,8 @@
+# v2.12.1
+
+## Bugfixes
+- Added a missing file to the setup package.
+
 # v2.12.0
 
 ## Features
