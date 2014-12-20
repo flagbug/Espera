@@ -84,14 +84,14 @@ If(Test-Path -Path $SquirrelDeltaNuPkgOutputPath) {
 	Remove-Item -Confirm:$false $SquirrelDeltaNuPkgOutputPath
 }
 
-$OutputSetupExe = "$ReleasesFolder\EsperaSetup.exe"
+$OutputSetupExe = "$ReleasesFolder\Espera.Setup.$Version.exe"
 If(Test-Path -Path $OutputSetupExe) {
 	Remove-Item -Confirm:$false $OutputSetupExe
 }
 
 &($Squirrel) --releasify $NuPkgPath -r $ReleasesFolder
 
-$SquirrelSetupExe = "$ReleasesFolder\Setup.exe"
+$SquirrelSetupExe = "$ReleasesFolder\EsperaSetup.exe"
 If(Test-Path -Path $SquirrelSetupExe) {
 	Rename-Item $SquirrelSetupExe $OutputSetupExe
 }
