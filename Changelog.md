@@ -1,3 +1,9 @@
+# v2.12.2
+
+## Bugfixes
+- Fixed some issues with the application setup.
+- Fixed the "Update & Restart" notification not disappearing if the changelog is disabled.
+
 # v2.12.1
 
 ## Bugfixes
