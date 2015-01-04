@@ -133,17 +133,17 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\ReactiveMarrow.0.5.0\lib\portable-net45+wp8+win8+monoandroid+monotouch\ReactiveMarrow.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=6.2.1.1, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI, Version=6.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-core.6.2.1.1\lib\Net45\ReactiveUI.dll</HintPath>
+      <HintPath>..\packages\reactiveui-core.6.3.0\lib\Net45\ReactiveUI.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Events, Version=6.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI.Events, Version=6.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-events.6.2.0\lib\net45\ReactiveUI.Events.dll</HintPath>
+      <HintPath>..\packages\reactiveui-events.6.3.0\lib\net45\ReactiveUI.Events.dll</HintPath>
     </Reference>
-    <Reference Include="Splat, Version=1.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Splat, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Splat.1.5.1\lib\Net45\Splat.dll</HintPath>
+      <HintPath>..\packages\Splat.1.6.0\lib\Net45\Splat.dll</HintPath>
     </Reference>
     <Reference Include="SQLitePCL.raw, Version=0.6.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

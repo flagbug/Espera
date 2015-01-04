@@ -102,17 +102,17 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NuGet.Core.2.8.3\lib\net40-Client\NuGet.Core.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=6.2.1.1, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI, Version=6.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-core.6.2.1.1\lib\Net45\ReactiveUI.dll</HintPath>
+      <HintPath>..\packages\reactiveui-core.6.3.0\lib\Net45\ReactiveUI.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Testing, Version=6.2.1.1, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI.Testing, Version=6.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-testing.6.2.1.1\lib\net45\ReactiveUI.Testing.dll</HintPath>
+      <HintPath>..\packages\reactiveui-testing.6.3.0\lib\net45\ReactiveUI.Testing.dll</HintPath>
     </Reference>
-    <Reference Include="Splat, Version=1.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Splat, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Splat.1.5.1\lib\Net45\Splat.dll</HintPath>
+      <HintPath>..\packages\Splat.1.6.0\lib\Net45\Splat.dll</HintPath>
     </Reference>
     <Reference Include="Squirrel, Version=0.7.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
