@@ -16,5 +16,7 @@
         <file src="Espera.View\bin\Release\*.dll" target="lib\net45\" />
         <file src="Espera.View\bin\Release\*.exe" target="lib\net45\" />
 		<file src="Espera.View\bin\Release\*.exe.config" target="lib\net45\" />
+        <file src="Espera.View\bin\Release\x86\sqlite3.dll" target="lib\net45\x86\sqlite3.dll" />
+        <file src="Espera.View\bin\Release\x64\sqlite3.dll" target="lib\net45\x64\sqlite3.dll" />
     </files>
 </package>
