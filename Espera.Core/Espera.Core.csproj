@@ -35,9 +35,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Akavache, Version=4.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Akavache, Version=4.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\akavache.core.4.0.4\lib\net45\Akavache.dll</HintPath>
+      <HintPath>..\packages\akavache.core.4.1.0\lib\net45\Akavache.dll</HintPath>
     </Reference>
     <Reference Include="Espera.Network, Version=1.0.34.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
