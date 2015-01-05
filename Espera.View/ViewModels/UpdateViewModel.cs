@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using ReactiveUI;
 using Splat;
 using Squirrel;
-using System.Linq;
 using Espera.Core.Analytics;
 using System.Reactive.Threading.Tasks;
 
@@ -98,74 +97,35 @@ namespace Espera.View.ViewModels
             if (ModeDetector.InUnitTestRunner())
                 return;
 
-            this.Log().Info("Looking for application updates");
-
-            UpdateInfo updateInfo;
+            ReleaseEntry appliedEntry;
 
             try
             {
-                updateInfo = await this.updateManager.CheckForUpdate();
+                appliedEntry = await this.updateManager.UpdateApp();
             }
 
             catch (Exception ex)
             {
-                this.Log().ErrorException("Error while checking for updates", ex);
+                this.Log().Error("Failed to update application", ex);
+                AnalyticsClient.Instance.RecordNonFatalError(ex);
                 return;
             }
 
-            if (updateInfo.ReleasesToApply.Any())
+            if (appliedEntry != null)
             {
-                this.Log().Info("New version available: {0}", updateInfo.FutureReleaseEntry.Version);
-
-                Task changelogFetchTask = ChangelogFetcher.FetchAsync().ToObservable()
+                await ChangelogFetcher.FetchAsync().ToObservable()
                     .Timeout(TimeSpan.FromSeconds(30))
                     .SelectMany(x => BlobCache.LocalMachine.InsertObject(BlobCacheKeys.Changelog, x))
                     .LoggedCatch(this, Observable.Return(Unit.Default), "Could not to fetch changelog")
                     .ToTask();
 
-                this.Log().Info("Downloading updates...");
-
-                try
-                {
-                    await this.updateManager.DownloadReleases(updateInfo.ReleasesToApply);
-                }
-
-                catch (Exception ex)
-                {
-                    this.Log().Error("Failed to download updates.", ex);
-                    AnalyticsClient.Instance.RecordNonFatalError(ex);
-                    return;
-                }
-
-                this.Log().Info("Applying updates...");
-
-                try
-                {
-                    await this.updateManager.ApplyReleases(updateInfo);
-                }
-
-                catch (Exception ex)
-                {
-                    this.Log().Error("Failed to apply updates.", ex);
-                    AnalyticsClient.Instance.RecordNonFatalError(ex);
-                    return;
-                }
-
-                await changelogFetchTask;
-
                 lock (this.updateLock)
                 {
                     this.updateRun = true;
-                    // Don't use the local IsUpdated property here, it's only used for the current session
                     this.settings.IsUpdated = true;
                 }
 
-                this.Log().Info("Updates applied.");
-            }
-
-            else
-            {
-                this.Log().Info("No updates found");
+                this.Log().Info("Updated to version \{appliedEntry.Version}");
             }
         }
     }
