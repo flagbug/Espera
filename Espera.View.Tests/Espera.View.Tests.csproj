@@ -194,10 +194,6 @@
       <Name>Espera.View</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.CSharp.FxCopAnalyzers.1.0.0-beta1-20141031-01\tools\analyzers\Microsoft.CodeAnalysis.CSharp.FxCopAnalyzers.dll" />
-    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.CSharp.FxCopAnalyzers.1.0.0-beta1-20141031-01\tools\analyzers\Microsoft.CodeAnalysis.FxCopAnalyzers.dll" />
-  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
