@@ -125,7 +125,7 @@ namespace Espera.View.ViewModels
                     this.settings.IsUpdated = true;
                 }
 
-                this.Log().Info("Updated to version \{appliedEntry.Version}");
+                this.Log().Info($"Updated to version {appliedEntry.Version}");
             }
         }
     }

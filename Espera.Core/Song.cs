@@ -97,7 +97,7 @@ namespace Espera.Core
 
         public override string ToString()
         {
-            return "Title: \{this.Title}, Artist: \{this.Artist}, Path: \{this.OriginalPath}";
+            return $"Title: {this.Title}, Artist: {this.Artist}, Path: {this.OriginalPath}";
         }
 
         public bool UpdateMetadataFrom(Song song)

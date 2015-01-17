@@ -45,7 +45,7 @@ namespace Espera.View.ViewModels
 
             if (song == null)
             {
-                this.Log().Error("Could not register direct YouTube url \{url}");
+                this.Log().Error($"Could not register direct YouTube URL {url}");
                 return;
             }
 

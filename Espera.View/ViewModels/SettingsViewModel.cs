@@ -128,7 +128,7 @@ namespace Espera.View.ViewModels
 
                 catch (Win32Exception ex)
                 {
-                    this.Log().ErrorException("Could not open link \{x}", ex);
+                    this.Log().ErrorException($"Could not open link {x}", ex);
                 }
             });
 
@@ -441,7 +441,7 @@ namespace Espera.View.ViewModels
             {
                 Version v = AppInfo.Version;
 
-                return "\{v.Major}.\{v.Minor}.\{v.Revision}";
+                return $"{v.Major}.{v.Minor}.{v.Revision}";
             }
         }
 

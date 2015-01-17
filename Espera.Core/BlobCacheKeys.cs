@@ -33,7 +33,7 @@ namespace Espera.Core
         /// <summary>
         /// Gets the artwork key for the specified artwork hash and size.
         /// </summary>
-        public static string GetArtworkKeyWithSize(string key, int size) => "\{key}-\{size}x\{size}";
+        public static string GetArtworkKeyWithSize(string key, int size) => $"{key}-{size}x{size}";
 
         public static string GetKeyForArtwork(byte[] artworkData)
         {
@@ -58,7 +58,7 @@ namespace Espera.Core
             if (album == null)
                 throw new ArgumentNullException(nameof(album));
 
-            return OnlineArtwork + "\{artist.ToLowerInvariant()}-\{album.ToLowerInvariant()}";
+            return OnlineArtwork + $"{artist.ToLowerInvariant()}-{album.ToLowerInvariant()}";
         }
 
         public static string GetKeyForSoundCloudCache(string searchTerm)

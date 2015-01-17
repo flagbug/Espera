@@ -90,7 +90,7 @@ namespace Espera.Core
 
                 catch (HttpRequestException ex)
                 {
-                    throw new ArtworkFetchException("Error while requesting the release id for artist \{artist} and album \{album}", ex);
+                    throw new ArtworkFetchException($"Error while requesting the release id for artist {artist} and album {album}", ex);
                 }
             }
 
@@ -131,7 +131,7 @@ namespace Espera.Core
 
                     catch (HttpRequestException ex)
                     {
-                        string errorInfo = "Could not download artwork informations for release id \{releaseId}";
+                        string errorInfo = $"Could not download artwork informations for release id {releaseId}";
 
                         // If we can't even get the last artwork, throw
                         if (releaseId == releaseIds.Last())

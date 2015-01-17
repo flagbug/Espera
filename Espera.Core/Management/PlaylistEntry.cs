@@ -65,7 +65,7 @@ namespace Espera.Core.Management
 
         public override string ToString()
         {
-            return "Index = \{this.Index}, Votes = \{this.votes}, Guid = \{this.Guid}";
+            return $"Index = {this.Index}, Votes = {this.votes}, Guid = {this.Guid}";
         }
 
         internal void ResetVotes()
