@@ -9,7 +9,7 @@
         <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
         <projectUrl>http://github.com/flagbug/Espera</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>Espera is a media player that plays your music, YouTube videos, SoundCloud songs and has a special "party mode".</description>
+        <description>Espera is a media player that plays your music, YouTube videos, SoundCloud songs and has a special party mode.</description>
         <tags></tags>
     </metadata>
     <files>
