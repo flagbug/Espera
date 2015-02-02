@@ -1,3 +1,8 @@
+# v2.12.3
+
+## Bugfixes
+- Fixed various installer and updater issues.
+
 # v2.12.2
 
 ## Bugfixes
