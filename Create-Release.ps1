@@ -30,8 +30,9 @@ Function ZipFiles($Filename, $Source)
 $NuGet = "$PSScriptRoot\.nuget\NuGet.exe"
 &($Nuget) restore Espera.sln
 $SquirrelPackagePath = (ls .\packages\squirrel.windows.*)[0]
-$Squirrel = Join-Path  $SquirrelPackagePath "tools\Squirrel.com"
-$SquirrelUpdate = Join-Path  $SquirrelPackagePath "tools\Squirrel.exe"
+$Squirrel = Join-Path $SquirrelPackagePath "tools\Squirrel.com"
+$SquirrelUpdate = Join-Path $SquirrelPackagePath "tools\Squirrel.exe"
+$SquirrelSync = Join-Path $SquirrelPackagePath "tools\SyncReleases.exe"
 
 $BuildPath = "$PSScriptRoot\Espera.View\bin\Release"
 $NuSpecPath = "$PSScriptRoot\Espera.nuspec"
@@ -71,6 +72,8 @@ if($includeUpdater) {
 	# Update.exe with this one
 	cp $SquirrelUpdate $BuildPath
 }
+
+&($SquirrelSync) -r $ReleasesFolder -u "http://getespera.com/releases/squirrel/"
 
 &($NuGet) pack $NuSpecPath
 
