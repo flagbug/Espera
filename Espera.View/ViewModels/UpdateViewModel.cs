@@ -75,7 +75,10 @@ namespace Espera.View.ViewModels
 
         public ReactiveCommand<Unit> Restart { get; }
 
-        public bool ShouldRestart => this.shouldRestart.Value;
+        public bool ShouldRestart
+        {
+            get { return this.shouldRestart.Value;}
+        }
 
         public void ChangelogShown()
         {
@@ -133,7 +136,7 @@ namespace Espera.View.ViewModels
                     this.settings.IsUpdated = true;
                 }
 
-                this.Log().Info($"Updated to version {appliedEntry.Version}");
+                this.Log().Info("Updated to version {0}", appliedEntry.Version);
             }
         }
     }
