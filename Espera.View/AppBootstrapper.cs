@@ -182,7 +182,10 @@ namespace Espera.View
             this.Log().FatalException("An unhandled exception occurred, opening the crash report", e.Exception);
 
             // MainWindow is sometimes null because of reasons
-            this.Application.MainWindow?.Hide();
+            if (this.Application.MainWindow != null)
+            {
+                this.Application.MainWindow.Hide();
+            }
 
             var windowManager = Locator.Current.GetService<IWindowManager>();
             windowManager.ShowDialog(new CrashViewModel(e.Exception));
