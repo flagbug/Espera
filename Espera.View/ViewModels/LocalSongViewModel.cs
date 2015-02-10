@@ -12,7 +12,7 @@ namespace Espera.View.ViewModels
         public LocalSongViewModel(Song model)
         {
             if (model == null)
-                throw new ArgumentNullException(nameof(model));
+                throw new ArgumentNullException("model");
 
             this.Model = model;
 
@@ -27,35 +27,67 @@ namespace Espera.View.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public string Album => this.Model.Album;
+        public string Album
+        {
+            get { return this.Model.Album; }
+        }
 
-        public string Artist => this.Model.Artist;
+        public string Artist
+        {
+            get { return this.Model.Artist; }
+        }
 
-        public TimeSpan Duration => this.Model.Duration;
+        public TimeSpan Duration
+        {
+            get { return this.Model.Duration; }
+        }
 
-        public string FormattedDuration => this.Duration.FormatAdaptive();
+        public string FormattedDuration
+        {
+            get { return this.Duration.FormatAdaptive(); }
+        }
 
-        public string Genre => this.Model.Genre;
+        public string Genre
+        {
+            get { return this.Model.Genre; }
+        }
 
-        public Song Model { get; }
+        public Song Model { get; private set; }
 
-        public string Path => this.Model.OriginalPath;
+        public string Path
+        {
+            get { return this.Model.OriginalPath; }
+        }
 
-        public string Title => this.Model.Title;
+        public string Title
+        {
+            get { return this.Model.Title; }
+        }
 
-        public int TrackNumber => this.Model.TrackNumber;
+        public int TrackNumber
+        {
+            get { return this.Model.TrackNumber; }
+        }
 
-        public void Dispose() => this.propertyChangedSubscription.Dispose();
+        public void Dispose()
+        {
+            this.propertyChangedSubscription.Dispose();
+        }
 
-        public bool Equals(LocalSongViewModel other) => this.Model.Equals(other.Model);
+        public bool Equals(LocalSongViewModel other)
+        {
+            return this.Model.Equals(other.Model);
+        }
 
-        public override bool Equals(object obj) => base.Equals(obj as LocalSongViewModel);
-
-        public override int GetHashCode() => this.Model.GetHashCode();
+        public override int GetHashCode()
+        {
+            return this.Model.GetHashCode();
+        }
 
         private void OnPropertyChanged(string propertyName)
         {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            var handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

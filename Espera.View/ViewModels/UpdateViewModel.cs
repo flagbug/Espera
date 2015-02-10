@@ -24,7 +24,7 @@ namespace Espera.View.ViewModels
         public UpdateViewModel(ViewSettings settings, IUpdateManager updateManager = null)
         {
             if (settings == null)
-                throw new ArgumentNullException(nameof(settings));
+                throw new ArgumentNullException("settings");
 
             this.settings = settings;
             this.updateManager = updateManager ?? new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45, AppInfo.AppRootPath);
@@ -43,10 +43,20 @@ namespace Espera.View.ViewModels
                 .InvokeCommand(this.CheckForUpdate);
         }
 
+        public string PortableDownloadLink
+        {
+            get { return "http://getespera.com/EsperaPortable.zip"; }
+        }
+
         /// <summary>
         /// Checks the server if an update is available and applies the update if there is one.
         /// </summary>
         public ReactiveCommand<Unit> CheckForUpdate { get; }
+
+        public bool ShowChangelog
+        {
+            get { return this.settings.IsUpdated && this.settings.EnableChangelog; }
+        }
 
         /// <summary>
         /// Used in the changelog dialog to opt-out of the automatic changelog.
@@ -66,8 +76,6 @@ namespace Espera.View.ViewModels
         public ReactiveCommand<Unit> Restart { get; }
 
         public bool ShouldRestart => this.shouldRestart.Value;
-
-        public bool ShowChangelog => this.settings.IsUpdated && this.settings.EnableChangelog;
 
         public void ChangelogShown()
         {

@@ -30,8 +30,11 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.message, value); }
         }
 
-        public bool? SendingSucceeded => this.sendingSucceeded.Value;
+        public bool? SendingSucceeded
+        {
+            get { return this.sendingSucceeded == null ? null : this.sendingSucceeded.Value; }
+        }
 
-        public ReactiveCommand<bool> SubmitBugReport { get; }
+        public ReactiveCommand<bool> SubmitBugReport { get; private set; }
     }
 }

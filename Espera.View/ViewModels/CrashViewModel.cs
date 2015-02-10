@@ -21,7 +21,7 @@ namespace Espera.View.ViewModels
                 .Select(x => new bool?(x))
                 .ToProperty(this, x => x.SendingSucceeded);
 
-            if (this.SendsAutomatically)
+            if (AnalyticsClient.Instance.EnableAutomaticReports)
             {
                 this.SubmitCrashReport.Execute(null);
             }
@@ -29,10 +29,16 @@ namespace Espera.View.ViewModels
 
         public string ReportContent { get; private set; }
 
-        public bool? SendingSucceeded => this.sendingSucceeded.Value;
+        public bool? SendingSucceeded
+        {
+            get { return this.sendingSucceeded == null ? null : this.sendingSucceeded.Value; }
+        }
 
-        public bool SendsAutomatically => AnalyticsClient.Instance.EnableAutomaticReports;
+        public bool SendsAutomatically
+        {
+            get { return AnalyticsClient.Instance.EnableAutomaticReports; }
+        }
 
-        public ReactiveCommand<bool> SubmitCrashReport { get; }
+        public ReactiveCommand<bool> SubmitCrashReport { get; private set; }
     }
 }

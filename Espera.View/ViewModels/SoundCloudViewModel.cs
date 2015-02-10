@@ -20,7 +20,7 @@ namespace Espera.View.ViewModels
                 song => new SoundCloudSongViewModel(song), songFinder ?? new SoundCloudSongFinder(Locator.Current.GetService<IBlobCache>(BlobCacheKeys.RequestCacheContract)))
         {
             if (viewSettings == null)
-                throw new ArgumentNullException(nameof(viewSettings));
+                Throw.ArgumentNullException(() => viewSettings);
 
             this.viewSettings = viewSettings;
 
@@ -43,9 +43,9 @@ namespace Espera.View.ViewModels
             set { this.viewSettings.SoundCloudLinkColumnWidth = value; }
         }
 
-        public ReactiveCommand<object> OrderByPlaybacksCommand { get; }
+        public ReactiveCommand<object> OrderByPlaybacksCommand { get; private set; }
 
-        public ReactiveCommand<object> OrderByUploaderCommand { get; }
+        public ReactiveCommand<object> OrderByUploaderCommand { get; private set; }
 
         public int PlaybacksColumnWidth
         {

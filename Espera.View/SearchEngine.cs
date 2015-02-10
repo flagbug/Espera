@@ -17,7 +17,7 @@ namespace Espera.View
         public static IEnumerable<Song> FilterSongs(this IEnumerable<Song> source, string searchText)
         {
             if (searchText == null)
-                throw new ArgumentNullException(nameof(searchText));
+                Throw.ArgumentNullException(() => searchText);
 
             if (String.IsNullOrWhiteSpace(searchText))
                 return source;

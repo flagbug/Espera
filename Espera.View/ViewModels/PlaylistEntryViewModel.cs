@@ -31,9 +31,15 @@ namespace Espera.View.ViewModels
                 .DisposeWith(disposable);
         }
 
-        public int Index => this.entry.Index;
+        public int Index
+        {
+            get { return this.entry.Index; }
+        }
 
-        public bool IsCorrupted => this.isCorrupted.Value;
+        public bool IsCorrupted
+        {
+            get { return this.isCorrupted.Value; }
+        }
 
         public bool IsPlaying
         {
@@ -41,10 +47,19 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.isPlaying, value); }
         }
 
-        public bool IsYoutube => this.Model is YoutubeSong;
+        public bool IsYoutube
+        {
+            get { return this.Model is YoutubeSong; }
+        }
 
-        public int Votes => this.votes.Value;
+        public int Votes
+        {
+            get { return this.votes.Value; }
+        }
 
-        public void Dispose() => this.disposable.Dispose();
+        public void Dispose()
+        {
+            this.disposable.Dispose();
+        }
     }
 }

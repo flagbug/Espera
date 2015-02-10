@@ -25,10 +25,10 @@ namespace Espera.View.ViewModels
         protected SongSourceViewModel(Library library, CoreSettings coreSettings, Guid accessToken)
         {
             if (library == null)
-                throw new ArgumentNullException(nameof(library));
+                throw new ArgumentNullException("library");
 
             if (coreSettings == null)
-                throw new ArgumentNullException(nameof(coreSettings));
+                throw new ArgumentNullException("coreSettings");
 
             this.library = library;
             this.CoreSettings = coreSettings;
@@ -86,17 +86,23 @@ namespace Espera.View.ViewModels
             this.OrderByTitleCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByTitle<T>, ref this.titleOrder));
         }
 
-        public ReactiveCommand<object> AddToPlaylistCommand { get; }
+        public ReactiveCommand<object> AddToPlaylistCommand { get; private set; }
 
         public abstract DefaultPlaybackAction DefaultPlaybackAction { get; }
 
-        public IReactiveCommand DefaultPlaybackCommand => this.defaultPlaybackCommand.Value;
+        public IReactiveCommand DefaultPlaybackCommand
+        {
+            get { return this.defaultPlaybackCommand.Value; }
+        }
 
-        public bool IsAdmin => this.isAdmin.Value;
+        public bool IsAdmin
+        {
+            get { return this.isAdmin.Value; }
+        }
 
-        public ReactiveCommand<object> OrderByDurationCommand { get; }
+        public ReactiveCommand<object> OrderByDurationCommand { get; private set; }
 
-        public ReactiveCommand<object> OrderByTitleCommand { get; }
+        public ReactiveCommand<object> OrderByTitleCommand { get; private set; }
 
         public abstract ReactiveCommand<Unit> PlayNowCommand { get; }
 
@@ -120,9 +126,12 @@ namespace Espera.View.ViewModels
 
         public ReactiveCommand<object> SelectionChangedCommand { get; set; }
 
-        protected CoreSettings CoreSettings { get; }
+        protected CoreSettings CoreSettings { get; private set; }
 
-        protected Library Library => library;
+        protected Library Library
+        {
+            get { return this.library; }
+        }
 
         protected Func<IEnumerable<T>, IOrderedEnumerable<T>> SongOrderFunc { get; private set; }
 

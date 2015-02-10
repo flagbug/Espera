@@ -32,13 +32,13 @@ namespace Espera.View.ViewModels
         public PlaylistViewModel(Playlist playlist, Library library, Guid accessToken, CoreSettings coreSettings)
         {
             if (playlist == null)
-                throw new ArgumentNullException(nameof(playlist));
+                throw new ArgumentNullException("playlist");
 
             if (library == null)
-                throw new ArgumentNullException(nameof(library));
+                throw new ArgumentNullException("library");
 
             if (coreSettings == null)
-                throw new ArgumentNullException(nameof(coreSettings));
+                throw new ArgumentNullException("coreSettings");
 
             this.playlist = playlist;
             this.library = library;
@@ -125,9 +125,12 @@ namespace Espera.View.ViewModels
             this.RemoveSelectedPlaylistEntriesCommand.Subscribe(x => this.library.RemoveFromPlaylist(this.SelectedEntries.Select(entry => entry.Index), accessToken));
         }
 
-        public bool CanAlterPlaylist => this.canAlterPlaylist.Value;
+        public bool CanAlterPlaylist
+        {
+            get { return this.canAlterPlaylist.Value; }
+        }
 
-        public IObservable<PlaylistEntryViewModel> CurrentPlayingEntry { get; }
+        public IObservable<PlaylistEntryViewModel> CurrentPlayingEntry { get; private set; }
 
         public bool EditName
         {
@@ -154,15 +157,21 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public string Error => null;
+        public string Error
+        {
+            get { return null; }
+        }
 
-        public Playlist Model => this.playlist;
+        public Playlist Model
+        {
+            get { return this.playlist; }
+        }
 
-        public ReactiveCommand<object> MovePlaylistSongCommand { get; }
+        public ReactiveCommand<object> MovePlaylistSongCommand { get; private set; }
 
-        public ReactiveCommand<object> MovePlaylistSongDownCommand { get; }
+        public ReactiveCommand<object> MovePlaylistSongDownCommand { get; private set; }
 
-        public ReactiveCommand<object> MovePlaylistSongUpCommand { get; }
+        public ReactiveCommand<object> MovePlaylistSongUpCommand { get; private set; }
 
         public string Name
         {
@@ -177,7 +186,7 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public ReactiveCommand<object> RemoveSelectedPlaylistEntriesCommand { get; }
+        public ReactiveCommand<object> RemoveSelectedPlaylistEntriesCommand { get; private set; }
 
         public IEnumerable<PlaylistEntryViewModel> SelectedEntries
         {
@@ -185,17 +194,26 @@ namespace Espera.View.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.selectedEntries, value); }
         }
 
-        public IReadOnlyReactiveCollection<PlaylistEntryViewModel> Songs => this.entries;
+        public IReadOnlyReactiveCollection<PlaylistEntryViewModel> Songs
+        {
+            get { return this.entries; }
+        }
 
         /// <summary>
         /// Gets the number of songs that come after the currently played song.
         /// </summary>
-        public int SongsRemaining => this.songsRemaining.Value;
+        public int SongsRemaining
+        {
+            get { return this.songsRemaining.Value; }
+        }
 
         /// <summary>
         /// Gets the total remaining time of all songs that come after the currently played song.
         /// </summary>
-        public TimeSpan? TimeRemaining => this.timeRemaining.Value;
+        public TimeSpan? TimeRemaining
+        {
+            get { return this.timeRemaining.Value; }
+        }
 
         public string this[string columnName]
         {

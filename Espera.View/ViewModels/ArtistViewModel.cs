@@ -55,11 +55,14 @@ namespace Espera.View.ViewModels
             this.IsAllArtists = true;
         }
 
-        public BitmapSource Cover => this.cover?.Value;
+        public BitmapSource Cover
+        {
+            get { return this.cover == null ? null : this.cover.Value; }
+        }
 
-        public bool IsAllArtists { get; }
+        public bool IsAllArtists { get; private set; }
 
-        public string Name { get; }
+        public string Name { get; private set; }
 
         public int CompareTo(ArtistViewModel other)
         {
@@ -78,12 +81,18 @@ namespace Espera.View.ViewModels
                 return 1;
             }
 
-            return String.Compare(SortHelpers.RemoveArtistPrefixes(this.Name), SortHelpers.RemoveArtistPrefixes(other.Name), StringComparison.OrdinalIgnoreCase);
+            return String.Compare(SortHelpers.RemoveArtistPrefixes(this.Name), SortHelpers.RemoveArtistPrefixes(other.Name), StringComparison.InvariantCultureIgnoreCase);
         }
 
-        public void Dispose() => this.cover.Dispose();
+        public void Dispose()
+        {
+            this.cover.Dispose();
+        }
 
-        public bool Equals(ArtistViewModel other) => this.Name == other.Name;
+        public bool Equals(ArtistViewModel other)
+        {
+            return this.Name == other.Name;
+        }
 
         public void UpdateSongs(IEnumerable<LocalSong> songs)
         {

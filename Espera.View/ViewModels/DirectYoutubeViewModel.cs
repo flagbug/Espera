@@ -24,7 +24,10 @@ namespace Espera.View.ViewModels
             this.youtubeSongFinder = youtubeSongFinder ?? new YoutubeSongFinder(Locator.Current.GetService<IBlobCache>(BlobCacheKeys.RequestCacheContract));
         }
 
-        public override DefaultPlaybackAction DefaultPlaybackAction => DefaultPlaybackAction.AddToPlaylist;
+        public override DefaultPlaybackAction DefaultPlaybackAction
+        {
+            get { return DefaultPlaybackAction.AddToPlaylist; }
+        }
 
         public override ReactiveCommand<Unit> PlayNowCommand
         {
@@ -39,13 +42,13 @@ namespace Espera.View.ViewModels
         public async Task AddDirectYoutubeUrlToPlaylist(Uri url, int? targetIndex)
         {
             if (url == null)
-                throw new ArgumentNullException(nameof(url));
+                Throw.ArgumentNullException(() => url);
 
             YoutubeSong song = await this.youtubeSongFinder.ResolveYoutubeSongFromUrl(url);
 
             if (song == null)
             {
-                this.Log().Error($"Could not register direct YouTube URL {url}");
+                this.Log().Error("Could not register direct YouTube url {0}", url.OriginalString);
                 return;
             }
 

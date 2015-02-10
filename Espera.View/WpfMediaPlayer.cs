@@ -14,7 +14,7 @@ namespace Espera.View
         public WpfMediaPlayer(MediaElement mediaElement)
         {
             if (mediaElement == null)
-                throw new ArgumentNullException(nameof(mediaElement));
+                throw new ArgumentNullException("mediaElement");
 
             this.mediaElement = mediaElement;
         }
@@ -25,7 +25,10 @@ namespace Espera.View
             set { this.mediaElement.Dispatcher.Invoke(() => this.mediaElement.Position = value); }
         }
 
-        public IObservable<Unit> Finished => this.mediaElement.Events().MediaEnded.Select(_ => Unit.Default);
+        public IObservable<Unit> Finished
+        {
+            get { return this.mediaElement.Events().MediaEnded.Select(_ => Unit.Default); }
+        }
 
         public Task LoadAsync(Uri uri)
         {

@@ -29,7 +29,7 @@ namespace Espera.View.ViewModels
             : base(library, coreSettings, accessToken)
         {
             if (viewSettings == null)
-                throw new ArgumentNullException(nameof(viewSettings));
+                Throw.ArgumentNullException(() => viewSettings);
 
             this.viewSettings = viewSettings;
 
@@ -87,9 +87,12 @@ namespace Espera.View.ViewModels
             this.OpenTagEditor = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedSongs, x => x.Any()));
         }
 
-        public IReactiveDerivedList<ArtistViewModel> Artists { get; }
+        public IReactiveDerivedList<ArtistViewModel> Artists { get; private set; }
 
-        public override DefaultPlaybackAction DefaultPlaybackAction => this.CoreSettings.DefaultPlaybackAction;
+        public override DefaultPlaybackAction DefaultPlaybackAction
+        {
+            get { return this.CoreSettings.DefaultPlaybackAction; }
+        }
 
         public int DurationColumnWidth
         {
@@ -103,11 +106,17 @@ namespace Espera.View.ViewModels
             set { this.viewSettings.LocalGenreColumnWidth = value; }
         }
 
-        public bool IsUpdating => this.isUpdating.Value;
+        public bool IsUpdating
+        {
+            get { return this.isUpdating.Value; }
+        }
 
-        public ReactiveCommand<object> OpenTagEditor { get; }
+        public ReactiveCommand<object> OpenTagEditor { get; private set; }
 
-        public override ReactiveCommand<Unit> PlayNowCommand => this.playNowCommand;
+        public override ReactiveCommand<Unit> PlayNowCommand
+        {
+            get { return this.playNowCommand; }
+        }
 
         public ArtistViewModel SelectedArtist
         {
@@ -119,7 +128,10 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public bool ShowAddSongsHelperMessage => this.showAddSongsHelperMessage.Value;
+        public bool ShowAddSongsHelperMessage
+        {
+            get { return this.showAddSongsHelperMessage.Value; }
+        }
 
         public int TitleColumnWidth
         {
@@ -152,7 +164,7 @@ namespace Espera.View.ViewModels
 
             foreach (var songs in groupedByArtist)
             {
-                ArtistViewModel model = this.allArtists.FirstOrDefault(x => x.Name.Equals(songs.Key, StringComparison.OrdinalIgnoreCase));
+                ArtistViewModel model = this.allArtists.FirstOrDefault(x => x.Name.Equals(songs.Key, StringComparison.InvariantCultureIgnoreCase));
 
                 if (model == null)
                 {
@@ -181,7 +193,7 @@ namespace Espera.View.ViewModels
             }
 
             List<LocalSongViewModel> selectableSongs = this.filteredSongs
-                .Where(group => this.SelectedArtist.IsAllArtists || @group.Key.Equals(this.SelectedArtist.Name, StringComparison.OrdinalIgnoreCase))
+                .Where(group => this.SelectedArtist.IsAllArtists || @group.Key.Equals(this.SelectedArtist.Name, StringComparison.InvariantCultureIgnoreCase))
                 .SelectMany(x => x)
                 .Select(song => new LocalSongViewModel(song))
                 .OrderBy(this.SongOrderFunc)
