@@ -18,6 +18,7 @@
     <_ResolveReferenceDependencies>true</_ResolveReferenceDependencies>
     <NuGetPackageImportStamp>6a59f6e0</NuGetPackageImportStamp>
     <NuGetPackageImportStamp>d55c3b1a</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>2d871995</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -224,6 +225,7 @@
     <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
     <Error Condition="!Exists('..\packages\refit.2.2.0\build\refit.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\refit.2.2.0\build\refit.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.1.0.0.0-beta2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.1.0.0.0-beta2\build\Microsoft.Net.Compilers.props'))" />
+    <Error Condition="!Exists('..\packages\refit.2.0.2\build\refit.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\refit.2.0.2\build\refit.targets'))" />
   </Target>
   <Import Project="..\packages\refit.2.2.0\build\refit.targets" Condition="Exists('..\packages\refit.2.2.0\build\refit.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

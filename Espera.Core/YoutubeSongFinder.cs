@@ -34,7 +34,7 @@ namespace Espera.Core
         public YoutubeSongFinder(IBlobCache requestCache)
         {
             if (requestCache == null)
-                throw new ArgumentNullException(nameof(requestCache));
+                throw new ArgumentNullException("requestCache");
 
             this.requestCache = requestCache;
         }
@@ -95,7 +95,7 @@ namespace Espera.Core
 
                 return songs;
             })
-            // The API gives no clue what can throw, wrap it all up
+                // The API gives no clue what can throw, wrap it all up
             .Catch<IReadOnlyList<YoutubeSong>, Exception>(ex => Observable.Throw<IReadOnlyList<YoutubeSong>>(new NetworkSongFinderException("YoutubeSongFinder search failed", ex)));
         }
     }

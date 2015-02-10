@@ -41,14 +41,14 @@ namespace Espera.Core.Mobile
             int playbackCount = 0;
 
             var soundCloudSong = song as SoundCloudSong;
-            if (soundCloudSong?.ArtworkUrl != null)
+            if (soundCloudSong != null && soundCloudSong.ArtworkUrl != null)
             {
                 artworkKey = soundCloudSong.ArtworkUrl.ToString();
                 playbackCount = soundCloudSong.PlaybackCount.GetValueOrDefault();
             }
 
             var youtubeSong = song as YoutubeSong;
-            if (youtubeSong?.ThumbnailSource != null)
+            if (youtubeSong != null && youtubeSong.ThumbnailSource != null)
             {
                 artworkKey = youtubeSong.ThumbnailSource.ToString();
                 playbackCount = youtubeSong.Views;

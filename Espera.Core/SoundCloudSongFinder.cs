@@ -27,7 +27,7 @@ namespace Espera.Core
         public SoundCloudSongFinder(IBlobCache requestCache)
         {
             if (requestCache == null)
-                throw new ArgumentNullException(nameof(requestCache));
+                throw new ArgumentNullException("requestCache");
 
             this.requestCache = requestCache;
         }

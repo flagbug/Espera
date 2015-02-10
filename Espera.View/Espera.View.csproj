@@ -21,6 +21,31 @@
     <_ResolveReferenceDependencies>true</_ResolveReferenceDependencies>
     <NuGetPackageImportStamp>556551d3</NuGetPackageImportStamp>
     <NuGetPackageImportStamp>a71e7d0f</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>8a89f963</NuGetPackageImportStamp>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <InstallUrl>http://getespera.com/releases/clickonce/</InstallUrl>
+    <SupportUrl>http://github.com/flagbug/Espera</SupportUrl>
+    <ErrorReportUrl>http://github.com/flagbug/Espera/issues</ErrorReportUrl>
+    <ProductName>Espera</ProductName>
+    <PublisherName>Dennis Daume</PublisherName>
+    <MinimumRequiredVersion>1.0.0.0</MinimumRequiredVersion>
+    <WebPage>publish.htm</WebPage>
+    <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
+    <ApplicationRevision>4</ApplicationRevision>
+    <ApplicationVersion>2.10.0.4</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <CreateDesktopShortcut>true</CreateDesktopShortcut>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>ApplicationIcon.ico</ApplicationIcon>

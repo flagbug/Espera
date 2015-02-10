@@ -50,13 +50,19 @@ namespace Espera.Core.Management
         /// Gets a value indicating whether the next song in the playlist can be played.
         /// </summary>
         /// <value>true if the next song in the playlist can be played; otherwise, false.</value>
-        public bool CanPlayNextSong => this.canPlayNextSong.Value;
+        public bool CanPlayNextSong
+        {
+            get { return this.canPlayNextSong.Value; }
+        }
 
         /// <summary>
         /// Gets a value indicating whether the previous song in the playlist can be played.
         /// </summary>
         /// <value>true if the previous song in the playlist can be played; otherwise, false.</value>
-        public bool CanPlayPreviousSong => this.canPlayPreviousSong.Value;
+        public bool CanPlayPreviousSong
+        {
+            get { return this.canPlayPreviousSong.Value; }
+        }
 
         /// <summary>
         /// Gets or sets the index of the currently played song in the playlist.
@@ -74,7 +80,7 @@ namespace Espera.Core.Management
             set
             {
                 if (value != null && !this.ContainsIndex(value.Value))
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw new ArgumentOutOfRangeException("value");
 
                 this.RaiseAndSetIfChanged(ref this.currentSongIndex, value);
             }
@@ -84,7 +90,7 @@ namespace Espera.Core.Management
         /// Gets a value indicating whether this playlist is temporary and used for instant-playing.
         /// This means that this playlist isn't saved to the harddrive when closing the application.
         /// </summary>
-        public bool IsTemporary { get; }
+        public bool IsTemporary { get; private set; }
 
         public string Name
         {
@@ -119,9 +125,15 @@ namespace Espera.Core.Management
         /// </summary>
         /// <param name="songIndex">The index to look for.</param>
         /// <returns>True, if there exists a song at the specified index; otherwise, false.</returns>
-        public bool ContainsIndex(int songIndex) => this.playlist.Any(entry => entry.Index == songIndex);
+        public bool ContainsIndex(int songIndex)
+        {
+            return this.playlist.Any(entry => entry.Index == songIndex);
+        }
 
-        public IEnumerator<PlaylistEntry> GetEnumerator() => this.playlist.GetEnumerator();
+        public IEnumerator<PlaylistEntry> GetEnumerator()
+        {
+            return this.playlist.GetEnumerator();
+        }
 
         /// <summary>
         /// Gets all indexes of the specified songs.
@@ -132,6 +144,11 @@ namespace Espera.Core.Management
                 .Where(entry => songs.Contains(entry.Song))
                 .Select(entry => entry.Index)
                 .ToList();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         internal PlaylistEntry AddShadowVotedSong(Song song)
@@ -193,7 +210,7 @@ namespace Espera.Core.Management
         internal void RemoveSongs(IEnumerable<int> indexes)
         {
             if (indexes == null)
-                throw new ArgumentNullException(nameof(indexes));
+                Throw.ArgumentNullException(() => indexes);
 
             // Use a HashSet for better lookup performance
             var indexList = new HashSet<int>(indexes);
@@ -254,14 +271,12 @@ namespace Espera.Core.Management
             return entry;
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
         private void OnCollectionChanged(IObservable<NotifyCollectionChangedEventArgs> args)
         {
-            args.Subscribe(x => this.CollectionChanged?.Invoke(this, x));
+            if (this.CollectionChanged == null)
+                return;
+
+            args.Subscribe(x => this.CollectionChanged(this, x));
         }
 
         private void RebuildIndexes()

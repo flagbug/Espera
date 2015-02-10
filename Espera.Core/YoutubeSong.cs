@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Espera.Core.Audio;
 using YoutubeExtractor;
 
 namespace Espera.Core
@@ -38,11 +37,20 @@ namespace Espera.Core
         /// </summary>
         public string Description { get; set; }
 
-        public override bool IsVideo => true;
+        public override bool IsVideo
+        {
+            get { return true; }
+        }
 
-        public override NetworkSongSource NetworkSongSource => NetworkSongSource.Youtube;
+        public override NetworkSongSource NetworkSongSource
+        {
+            get { return NetworkSongSource.Youtube; }
+        }
 
-        public override string PlaybackPath => this.playbackPath;
+        public override string PlaybackPath
+        {
+            get { return this.playbackPath; }
+        }
 
         /// <summary>
         /// Gets or sets the average rating.
@@ -95,9 +103,12 @@ namespace Espera.Core
                 }
             }
 
-            catch (Exception ex) if (ex is WebException || ex is VideoNotAvailableException || ex is YoutubeParseException)
+            catch (Exception ex)
             {
-                throw new SongPreparationException(ex);
+                if (ex is WebException || ex is VideoNotAvailableException || ex is YoutubeParseException)
+                {
+                    throw new SongPreparationException(ex);
+                }
             }
 
             if (video == null)

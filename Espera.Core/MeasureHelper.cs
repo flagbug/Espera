@@ -6,7 +6,7 @@ using Splat;
 
 namespace Espera.Core
 {
-    public static class MeasureHelper
+    public class MeasureHelper
     {
         public static IDisposable Measure([CallerMemberName] string caller = null)
         {

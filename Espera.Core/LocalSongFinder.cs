@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Linq;
+using Rareform.Validation;
 using ReactiveUI;
 using Splat;
 using TagLib;
@@ -24,7 +25,7 @@ namespace Espera.Core
         public LocalSongFinder(string directoryPath, IFileSystem fileSystem = null)
         {
             if (directoryPath == null)
-                throw new ArgumentNullException(nameof(directoryPath));
+                Throw.ArgumentNullException(() => directoryPath);
 
             this.directoryPath = directoryPath;
             this.fileSystem = fileSystem ?? new FileSystem();
@@ -55,7 +56,7 @@ namespace Espera.Core
 
             IPicture picture = tag.Pictures.FirstOrDefault();
 
-            return Tuple.Create(song, picture?.Data.Data);
+            return Tuple.Create(song, picture == null ? null : picture.Data.Data);
         }
 
         private static string PrepareTag(string tag, string replacementIfNull)
@@ -71,7 +72,7 @@ namespace Espera.Core
                 {
                     using (var file = File.Create(fileAbstraction))
                     {
-                        if (file?.Tag != null)
+                        if (file != null && file.Tag != null)
                         {
                             return CreateSong(file.Tag, file.Properties.Duration, file.Name);
                         }
@@ -83,7 +84,7 @@ namespace Espera.Core
 
             catch (Exception ex)
             {
-                this.Log().ErrorException($"Couldn't read song file {filePath}", ex);
+                this.Log().ErrorException(string.Format("Couldn't read song file {0}", filePath), ex);
                 return null;
             }
         }
@@ -100,7 +101,7 @@ namespace Espera.Core
 
             catch (Exception ex)
             {
-                this.Log().ErrorException($"Couldn't get files from directory {rootPath}", ex);
+                this.Log().ErrorException(string.Format("Couldn't get files from directory {0}", rootPath), ex);
             }
 
             IEnumerable<string> directories = Enumerable.Empty<string>();
@@ -112,7 +113,7 @@ namespace Espera.Core
 
             catch (Exception ex)
             {
-                this.Log().ErrorException($"Couldn't get directories from directory {rootPath}", ex);
+                this.Log().ErrorException(string.Format("Couldn't get directories from directory {0}", rootPath), ex);
             }
 
             return files.Concat(directories.SelectMany(ScanDirectoryForValidPaths));
@@ -123,10 +124,10 @@ namespace Espera.Core
             public TagLibFileAbstraction(string path, IFileSystem fileSystem)
             {
                 if (path == null)
-                    throw new ArgumentNullException(nameof(path));
+                    throw new ArgumentNullException("path");
 
                 if (fileSystem == null)
-                    throw new ArgumentNullException(nameof(fileSystem));
+                    throw new ArgumentNullException("fileSystem");
 
                 this.Name = path;
 
@@ -136,15 +137,21 @@ namespace Espera.Core
                 this.WriteStream = stream;
             }
 
-            public string Name { get; }
+            public string Name { get; private set; }
 
-            public Stream ReadStream { get; }
+            public Stream ReadStream { get; private set; }
 
-            public Stream WriteStream { get; }
+            public Stream WriteStream { get; private set; }
 
-            public void CloseStream(Stream stream) => stream.Close();
+            public void CloseStream(Stream stream)
+            {
+                stream.Close();
+            }
 
-            public void Dispose() => this.ReadStream.Dispose();
+            public void Dispose()
+            {
+                this.ReadStream.Dispose();
+            }
         }
     }
 }

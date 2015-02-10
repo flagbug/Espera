@@ -10,7 +10,7 @@ namespace Espera.Core
             where T : class, INotifyCollectionChanged
         {
             if (source == null)
-                throw new ArgumentNullException(nameof(source));
+                throw new ArgumentNullException("source");
 
             return Observable.FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
                 handler => source.CollectionChanged += handler,

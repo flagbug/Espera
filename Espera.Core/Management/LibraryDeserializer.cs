@@ -116,7 +116,7 @@ namespace Espera.Core.Management
                 (
                     song["path"].ToObject<string>(),
                     TimeSpan.FromTicks(song["duration"].ToObject<long>()),
-                    song["artworkKey"]?.ToObject<string>()
+                    song["artworkKey"] == null ? null : song["artworkKey"].ToObject<string>()
                 )
                 {
                     Album = song["album"].ToObject<string>(),
@@ -130,7 +130,7 @@ namespace Espera.Core.Management
 
         public static string DeserializeSongSourcePath(JObject json)
         {
-            return json["songSourcePath"]?.ToObject<string>();
+            return json["songSourcePath"] == null ? null : json["songSourcePath"].ToObject<string>();
         }
     }
 }

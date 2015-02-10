@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Espera.Core.Audio
+namespace Espera.Core
 {
     public class SongPreparationException : Exception
     {

@@ -6,6 +6,7 @@ using System.Reactive.Disposables;
 using Akavache;
 using Espera.Core.Settings;
 using Splat;
+using Xamarin;
 
 namespace Espera.Core.Analytics
 {
@@ -50,9 +51,15 @@ namespace Espera.Core.Analytics
             }
         }
 
-        public bool EnableAutomaticReports => this.coreSettings.EnableAutomaticReports;
+        public bool EnableAutomaticReports
+        {
+            get { return this.coreSettings.EnableAutomaticReports; }
+        }
 
-        public void Dispose() => this.endpoint.Dispose();
+        public void Dispose()
+        {
+            this.endpoint.Dispose();
+        }
 
         public void Initialize(CoreSettings settings)
         {

@@ -9,17 +9,32 @@ namespace Espera.Core.Audio
     {
         public TimeSpan CurrentTime { get; set; }
 
-        public IObservable<Unit> Finished => Observable.Never<Unit>();
+        public IObservable<Unit> Finished
+        {
+            get { return Observable.Never<Unit>(); }
+        }
 
-        public Task LoadAsync(Uri uri) => Task.Delay(0);
+        public Task LoadAsync(Uri uri)
+        {
+            return Task.Delay(0);
+        }
 
-        public Task PauseAsync() => Task.Delay(0);
+        public Task PauseAsync()
+        {
+            return Task.Delay(0);
+        }
 
-        public Task PlayAsync() => Task.Delay(0);
+        public Task PlayAsync()
+        {
+            return Task.Delay(0);
+        }
 
         public void SetVolume(float volume)
         { }
 
-        public Task StopAsync() => Task.Delay(0);
+        public Task StopAsync()
+        {
+            return Task.Delay(0);
+        }
     }
 }

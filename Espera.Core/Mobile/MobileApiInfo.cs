@@ -15,10 +15,10 @@ namespace Espera.Core.Mobile
         public MobileApiInfo(IObservable<IReadOnlyList<MobileClient>> connectedClients, IObservable<bool> isPortOccupied)
         {
             if (connectedClients == null)
-                throw new ArgumentNullException(nameof(connectedClients));
+                throw new ArgumentNullException("connectedClients");
 
             if (isPortOccupied == null)
-                throw new ArgumentNullException(nameof(isPortOccupied));
+                throw new ArgumentNullException("isPortOccupied");
 
             this.IsPortOccupied = isPortOccupied;
 
@@ -26,10 +26,10 @@ namespace Espera.Core.Mobile
             this.ConnectedClientCount = connectedClients.Select(x => x.Count);
         }
 
-        public IObservable<int> ConnectedClientCount { get; }
+        public IObservable<int> ConnectedClientCount { get; private set; }
 
-        public IObservable<bool> IsPortOccupied { get; }
+        public IObservable<bool> IsPortOccupied { get; private set; }
 
-        public IObservable<Unit> VideoPlayerToggleRequest { get; }
+        public IObservable<Unit> VideoPlayerToggleRequest { get; private set; }
     }
 }

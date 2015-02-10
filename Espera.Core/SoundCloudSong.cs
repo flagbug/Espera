@@ -45,9 +45,15 @@ namespace Espera.Core
         [JsonProperty("streamable")]
         public bool IsStreamable { get; set; }
 
-        public override bool IsVideo => false;
+        public override bool IsVideo
+        {
+            get { return false; }
+        }
 
-        public override NetworkSongSource NetworkSongSource => NetworkSongSource.SoundCloud;
+        public override NetworkSongSource NetworkSongSource
+        {
+            get { return NetworkSongSource.SoundCloud; }
+        }
 
         [JsonProperty("permalink_url")]
         public Uri PermaLinkUrl

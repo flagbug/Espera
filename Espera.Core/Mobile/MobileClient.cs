@@ -45,13 +45,13 @@ namespace Espera.Core.Mobile
         public MobileClient(TcpClient socket, TcpClient fileSocket, Library library)
         {
             if (socket == null)
-                throw new ArgumentNullException(nameof(socket));
+                Throw.ArgumentNullException(() => socket);
 
             if (fileSocket == null)
-                throw new ArgumentNullException(nameof(fileSocket));
+                Throw.ArgumentNullException(() => socket);
 
             if (library == null)
-                throw new ArgumentNullException(nameof(library));
+                Throw.ArgumentNullException(() => library);
 
             this.socket = socket;
             this.fileSocket = fileSocket;
@@ -90,12 +90,18 @@ namespace Espera.Core.Mobile
             };
         }
 
-        public IObservable<Unit> Disconnected => this.disconnected.AsObservable();
+        public IObservable<Unit> Disconnected
+        {
+            get { return this.disconnected.AsObservable(); }
+        }
 
         /// <summary>
         /// Signals when the mobile client wants to toggle the visibility of the video player.
         /// </summary>
-        public IObservable<Unit> VideoPlayerToggleRequest => this.videoPlayerToggleRequest.AsObservable();
+        public IObservable<Unit> VideoPlayerToggleRequest
+        {
+            get { return this.videoPlayerToggleRequest.AsObservable(); }
+        }
 
         public void Dispose()
         {
@@ -200,7 +206,10 @@ namespace Espera.Core.Mobile
             return message;
         }
 
-        private static ResponseInfo CreateResponse(ResponseStatus status, JObject content = null) => CreateResponse(status, null, content);
+        private static ResponseInfo CreateResponse(ResponseStatus status, JObject content = null)
+        {
+            return CreateResponse(status, null, content);
+        }
 
         private static ResponseInfo CreateResponse(ResponseStatus status, string message, JObject content = null)
         {

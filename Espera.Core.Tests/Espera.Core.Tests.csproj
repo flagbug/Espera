@@ -20,6 +20,7 @@
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>308031bf</NuGetPackageImportStamp>
     <NuGetPackageImportStamp>774413e7</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>fe50036d</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>

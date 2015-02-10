@@ -23,7 +23,7 @@ namespace Espera.Core.Audio
         {
             get
             {
-                return this.currentReader?.CurrentTime ?? TimeSpan.Zero;
+                return this.currentReader == null ? TimeSpan.Zero : this.currentReader.CurrentTime;
             }
 
             set
@@ -65,7 +65,10 @@ namespace Espera.Core.Audio
 
                 AudioFileReader oldReader = Interlocked.Exchange(ref this.currentReader, newReader);
 
-                oldReader?.Dispose();
+                if (oldReader != null)
+                {
+                    oldReader.Dispose();
+                }
 
                 this.outputDevice.Init(this.currentReader);
             });

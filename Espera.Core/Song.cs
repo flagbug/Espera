@@ -83,7 +83,10 @@ namespace Espera.Core
 
         public int TrackNumber { get; set; }
 
-        public override bool Equals(object obj) => this.Equals(obj as Song);
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as Song);
+        }
 
         public bool Equals(Song other)
         {
@@ -97,16 +100,16 @@ namespace Espera.Core
 
         public override string ToString()
         {
-            return $"Title: {this.Title}, Artist: {this.Artist}, Path: {this.OriginalPath}";
+            return String.Format("Title: {0}, Artist: {1}, Path: {2}", this.Title, this.Artist, this.OriginalPath);
         }
 
         public bool UpdateMetadataFrom(Song song)
         {
             if (song == null)
-                throw new ArgumentNullException(nameof(song));
+                Throw.ArgumentNullException(() => song);
 
             if (this.OriginalPath != song.OriginalPath)
-                throw new InvalidOperationException("The original path of both songs must be the same");
+                Throw.ArgumentException("The original path of both songs must be the same", () => song);
 
             // NB: Wow this is dumb
             bool changed = false;
@@ -153,11 +156,19 @@ namespace Espera.Core
         /// <summary>
         /// Prepares the song for playback.
         /// </summary>
-        internal virtual Task PrepareAsync(YoutubeStreamingQuality qualityHint) => Task.Delay(0);
+        internal virtual Task PrepareAsync(YoutubeStreamingQuality qualityHint)
+        {
+            return Task.Delay(0);
+        }
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChangedEventHandler handler = this.PropertyChanged;
+
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
     }
 }

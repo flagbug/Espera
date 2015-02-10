@@ -18,15 +18,13 @@ namespace Espera.Core
         private const string ArtworkEndpoint = "http://coverartarchive.org/release/{0}/";
         private const string SearchEndpoint = "http://www.musicbrainz.org/ws/2/release/?query=artist:{0}+release:{1}";
 
-        // The MusicBraint search service allows us to perform one request per second on
-        // average, make sure we don't exceed that.
-        private readonly TimeSpan OperationRate = TimeSpan.FromSeconds(1.5);
-
         private readonly RateLimitedOperationQueue queue;
 
         public MusicBrainzArtworkFetcher()
         {
-            this.queue = new RateLimitedOperationQueue(OperationRate, RxApp.TaskpoolScheduler);
+            // The MusicBraint search service allows us to perform onme request per second on
+            // average, make sure we don't exceed that.
+            this.queue = new RateLimitedOperationQueue(TimeSpan.FromSeconds(1.5), RxApp.TaskpoolScheduler);
         }
 
         public async Task<Uri> RetrieveAsync(string artist, string album)
@@ -49,7 +47,7 @@ namespace Espera.Core
         /// <summary>
         /// Escapes a lucene query
         /// </summary>
-        private static string Escape(string s)
+        private static String Escape(String s)
         {
             var sb = new StringBuilder();
 
@@ -90,7 +88,7 @@ namespace Espera.Core
 
                 catch (HttpRequestException ex)
                 {
-                    throw new ArtworkFetchException($"Error while requesting the release id for artist {artist} and album {album}", ex);
+                    throw new ArtworkFetchException(string.Format("Error while requesting the release id for artist {0} and album {1}", artist, album), ex);
                 }
             }
 
@@ -131,7 +129,7 @@ namespace Espera.Core
 
                     catch (HttpRequestException ex)
                     {
-                        string errorInfo = $"Could not download artwork informations for release id {releaseId}";
+                        string errorInfo = string.Format("Could not download artwork informations for release id {0}", releaseId);
 
                         // If we can't even get the last artwork, throw
                         if (releaseId == releaseIds.Last())

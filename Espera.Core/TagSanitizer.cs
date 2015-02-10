@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Rareform.Validation;
 using System.Text;
 using System.Xml;
 
@@ -13,7 +13,7 @@ namespace Espera.Core
         public static string Sanitize(string tag)
         {
             if (tag == null)
-                throw new ArgumentNullException(nameof(tag));
+                Throw.ArgumentNullException(() => tag);
 
             var buffer = new StringBuilder(tag.Length);
 
