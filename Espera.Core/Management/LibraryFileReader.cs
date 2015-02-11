@@ -15,7 +15,7 @@ namespace Espera.Core.Management
         public LibraryFileReader(string sourcePath)
         {
             if (sourcePath == null)
-                throw new ArgumentNullException(nameof(sourcePath));
+                throw new ArgumentNullException("sourcePath");
 
             this.sourcePath = sourcePath;
         }

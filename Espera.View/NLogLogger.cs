@@ -1,6 +1,6 @@
-﻿using System;
-using NLog;
+﻿using NLog;
 using Splat;
+using System;
 using LogLevel = Splat.LogLevel;
 
 namespace Espera.View
@@ -12,7 +12,7 @@ namespace Espera.View
         public NLogLogger(Logger logger)
         {
             if (logger == null)
-                throw new ArgumentNullException(nameof(logger));
+                throw new ArgumentNullException("logger");
 
             this.logger = logger;
         }

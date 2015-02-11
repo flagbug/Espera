@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
-using System.Reflection;
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Mobile;
@@ -16,6 +8,14 @@ using Rareform.Reflection;
 using Rareform.Validation;
 using ReactiveUI;
 using Splat;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
+using System.Reflection;
 
 namespace Espera.View.ViewModels
 {
@@ -128,7 +128,7 @@ namespace Espera.View.ViewModels
 
                 catch (Win32Exception ex)
                 {
-                    this.Log().ErrorException("Could not open link \{x}", ex);
+                    this.Log().ErrorException(String.Format("Could not open link {0}", x), ex);
                 }
             });
 
@@ -247,11 +247,6 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public string DonationPage
-        {
-            get { return "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=K5AWR8EDG9QJY"; }
-        }
-
         public IEnumerable<string> DefaultPlaybackEngineStrings
         {
             get
@@ -260,6 +255,11 @@ namespace Espera.View.ViewModels
                     .Cast<DefaultPlaybackEngine>()
                     .Select(x => this.defaultPlaybackEngineMap[x]);
             }
+        }
+
+        public string DonationPage
+        {
+            get { return "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=K5AWR8EDG9QJY"; }
         }
 
         public bool EnableAutomaticLibraryUpdates
@@ -323,15 +323,15 @@ namespace Espera.View.ViewModels
             get { return this.isRemoteAccessReallyLocked.Value; }
         }
 
-        public string LibrarySource
-        {
-            get { return this.librarySource.Value; }
-        }
-
         public bool IsWrongPassword
         {
             get { return this.isWrongPassword; }
             set { this.RaiseAndSetIfChanged(ref this.isWrongPassword, value); }
+        }
+
+        public string LibrarySource
+        {
+            get { return this.librarySource.Value; }
         }
 
         public bool LockPlaylist
@@ -388,28 +388,28 @@ namespace Espera.View.ViewModels
 
         public ReactiveCommand<object> LoginCommand { get; private set; }
 
-        public string PlayStoreLink
-        {
-            get { return "http://play.google.com/store/apps/details?id=com.flagbug.esperamobile"; }
-        }
-
         public string LoginPassword
         {
             private get { return this.loginPassword; }
             set { this.RaiseAndSetIfChanged(ref this.loginPassword, value); }
         }
 
-        public string ReleaseNotes
-        {
-            get { return "http://getespera.com/release-notes"; }
-        }
-
         public ReactiveCommand<object> OpenLinkCommand { get; private set; }
+
+        public string PlayStoreLink
+        {
+            get { return "http://play.google.com/store/apps/details?id=com.flagbug.esperamobile"; }
+        }
 
         public int Port
         {
             get { return this.port; }
             set { this.RaiseAndSetIfChanged(ref port, value); }
+        }
+
+        public string ReleaseNotes
+        {
+            get { return "http://getespera.com/release-notes"; }
         }
 
         public string RemoteControlPassword
@@ -419,11 +419,6 @@ namespace Espera.View.ViewModels
         }
 
         public ReactiveCommand<object> ReportBugCommand { get; private set; }
-
-        public bool ShowRemoteControlPasswordError
-        {
-            get { return this.showRemoteControlPasswordError.Value; }
-        }
 
         public double Scaling
         {
@@ -439,6 +434,11 @@ namespace Espera.View.ViewModels
         {
             get { return this.showLogin; }
             set { this.RaiseAndSetIfChanged(ref this.showLogin, value); }
+        }
+
+        public bool ShowRemoteControlPasswordError
+        {
+            get { return this.showRemoteControlPasswordError.Value; }
         }
 
         public bool ShowSettings

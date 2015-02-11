@@ -1,11 +1,11 @@
+using Akavache;
+using Espera.Core.Settings;
+using Splat;
 using System;
 using System.Collections.Generic;
 using System.Deployment.Application;
 using System.Globalization;
 using System.Reactive.Disposables;
-using Akavache;
-using Espera.Core.Settings;
-using Splat;
 using Xamarin;
 
 namespace Espera.Core.Analytics
@@ -64,7 +64,7 @@ namespace Espera.Core.Analytics
         public void Initialize(CoreSettings settings)
         {
             if (settings == null)
-                throw new ArgumentNullException(nameof(settings));
+                throw new ArgumentNullException("settings");
 
             this.coreSettings = settings;
 

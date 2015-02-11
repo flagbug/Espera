@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Espera.Core;
+using ReactiveUI;
+using Splat;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
-using Espera.Core;
-using ReactiveUI;
-using Splat;
 
 namespace Espera.View.ViewModels
 {
@@ -98,7 +98,8 @@ namespace Espera.View.ViewModels
         {
             var songsToAdd = songs.Where(x => !this.songs.Contains(x)).ToList();
 
-            // Can't use AddRange here, ReactiveList resets the list on big changes and we don't get the add notification
+            // Can't use AddRange here, ReactiveList resets the list on big changes and we don't get
+            // the add notification
             foreach (LocalSong song in songsToAdd)
             {
                 this.songs.Add(song);
@@ -116,21 +117,21 @@ namespace Espera.View.ViewModels
 
             catch (KeyNotFoundException ex)
             {
-                this.Log().WarnException("Could not find key \{key} of album cover. This reeks like a threading problem", ex);
+                this.Log().WarnException(String.Format("Could not find key {0} of album cover. This reeks like a threading problem", key), ex);
 
                 return null;
             }
 
             catch (ArtworkCacheException ex)
             {
-                this.Log().ErrorException("Unable to load artwork with key \{key} from cache", ex);
+                this.Log().ErrorException(String.Format("Unable to load artwork with key {0} from cache", key), ex);
 
                 return null;
             }
 
             catch (Exception ex)
             {
-                this.Log().InfoException("Akavache threw an error on artist cover loading for key \{key}", ex);
+                this.Log().InfoException(String.Format("Akavache threw an error on artist cover loading for key {0}", key), ex);
 
                 return null;
             }

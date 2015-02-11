@@ -6,6 +6,7 @@ using Rareform.Extensions;
 using Rareform.Validation;
 using ReactiveMarrow;
 using ReactiveUI;
+using Splat;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -19,7 +20,6 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
-using Splat;
 
 namespace Espera.Core.Management
 {
@@ -52,16 +52,16 @@ namespace Espera.Core.Management
             IFileSystem fileSystem, Func<string, ILocalSongFinder> localSongFinderFunc = null)
         {
             if (libraryReader == null)
-                throw new ArgumentNullException(nameof(libraryReader));
+                throw new ArgumentNullException("libraryReader");
 
             if (libraryWriter == null)
-                throw new ArgumentNullException(nameof(libraryWriter));
+                throw new ArgumentNullException("libraryWriter");
 
             if (settings == null)
-                throw new ArgumentNullException(nameof(settings));
+                throw new ArgumentNullException("settings");
 
             if (fileSystem == null)
-                throw new ArgumentNullException(nameof(fileSystem));
+                throw new ArgumentNullException("fileSystem");
 
             this.libraryReader = libraryReader;
             this.libraryWriter = libraryWriter;
@@ -124,8 +124,8 @@ namespace Espera.Core.Management
         public IObservable<AudioPlayerState> PlaybackState { get; private set; }
 
         /// <summary>
-        /// Returns an enumeration of playlists that implements
-        /// <see cref="INotifyCollectionChanged" /> .
+        /// Returns an enumeration of playlists that implements <see cref="INotifyCollectionChanged"
+        /// /> .
         /// </summary>
         public IReadOnlyReactiveList<Playlist> Playlists
         {
@@ -217,7 +217,7 @@ namespace Espera.Core.Management
         public void AddGuestSongToPlaylist(Song song, Guid accessToken)
         {
             if (song == null)
-                throw new ArgumentNullException(nameof(song));
+                throw new ArgumentNullException("song");
 
             this.accessControl.VerifyVotingPreconditions(accessToken);
 
@@ -238,7 +238,7 @@ namespace Espera.Core.Management
         public void AddPlaylist(string name, Guid accessToken)
         {
             if (name == null)
-                throw new ArgumentNullException(nameof(name));
+                throw new ArgumentNullException("name");
 
             if (this.GetPlaylistByName(name) != null)
                 throw new InvalidOperationException("A playlist with this name already exists.");
@@ -256,7 +256,7 @@ namespace Espera.Core.Management
         public void AddSongsToPlaylist(IEnumerable<Song> songList, Guid accessToken)
         {
             if (songList == null)
-                throw new ArgumentNullException(nameof(songList));
+                throw new ArgumentNullException("songList");
 
             this.accessControl.VerifyAccess(accessToken);
 
@@ -324,7 +324,7 @@ namespace Espera.Core.Management
                 .Where(path => !String.IsNullOrEmpty(path))
                 .Do(_ => this.Log().Info("Triggering library update."))
                 // Abort the update if the song source doesn't exist.
-                //
+                // 
                 // The source may be a NAS that's just temporarily offline and we don't want to
                 // purge the whole library in this case.
                 .Where(path =>
@@ -824,7 +824,7 @@ namespace Espera.Core.Management
 
                 catch (ArtworkCacheException ex)
                 {
-                    this.Log().ErrorException("Error while fetching artwork for \{song.Artist} - \{song.Album}", ex);
+                    this.Log().ErrorException(String.Format("Error while fetching artwork for {0} - {1}", song.Artist, song.Album), ex);
                 }
 
                 if (key != null)

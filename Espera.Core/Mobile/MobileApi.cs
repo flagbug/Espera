@@ -1,4 +1,11 @@
-﻿using System;
+﻿using Espera.Core.Analytics;
+using Espera.Core.Management;
+using Espera.Network;
+using Rareform.Validation;
+using ReactiveMarrow;
+using ReactiveUI;
+using Splat;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -8,13 +15,6 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text;
 using System.Threading.Tasks;
-using Espera.Core.Analytics;
-using Espera.Core.Management;
-using Espera.Network;
-using Rareform.Validation;
-using ReactiveMarrow;
-using ReactiveUI;
-using Splat;
 
 namespace Espera.Core.Mobile
 {
@@ -145,12 +145,12 @@ namespace Espera.Core.Mobile
                             // We don't use a broadcast here, but send a UDP packet to each address
                             // in the same subnet individually, so the client can determine the
                             // correct sender IP address.
-                            //
+                            // 
                             // I don't know if we actually need this in the real world, but when
                             // using the Genymotion emulator, which uses Virtualbox, a virtual
                             // network adapter is created and the client on the emulator gets
                             // confused which IP address it should choose.
-                            //
+                            // 
                             // I'm not good at networking stuff, so I just assume all devices just
                             // have a different last digit block.
                             foreach (int i in Enumerable.Range(1, 254).Where(x => x != address[3]).ToList()) // Save to a list before we change the last address byte
@@ -173,12 +173,12 @@ namespace Espera.Core.Mobile
             {
                 this.fileListener = new TcpListener(new IPEndPoint(IPAddress.Any, this.port + 1));
                 this.fileListener.Start();
-                this.Log().Info("Starting to listen for incoming file transfer connections on port \{this.port + 1}");
+                this.Log().Info("Starting to listen for incoming file transfer connections on port {0}", this.port + 1);
             }
 
             catch (SocketException ex)
             {
-                this.Log().ErrorException("Port \{this.port} is already taken", ex);
+                this.Log().ErrorException(String.Format("Port {0} is already taken", this.port), ex);
                 this.isPortOccupied.OnNext(true);
                 return;
             }
@@ -187,14 +187,14 @@ namespace Espera.Core.Mobile
             {
                 this.messageListener = new TcpListener(new IPEndPoint(IPAddress.Any, this.port));
                 this.messageListener.Start();
-                this.Log().Info("Starting to listen for incoming message connections on port \{this.port}");
+                this.Log().Info("Starting to listen for incoming message connections on port {0}", this.port + 1);
             }
 
             catch (SocketException ex)
             {
                 this.fileListener.Stop();
 
-                this.Log().ErrorException("Port \{this.port} is already taken", ex);
+                this.Log().ErrorException(String.Format("Port {0} is already taken", this.port), ex);
                 this.isPortOccupied.OnNext(true);
                 return;
             }

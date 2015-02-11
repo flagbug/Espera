@@ -1,3 +1,13 @@
+using Akavache;
+using Espera.Core.Audio;
+using Espera.Core.Management;
+using Espera.Network;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Rareform.Validation;
+using ReactiveMarrow;
+using ReactiveUI;
+using Splat;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,16 +21,6 @@ using System.Reactive.Subjects;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Akavache;
-using Espera.Core.Audio;
-using Espera.Core.Management;
-using Espera.Network;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Rareform.Validation;
-using ReactiveMarrow;
-using ReactiveUI;
-using Splat;
 
 namespace Espera.Core.Mobile
 {
@@ -130,7 +130,7 @@ namespace Espera.Core.Mobile
 
                     catch (JsonException ex)
                     {
-                        this.Log().ErrorException("Mobile client with access token \{this.accessToken} sent a malformed request", ex);
+                        this.Log().ErrorException(String.Format("Mobile client with access token {0} sent a malformed request", this.accessToken), ex);
                         return Unit.Default;
                     }
 
@@ -153,7 +153,7 @@ namespace Espera.Core.Mobile
 
                         catch (Exception ex)
                         {
-                            this.Log().ErrorException("Mobile client with access token \{this.accessToken} sent a request that caused an exception", ex);
+                            this.Log().ErrorException(String.Format("Mobile client with access token {0} sent a request that caused an exception", this.accessToken), ex);
                             if (Debugger.IsAttached)
                             {
                                 Debugger.Break();

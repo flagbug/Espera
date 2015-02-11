@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Espera.Core.Settings;
+using Rareform.Extensions;
+using ReactiveUI;
+using Splat;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
-using Espera.Core.Settings;
-using Rareform.Extensions;
-using ReactiveUI;
-using Splat;
 
 namespace Espera.Core.Management
 {
@@ -32,7 +32,7 @@ namespace Espera.Core.Management
         public AccessControl(CoreSettings coreSettings)
         {
             if (coreSettings == null)
-                throw new ArgumentNullException(nameof(coreSettings));
+                throw new ArgumentNullException("coreSettings");
 
             this.coreSettings = coreSettings;
 
@@ -82,7 +82,7 @@ namespace Espera.Core.Management
         public bool IsVoteRegistered(Guid accessToken, PlaylistEntry entry)
         {
             if (entry == null)
-                throw new ArgumentNullException(nameof(entry));
+                throw new ArgumentNullException("entry");
 
             AccessEndPoint endPoint = this.VerifyAccessToken(accessToken);
 
@@ -121,8 +121,8 @@ namespace Espera.Core.Management
         }
 
         /// <summary>
-        /// Registers a new remote access token which's default reights depend on the
-        /// <see cref="CoreSettings.LockRemoteControl" /> setting.
+        /// Registers a new remote access token which's default reights depend on the <see
+        /// cref="CoreSettings.LockRemoteControl" /> setting.
         /// </summary>
         public Guid RegisterRemoteAccessToken(Guid deviceId)
         {
@@ -145,15 +145,15 @@ namespace Espera.Core.Management
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// There are no votes left for the given access token, or a the same entry is registered twice.
-        ///
-        /// --or--
-        ///
+        /// 
+        /// -- or--
+        /// 
         /// The access token isn't a guest token.
         /// </exception>
         public void RegisterShadowVote(Guid accessToken, PlaylistEntry entry)
         {
             if (entry == null)
-                throw new ArgumentNullException(nameof(entry));
+                throw new ArgumentNullException("entry");
 
             if (!entry.IsShadowVoted)
                 throw new ArgumentException("Entry must be shadow voted");
@@ -179,7 +179,7 @@ namespace Espera.Core.Management
         public void RegisterVote(Guid accessToken, PlaylistEntry entry)
         {
             if (entry == null)
-                throw new ArgumentNullException(nameof(entry));
+                throw new ArgumentNullException("entry");
 
             this.VerifyVotingPreconditions(accessToken);
 
@@ -201,10 +201,10 @@ namespace Espera.Core.Management
             this.VerifyAccess(accessToken);
 
             if (password == null)
-                throw new ArgumentNullException(nameof(password));
+                throw new ArgumentNullException("password");
 
             if (string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Password is invalid", nameof(password));
+                throw new ArgumentException("Password is invalid", "password");
 
             this.localPassword = password;
         }
@@ -219,10 +219,10 @@ namespace Espera.Core.Management
             this.VerifyAccess(accessToken);
 
             if (password == null)
-                throw new ArgumentNullException(nameof(password));
+                throw new ArgumentNullException("password");
 
             if (string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Password is invalid", nameof(password));
+                throw new ArgumentException("Password is invalid", "password");
 
             this.coreSettings.RemoteControlPassword = password;
 

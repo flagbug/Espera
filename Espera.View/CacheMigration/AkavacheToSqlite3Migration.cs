@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Reflection;
-using Akavache;
+﻿using Akavache;
 using Espera.Core;
 using Espera.Core.Settings;
 using Lager;
 using Splat;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Reflection;
 
 namespace Espera.View.CacheMigration
 {
@@ -21,10 +21,10 @@ namespace Espera.View.CacheMigration
         public AkavacheToSqlite3Migration(IBlobCache oldBlobCache, IBlobCache newBlobCache)
         {
             if (oldBlobCache == null)
-                throw new ArgumentNullException(nameof(oldBlobCache));
+                throw new ArgumentNullException("oldBlobCache");
 
             if (newBlobCache == null)
-                throw new ArgumentNullException(nameof(newBlobCache));
+                throw new ArgumentNullException("newBlobCache");
 
             this.oldBlobCache = oldBlobCache;
             this.newBlobCache = newBlobCache;

@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Akavache;
+using Punchclock;
+using Splat;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
-using Akavache;
-using Punchclock;
-using Splat;
 
 namespace Espera.Core
 {
@@ -84,7 +84,7 @@ namespace Espera.Core
             // Previously failed lookups are marked as failed, it doesn't make sense to let it fail again
             if (artworkCacheKey == OnlineFailMark)
             {
-                this.Log().Debug("Key \{lookupKey} is marked as failed, returning.");
+                this.Log().Debug("Key {0} is marked as failed, returning.", lookupKey);
 
                 this.keyedMemoizingSemaphore.Release(lookupKey);
 
@@ -100,7 +100,7 @@ namespace Espera.Core
                 return artworkCacheKey;
             }
 
-            this.Log().Info("Fetching online link for artwork \{artist} - \{album}");
+            this.Log().Info("Fetching online link for artwork {0} - {1}", artist, album);
 
             Uri artworkLink;
 
@@ -129,7 +129,7 @@ namespace Espera.Core
 
             using (var client = new HttpClient())
             {
-                this.Log().Info("Downloading artwork data for \{artist} - \{album} from \{artworkLink}");
+                this.Log().Info("Downloading artwork data for {0} - {1} from {2}", artist, album, artworkLink);
 
                 try
                 {
@@ -140,7 +140,7 @@ namespace Espera.Core
                 {
                     this.keyedMemoizingSemaphore.Release(lookupKey);
 
-                    throw new ArtworkCacheException("Unable to download artwork from \{artworkLink}", ex);
+                    throw new ArtworkCacheException(String.Format("Unable to download artwork from {0}", artworkLink), ex);
                 }
             }
 

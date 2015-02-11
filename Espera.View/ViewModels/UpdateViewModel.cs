@@ -1,15 +1,15 @@
 ﻿using Akavache;
 using Espera.Core;
+using Espera.Core.Analytics;
+using ReactiveUI;
+using Splat;
+using Squirrel;
 using System;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
-using ReactiveUI;
-using Splat;
-using Squirrel;
-using Espera.Core.Analytics;
 using System.Reactive.Threading.Tasks;
+using System.Threading.Tasks;
 
 namespace Espera.View.ViewModels
 {
@@ -43,25 +43,20 @@ namespace Espera.View.ViewModels
                 .InvokeCommand(this.CheckForUpdate);
         }
 
-        public string PortableDownloadLink
-        {
-            get { return "http://getespera.com/EsperaPortable.zip"; }
-        }
-
         /// <summary>
         /// Checks the server if an update is available and applies the update if there is one.
         /// </summary>
-        public ReactiveCommand<Unit> CheckForUpdate { get; }
-
-        public bool ShowChangelog
-        {
-            get { return this.settings.IsUpdated && this.settings.EnableChangelog; }
-        }
+        public ReactiveCommand<Unit> CheckForUpdate { get; private set; }
 
         /// <summary>
         /// Used in the changelog dialog to opt-out of the automatic changelog.
         /// </summary>
         public bool DisableChangelog { get; set; }
+
+        public string PortableDownloadLink
+        {
+            get { return "http://getespera.com/EsperaPortable.zip"; }
+        }
 
         public IEnumerable<ChangelogReleaseEntry> ReleaseEntries
         {
@@ -73,11 +68,16 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public ReactiveCommand<Unit> Restart { get; }
+        public ReactiveCommand<Unit> Restart { get; private set; }
 
         public bool ShouldRestart
         {
-            get { return this.shouldRestart.Value;}
+            get { return this.shouldRestart.Value; }
+        }
+
+        public bool ShowChangelog
+        {
+            get { return this.settings.IsUpdated && this.settings.EnableChangelog; }
         }
 
         public void ChangelogShown()

@@ -1,13 +1,14 @@
-﻿using System;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using Akavache;
+﻿using Akavache;
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
+using Rareform.Validation;
 using ReactiveUI;
 using Splat;
+using System;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace Espera.View.ViewModels
 {
@@ -36,8 +37,9 @@ namespace Espera.View.ViewModels
 
         /// <summary>
         /// Resolves the given YouTube URL and adds the song to the playlist.
-        ///
-        /// This method will only execute successfully if the <see cref="SongSourceViewModel{T}.AddToPlaylistCommand"/> command can execute.
+        /// 
+        /// This method will only execute successfully if the <see
+        /// cref="SongSourceViewModel{T}.AddToPlaylistCommand" /> command can execute.
         /// </summary>
         public async Task AddDirectYoutubeUrlToPlaylist(Uri url, int? targetIndex)
         {

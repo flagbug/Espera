@@ -1,10 +1,10 @@
 ﻿using Espera.Core;
 using Rareform.Validation;
 using ReactiveUI;
+using Splat;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using Splat;
 
 namespace Espera.View.ViewModels
 {
@@ -27,7 +27,7 @@ namespace Espera.View.ViewModels
 
                 catch (Win32Exception ex)
                 {
-                    this.Log().ErrorException("Could not open link \{this.Path}", ex);
+                    this.Log().ErrorException(String.Format("Could not open link {0}", this.Path), ex);
                 }
             });
         }

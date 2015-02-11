@@ -1,18 +1,18 @@
-﻿using System;
+﻿using ReactiveUI;
+using Splat;
+using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
-using ReactiveUI;
-using Splat;
 
 namespace Espera.Core.Audio
 {
     /// <summary>
     /// This class implements the basic audio player behavior.
-    ///
+    /// 
     /// The actual playback implementation is defined in the <see cref="IMediaPlayerCallback" /> implementations.
     /// </summary>
     public sealed class AudioPlayer : IEnableLogger
@@ -110,7 +110,7 @@ namespace Espera.Core.Audio
         internal async Task LoadAsync(Song song)
         {
             if (song == null)
-                throw new ArgumentNullException(nameof(song));
+                throw new ArgumentNullException("song");
 
             await this.gate.WaitAsync();
 
@@ -183,7 +183,8 @@ namespace Espera.Core.Audio
         }
 
         /// <summary>
-        /// Plays the loaded song asynchronously and sets the <see cref="PlaybackState" /> to <see cref="AudioPlayerState.Playing" />
+        /// Plays the loaded song asynchronously and sets the <see cref="PlaybackState" /> to <see
+        /// cref="AudioPlayerState.Playing" />
         /// </summary>
         /// <exception cref="PlaybackException">An error occured while playing the song.</exception>
         internal async Task PlayAsync()

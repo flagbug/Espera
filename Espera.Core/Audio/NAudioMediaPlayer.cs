@@ -49,7 +49,10 @@ namespace Espera.Core.Audio
 
             try
             {
-                this.currentReader?.Dispose();
+                if (this.currentReader != null)
+                {
+                    this.currentReader.Dispose();
+                }
             }
 
             // Weird exception
