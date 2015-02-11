@@ -5,9 +5,9 @@ namespace Espera.Core.Analytics
 {
     public interface IAnalyticsEndpoint : IDisposable
     {
-        void Identify(string id, IDictionary<string, string> traits = null);
+        void Identify(IDictionary<string, string> traits = null);
 
-        void Initialize(Guid id);
+        void Initialize();
 
         void ReportBug(string message);
 

@@ -27,7 +27,7 @@ namespace Espera.View.ViewModels
                 throw new ArgumentNullException("settings");
 
             this.settings = settings;
-            this.updateManager = updateManager ?? new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45, AppInfo.AppRootPath);
+            this.updateManager = updateManager ?? new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45);
 
             this.updateLock = new object();
 

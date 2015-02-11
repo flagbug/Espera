@@ -1,9 +1,9 @@
-﻿using System;
-using Akavache;
+﻿using Akavache;
 using Espera.Core.Management;
 using Espera.Network;
 using Lager;
 using Splat;
+using System;
 
 namespace Espera.Core.Settings
 {
@@ -12,15 +12,6 @@ namespace Espera.Core.Settings
         public CoreSettings(IBlobCache blobCache = null)
             : base("__CoreSettings__", blobCache ?? (ModeDetector.InUnitTestRunner() ? new InMemoryBlobCache() : BlobCache.LocalMachine))
         { }
-
-        /// <summary>
-        /// Have we upgraded to the Buddy v2 client yet?
-        /// </summary>
-        public bool BuddyAnalyticsUpgraded
-        {
-            get { return this.GetOrCreate(false); }
-            set { this.SetOrCreate(value); }
-        }
 
         public DefaultPlaybackAction DefaultPlaybackAction
         {
@@ -121,12 +112,6 @@ namespace Espera.Core.Settings
         public bool StreamHighestYoutubeQuality
         {
             get { return this.GetOrCreate(true); }
-            set { this.SetOrCreate(value); }
-        }
-
-        public Guid UniqueId
-        {
-            get { return this.GetOrCreate(Guid.NewGuid()); }
             set { this.SetOrCreate(value); }
         }
 

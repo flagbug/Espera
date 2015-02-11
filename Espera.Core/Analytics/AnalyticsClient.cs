@@ -68,7 +68,7 @@ namespace Espera.Core.Analytics
 
             this.coreSettings = settings;
 
-            this.endpoint.Initialize(this.coreSettings.UniqueId);
+            this.endpoint.Initialize();
 
             this.Log().Info("Initialized the analytics and crash report provider");
             this.Log().Info("Automatic analytics are {0}", this.EnableAutomaticReports ? "Enabled" : "Disabled");
@@ -77,11 +77,10 @@ namespace Espera.Core.Analytics
             {
                 var traits = new Dictionary<string, string>
                 {
-                    { "Deployment Type", AppInfo.IsPortable ? "Portable" : "Squirrel" },
                     { "Language", CultureInfo.InstalledUICulture.TwoLetterISOLanguageName }
                 };
 
-                this.endpoint.Identify(this.coreSettings.UniqueId.ToString(), traits);
+                this.endpoint.Identify(traits);
             }
         }
 

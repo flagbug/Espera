@@ -6,8 +6,6 @@ namespace Espera.Core.Analytics
 {
     internal class XamarinAnalyticsEndpoint : IAnalyticsEndpoint
     {
-        private Guid id;
-
         public void Dispose()
         {
             // Xamarin Insights can only be terminated if it has been started before, otherwise it
@@ -18,17 +16,13 @@ namespace Espera.Core.Analytics
             }
         }
 
-        public void Identify(string id, IDictionary<string, string> traits = null)
+        public void Identify(IDictionary<string, string> traits = null)
         {
-            traits.Add(Insights.Traits.Name, id);
-
-            Insights.Identify(id, traits);
+            Insights.Identify(Insights.Traits.GuestIdentifier, traits);
         }
 
-        public void Initialize(Guid id)
+        public void Initialize()
         {
-            this.id = id;
-
             Insights.Initialize("ed4fea5ffb4fa2a1d36acfeb3df4203153d92acf", AppInfo.Version.ToString(), "Espera", AppInfo.BlobCachePath);
         }
 
@@ -62,7 +56,7 @@ namespace Espera.Core.Analytics
 
         public void UpdateEmail(string email)
         {
-            Insights.Identify(id.ToString(), Insights.Traits.Email, email);
+            Insights.Identify(Insights.Traits.GuestIdentifier, Insights.Traits.Email, email);
         }
     }
 }

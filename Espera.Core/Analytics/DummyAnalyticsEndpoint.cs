@@ -10,11 +10,11 @@ namespace Espera.Core.Analytics
         {
         }
 
-        public void Identify(string id, IDictionary<string, string> traits = null)
+        public void Identify(IDictionary<string, string> traits = null)
         {
         }
 
-        public void Initialize(Guid id)
+        public void Initialize()
         {
         }
 

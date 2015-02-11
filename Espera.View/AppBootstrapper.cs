@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.IO.Abstractions;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Subjects;
-using System.Windows;
-using System.Windows.Threading;
-using Akavache;
+﻿using Akavache;
 using Akavache.Sqlite3;
 using Caliburn.Micro;
 using Espera.Core;
@@ -24,7 +13,16 @@ using NLog.Targets;
 using ReactiveUI;
 using Splat;
 using Squirrel;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.IO.Abstractions;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace Espera.View
 {
@@ -36,28 +34,24 @@ namespace Espera.View
 
         static AppBootstrapper()
         {
-            BlobCache.ApplicationName = AppInfo.AppName;
+            BlobCache.ApplicationName = "Espera";
         }
 
         public AppBootstrapper()
         {
-            using (var mgr = new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45, AppInfo.AppRootPath))
+            using (var mgr = new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45))
             {
-                if (AppInfo.IsPortable)
-                {
-                    // The portable version only needs to rewrite the shortcut at the application root
-                    SquirrelAwareApp.HandleEvents(onAppUpdate: v => mgr.CreateShortcutsForExecutable("Espera.exe", ShortcutLocation.AppRoot, false));
-                }
-
-                else
-                {
-                    // We have to re-implement the things Squirrel does for normal applications,
-                    // because we're marked as Squirrel-aware
-                    SquirrelAwareApp.HandleEvents(
-                      onInitialInstall: v => mgr.CreateShortcutForThisExe(),
-                      onAppUpdate: v => mgr.CreateShortcutForThisExe(),
-                      onAppUninstall: v => mgr.RemoveShortcutForThisExe());
-                }
+                // We have to re-implement the things Squirrel does for normal applications, because
+                // we're marked as Squirrel-aware
+                SquirrelAwareApp.HandleEvents(
+                    onInitialInstall: v => mgr.CreateShortcutForThisExe(),
+                    onAppUpdate: v =>
+                    {
+                        mgr.CreateShortcutForThisExe();
+                        // Update the shortcut for the portable version
+                        mgr.CreateShortcutsForExecutable("Espera.exe", ShortcutLocation.AppRoot, false);
+                    },
+                    onAppUninstall: v => mgr.RemoveShortcutForThisExe());
             }
 
             this.Initialize();
@@ -138,15 +132,10 @@ namespace Espera.View
             this.Log().Info("Application version: " + AppInfo.Version);
             this.Log().Info("OS Version: " + Environment.OSVersion.VersionString);
             this.Log().Info("Current culture: " + CultureInfo.InstalledUICulture.Name);
-            this.Log().Info("This is a {0} application", AppInfo.IsPortable ? "portable" : "non-portable");
 
-            Directory.CreateDirectory(AppInfo.ApplicationDataPath);
-
-            if (AppInfo.IsPortable)
-            {
-                Directory.CreateDirectory(AppInfo.BlobCachePath);
-                BlobCache.LocalMachine = new SQLitePersistentBlobCache(Path.Combine(AppInfo.BlobCachePath, "blobs.db"));
-            }
+            Directory.CreateDirectory(AppInfo.ApplicationRootPath);
+            Directory.CreateDirectory(AppInfo.BlobCachePath);
+            BlobCache.LocalMachine = new SQLitePersistentBlobCache(Path.Combine(AppInfo.BlobCachePath, "blobs.db"));
 
             var newBlobCache = BlobCache.LocalMachine;
 
@@ -229,10 +218,6 @@ namespace Espera.View
             {
                 coreSettings.YoutubeDownloadPath = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
             }
-
-#if DEBUG
-            coreSettings.EnableAutomaticReports = false;
-#endif
 
             this.viewSettings.InitializeAsync().Wait();
 

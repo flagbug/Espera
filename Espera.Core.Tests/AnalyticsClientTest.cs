@@ -19,7 +19,7 @@ namespace Espera.Core.Tests
 
                 client.Initialize(coreSettings);
 
-                endpoint.Received().Initialize(coreSettings.UniqueId);
+                endpoint.Received().Initialize();
             }
         }
 
