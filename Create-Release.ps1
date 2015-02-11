@@ -115,9 +115,6 @@ If(Test-Path -Path $ReleaseZip) {
 
 New-Item -ItemType directory -Path $PortableAppPath
 
-# This file tells Espera that it's a portable application
-New-Item "$PortableAppPath\PORTABLE" -type file
-
 # Create a Squirrel-conforming app directory
 New-Item -ItemType directory -Path "$PortableAppPath\packages"
 
