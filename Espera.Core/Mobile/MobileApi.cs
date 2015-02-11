@@ -173,12 +173,12 @@ namespace Espera.Core.Mobile
             {
                 this.fileListener = new TcpListener(new IPEndPoint(IPAddress.Any, this.port + 1));
                 this.fileListener.Start();
-                this.Log().Info($"Starting to listen for incoming file transfer connections on port {this.port + 1}");
+                this.Log().Info("Starting to listen for incoming file transfer connections on port \{this.port + 1}");
             }
 
             catch (SocketException ex)
             {
-                this.Log().ErrorException($"Port {this.port} is already taken", ex);
+                this.Log().ErrorException("Port \{this.port} is already taken", ex);
                 this.isPortOccupied.OnNext(true);
                 return;
             }
@@ -187,14 +187,14 @@ namespace Espera.Core.Mobile
             {
                 this.messageListener = new TcpListener(new IPEndPoint(IPAddress.Any, this.port));
                 this.messageListener.Start();
-                this.Log().Info($"Starting to listen for incoming message connections on port {this.port}");
+                this.Log().Info("Starting to listen for incoming message connections on port \{this.port}");
             }
 
             catch (SocketException ex)
             {
                 this.fileListener.Stop();
 
-                this.Log().ErrorException($"Port {this.port} is already taken", ex);
+                this.Log().ErrorException("Port \{this.port} is already taken", ex);
                 this.isPortOccupied.OnNext(true);
                 return;
             }

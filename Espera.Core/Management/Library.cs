@@ -811,7 +811,7 @@ namespace Espera.Core.Management
 
             List<LocalSong> songsWithoutArtwork = this.Songs.Where(x => x.ArtworkKey == null).ToList();
 
-            this.Log().Info($"{songsWithoutArtwork.Count} songs don't have an artwork");
+            this.Log().Info("{0} songs don't have an artwork", songsWithoutArtwork.Count);
 
             foreach (LocalSong song in songsWithoutArtwork)
             {
@@ -824,7 +824,7 @@ namespace Espera.Core.Management
 
                 catch (ArtworkCacheException ex)
                 {
-                    this.Log().ErrorException($"Error while fetching artwork for {song.Artist} - {song.Album}", ex);
+                    this.Log().ErrorException("Error while fetching artwork for \{song.Artist} - \{song.Album}", ex);
                 }
 
                 if (key != null)

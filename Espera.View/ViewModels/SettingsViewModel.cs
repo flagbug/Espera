@@ -128,7 +128,7 @@ namespace Espera.View.ViewModels
 
                 catch (Win32Exception ex)
                 {
-                    this.Log().ErrorException($"Could not open link {x}", ex);
+                    this.Log().ErrorException("Could not open link \{x}", ex);
                 }
             });
 

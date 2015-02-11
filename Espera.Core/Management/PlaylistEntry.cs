@@ -65,11 +65,11 @@ namespace Espera.Core.Management
             return other != null && this.Guid == other.Guid;
         }
 
-            public override string ToString()
-            {
+        public override string ToString()
+        {
                 return string.Format("Index = {0}, Votes = {1}, Guid = {2}",
                     this.Index, this.Votes, this.Guid.ToString().Substring(0, 8));
-            }
+        }
 
             internal void ResetVotes()
             {
