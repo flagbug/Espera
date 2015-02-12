@@ -1,5 +1,6 @@
 param (
 	[switch]$includeUpdater = $false
+	[switch]$sync = $true
 )
 
 Set-StrictMode -version Latest
@@ -65,6 +66,7 @@ If(!(Test-Path -Path $ReleasesFolder )){
 
 # ==================================== Squirrel
 
+
 $NuPkgPath = "$PSScriptRoot\Espera.$Version.nupkg"
 
 if($includeUpdater) {
@@ -73,7 +75,9 @@ if($includeUpdater) {
 	cp $SquirrelUpdate $BuildPath
 }
 
-&($SquirrelSync) -r $ReleasesFolder -u "http://getespera.com/releases/squirrel/"
+If($sync) {
+	&($SquirrelSync) -r $ReleasesFolder -u "http://getespera.com/releases/squirrel/"
+}
 
 &($NuGet) pack $NuSpecPath
 
