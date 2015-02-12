@@ -32,7 +32,7 @@ $NuGet = "$PSScriptRoot\.nuget\NuGet.exe"
 $SquirrelPackagePath = (ls .\packages\squirrel.windows.*)[0]
 $Squirrel = Join-Path $SquirrelPackagePath "tools\Squirrel.com"
 $SquirrelUpdate = Join-Path $SquirrelPackagePath "tools\Squirrel.exe"
-$SquirrelSync = Join-Path $SquirrelPackagePath "tools\SyncReleases.exe"
+$SquirrelSync = "$PSScriptRoot\SyncReleases.exe"
 
 $BuildPath = "$PSScriptRoot\Espera.View\bin\Release"
 $NuSpecPath = "$PSScriptRoot\Espera.nuspec"
