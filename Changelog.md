@@ -1,3 +1,8 @@
+# v2.12.4
+
+## Bugfixes
+- Fixed some updating issues with the portable version.
+
 # v2.12.3
 
 ## Bugfixes
