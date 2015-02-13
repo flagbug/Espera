@@ -1,6 +1,6 @@
 param (
-	[switch]$includeUpdater = $false
-	[switch]$sync = $true
+	[switch]$includeUpdater,
+	[switch]$noSync
 )
 
 Set-StrictMode -version Latest
