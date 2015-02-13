@@ -75,7 +75,7 @@ if($includeUpdater) {
 	cp $SquirrelUpdate $BuildPath
 }
 
-If($sync) {
+If(!$noSync) {
 	&($SquirrelSync) -r $ReleasesFolder -u "http://getespera.com/releases/squirrel/"
 }
 
