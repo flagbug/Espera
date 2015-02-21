@@ -1,3 +1,5 @@
+*.pfx
+
 # Releases folder for Squirrel.Windows and ClickOnce
 /ClickOnceReleases
 /SquirrelReleases

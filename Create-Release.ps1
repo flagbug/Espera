@@ -1,6 +1,7 @@
 param (
 	[switch]$includeUpdater = $false,
-	[switch]$noSync = $false
+	[switch]$noSync = $false,
+	[switch]$noSign = $false
 )
 
 Set-StrictMode -version Latest
@@ -96,7 +97,11 @@ If(Test-Path -Path $OutputSetupExe) {
 	Remove-Item -Confirm:$false $OutputSetupExe
 }
 
-&($Squirrel) --releasify $NuPkgPath -r $ReleasesFolder
+$Pass = Read-Host 'Certificate Password:' -AsSecureString
+$CertificatePath = "$PSScriptRoot\Espera.pfx"
+$RealPass = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pass))
+
+&($Squirrel) --releasify $NuPkgPath -r $ReleasesFolder -n "/a /f $CertificatePath /p $RealPass"
 
 $SquirrelSetupExe = "$ReleasesFolder\EsperaSetup.exe"
 If(Test-Path -Path $SquirrelSetupExe) {
@@ -145,6 +150,19 @@ $Shortcut = $WshShell.CreateShortcut("$PortableFolder\Espera.lnk")
 $Shortcut.TargetPath = "$PortableAppPath\Espera.cmd"
 $Shortcut.IconLocation = "$PortableAppPath\Icon.ico"
 $Shortcut.Save()
+
+if(!$noSign) {
+	# Get the executables we want to sign
+	$Executables = Get-ChildItem $PortableFolder -Filter *.exe -Recurse
+	$SignTool = Join-Path $SquirrelPackagePath "tools\Signtool.exe"
+
+	for ($i=0; $i -lt $Executables.Count; $i++) {
+	    $FileName = $Executables[$i].FullName
+		Write-Host "Signing $FileName"
+		
+		&($SignTool) sign -a -f $CertificatePath -p $RealPass $FileName
+	}
+}
 
 ZipFiles $ReleaseZip $PortableFolder
 
