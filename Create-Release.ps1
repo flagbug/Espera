@@ -97,11 +97,17 @@ If(Test-Path -Path $OutputSetupExe) {
 	Remove-Item -Confirm:$false $OutputSetupExe
 }
 
-$Pass = Read-Host 'Certificate Password:' -AsSecureString
-$CertificatePath = "$PSScriptRoot\Espera.pfx"
-$RealPass = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pass))
+if(!$noSign) {
+	$Pass = Read-Host 'Certificate Password:' -AsSecureString
+	$CertificatePath = "$PSScriptRoot\Espera.pfx"
+	$RealPass = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pass))
 
-&($Squirrel) --releasify $NuPkgPath -r $ReleasesFolder -n "/a /f $CertificatePath /p $RealPass"
+	&($Squirrel) --releasify $NuPkgPath -r $ReleasesFolder -n "/a /f $CertificatePath /p $RealPass"
+}
+
+else {
+	&($Squirrel) --releasify $NuPkgPath -r $ReleasesFolder
+}
 
 $SquirrelSetupExe = "$ReleasesFolder\EsperaSetup.exe"
 If(Test-Path -Path $SquirrelSetupExe) {
