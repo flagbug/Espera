@@ -1,3 +1,8 @@
+# v2.12.5
+
+## Features
+- The installer an Espera itself is now signed.
+
 # v2.12.4
 
 ## Bugfixes
