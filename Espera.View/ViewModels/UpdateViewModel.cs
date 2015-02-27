@@ -6,6 +6,7 @@ using Splat;
 using Squirrel;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
@@ -107,6 +108,9 @@ namespace Espera.View.ViewModels
         {
             if (ModeDetector.InUnitTestRunner())
                 return;
+#if DEBUG
+            return;
+#endif
 
             ReleaseEntry appliedEntry;
 
