@@ -1,15 +1,17 @@
-﻿using Espera.Core;
+﻿using Akavache;
+using Espera.Core;
 using ReactiveUI;
+using Splat;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Media;
-using Akavache;
-using Splat;
 using YoutubeExtractor;
 using ReactiveCommand = ReactiveUI.ReactiveCommand;
 
@@ -38,7 +40,8 @@ namespace Espera.View.ViewModels
             // Wait for the opening of the context menu to download the YouTube information
             this.WhenAnyValue(x => x.IsContextMenuOpen)
                 .FirstAsync(x => x)
-                .Subscribe(_ => this.LoadContextMenu());
+                .SelectMany(_ => this.LoadContextMenu().ToObservable())
+                .Subscribe();
 
             // We have to set a dummy here, so that we can connect the commands
             this.isDownloading = Observable.Never<bool>().ToProperty(this, x => x.IsDownloading);
@@ -149,7 +152,28 @@ namespace Espera.View.ViewModels
         {
             this.IsLoadingContextMenu = true;
 
-            IEnumerable<VideoInfo> infos = await Task.Run(() => DownloadUrlResolver.GetDownloadUrls(this.Path, false).ToList());
+            var infos = new List<VideoInfo>(0);
+
+            try
+            {
+                infos = await Task.Run(() => DownloadUrlResolver.GetDownloadUrls(this.Path, false).ToList());
+            }
+
+            catch (YoutubeParseException ex)
+            {
+                this.Log().ErrorException("Failed to load the available YouTube videos", ex);
+            }
+
+            catch (VideoNotAvailableException ex)
+            {
+                this.Log().ErrorException("Failed to load the available YouTube videos", ex);
+            }
+
+            catch (WebException ex)
+            {
+                this.Log().ErrorException("Failed to load the available YouTube videos", ex);
+            }
+
             this.VideosToDownload = infos.Where(x => x.AdaptiveType == AdaptiveType.None && x.VideoType != VideoType.Unknown)
                 .OrderBy(x => x.VideoType)
                 .ThenByDescending(x => x.Resolution)
