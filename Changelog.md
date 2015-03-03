@@ -1,3 +1,8 @@
+# v2.12.6
+
+## Bugfixes
+- Fixed a crash when opening the context menu in the list of YouTube videos.
+
 # v2.12.5
 
 ## Features
