@@ -126,22 +126,25 @@ namespace Espera.View.ViewModels
                 return;
             }
 
-            if (appliedEntry != null)
+            if (appliedEntry == null)
             {
-                await ChangelogFetcher.FetchAsync().ToObservable()
-                    .Timeout(TimeSpan.FromSeconds(30))
-                    .SelectMany(x => BlobCache.LocalMachine.InsertObject(BlobCacheKeys.Changelog, x))
-                    .LoggedCatch(this, Observable.Return(Unit.Default), "Could not to fetch changelog")
-                    .ToTask();
-
-                lock (this.updateLock)
-                {
-                    this.updateRun = true;
-                    this.settings.IsUpdated = true;
-                }
-
-                this.Log().Info("Updated to version {0}", appliedEntry.Version);
+                this.Log().Info("No update available");
+                return;
             }
+
+            await ChangelogFetcher.FetchAsync().ToObservable()
+                .Timeout(TimeSpan.FromSeconds(30))
+                .SelectMany(x => BlobCache.LocalMachine.InsertObject(BlobCacheKeys.Changelog, x))
+                .LoggedCatch(this, Observable.Return(Unit.Default), "Could not to fetch changelog")
+                .ToTask();
+
+            lock (this.updateLock)
+            {
+                this.updateRun = true;
+                this.settings.IsUpdated = true;
+            }
+
+            this.Log().Info("Updated to version {0}", appliedEntry.Version);
         }
     }
 }
