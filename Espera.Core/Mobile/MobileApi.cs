@@ -6,6 +6,7 @@ using ReactiveMarrow;
 using ReactiveUI;
 using Splat;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -105,6 +106,9 @@ namespace Espera.Core.Mobile
             var clientCache = new List<UdpClient>();
             var clientDisposable = new CompositeDisposable();
 
+            // Keep a list of addresses that we've reported exception on, so we don't spam the log
+            // and analytics
+            var reportedExceptionAddresses = new HashSet<IPAddress>();
             using (clientDisposable)
             {
                 while (!this.dispose)
@@ -157,7 +161,22 @@ namespace Espera.Core.Mobile
                             {
                                 address[3] = (byte)i;
 
-                                client.Send(message, message.Length, new IPEndPoint(new IPAddress(address), this.port));
+                                try
+                                {
+                                    client.Send(message, message.Length, new IPEndPoint(new IPAddress(address), this.port));
+                                }
+
+                                catch (SocketException ex)
+                                {
+                                    if (!reportedExceptionAddresses.Contains(ipAddress))
+                                    {
+                                        this.Log().WarnException(string.Format("Failed to send UDP packet to {0} at port {1}", address, port), ex);
+
+                                        AnalyticsClient.Instance.RecordNonFatalError(ex);
+
+                                        reportedExceptionAddresses.Add(ipAddress);
+                                    }
+                                }
                             }
                         }
                     });
