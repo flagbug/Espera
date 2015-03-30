@@ -109,6 +109,7 @@ namespace Espera.Core.Mobile
             // Keep a list of addresses that we've reported exception on, so we don't spam the log
             // and analytics
             var reportedExceptionAddresses = new HashSet<IPAddress>();
+
             using (clientDisposable)
             {
                 while (!this.dispose)
@@ -181,7 +182,7 @@ namespace Espera.Core.Mobile
                         }
                     });
 
-                    await Task.Delay(1000);
+                    await Task.Delay(2500);
                 }
             }
         }
