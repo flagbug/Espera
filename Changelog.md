@@ -1,3 +1,8 @@
+# v2.12.7
+
+## Bugfixes
+- Fixed a crash when sending the server discovery message for the mobile client.
+
 # v2.12.6
 
 ## Bugfixes
