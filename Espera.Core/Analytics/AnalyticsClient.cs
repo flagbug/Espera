@@ -72,16 +72,6 @@ namespace Espera.Core.Analytics
 
             this.Log().Info("Initialized the analytics and crash report provider");
             this.Log().Info("Automatic analytics are {0}", this.EnableAutomaticReports ? "Enabled" : "Disabled");
-
-            if (this.EnableAutomaticReports)
-            {
-                var traits = new Dictionary<string, string>
-                {
-                    { "Language", CultureInfo.InstalledUICulture.TwoLetterISOLanguageName }
-                };
-
-                this.endpoint.Identify(traits);
-            }
         }
 
         /// <summary>
