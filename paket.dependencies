@@ -1,0 +1,31 @@
+source https://api.nuget.org/v3/index.json
+source https://www.nuget.org/api/v2/
+source https://www.myget.org/F/aspnetvnext/
+
+nuget Nuget.CommandLine
+nuget akavache 4.1.1 framework: >= net45
+nuget Caliburn.Micro 2.0.2 framework: >= net45
+nuget Espera-Network 1.0.36 framework: >= net45
+nuget GlobalHotKey 1.1.0 framework: >= net45
+nuget Google.GData.YouTube 2.2.0.0 framework: >= net45
+nuget Lager 0.4.2 framework: >= net45
+nuget MahApps.Metro 1.1.2.0 framework: >= net45
+nuget NAudio 1.7.3 framework: >= net45
+nuget NLog 3.2.0.0 framework: >= net45
+nuget NSubstitute 1.8.1.0 framework: >= net45
+nuget Ookii.Dialogs 1.0 framework: >= net45
+nuget Paket 1.36.1 framework: >= net45
+nuget Punchclock 1.2.0 framework: >= net45
+nuget Rareform 1.5.2 framework: >= net45
+nuget ReactiveMarrow 0.5.1 framework: >= net45
+nuget reactiveui 6.4.0.1 framework: >= net45
+nuget reactiveui-events 6.4.0.1 framework: >= net45
+nuget reactiveui-testing 6.4.0.1 framework: >= net45
+nuget refit 2.2.1 framework: >= net45
+nuget squirrel.windows 0.9.3 framework: >= net45
+nuget System.IO.Abstractions.TestingHelpers 2.0.0.113 framework: >= net45
+nuget taglib 2.1.0.0 framework: >= net45
+nuget Xamarin.Insights 1.9.1.107 framework: >= net45
+nuget xunit 1.9.2 framework: >= net45
+nuget xunit.runner.visualstudio 2.0.0 framework: >= net45
+nuget YoutubeExtractor 0.10.6 framework: >= net45
