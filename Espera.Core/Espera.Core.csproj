@@ -1038,6 +1038,15 @@
         </Reference>
       </ItemGroup>
     </When>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6')">
+      <ItemGroup>
+        <Reference Include="Xamarin.Insights">
+          <HintPath>..\packages\Xamarin.Insights\lib\portable-win+net40\Xamarin.Insights.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
     <When Condition="$(TargetFrameworkIdentifier) == 'MonoAndroid'">
       <ItemGroup>
         <Reference Include="Xamarin.Insights">
@@ -1079,6 +1088,15 @@
         </Reference>
       </ItemGroup>
     </When>
+    <When Condition="$(TargetFrameworkIdentifier) == 'Xamarin.Mac'">
+      <ItemGroup>
+        <Reference Include="Xamarin.Insights">
+          <HintPath>..\packages\Xamarin.Insights\lib\Xamarin.Mac20\Xamarin.Insights.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
     <When Condition="$(TargetFrameworkIdentifier) == 'Xamarin.iOS'">
       <ItemGroup>
         <Reference Include="PLCrashReporterUnifiedBinding">
@@ -1088,15 +1106,6 @@
         </Reference>
         <Reference Include="Xamarin.Insights">
           <HintPath>..\packages\Xamarin.Insights\lib\Xamarin.iOS10\Xamarin.Insights.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-      </ItemGroup>
-    </When>
-    <When Condition="($(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6')) Or ($(TargetFrameworkIdentifier) == 'Xamarin.Mac')">
-      <ItemGroup>
-        <Reference Include="Xamarin.Insights">
-          <HintPath>..\packages\Xamarin.Insights\lib\portable-win+net40\Xamarin.Insights.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
