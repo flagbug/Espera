@@ -46,7 +46,6 @@ NUGET
     Newtonsoft.Json (6.0.8) - framework: >= net45
     NLog (3.2.0.0) - framework: >= net45
     NSubstitute (1.8.1.0) - framework: >= net45
-    NuGet.CommandLine (2.8.6)
     NuGet.Core (2.8.3) - framework: >= net45
       Microsoft.Web.Xdt (>= 2.1.0)
     Ookii.Dialogs (1.0) - framework: >= net45

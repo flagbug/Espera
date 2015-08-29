@@ -2,7 +2,6 @@ source https://api.nuget.org/v3/index.json
 source https://www.nuget.org/api/v2/
 source https://www.myget.org/F/aspnetvnext/
 
-nuget Nuget.CommandLine
 nuget akavache 4.1.1 framework: >= net45
 nuget Caliburn.Micro 2.0.2 framework: >= net45
 nuget Espera-Network 1.0.36 framework: >= net45
