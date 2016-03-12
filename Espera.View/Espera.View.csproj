@@ -74,6 +74,18 @@
     <Reference Include="DeltaCompressionDotNet.PatchApi">
       <HintPath>..\packages\DeltaCompressionDotNet.1.0.0\lib\net45\DeltaCompressionDotNet.PatchApi.dll</HintPath>
     </Reference>
+    <Reference Include="DynamicData, Version=4.3.1.1090, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamicData.4.3.1.1090\lib\net45\DynamicData.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DynamicData.Plinq, Version=4.3.1.1090, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamicData.4.3.1.1090\lib\net45\DynamicData.Plinq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DynamicData.ReactiveUI, Version=2.2.0.2007, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamicData.ReactiveUI.2.2.0.2007\lib\portable-net45+win+wpa81+wp80\DynamicData.ReactiveUI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Espera.Network, Version=1.0.36.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Espera-Network.1.0.36\lib\portable-net45+monoandroid+wpa81\Espera.Network.dll</HintPath>

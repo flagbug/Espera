@@ -4,10 +4,14 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using DynamicData;
+using DynamicData.Controllers;
+using DynamicData.ReactiveUI;
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Rareform.Validation;
+using ReactiveMarrow;
 using ReactiveUI;
 
 namespace Espera.View.ViewModels
@@ -17,12 +21,13 @@ namespace Espera.View.ViewModels
         private readonly ReactiveList<ArtistViewModel> allArtists;
         private readonly ArtistViewModel allArtistsViewModel;
         private readonly SortOrder artistOrder;
+        private readonly ReactiveList<ArtistViewModel> artists;
         private readonly Subject<Unit> artistUpdateSignal;
         private readonly ObservableAsPropertyHelper<bool> isUpdating;
         private readonly ReactiveCommand<Unit> playNowCommand;
         private readonly ObservableAsPropertyHelper<bool> showAddSongsHelperMessage;
+        private readonly ReactiveList<LocalSongViewModel> songs;
         private readonly ViewSettings viewSettings;
-        private ILookup<string, Song> filteredSongs;
         private ArtistViewModel selectedArtist;
 
         public LocalViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, Guid accessToken)
@@ -38,14 +43,61 @@ namespace Espera.View.ViewModels
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
             this.allArtists = new ReactiveList<ArtistViewModel> { this.allArtistsViewModel };
 
+            /*
             this.Artists = this.allArtists.CreateDerivedCollection(x => x,
                 x => x.IsAllArtists || this.filteredSongs.Contains(x.Name), (x, y) => x.CompareTo(y), this.artistUpdateSignal);
+                */
 
             // We need a default sorting order
             this.ApplyOrder(SortHelpers.GetOrderByArtist<LocalSongViewModel>, ref this.artistOrder);
 
             this.SelectedArtist = this.allArtistsViewModel;
 
+            this.songs = new ReactiveList<LocalSongViewModel>();
+            this.SelectableSongs = this.songs;
+            this.artists = new ReactiveList<ArtistViewModel>();
+            var source = new SourceCache<LocalSong, Guid>(x => x.Guid);
+
+            IObservable<Func<LocalSong, bool>> searchEngine = this.WhenAnyValue(x => x.SearchText)
+                .Select(searchText => new SearchEngine(searchText))
+                .Select(engine => new Func<LocalSong, bool>(song => engine.Filter(song)));
+
+            IObservable<Func<LocalSong, bool>> artistFilter = this.WhenAnyValue(x => x.SelectedArtist)
+                .Select(artist => new Func<LocalSong, bool>(song => artist.IsAllArtists || song.Artist.Equals(artist.Name, StringComparison.InvariantCultureIgnoreCase)));
+
+            var filteredSource = source.Connect()
+                .Filter(searchEngine)
+                .Publish()
+                .RefCount();
+
+            filteredSource
+                .Filter(artistFilter)
+                .Transform(x => new LocalSongViewModel(x))
+                .Bind(this.songs)
+                .DisposeMany()
+                .Subscribe();
+
+            filteredSource
+                .Group(x => x.Artist)
+                .Transform(x => new ArtistViewModel(x.Key, Observable.Never<string>()))
+                .Sort(new ArtistViewModel.Comparer())
+                .Bind(this.artists)
+                .DisposeMany()
+                .Subscribe();
+
+            this.Library.SongsUpdated
+                .Buffer(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
+                .Where(x => x.Any())
+                .ToUnit()
+                .StartWith(Unit.Default)
+                .Select(_ => this.Library.Songs)
+                .Subscribe(x => source.Edit(update =>
+                {
+                    update.Clear();
+                    update.AddOrUpdate(x);
+                }));
+
+            /*
             var gate = new object();
             this.Library.SongsUpdated
                 .Buffer(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
@@ -65,6 +117,7 @@ namespace Espera.View.ViewModels
                 .Skip(1)
                 .Synchronize(gate)
                 .Subscribe(_ => this.UpdateSelectableSongs());
+                */
 
             this.playNowCommand = ReactiveCommand.CreateAsyncTask(this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
                 .Select(x => x == AccessPermission.Admin || !coreSettings.LockPlayPause), _ =>
@@ -87,7 +140,7 @@ namespace Espera.View.ViewModels
             this.OpenTagEditor = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedSongs, x => x.Any()));
         }
 
-        public IReactiveDerivedList<ArtistViewModel> Artists { get; private set; }
+        public IReadOnlyReactiveList<ArtistViewModel> Artists => this.artists;
 
         public override DefaultPlaybackAction DefaultPlaybackAction
         {
@@ -121,6 +174,7 @@ namespace Espera.View.ViewModels
         public ArtistViewModel SelectedArtist
         {
             get { return this.selectedArtist; }
+
             set
             {
                 // We don't ever want the selected artist to be null
@@ -139,6 +193,7 @@ namespace Espera.View.ViewModels
             set { this.viewSettings.LocalTitleColumnWidth = value; }
         }
 
+        /*
         private void UpdateArtists()
         {
             var groupedByArtist = this.Library.Songs
@@ -224,6 +279,6 @@ namespace Espera.View.ViewModels
             {
                 this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
             }
-        }
+        }*/
     }
 }

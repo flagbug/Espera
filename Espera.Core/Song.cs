@@ -1,10 +1,10 @@
-﻿using Espera.Network;
-using Rareform.Validation;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Espera.Network;
+using Rareform.Validation;
 
 namespace Espera.Core
 {
@@ -14,7 +14,7 @@ namespace Espera.Core
         private bool isCorrupted;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Song" /> class.
+        /// Initializes a new instance of the <see cref="Song"/> class.
         /// </summary>
         /// <param name="path">The path of the song.</param>
         /// <param name="duration">The duration of the song.</param>
@@ -45,7 +45,9 @@ namespace Espera.Core
         public string Genre { get; set; }
 
         /// <summary>
-        /// A runtime identifier for interaction with the mobile API.
+        /// A runtime identifier that uniquely identifies this songs.
+        /// 
+        /// This identifier changes at each startup, but is stable in a running instance of the application.
         /// </summary>
         public Guid Guid { get; private set; }
 
@@ -56,6 +58,7 @@ namespace Espera.Core
         public bool IsCorrupted
         {
             get { return this.isCorrupted; }
+
             set
             {
                 if (this.isCorrupted != value)

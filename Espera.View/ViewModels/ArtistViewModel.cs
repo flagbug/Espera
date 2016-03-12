@@ -1,17 +1,16 @@
-﻿using Espera.Core;
-using ReactiveUI;
-using Splat;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
+using Espera.Core;
+using ReactiveUI;
+using Splat;
 
 namespace Espera.View.ViewModels
 {
-    public sealed class ArtistViewModel : ReactiveObject, IComparable<ArtistViewModel>, IEquatable<ArtistViewModel>, IDisposable
+    public sealed class ArtistViewModel : ReactiveObject, IEquatable<ArtistViewModel>, IDisposable
     {
         private readonly ObservableAsPropertyHelper<BitmapSource> cover;
         private readonly int orderHint;
@@ -21,23 +20,21 @@ namespace Espera.View.ViewModels
         /// The constructor.
         /// </summary>
         /// <param name="artistName"></param>
-        /// <param name="songs"></param>
+        /// <param name="artworkKeys"></param>
         /// <param name="orderHint">
         /// A hint that tells this instance which position it has in the artist list. This helps for
         /// priorizing the album cover loading. The higher the number, the earlier it is in the list
         /// (Think of a reversed sorted list).
         /// </param>
-        public ArtistViewModel(string artistName, IEnumerable<LocalSong> songs, int orderHint = 1)
+        public ArtistViewModel(string artistName, IObservable<string> artworkKeys, int orderHint = 1)
         {
             this.songs = new ReactiveList<LocalSong>();
 
             this.orderHint = orderHint;
 
-            this.cover = this.songs.ItemsAdded.Select(x => x.WhenAnyValue(y => y.ArtworkKey))
-                .Merge()
-                .Where(x => x != null)
+            artworkKeys
                 .Distinct() // Ignore duplicate artworks
-                .Select(LoadArtworkAsync)
+                .Select(key => Observable.FromAsync(() => this.LoadArtworkAsync(key)))
                 .Concat()
                 .FirstOrDefaultAsync(pic => pic != null)
                 .ToProperty(this, x => x.Cover);
@@ -64,29 +61,9 @@ namespace Espera.View.ViewModels
 
         public string Name { get; private set; }
 
-        public int CompareTo(ArtistViewModel other)
-        {
-            if (this.IsAllArtists && other.IsAllArtists)
-            {
-                return 0;
-            }
-
-            if (this.IsAllArtists)
-            {
-                return -1;
-            }
-
-            if (other.IsAllArtists)
-            {
-                return 1;
-            }
-
-            return String.Compare(SortHelpers.RemoveArtistPrefixes(this.Name), SortHelpers.RemoveArtistPrefixes(other.Name), StringComparison.InvariantCultureIgnoreCase);
-        }
-
         public void Dispose()
         {
-            this.cover.Dispose();
+            this.cover?.Dispose();
         }
 
         public bool Equals(ArtistViewModel other)
@@ -134,6 +111,29 @@ namespace Espera.View.ViewModels
                 this.Log().InfoException(String.Format("Akavache threw an error on artist cover loading for key {0}", key), ex);
 
                 return null;
+            }
+        }
+
+        public class Comparer : IComparer<ArtistViewModel>
+        {
+            public int Compare(ArtistViewModel x, ArtistViewModel y)
+            {
+                if (x.IsAllArtists && y.IsAllArtists)
+                {
+                    return 0;
+                }
+
+                if (x.IsAllArtists)
+                {
+                    return -1;
+                }
+
+                if (y.IsAllArtists)
+                {
+                    return 1;
+                }
+
+                return String.Compare(SortHelpers.RemoveArtistPrefixes(x.Name), SortHelpers.RemoveArtistPrefixes(y.Name), StringComparison.InvariantCultureIgnoreCase);
             }
         }
     }

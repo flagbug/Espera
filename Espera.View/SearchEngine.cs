@@ -1,47 +1,48 @@
-﻿using Espera.Core;
-using Rareform.Validation;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using Espera.Core;
 
 namespace Espera.View
 {
-    public static class SearchEngine
+    public static class StringExtensions
     {
-        /// <summary>
-        /// Filters the source by the specified search text.
-        /// </summary>
-        /// <param name="source">The songs to search.</param>
-        /// <param name="searchText">The search text.</param>
-        /// <returns>The filtered sequence of songs.</returns>
-        public static IEnumerable<Song> FilterSongs(this IEnumerable<Song> source, string searchText)
-        {
-            if (searchText == null)
-                Throw.ArgumentNullException(() => searchText);
-
-            if (String.IsNullOrWhiteSpace(searchText))
-                return source;
-
-            IEnumerable<string> keyWords = searchText.Split(' ');
-
-            return source
-                .AsParallel()
-                .Where
-                (
-                    song => keyWords.All
-                    (
-                        keyword =>
-                            song.Artist.ContainsIgnoreCase(keyword) ||
-                            song.Album.ContainsIgnoreCase(keyword) ||
-                            song.Genre.ContainsIgnoreCase(keyword) ||
-                            song.Title.ContainsIgnoreCase(keyword)
-                    )
-                );
-        }
-
-        private static bool ContainsIgnoreCase(this string value, string other)
+        public static bool ContainsIgnoreCase(this string value, string other)
         {
             return value.IndexOf(other, StringComparison.InvariantCultureIgnoreCase) >= 0;
+        }
+    }
+
+    public class SearchEngine
+    {
+        private readonly string[] keywords;
+        private readonly bool passThrough;
+
+        public SearchEngine(string searchText)
+        {
+            if (String.IsNullOrWhiteSpace(searchText))
+            {
+                this.passThrough = true;
+                return;
+            }
+
+            this.keywords = searchText.Split(' ');
+        }
+
+        public bool Filter(Song song)
+        {
+            if (this.passThrough)
+            {
+                return true;
+            }
+
+            return this.keywords.All
+            (
+                keyword =>
+                    song.Artist.ContainsIgnoreCase(keyword) ||
+                    song.Album.ContainsIgnoreCase(keyword) ||
+                    song.Genre.ContainsIgnoreCase(keyword) ||
+                    song.Title.ContainsIgnoreCase(keyword)
+            );
         }
     }
 }
