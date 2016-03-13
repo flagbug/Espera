@@ -68,7 +68,32 @@ namespace Espera.View.ViewModels
 
         public bool Equals(ArtistViewModel other)
         {
-            return this.Name == other.Name;
+            if (Object.ReferenceEquals(other, null))
+            {
+                return false;
+            }
+
+            if (this.IsAllArtists && other.IsAllArtists)
+            {
+                return true;
+            }
+
+            if (this.IsAllArtists || other.IsAllArtists)
+            {
+                return false;
+            }
+
+            return this.Name.Equals(other.Name, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj as ArtistViewModel);
+        }
+
+        public override int GetHashCode()
+        {
+            return new { A = this.IsAllArtists, B = this.Name }.GetHashCode();
         }
 
         public void UpdateSongs(IEnumerable<LocalSong> songs)
@@ -111,6 +136,45 @@ namespace Espera.View.ViewModels
                 this.Log().InfoException(String.Format("Akavache threw an error on artist cover loading for key {0}", key), ex);
 
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// A custom equality class for the artist grouping, until
+        /// https://github.com/RolandPheasant/DynamicData/issues/31 is resolved
+        /// </summary>
+        public class ArtistString : IEquatable<ArtistString>
+        {
+            private readonly string artistName;
+
+            public ArtistString(string artistName)
+            {
+                this.artistName = artistName;
+            }
+
+            public static implicit operator ArtistString(string source)
+            {
+                return new ArtistString(source);
+            }
+
+            public static implicit operator string(ArtistString source)
+            {
+                return source.artistName;
+            }
+
+            public bool Equals(ArtistString other)
+            {
+                return StringComparer.InvariantCultureIgnoreCase.Equals(this.artistName, other.artistName);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return base.Equals(obj as ArtistString);
+            }
+
+            public override int GetHashCode()
+            {
+                return StringComparer.InvariantCultureIgnoreCase.GetHashCode(this.artistName);
             }
         }
 
