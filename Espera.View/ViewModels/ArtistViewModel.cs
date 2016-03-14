@@ -169,7 +169,7 @@ namespace Espera.View.ViewModels
 
             public override bool Equals(object obj)
             {
-                return base.Equals(obj as ArtistString);
+                return this.Equals(obj as ArtistString);
             }
 
             public override int GetHashCode()
