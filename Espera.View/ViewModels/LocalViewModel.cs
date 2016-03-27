@@ -78,7 +78,7 @@ namespace Espera.View.ViewModels
 
             filteredSource
                 .Filter(artistFilter)
-                .Sort(SortExpressionComparer<LocalSongViewModel>.Ascending(x => SortHelpers.RemoveArtistPrefixes(x.Artist)).ThenByAscending(x => x.Album).ThenByAscending(x => x.TrackNumber), SortOptimisations.ComparesImmutableValuesOnly)
+                .Sort(SortExpressionComparer<LocalSongViewModel>.Ascending(x => SortHelpers.RemoveArtistPrefixes(x.Artist)).ThenByAscending(x => x.Album).ThenByAscending(x => x.TrackNumber))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Bind(this.songs)
                 .DisposeMany()
