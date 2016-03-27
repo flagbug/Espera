@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DynamicData;
+using DynamicData.Binding;
 using DynamicData.Controllers;
 using DynamicData.Operators;
 using DynamicData.ReactiveUI;
@@ -77,6 +78,7 @@ namespace Espera.View.ViewModels
 
             filteredSource
                 .Filter(artistFilter)
+                .Sort(SortExpressionComparer<LocalSongViewModel>.Ascending(x => SortHelpers.RemoveArtistPrefixes(x.Artist)).ThenByAscending(x => x.Album).ThenByAscending(x => x.TrackNumber), SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Bind(this.songs)
                 .DisposeMany()
