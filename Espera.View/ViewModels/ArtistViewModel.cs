@@ -14,7 +14,6 @@ namespace Espera.View.ViewModels
     {
         private readonly ObservableAsPropertyHelper<BitmapSource> cover;
         private readonly int orderHint;
-        private readonly ReactiveList<LocalSong> songs;
 
         /// <summary>
         /// The constructor.
@@ -28,19 +27,16 @@ namespace Espera.View.ViewModels
         /// </param>
         public ArtistViewModel(string artistName, IObservable<string> artworkKeys, int orderHint = 1)
         {
-            this.songs = new ReactiveList<LocalSong>();
-
             this.orderHint = orderHint;
 
-            artworkKeys
+            this.cover = artworkKeys
+                .Where(x => x != null)
                 .Distinct() // Ignore duplicate artworks
                 .Select(key => Observable.FromAsync(() => this.LoadArtworkAsync(key)))
                 .Concat()
                 .FirstOrDefaultAsync(pic => pic != null)
                 .ToProperty(this, x => x.Cover);
             var connect = this.Cover; // Connect the property to the source observable immediately
-
-            this.UpdateSongs(songs);
 
             this.Name = artistName;
             this.IsAllArtists = false;
@@ -94,18 +90,6 @@ namespace Espera.View.ViewModels
         public override int GetHashCode()
         {
             return new { A = this.IsAllArtists, B = this.Name }.GetHashCode();
-        }
-
-        public void UpdateSongs(IEnumerable<LocalSong> songs)
-        {
-            var songsToAdd = songs.Where(x => !this.songs.Contains(x)).ToList();
-
-            // Can't use AddRange here, ReactiveList resets the list on big changes and we don't get
-            // the add notification
-            foreach (LocalSong song in songsToAdd)
-            {
-                this.songs.Add(song);
-            }
         }
 
         private async Task<BitmapSource> LoadArtworkAsync(string key)

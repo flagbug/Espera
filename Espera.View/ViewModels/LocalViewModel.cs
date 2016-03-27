@@ -19,7 +19,6 @@ namespace Espera.View.ViewModels
 {
     public class LocalViewModel : SongSourceViewModel<LocalSongViewModel>
     {
-        private readonly ReactiveList<ArtistViewModel> allArtists;
         private readonly ArtistViewModel allArtistsViewModel;
         private readonly SortOrder artistOrder;
         private readonly ReactiveList<ArtistViewModel> artists;
@@ -42,7 +41,6 @@ namespace Espera.View.ViewModels
             this.artistUpdateSignal = new Subject<Unit>();
 
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
-            this.allArtists = new ReactiveList<ArtistViewModel> { this.allArtistsViewModel };
 
             // We need a default sorting order
             this.ApplyOrder(SortHelpers.GetOrderByArtist<LocalSongViewModel>, ref this.artistOrder);
@@ -52,32 +50,48 @@ namespace Espera.View.ViewModels
             this.songs = new ReactiveList<LocalSongViewModel>();
             this.SelectableSongs = this.songs;
             this.artists = new ReactiveList<ArtistViewModel>();
-            var source = new SourceCache<LocalSong, Guid>(x => x.Guid);
+            var songSource = new SourceCache<LocalSong, Guid>(x => x.Guid);
 
-            IObservable<Func<LocalSong, bool>> searchEngine = this.WhenAnyValue(x => x.SearchText)
+            IObservableCache<LocalSongViewModel, Guid> songsCache = songSource.Connect()
+                .Transform(x => new LocalSongViewModel(x))
+                .DisposeMany()
+                .AsObservableCache();
+
+            IObservableCache<ArtistViewModel, ArtistViewModel.ArtistString> artistsCache = songSource.Connect()
+                .Group(x => (ArtistViewModel.ArtistString)x.Artist)
+                .Transform(x => new ArtistViewModel(x.Key, x.Cache.Connect().WhereReasonsAre(ChangeReason.Add).Flatten().Select(y => y.Current.ArtworkKey)))
+                .DisposeMany()
+                .AsObservableCache();
+
+            IObservable<Func<LocalSongViewModel, bool>> searchEngine = this.WhenAnyValue(x => x.SearchText)
                 .Select(searchText => new SearchEngine(searchText))
-                .Select(engine => new Func<LocalSong, bool>(song => engine.Filter(song)));
+                .Select(engine => new Func<LocalSongViewModel, bool>(song => engine.Filter(song.Model)));
 
-            IObservable<Func<LocalSong, bool>> artistFilter = this.WhenAnyValue(x => x.SelectedArtist)
-                .Select(artist => new Func<LocalSong, bool>(song => artist.IsAllArtists || song.Artist.Equals(artist.Name, StringComparison.InvariantCultureIgnoreCase)));
+            IObservable<Func<LocalSongViewModel, bool>> artistFilter = this.WhenAnyValue(x => x.SelectedArtist)
+                .Select(artist => new Func<LocalSongViewModel, bool>(song => artist.IsAllArtists || song.Artist.Equals(artist.Name, StringComparison.InvariantCultureIgnoreCase)));
 
-            var filteredSource = source.Connect()
+            var filteredSource = songsCache.Connect()
                 .Filter(searchEngine)
                 .Publish()
                 .RefCount();
 
             filteredSource
                 .Filter(artistFilter)
-                .Transform(x => new LocalSongViewModel(x))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Bind(this.songs)
                 .DisposeMany()
                 .Subscribe();
 
-            filteredSource
-                .Group(x => (ArtistViewModel.ArtistString) x.Artist)
-                .Transform(x => new ArtistViewModel(x.Key, Observable.Never<string>()))
-                .Or(Observable.Return(new ChangeSet<ArtistViewModel, ArtistViewModel.ArtistString>(ChangeReason.Add, Guid.NewGuid().ToString(), this.allArtistsViewModel)))
+            var filteredArtistGrouping = filteredSource
+                .Group(x => x.Artist)
+                .Convert(x => x.Key)
+                .ToCollection()
+                .Select(x => new HashSet<string>(x, StringComparer.InvariantCultureIgnoreCase))
+                .Select(artists => new Func<ArtistViewModel, bool>(artistViewModel => artists.Contains(artistViewModel.Name)));
+
+            artistsCache.Connect()
+                .Filter(filteredArtistGrouping)
+                .StartWithItem(this.allArtistsViewModel, Guid.NewGuid().ToString())
                 .Sort(new ArtistViewModel.Comparer(), SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Bind(this.artists)
@@ -90,7 +104,7 @@ namespace Espera.View.ViewModels
                 .ToUnit()
                 .StartWith(Unit.Default)
                 .Select(_ => this.Library.Songs)
-                .Subscribe(x => source.Edit(update =>
+                .Subscribe(x => songSource.Edit(update =>
                 {
                     update.Clear();
                     update.AddOrUpdate(x);
