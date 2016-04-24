@@ -26,7 +26,7 @@
     </Window.Resources>
     <StackPanel Margin="10" Orientation="Vertical">
         <TextBlock Style="{StaticResource DescriptionHeaderStyle}" Text="Report a bug" />
-        <TextBlock Style="{StaticResource DescriptionHeaderStyle2}" Text="You can send a bug report to help improving Espera" />
+        <TextBlock Style="{StaticResource DescriptionHeaderStyle2}" Text="You can send a bug report to help improve Espera" />
         <DockPanel Margin="0, 10, 0, 0">
             <TextBlock VerticalAlignment="Center"
                        DockPanel.Dock="Left"
