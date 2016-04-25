@@ -4,25 +4,31 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using DynamicData;
+using DynamicData.Binding;
+using DynamicData.Controllers;
+using DynamicData.Operators;
+using DynamicData.ReactiveUI;
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Rareform.Validation;
+using ReactiveMarrow;
 using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
     public class LocalViewModel : SongSourceViewModel<LocalSongViewModel>
     {
-        private readonly ReactiveList<ArtistViewModel> allArtists;
         private readonly ArtistViewModel allArtistsViewModel;
         private readonly SortOrder artistOrder;
+        private readonly ReactiveList<ArtistViewModel> artists;
         private readonly Subject<Unit> artistUpdateSignal;
         private readonly ObservableAsPropertyHelper<bool> isUpdating;
         private readonly ReactiveCommand<Unit> playNowCommand;
         private readonly ObservableAsPropertyHelper<bool> showAddSongsHelperMessage;
+        private readonly ReactiveList<LocalSongViewModel> songs;
         private readonly ViewSettings viewSettings;
-        private ILookup<string, Song> filteredSongs;
         private ArtistViewModel selectedArtist;
 
         public LocalViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, Guid accessToken)
@@ -36,35 +42,75 @@ namespace Espera.View.ViewModels
             this.artistUpdateSignal = new Subject<Unit>();
 
             this.allArtistsViewModel = new ArtistViewModel("All Artists");
-            this.allArtists = new ReactiveList<ArtistViewModel> { this.allArtistsViewModel };
-
-            this.Artists = this.allArtists.CreateDerivedCollection(x => x,
-                x => x.IsAllArtists || this.filteredSongs.Contains(x.Name), (x, y) => x.CompareTo(y), this.artistUpdateSignal);
 
             // We need a default sorting order
             this.ApplyOrder(SortHelpers.GetOrderByArtist<LocalSongViewModel>, ref this.artistOrder);
 
             this.SelectedArtist = this.allArtistsViewModel;
 
-            var gate = new object();
+            this.songs = new ReactiveList<LocalSongViewModel>();
+            this.SelectableSongs = this.songs;
+            this.artists = new ReactiveList<ArtistViewModel>();
+            var songSource = new SourceCache<LocalSong, Guid>(x => x.Guid);
+
+            IObservableCache<LocalSongViewModel, Guid> songsCache = songSource.Connect()
+                .Transform(x => new LocalSongViewModel(x))
+                .DisposeMany()
+                .AsObservableCache();
+
+            IObservableCache<ArtistViewModel, ArtistViewModel.ArtistString> artistsCache = songSource.Connect()
+                .Group(x => (ArtistViewModel.ArtistString)x.Artist)
+                .Transform(x => new ArtistViewModel(x.Key, x.Cache.Connect().WhereReasonsAre(ChangeReason.Add).Flatten().Select(y => y.Current.ArtworkKey)))
+                .DisposeMany()
+                .AsObservableCache();
+
+            IObservable<Func<LocalSongViewModel, bool>> searchEngine = this.WhenAnyValue(x => x.SearchText)
+                .Select(searchText => new SearchEngine(searchText))
+                .Select(engine => new Func<LocalSongViewModel, bool>(song => engine.Filter(song.Model)));
+
+            IObservable<Func<LocalSongViewModel, bool>> artistFilter = this.WhenAnyValue(x => x.SelectedArtist)
+                .Select(artist => new Func<LocalSongViewModel, bool>(song => artist.IsAllArtists || song.Artist.Equals(artist.Name, StringComparison.InvariantCultureIgnoreCase)));
+
+            var filteredSource = songsCache.Connect()
+                .Filter(searchEngine)
+                .Publish()
+                .RefCount();
+
+            filteredSource
+                .Filter(artistFilter)
+                .Sort(SortExpressionComparer<LocalSongViewModel>.Ascending(x => SortHelpers.RemoveArtistPrefixes(x.Artist)).ThenByAscending(x => x.Album).ThenByAscending(x => x.TrackNumber))
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Bind(this.songs)
+                .DisposeMany()
+                .Subscribe();
+
+            var filteredArtistGrouping = filteredSource
+                .Group(x => x.Artist)
+                .Convert(x => x.Key)
+                .ToCollection()
+                .Select(x => new HashSet<string>(x, StringComparer.InvariantCultureIgnoreCase))
+                .Select(artists => new Func<ArtistViewModel, bool>(artistViewModel => artists.Contains(artistViewModel.Name)));
+
+            artistsCache.Connect()
+                .Filter(filteredArtistGrouping)
+                .StartWithItem(this.allArtistsViewModel, Guid.NewGuid().ToString())
+                .Sort(new ArtistViewModel.Comparer(), SortOptimisations.ComparesImmutableValuesOnly)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Bind(this.artists)
+                .DisposeMany()
+                .Subscribe();
+
             this.Library.SongsUpdated
                 .Buffer(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
                 .Where(x => x.Any())
-                .Select(_ => Unit.Default)
-                .Merge(this.WhenAny(x => x.SearchText, _ => Unit.Default)
-                    .Do(_ => this.SelectedArtist = this.allArtistsViewModel))
-                .Synchronize(gate)
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ =>
+                .ToUnit()
+                .StartWith(Unit.Default)
+                .Select(_ => this.Library.Songs)
+                .Subscribe(x => songSource.Edit(update =>
                 {
-                    this.UpdateSelectableSongs();
-                    this.UpdateArtists();
-                });
-
-            this.WhenAnyValue(x => x.SelectedArtist)
-                .Skip(1)
-                .Synchronize(gate)
-                .Subscribe(_ => this.UpdateSelectableSongs());
+                    update.Clear();
+                    update.AddOrUpdate(x);
+                }));
 
             this.playNowCommand = ReactiveCommand.CreateAsyncTask(this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
                 .Select(x => x == AccessPermission.Admin || !coreSettings.LockPlayPause), _ =>
@@ -87,7 +133,7 @@ namespace Espera.View.ViewModels
             this.OpenTagEditor = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedSongs, x => x.Any()));
         }
 
-        public IReactiveDerivedList<ArtistViewModel> Artists { get; private set; }
+        public IReadOnlyReactiveList<ArtistViewModel> Artists => this.artists;
 
         public override DefaultPlaybackAction DefaultPlaybackAction
         {
@@ -121,6 +167,7 @@ namespace Espera.View.ViewModels
         public ArtistViewModel SelectedArtist
         {
             get { return this.selectedArtist; }
+
             set
             {
                 // We don't ever want the selected artist to be null
@@ -137,93 +184,6 @@ namespace Espera.View.ViewModels
         {
             get { return this.viewSettings.LocalTitleColumnWidth; }
             set { this.viewSettings.LocalTitleColumnWidth = value; }
-        }
-
-        private void UpdateArtists()
-        {
-            var groupedByArtist = this.Library.Songs
-               .ToLookup(x => x.Artist, StringComparer.InvariantCultureIgnoreCase);
-
-            List<ArtistViewModel> artistsToRemove = this.allArtists.Where(x => !groupedByArtist.Contains(x.Name)).ToList();
-            artistsToRemove.Remove(this.allArtistsViewModel);
-
-            this.allArtists.RemoveAll(artistsToRemove);
-
-            foreach (ArtistViewModel artistViewModel in artistsToRemove)
-            {
-                artistViewModel.Dispose();
-            }
-
-            // We use this reverse ordered list of artists so we can priorize the loading of album
-            // covers of artists that we display first in the artist list. This way we can "fake" a
-            // fast loading of all covers, as the user doesn't see most of the artists down the
-            // list. The higher the number, the higher the prioritization.
-            List<string> orderedArtists = groupedByArtist.Select(x => x.Key)
-                .OrderByDescending(SortHelpers.RemoveArtistPrefixes)
-                .ToList();
-
-            foreach (var songs in groupedByArtist)
-            {
-                ArtistViewModel model = this.allArtists.FirstOrDefault(x => x.Name.Equals(songs.Key, StringComparison.InvariantCultureIgnoreCase));
-
-                if (model == null)
-                {
-                    int priority = orderedArtists.IndexOf(songs.Key) + 1;
-                    this.allArtists.Add(new ArtistViewModel(songs.Key, songs, priority));
-                }
-
-                else
-                {
-                    model.UpdateSongs(songs);
-                }
-            }
-        }
-
-        private void UpdateSelectableSongs()
-        {
-            this.filteredSongs = this.Library.Songs.FilterSongs(this.SearchText)
-                .ToLookup(x => x.Artist, StringComparer.InvariantCultureIgnoreCase);
-
-            var newArtists = new HashSet<string>(this.filteredSongs.Select(x => x.Key));
-            var oldArtists = this.Artists.Where(x => !x.IsAllArtists).Select(x => x.Name);
-
-            if (!newArtists.SetEquals(oldArtists))
-            {
-                this.artistUpdateSignal.OnNext(Unit.Default);
-            }
-
-            List<LocalSongViewModel> selectableSongs = this.filteredSongs
-                .Where(group => this.SelectedArtist.IsAllArtists || @group.Key.Equals(this.SelectedArtist.Name, StringComparison.InvariantCultureIgnoreCase))
-                .SelectMany(x => x)
-                .Select(song => new LocalSongViewModel(song))
-                .OrderBy(this.SongOrderFunc)
-                .ToList();
-
-            // Ignore redundant song updates.
-            if (!selectableSongs.SequenceEqual(this.SelectableSongs))
-            {
-                // Scratch the old viewmodels
-                foreach (var viewModel in this.SelectableSongs)
-                {
-                    viewModel.Dispose();
-                }
-
-                this.SelectableSongs = selectableSongs;
-            }
-
-            else
-            {
-                // We don't have to update the selectable songs, get rid of the redundant ones we've created
-                foreach (LocalSongViewModel viewModel in selectableSongs)
-                {
-                    viewModel.Dispose();
-                }
-            }
-
-            if (this.SelectedSongs == null)
-            {
-                this.SelectedSongs = this.SelectableSongs.Take(1).ToList();
-            }
         }
     }
 }
