@@ -225,14 +225,11 @@ namespace Espera.View.ViewModels
 
         private async Task GetThumbnailAsync()
         {
-            Uri thumbnailUrl = ((YoutubeSong)this.Model).ThumbnailSource;
-            thumbnailUrl = new Uri(thumbnailUrl.ToString().Replace("default", "hqdefault"));
-
             this.IsLoadingThumbnail = true;
 
             try
             {
-                IBitmap image = await BlobCache.LocalMachine.LoadImageFromUrl(thumbnailUrl.ToString(), absoluteExpiration: DateTimeOffset.Now + TimeSpan.FromMinutes(60));
+                IBitmap image = await BlobCache.LocalMachine.LoadImageFromUrl(((YoutubeSong)this.Model).ThumbnailSource.ToString(), absoluteExpiration: DateTimeOffset.Now + TimeSpan.FromMinutes(60));
 
                 this.Thumbnail = image.ToNative();
             }
