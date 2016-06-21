@@ -55,7 +55,11 @@ namespace Espera.Core
         /// <summary>
         /// Gets or sets the average rating.
         /// </summary>
+        /// <remarks>
+        /// Obsolete because Youtube API v3 does not longer provide a rating.
+        /// </remarks>
         /// <value>The average rating. <c>null</c> , if the rating is unknown.</value>
+        [Obsolete]
         public double? Rating { get; set; }
 
         /// <summary>
