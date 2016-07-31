@@ -53,7 +53,7 @@ namespace Espera.Core
 
         private static IObservable<IReadOnlyList<SoundCloudSong>> SearchSongs(string searchTerm)
         {
-            return RestService.For<ISoundCloudApi>("http://api.soundcloud.com").Search(searchTerm, ClientId);
+            return RestService.For<ISoundCloudApi>("https://api.soundcloud.com").Search(searchTerm, ClientId);
         }
 
         private static void SetupSongUrls(IEnumerable<SoundCloudSong> songs)

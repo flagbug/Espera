@@ -26,9 +26,12 @@ namespace Espera.Core.Tests
         [Fact]
         public async Task CanPlayAWholeBunchOfSongs()
         {
+            var streamProxy = Substitute.For<IHttpsProxyService>();
+            streamProxy.GetProxiedUri(new Uri("https://foobar.com")).ReturnsForAnyArgs(x => x.Args().First());
+
             var song = new LocalSong("C://", TimeSpan.Zero);
 
-            using (Library library = new LibraryBuilder().WithPlaylist().Build())
+            using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(new AudioPlayer(streamProxy)).Build())
             {
                 var awaiter = library.PlaybackState.Where(x => x == AudioPlayerState.Playing)
                     .Select((x, i) => i + 1)
@@ -231,9 +234,12 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task CallsAudioPlayerPlay()
             {
+                var streamProxy = Substitute.For<IHttpsProxyService>();
+                streamProxy.GetProxiedUri(new Uri("https://foobar.com")).ReturnsForAnyArgs(x => x.Args().First());
+
                 var audioPlayerCallback = Substitute.For<IMediaPlayerCallback>();
 
-                using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(audioPlayerCallback).Build())
+                using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(audioPlayerCallback).WithAudioPlayer(new AudioPlayer(streamProxy)).Build())
                 {
                     Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
@@ -427,7 +433,10 @@ namespace Espera.Core.Tests
                         }
                     }));
 
-                    using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(audioPlayer).Build())
+                    var streamProxy = Substitute.For<IHttpsProxyService>();
+                    streamProxy.GetProxiedUri(new Uri("https://foobar.com")).ReturnsForAnyArgs(x => x.Args().First());
+
+                    using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(audioPlayer).WithAudioPlayer(new AudioPlayer(streamProxy)).Build())
                     {
                         Song[] songs = Helpers.SetupSongMocks(2);
 
@@ -444,7 +453,10 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task PlaysMultipleSongsInARow()
             {
-                using (Library library = Helpers.CreateLibrary())
+                var streamProxy = Substitute.For<IHttpsProxyService>();
+                streamProxy.GetProxiedUri(new Uri("https://foobar.com")).ReturnsForAnyArgs(x => x.Args().First());
+
+                using (Library library = Helpers.CreateLibrary(audioPlayer: new AudioPlayer(streamProxy)))
                 {
                     var conn = library.PlaybackState.Where(x => x == AudioPlayerState.Playing)
                         .Take(2)
@@ -460,9 +472,12 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task SmokeTest()
             {
+                var streamProxy = Substitute.For<IHttpsProxyService>();
+                streamProxy.GetProxiedUri(new Uri("https://foobar.com")).ReturnsForAnyArgs(x => x.Args().First());
+
                 var audioPlayer = Substitute.For<IMediaPlayerCallback>();
 
-                using (Library library = new LibraryBuilder().WithAudioPlayer(audioPlayer).Build())
+                using (Library library = new LibraryBuilder().WithAudioPlayer(audioPlayer).WithAudioPlayer(new AudioPlayer(streamProxy)).Build())
                 {
                     Song song = Helpers.SetupSongMock();
 
@@ -541,7 +556,10 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task PlaysNextSongAutomatically()
             {
-                using (Library library = new LibraryBuilder().WithPlaylist().Build())
+                var streamProxy = Substitute.For<IHttpsProxyService>();
+                streamProxy.GetProxiedUri(new Uri("https://foobar.com")).ReturnsForAnyArgs(x => x.Args().First());
+
+                using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(new AudioPlayer(streamProxy)).Build())
                 {
                     Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 
@@ -564,7 +582,10 @@ namespace Espera.Core.Tests
                 var audioPlayerCallback = Substitute.For<IMediaPlayerCallback>();
                 audioPlayerCallback.LoadAsync(Arg.Any<Uri>()).Returns(Observable.Throw<Unit>(new SongLoadException()).ToTask());
 
-                using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(audioPlayerCallback).Build())
+                var streamProxy = Substitute.For<IHttpsProxyService>();
+                streamProxy.GetProxiedUri(new Uri("https://foobar.com")).ReturnsForAnyArgs(x => x.Args().First());
+
+                using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(audioPlayerCallback).WithAudioPlayer(new AudioPlayer(streamProxy)).Build())
                 {
                     Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
@@ -788,7 +809,10 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task WhileSongIsPlayingStopsCurrentSong()
             {
-                using (Library library = new LibraryBuilder().WithPlaylist().Build())
+                var streamProxy = Substitute.For<IHttpsProxyService>();
+                streamProxy.GetProxiedUri(new Uri("https://foobar.com")).ReturnsForAnyArgs(x => x.Args().First());
+
+                using (Library library = new LibraryBuilder().WithPlaylist().WithAudioPlayer(new AudioPlayer(streamProxy)).Build())
                 {
                     Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
 

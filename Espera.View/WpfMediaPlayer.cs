@@ -32,11 +32,7 @@ namespace Espera.View
 
         public Task LoadAsync(Uri uri)
         {
-            // MediaElement is too dumb to accept https urls, so try to remove it
-            // https: //connect.microsoft.com/VisualStudio/feedback/details/934355/in-a-wpf-standalone-application-exe-when-the-source-of-a-mediaelement-is-set-to-a-https-uri-it-throws-a-nullreferenceexception
-            var strippedHttp = new Uri(uri.ToString().Replace("https://", "http://"));
-
-            return this.mediaElement.Dispatcher.InvokeAsync(() => this.mediaElement.Source = strippedHttp).Task;
+            return this.mediaElement.Dispatcher.InvokeAsync(() => this.mediaElement.Source = uri).Task;
         }
 
         public Task PauseAsync()

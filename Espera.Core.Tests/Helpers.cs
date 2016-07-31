@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
+using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Microsoft.Reactive.Testing;
@@ -74,13 +75,14 @@ namespace Espera.Core.Tests
         }
 
         public static Library CreateLibrary(CoreSettings settings = null, ILibraryReader reader = null, ILibraryWriter writer = null,
-            IFileSystem fileSystem = null, ILocalSongFinder localSongFinder = null)
+            IFileSystem fileSystem = null, ILocalSongFinder localSongFinder = null, AudioPlayer audioPlayer = null)
         {
             return new LibraryBuilder().WithReader(reader)
                 .WithWriter(writer)
                 .WithSettings(settings)
                 .WithFileSystem(fileSystem)
                 .WithSongFinder(localSongFinder)
+                .WithAudioPlayer(audioPlayer)
                 .Build();
         }
 

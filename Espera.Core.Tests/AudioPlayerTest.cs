@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -29,7 +30,10 @@ namespace Espera.Core.Tests
         [Fact]
         public async Task StopsCurrentMediaPlayerWhenSwitchingAndPlaying()
         {
-            var audioPlayer = new AudioPlayer();
+            var streamProxy = Substitute.For<IHttpsProxyService>();
+            streamProxy.GetProxiedUri(new Uri("https://foobar.com")).ReturnsForAnyArgs(x => x.Args().First());
+
+            var audioPlayer = new AudioPlayer(streamProxy);
 
             var oldMediaPlayer = Substitute.For<IMediaPlayerCallback>();
             var newMediaPlayer = Substitute.For<IMediaPlayerCallback>();
@@ -56,7 +60,10 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task DisposesCurrentAudioPlayerIfNewOneRegistered()
             {
-                var audioPlayer = new AudioPlayer();
+                var streamProxy = Substitute.For<IHttpsProxyService>();
+                streamProxy.GetProxiedUri(new Uri("https://foobar.com")).ReturnsForAnyArgs(x => x.Args().First());
+
+                var audioPlayer = new AudioPlayer(streamProxy);
 
                 var oldMediaPlayer = Substitute.For<IMediaPlayerCallback, IDisposable>();
                 var newMediaPlayer = Substitute.For<IMediaPlayerCallback, IDisposable>();
@@ -76,7 +83,10 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task LoadsIntoAudioPlayerIfSongIsAudio()
             {
-                var audioPlayer = new AudioPlayer();
+                var streamProxy = Substitute.For<IHttpsProxyService>();
+                streamProxy.GetProxiedUri(new Uri("https://foobar.com")).ReturnsForAnyArgs(x => x.Args().First());
+
+                var audioPlayer = new AudioPlayer(streamProxy);
                 var mediaPlayerCallback = Substitute.For<IMediaPlayerCallback>();
                 audioPlayer.RegisterAudioPlayerCallback(mediaPlayerCallback);
 
@@ -91,7 +101,10 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task LoadsIntoVideoPlayerIfSongIsVideo()
             {
-                var audioPlayer = new AudioPlayer();
+                var streamProxy = Substitute.For<IHttpsProxyService>();
+                streamProxy.GetProxiedUri(new Uri("https://foobar.com")).ReturnsForAnyArgs(x => x.Args().First());
+
+                var audioPlayer = new AudioPlayer(streamProxy);
                 var mediaPlayerCallback = Substitute.For<IMediaPlayerCallback>();
                 audioPlayer.RegisterVideoPlayerCallback(mediaPlayerCallback);
 
@@ -106,7 +119,10 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task StopsCurrentPlayback()
             {
-                var audioPlayer = new AudioPlayer();
+                var streamProxy = Substitute.For<IHttpsProxyService>();
+                streamProxy.GetProxiedUri(new Uri("https://foobar.com")).ReturnsForAnyArgs(x => x.Args().First());
+
+                var audioPlayer = new AudioPlayer(streamProxy);
 
                 var states = audioPlayer.PlaybackState.CreateCollection();
 
@@ -128,7 +144,10 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task DisposesDanglingAudioPlayer()
             {
-                var audioPlayer = new AudioPlayer();
+                var streamProxy = Substitute.For<IHttpsProxyService>();
+                streamProxy.GetProxiedUri(new Uri("https://foobar.com")).ReturnsForAnyArgs(x => x.Args().First());
+
+                var audioPlayer = new AudioPlayer(streamProxy);
                 var mediaPlayer = Substitute.For<IMediaPlayerCallback>();
                 audioPlayer.RegisterAudioPlayerCallback(mediaPlayer);
                 await audioPlayer.LoadAsync(Helpers.SetupSongMock());

@@ -22,6 +22,7 @@ namespace Espera.Core.Tests
         private CoreSettings settings;
         private ILocalSongFinder songFinder;
         private ILibraryWriter writer;
+        private AudioPlayer audioPlayer;
 
         public Library Build()
         {
@@ -35,7 +36,8 @@ namespace Espera.Core.Tests
                 this.writer ?? Substitute.For<ILibraryWriter>(),
                 this.settings ?? new CoreSettings(new InMemoryBlobCache()),
                 this.fileSystem ?? new MockFileSystem(),
-                x => this.songFinder ?? SetupDefaultLocalSongFinder());
+                x => this.songFinder ?? SetupDefaultLocalSongFinder(),
+                this.audioPlayer ?? new AudioPlayer());
 
             Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
@@ -47,6 +49,12 @@ namespace Espera.Core.Tests
             library.RegisterAudioPlayerCallback(this.audioPlayerCallback ?? mediaPlayerCallback, accessToken);
 
             return library;
+        }
+
+        public LibraryBuilder WithAudioPlayer(AudioPlayer player)
+        {
+            this.audioPlayer = player;
+            return this;
         }
 
         public LibraryBuilder WithAudioPlayer(IMediaPlayerCallback player)
