@@ -112,12 +112,6 @@ namespace Espera.View.ViewModels
             private set { this.RaiseAndSetIfChanged(ref this.isLoadingThumbnail, value); }
         }
 
-        [Obsolete]
-        public double? Rating
-        {
-            get { return ((YoutubeSong)this.Model).Rating; }
-        }
-
         public ImageSource Thumbnail
         {
             get

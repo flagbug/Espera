@@ -144,14 +144,6 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="{Binding Path=RatingColumnWidth, Mode=TwoWay}">
-                        <GridViewColumnHeader Command="{Binding Path=OrderByRatingCommand}" Content="Rating" />
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Path=Rating, StringFormat=\{0:0.0\}, TargetNullValue=n/a}" TextTrimming="CharacterEllipsis" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
                     <GridViewColumn Width="{Binding Path=ViewsColumnWidth, Mode=TwoWay}">
                         <GridViewColumnHeader Command="{Binding Path=OrderByViewsCommand}" Content="Views" />
                         <GridViewColumn.CellTemplate>

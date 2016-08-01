@@ -12,7 +12,6 @@ namespace Espera.View.ViewModels
     public class YoutubeViewModel : NetworkSongViewModel<YoutubeSongViewModel, YoutubeSong>
     {
         private readonly ViewSettings viewSettings;
-        private SortOrder ratingOrder;
         private SortOrder viewsOrder;
 
         public YoutubeViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, Guid accessToken, IYoutubeSongFinder songFinder = null)
@@ -24,9 +23,6 @@ namespace Espera.View.ViewModels
                 Throw.ArgumentNullException(() => viewSettings);
 
             this.viewSettings = viewSettings;
-
-            this.OrderByRatingCommand = ReactiveCommand.Create();
-            this.OrderByRatingCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByRating, ref this.ratingOrder));
 
             this.OrderByViewsCommand = ReactiveCommand.Create();
             this.OrderByViewsCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByViews, ref this.viewsOrder));
@@ -44,15 +40,7 @@ namespace Espera.View.ViewModels
             set { this.viewSettings.YoutubeLinkColumnWidth = value; }
         }
 
-        public ReactiveCommand<object> OrderByRatingCommand { get; private set; }
-
         public ReactiveCommand<object> OrderByViewsCommand { get; private set; }
-
-        public int RatingColumnWidth
-        {
-            get { return this.viewSettings.YoutubeRatingColumnWidth; }
-            set { this.viewSettings.YoutubeRatingColumnWidth = value; }
-        }
 
         public int TitleColumnWidth
         {
