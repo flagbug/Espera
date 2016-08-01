@@ -146,7 +146,7 @@
     <Compile Include="SoundCloudSongFinderTest.cs" />
     <Compile Include="SoundCloudSongTest.cs" />
     <Compile Include="TagSanitizerTest.cs" />
-    <Compile Include="HttpsProxyServiceTest.cs" />
+    <Compile Include="UriRewriteTest.cs" />
     <Compile Include="YoutubeSongFinderTest.cs" />
   </ItemGroup>
   <ItemGroup>
