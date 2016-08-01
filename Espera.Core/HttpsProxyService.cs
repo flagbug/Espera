@@ -44,7 +44,9 @@ namespace Espera.Core
 #if DEBUG
             return 8080;
 #endif
+#pragma warning disable 162
             return port;
+#pragma warning restore 162
         }
 
         public void Dispose()
