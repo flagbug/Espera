@@ -5,11 +5,11 @@ using Xunit;
 
 namespace Espera.Core.Tests
 {
-    public class HttpsProxyServiceTest : IDisposable
+    public class UriRewriteTest : IDisposable
     {
         private readonly IHttpsProxyService httpsProxyService;
 
-        public HttpsProxyServiceTest()
+        public UriRewriteTest()
         {
             httpsProxyService = new HttpsProxyService();
         }
