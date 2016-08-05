@@ -112,12 +112,6 @@ namespace Espera.View
             set { this.SetOrCreate(value); }
         }
 
-        public int YoutubeRatingColumnWidth
-        {
-            get { return this.GetOrCreate(75); }
-            set { this.SetOrCreate(value); }
-        }
-
         public int YoutubeTitleColumnWidth
         {
             get { return this.GetOrCreate(200); }

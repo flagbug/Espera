@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Espera.Core.Audio;
 using YoutubeExtractor;
 
 namespace Espera.Core
@@ -52,11 +53,6 @@ namespace Espera.Core
             get { return this.playbackPath; }
         }
 
-        /// <summary>
-        /// Gets or sets the average rating.
-        /// </summary>
-        /// <value>The average rating. <c>null</c> , if the rating is unknown.</value>
-        public double? Rating { get; set; }
 
         /// <summary>
         /// Gets or sets the thumbnail source.
@@ -182,6 +178,15 @@ namespace Espera.Core
             string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
             var r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
             return r.Replace(path, "");
+        }
+
+        public override Uri GetSafePlaybackPath(IHttpsProxyService proxyService)
+        {
+            if (proxyService == null)
+            {
+                throw new ArgumentNullException(nameof(proxyService));
+            }
+            return proxyService.GetProxiedUri(new Uri(playbackPath));
         }
     }
 }

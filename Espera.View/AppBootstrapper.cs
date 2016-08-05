@@ -23,6 +23,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows;
 using System.Windows.Threading;
+using Espera.Core.Audio;
 
 namespace Espera.View
 {
@@ -72,6 +73,8 @@ namespace Espera.View
             Locator.CurrentMutable.RegisterLazySingleton(() => new SQLitePersistentBlobCache(Path.Combine(AppInfo.BlobCachePath, "api-requests.cache.db")),
                 typeof(IBlobCache), BlobCacheKeys.RequestCacheContract);
 
+            Locator.CurrentMutable.RegisterLazySingleton(() => new HttpsProxyService(), typeof(IHttpsProxyService));
+
             Locator.CurrentMutable.RegisterLazySingleton(() =>
                 new ShellViewModel(Locator.Current.GetService<Library>(),
                     this.viewSettings, this.coreSettings,
@@ -98,6 +101,9 @@ namespace Espera.View
 
             this.Log().Info("Shutting down the library");
             Locator.Current.GetService<Library>().Dispose();
+
+            this.Log().Info("Shutting down OWIN host");
+            Locator.Current.GetService<IHttpsProxyService>().Dispose();
 
             this.Log().Info("Shutting down BlobCaches");
             BlobCache.Shutdown().Wait();

@@ -49,7 +49,7 @@ namespace Espera.Core.Management
         private string songSourcePath;
 
         public Library(ILibraryReader libraryReader, ILibraryWriter libraryWriter, CoreSettings settings,
-            IFileSystem fileSystem, Func<string, ILocalSongFinder> localSongFinderFunc = null)
+            IFileSystem fileSystem, Func<string, ILocalSongFinder> localSongFinderFunc = null, AudioPlayer audioPlayer = null)
         {
             if (libraryReader == null)
                 throw new ArgumentNullException("libraryReader");
@@ -75,7 +75,7 @@ namespace Espera.Core.Management
             this.songs = new HashSet<LocalSong>();
             this.playlists = new ReactiveList<Playlist>();
             this.songsUpdated = new Subject<Unit>();
-            this.audioPlayer = new AudioPlayer();
+            this.audioPlayer = audioPlayer ?? new AudioPlayer();
             this.manualUpdateTrigger = new Subject<Unit>();
 
             this.LoadedSong = this.audioPlayer.LoadedSong;

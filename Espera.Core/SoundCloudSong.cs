@@ -1,6 +1,7 @@
 using Espera.Network;
 using Newtonsoft.Json;
 using System;
+using Espera.Core.Audio;
 
 namespace Espera.Core
 {
@@ -103,6 +104,11 @@ namespace Espera.Core
                 this.user = value;
                 this.Artist = value == null ? string.Empty : value.Username;
             }
+        }
+
+        public override Uri GetSafePlaybackPath(IHttpsProxyService proxyService)
+        {
+            return new Uri(PlaybackPath.Replace("https://", "http://"));
         }
     }
 

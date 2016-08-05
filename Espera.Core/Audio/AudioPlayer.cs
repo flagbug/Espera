@@ -5,6 +5,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,13 +23,16 @@ namespace Espera.Core.Audio
         private readonly SemaphoreSlim gate;
         private readonly BehaviorSubject<Song> loadedSong;
         private readonly BehaviorSubject<AudioPlayerState> playbackState;
+        private readonly IHttpsProxyService httpsProxyService;
         private IMediaPlayerCallback audioPlayerCallback;
         private IMediaPlayerCallback currentCallback;
         private bool disposeCurrentAudioCallback;
         private IMediaPlayerCallback videoPlayerCallback;
 
-        internal AudioPlayer()
+        internal AudioPlayer(IHttpsProxyService httpsProxyService = null)
         {
+
+            this.httpsProxyService = httpsProxyService ?? Locator.Current.GetService<IHttpsProxyService>();
             this.audioPlayerCallback = new DummyMediaPlayerCallback();
             this.videoPlayerCallback = new DummyMediaPlayerCallback();
             this.currentCallback = new DummyMediaPlayerCallback();
@@ -142,7 +146,7 @@ namespace Espera.Core.Audio
 
             try
             {
-                await this.currentCallback.LoadAsync(new Uri(this.loadedSong.Value.PlaybackPath));
+                await this.currentCallback.LoadAsync(song.GetSafePlaybackPath(httpsProxyService));
 
                 this.finishSubscription.Disposable = this.currentCallback.Finished.FirstAsync()
                     .SelectMany(_ => this.Finished().ToObservable())

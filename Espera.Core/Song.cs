@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Espera.Core.Audio;
 
 namespace Espera.Core
 {
@@ -152,6 +153,11 @@ namespace Espera.Core
             }
 
             return changed;
+        }
+
+        public virtual Uri GetSafePlaybackPath(IHttpsProxyService proxyService)
+        {
+            return new Uri(PlaybackPath);
         }
 
         /// <summary>
