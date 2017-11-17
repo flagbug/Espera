@@ -86,7 +86,7 @@ namespace Espera.View
         {
             FrameworkElement container = d as FrameworkElement;
 
-            if (d == null)
+            if (container == null)
             {
                 Debug.Fail("Invalid type!");
                 return;
