@@ -113,7 +113,7 @@ namespace Espera.View
             // restrict to scroll at two places at a time (how would that go anyways) but only syncs
             // them in time.... that's fair enough; (300ms for ListBox, 20ms for Content)
             TimeSpan span = DateTime.UtcNow - s_lastTime;
-            if (span.Milliseconds < (itemwise ? 300 : 20))
+            if (span.TotalMilliseconds < (itemwise ? 300 : 20))
                 return;
             s_lastTime = DateTime.UtcNow;
 
