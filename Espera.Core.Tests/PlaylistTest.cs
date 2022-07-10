@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Espera.Core.Management;
 using Xunit;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace Espera.Core.Tests
 {
@@ -20,8 +21,8 @@ namespace Espera.Core.Tests
 
             playlist.CurrentSongIndex = 1;
 
-            Assert.Equal(1, playlist[1].Votes);
-            Assert.Equal(1, playlist[2].Votes);
+            Assert.AreSame(1, playlist[1].Votes);
+            Assert.AreSame(1, playlist[2].Votes);
         }
 
         [Fact]
@@ -34,17 +35,17 @@ namespace Espera.Core.Tests
 
             playlist.CurrentSongIndex = 0;
 
-            Assert.Equal(1, playlist[0].Votes);
+            Assert.AreSame(1, playlist[0].Votes);
 
             playlist.CurrentSongIndex = 1;
 
-            Assert.Equal(0, playlist[0].Votes);
+            Assert.AreSame(0, playlist[0].Votes);
 
             playlist.VoteFor(2);
 
             playlist.CurrentSongIndex = 2;
 
-            Assert.Equal(0, playlist[1].Votes);
+            Assert.AreSame(0, playlist[1].Votes);
         }
 
         [Fact]
@@ -61,7 +62,7 @@ namespace Espera.Core.Tests
             playlist.VoteFor(4);
             playlist.VoteFor(3);
 
-            Assert.Equal(playlist, expectedOrder);
+            Assert.AreSame(playlist, expectedOrder);
         }
 
         public class TheAddSongsMethod
@@ -69,14 +70,14 @@ namespace Espera.Core.Tests
             [Fact]
             public void SetsCorrectPlaylistIndexes()
             {
-                Song[] songs = Helpers.SetupSongMocks(2);
+                var songs = Helpers.SetupSongMocks(2);
 
                 var playlist = new Playlist("Playlist");
 
                 playlist.AddSongs(songs);
 
-                Assert.Equal(0, playlist[0].Index);
-                Assert.Equal(1, playlist[1].Index);
+                Assert.AreSame(0, playlist[0].Index);
+                Assert.AreSame(1, playlist[1].Index);
             }
 
             [Fact]
@@ -84,20 +85,20 @@ namespace Espera.Core.Tests
             {
                 var playlist = new Playlist("Playlist");
 
-                Assert.Throws<ArgumentNullException>(() => playlist.AddSongs(null));
+                Xunit.Assert.Throws<ArgumentNullException>(() => playlist.AddSongs(null));
             }
 
             [Fact]
             public void SmokeTest()
             {
-                Song[] songs = Helpers.SetupSongMocks(4);
-                Playlist playlist = Helpers.SetupPlaylist(songs);
+                var songs = Helpers.SetupSongMocks(4);
+                var playlist = Helpers.SetupPlaylist(songs);
 
-                Assert.Equal(4, playlist.Count());
-                Assert.Equal(songs[0], playlist[0].Song);
-                Assert.Equal(songs[1], playlist[1].Song);
-                Assert.Equal(songs[2], playlist[2].Song);
-                Assert.Equal(songs[3], playlist[3].Song);
+                Assert.AreSame(4, playlist.Count());
+                Assert.AreSame(songs[0], playlist[0].Song);
+                Assert.AreSame(songs[1], playlist[1].Song);
+                Assert.AreSame(songs[2], playlist[2].Song);
+                Assert.AreSame(songs[3], playlist[3].Song);
             }
         }
 
@@ -106,23 +107,23 @@ namespace Espera.Core.Tests
             [Fact]
             public void ReturnsFalseIfCurrentSongIndexIsLastSong()
             {
-                Song[] songs = Helpers.SetupSongMocks(4);
-                Playlist playlist = Helpers.SetupPlaylist(songs);
+                var songs = Helpers.SetupSongMocks(4);
+                var playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.CurrentSongIndex = 3;
 
-                Assert.False(playlist.CanPlayNextSong);
+                Assert.IsFalse(playlist.CanPlayNextSong);
             }
 
             [Fact]
             public void ReturnsFalseIfCurrentSongIndexIsNull()
             {
-                Song[] songs = Helpers.SetupSongMocks(4);
-                Playlist playlist = Helpers.SetupPlaylist(songs);
+                var songs = Helpers.SetupSongMocks(4);
+                var playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.CurrentSongIndex = null;
 
-                Assert.False(playlist.CanPlayNextSong);
+                Assert.IsFalse(playlist.CanPlayNextSong);
             }
 
             [Fact]
@@ -130,18 +131,18 @@ namespace Espera.Core.Tests
             {
                 var playlist = new Playlist("Playlist");
 
-                Assert.False(playlist.CanPlayNextSong);
+                Assert.IsFalse(playlist.CanPlayNextSong);
             }
 
             [Fact]
             public void ReturnsTrueIfCurrentSongIndexIsZero()
             {
-                Song[] songs = Helpers.SetupSongMocks(4);
-                Playlist playlist = Helpers.SetupPlaylist(songs);
+                var songs = Helpers.SetupSongMocks(4);
+                var playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.CurrentSongIndex = 0;
 
-                Assert.True(playlist.CanPlayNextSong);
+                Assert.IsTrue(playlist.CanPlayNextSong);
             }
         }
 
@@ -150,23 +151,23 @@ namespace Espera.Core.Tests
             [Fact]
             public void ReturnsFalseIfCurrentSongIndexIsNull()
             {
-                Song[] songs = Helpers.SetupSongMocks(4);
-                Playlist playlist = Helpers.SetupPlaylist(songs);
+                var songs = Helpers.SetupSongMocks(4);
+                var playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.CurrentSongIndex = null;
 
-                Assert.False(playlist.CanPlayPreviousSong);
+                Assert.IsFalse(playlist.CanPlayPreviousSong);
             }
 
             [Fact]
             public void ReturnsFalseIfCurrentSongIndexIsZero()
             {
-                Song[] songs = Helpers.SetupSongMocks(4);
-                Playlist playlist = Helpers.SetupPlaylist(songs);
+                var songs = Helpers.SetupSongMocks(4);
+                var playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.CurrentSongIndex = 0;
 
-                Assert.False(playlist.CanPlayPreviousSong);
+                Assert.IsFalse(playlist.CanPlayPreviousSong);
             }
 
             [Fact]
@@ -174,18 +175,18 @@ namespace Espera.Core.Tests
             {
                 var playlist = new Playlist("Playlist");
 
-                Assert.False(playlist.CanPlayPreviousSong);
+                Assert.IsFalse(playlist.CanPlayPreviousSong);
             }
 
             [Fact]
             public void ReturnsTrueIfCurrentSongIndexIsLastSong()
             {
-                Song[] songs = Helpers.SetupSongMocks(4);
-                Playlist playlist = Helpers.SetupPlaylist(songs);
+                var songs = Helpers.SetupSongMocks(4);
+                var playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.CurrentSongIndex = 3;
 
-                Assert.True(playlist.CanPlayPreviousSong);
+                Assert.IsTrue(playlist.CanPlayPreviousSong);
             }
         }
 
@@ -202,16 +203,16 @@ namespace Espera.Core.Tests
             {
                 var playlist = new Playlist("Playlist");
 
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex = 0);
+                Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex = 0);
             }
 
             [Fact]
             public void SetterThrowsArgumentOutOfRangeExceptionIfValueIsNotInPlaylistRange()
             {
-                Song[] songs = Helpers.SetupSongMocks(3);
-                Playlist playlist = Helpers.SetupPlaylist(songs);
+                var songs = Helpers.SetupSongMocks(3);
+                var playlist = Helpers.SetupPlaylist(songs);
 
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex = 3);
+                Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => playlist.CurrentSongIndex = 3);
             }
         }
 
@@ -220,49 +221,49 @@ namespace Espera.Core.Tests
             [Fact]
             public void ReturnsCorrectIndexesForMultipleSongs()
             {
-                Song[] songs = Helpers.SetupSongMocks(3);
+                var songs = Helpers.SetupSongMocks(3);
 
-                Playlist playlist = Helpers.SetupPlaylist(songs);
+                var playlist = Helpers.SetupPlaylist(songs);
 
-                IEnumerable<int> indexes = playlist.GetIndexes(songs);
+                var indexes = playlist.GetIndexes(songs);
 
-                Assert.Equal(new[] { 0, 1, 2 }, indexes);
+                Assert.AreSame(new[] { 0, 1, 2 }, indexes);
             }
 
             [Fact]
             public void ReturnsCorrectIndexesForOneSong()
             {
-                Song song = Helpers.SetupSongMock();
+                var song = Helpers.SetupSongMock();
 
-                Playlist playlist = Helpers.SetupPlaylist(song);
+                var playlist = Helpers.SetupPlaylist(song);
 
                 int index = playlist.GetIndexes(new[] { song }).Single();
 
-                Assert.Equal(0, index);
+                Assert.AreSame(0, index);
             }
 
             [Fact]
             public void ReturnsCorrectIndexesForOneSongWithMultipleReferences()
             {
-                Song song = Helpers.SetupSongMock();
+                var song = Helpers.SetupSongMock();
 
-                Playlist playlist = Helpers.SetupPlaylist(Enumerable.Repeat(song, 3));
+                var playlist = Helpers.SetupPlaylist(Enumerable.Repeat(song, 3));
 
-                IEnumerable<int> indexes = playlist.GetIndexes(new[] { song });
+                var indexes = playlist.GetIndexes(new[] { song });
 
-                Assert.Equal(new[] { 0, 1, 2 }, indexes);
+                Assert.AreSame(new[] { 0, 1, 2 }, indexes);
             }
 
             [Fact]
             public void ReturnsNoIndexesForSongsThatAreNotInPlaylist()
             {
-                Song[] songs = Helpers.SetupSongMocks(4);
+                var songs = Helpers.SetupSongMocks(4);
 
-                Playlist playlist = Helpers.SetupPlaylist(songs.Take(2));
+                var playlist = Helpers.SetupPlaylist(songs.Take(2));
 
-                IEnumerable<int> indexes = playlist.GetIndexes(songs.Skip(2));
+                var indexes = playlist.GetIndexes(songs.Skip(2));
 
-                Assert.Empty(indexes);
+                Xunit.Assert.Empty(indexes);
             }
         }
 
@@ -273,16 +274,16 @@ namespace Espera.Core.Tests
             {
                 var playlist = new Playlist("Playlist");
 
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist[-1]);
+                Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => playlist[-1]);
             }
 
             [Fact]
             public void ThrowsArgumentOutOfRangeExceptionIfMoreThanZero()
             {
-                Song song = Helpers.SetupSongMock();
+                var song = Helpers.SetupSongMock();
                 var playlist = Helpers.SetupPlaylist(song);
 
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist[1]);
+                Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => playlist[1]);
             }
         }
 
@@ -291,56 +292,56 @@ namespace Espera.Core.Tests
             [Fact]
             public void CanDecrementIndex()
             {
-                Song[] songs = Helpers.SetupSongMocks(3);
+                var songs = Helpers.SetupSongMocks(3);
                 var playlist = new Playlist("Playlist");
                 playlist.AddSongs(songs);
 
                 playlist.MoveSong(2, 1);
 
-                Assert.Equal(songs[0], playlist[0].Song);
-                Assert.Equal(songs[1], playlist[2].Song);
-                Assert.Equal(songs[2], playlist[1].Song);
+                Assert.AreSame(songs[0], playlist[0].Song);
+                Assert.AreSame(songs[1], playlist[2].Song);
+                Assert.AreSame(songs[2], playlist[1].Song);
             }
 
             [Fact]
             public void CanIncrementIndex()
             {
-                Song[] songs = Helpers.SetupSongMocks(3);
+                var songs = Helpers.SetupSongMocks(3);
                 var playlist = new Playlist("Playlist");
                 playlist.AddSongs(songs);
 
                 playlist.MoveSong(0, 1);
 
-                Assert.Equal(songs[0], playlist[1].Song);
-                Assert.Equal(songs[1], playlist[0].Song);
-                Assert.Equal(songs[2], playlist[2].Song);
+                Assert.AreSame(songs[0], playlist[1].Song);
+                Assert.AreSame(songs[1], playlist[0].Song);
+                Assert.AreSame(songs[2], playlist[2].Song);
             }
 
             [Fact]
             public void SmokeTest()
             {
-                Song[] songs = Helpers.SetupSongMocks(3);
+                var songs = Helpers.SetupSongMocks(3);
                 var playlist = new Playlist("Playlist");
                 playlist.AddSongs(songs);
 
                 playlist.MoveSong(0, 2);
 
-                Assert.Equal(songs[1], playlist[0].Song);
-                Assert.Equal(songs[2], playlist[1].Song);
-                Assert.Equal(songs[0], playlist[2].Song);
+                Assert.AreSame(songs[1], playlist[0].Song);
+                Assert.AreSame(songs[2], playlist[1].Song);
+                Assert.AreSame(songs[0], playlist[2].Song);
             }
 
             [Fact]
             public void ValidatesArguments()
             {
-                Song[] songs = Helpers.SetupSongMocks(2);
+                var songs = Helpers.SetupSongMocks(2);
                 var playlist = new Playlist("Playlist");
                 playlist.AddSongs(songs);
 
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSong(-1, 1));
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSong(2, 1));
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSong(0, 2));
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSong(0, -1));
+                Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSong(-1, 1));
+                Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSong(2, 1));
+                Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSong(0, 2));
+                Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => playlist.MoveSong(0, -1));
             }
         }
 
@@ -351,7 +352,7 @@ namespace Espera.Core.Tests
             {
                 var playlist = new Playlist("Playlist", true);
 
-                Assert.Throws<InvalidOperationException>(() => playlist.Name = "Test");
+                Xunit.Assert.Throws<InvalidOperationException>(() => playlist.Name = "Test");
             }
         }
 
@@ -360,44 +361,44 @@ namespace Espera.Core.Tests
             [Fact]
             public void CorrectsCurrentSongIndex()
             {
-                Song[] songs = Helpers.SetupSongMocks(2);
+                var songs = Helpers.SetupSongMocks(2);
 
-                Playlist playlist = Helpers.SetupPlaylist(songs);
+                var playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.CurrentSongIndex = 1;
 
                 playlist.RemoveSongs(new[] { 0 });
 
-                Assert.Equal(0, playlist.CurrentSongIndex);
+                Assert.AreSame(0, playlist.CurrentSongIndex);
             }
 
             [Fact]
             public void EnsuresOrderForMultipleRemovedSongs()
             {
-                Song[] songs = Helpers.SetupSongMocks(7);
-                Playlist playlist = Helpers.SetupPlaylist(songs);
+                var songs = Helpers.SetupSongMocks(7);
+                var playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.RemoveSongs(new[] { 1, 3, 4 });
 
-                Assert.Equal(4, playlist.Count());
-                Assert.Equal(songs[0], playlist[0].Song);
-                Assert.Equal(songs[2], playlist[1].Song);
-                Assert.Equal(songs[5], playlist[2].Song);
-                Assert.Equal(songs[6], playlist[3].Song);
+                Assert.AreSame(4, playlist.Count());
+                Assert.AreSame(songs[0], playlist[0].Song);
+                Assert.AreSame(songs[2], playlist[1].Song);
+                Assert.AreSame(songs[5], playlist[2].Song);
+                Assert.AreSame(songs[6], playlist[3].Song);
             }
 
             [Fact]
             public void EnsuresOrderForOneRemovedSong()
             {
-                Song[] songs = Helpers.SetupSongMocks(4);
-                Playlist playlist = Helpers.SetupPlaylist(songs);
+                var songs = Helpers.SetupSongMocks(4);
+                var playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.RemoveSongs(new[] { 1 });
 
-                Assert.Equal(3, playlist.Count());
-                Assert.Equal(songs[0], playlist[0].Song);
-                Assert.Equal(songs[2], playlist[1].Song);
-                Assert.Equal(songs[3], playlist[2].Song);
+                Assert.AreSame(3, playlist.Count());
+                Assert.AreSame(songs[0], playlist[0].Song);
+                Assert.AreSame(songs[2], playlist[1].Song);
+                Assert.AreSame(songs[3], playlist[2].Song);
             }
 
             [Fact]
@@ -405,7 +406,7 @@ namespace Espera.Core.Tests
             {
                 var playlist = new Playlist("Playlist");
 
-                Assert.Throws<ArgumentNullException>(() => playlist.RemoveSongs(null));
+                Xunit.Assert.Throws<ArgumentNullException>(() => playlist.RemoveSongs(null));
             }
         }
 
@@ -414,9 +415,9 @@ namespace Espera.Core.Tests
             [Fact]
             public void MigratesCurrentSongIndex()
             {
-                Song[] songs = Helpers.SetupSongMocks(100);
+                var songs = Helpers.SetupSongMocks(100);
 
-                Playlist playlist = Helpers.SetupPlaylist(songs);
+                var playlist = Helpers.SetupPlaylist(songs);
 
                 playlist.CurrentSongIndex = 0;
 
@@ -424,7 +425,7 @@ namespace Espera.Core.Tests
 
                 int newIndex = playlist.GetIndexes(new[] { songs[0] }).First();
 
-                Assert.Equal(newIndex, playlist.CurrentSongIndex);
+                Assert.AreSame(newIndex, playlist.CurrentSongIndex);
             }
         }
 
@@ -436,8 +437,8 @@ namespace Espera.Core.Tests
                 var playlist = new Playlist("Playlist");
                 playlist.AddSongs(Helpers.SetupSongMocks(1));
 
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.VoteFor(-1));
-                Assert.Throws<ArgumentOutOfRangeException>(() => playlist.VoteFor(2));
+                Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => playlist.VoteFor(-1));
+                Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => playlist.VoteFor(2));
             }
 
             [Fact]
@@ -450,7 +451,7 @@ namespace Espera.Core.Tests
 
                 playlist.VoteFor(1);
 
-                Assert.Equal(1, playlist[1].Votes);
+                Assert.AreSame(1, playlist[1].Votes);
             }
 
             [Fact]
@@ -462,7 +463,7 @@ namespace Espera.Core.Tests
 
                 playlist.VoteFor(0);
 
-                Assert.Equal(snapshot, playlist);
+                Assert.AreSame(snapshot, playlist);
             }
 
             [Fact]
@@ -473,7 +474,7 @@ namespace Espera.Core.Tests
 
                 playlist.VoteFor(0);
 
-                Assert.Equal(1, playlist[0].Votes);
+                Assert.AreSame(1, playlist[0].Votes);
             }
 
             [Fact]
@@ -484,15 +485,15 @@ namespace Espera.Core.Tests
 
                 playlist.VoteFor(4);
 
-                PlaylistEntry entry1 = playlist[4];
+                var entry1 = playlist[4];
                 playlist.VoteFor(4);
 
-                Assert.Equal(1, entry1.Index);
+                Assert.AreSame(1, entry1.Index);
 
-                PlaylistEntry entry2 = playlist[4];
+                var entry2 = playlist[4];
                 playlist.VoteFor(4);
 
-                Assert.Equal(2, entry2.Index);
+                Assert.AreSame(2, entry2.Index);
             }
 
             [Fact]
@@ -505,7 +506,7 @@ namespace Espera.Core.Tests
                 playlist.VoteFor(0);
                 playlist.VoteFor(1);
 
-                Assert.Equal(snapshot, playlist);
+                Assert.AreSame(snapshot, playlist);
             }
 
             [Fact]
@@ -522,7 +523,7 @@ namespace Espera.Core.Tests
                 playlist.VoteFor(3);
                 playlist.VoteFor(2);
 
-                Assert.Equal(expectedOrder, playlist);
+                Assert.AreSame(expectedOrder, playlist);
             }
 
             [Fact]
@@ -533,7 +534,7 @@ namespace Espera.Core.Tests
 
                 playlist.CurrentSongIndex = 1;
 
-                Assert.Throws<InvalidOperationException>(() => playlist.VoteFor(1));
+                Xunit.Assert.Throws<InvalidOperationException>(() => playlist.VoteFor(1));
             }
 
             [Fact]
@@ -544,7 +545,7 @@ namespace Espera.Core.Tests
 
                 playlist.CurrentSongIndex = 1;
 
-                Assert.Throws<InvalidOperationException>(() => playlist.VoteFor(0));
+                Xunit.Assert.Throws<InvalidOperationException>(() => playlist.VoteFor(0));
             }
         }
     }

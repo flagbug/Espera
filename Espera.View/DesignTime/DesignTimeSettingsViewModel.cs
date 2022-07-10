@@ -11,8 +11,10 @@ namespace Espera.View.DesignTime
     internal class DesignTimeSettingsViewModel : SettingsViewModel
     {
         public DesignTimeSettingsViewModel()
-            : base(DesignTime.LoadLibrary(), new ViewSettings(), new CoreSettings(), new WindowManager(), Guid.NewGuid(),
+            : base(DesignTime.LoadLibrary(), new ViewSettings(), new CoreSettings(), new WindowManager(),
+                Guid.NewGuid(),
                 new MobileApiInfo(Observable.Return(new List<MobileClient>()), Observable.Return(false)))
-        { }
+        {
+        }
     }
 }

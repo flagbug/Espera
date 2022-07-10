@@ -3,10 +3,10 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading.Tasks;
 using Espera.Core.Mobile;
 using Espera.Network;
 using Xunit;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace Espera.Core.Tests
 {
@@ -22,7 +22,7 @@ namespace Espera.Core.Tests
 
                 var song = MobileSong.Create(metadata, Observable.Never<byte[]>(), fileSystem);
 
-                Assert.Equal(0, fileSystem.FileInfo.FromFileName(song.PlaybackPath).Length);
+                Assert.AreEqual(0, fileSystem.FileInfo.FromFileName(song.PlaybackPath).Length);
             }
 
             [Fact]
@@ -35,8 +35,8 @@ namespace Espera.Core.Tests
 
                 DirectoryInfoBase tempDir = fileSystem.DirectoryInfo.FromDirectoryName(fileSystem.Path.GetTempPath());
 
-                Assert.Equal(song.OriginalPath, tempDir.GetFiles().First().FullName);
-                Assert.Equal(song.PlaybackPath, tempDir.GetFiles().First().FullName);
+                Assert.AreEqual(song.OriginalPath, tempDir.GetFiles().First().FullName);
+                Assert.AreEqual(song.PlaybackPath, tempDir.GetFiles().First().FullName);
             }
 
             [Fact]
@@ -48,7 +48,7 @@ namespace Espera.Core.Tests
 
                 var song = MobileSong.Create(metadata, Observable.Return(data), fileSystem);
 
-                Assert.Equal(data, fileSystem.File.ReadAllBytes(song.PlaybackPath));
+                Assert.AreEqual(data, fileSystem.File.ReadAllBytes(song.PlaybackPath));
             }
         }
 
@@ -61,14 +61,14 @@ namespace Espera.Core.Tests
                 var data = new Subject<byte[]>();
                 var song = MobileSong.Create(metadata, data, new MockFileSystem());
 
-                Task awaiter = song.PrepareAsync(YoutubeStreamingQuality.Low);
+                var awaiter = song.PrepareAsync(YoutubeStreamingQuality.Low);
 
-                Assert.False(awaiter.IsCompleted);
+                Assert.IsFalse(awaiter.IsCompleted);
 
                 data.OnNext(new byte[] { 0, 1 });
                 data.OnCompleted();
 
-                Assert.True(awaiter.IsCompleted);
+                Assert.IsTrue(awaiter.IsCompleted);
             }
         }
     }

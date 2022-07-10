@@ -7,20 +7,23 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using Espera.View.ViewModels;
 using ReactiveUI;
+using EventsMixin = System.Windows.EventsMixin;
 
 namespace Espera.View.Views
 {
     public partial class YoutubeView : IViewFor<YoutubeViewModel>
     {
-        public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register("ViewModel", typeof(YoutubeViewModel), typeof(YoutubeView));
+        public static readonly DependencyProperty ViewModelProperty =
+            DependencyProperty.Register("ViewModel", typeof(YoutubeViewModel), typeof(YoutubeView));
 
         public YoutubeView()
         {
             InitializeComponent();
 
-            this.Events().DataContextChanged.Subscribe(x => this.ViewModel = (YoutubeViewModel)x.NewValue);
+            EventsMixin.Events(this).DataContextChanged.Subscribe(x => ViewModel = (YoutubeViewModel)x.NewValue);
 
-            this.YoutubeSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x))
+            YoutubeSongs.ItemContainerStyle
+                .RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x))
                 .Where(x => x.Item2.LeftButton == MouseButtonState.Pressed)
                 .Subscribe(x =>
                 {
@@ -28,20 +31,20 @@ namespace Espera.View.Views
                     DragDrop.DoDragDrop((ListViewItem)x.Item1, DragDropHelper.SongSourceFormat, DragDropEffects.Link);
                 });
 
-            this.YoutubeSongs.Events().ContextMenuOpening.Where(_ => !this.ViewModel.SelectableSongs.Any())
+            EventsMixin.Events(YoutubeSongs).ContextMenuOpening.Where(_ => !ViewModel.SelectableSongs.Any())
                 .Subscribe(x => x.Handled = true);
         }
 
         object IViewFor.ViewModel
         {
-            get { return ViewModel; }
-            set { ViewModel = (YoutubeViewModel)value; }
+            get => ViewModel;
+            set => ViewModel = (YoutubeViewModel)value;
         }
 
         public YoutubeViewModel ViewModel
         {
-            get { return (YoutubeViewModel)this.GetValue(ViewModelProperty); }
-            set { this.SetValue(ViewModelProperty, value); }
+            get => (YoutubeViewModel)this.GetValue(ViewModelProperty);
+            set => this.SetValue(ViewModelProperty, value);
         }
 
         private void ExternalPathLeftMouseButtonDown(object sender, MouseButtonEventArgs e)
@@ -58,24 +61,18 @@ namespace Espera.View.Views
 
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            IReactiveCommand command = this.ViewModel.DefaultPlaybackCommand;
+            IReactiveCommand command = ViewModel.DefaultPlaybackCommand;
 
-            if (e.LeftButton == MouseButtonState.Pressed && command.CanExecute(null))
-            {
-                command.Execute(null);
-            }
+            if (e.LeftButton == MouseButtonState.Pressed && command.CanExecute(null)) command.Execute(null);
         }
 
         private void SongKeyPressed(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                IReactiveCommand command = this.ViewModel.DefaultPlaybackCommand;
+                IReactiveCommand command = ViewModel.DefaultPlaybackCommand;
 
-                if (command.CanExecute(null))
-                {
-                    command.Execute(null);
-                }
+                if (command.CanExecute(null)) command.Execute(null);
 
                 e.Handled = true;
             }

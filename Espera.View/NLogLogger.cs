@@ -1,11 +1,11 @@
-﻿using NLog;
-using Splat;
-using System;
+﻿using System;
+using NLog;
+using NuGet;
 using LogLevel = Splat.LogLevel;
 
 namespace Espera.View
 {
-    internal class NLogLogger : ILogger
+    internal class NLogLogger : Splat.ILogger
     {
         private readonly Logger logger;
 
@@ -46,5 +46,6 @@ namespace Espera.View
 
             throw new NotImplementedException("LogLevel isn't implemented");
         }
+
     }
 }

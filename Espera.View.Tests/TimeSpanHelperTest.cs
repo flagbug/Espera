@@ -10,7 +10,7 @@ namespace Espera.View.Tests
         {
             var timeSpan = new TimeSpan(0, 3, 5, 10);
 
-            string formatted = timeSpan.FormatAdaptive();
+            var formatted = timeSpan.FormatAdaptive();
 
             Assert.Equal("03:05:10", formatted);
         }
@@ -20,7 +20,7 @@ namespace Espera.View.Tests
         {
             var timeSpan = TimeSpan.FromMinutes(5).Add(TimeSpan.FromSeconds(10));
 
-            string formatted = timeSpan.FormatAdaptive();
+            var formatted = timeSpan.FormatAdaptive();
 
             Assert.Equal("05:10", formatted);
         }

@@ -9,10 +9,7 @@ namespace Espera.Core.Audio
     {
         public TimeSpan CurrentTime { get; set; }
 
-        public IObservable<Unit> Finished
-        {
-            get { return Observable.Never<Unit>(); }
-        }
+        public IObservable<Unit> Finished => Observable.Never<Unit>();
 
         public Task LoadAsync(Uri uri)
         {
@@ -30,7 +27,8 @@ namespace Espera.Core.Audio
         }
 
         public void SetVolume(float volume)
-        { }
+        {
+        }
 
         public Task StopAsync()
         {

@@ -1,16 +1,15 @@
-﻿using Akavache;
+﻿using System;
+using System.Collections.Generic;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
+using System.Threading.Tasks;
+using Akavache;
 using Espera.Core;
 using Espera.Core.Analytics;
 using ReactiveUI;
 using Splat;
 using Squirrel;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
 
 namespace Espera.View.ViewModels
 {
@@ -28,36 +27,34 @@ namespace Espera.View.ViewModels
                 throw new ArgumentNullException("settings");
 
             this.settings = settings;
-            this.updateManager = updateManager ?? new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45);
+            this.updateManager =
+                updateManager ?? new UpdateManager(AppInfo.UpdatePath, "Espera", FrameworkVersion.Net45);
 
-            this.updateLock = new object();
+            updateLock = new object();
 
-            this.CheckForUpdate = ReactiveCommand.CreateAsyncTask(_ => this.UpdateSilentlyAsync());
+            CheckForUpdate = ReactiveCommand.CreateAsyncTask(_ => UpdateSilentlyAsync());
 
-            this.shouldRestart = this.settings.WhenAnyValue(x => x.IsUpdated)
+            shouldRestart = this.settings.WhenAnyValue(x => x.IsUpdated)
                 .ToProperty(this, x => x.ShouldRestart);
 
-            this.Restart = ReactiveCommand.CreateAsyncTask(_ => Task.Run(() => UpdateManager.RestartApp()));
+            Restart = ReactiveCommand.CreateAsyncTask(_ => Task.Run(() => UpdateManager.RestartApp()));
 
             Observable.Interval(TimeSpan.FromHours(2), RxApp.TaskpoolScheduler)
                 .StartWith(0) // Trigger an initial update check
-                .InvokeCommand(this.CheckForUpdate);
+                .InvokeCommand(CheckForUpdate);
         }
 
         /// <summary>
-        /// Checks the server if an update is available and applies the update if there is one.
+        ///     Checks the server if an update is available and applies the update if there is one.
         /// </summary>
-        public ReactiveCommand<Unit> CheckForUpdate { get; private set; }
+        public ReactiveCommand<Unit> CheckForUpdate { get; }
 
         /// <summary>
-        /// Used in the changelog dialog to opt-out of the automatic changelog.
+        ///     Used in the changelog dialog to opt-out of the automatic changelog.
         /// </summary>
         public bool DisableChangelog { get; set; }
 
-        public string PortableDownloadLink
-        {
-            get { return "http://getespera.com/EsperaPortable.zip"; }
-        }
+        public string PortableDownloadLink => "http://getespera.com/EsperaPortable.zip";
 
         public IEnumerable<ChangelogReleaseEntry> ReleaseEntries
         {
@@ -69,39 +66,30 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public ReactiveCommand<Unit> Restart { get; private set; }
+        public ReactiveCommand<Unit> Restart { get; }
 
-        public bool ShouldRestart
-        {
-            get { return this.shouldRestart.Value; }
-        }
+        public bool ShouldRestart => shouldRestart.Value;
 
-        public bool ShowChangelog
+        public bool ShowChangelog => settings.IsUpdated && settings.EnableChangelog;
+
+        public void Dispose()
         {
-            get { return this.settings.IsUpdated && this.settings.EnableChangelog; }
+            updateManager.Dispose();
         }
 
         public void ChangelogShown()
         {
-            this.settings.EnableChangelog = !this.DisableChangelog;
+            settings.EnableChangelog = !DisableChangelog;
         }
 
         public void DismissUpdateNotification()
         {
             // We don't want to overwrite the update status if the update manager already downloaded
             // the update
-            lock (this.updateLock)
+            lock (updateLock)
             {
-                if (!this.updateRun)
-                {
-                    this.settings.IsUpdated = false;
-                }
+                if (!updateRun) settings.IsUpdated = false;
             }
-        }
-
-        public void Dispose()
-        {
-            this.updateManager.Dispose();
         }
 
         private async Task UpdateSilentlyAsync()
@@ -116,7 +104,7 @@ namespace Espera.View.ViewModels
 
             try
             {
-                appliedEntry = await this.updateManager.UpdateApp();
+                appliedEntry = await updateManager.UpdateApp();
             }
 
             catch (Exception ex)
@@ -138,10 +126,10 @@ namespace Espera.View.ViewModels
                 .LoggedCatch(this, Observable.Return(Unit.Default), "Could not to fetch changelog")
                 .ToTask();
 
-            lock (this.updateLock)
+            lock (updateLock)
             {
-                this.updateRun = true;
-                this.settings.IsUpdated = true;
+                updateRun = true;
+                settings.IsUpdated = true;
             }
 
             this.Log().Info("Updated to version {0}", appliedEntry.Version);

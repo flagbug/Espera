@@ -25,7 +25,8 @@
                   ItemsSource="{Binding Path=SelectableSongs}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
-                    <i:InvokeCommandAction Command="{Binding Path=SelectionChangedCommand}" CommandParameter="{Binding ElementName=SoundCloudSongs, Path=SelectedItems}" />
+                    <i:InvokeCommandAction Command="{Binding Path=SelectionChangedCommand}"
+                                           CommandParameter="{Binding ElementName=SoundCloudSongs, Path=SelectedItems}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <ListView.Style>
@@ -98,7 +99,8 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock>
-                                    <Hyperlink PreviewMouseLeftButtonDown="ExternalPathLeftMouseButtonDown" PreviewMouseLeftButtonUp="ExternalPathLeftMouseButtonUp">
+                                    <Hyperlink PreviewMouseLeftButtonDown="ExternalPathLeftMouseButtonDown"
+                                               PreviewMouseLeftButtonUp="ExternalPathLeftMouseButtonUp">
                                         <TextBlock Foreground="{DynamicResource BlackColorBrush}"
                                                    Text="{Binding Path=Path}"
                                                    TextDecorations="Underline"

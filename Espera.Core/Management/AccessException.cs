@@ -3,5 +3,6 @@
 namespace Espera.Core.Management
 {
     public class AccessException : Exception
-    { }
+    {
+    }
 }

@@ -21,7 +21,6 @@ namespace Espera.View.ViewModels
         private readonly CompositeDisposable disposable;
         private readonly IReactiveDerivedList<PlaylistEntryViewModel> entries;
         private readonly Library library;
-        private readonly Playlist playlist;
         private readonly ObservableAsPropertyHelper<int> songsRemaining;
         private readonly ObservableAsPropertyHelper<TimeSpan?> timeRemaining;
         private bool editName;
@@ -40,116 +39,119 @@ namespace Espera.View.ViewModels
             if (coreSettings == null)
                 throw new ArgumentNullException("coreSettings");
 
-            this.playlist = playlist;
+            this.Model = playlist;
             this.library = library;
 
-            this.disposable = new CompositeDisposable();
+            disposable = new CompositeDisposable();
 
-            this.entries = playlist
+            entries = playlist
                 .CreateDerivedCollection(entry => new PlaylistEntryViewModel(entry), x => x.Dispose())
-                .DisposeWith(this.disposable);
+                .DisposeWith(disposable);
 
-            this.playlist.WhenAnyValue(x => x.CurrentSongIndex).ToUnit()
-                .Merge(this.entries.Changed.ToUnit())
-                .Subscribe(_ => this.UpdateCurrentSong())
-                .DisposeWith(this.disposable);
+            this.Model.WhenAnyValue(x => x.CurrentSongIndex).ToUnit()
+                .Merge(entries.Changed.ToUnit())
+                .Subscribe(_ => UpdateCurrentSong())
+                .DisposeWith(disposable);
 
-            IObservable<List<PlaylistEntryViewModel>> remainingSongs = this.entries.Changed
+            IObservable<List<PlaylistEntryViewModel>> remainingSongs = entries.Changed
                 .Select(x => Unit.Default)
-                .Merge(this.playlist.WhenAnyValue(x => x.CurrentSongIndex).ToUnit())
-                .Select(x => this.entries.Reverse().TakeWhile(entry => !entry.IsPlaying).ToList());
+                .Merge(this.Model.WhenAnyValue(x => x.CurrentSongIndex).ToUnit())
+                .Select(x => entries.Reverse().TakeWhile(entry => !entry.IsPlaying).ToList());
 
-            this.songsRemaining = remainingSongs
+            songsRemaining = remainingSongs
                 .Select(x => x.Count)
                 .ToProperty(this, x => x.SongsRemaining)
-                .DisposeWith(this.disposable);
+                .DisposeWith(disposable);
 
-            this.timeRemaining = remainingSongs
-                .Select(x => x.Any() ? x.Select(entry => entry.Duration).Aggregate((t1, t2) => t1 + t2) : (TimeSpan?)null)
+            timeRemaining = remainingSongs
+                .Select(x =>
+                    x.Any() ? x.Select(entry => entry.Duration).Aggregate((t1, t2) => t1 + t2) : (TimeSpan?)null)
                 .ToProperty(this, x => x.TimeRemaining)
-                .DisposeWith(this.disposable);
+                .DisposeWith(disposable);
 
-            this.CurrentPlayingEntry = this.Model.WhenAnyValue(x => x.CurrentSongIndex).Select(x => x == null ? null : this.entries[x.Value]);
+            CurrentPlayingEntry = Model.WhenAnyValue(x => x.CurrentSongIndex)
+                .Select(x => x == null ? null : entries[x.Value]);
 
-            this.canAlterPlaylist = this.library.LocalAccessControl.HasAccess(coreSettings.WhenAnyValue(x => x.LockPlaylist), accessToken)
+            this.canAlterPlaylist = this.library.LocalAccessControl
+                .HasAccess(coreSettings.WhenAnyValue(x => x.LockPlaylist), accessToken)
                 .ToProperty(this, x => x.CanAlterPlaylist)
                 .DisposeWith(disposable);
 
             // We re-evaluate the selected entries after each up or down move here, because WPF
             // doesn't send us proper updates about the selection
             var reEvaluateSelectedPlaylistEntry = new Subject<Unit>();
-            this.MovePlaylistSongUpCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedEntries)
-                .Merge(reEvaluateSelectedPlaylistEntry.Select(_ => this.SelectedEntries))
+            MovePlaylistSongUpCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedEntries)
+                .Merge(reEvaluateSelectedPlaylistEntry.Select(_ => SelectedEntries))
                 .Select(x => x != null && x.Count() == 1 && x.First().Index > 0)
-                .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveUp, canAlterPlaylist) => canMoveUp && canAlterPlaylist));
-            this.MovePlaylistSongUpCommand.Subscribe(_ =>
+                .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist),
+                    (canMoveUp, canAlterPlaylist) => canMoveUp && canAlterPlaylist));
+            MovePlaylistSongUpCommand.Subscribe(_ =>
             {
-                int index = this.SelectedEntries.First().Index;
+                int index = SelectedEntries.First().Index;
                 this.library.MovePlaylistSong(index, index - 1, accessToken);
                 reEvaluateSelectedPlaylistEntry.OnNext(Unit.Default);
             });
 
-            this.MovePlaylistSongDownCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedEntries)
-                .Merge(reEvaluateSelectedPlaylistEntry.Select(_ => this.SelectedEntries))
-                .Select(x => x != null && x.Count() == 1 && x.First().Index < this.Songs.Count - 1)
-                .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveDown, canAlterPlaylist) => canMoveDown && canAlterPlaylist));
-            this.MovePlaylistSongDownCommand.Subscribe(_ =>
+            MovePlaylistSongDownCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedEntries)
+                .Merge(reEvaluateSelectedPlaylistEntry.Select(_ => SelectedEntries))
+                .Select(x => x != null && x.Count() == 1 && x.First().Index < Songs.Count - 1)
+                .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist),
+                    (canMoveDown, canAlterPlaylist) => canMoveDown && canAlterPlaylist));
+            MovePlaylistSongDownCommand.Subscribe(_ =>
             {
-                int index = this.SelectedEntries.First().Index;
+                int index = SelectedEntries.First().Index;
                 this.library.MovePlaylistSong(index, index + 1, accessToken);
                 reEvaluateSelectedPlaylistEntry.OnNext(Unit.Default);
             });
 
-            this.MovePlaylistSongCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedEntries)
-                .Merge(reEvaluateSelectedPlaylistEntry.Select(_ => this.SelectedEntries))
+            MovePlaylistSongCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedEntries)
+                .Merge(reEvaluateSelectedPlaylistEntry.Select(_ => SelectedEntries))
                 .Select(x => x != null && x.Count() == 1)
-                .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist), (canMoveUp, canAlterPlaylist) => canMoveUp && canAlterPlaylist));
-            this.MovePlaylistSongCommand.Subscribe(x =>
+                .CombineLatest(this.WhenAnyValue(x => x.CanAlterPlaylist),
+                    (canMoveUp, canAlterPlaylist) => canMoveUp && canAlterPlaylist));
+            MovePlaylistSongCommand.Subscribe(x =>
             {
-                int fromIndex = this.SelectedEntries.First().Index;
-                int toIndex = (int?)x ?? this.Songs.Last().Index + 1;
+                int fromIndex = SelectedEntries.First().Index;
+                var toIndex = (int?)x ?? Songs.Last().Index + 1;
 
                 // If we move a song from the front of the playlist to the back, we want it move be
                 // in front of the target song
-                if (fromIndex < toIndex)
-                {
-                    toIndex--;
-                }
+                if (fromIndex < toIndex) toIndex--;
 
                 this.library.MovePlaylistSong(fromIndex, toIndex, accessToken);
                 reEvaluateSelectedPlaylistEntry.OnNext(Unit.Default);
             });
 
-            this.RemoveSelectedPlaylistEntriesCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedEntries, x => x.CanAlterPlaylist,
-                (selectedPlaylistEntries, canAlterPlaylist) => selectedPlaylistEntries != null && selectedPlaylistEntries.Any() && canAlterPlaylist));
-            this.RemoveSelectedPlaylistEntriesCommand.Subscribe(x => this.library.RemoveFromPlaylist(this.SelectedEntries.Select(entry => entry.Index), accessToken));
+            RemoveSelectedPlaylistEntriesCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedEntries,
+                x => x.CanAlterPlaylist,
+                (selectedPlaylistEntries, canAlterPlaylist) => selectedPlaylistEntries != null &&
+                                                               selectedPlaylistEntries.Any() && canAlterPlaylist));
+            RemoveSelectedPlaylistEntriesCommand.Subscribe(x =>
+                this.library.RemoveFromPlaylist(SelectedEntries.Select(entry => entry.Index), accessToken));
         }
 
-        public bool CanAlterPlaylist
-        {
-            get { return this.canAlterPlaylist.Value; }
-        }
+        public bool CanAlterPlaylist => canAlterPlaylist.Value;
 
-        public IObservable<PlaylistEntryViewModel> CurrentPlayingEntry { get; private set; }
+        public IObservable<PlaylistEntryViewModel> CurrentPlayingEntry { get; }
 
         public bool EditName
         {
-            get { return this.editName; }
+            get => editName;
             set
             {
-                if (this.EditName != value)
+                if (EditName != value)
                 {
-                    this.editName = value;
+                    editName = value;
 
-                    if (this.EditName)
+                    if (EditName)
                     {
-                        this.saveName = this.Name;
+                        saveName = Name;
                     }
 
                     else if (this.HasErrors())
                     {
-                        this.Name = this.saveName;
-                        this.saveName = null;
+                        Name = saveName;
+                        saveName = null;
                     }
 
                     this.RaisePropertyChanged();
@@ -157,63 +159,48 @@ namespace Espera.View.ViewModels
             }
         }
 
-        public string Error
-        {
-            get { return null; }
-        }
+        public string Error => null;
 
-        public Playlist Model
-        {
-            get { return this.playlist; }
-        }
+        public Playlist Model { get; }
 
-        public ReactiveCommand<object> MovePlaylistSongCommand { get; private set; }
+        public ReactiveCommand<object> MovePlaylistSongCommand { get; }
 
-        public ReactiveCommand<object> MovePlaylistSongDownCommand { get; private set; }
+        public ReactiveCommand<object> MovePlaylistSongDownCommand { get; }
 
-        public ReactiveCommand<object> MovePlaylistSongUpCommand { get; private set; }
+        public ReactiveCommand<object> MovePlaylistSongUpCommand { get; }
 
         public string Name
         {
-            get { return this.playlist.IsTemporary ? "Now Playing" : this.playlist.Name; }
+            get => Model.IsTemporary ? "Now Playing" : Model.Name;
             set
             {
-                if (this.Name != value)
+                if (Name != value)
                 {
-                    this.playlist.Name = value;
+                    Model.Name = value;
                     this.RaisePropertyChanged();
                 }
             }
         }
 
-        public ReactiveCommand<object> RemoveSelectedPlaylistEntriesCommand { get; private set; }
+        public ReactiveCommand<object> RemoveSelectedPlaylistEntriesCommand { get; }
 
         public IEnumerable<PlaylistEntryViewModel> SelectedEntries
         {
-            get { return this.selectedEntries ?? Enumerable.Empty<PlaylistEntryViewModel>(); }
-            set { this.RaiseAndSetIfChanged(ref this.selectedEntries, value); }
+            get => selectedEntries ?? Enumerable.Empty<PlaylistEntryViewModel>();
+            set => this.RaiseAndSetIfChanged(ref selectedEntries, value);
         }
 
-        public IReadOnlyReactiveCollection<PlaylistEntryViewModel> Songs
-        {
-            get { return this.entries; }
-        }
+        public IReadOnlyReactiveCollection<PlaylistEntryViewModel> Songs => entries;
 
         /// <summary>
-        /// Gets the number of songs that come after the currently played song.
+        ///     Gets the number of songs that come after the currently played song.
         /// </summary>
-        public int SongsRemaining
-        {
-            get { return this.songsRemaining.Value; }
-        }
+        public int SongsRemaining => songsRemaining.Value;
 
         /// <summary>
-        /// Gets the total remaining time of all songs that come after the currently played song.
+        ///     Gets the total remaining time of all songs that come after the currently played song.
         /// </summary>
-        public TimeSpan? TimeRemaining
-        {
-            get { return this.timeRemaining.Value; }
-        }
+        public TimeSpan? TimeRemaining => timeRemaining.Value;
 
         public string this[string columnName]
         {
@@ -221,17 +208,12 @@ namespace Espera.View.ViewModels
             {
                 string error = null;
 
-                if (columnName == Reflector.GetMemberName(() => this.Name))
+                if (columnName == Reflector.GetMemberName(() => Name))
                 {
-                    if (this.library.Playlists.Count(p => p.Name == this.Name) > 1)
-                    {
+                    if (library.Playlists.Count(p => p.Name == Name) > 1)
                         error = "Name already exists.";
-                    }
 
-                    else if (String.IsNullOrWhiteSpace(this.Name))
-                    {
-                        error = "Name cannot be empty or whitespace.";
-                    }
+                    else if (string.IsNullOrWhiteSpace(Name)) error = "Name cannot be empty or whitespace.";
                 }
 
                 return error;
@@ -240,29 +222,20 @@ namespace Espera.View.ViewModels
 
         public void Dispose()
         {
-            this.disposable.Dispose();
+            disposable.Dispose();
 
-            foreach (PlaylistEntryViewModel entry in entries)
-            {
-                entry.Dispose();
-            }
+            foreach (PlaylistEntryViewModel entry in entries) entry.Dispose();
         }
 
         private void UpdateCurrentSong()
         {
-            foreach (PlaylistEntryViewModel entry in entries)
-            {
-                entry.IsPlaying = false;
-            }
+            foreach (PlaylistEntryViewModel entry in entries) entry.IsPlaying = false;
 
-            if (this.playlist.CurrentSongIndex.HasValue)
+            if (Model.CurrentSongIndex.HasValue)
             {
-                PlaylistEntryViewModel entry = this.entries[this.playlist.CurrentSongIndex.Value];
+                PlaylistEntryViewModel entry = entries[Model.CurrentSongIndex.Value];
 
-                if (!entry.IsCorrupted)
-                {
-                    entry.IsPlaying = true;
-                }
+                if (!entry.IsCorrupted) entry.IsPlaying = true;
             }
         }
     }

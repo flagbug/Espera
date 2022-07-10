@@ -10,10 +10,7 @@ namespace Espera.Core.Analytics
         {
             // Xamarin Insights can only be terminated if it has been started before, otherwise it
             // throws an exception
-            if (Insights.IsInitialized)
-            {
-                Insights.Terminate();
-            }
+            if (Insights.IsInitialized) Insights.Terminate();
         }
 
         public void Identify(IDictionary<string, string> traits = null)
@@ -23,7 +20,8 @@ namespace Espera.Core.Analytics
 
         public void Initialize()
         {
-            Insights.Initialize("ed4fea5ffb4fa2a1d36acfeb3df4203153d92acf", AppInfo.Version.ToString(), "Espera", AppInfo.BlobCachePath);
+            Insights.Initialize("ed4fea5ffb4fa2a1d36acfeb3df4203153d92acf", AppInfo.Version.ToString(), "Espera",
+                AppInfo.BlobCachePath);
         }
 
         public void ReportBug(string message)

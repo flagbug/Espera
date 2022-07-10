@@ -1,7 +1,7 @@
-﻿using Espera.Core.Analytics;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.Reactive.Linq;
+using Espera.Core.Analytics;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
@@ -11,34 +11,26 @@ namespace Espera.View.ViewModels
 
         public CrashViewModel(Exception exception)
         {
-            this.ReportContent = exception.ToString();
+            ReportContent = exception.ToString();
 
-            this.SubmitCrashReport = ReactiveCommand.CreateAsyncObservable(this.WhenAnyValue(x => x.SendingSucceeded)
+            SubmitCrashReport = ReactiveCommand.CreateAsyncObservable(this.WhenAnyValue(x => x.SendingSucceeded)
                 .Select(x => x == null || !x.Value), _ =>
-                    Observable.Start(() => AnalyticsClient.Instance.RecordCrash(exception), RxApp.TaskpoolScheduler).Select(__ => true));
+                Observable.Start(() => AnalyticsClient.Instance.RecordCrash(exception), RxApp.TaskpoolScheduler)
+                    .Select(__ => true));
 
-            this.sendingSucceeded = this.SubmitCrashReport
+            sendingSucceeded = SubmitCrashReport
                 .Select(x => new bool?(x))
                 .ToProperty(this, x => x.SendingSucceeded);
 
-            if (AnalyticsClient.Instance.EnableAutomaticReports)
-            {
-                this.SubmitCrashReport.Execute(null);
-            }
+            if (AnalyticsClient.Instance.EnableAutomaticReports) SubmitCrashReport.Execute(null);
         }
 
-        public string ReportContent { get; private set; }
+        public string ReportContent { get; }
 
-        public bool? SendingSucceeded
-        {
-            get { return this.sendingSucceeded == null ? null : this.sendingSucceeded.Value; }
-        }
+        public bool? SendingSucceeded => sendingSucceeded == null ? null : sendingSucceeded.Value;
 
-        public bool SendsAutomatically
-        {
-            get { return AnalyticsClient.Instance.EnableAutomaticReports; }
-        }
+        public bool SendsAutomatically => AnalyticsClient.Instance.EnableAutomaticReports;
 
-        public ReactiveCommand<bool> SubmitCrashReport { get; private set; }
+        public ReactiveCommand<bool> SubmitCrashReport { get; }
     }
 }

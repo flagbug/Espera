@@ -1,5 +1,6 @@
 ﻿using System;
 using Xunit;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace Espera.Core.Tests
 {
@@ -10,7 +11,7 @@ namespace Espera.Core.Tests
             [Fact]
             public void ThrowsArgumentNullExceptionIfTagIsNull()
             {
-                Assert.Throws<ArgumentNullException>(() => TagSanitizer.Sanitize(null));
+                Xunit.Assert.Throws<ArgumentNullException>(() => TagSanitizer.Sanitize(null));
             }
 
             [Fact]
@@ -18,9 +19,9 @@ namespace Espera.Core.Tests
             {
                 const string tag = "A\u0018B";
 
-                string sanitized = TagSanitizer.Sanitize(tag);
+                var sanitized = TagSanitizer.Sanitize(tag);
 
-                Assert.Equal("A_B", sanitized);
+                Assert.AreEqual("A_B", sanitized);
             }
         }
     }

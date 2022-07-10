@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace Espera.Core.Management
 {
@@ -20,24 +20,16 @@ namespace Espera.Core.Management
                     Type type;
 
                     if (typeString == "Local")
-                    {
                         type = typeof(LocalSong);
-                    }
 
                     else if (typeString == "YouTube")
-                    {
                         type = typeof(YoutubeSong);
-                    }
 
                     else if (typeString == "SoundCloud")
-                    {
                         type = typeof(SoundCloudSong);
-                    }
 
                     else
-                    {
                         throw new NotImplementedException("Type not implemented.");
-                    }
 
                     TimeSpan? duration = null;
                     string title = null;
@@ -76,29 +68,23 @@ namespace Espera.Core.Management
                 var s = p.Entries.Select(entry =>
                 {
                     if (entry.Type == typeof(YoutubeSong))
-                    {
                         return new YoutubeSong(entry.OriginalPath, entry.Duration.Value)
                         {
                             Title = entry.Title
                         };
-                    }
 
                     if (entry.Type == typeof(SoundCloudSong))
-                    {
                         return new SoundCloudSong(entry.OriginalPath, entry.PlaybackPath)
                         {
                             Artist = entry.Artist,
                             Title = entry.Title,
                             Duration = entry.Duration.Value
                         };
-                    }
 
                     if (entry.Type == typeof(LocalSong))
-                    {
                         // We search for the path locally, so we don't have to serialize data about
                         // local songs
                         return songs.First(song => song.OriginalPath == entry.OriginalPath);
-                    }
 
                     throw new NotImplementedException();
                 });

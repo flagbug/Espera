@@ -1,14 +1,13 @@
-﻿using Espera.View.ViewModels;
-using Ookii.Dialogs.Wpf;
-using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Espera.View.ViewModels;
+using Ookii.Dialogs.Wpf;
 
 namespace Espera.View.Views
 {
     /// <summary>
-    /// Interaction logic for SettingsView.xaml
+    ///     Interaction logic for SettingsView.xaml
     /// </summary>
     public partial class SettingsView
     {
@@ -29,9 +28,7 @@ namespace Espera.View.Views
             dialog.ShowDialog();
 
             if (!string.IsNullOrWhiteSpace(dialog.SelectedPath))
-            {
                 ((SettingsViewModel)this.DataContext).ChangeLibrarySource(dialog.SelectedPath);
-            }
         }
 
         private void ChangeYoutubeDownloadPath(object sender, RoutedEventArgs e)
@@ -41,21 +38,16 @@ namespace Espera.View.Views
             dialog.ShowDialog();
 
             if (!string.IsNullOrWhiteSpace(dialog.SelectedPath))
-            {
                 ((SettingsViewModel)this.DataContext).YoutubeDownloadPath = dialog.SelectedPath;
-            }
         }
 
         private void CreateAdminButtonClick(object sender, RoutedEventArgs e)
         {
             ICommand command = ((SettingsViewModel)this.DataContext).CreateAdminCommand;
 
-            if (command.CanExecute(null))
-            {
-                command.Execute(null);
-            }
+            if (command.CanExecute(null)) command.Execute(null);
 
-            this.AdminPasswordBox.Password = String.Empty;
+            this.AdminPasswordBox.Password = string.Empty;
         }
 
         private void CreationPasswordChanged(object sender, RoutedEventArgs e)

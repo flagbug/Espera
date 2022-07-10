@@ -6,6 +6,7 @@ namespace Espera.Core
     {
         public NetworkSongFinderException(string message, Exception innerException)
             : base(message, innerException)
-        { }
+        {
+        }
     }
 }

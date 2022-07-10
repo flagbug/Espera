@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 namespace Espera.Core
 {
     /// <summary>
-    /// A semaphore, that holds a one-time lock on a specific key. It also memoizes the keys, so
-    /// once released keys aren't locked when waiting on them the next time.
+    ///     A semaphore, that holds a one-time lock on a specific key. It also memoizes the keys, so
+    ///     once released keys aren't locked when waiting on them the next time.
     /// </summary>
     public class KeyedMemoizingSemaphore
     {
@@ -16,12 +16,12 @@ namespace Espera.Core
 
         public KeyedMemoizingSemaphore()
         {
-            this.keyedSemaphore = new Dictionary<string, AsyncSubject<Unit>>();
+            keyedSemaphore = new Dictionary<string, AsyncSubject<Unit>>();
         }
 
         public void Release(string key)
         {
-            lock (this.keyedSemaphore)
+            lock (keyedSemaphore)
             {
                 AsyncSubject<Unit> semaphore = keyedSemaphore[key];
 
@@ -32,17 +32,14 @@ namespace Espera.Core
 
         public Task Wait(string key)
         {
-            lock (this.keyedSemaphore)
+            lock (keyedSemaphore)
             {
                 AsyncSubject<Unit> semaphore;
 
-                if (this.keyedSemaphore.TryGetValue(key, out semaphore))
-                {
-                    return semaphore.ToTask();
-                }
+                if (keyedSemaphore.TryGetValue(key, out semaphore)) return semaphore.ToTask();
 
                 semaphore = new AsyncSubject<Unit>();
-                this.keyedSemaphore.Add(key, semaphore);
+                keyedSemaphore.Add(key, semaphore);
 
                 return Task.Delay(0);
             }

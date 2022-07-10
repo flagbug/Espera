@@ -1,10 +1,10 @@
-﻿using Espera.Network;
-using Rareform.Validation;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Espera.Network;
+using Rareform.Validation;
 
 namespace Espera.Core
 {
@@ -14,7 +14,7 @@ namespace Espera.Core
         private bool isCorrupted;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Song" /> class.
+        ///     Initializes a new instance of the <see cref="Song" /> class.
         /// </summary>
         /// <param name="path">The path of the song.</param>
         /// <param name="duration">The duration of the song.</param>
@@ -24,17 +24,15 @@ namespace Espera.Core
             if (path == null)
                 throw new ArgumentNullException("path");
 
-            this.OriginalPath = path;
-            this.Duration = duration;
+            OriginalPath = path;
+            Duration = duration;
 
-            this.Album = String.Empty;
-            this.Artist = String.Empty;
-            this.Genre = String.Empty;
-            this.Title = String.Empty;
-            this.Guid = Guid.NewGuid();
+            Album = string.Empty;
+            Artist = string.Empty;
+            Genre = string.Empty;
+            Title = string.Empty;
+            Guid = Guid.NewGuid();
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public string Album { get; set; }
 
@@ -45,23 +43,23 @@ namespace Espera.Core
         public string Genre { get; set; }
 
         /// <summary>
-        /// A runtime identifier for interaction with the mobile API.
+        ///     A runtime identifier for interaction with the mobile API.
         /// </summary>
-        public Guid Guid { get; private set; }
+        public Guid Guid { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the song is corrupted and can't be played.
+        ///     Gets a value indicating whether the song is corrupted and can't be played.
         /// </summary>
         /// <value><c>true</c> if the song is corrupted; otherwise, <c>false</c> .</value>
         public bool IsCorrupted
         {
-            get { return this.isCorrupted; }
+            get => isCorrupted;
             set
             {
-                if (this.isCorrupted != value)
+                if (isCorrupted != value)
                 {
-                    this.isCorrupted = value;
-                    this.OnPropertyChanged();
+                    isCorrupted = value;
+                    OnPropertyChanged();
                 }
             }
         }
@@ -71,12 +69,12 @@ namespace Espera.Core
         public abstract NetworkSongSource NetworkSongSource { get; }
 
         /// <summary>
-        /// Gets the path of the song on the local filesystem, or in the internet.
+        ///     Gets the path of the song on the local filesystem, or in the internet.
         /// </summary>
         public string OriginalPath { get; protected set; }
 
         /// <summary>
-        /// Gets the path to stream the audio from.
+        ///     Gets the path to stream the audio from.
         /// </summary>
         public abstract string PlaybackPath { get; }
 
@@ -84,24 +82,26 @@ namespace Espera.Core
 
         public int TrackNumber { get; set; }
 
-        public override bool Equals(object obj)
-        {
-            return this.Equals(obj as Song);
-        }
-
         public bool Equals(Song other)
         {
-            return other != null && this.OriginalPath == other.OriginalPath;
+            return other != null && OriginalPath == other.OriginalPath;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Song);
         }
 
         public override int GetHashCode()
         {
-            return this.OriginalPath.GetHashCode();
+            return OriginalPath.GetHashCode();
         }
 
         public override string ToString()
         {
-            return String.Format("Title: {0}, Artist: {1}, Path: {2}", this.Title, this.Artist, this.OriginalPath);
+            return string.Format("Title: {0}, Artist: {1}, Path: {2}", Title, Artist, OriginalPath);
         }
 
         public bool UpdateMetadataFrom(Song song)
@@ -109,45 +109,45 @@ namespace Espera.Core
             if (song == null)
                 Throw.ArgumentNullException(() => song);
 
-            if (this.OriginalPath != song.OriginalPath)
+            if (OriginalPath != song.OriginalPath)
                 Throw.ArgumentException("The original path of both songs must be the same", () => song);
 
             // NB: Wow this is dumb
-            bool changed = false;
+            var changed = false;
 
-            if (this.Album != song.Album)
+            if (Album != song.Album)
             {
-                this.Album = song.Album;
+                Album = song.Album;
                 changed = true;
             }
 
-            if (this.Artist != song.Artist)
+            if (Artist != song.Artist)
             {
-                this.Artist = song.Artist;
+                Artist = song.Artist;
                 changed = true;
             }
 
-            if (this.Duration != song.Duration)
+            if (Duration != song.Duration)
             {
-                this.Duration = song.Duration;
+                Duration = song.Duration;
                 changed = true;
             }
 
-            if (this.Genre != song.Genre)
+            if (Genre != song.Genre)
             {
-                this.Genre = song.Genre;
+                Genre = song.Genre;
                 changed = true;
             }
 
-            if (this.Title != song.Title)
+            if (Title != song.Title)
             {
-                this.Title = song.Title;
+                Title = song.Title;
                 changed = true;
             }
 
-            if (this.TrackNumber != song.TrackNumber)
+            if (TrackNumber != song.TrackNumber)
             {
-                this.TrackNumber = song.TrackNumber;
+                TrackNumber = song.TrackNumber;
                 changed = true;
             }
 
@@ -155,7 +155,7 @@ namespace Espera.Core
         }
 
         /// <summary>
-        /// Prepares the song for playback.
+        ///     Prepares the song for playback.
         /// </summary>
         internal virtual Task PrepareAsync(YoutubeStreamingQuality qualityHint)
         {
@@ -164,12 +164,9 @@ namespace Espera.Core
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChangedEventHandler handler = this.PropertyChanged;
+            PropertyChangedEventHandler handler = PropertyChanged;
 
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(propertyName));
-            }
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

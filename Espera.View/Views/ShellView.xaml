@@ -34,7 +34,8 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
+                <ResourceDictionary
+                    Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/FlatSlider.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml " />
                 <ResourceDictionary Source="/Resources/Icons.xaml" />
@@ -222,7 +223,8 @@
     </Controls:MetroWindow.Flyouts>
     <Grid x:Name="mainGrid" Margin="10">
         <Grid.LayoutTransform>
-            <ScaleTransform ScaleX="{Binding Path=SettingsViewModel.Scaling}" ScaleY="{Binding Path=SettingsViewModel.Scaling}" />
+            <ScaleTransform ScaleX="{Binding Path=SettingsViewModel.Scaling}"
+                            ScaleY="{Binding Path=SettingsViewModel.Scaling}" />
         </Grid.LayoutTransform>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -251,7 +253,8 @@
                                         <Setter.Value>
                                             <Rectangle Width="12" Height="12">
                                                 <Rectangle.Fill>
-                                                    <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_control_pause}" />
+                                                    <VisualBrush Stretch="Uniform"
+                                                                 Visual="{StaticResource appbar_control_pause}" />
                                                 </Rectangle.Fill>
                                             </Rectangle>
                                         </Setter.Value>
@@ -263,7 +266,8 @@
                                         <Setter.Value>
                                             <Rectangle Width="12" Height="12">
                                                 <Rectangle.Fill>
-                                                    <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_control_play}" />
+                                                    <VisualBrush Stretch="Uniform"
+                                                                 Visual="{StaticResource appbar_control_play}" />
                                                 </Rectangle.Fill>
                                             </Rectangle>
                                         </Setter.Value>
@@ -376,13 +380,16 @@
                 <ColumnDefinition Width="300" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Grid Grid.Column="0" Visibility="{Binding Path=IsLocal, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid Grid.Column="0"
+                  Visibility="{Binding Path=IsLocal, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Views:ArtistsView DataContext="{Binding Path=LocalViewModel}" />
             </Grid>
-            <Grid Grid.Column="0" Visibility="{Binding Path=IsYoutube, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid Grid.Column="0"
+                  Visibility="{Binding Path=IsYoutube, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Views:NetworkSongDetailView DataContext="{Binding Path=YoutubeViewModel}" Header="video info" />
             </Grid>
-            <Grid Grid.Column="0" Visibility="{Binding Path=IsSoundCloud, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid Grid.Column="0"
+                  Visibility="{Binding Path=IsSoundCloud, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Views:NetworkSongDetailView DataContext="{Binding Path=SoundCloudViewModel}" Header="song info" />
             </Grid>
             <Grid Grid.Column="1">
@@ -442,13 +449,16 @@
                                                                     ValidatesOnDataErrors=True,
                                                                     UpdateSourceTrigger=PropertyChanged}">
                                                 <TextBox.Style>
-                                                    <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="{x:Type TextBox}">
+                                                    <Style BasedOn="{StaticResource {x:Type TextBox}}"
+                                                           TargetType="{x:Type TextBox}">
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Path=EditName}" Value="False">
+                                                            <DataTrigger Binding="{Binding Path=EditName}"
+                                                                         Value="False">
                                                                 <Setter Property="Visibility" Value="Collapsed" />
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Path=EditName}" Value="True">
-                                                                <Setter Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={x:Static RelativeSource.Self}}" />
+                                                                <Setter Property="FocusManager.FocusedElement"
+                                                                        Value="{Binding RelativeSource={x:Static RelativeSource.Self}}" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -467,10 +477,12 @@
                                             </TextBlock>
                                         </Grid>
                                         <StackPanel Margin="0, 5, 0, 0" Orientation="Horizontal">
-                                            <TextBlock Style="{StaticResource ArtistInfoStyle}" Text="{Binding Path=Songs.Count}" />
+                                            <TextBlock Style="{StaticResource ArtistInfoStyle}"
+                                                       Text="{Binding Path=Songs.Count}" />
                                             <TextBlock>
                                                 <TextBlock.Style>
-                                                    <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
+                                                    <Style BasedOn="{StaticResource ArtistInfoStyle}"
+                                                           TargetType="{x:Type TextBlock}">
                                                         <Setter Property="Text" Value=" Songs" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding Path=Songs.Count}" Value="1">
@@ -570,9 +582,12 @@
                         <ListBox.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Command="{Binding Path=PlayOverrideCommand}" Header="Play" />
-                                <MenuItem Command="{Binding Path=CurrentPlaylist.RemoveSelectedPlaylistEntriesCommand}" Header="Remove" />
-                                <MenuItem Command="{Binding Path=CurrentPlaylist.MovePlaylistSongUpCommand}" Header="Move Up" />
-                                <MenuItem Command="{Binding Path=CurrentPlaylist.MovePlaylistSongDownCommand}" Header="Move Down" />
+                                <MenuItem Command="{Binding Path=CurrentPlaylist.RemoveSelectedPlaylistEntriesCommand}"
+                                          Header="Remove" />
+                                <MenuItem Command="{Binding Path=CurrentPlaylist.MovePlaylistSongUpCommand}"
+                                          Header="Move Up" />
+                                <MenuItem Command="{Binding Path=CurrentPlaylist.MovePlaylistSongDownCommand}"
+                                          Header="Move Down" />
                             </ContextMenu>
                         </ListBox.ContextMenu>
                         <ListBox.ItemContainerStyle>
@@ -589,27 +604,33 @@
                                     <StackPanel.Triggers>
                                         <EventTrigger RoutedEvent="StackPanel.DragEnter">
                                             <BeginStoryboard>
-                                                <Storyboard TargetProperty="Visibility" TargetName="PlaylistItemDragIndicator">
+                                                <Storyboard TargetProperty="Visibility"
+                                                            TargetName="PlaylistItemDragIndicator">
                                                     <ObjectAnimationUsingKeyFrames>
-                                                        <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}" />
+                                                        <DiscreteObjectKeyFrame KeyTime="0"
+                                                            Value="{x:Static Visibility.Visible}" />
                                                     </ObjectAnimationUsingKeyFrames>
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </EventTrigger>
                                         <EventTrigger RoutedEvent="StackPanel.DragLeave">
                                             <BeginStoryboard>
-                                                <Storyboard TargetProperty="Visibility" TargetName="PlaylistItemDragIndicator">
+                                                <Storyboard TargetProperty="Visibility"
+                                                            TargetName="PlaylistItemDragIndicator">
                                                     <ObjectAnimationUsingKeyFrames>
-                                                        <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Collapsed}" />
+                                                        <DiscreteObjectKeyFrame KeyTime="0"
+                                                            Value="{x:Static Visibility.Collapsed}" />
                                                     </ObjectAnimationUsingKeyFrames>
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </EventTrigger>
                                         <EventTrigger RoutedEvent="StackPanel.Drop">
                                             <BeginStoryboard>
-                                                <Storyboard TargetProperty="Visibility" TargetName="PlaylistItemDragIndicator">
+                                                <Storyboard TargetProperty="Visibility"
+                                                            TargetName="PlaylistItemDragIndicator">
                                                     <ObjectAnimationUsingKeyFrames>
-                                                        <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Collapsed}" />
+                                                        <DiscreteObjectKeyFrame KeyTime="0"
+                                                            Value="{x:Static Visibility.Collapsed}" />
                                                     </ObjectAnimationUsingKeyFrames>
                                                 </Storyboard>
                                             </BeginStoryboard>
@@ -631,7 +652,8 @@
                                                        Visibility="{Binding Path=IsPlaying,
                                                                             Converter={StaticResource BooleanToVisibilityConverter}}">
                                                 <Rectangle.Fill>
-                                                    <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_sound_3}" />
+                                                    <VisualBrush Stretch="Uniform"
+                                                                 Visual="{StaticResource appbar_sound_3}" />
                                                 </Rectangle.Fill>
                                             </Rectangle>
                                             <Rectangle Width="15"
@@ -640,7 +662,8 @@
                                                        Visibility="{Binding Path=IsCorrupted,
                                                                             Converter={StaticResource BooleanToVisibilityConverter}}">
                                                 <Rectangle.Fill>
-                                                    <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_close}" />
+                                                    <VisualBrush Stretch="Uniform"
+                                                                 Visual="{StaticResource appbar_close}" />
                                                 </Rectangle.Fill>
                                             </Rectangle>
                                         </Grid>
@@ -660,13 +683,17 @@
                                                            HorizontalAlignment="Left"
                                                            TextTrimming="CharacterEllipsis">
                                                     <TextBlock.Style>
-                                                        <Style BasedOn="{StaticResource ArtistInfoStyle}" TargetType="{x:Type TextBlock}">
+                                                        <Style BasedOn="{StaticResource ArtistInfoStyle}"
+                                                               TargetType="{x:Type TextBlock}">
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Path=IsYoutube}" Value="True">
+                                                                <DataTrigger Binding="{Binding Path=IsYoutube}"
+                                                                             Value="True">
                                                                     <Setter Property="Text" Value="YouTube" />
                                                                 </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Path=IsYoutube}" Value="False">
-                                                                    <Setter Property="Text" Value="{Binding Path=Artist}" />
+                                                                <DataTrigger Binding="{Binding Path=IsYoutube}"
+                                                                             Value="False">
+                                                                    <Setter Property="Text"
+                                                                            Value="{Binding Path=Artist}" />
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
@@ -704,7 +731,8 @@
                             </TextBlock.Style>
                         </TextBlock>
                         <TextBlock Text=" remaining, with " />
-                        <TextBlock Text="{Binding Path=CurrentPlaylist.TimeRemaining.TotalMinutes, FallbackValue=0, StringFormat=\{0:0.0\}}" />
+                        <TextBlock
+                            Text="{Binding Path=CurrentPlaylist.TimeRemaining.TotalMinutes, FallbackValue=0, StringFormat=\{0:0.0\}}" />
                         <TextBlock Text=" minutes play time" />
                     </StackPanel>
                 </Grid>

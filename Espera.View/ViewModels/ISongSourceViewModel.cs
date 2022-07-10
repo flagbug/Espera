@@ -9,9 +9,8 @@ namespace Espera.View.ViewModels
     internal interface ISongSourceViewModel : INotifyPropertyChanged
     {
         /// <summary>
-        /// Adds the selected songs to the playlist.
-        ///
-        /// The parameter is an optional integer that specifies the target index of the song in the playlist.
+        ///     Adds the selected songs to the playlist.
+        ///     The parameter is an optional integer that specifies the target index of the song in the playlist.
         /// </summary>
         ReactiveCommand<object> AddToPlaylistCommand { get; }
 

@@ -10,7 +10,8 @@ namespace Espera.Core.Management
 {
     internal static class LibrarySerializer
     {
-        public static void Serialize(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists, string songSourcePath, Stream targetStream)
+        public static void Serialize(IEnumerable<LocalSong> songs, IEnumerable<Playlist> playlists,
+            string songSourcePath, Stream targetStream)
         {
             var json = JObject.FromObject(new
             {
@@ -51,24 +52,16 @@ namespace Espera.Core.Management
             string type;
 
             if (song is LocalSong)
-            {
                 type = "Local";
-            }
 
             else if (song is YoutubeSong)
-            {
                 type = "YouTube";
-            }
 
             else if (song is SoundCloudSong)
-            {
                 type = "SoundCloud";
-            }
 
             else
-            {
                 throw new NotImplementedException("Song type not implemented.");
-            }
 
             return new
             {
