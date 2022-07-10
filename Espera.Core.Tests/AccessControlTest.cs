@@ -5,6 +5,7 @@ using Espera.Core.Management;
 using Espera.Core.Settings;
 using ReactiveUI;
 using Xunit;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace Espera.Core.Tests
 {
@@ -21,31 +22,31 @@ namespace Espera.Core.Tests
 
             var accessControl = new AccessControl(settings);
 
-            Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+            var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
-            Assert.Throws<AccessException>(() => accessControl.VerifyAccess(token));
+            object p = Xunit.Assert.Throws<AccessException>(() => accessControl.VerifyAccess(token));
         }
 
         [Fact]
         public void RegisteredShadowVoteUnregistersAutomaticallyWhenEntryVoteCountIsReset()
         {
             var accessControl = SetupVotableAccessControl();
-            Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+            var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
-            PlaylistEntry entry = SetupShadowVotedEntry();
+            var entry = SetupShadowVotedEntry();
 
             accessControl.RegisterShadowVote(token, entry);
 
             entry.ResetVotes();
 
-            Assert.False(entry.IsShadowVoted);
+            Assert.IsFalse(entry.IsShadowVoted);
         }
 
         [Fact]
         public void RegisteredVoteUnregistersAutomaticallyWhenEntryVoteCountIsReset()
         {
             var accessControl = SetupVotableAccessControl(2);
-            Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+            var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
             var entry = new PlaylistEntry(0, Helpers.SetupSongMock());
             entry.Vote();
@@ -55,20 +56,20 @@ namespace Espera.Core.Tests
 
             entry.ResetVotes();
 
-            Assert.Equal(new int?[] { 2, 1, 2 }, votes);
+            Assert.AreSame(new int?[] { 2, 1, 2 }, votes);
         }
 
         [Fact]
         public void RegisterVoteForSameEntryThrowsInvalidOperationException()
         {
             var accessControl = SetupVotableAccessControl(2);
-            Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+            var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
             var entry = SetupVotedEntry();
 
             accessControl.RegisterVote(token, entry);
             entry.Vote();
-            Assert.Throws<InvalidOperationException>(() => accessControl.RegisterVote(token, entry));
+            Xunit.Assert.Throws<InvalidOperationException>(() => accessControl.RegisterVote(token, entry));
         }
 
         [Fact]
@@ -78,7 +79,7 @@ namespace Espera.Core.Tests
 
             var accessControl = new AccessControl(settings);
 
-            Assert.Throws<ArgumentException>(() => accessControl.VerifyAccess(new Guid()));
+            Xunit.Assert.Throws<ArgumentException>(() => accessControl.VerifyAccess(new Guid()));
         }
 
         [Fact]
@@ -91,7 +92,7 @@ namespace Espera.Core.Tests
 
             var accessControl = new AccessControl(settings);
 
-            Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+            var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
             accessControl.VerifyAccess(token);
         }
@@ -106,8 +107,8 @@ namespace Espera.Core.Tests
 
             var accessControl = new AccessControl(settings);
 
-            Guid remoteToken = accessControl.RegisterRemoteAccessToken(new Guid());
-            Guid adminToken = accessControl.RegisterLocalAccessToken();
+            var remoteToken = accessControl.RegisterRemoteAccessToken(new Guid());
+            var adminToken = accessControl.RegisterLocalAccessToken();
 
             var permissions = accessControl.ObserveAccessPermission(remoteToken).CreateCollection();
 
@@ -117,7 +118,11 @@ namespace Espera.Core.Tests
             settings.LockRemoteControl = false;
             settings.LockRemoteControl = true;
 
-            Assert.Equal(new[] { AccessPermission.Admin, AccessPermission.Guest, AccessPermission.Admin, AccessPermission.Guest }, permissions);
+            Assert.AreSame(
+                new[]
+                {
+                    AccessPermission.Admin, AccessPermission.Guest, AccessPermission.Admin, AccessPermission.Guest
+                }, permissions);
         }
 
         private static PlaylistEntry SetupShadowVotedEntry()
@@ -158,8 +163,8 @@ namespace Espera.Core.Tests
 
                 var accessControl = new AccessControl(settings);
 
-                Guid token = accessControl.RegisterLocalAccessToken();
-                Assert.Throws<InvalidOperationException>(() => accessControl.DowngradeLocalAccess(token));
+                var token = accessControl.RegisterLocalAccessToken();
+                Xunit.Assert.Throws<InvalidOperationException>(() => accessControl.DowngradeLocalAccess(token));
             }
         }
 
@@ -170,13 +175,13 @@ namespace Espera.Core.Tests
             {
                 var settings = new CoreSettings { EnableGuestSystem = true };
                 var accessControl = new AccessControl(settings);
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+                var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
                 var entry = SetupVotedEntry();
                 accessControl.RegisterVote(token, entry);
 
-                Assert.True(accessControl.IsVoteRegistered(token, entry));
-                Assert.False(accessControl.IsVoteRegistered(token, new PlaylistEntry(0, Helpers.SetupSongMock())));
+                Assert.IsTrue(accessControl.IsVoteRegistered(token, entry));
+                Assert.IsFalse(accessControl.IsVoteRegistered(token, new PlaylistEntry(0, Helpers.SetupSongMock())));
             }
         }
 
@@ -192,7 +197,7 @@ namespace Espera.Core.Tests
 
                 var accessControl = new AccessControl(settings);
 
-                Guid token = accessControl.RegisterLocalAccessToken();
+                var token = accessControl.RegisterLocalAccessToken();
 
                 var permissions = accessControl.ObserveAccessPermission(token).CreateCollection();
 
@@ -200,7 +205,8 @@ namespace Espera.Core.Tests
                 accessControl.DowngradeLocalAccess(token);
                 accessControl.UpgradeLocalAccess(token, "password");
 
-                Assert.Equal(new[] { AccessPermission.Admin, AccessPermission.Guest, AccessPermission.Admin }, permissions);
+                Assert.AreSame(new[] { AccessPermission.Admin, AccessPermission.Guest, AccessPermission.Admin },
+                    permissions);
             }
 
             [Fact]
@@ -210,7 +216,7 @@ namespace Espera.Core.Tests
 
                 var accessControl = new AccessControl(settings);
 
-                Assert.Throws<ArgumentException>(() => accessControl.ObserveAccessPermission(new Guid()));
+                Xunit.Assert.Throws<ArgumentException>(() => accessControl.ObserveAccessPermission(new Guid()));
             }
         }
 
@@ -219,24 +225,24 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task ReturnsCurrentValueImmediately()
             {
-                var accessControl = SetupVotableAccessControl(3);
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+                var accessControl = SetupVotableAccessControl();
+                var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
-                Assert.Equal(3, await accessControl.ObserveRemainingVotes(token).FirstAsync());
+                Assert.AreSame(3, await accessControl.ObserveRemainingVotes(token).FirstAsync());
             }
 
             [Fact]
             public void SmokeTest()
             {
                 var accessControl = SetupVotableAccessControl(2);
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+                var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
                 var votes = accessControl.ObserveRemainingVotes(token).CreateCollection();
 
                 accessControl.RegisterVote(token, SetupVotedEntry());
                 accessControl.RegisterVote(token, SetupVotedEntry());
 
-                Assert.Equal(new int?[] { 2, 1, 0 }, votes);
+                Assert.AreSame(new int?[] { 2, 1, 0 }, votes);
             }
         }
 
@@ -247,11 +253,11 @@ namespace Espera.Core.Tests
             {
                 var accessControl = new AccessControl(new CoreSettings());
 
-                Guid accessToken = accessControl.RegisterRemoteAccessToken(new Guid());
+                var accessToken = accessControl.RegisterRemoteAccessToken(new Guid());
 
-                Guid existingAccessToken = accessControl.RegisterRemoteAccessToken(new Guid());
+                var existingAccessToken = accessControl.RegisterRemoteAccessToken(new Guid());
 
-                Assert.Equal(accessToken, existingAccessToken);
+                Assert.AreSame(accessToken, existingAccessToken);
             }
         }
 
@@ -261,26 +267,26 @@ namespace Espera.Core.Tests
             public void EntryMustBeShadowVoted()
             {
                 var accessControl = SetupVotableAccessControl();
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+                var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
                 var entry = new PlaylistEntry(0, Helpers.SetupSongMock());
 
-                Assert.Throws<ArgumentException>(() => accessControl.RegisterShadowVote(token, entry));
+                Xunit.Assert.Throws<ArgumentException>(() => accessControl.RegisterShadowVote(token, entry));
             }
 
             [Fact]
             public async Task SmokeTest()
             {
-                var accessControl = SetupVotableAccessControl(3);
+                var accessControl = SetupVotableAccessControl();
 
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+                var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
                 var entry = SetupShadowVotedEntry();
 
                 accessControl.RegisterShadowVote(token, entry);
 
-                Assert.True(entry.IsShadowVoted);
-                Assert.Equal(2, await accessControl.ObserveRemainingVotes(token).FirstAsync());
+                Assert.IsTrue(entry.IsShadowVoted);
+                Assert.AreSame(2, await accessControl.ObserveRemainingVotes(token).FirstAsync());
             }
 
             [Fact]
@@ -293,12 +299,13 @@ namespace Espera.Core.Tests
                 };
 
                 var accessControl = new AccessControl(settings);
-                Guid localToken = accessControl.RegisterLocalAccessToken();
+                var localToken = accessControl.RegisterLocalAccessToken();
                 accessControl.SetRemotePassword(localToken, "Password");
 
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+                var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
-                Assert.Throws<InvalidOperationException>(() => accessControl.RegisterShadowVote(token, SetupShadowVotedEntry()));
+                Xunit.Assert.Throws<InvalidOperationException>(() =>
+                    accessControl.RegisterShadowVote(token, SetupShadowVotedEntry()));
             }
 
             [Fact]
@@ -306,18 +313,20 @@ namespace Espera.Core.Tests
             {
                 var accessControl = SetupVotableAccessControl();
 
-                Guid token = accessControl.RegisterLocalAccessToken();
+                var token = accessControl.RegisterLocalAccessToken();
 
-                Assert.Throws<InvalidOperationException>(() => accessControl.RegisterShadowVote(token, SetupShadowVotedEntry()));
+                Xunit.Assert.Throws<InvalidOperationException>(() =>
+                    accessControl.RegisterShadowVote(token, SetupShadowVotedEntry()));
             }
 
             [Fact]
             public void WithoutVotesLeftThrowsInvalidOperationException()
             {
                 var accessControl = SetupVotableAccessControl(0);
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+                var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
-                Assert.Throws<InvalidOperationException>(() => accessControl.RegisterShadowVote(token, SetupShadowVotedEntry()));
+                Xunit.Assert.Throws<InvalidOperationException>(() =>
+                    accessControl.RegisterShadowVote(token, SetupShadowVotedEntry()));
             }
         }
 
@@ -328,9 +337,9 @@ namespace Espera.Core.Tests
             {
                 var accessControl = SetupVotableAccessControl();
 
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+                var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
-                PlaylistEntry entry = SetupShadowVotedEntry();
+                var entry = SetupShadowVotedEntry();
 
                 accessControl.RegisterShadowVote(token, entry);
                 accessControl.RegisterVote(token, entry);
@@ -339,13 +348,13 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task SmokeTest()
             {
-                AccessControl accessControl = SetupVotableAccessControl(2);
+                var accessControl = SetupVotableAccessControl(2);
 
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+                var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
                 accessControl.RegisterVote(token, SetupVotedEntry());
 
-                Assert.Equal(1, await accessControl.ObserveRemainingVotes(token).FirstAsync());
+                Assert.AreSame(1, await accessControl.ObserveRemainingVotes(token).FirstAsync());
             }
 
             [Fact]
@@ -354,9 +363,9 @@ namespace Espera.Core.Tests
                 var settings = new CoreSettings { EnableGuestSystem = false };
 
                 var accessControl = new AccessControl(settings);
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+                var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
-                Assert.Throws<InvalidOperationException>(() => accessControl.RegisterVote(token, SetupVotedEntry()));
+                Xunit.Assert.Throws<InvalidOperationException>(() => accessControl.RegisterVote(token, SetupVotedEntry()));
             }
 
             [Fact]
@@ -368,9 +377,10 @@ namespace Espera.Core.Tests
                     MaxVoteCount = 0
                 };
                 var accessControl = new AccessControl(settings);
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+                var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
-                Assert.Throws<InvalidOperationException>(() => accessControl.RegisterVote(token, new PlaylistEntry(0, Helpers.SetupSongMock())));
+                Xunit.Assert.Throws<InvalidOperationException>(() =>
+                    accessControl.RegisterVote(token, new PlaylistEntry(0, Helpers.SetupSongMock())));
             }
         }
 
@@ -383,12 +393,12 @@ namespace Espera.Core.Tests
 
                 var accessControl = new AccessControl(settings);
 
-                Guid token = accessControl.RegisterLocalAccessToken();
+                var token = accessControl.RegisterLocalAccessToken();
 
                 accessControl.SetLocalPassword(token, "password123");
                 accessControl.DowngradeLocalAccess(token);
 
-                Assert.Throws<AccessException>(() => accessControl.SetLocalPassword(token, "lololol"));
+                Xunit.Assert.Throws<AccessException>(() => accessControl.SetLocalPassword(token, "lololol"));
             }
 
             [Fact]
@@ -398,11 +408,11 @@ namespace Espera.Core.Tests
 
                 var accessControl = new AccessControl(settings);
 
-                Guid token = accessControl.RegisterLocalAccessToken();
+                var token = accessControl.RegisterLocalAccessToken();
 
-                Assert.Throws<ArgumentException>(() => accessControl.SetLocalPassword(token, ""));
-                Assert.Throws<ArgumentException>(() => accessControl.SetLocalPassword(token, " "));
-                Assert.Throws<ArgumentNullException>(() => accessControl.SetLocalPassword(token, null));
+                Xunit.Assert.Throws<ArgumentException>(() => accessControl.SetLocalPassword(token, ""));
+                Xunit.Assert.Throws<ArgumentException>(() => accessControl.SetLocalPassword(token, " "));
+                Xunit.Assert.Throws<ArgumentNullException>(() => accessControl.SetLocalPassword(token, null));
             }
 
             [Fact]
@@ -411,9 +421,9 @@ namespace Espera.Core.Tests
                 var settings = new CoreSettings();
                 var accessControl = new AccessControl(settings);
 
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+                var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
-                Assert.Throws<ArgumentException>(() => accessControl.SetLocalPassword(token, "password123"));
+                Xunit.Assert.Throws<ArgumentException>(() => accessControl.SetLocalPassword(token, "password123"));
             }
         }
 
@@ -430,15 +440,16 @@ namespace Espera.Core.Tests
 
                 var accessControl = new AccessControl(settings);
 
-                Guid localToken = accessControl.RegisterLocalAccessToken();
+                var localToken = accessControl.RegisterLocalAccessToken();
 
-                Guid remoteToken = accessControl.RegisterRemoteAccessToken(new Guid());
+                var remoteToken = accessControl.RegisterRemoteAccessToken(new Guid());
                 var remotePermissions = accessControl.ObserveAccessPermission(remoteToken).CreateCollection();
 
                 accessControl.SetRemotePassword(localToken, "password");
 
-                Assert.Equal(AccessPermission.Admin, accessControl.ObserveAccessPermission(localToken).FirstAsync().Wait());
-                Assert.Equal(new[] { AccessPermission.Admin, AccessPermission.Guest }, remotePermissions);
+                Assert.AreSame(AccessPermission.Admin,
+                    accessControl.ObserveAccessPermission(localToken).FirstAsync().Wait());
+                Assert.AreSame(new[] { AccessPermission.Admin, AccessPermission.Guest }, remotePermissions);
             }
         }
 
@@ -450,10 +461,10 @@ namespace Espera.Core.Tests
                 var settings = new CoreSettings();
                 var accessControl = new AccessControl(settings);
 
-                Guid token = accessControl.RegisterLocalAccessToken();
+                var token = accessControl.RegisterLocalAccessToken();
                 accessControl.SetLocalPassword(token, "password123");
 
-                Assert.Throws<ArgumentException>(() => accessControl.UpgradeLocalAccess(new Guid(), "password123"));
+                Xunit.Assert.Throws<ArgumentException>(() => accessControl.UpgradeLocalAccess(new Guid(), "password123"));
             }
 
             [Fact]
@@ -462,10 +473,10 @@ namespace Espera.Core.Tests
                 var settings = new CoreSettings();
                 var accessControl = new AccessControl(settings);
 
-                Guid token = accessControl.RegisterLocalAccessToken();
+                var token = accessControl.RegisterLocalAccessToken();
                 accessControl.SetLocalPassword(token, "password123");
 
-                Assert.Throws<WrongPasswordException>(() => accessControl.UpgradeLocalAccess(token, "lolol"));
+                Xunit.Assert.Throws<WrongPasswordException>(() => accessControl.UpgradeLocalAccess(token, "lolol"));
             }
 
             [Fact]
@@ -474,7 +485,7 @@ namespace Espera.Core.Tests
                 var settings = new CoreSettings();
                 var accessControl = new AccessControl(settings);
 
-                Guid token = accessControl.RegisterLocalAccessToken();
+                var token = accessControl.RegisterLocalAccessToken();
 
                 accessControl.SetLocalPassword(token, "password123");
                 accessControl.UpgradeLocalAccess(token, "password123");
@@ -488,9 +499,9 @@ namespace Espera.Core.Tests
                 var settings = new CoreSettings();
                 var accessControl = new AccessControl(settings);
 
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+                var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
-                Assert.Throws<ArgumentException>(() => accessControl.UpgradeLocalAccess(token, "password123"));
+                Xunit.Assert.Throws<ArgumentException>(() => accessControl.UpgradeLocalAccess(token, "password123"));
             }
         }
 
@@ -506,9 +517,9 @@ namespace Espera.Core.Tests
 
                 var accessControl = new AccessControl(settings);
 
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+                var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
-                Assert.Throws<WrongPasswordException>(() => accessControl.UpgradeRemoteAccess(token, "lolol"));
+                Xunit.Assert.Throws<WrongPasswordException>(() => accessControl.UpgradeRemoteAccess(token, "lolol"));
             }
 
             [Fact]
@@ -522,7 +533,7 @@ namespace Espera.Core.Tests
 
                 var accessControl = new AccessControl(settings);
 
-                Guid token = accessControl.RegisterRemoteAccessToken(new Guid());
+                var token = accessControl.RegisterRemoteAccessToken(new Guid());
 
                 accessControl.UpgradeRemoteAccess(token, "password123");
 
@@ -539,7 +550,7 @@ namespace Espera.Core.Tests
 
                 var accessControl = new AccessControl(settings);
 
-                Assert.Throws<ArgumentException>(() => accessControl.UpgradeRemoteAccess(new Guid(), "password123"));
+                Xunit.Assert.Throws<ArgumentException>(() => accessControl.UpgradeRemoteAccess(new Guid(), "password123"));
             }
 
             [Fact]
@@ -552,9 +563,9 @@ namespace Espera.Core.Tests
 
                 var accessControl = new AccessControl(settings);
 
-                Guid token = accessControl.RegisterLocalAccessToken();
+                var token = accessControl.RegisterLocalAccessToken();
 
-                Assert.Throws<ArgumentException>(() => accessControl.UpgradeRemoteAccess(token, "password123"));
+                Xunit.Assert.Throws<ArgumentException>(() => accessControl.UpgradeRemoteAccess(token, "password123"));
             }
         }
 
@@ -567,14 +578,14 @@ namespace Espera.Core.Tests
 
                 var accessControl = new AccessControl(settings);
 
-                Guid token = accessControl.RegisterLocalAccessToken();
+                var token = accessControl.RegisterLocalAccessToken();
 
                 accessControl.VerifyAccess(token, false);
 
                 accessControl.SetLocalPassword(token, "password123");
                 accessControl.DowngradeLocalAccess(token);
 
-                Assert.Throws<AccessException>(() => accessControl.VerifyAccess(token));
+                Xunit.Assert.Throws<AccessException>(() => accessControl.VerifyAccess(token));
             }
         }
 
@@ -587,7 +598,7 @@ namespace Espera.Core.Tests
 
                 var accessControl = new AccessControl(settings);
 
-                Guid accessToken = accessControl.RegisterLocalAccessToken();
+                var accessToken = accessControl.RegisterLocalAccessToken();
 
                 accessControl.VerifyVotingPreconditions(accessToken);
             }
@@ -599,9 +610,9 @@ namespace Espera.Core.Tests
 
                 var accessControl = new AccessControl(settings);
 
-                Guid accessToken = accessControl.RegisterLocalAccessToken();
+                var accessToken = accessControl.RegisterLocalAccessToken();
 
-                Assert.Throws<InvalidOperationException>(() => accessControl.VerifyVotingPreconditions(accessToken));
+                Xunit.Assert.Throws<InvalidOperationException>(() => accessControl.VerifyVotingPreconditions(accessToken));
             }
         }
     }

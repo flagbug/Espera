@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Akavache;
 using Xunit;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace Espera.Core.Tests
 {
@@ -20,7 +21,7 @@ namespace Espera.Core.Tests
 
                 var result = await finder.GetSongsAsync();
 
-                Assert.Equal(1, result.Count);
+                Assert.AreEqual(1, result.Count);
             }
 
             [Fact]
@@ -34,7 +35,7 @@ namespace Espera.Core.Tests
 
                 var result = await finder.GetSongsAsync(searchTerm);
 
-                Assert.Equal(1, result.Count);
+                Assert.AreEqual(1, result.Count);
             }
         }
     }

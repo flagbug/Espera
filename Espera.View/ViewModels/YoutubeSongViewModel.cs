@@ -1,17 +1,16 @@
-﻿using Akavache;
-using Espera.Core;
-using ReactiveUI;
-using Splat;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using Akavache;
+using Espera.Core;
+using ReactiveUI;
+using Splat;
 using YoutubeExtractor;
 using ReactiveCommand = ReactiveUI.ReactiveCommand;
 
@@ -33,130 +32,111 @@ namespace Espera.View.ViewModels
         public YoutubeSongViewModel(YoutubeSong wrapped, Func<string> downloadPathFunc)
             : base(wrapped)
         {
-            this.hasThumbnail = this.WhenAnyValue(x => x.Thumbnail)
+            hasThumbnail = this.WhenAnyValue(x => x.Thumbnail)
                 .Select(x => x != null)
                 .ToProperty(this, x => x.HasThumbnail);
 
             // Wait for the opening of the context menu to download the YouTube information
             this.WhenAnyValue(x => x.IsContextMenuOpen)
                 .FirstAsync(x => x)
-                .SelectMany(_ => this.LoadContextMenu().ToObservable())
+                .SelectMany(_ => LoadContextMenu().ToObservable())
                 .Subscribe();
 
             // We have to set a dummy here, so that we can connect the commands
-            this.isDownloading = Observable.Never<bool>().ToProperty(this, x => x.IsDownloading);
+            isDownloading = Observable.Never<bool>().ToProperty(this, x => x.IsDownloading);
 
-            this.DownloadVideoCommand = ReactiveCommand.CreateAsyncTask(this.WhenAnyValue(x => x.IsDownloading).Select(x => !x),
-                x => this.DownloadVideo((VideoInfo)x, downloadPathFunc()));
+            DownloadVideoCommand = ReactiveCommand.CreateAsyncTask(
+                this.WhenAnyValue(x => x.IsDownloading).Select(x => !x),
+                x => DownloadVideo((VideoInfo)x, downloadPathFunc()));
 
-            this.DownloadAudioCommand = ReactiveCommand.CreateAsyncTask(this.WhenAnyValue(x => x.IsDownloading).Select(x => !x),
-                x => this.DownloadAudio((VideoInfo)x, downloadPathFunc()));
+            DownloadAudioCommand = ReactiveCommand.CreateAsyncTask(
+                this.WhenAnyValue(x => x.IsDownloading).Select(x => !x),
+                x => DownloadAudio((VideoInfo)x, downloadPathFunc()));
 
-            this.isDownloading = this.DownloadVideoCommand.IsExecuting
-                .CombineLatest(this.DownloadAudioCommand.IsExecuting, (x1, x2) => x1 || x2)
+            isDownloading = DownloadVideoCommand.IsExecuting
+                .CombineLatest(DownloadAudioCommand.IsExecuting, (x1, x2) => x1 || x2)
                 .ToProperty(this, x => x.IsDownloading);
         }
 
         public IEnumerable<VideoInfo> AudioToDownload
         {
-            get { return this.audioToDownload; }
-            private set { this.RaiseAndSetIfChanged(ref this.audioToDownload, value); }
+            get => audioToDownload;
+            private set => this.RaiseAndSetIfChanged(ref audioToDownload, value);
         }
 
-        public string Description
-        {
-            get { return ((YoutubeSong)this.Model).Description; }
-        }
+        public string Description => ((YoutubeSong)Model).Description;
 
-        public ReactiveCommand<Unit> DownloadAudioCommand { get; private set; }
+        public ReactiveCommand<Unit> DownloadAudioCommand { get; }
 
         public bool DownloadFailed
         {
-            get { return this.downloadFailed; }
-            set { this.RaiseAndSetIfChanged(ref this.downloadFailed, value); }
+            get => downloadFailed;
+            set => this.RaiseAndSetIfChanged(ref downloadFailed, value);
         }
 
         public int DownloadProgress
         {
-            get { return this.downloadProgress; }
-            set { this.RaiseAndSetIfChanged(ref this.downloadProgress, value); }
+            get => downloadProgress;
+            set => this.RaiseAndSetIfChanged(ref downloadProgress, value);
         }
 
-        public ReactiveCommand<Unit> DownloadVideoCommand { get; private set; }
+        public ReactiveCommand<Unit> DownloadVideoCommand { get; }
 
-        public bool HasThumbnail
-        {
-            get { return this.hasThumbnail.Value; }
-        }
+        public bool HasThumbnail => hasThumbnail.Value;
 
         public bool IsContextMenuOpen
         {
-            get { return this.isContextMenuOpen; }
-            set { this.RaiseAndSetIfChanged(ref this.isContextMenuOpen, value); }
+            get => isContextMenuOpen;
+            set => this.RaiseAndSetIfChanged(ref isContextMenuOpen, value);
         }
 
-        public bool IsDownloading
-        {
-            get { return this.isDownloading.Value; }
-        }
+        public bool IsDownloading => isDownloading.Value;
 
         public bool IsLoadingContextMenu
         {
-            get { return this.isLoadingContextMenu; }
-            private set { this.RaiseAndSetIfChanged(ref this.isLoadingContextMenu, value); }
+            get => isLoadingContextMenu;
+            private set => this.RaiseAndSetIfChanged(ref isLoadingContextMenu, value);
         }
 
         public bool IsLoadingThumbnail
         {
-            get { return this.isLoadingThumbnail; }
-            private set { this.RaiseAndSetIfChanged(ref this.isLoadingThumbnail, value); }
+            get => isLoadingThumbnail;
+            private set => this.RaiseAndSetIfChanged(ref isLoadingThumbnail, value);
         }
 
-        public double? Rating
-        {
-            get { return ((YoutubeSong)this.Model).Rating; }
-        }
+        public double? Rating => ((YoutubeSong)Model).Rating;
 
         public ImageSource Thumbnail
         {
             get
             {
-                if (this.thumbnail == null)
-                {
-                    this.GetThumbnailAsync();
-                }
+                if (thumbnail == null) GetThumbnailAsync();
 
-                return this.thumbnail;
+                return thumbnail;
             }
 
-            private set { this.RaiseAndSetIfChanged(ref this.thumbnail, value); }
+            private set => this.RaiseAndSetIfChanged(ref thumbnail, value);
         }
 
         public IEnumerable<VideoInfo> VideosToDownload
         {
-            get { return this.videosToDownload; }
-            private set { this.RaiseAndSetIfChanged(ref this.videosToDownload, value); }
+            get => videosToDownload;
+            private set => this.RaiseAndSetIfChanged(ref videosToDownload, value);
         }
 
-        public int ViewCount
-        {
-            get { return ((YoutubeSong)this.Model).Views; }
-        }
+        public int ViewCount => ((YoutubeSong)Model).Views;
 
-        public string Views
-        {
-            get { return String.Format(NumberFormatInfo.InvariantInfo, "{0:N0}", ((YoutubeSong)this.Model).Views); }
-        }
+        public string Views => string.Format(NumberFormatInfo.InvariantInfo, "{0:N0}", ((YoutubeSong)Model).Views);
 
         public async Task LoadContextMenu()
         {
-            this.IsLoadingContextMenu = true;
+            IsLoadingContextMenu = true;
 
             var infos = new List<VideoInfo>(0);
 
             try
             {
-                infos = await Task.Run(() => DownloadUrlResolver.GetDownloadUrls(this.Path, false).ToList());
+                infos = await Task.Run(() => DownloadUrlResolver.GetDownloadUrls(Path, false).ToList());
             }
 
             catch (YoutubeParseException ex)
@@ -164,35 +144,25 @@ namespace Espera.View.ViewModels
                 this.Log().ErrorException("Failed to load the available YouTube videos", ex);
             }
 
-            catch (VideoNotAvailableException ex)
-            {
-                this.Log().ErrorException("Failed to load the available YouTube videos", ex);
-            }
-
-            catch (WebException ex)
-            {
-                this.Log().ErrorException("Failed to load the available YouTube videos", ex);
-            }
-
-            this.VideosToDownload = infos.Where(x => x.AdaptiveType == AdaptiveType.None && x.VideoType != VideoType.Unknown)
+            VideosToDownload = infos.Where(x => x.AdaptiveType == AdaptiveType.None && x.VideoType != VideoType.Unknown)
                 .OrderBy(x => x.VideoType)
                 .ThenByDescending(x => x.Resolution)
                 .ToList();
-            this.AudioToDownload = infos.Where(x => x.CanExtractAudio).OrderByDescending(x => x.AudioBitrate).ToList();
+            AudioToDownload = infos.Where(x => x.CanExtractAudio).OrderByDescending(x => x.AudioBitrate).ToList();
 
-            this.IsLoadingContextMenu = false;
+            IsLoadingContextMenu = false;
         }
 
         private async Task DownloadAudio(VideoInfo videoInfo, string downloadPath)
         {
-            await this.DownloadFromYoutube(videoInfo, () => YoutubeSong.DownloadAudioAsync(videoInfo, downloadPath,
-                Observer.Create<double>(progress => this.DownloadProgress = (int)progress)));
+            await DownloadFromYoutube(videoInfo, () => YoutubeSong.DownloadAudioAsync(videoInfo, downloadPath,
+                Observer.Create<double>(progress => DownloadProgress = (int)progress)));
         }
 
         private async Task DownloadFromYoutube(VideoInfo videoInfo, Func<Task> downloadFunction)
         {
-            this.DownloadProgress = 0;
-            this.DownloadFailed = false;
+            DownloadProgress = 0;
+            DownloadFailed = false;
 
             try
             {
@@ -201,7 +171,7 @@ namespace Espera.View.ViewModels
 
             catch (YoutubeParseException)
             {
-                this.DownloadFailed = true;
+                DownloadFailed = true;
                 return;
             }
 
@@ -212,28 +182,29 @@ namespace Espera.View.ViewModels
 
             catch (YoutubeDownloadException)
             {
-                this.DownloadFailed = true;
+                DownloadFailed = true;
             }
         }
 
         private async Task DownloadVideo(VideoInfo videoInfo, string downloadPath)
         {
-            await this.DownloadFromYoutube(videoInfo, () => YoutubeSong.DownloadVideoAsync(videoInfo, downloadPath,
-                Observer.Create<double>(progress => this.DownloadProgress = (int)progress)));
+            await DownloadFromYoutube(videoInfo, () => YoutubeSong.DownloadVideoAsync(videoInfo, downloadPath,
+                Observer.Create<double>(progress => DownloadProgress = (int)progress)));
         }
 
         private async Task GetThumbnailAsync()
         {
-            Uri thumbnailUrl = ((YoutubeSong)this.Model).ThumbnailSource;
+            Uri thumbnailUrl = ((YoutubeSong)Model).ThumbnailSource;
             thumbnailUrl = new Uri(thumbnailUrl.ToString().Replace("default", "hqdefault"));
 
-            this.IsLoadingThumbnail = true;
+            IsLoadingThumbnail = true;
 
             try
             {
-                IBitmap image = await BlobCache.LocalMachine.LoadImageFromUrl(thumbnailUrl.ToString(), absoluteExpiration: DateTimeOffset.Now + TimeSpan.FromMinutes(60));
+                IBitmap image = await BlobCache.LocalMachine.LoadImageFromUrl(thumbnailUrl.ToString(),
+                    absoluteExpiration: DateTimeOffset.Now + TimeSpan.FromMinutes(60));
 
-                this.Thumbnail = image.ToNative();
+                Thumbnail = image.ToNative();
             }
 
             catch (Exception ex)
@@ -241,7 +212,7 @@ namespace Espera.View.ViewModels
                 this.Log().ErrorException("Failed to download YouTube artwork", ex);
             }
 
-            this.IsLoadingThumbnail = false;
+            IsLoadingThumbnail = false;
         }
     }
 }

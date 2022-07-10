@@ -1,8 +1,8 @@
-﻿using NSubstitute;
-using System;
+﻿using System;
 using System.IO.Abstractions;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using NSubstitute;
 using Xunit;
 
 namespace Espera.Core.Tests

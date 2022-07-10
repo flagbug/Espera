@@ -1,4 +1,14 @@
-﻿using Akavache;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.IO.Abstractions;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Windows;
+using System.Windows.Threading;
+using Akavache;
 using Akavache.Sqlite3;
 using Caliburn.Micro;
 using Espera.Core;
@@ -13,16 +23,6 @@ using NLog.Targets;
 using ReactiveUI;
 using Splat;
 using Squirrel;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.IO.Abstractions;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Windows;
-using System.Windows.Threading;
 
 namespace Espera.View
 {
@@ -59,27 +59,29 @@ namespace Espera.View
 
         protected override void Configure()
         {
-            this.viewSettings = new ViewSettings();
-            Locator.CurrentMutable.RegisterConstant(this.viewSettings, typeof(ViewSettings));
+            viewSettings = new ViewSettings();
+            Locator.CurrentMutable.RegisterConstant(viewSettings, typeof(ViewSettings));
 
-            this.coreSettings = new CoreSettings();
+            coreSettings = new CoreSettings();
 
-            Locator.CurrentMutable.RegisterLazySingleton(() => new Library(new LibraryFileReader(AppInfo.LibraryFilePath),
-                new LibraryFileWriter(AppInfo.LibraryFilePath), this.coreSettings, new FileSystem()), typeof(Library));
+            Locator.CurrentMutable.RegisterLazySingleton(() =>
+                new Library(new LibraryFileReader(AppInfo.LibraryFilePath),
+                    new LibraryFileWriter(AppInfo.LibraryFilePath), coreSettings, new FileSystem()), typeof(Library));
 
             Locator.CurrentMutable.RegisterLazySingleton(() => new WindowManager(), typeof(IWindowManager));
 
-            Locator.CurrentMutable.RegisterLazySingleton(() => new SQLitePersistentBlobCache(Path.Combine(AppInfo.BlobCachePath, "api-requests.cache.db")),
+            Locator.CurrentMutable.RegisterLazySingleton(
+                () => new SQLitePersistentBlobCache(Path.Combine(AppInfo.BlobCachePath, "api-requests.cache.db")),
                 typeof(IBlobCache), BlobCacheKeys.RequestCacheContract);
 
             Locator.CurrentMutable.RegisterLazySingleton(() =>
-                new ShellViewModel(Locator.Current.GetService<Library>(),
-                    this.viewSettings, this.coreSettings,
-                    Locator.Current.GetService<IWindowManager>(),
-                    Locator.Current.GetService<MobileApiInfo>()),
+                    new ShellViewModel(Locator.Current.GetService<Library>(),
+                        viewSettings, coreSettings,
+                        Locator.Current.GetService<IWindowManager>(),
+                        Locator.Current.GetService<MobileApiInfo>()),
                 typeof(ShellViewModel));
 
-            this.ConfigureLogging();
+            ConfigureLogging();
         }
 
         protected override IEnumerable<object> GetAllInstances(Type serviceType)
@@ -109,10 +111,10 @@ namespace Espera.View
             this.Log().Info("Shutting down NLog");
             NLog.LogManager.Shutdown();
 
-            if (this.mobileApi != null)
+            if (mobileApi != null)
             {
                 this.Log().Info("Shutting down mobile API");
-                this.mobileApi.Dispose();
+                mobileApi.Dispose();
             }
 
             this.Log().Info("Shutting down analytics client");
@@ -154,11 +156,11 @@ namespace Espera.View
                 this.Log().Info("BlobCache shutdown finished");
             }
 
-            this.SetupLager();
+            SetupLager();
 
-            this.SetupAnalyticsClient();
+            SetupAnalyticsClient();
 
-            this.SetupMobileApi();
+            SetupMobileApi();
 
             this.DisplayRootViewFor<ShellViewModel>();
         }
@@ -171,10 +173,7 @@ namespace Espera.View
             this.Log().FatalException("An unhandled exception occurred, opening the crash report", e.Exception);
 
             // MainWindow is sometimes null because of reasons
-            if (this.Application.MainWindow != null)
-            {
-                this.Application.MainWindow.Hide();
-            }
+            if (this.Application.MainWindow != null) this.Application.MainWindow.Hide();
 
             var windowManager = Locator.Current.GetService<IWindowManager>();
             windowManager.ShowDialog(new CrashViewModel(e.Exception));
@@ -199,27 +198,26 @@ namespace Espera.View
             logConfig.LoggingRules.Add(new LoggingRule("*", NLog.LogLevel.Info, target));
             NLog.LogManager.Configuration = logConfig;
 
-            Locator.CurrentMutable.RegisterConstant(new NLogLogger(NLog.LogManager.GetCurrentClassLogger()), typeof(ILogger));
+            Locator.CurrentMutable.RegisterConstant(new NLogLogger(NLog.LogManager.GetCurrentClassLogger()),
+                typeof(ILogger));
         }
 
         private void SetupAnalyticsClient()
         {
-            AnalyticsClient.Instance.Initialize(this.coreSettings);
+            AnalyticsClient.Instance.Initialize(coreSettings);
         }
 
         private void SetupLager()
         {
             this.Log().Info("Initializing Lager settings storages...");
 
-            this.coreSettings.InitializeAsync().Wait();
+            coreSettings.InitializeAsync().Wait();
 
             // If we don't have a path or it doesn't exist anymore, restore it.
-            if (coreSettings.YoutubeDownloadPath == String.Empty || !Directory.Exists(coreSettings.YoutubeDownloadPath))
-            {
+            if (coreSettings.YoutubeDownloadPath == string.Empty || !Directory.Exists(coreSettings.YoutubeDownloadPath))
                 coreSettings.YoutubeDownloadPath = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
-            }
 
-            this.viewSettings.InitializeAsync().Wait();
+            viewSettings.InitializeAsync().Wait();
 
             this.Log().Info("Settings storages initialized.");
         }
@@ -228,17 +226,17 @@ namespace Espera.View
         {
             var library = Locator.Current.GetService<Library>();
 
-            this.Log().Info("Remote control is {0}", this.coreSettings.EnableRemoteControl ? "enabled" : "disabled");
-            this.Log().Info("Port is set to {0}", this.coreSettings.Port);
+            this.Log().Info("Remote control is {0}", coreSettings.EnableRemoteControl ? "enabled" : "disabled");
+            this.Log().Info("Port is set to {0}", coreSettings.Port);
 
-            IObservable<MobileApi> apiChanged = this.coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged()
-                .CombineLatest(this.coreSettings.WhenAnyValue(x => x.EnableRemoteControl), Tuple.Create)
+            IObservable<MobileApi> apiChanged = coreSettings.WhenAnyValue(x => x.Port).DistinctUntilChanged()
+                .CombineLatest(coreSettings.WhenAnyValue(x => x.EnableRemoteControl), Tuple.Create)
                 .Do(_ =>
                 {
-                    if (this.mobileApi != null)
+                    if (mobileApi != null)
                     {
-                        this.mobileApi.Dispose();
-                        this.mobileApi = null;
+                        mobileApi.Dispose();
+                        mobileApi = null;
                     }
                 })
                 .Where(x => x.Item2)
@@ -247,15 +245,17 @@ namespace Espera.View
 
             apiChanged.Subscribe(x =>
             {
-                this.mobileApi = x;
+                mobileApi = x;
                 x.SendBroadcastAsync();
                 x.StartClientDiscovery();
             });
 
-            IConnectableObservable<IReadOnlyList<MobileClient>> connectedClients = apiChanged.Select(x => x.ConnectedClients).Switch().Publish(new List<MobileClient>());
+            IConnectableObservable<IReadOnlyList<MobileClient>> connectedClients =
+                apiChanged.Select(x => x.ConnectedClients).Switch().Publish(new List<MobileClient>());
             connectedClients.Connect();
 
-            IConnectableObservable<bool> isPortOccupied = apiChanged.Select(x => x.IsPortOccupied).Switch().Publish(false);
+            IConnectableObservable<bool> isPortOccupied =
+                apiChanged.Select(x => x.IsPortOccupied).Switch().Publish(false);
             isPortOccupied.Connect();
 
             var apiStats = new MobileApiInfo(connectedClients, isPortOccupied);

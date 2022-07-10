@@ -6,7 +6,9 @@ namespace Espera.View.DesignTime
     public class DesignTimeLocalViewModel : LocalViewModel
     {
         public DesignTimeLocalViewModel()
-            : base(DesignTime.LoadLibrary(), new ViewSettings(), new CoreSettings(), DesignTime.LoadLibrary().LocalAccessControl.RegisterLocalAccessToken())
-        { }
+            : base(DesignTime.LoadLibrary(), new ViewSettings(), new CoreSettings(),
+                DesignTime.LoadLibrary().LocalAccessControl.RegisterLocalAccessToken())
+        {
+        }
     }
 }

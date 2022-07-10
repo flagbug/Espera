@@ -42,42 +42,28 @@ namespace Espera.View
         public static T GetFirstVisualChild<T>(DependencyObject depObj) where T : DependencyObject
         {
             if (depObj != null)
-            {
-                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+                for (var i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
                 {
                     DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-                    if (child != null && child is T)
-                    {
-                        return (T)child;
-                    }
+                    if (child != null && child is T) return (T)child;
 
-                    T childItem = GetFirstVisualChild<T>(child);
-                    if (childItem != null)
-                    {
-                        return childItem;
-                    }
+                    var childItem = GetFirstVisualChild<T>(child);
+                    if (childItem != null) return childItem;
                 }
-            }
 
             return null;
         }
 
         public static bool GetScrollOnDragDrop(DependencyObject element)
         {
-            if (element == null)
-            {
-                throw new ArgumentNullException("element");
-            }
+            if (element == null) throw new ArgumentNullException("element");
 
             return (bool)element.GetValue(ScrollOnDragDropProperty);
         }
 
         public static void SetScrollOnDragDrop(DependencyObject element, bool value)
         {
-            if (element == null)
-            {
-                throw new ArgumentNullException("element");
-            }
+            if (element == null) throw new ArgumentNullException("element");
 
             element.SetValue(ScrollOnDragDropProperty, value);
         }
@@ -94,10 +80,7 @@ namespace Espera.View
 
             Unsubscribe(container);
 
-            if (true.Equals(e.NewValue))
-            {
-                Subscribe(container);
-            }
+            if (true.Equals(e.NewValue)) Subscribe(container);
         }
 
         private static void OnContainerPreviewDragOver(object sender, DragEventArgs e)
@@ -107,12 +90,12 @@ namespace Espera.View
                 return;
 
             // determine Item-wise or content scrolling (by pixel)
-            bool itemwise = (bool)container.GetValue(ScrollViewer.CanContentScrollProperty);
+            var itemwise = (bool)container.GetValue(ScrollViewer.CanContentScrollProperty);
 
             // record time and execute only so often - store time singular static this does not
             // restrict to scroll at two places at a time (how would that go anyways) but only syncs
             // them in time.... that's fair enough; (300ms for ListBox, 20ms for Content)
-            TimeSpan span = DateTime.UtcNow - s_lastTime;
+            var span = DateTime.UtcNow - s_lastTime;
             if (span.Milliseconds < (itemwise ? 300 : 20))
                 return;
             s_lastTime = DateTime.UtcNow;
@@ -128,11 +111,11 @@ namespace Espera.View
             double actualHeight = scrollViewer.ActualHeight;
             // try max 25% of height (4 sml ctrl) and limit to max so the regions don't become too
             // big but also the sensitive regions never overlap
-            double tolerance = Math.Min(k_maxTolerance, actualHeight * 0.25);
+            var tolerance = Math.Min(k_maxTolerance, actualHeight * 0.25);
             double verticalPos = e.GetPosition(scrollViewer).Y;
             // for list box go as fast as maximum 3 (leave some room to hit->0.35 more) for content
             // jump 30;
-            double offset = itemwise ? 3.35 : 30d;
+            var offset = itemwise ? 3.35 : 30d;
 
             if (verticalPos < tolerance) // Top of visible list?
             {

@@ -1,16 +1,17 @@
-﻿using Espera.Core.Audio;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Network;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Espera.Core.Mobile
 {
     public static class MobileHelper
     {
-        public static JObject SerializePlaylist(Playlist playlist, AudioPlayerState playbackState, TimeSpan currentTime, TimeSpan totalTime)
+        public static JObject SerializePlaylist(Playlist playlist, AudioPlayerState playbackState, TimeSpan currentTime,
+            TimeSpan totalTime)
         {
             var networkPlaylist = new NetworkPlaylist
             {
@@ -38,7 +39,7 @@ namespace Espera.Core.Mobile
         private static NetworkSong ToNetworkSong(this Song song, Guid guid)
         {
             string artworkKey = null;
-            int playbackCount = 0;
+            var playbackCount = 0;
 
             var soundCloudSong = song as SoundCloudSong;
             if (soundCloudSong != null && soundCloudSong.ArtworkUrl != null)

@@ -25,16 +25,16 @@ namespace Espera.View
                 .Cast<Match>()
                 .Select(x => x.Result("$1"));
 
-            var versionSplit = versionMatchNoCapture.Split(markdown).Where(x => x != String.Empty);
+            var versionSplit = versionMatchNoCapture.Split(markdown).Where(x => x != string.Empty);
 
             var releases = versions.Zip(versionSplit, (version, content) =>
             {
                 var types = typeMatch.Matches(content)
                     .Cast<Match>()
                     .Select(x => x.Result("$1"));
-                string noNewLine = content.Replace("\r", String.Empty).Replace("\n", String.Empty);
+                string noNewLine = content.Replace("\r", string.Empty).Replace("\n", string.Empty);
                 var changes = typeMatchNoCapture.Split(noNewLine)
-                    .Where(x => x != String.Empty)
+                    .Where(x => x != string.Empty)
                     .Select(x => x.Split(new[] { "- " }, StringSplitOptions.RemoveEmptyEntries)
                         .Select(y => y.Replace("  ", " ")).ToList());
 

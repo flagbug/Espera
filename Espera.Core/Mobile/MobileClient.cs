@@ -1,3 +1,14 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Net.Sockets;
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Threading;
+using System.Threading.Tasks;
 using Akavache;
 using Espera.Core.Audio;
 using Espera.Core.Management;
@@ -8,24 +19,11 @@ using Rareform.Validation;
 using ReactiveMarrow;
 using ReactiveUI;
 using Splat;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net.Sockets;
-using System.Reactive;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Espera.Core.Mobile
 {
     /// <summary>
-    /// Represents one mobile endpoint and handles the interaction.
+    ///     Represents one mobile endpoint and handles the interaction.
     /// </summary>
     public class MobileClient : IDisposable, IEnableLogger
     {
@@ -57,62 +55,56 @@ namespace Espera.Core.Mobile
             this.fileSocket = fileSocket;
             this.library = library;
 
-            this.disposable = new CompositeDisposable();
-            this.gate = new SemaphoreSlim(1, 1);
-            this.disconnected = new Subject<Unit>();
-            this.lastSoundCloudRequest = new List<SoundCloudSong>();
-            this.lastYoutubeRequest = new List<YoutubeSong>();
-            this.videoPlayerToggleRequest = new Subject<Unit>();
+            disposable = new CompositeDisposable();
+            gate = new SemaphoreSlim(1, 1);
+            disconnected = new Subject<Unit>();
+            lastSoundCloudRequest = new List<SoundCloudSong>();
+            lastYoutubeRequest = new List<YoutubeSong>();
+            videoPlayerToggleRequest = new Subject<Unit>();
 
-            this.messageActionMap = new Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>>
+            messageActionMap = new Dictionary<RequestAction, Func<JToken, Task<ResponseInfo>>>
             {
-                {RequestAction.GetConnectionInfo, this.GetConnectionInfo},
-                {RequestAction.ToggleYoutubePlayer, this.ToggleVideoPlayer},
-                {RequestAction.GetLibraryContent, this.GetLibraryContent},
-                {RequestAction.GetSoundCloudSongs, this.GetSoundCloudSongs},
-                {RequestAction.GetYoutubeSongs, this.GetYoutubeSongs},
-                {RequestAction.AddPlaylistSongs, this.AddPlaylistSongs},
-                {RequestAction.AddPlaylistSongsNow, this.AddPlaylistSongsNow},
-                {RequestAction.GetCurrentPlaylist, this.GetCurrentPlaylist},
-                {RequestAction.PlayPlaylistSong, this.PlayPlaylistSong},
-                {RequestAction.ContinueSong, this.ContinueSong},
-                {RequestAction.PauseSong, this.PauseSong},
-                {RequestAction.PlayNextSong, this.PlayNextSong},
-                {RequestAction.PlayPreviousSong, this.PlayPreviousSong},
-                {RequestAction.RemovePlaylistSong, this.PostRemovePlaylistSong},
-                {RequestAction.MovePlaylistSongUp, this.MovePlaylistSongUp},
-                {RequestAction.MovePlaylistSongDown, this.MovePlaylistSongDown},
-                {RequestAction.GetVolume, this.GetVolume},
-                {RequestAction.SetVolume, this.SetVolume},
-                {RequestAction.VoteForSong, this.VoteForSong},
-                {RequestAction.QueueRemoteSong, this.QueueRemoteSong},
-                {RequestAction.SetCurrentTime, this.SetCurrentTime}
+                { RequestAction.GetConnectionInfo, GetConnectionInfo },
+                { RequestAction.ToggleYoutubePlayer, ToggleVideoPlayer },
+                { RequestAction.GetLibraryContent, GetLibraryContent },
+                { RequestAction.GetSoundCloudSongs, GetSoundCloudSongs },
+                { RequestAction.GetYoutubeSongs, GetYoutubeSongs },
+                { RequestAction.AddPlaylistSongs, AddPlaylistSongs },
+                { RequestAction.AddPlaylistSongsNow, AddPlaylistSongsNow },
+                { RequestAction.GetCurrentPlaylist, GetCurrentPlaylist },
+                { RequestAction.PlayPlaylistSong, PlayPlaylistSong },
+                { RequestAction.ContinueSong, ContinueSong },
+                { RequestAction.PauseSong, PauseSong },
+                { RequestAction.PlayNextSong, PlayNextSong },
+                { RequestAction.PlayPreviousSong, PlayPreviousSong },
+                { RequestAction.RemovePlaylistSong, PostRemovePlaylistSong },
+                { RequestAction.MovePlaylistSongUp, MovePlaylistSongUp },
+                { RequestAction.MovePlaylistSongDown, MovePlaylistSongDown },
+                { RequestAction.GetVolume, GetVolume },
+                { RequestAction.SetVolume, SetVolume },
+                { RequestAction.VoteForSong, VoteForSong },
+                { RequestAction.QueueRemoteSong, QueueRemoteSong },
+                { RequestAction.SetCurrentTime, SetCurrentTime }
             };
         }
 
-        public IObservable<Unit> Disconnected
-        {
-            get { return this.disconnected.AsObservable(); }
-        }
+        public IObservable<Unit> Disconnected => disconnected.AsObservable();
 
         /// <summary>
-        /// Signals when the mobile client wants to toggle the visibility of the video player.
+        ///     Signals when the mobile client wants to toggle the visibility of the video player.
         /// </summary>
-        public IObservable<Unit> VideoPlayerToggleRequest
-        {
-            get { return this.videoPlayerToggleRequest.AsObservable(); }
-        }
+        public IObservable<Unit> VideoPlayerToggleRequest => videoPlayerToggleRequest.AsObservable();
 
         public void Dispose()
         {
-            this.socket.Close();
-            this.gate.Dispose();
-            this.disposable.Dispose();
+            socket.Close();
+            gate.Dispose();
+            disposable.Dispose();
         }
 
         public void ListenAsync()
         {
-            Observable.FromAsync(() => this.socket.GetStream().ReadNextMessageAsync())
+            Observable.FromAsync(() => socket.GetStream().ReadNextMessageAsync())
                 .Repeat()
                 .LoggedCatch(this, null, "Message connection was closed by the remote device or the connection failed")
                 .TakeWhile(x => x != null)
@@ -130,7 +122,9 @@ namespace Espera.Core.Mobile
 
                     catch (JsonException ex)
                     {
-                        this.Log().ErrorException(String.Format("Mobile client with access token {0} sent a malformed request", this.accessToken), ex);
+                        this.Log().ErrorException(
+                            string.Format("Mobile client with access token {0} sent a malformed request", accessToken),
+                            ex);
                         return Unit.Default;
                     }
 
@@ -138,9 +132,9 @@ namespace Espera.Core.Mobile
 
                     Func<JToken, Task<ResponseInfo>> action;
 
-                    if (this.messageActionMap.TryGetValue(request.RequestAction, out action))
+                    if (messageActionMap.TryGetValue(request.RequestAction, out action))
                     {
-                        bool isFatalRequest = false;
+                        var isFatalRequest = false;
                         try
                         {
                             ResponseInfo response = await action(request.Parameters);
@@ -148,16 +142,16 @@ namespace Espera.Core.Mobile
 
                             responseMessage.Payload = await Task.Run(() => JObject.FromObject(response));
 
-                            await this.SendMessage(responseMessage);
+                            await SendMessage(responseMessage);
                         }
 
                         catch (Exception ex)
                         {
-                            this.Log().ErrorException(String.Format("Mobile client with access token {0} sent a request that caused an exception", this.accessToken), ex);
-                            if (Debugger.IsAttached)
-                            {
-                                Debugger.Break();
-                            }
+                            this.Log().ErrorException(
+                                string.Format(
+                                    "Mobile client with access token {0} sent a request that caused an exception",
+                                    accessToken), ex);
+                            if (Debugger.IsAttached) Debugger.Break();
 
                             isFatalRequest = true;
                         }
@@ -169,7 +163,7 @@ namespace Espera.Core.Mobile
                             responseMessage.Payload = JObject.FromObject(response);
 
                             // Client what are you doing? Client stahp!
-                            await this.SendMessage(responseMessage);
+                            await SendMessage(responseMessage);
                         }
 
                         return Unit.Default;
@@ -177,18 +171,19 @@ namespace Espera.Core.Mobile
 
                     return Unit.Default;
                 })
-                .Finally(() => this.disconnected.OnNext(Unit.Default))
+                .Finally(() => disconnected.OnNext(Unit.Default))
                 .Subscribe()
-                .DisposeWith(this.disposable);
+                .DisposeWith(disposable);
 
-            var transfers = Observable.FromAsync(() => this.fileSocket.GetStream().ReadNextFileTransferMessageAsync())
+            var transfers = Observable.FromAsync(() => fileSocket.GetStream().ReadNextFileTransferMessageAsync())
                 .Repeat()
-                .LoggedCatch(this, null, "File transfer connection was closed by the remote device or the connection failed")
+                .LoggedCatch(this, null,
+                    "File transfer connection was closed by the remote device or the connection failed")
                 .TakeWhile(x => x != null)
                 .Publish();
-            transfers.Connect().DisposeWith(this.disposable);
+            transfers.Connect().DisposeWith(disposable);
 
-            this.songTransfers = transfers;
+            songTransfers = transfers;
         }
 
         private static NetworkMessage CreatePushMessage(PushAction action, JObject content)
@@ -217,7 +212,7 @@ namespace Espera.Core.Mobile
             {
                 Status = status,
                 Message = message,
-                Content = content,
+                Content = content
             };
         }
 
@@ -226,40 +221,35 @@ namespace Espera.Core.Mobile
             IEnumerable<Song> songs;
             ResponseInfo response;
 
-            bool areValid = this.TryValidateSongGuids(parameters["guids"].Select(x => x.ToString()), out songs, out response);
+            var areValid = TryValidateSongGuids(parameters["guids"].Select(x => x.ToString()), out songs, out response);
 
             if (areValid)
             {
-                AccessPermission permission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken).FirstAsync();
+                AccessPermission permission =
+                    await library.RemoteAccessControl.ObserveAccessPermission(accessToken).FirstAsync();
 
                 if (permission == AccessPermission.Guest)
                 {
-                    int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
+                    int? remainingVotes =
+                        await library.RemoteAccessControl.ObserveRemainingVotes(accessToken).FirstAsync();
 
                     if (remainingVotes == null)
-                    {
                         return CreateResponse(ResponseStatus.NotSupported, "Voting isn't supported");
-                    }
 
-                    if (remainingVotes == 0)
-                    {
-                        return CreateResponse(ResponseStatus.Rejected, "Not enough votes left");
-                    }
+                    if (remainingVotes == 0) return CreateResponse(ResponseStatus.Rejected, "Not enough votes left");
                 }
 
                 if (permission == AccessPermission.Admin)
                 {
-                    this.library.AddSongsToPlaylist(songs, this.accessToken);
+                    library.AddSongsToPlaylist(songs, accessToken);
                 }
 
                 else
                 {
                     if (songs.Count() > 1)
-                    {
                         return CreateResponse(ResponseStatus.Unauthorized, "Guests can't add more than one song");
-                    }
 
-                    this.library.AddGuestSongToPlaylist(songs.First(), this.accessToken);
+                    library.AddGuestSongToPlaylist(songs.First(), accessToken);
                 }
 
                 return CreateResponse(ResponseStatus.Success);
@@ -273,13 +263,13 @@ namespace Espera.Core.Mobile
             IEnumerable<Song> songs;
             ResponseInfo response;
 
-            bool areValid = this.TryValidateSongGuids(parameters["guids"].Select(x => x.ToString()), out songs, out response);
+            var areValid = TryValidateSongGuids(parameters["guids"].Select(x => x.ToString()), out songs, out response);
 
             if (areValid)
             {
                 try
                 {
-                    await this.library.PlayInstantlyAsync(songs, this.accessToken);
+                    await library.PlayInstantlyAsync(songs, accessToken);
                 }
 
                 catch (AccessException)
@@ -297,7 +287,7 @@ namespace Espera.Core.Mobile
         {
             try
             {
-                await this.library.ContinueSongAsync(this.accessToken);
+                await library.ContinueSongAsync(accessToken);
             }
 
             catch (AccessException)
@@ -310,45 +300,43 @@ namespace Espera.Core.Mobile
 
         private async Task<ResponseInfo> GetConnectionInfo(JToken parameters)
         {
-            Guid deviceId = Guid.Parse(parameters["deviceId"].ToString());
+            var deviceId = Guid.Parse(parameters["deviceId"].ToString());
 
-            this.accessToken = this.library.RemoteAccessControl.RegisterRemoteAccessToken(deviceId);
-            this.Log().Info("Registering new mobile client with access token {0}", this.accessToken);
+            accessToken = library.RemoteAccessControl.RegisterRemoteAccessToken(deviceId);
+            this.Log().Info("Registering new mobile client with access token {0}", accessToken);
 
-            if (this.library.RemoteAccessControl.IsRemoteAccessReallyLocked)
+            if (library.RemoteAccessControl.IsRemoteAccessReallyLocked)
             {
                 var password = parameters["password"].Value<string>();
 
                 if (password != null)
-                {
                     try
                     {
-                        this.library.RemoteAccessControl.UpgradeRemoteAccess(this.accessToken, password);
+                        library.RemoteAccessControl.UpgradeRemoteAccess(accessToken, password);
                     }
 
                     catch (WrongPasswordException)
                     {
                         return CreateResponse(ResponseStatus.WrongPassword);
                     }
-                }
             }
 
-            AccessPermission accessPermission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken).FirstAsync();
+            AccessPermission accessPermission =
+                await library.RemoteAccessControl.ObserveAccessPermission(accessToken).FirstAsync();
 
             // This is stupid
-            NetworkAccessPermission permission = accessPermission == AccessPermission.Admin ? NetworkAccessPermission.Admin : NetworkAccessPermission.Guest;
+            NetworkAccessPermission permission = accessPermission == AccessPermission.Admin
+                ? NetworkAccessPermission.Admin
+                : NetworkAccessPermission.Guest;
 
-            int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
+            int? remainingVotes = await library.RemoteAccessControl.ObserveRemainingVotes(accessToken).FirstAsync();
 
             var guestSystemInfo = new GuestSystemInfo
             {
-                IsEnabled = remainingVotes.HasValue,
+                IsEnabled = remainingVotes.HasValue
             };
 
-            if (remainingVotes.HasValue)
-            {
-                guestSystemInfo.RemainingVotes = remainingVotes.Value;
-            }
+            if (remainingVotes.HasValue) guestSystemInfo.RemainingVotes = remainingVotes.Value;
 
             var connectionInfo = new ConnectionInfo
             {
@@ -357,18 +345,18 @@ namespace Espera.Core.Mobile
                 GuestSystemInfo = guestSystemInfo
             };
 
-            this.SetupPushNotifications();
+            SetupPushNotifications();
 
             return CreateResponse(ResponseStatus.Success, null, JObject.FromObject(connectionInfo));
         }
 
         private async Task<ResponseInfo> GetCurrentPlaylist(JToken dontCare)
         {
-            Playlist playlist = this.library.CurrentPlaylist;
-            AudioPlayerState playbackState = await this.library.PlaybackState.FirstAsync();
+            var playlist = library.CurrentPlaylist;
+            AudioPlayerState playbackState = await library.PlaybackState.FirstAsync();
 
-            TimeSpan currentTime = await this.library.CurrentPlaybackTime.FirstAsync();
-            TimeSpan totalTime = await this.library.TotalTime.FirstAsync();
+            TimeSpan currentTime = await library.CurrentPlaybackTime.FirstAsync();
+            TimeSpan totalTime = await library.TotalTime.FirstAsync();
             JObject content = MobileHelper.SerializePlaylist(playlist, playbackState, currentTime, totalTime);
 
             return CreateResponse(ResponseStatus.Success, null, content);
@@ -376,7 +364,7 @@ namespace Espera.Core.Mobile
 
         private async Task<ResponseInfo> GetLibraryContent(JToken dontCare)
         {
-            JObject content = await Task.Run(() => MobileHelper.SerializeSongs(this.library.Songs));
+            JObject content = await Task.Run(() => MobileHelper.SerializeSongs(library.Songs));
 
             return CreateResponse(ResponseStatus.Success, null, content);
         }
@@ -394,7 +382,7 @@ namespace Espera.Core.Mobile
 
                 // Cache the latest SoundCloud search request, so we can find the songs by GUID when
                 // we add one to the playlist later
-                this.lastSoundCloudRequest = songs;
+                lastSoundCloudRequest = songs;
 
                 JObject content = MobileHelper.SerializeSongs(songs);
 
@@ -409,7 +397,7 @@ namespace Espera.Core.Mobile
 
         private Task<ResponseInfo> GetVolume(JToken dontCare)
         {
-            float volume = this.library.Volume;
+            var volume = library.Volume;
 
             var response = JObject.FromObject(new
             {
@@ -432,7 +420,7 @@ namespace Espera.Core.Mobile
 
                 // Cache the latest YouTube search request, so we can find the songs by GUID when we
                 // add one to the playlist later
-                this.lastYoutubeRequest = songs;
+                lastYoutubeRequest = songs;
 
                 JObject content = MobileHelper.SerializeSongs(songs);
 
@@ -442,29 +430,26 @@ namespace Espera.Core.Mobile
             catch (NetworkSongFinderException)
             {
                 return CreateResponse(ResponseStatus.Failed, "Couldn't retrieve any YouTube songs");
-            };
+            }
+
+            ;
         }
 
         private Task<ResponseInfo> MovePlaylistSongDown(JToken parameters)
         {
             Guid songGuid;
-            bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
+            var valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
 
-            if (!valid)
-            {
-                return Task.FromResult(CreateResponse(ResponseStatus.MalformedRequest, "Malformed GUID"));
-            }
+            if (!valid) return Task.FromResult(CreateResponse(ResponseStatus.MalformedRequest, "Malformed GUID"));
 
-            PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
+            PlaylistEntry entry = library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
 
             if (entry == null)
-            {
                 return Task.FromResult(CreateResponse(ResponseStatus.NotFound, "Playlist entry not found"));
-            }
 
             try
             {
-                this.library.MovePlaylistSong(entry.Index, entry.Index + 1, this.accessToken);
+                library.MovePlaylistSong(entry.Index, entry.Index + 1, accessToken);
             }
 
             catch (AccessException)
@@ -478,23 +463,17 @@ namespace Espera.Core.Mobile
         private Task<ResponseInfo> MovePlaylistSongUp(JToken parameters)
         {
             Guid songGuid;
-            bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
+            var valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
 
-            if (!valid)
-            {
-                return Task.FromResult(CreateResponse(ResponseStatus.MalformedRequest, "Malformed GUID"));
-            }
+            if (!valid) return Task.FromResult(CreateResponse(ResponseStatus.MalformedRequest, "Malformed GUID"));
 
-            PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
+            PlaylistEntry entry = library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
 
-            if (entry == null)
-            {
-                return Task.FromResult(CreateResponse(ResponseStatus.NotFound));
-            }
+            if (entry == null) return Task.FromResult(CreateResponse(ResponseStatus.NotFound));
 
             try
             {
-                this.library.MovePlaylistSong(entry.Index, entry.Index - 1, this.accessToken);
+                library.MovePlaylistSong(entry.Index, entry.Index - 1, accessToken);
             }
 
             catch (AccessException)
@@ -509,7 +488,7 @@ namespace Espera.Core.Mobile
         {
             try
             {
-                await this.library.PauseSongAsync(this.accessToken);
+                await library.PauseSongAsync(accessToken);
             }
 
             catch (AccessException)
@@ -524,7 +503,7 @@ namespace Espera.Core.Mobile
         {
             try
             {
-                await this.library.PlayNextSongAsync(this.accessToken);
+                await library.PlayNextSongAsync(accessToken);
             }
 
             catch (AccessException)
@@ -538,23 +517,17 @@ namespace Espera.Core.Mobile
         private async Task<ResponseInfo> PlayPlaylistSong(JToken parameters)
         {
             Guid songGuid;
-            bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
+            var valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
 
-            if (!valid)
-            {
-                return CreateResponse(ResponseStatus.MalformedRequest, "Malformed GUID");
-            }
+            if (!valid) return CreateResponse(ResponseStatus.MalformedRequest, "Malformed GUID");
 
-            PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
+            PlaylistEntry entry = library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
 
-            if (entry == null)
-            {
-                return CreateResponse(ResponseStatus.NotFound, "Playlist entry not found");
-            }
+            if (entry == null) return CreateResponse(ResponseStatus.NotFound, "Playlist entry not found");
 
             try
             {
-                await this.library.PlaySongAsync(entry.Index, this.accessToken);
+                await library.PlaySongAsync(entry.Index, accessToken);
             }
 
             catch (AccessException)
@@ -569,7 +542,7 @@ namespace Espera.Core.Mobile
         {
             try
             {
-                await this.library.PlayPreviousSongAsync(this.accessToken);
+                await library.PlayPreviousSongAsync(accessToken);
             }
 
             catch (AccessException)
@@ -582,16 +555,13 @@ namespace Espera.Core.Mobile
 
         private Task<ResponseInfo> PostRemovePlaylistSong(JToken parameters)
         {
-            Guid songGuid = Guid.Parse(parameters["entryGuid"].ToString());
+            var songGuid = Guid.Parse(parameters["entryGuid"].ToString());
 
-            PlaylistEntry entry = this.library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
+            PlaylistEntry entry = library.CurrentPlaylist.FirstOrDefault(x => x.Guid == songGuid);
 
-            if (entry == null)
-            {
-                return Task.FromResult(CreateResponse(ResponseStatus.NotFound, "Guid not found"));
-            }
+            if (entry == null) return Task.FromResult(CreateResponse(ResponseStatus.NotFound, "Guid not found"));
 
-            this.library.RemoveFromPlaylist(new[] { entry.Index }, this.accessToken);
+            library.RemoveFromPlaylist(new[] { entry.Index }, accessToken);
 
             return Task.FromResult(CreateResponse(ResponseStatus.Success));
         }
@@ -605,7 +575,7 @@ namespace Espera.Core.Mobile
 
             NetworkMessage message = CreatePushMessage(PushAction.UpdateAccessPermission, content);
 
-            await this.SendMessage(message);
+            await SendMessage(message);
         }
 
         private Task PushCurrentPlaybackTime(TimeSpan currentPlaybackTime)
@@ -617,24 +587,22 @@ namespace Espera.Core.Mobile
 
             NetworkMessage message = CreatePushMessage(PushAction.UpdateCurrentPlaybackTime, content);
 
-            return this.SendMessage(message);
+            return SendMessage(message);
         }
 
         private Task PushGuestSystemInfo(int? remainingVotes)
         {
             var guestSystemInfo = new GuestSystemInfo
             {
-                IsEnabled = remainingVotes.HasValue,
+                IsEnabled = remainingVotes.HasValue
             };
 
-            if (remainingVotes.HasValue)
-            {
-                guestSystemInfo.RemainingVotes = remainingVotes.Value;
-            }
+            if (remainingVotes.HasValue) guestSystemInfo.RemainingVotes = remainingVotes.Value;
 
-            NetworkMessage message = CreatePushMessage(PushAction.UpdateGuestSystemInfo, JObject.FromObject(guestSystemInfo));
+            NetworkMessage message =
+                CreatePushMessage(PushAction.UpdateGuestSystemInfo, JObject.FromObject(guestSystemInfo));
 
-            return this.SendMessage(message);
+            return SendMessage(message);
         }
 
         private async Task PushPlaybackState(AudioPlayerState state)
@@ -646,54 +614,47 @@ namespace Espera.Core.Mobile
 
             NetworkMessage message = CreatePushMessage(PushAction.UpdatePlaybackState, content);
 
-            await this.SendMessage(message);
+            await SendMessage(message);
         }
 
         private async Task PushPlaylist(Playlist playlist, AudioPlayerState state)
         {
             JObject content = MobileHelper.SerializePlaylist(playlist, state,
-                await this.library.CurrentPlaybackTime.FirstAsync(),
-                await this.library.TotalTime.FirstAsync());
+                await library.CurrentPlaybackTime.FirstAsync(),
+                await library.TotalTime.FirstAsync());
 
             NetworkMessage message = CreatePushMessage(PushAction.UpdateCurrentPlaylist, content);
 
-            await this.SendMessage(message);
+            await SendMessage(message);
         }
 
         private async Task<ResponseInfo> QueueRemoteSong(JToken parameters)
         {
-            AccessPermission permission = await this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken).FirstAsync();
+            AccessPermission permission =
+                await library.RemoteAccessControl.ObserveAccessPermission(accessToken).FirstAsync();
 
             if (permission == AccessPermission.Guest)
             {
-                int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
+                int? remainingVotes = await library.RemoteAccessControl.ObserveRemainingVotes(accessToken).FirstAsync();
 
                 if (remainingVotes == null)
-                {
                     return CreateResponse(ResponseStatus.NotSupported, "Voting isn't supported");
-                }
 
-                if (remainingVotes == 0)
-                {
-                    return CreateResponse(ResponseStatus.Rejected, "Not enough votes left");
-                }
+                if (remainingVotes == 0) return CreateResponse(ResponseStatus.Rejected, "Not enough votes left");
             }
 
             var transferInfo = parameters.ToObject<SongTransferInfo>();
 
-            IObservable<byte[]> data = this.songTransfers.FirstAsync(x => x.TransferId == transferInfo.TransferId).Select(x => x.Data);
+            IObservable<byte[]> data = songTransfers.FirstAsync(x => x.TransferId == transferInfo.TransferId)
+                .Select(x => x.Data);
 
             var song = MobileSong.Create(transferInfo.Metadata, data);
 
             if (permission == AccessPermission.Guest)
-            {
-                this.library.AddGuestSongToPlaylist(song, this.accessToken);
-            }
+                library.AddGuestSongToPlaylist(song, accessToken);
 
             else
-            {
-                this.library.AddSongsToPlaylist(new[] { song }, this.accessToken);
-            }
+                library.AddSongsToPlaylist(new[] { song }, accessToken);
 
             return CreateResponse(ResponseStatus.Success);
         }
@@ -706,21 +667,21 @@ namespace Espera.Core.Mobile
                 message = await NetworkHelpers.PackMessageAsync(content);
             }
 
-            await this.gate.WaitAsync();
+            await gate.WaitAsync();
 
             try
             {
-                await this.socket.GetStream().WriteAsync(message, 0, message.Length);
+                await socket.GetStream().WriteAsync(message, 0, message.Length);
             }
 
             catch (Exception)
             {
-                this.disconnected.OnNext(Unit.Default);
+                disconnected.OnNext(Unit.Default);
             }
 
             finally
             {
-                this.gate.Release();
+                gate.Release();
             }
         }
 
@@ -730,7 +691,7 @@ namespace Espera.Core.Mobile
 
             try
             {
-                this.library.SetCurrentTime(time, this.accessToken);
+                library.SetCurrentTime(time, accessToken);
             }
 
             catch (AccessException)
@@ -743,46 +704,49 @@ namespace Espera.Core.Mobile
 
         private void SetupPushNotifications()
         {
-            this.library.WhenAnyValue(x => x.CurrentPlaylist).Skip(1)
-                .Merge(this.library.WhenAnyValue(x => x.CurrentPlaylist)
+            library.WhenAnyValue(x => x.CurrentPlaylist).Skip(1)
+                .Merge(library.WhenAnyValue(x => x.CurrentPlaylist)
                     .Select(x => x.Changed().Select(y => x))
                     .Switch())
-                .Merge(this.library.WhenAnyValue(x => x.CurrentPlaylist)
+                .Merge(library.WhenAnyValue(x => x.CurrentPlaylist)
                     .Select(x => x.WhenAnyValue(y => y.CurrentSongIndex).Skip(1).Select(y => x))
                     .Switch())
-                .CombineLatest(this.library.PlaybackState, Tuple.Create)
+                .CombineLatest(library.PlaybackState, Tuple.Create)
                 .ObserveOn(RxApp.TaskpoolScheduler)
-                .Subscribe(x => this.PushPlaylist(x.Item1, x.Item2))
-                .DisposeWith(this.disposable);
+                .Subscribe(x => PushPlaylist(x.Item1, x.Item2))
+                .DisposeWith(disposable);
 
-            this.library.PlaybackState.Skip(1)
+            library.PlaybackState.Skip(1)
                 .ObserveOn(RxApp.TaskpoolScheduler)
-                .Subscribe(x => this.PushPlaybackState(x))
-                .DisposeWith(this.disposable);
+                .Subscribe(x => PushPlaybackState(x))
+                .DisposeWith(disposable);
 
-            this.library.RemoteAccessControl.ObserveAccessPermission(this.accessToken)
+            library.RemoteAccessControl.ObserveAccessPermission(accessToken)
                 .Skip(1)
                 .ObserveOn(RxApp.TaskpoolScheduler)
-                .Subscribe(x => this.PushAccessPermission(x))
-                .DisposeWith(this.disposable);
+                .Subscribe(x => PushAccessPermission(x))
+                .DisposeWith(disposable);
 
-            this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken)
+            library.RemoteAccessControl.ObserveRemainingVotes(accessToken)
                 .Skip(1)
                 .ObserveOn(RxApp.TaskpoolScheduler)
-                .Subscribe(x => this.PushGuestSystemInfo(x))
-                .DisposeWith(this.disposable);
+                .Subscribe(x => PushGuestSystemInfo(x))
+                .DisposeWith(disposable);
 
-            TimeSpan lastTime = TimeSpan.Zero;
+            var lastTime = TimeSpan.Zero;
             // We can assume that, if the total time difference exceeds two seconds, the time change
             // is from an external source (e.g the user clicked on the time slider)
-            this.library.CurrentPlaybackTime
-                .Select(x => Math.Abs(lastTime.TotalSeconds - x.TotalSeconds) >= 2 ? Tuple.Create(x, true) : Tuple.Create(x, false))
+            library.CurrentPlaybackTime
+                .Select(x =>
+                    Math.Abs(lastTime.TotalSeconds - x.TotalSeconds) >= 2
+                        ? Tuple.Create(x, true)
+                        : Tuple.Create(x, false))
                 .Do(x => lastTime = x.Item1)
                 .Where(x => x.Item2)
                 .Select(x => x.Item1)
                 .ObserveOn(RxApp.TaskpoolScheduler)
-                .Subscribe(x => this.PushCurrentPlaybackTime(x))
-                .DisposeWith(this.disposable);
+                .Subscribe(x => PushCurrentPlaybackTime(x))
+                .DisposeWith(disposable);
         }
 
         private Task<ResponseInfo> SetVolume(JToken parameters)
@@ -790,11 +754,12 @@ namespace Espera.Core.Mobile
             var volume = parameters["volume"].ToObject<float>();
 
             if (volume < 0 || volume > 1.0)
-                return Task.FromResult(CreateResponse(ResponseStatus.MalformedRequest, "Volume must be between 0 and 1"));
+                return Task.FromResult(
+                    CreateResponse(ResponseStatus.MalformedRequest, "Volume must be between 0 and 1"));
 
             try
             {
-                this.library.SetVolume(volume, this.accessToken);
+                library.SetVolume(volume, accessToken);
             }
 
             catch (AccessException)
@@ -807,20 +772,21 @@ namespace Espera.Core.Mobile
 
         private Task<ResponseInfo> ToggleVideoPlayer(JToken arg)
         {
-            this.videoPlayerToggleRequest.OnNext(Unit.Default);
+            videoPlayerToggleRequest.OnNext(Unit.Default);
 
             return Task.FromResult(CreateResponse(ResponseStatus.Success));
         }
 
-        private bool TryValidateSongGuids(IEnumerable<string> guidStrings, out IEnumerable<Song> foundSongs, out ResponseInfo responseInfo)
+        private bool TryValidateSongGuids(IEnumerable<string> guidStrings, out IEnumerable<Song> foundSongs,
+            out ResponseInfo responseInfo)
         {
             var guids = new List<Guid>();
 
-            foreach (string guidString in guidStrings)
+            foreach (var guidString in guidStrings)
             {
                 Guid guid;
 
-                bool valid = Guid.TryParse(guidString, out guid);
+                var valid = Guid.TryParse(guidString, out guid);
 
                 if (valid)
                 {
@@ -837,21 +803,21 @@ namespace Espera.Core.Mobile
 
             // Look if any song in our local library or any song of the last SoundCloud or YouTube
             // requests has the requested Guid
-            Dictionary<Guid, Song> dic = this.library.Songs
-                .Concat(this.lastSoundCloudRequest.Cast<Song>())
-                .Concat(this.lastYoutubeRequest)
+            Dictionary<Guid, Song> dic = library.Songs
+                .Concat(lastSoundCloudRequest.Cast<Song>())
+                .Concat(lastYoutubeRequest)
                 .ToDictionary(x => x.Guid);
 
             List<Song> songs = guids.Select(x =>
-            {
-                Song song;
+                {
+                    Song song;
 
-                dic.TryGetValue(x, out song);
+                    dic.TryGetValue(x, out song);
 
-                return song;
-            })
-            .Where(x => x != null)
-            .ToList();
+                    return song;
+                })
+                .Where(x => x != null)
+                .ToList();
 
             if (guids.Count != songs.Count)
             {
@@ -867,47 +833,31 @@ namespace Espera.Core.Mobile
 
         private async Task<ResponseInfo> VoteForSong(JToken parameters)
         {
-            int? remainingVotes = await this.library.RemoteAccessControl.ObserveRemainingVotes(this.accessToken).FirstAsync();
+            int? remainingVotes = await library.RemoteAccessControl.ObserveRemainingVotes(accessToken).FirstAsync();
 
-            if (remainingVotes == null)
-            {
-                return CreateResponse(ResponseStatus.NotSupported, "Voting isn't supported");
-            }
+            if (remainingVotes == null) return CreateResponse(ResponseStatus.NotSupported, "Voting isn't supported");
 
-            if (remainingVotes == 0)
-            {
-                return CreateResponse(ResponseStatus.Rejected, "Not enough votes left");
-            }
+            if (remainingVotes == 0) return CreateResponse(ResponseStatus.Rejected, "Not enough votes left");
 
             Guid songGuid;
-            bool valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
+            var valid = Guid.TryParse(parameters["entryGuid"].ToString(), out songGuid);
 
-            if (!valid)
-            {
-                return CreateResponse(ResponseStatus.MalformedRequest, "Malformed GUID");
-            }
+            if (!valid) return CreateResponse(ResponseStatus.MalformedRequest, "Malformed GUID");
 
-            Playlist playlist = this.library.CurrentPlaylist;
+            var playlist = library.CurrentPlaylist;
             PlaylistEntry entry = playlist.FirstOrDefault(x => x.Guid == songGuid);
 
-            if (entry == null)
-            {
-                return CreateResponse(ResponseStatus.NotFound, "Playlist entry not found");
-            }
+            if (entry == null) return CreateResponse(ResponseStatus.NotFound, "Playlist entry not found");
 
-            if (this.library.RemoteAccessControl.IsVoteRegistered(this.accessToken, entry))
-            {
+            if (library.RemoteAccessControl.IsVoteRegistered(accessToken, entry))
                 return CreateResponse(ResponseStatus.Rejected, "Vote already registered");
-            }
 
             if (playlist.CurrentSongIndex.HasValue && entry.Index <= playlist.CurrentSongIndex.Value)
-            {
                 return CreateResponse(ResponseStatus.Rejected, "Vote rejected");
-            }
 
             try
             {
-                this.library.VoteForPlaylistEntry(entry.Index, this.accessToken);
+                library.VoteForPlaylistEntry(entry.Index, accessToken);
             }
 
             catch (AccessException)

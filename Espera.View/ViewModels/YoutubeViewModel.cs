@@ -15,55 +15,57 @@ namespace Espera.View.ViewModels
         private SortOrder ratingOrder;
         private SortOrder viewsOrder;
 
-        public YoutubeViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, Guid accessToken, IYoutubeSongFinder songFinder = null)
+        public YoutubeViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, Guid accessToken,
+            IYoutubeSongFinder songFinder = null)
             : base(library, accessToken, coreSettings,
                 song => new YoutubeSongViewModel(song, () => coreSettings.YoutubeDownloadPath),
-                songFinder ?? new YoutubeSongFinder(Locator.Current.GetService<IBlobCache>(BlobCacheKeys.RequestCacheContract)))
+                songFinder ??
+                new YoutubeSongFinder(Locator.Current.GetService<IBlobCache>(BlobCacheKeys.RequestCacheContract)))
         {
             if (viewSettings == null)
                 Throw.ArgumentNullException(() => viewSettings);
 
             this.viewSettings = viewSettings;
 
-            this.OrderByRatingCommand = ReactiveCommand.Create();
-            this.OrderByRatingCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByRating, ref this.ratingOrder));
+            OrderByRatingCommand = ReactiveCommand.Create();
+            OrderByRatingCommand.Subscribe(_ => ApplyOrder(SortHelpers.GetOrderByRating, ref ratingOrder));
 
-            this.OrderByViewsCommand = ReactiveCommand.Create();
-            this.OrderByViewsCommand.Subscribe(_ => this.ApplyOrder(SortHelpers.GetOrderByViews, ref this.viewsOrder));
+            OrderByViewsCommand = ReactiveCommand.Create();
+            OrderByViewsCommand.Subscribe(_ => ApplyOrder(SortHelpers.GetOrderByViews, ref viewsOrder));
         }
 
         public int DurationColumnWidth
         {
-            get { return this.viewSettings.YoutubeDurationColumnWidth; }
-            set { this.viewSettings.YoutubeDurationColumnWidth = value; }
+            get => viewSettings.YoutubeDurationColumnWidth;
+            set => viewSettings.YoutubeDurationColumnWidth = value;
         }
 
         public int LinkColumnWidth
         {
-            get { return this.viewSettings.YoutubeLinkColumnWidth; }
-            set { this.viewSettings.YoutubeLinkColumnWidth = value; }
+            get => viewSettings.YoutubeLinkColumnWidth;
+            set => viewSettings.YoutubeLinkColumnWidth = value;
         }
 
-        public ReactiveCommand<object> OrderByRatingCommand { get; private set; }
+        public ReactiveCommand<object> OrderByRatingCommand { get; }
 
-        public ReactiveCommand<object> OrderByViewsCommand { get; private set; }
+        public ReactiveCommand<object> OrderByViewsCommand { get; }
 
         public int RatingColumnWidth
         {
-            get { return this.viewSettings.YoutubeRatingColumnWidth; }
-            set { this.viewSettings.YoutubeRatingColumnWidth = value; }
+            get => viewSettings.YoutubeRatingColumnWidth;
+            set => viewSettings.YoutubeRatingColumnWidth = value;
         }
 
         public int TitleColumnWidth
         {
-            get { return this.viewSettings.YoutubeTitleColumnWidth; }
-            set { this.viewSettings.YoutubeTitleColumnWidth = value; }
+            get => viewSettings.YoutubeTitleColumnWidth;
+            set => viewSettings.YoutubeTitleColumnWidth = value;
         }
 
         public int ViewsColumnWidth
         {
-            get { return this.viewSettings.YoutubeViewsColumnWidth; }
-            set { this.viewSettings.YoutubeViewsColumnWidth = value; }
+            get => viewSettings.YoutubeViewsColumnWidth;
+            set => viewSettings.YoutubeViewsColumnWidth = value;
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using Espera.Network;
-using ReactiveMarrow;
-using System;
+﻿using System;
 using System.IO;
 using System.IO.Abstractions;
 using System.Reactive;
@@ -8,6 +6,8 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
+using Espera.Network;
+using ReactiveMarrow;
 
 namespace Espera.Core.Mobile
 {
@@ -18,23 +18,14 @@ namespace Espera.Core.Mobile
         private MobileSong(string path, TimeSpan duration)
             : base(path, duration)
         {
-            this.dataGate = new AsyncSubject<Unit>();
+            dataGate = new AsyncSubject<Unit>();
         }
 
-        public override bool IsVideo
-        {
-            get { return false; }
-        }
+        public override bool IsVideo => false;
 
-        public override NetworkSongSource NetworkSongSource
-        {
-            get { return NetworkSongSource.Mobile; }
-        }
+        public override NetworkSongSource NetworkSongSource => NetworkSongSource.Mobile;
 
-        public override string PlaybackPath
-        {
-            get { return this.OriginalPath; }
-        }
+        public override string PlaybackPath => OriginalPath;
 
         internal static MobileSong Create(NetworkSong metaData, IObservable<byte[]> data, IFileSystem fileSystem = null)
         {
@@ -43,7 +34,7 @@ namespace Espera.Core.Mobile
             string tempPath = fileSystem.Path.GetTempFileName();
 
             // Lol, MediaElement is too stupid to play a file with a .tmp extension
-            string newName = Path.ChangeExtension(tempPath, ".mp3");
+            var newName = Path.ChangeExtension(tempPath, ".mp3");
             fileSystem.File.Move(tempPath, newName);
             tempPath = newName;
 
@@ -66,7 +57,7 @@ namespace Espera.Core.Mobile
 
         internal override Task PrepareAsync(YoutubeStreamingQuality qualityHint)
         {
-            return this.dataGate.ToTask();
+            return dataGate.ToTask();
         }
     }
 }

@@ -1,6 +1,7 @@
-﻿using NSubstitute;
-using System;
+﻿using System;
+using NSubstitute;
 using Xunit;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace Espera.Core.Tests
 {
@@ -13,7 +14,7 @@ namespace Espera.Core.Tests
             {
                 var song = Substitute.For<Song>("TestPath", TimeSpan.Zero);
 
-                Assert.False(song.Equals(null));
+                Assert.IsFalse(song.Equals(null));
             }
 
             [Fact]
@@ -22,7 +23,7 @@ namespace Espera.Core.Tests
                 var song1 = Substitute.For<Song>("TestPath", TimeSpan.Zero);
                 var song2 = Substitute.For<Song>("TestPath", TimeSpan.Zero);
 
-                Assert.True(song1.Equals(song2));
+                Assert.IsTrue(song1.Equals(song2));
             }
 
             [Fact]
@@ -30,7 +31,7 @@ namespace Espera.Core.Tests
             {
                 var song = Substitute.For<Song>("TestPath", TimeSpan.Zero);
 
-                Assert.True(song.Equals(song));
+                Assert.IsTrue(song.Equals(song));
             }
 
             [Fact]
@@ -39,7 +40,7 @@ namespace Espera.Core.Tests
                 var song1 = Substitute.For<Song>("TestPath", TimeSpan.Zero);
                 var song2 = Substitute.For<Song>("TestPath1", TimeSpan.Zero);
 
-                Assert.False(song1.Equals(song2));
+                Assert.IsFalse(song1.Equals(song2));
             }
         }
 
@@ -51,7 +52,7 @@ namespace Espera.Core.Tests
                 var song1 = Substitute.For<Song>("TestPath", TimeSpan.Zero);
                 var song2 = Substitute.For<Song>("TestPath", TimeSpan.Zero);
 
-                Assert.Equal(song1.GetHashCode(), song2.GetHashCode());
+                Assert.AreEqual(song1.GetHashCode(), song2.GetHashCode());
             }
         }
     }

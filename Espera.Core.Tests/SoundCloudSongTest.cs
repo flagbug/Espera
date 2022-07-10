@@ -1,5 +1,6 @@
 using System;
 using Xunit;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace Espera.Core.Tests
 {
@@ -12,7 +13,7 @@ namespace Espera.Core.Tests
             {
                 var song = new SoundCloudSong("http://soundcloud.com", "http://streamable.com");
 
-                Assert.Equal("http://streamable.com", song.PlaybackPath);
+                Assert.AreEqual("http://streamable.com", song.PlaybackPath);
             }
 
             [Fact]
@@ -26,7 +27,7 @@ namespace Espera.Core.Tests
                     DownloadUrl = new Uri("http://downloadable.com")
                 };
 
-                Assert.Equal(song.PlaybackPath, song.DownloadUrl.ToString());
+                Assert.AreEqual(song.PlaybackPath, song.DownloadUrl.ToString());
             }
         }
     }

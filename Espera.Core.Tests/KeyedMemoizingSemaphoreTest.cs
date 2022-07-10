@@ -13,7 +13,7 @@ namespace Espera.Core.Tests
             {
                 var semaphore = new KeyedMemoizingSemaphore();
 
-                Assert.Throws<KeyNotFoundException>(() => semaphore.Release("wat"));
+                Xunit.Assert.Throws<KeyNotFoundException>(() => semaphore.Release("wat"));
             }
         }
 
@@ -27,8 +27,8 @@ namespace Espera.Core.Tests
                 await semaphore.Wait("key1");
                 await semaphore.Wait("key2");
 
-                Task awaiter1 = semaphore.Wait("key1");
-                Task awaiter2 = semaphore.Wait("key2");
+                var awaiter1 = semaphore.Wait("key1");
+                var awaiter2 = semaphore.Wait("key2");
 
                 Assert.False(awaiter1.IsCompleted);
                 Assert.False(awaiter2.IsCompleted);
@@ -58,7 +58,7 @@ namespace Espera.Core.Tests
 
                 await semaphore.Wait("key");
 
-                Task awaiter = semaphore.Wait("key");
+                var awaiter = semaphore.Wait("key");
 
                 Assert.False(awaiter.IsCompleted);
 

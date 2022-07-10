@@ -13,15 +13,14 @@ namespace Espera.Core
                 throw new ArgumentNullException("source");
 
             return Observable.FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
-                handler => source.CollectionChanged += handler,
-                handler => source.CollectionChanged -= handler)
+                    handler => source.CollectionChanged += handler,
+                    handler => source.CollectionChanged -= handler)
                 .Select(x => x.EventArgs);
         }
 
         public static void Retry(this Action block, int retries = 3)
         {
             while (true)
-            {
                 try
                 {
                     block();
@@ -32,12 +31,8 @@ namespace Espera.Core
                 {
                     retries--;
 
-                    if (retries == 0)
-                    {
-                        throw;
-                    }
+                    if (retries == 0) throw;
                 }
-            }
         }
     }
 }

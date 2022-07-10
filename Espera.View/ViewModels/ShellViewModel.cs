@@ -1,18 +1,16 @@
-﻿using Caliburn.Micro;
+﻿using System;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using Caliburn.Micro;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Mobile;
 using Espera.Core.Settings;
 using Rareform.Extensions;
 using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Concurrency;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 
 namespace Espera.View.ViewModels
 {
@@ -40,93 +38,92 @@ namespace Espera.View.ViewModels
         private bool isYoutube;
         private bool showVideoPlayer;
 
-        public ShellViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings, IWindowManager windowManager, MobileApiInfo mobileApiInfo)
+        public ShellViewModel(Library library, ViewSettings viewSettings, CoreSettings coreSettings,
+            IWindowManager windowManager, MobileApiInfo mobileApiInfo)
         {
             this.library = library;
-            this.ViewSettings = viewSettings;
+            ViewSettings = viewSettings;
             this.coreSettings = coreSettings;
 
-            this.disposable = new CompositeDisposable();
-            this.UpdateViewModel = new UpdateViewModel(viewSettings);
+            disposable = new CompositeDisposable();
+            UpdateViewModel = new UpdateViewModel(viewSettings);
 
             this.library.Initialize();
-            this.accessToken = this.library.LocalAccessControl.RegisterLocalAccessToken();
+            accessToken = this.library.LocalAccessControl.RegisterLocalAccessToken();
 
-            this.library.WhenAnyValue(x => x.CurrentPlaylist).Subscribe(x => this.RaisePropertyChanged("CurrentPlaylist"));
+            this.library.WhenAnyValue(x => x.CurrentPlaylist)
+                .Subscribe(x => this.RaisePropertyChanged("CurrentPlaylist"));
 
-            this.canChangeTime = this.library.LocalAccessControl.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockTime), this.accessToken)
+            canChangeTime = this.library.LocalAccessControl
+                .HasAccess(this.coreSettings.WhenAnyValue(x => x.LockTime), accessToken)
                 .ToProperty(this, x => x.CanChangeTime);
-            this.canChangeVolume = this.library.LocalAccessControl.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockVolume), this.accessToken)
+            canChangeVolume = this.library.LocalAccessControl
+                .HasAccess(this.coreSettings.WhenAnyValue(x => x.LockVolume), accessToken)
                 .ToProperty(this, x => x.CanChangeVolume);
-            this.canAlterPlaylist = this.library.LocalAccessControl.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlaylist), this.accessToken)
+            this.canAlterPlaylist = this.library.LocalAccessControl
+                .HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlaylist), accessToken)
                 .ToProperty(this, x => x.CanAlterPlaylist);
 
-            this.showVotes = this.library.RemoteAccessControl.WhenAnyValue(x => x.IsGuestSystemReallyEnabled)
-                .CombineLatest(mobileApiInfo.ConnectedClientCount, (enableGuestSystem, connectedClients) => enableGuestSystem && connectedClients > 0)
+            showVotes = this.library.RemoteAccessControl.WhenAnyValue(x => x.IsGuestSystemReallyEnabled)
+                .CombineLatest(mobileApiInfo.ConnectedClientCount,
+                    (enableGuestSystem, connectedClients) => enableGuestSystem && connectedClients > 0)
                 .ToProperty(this, x => x.ShowVotes);
 
-            mobileApiInfo.VideoPlayerToggleRequest.Subscribe(_ => this.ShowVideoPlayer = !this.ShowVideoPlayer);
+            mobileApiInfo.VideoPlayerToggleRequest.Subscribe(_ => ShowVideoPlayer = !ShowVideoPlayer);
 
-            this.isAdmin = this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken)
+            isAdmin = this.library.LocalAccessControl.ObserveAccessPermission(accessToken)
                 .Select(x => x == AccessPermission.Admin)
                 .ToProperty(this, x => x.IsAdmin);
 
-            this.NextSongCommand = ReactiveCommand.CreateAsyncTask(this.library.LocalAccessControl.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.accessToken)
-                    .CombineLatest(this.library.WhenAnyValue(x => x.CurrentPlaylist.CanPlayNextSong), (x1, x2) => x1 && x2)
+            NextSongCommand = ReactiveCommand.CreateAsyncTask(this.library.LocalAccessControl
+                    .HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause), accessToken)
+                    .CombineLatest(this.library.WhenAnyValue(x => x.CurrentPlaylist.CanPlayNextSong),
+                        (x1, x2) => x1 && x2)
                     .ObserveOn(RxApp.MainThreadScheduler),
-                _ => this.library.PlayNextSongAsync(this.accessToken));
+                _ => this.library.PlayNextSongAsync(accessToken));
 
-            this.PreviousSongCommand = ReactiveCommand.CreateAsyncTask(this.library.LocalAccessControl.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.accessToken)
-                    .CombineLatest(this.library.WhenAnyValue(x => x.CurrentPlaylist.CanPlayPreviousSong), (x1, x2) => x1 && x2)
+            PreviousSongCommand = ReactiveCommand.CreateAsyncTask(this.library.LocalAccessControl
+                    .HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause), accessToken)
+                    .CombineLatest(this.library.WhenAnyValue(x => x.CurrentPlaylist.CanPlayPreviousSong),
+                        (x1, x2) => x1 && x2)
                     .ObserveOn(RxApp.MainThreadScheduler),
-                _ => this.library.PlayPreviousSongAsync(this.accessToken));
+                _ => this.library.PlayPreviousSongAsync(accessToken));
 
             if (!this.library.Playlists.Any())
-            {
-                this.library.AddAndSwitchToPlaylist(this.GetNewPlaylistName(), this.accessToken);
-            }
+                this.library.AddAndSwitchToPlaylist(GetNewPlaylistName(), accessToken);
 
             else
-            {
-                this.library.SwitchToPlaylist(this.library.Playlists.First(), this.accessToken);
-            }
+                this.library.SwitchToPlaylist(this.library.Playlists.First(), accessToken);
 
-            this.SettingsViewModel = new SettingsViewModel(this.library, this.ViewSettings, this.coreSettings, windowManager, this.accessToken, mobileApiInfo);
+            SettingsViewModel = new SettingsViewModel(this.library, ViewSettings, this.coreSettings, windowManager,
+                accessToken, mobileApiInfo);
 
-            this.LocalViewModel = new LocalViewModel(this.library, this.ViewSettings, this.coreSettings, accessToken);
-            this.YoutubeViewModel = new YoutubeViewModel(this.library, this.ViewSettings, this.coreSettings, accessToken);
-            this.SoundCloudViewModel = new SoundCloudViewModel(this.library, accessToken, this.coreSettings, this.ViewSettings);
-            this.DirectYoutubeViewModel = new DirectYoutubeViewModel(this.library, this.coreSettings, accessToken);
+            LocalViewModel = new LocalViewModel(this.library, ViewSettings, this.coreSettings, accessToken);
+            YoutubeViewModel = new YoutubeViewModel(this.library, ViewSettings, this.coreSettings, accessToken);
+            SoundCloudViewModel = new SoundCloudViewModel(this.library, accessToken, this.coreSettings, ViewSettings);
+            DirectYoutubeViewModel = new DirectYoutubeViewModel(this.library, this.coreSettings, accessToken);
 
-            this.currentSongSource = this.WhenAnyValue(x => x.IsLocal, x => x.IsYoutube, x => x.IsSoundCloud,
-                (local, youtube, soundcloud) =>
-                {
-                    if (local)
+            currentSongSource = this.WhenAnyValue(x => x.IsLocal, x => x.IsYoutube, x => x.IsSoundCloud,
+                    (local, youtube, soundcloud) =>
                     {
-                        return (ISongSourceViewModel)this.LocalViewModel;
-                    }
+                        if (local) return (ISongSourceViewModel)LocalViewModel;
 
-                    if (youtube)
-                    {
-                        return this.YoutubeViewModel;
-                    }
+                        if (youtube) return YoutubeViewModel;
 
-                    if (soundcloud)
-                    {
-                        return this.SoundCloudViewModel;
-                    }
+                        if (soundcloud) return SoundCloudViewModel;
 
-                    return this.LocalViewModel;
-                })
+                        return LocalViewModel;
+                    })
                 .ToProperty(this, x => x.CurrentSongSource, null, ImmediateScheduler.Instance);
 
-            this.MuteCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.IsAdmin));
-            this.MuteCommand.Subscribe(x => this.Volume = 0);
+            MuteCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.IsAdmin));
+            MuteCommand.Subscribe(x => Volume = 0);
 
-            this.UnMuteCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.IsAdmin));
-            this.UnMuteCommand.Subscribe(x => this.Volume = 1);
+            UnMuteCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.IsAdmin));
+            UnMuteCommand.Subscribe(x => Volume = 1);
 
-            this.canModifyWindow = this.library.LocalAccessControl.HasAccess(this.ViewSettings.WhenAnyValue(x => x.LockWindow), this.accessToken)
+            canModifyWindow = this.library.LocalAccessControl
+                .HasAccess(ViewSettings.WhenAnyValue(x => x.LockWindow), accessToken)
                 .ToProperty(this, x => x.CanModifyWindow);
 
             this.isPlaying = this.library.PlaybackState
@@ -134,39 +131,41 @@ namespace Espera.View.ViewModels
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .ToProperty(this, x => x.IsPlaying);
 
-            this.currentTime = this.library.CurrentPlaybackTime
+            currentTime = this.library.CurrentPlaybackTime
                 .StartWith(TimeSpan.Zero)
                 .Select(x => x.FormatAdaptive())
                 .ToProperty(this, x => x.CurrentTime);
 
-            this.currentSeconds = this.library.CurrentPlaybackTime
+            currentSeconds = this.library.CurrentPlaybackTime
                 .Select(x => (int)x.TotalSeconds)
                 .ToProperty(this, x => x.CurrentSeconds);
 
-            this.totalTime = this.library.TotalTime
+            totalTime = this.library.TotalTime
                 .Select(x => x.FormatAdaptive())
                 .ToProperty(this, x => x.TotalTime);
 
-            this.totalSeconds = this.library.TotalTime
+            totalSeconds = this.library.TotalTime
                 .Select(x => (int)x.TotalSeconds)
                 .ToProperty(this, x => x.TotalSeconds);
 
-            this.volume = this.library.WhenAnyValue(x => x.Volume, x => (double)x)
+            volume = this.library.WhenAnyValue(x => x.Volume, x => (double)x)
                 .ToProperty(this, x => x.Volume);
 
-            this.AddPlaylistCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.CanAlterPlaylist));
-            this.AddPlaylistCommand.Subscribe(x => this.AddPlaylist());
+            AddPlaylistCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.CanAlterPlaylist));
+            AddPlaylistCommand.Subscribe(x => AddPlaylist());
 
-            this.Playlists = this.library.Playlists.CreateDerivedCollection(this.CreatePlaylistViewModel, x => x.Dispose());
+            Playlists = this.library.Playlists.CreateDerivedCollection(this.CreatePlaylistViewModel, x => x.Dispose());
 
-            this.ShowSettingsCommand = ReactiveCommand.Create();
-            this.ShowSettingsCommand.Subscribe(x => this.SettingsViewModel.HandleSettings());
+            ShowSettingsCommand = ReactiveCommand.Create();
+            ShowSettingsCommand.Subscribe(x => SettingsViewModel.HandleSettings());
 
-            this.ShufflePlaylistCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.CanAlterPlaylist));
-            this.ShufflePlaylistCommand.Subscribe(x => this.library.ShufflePlaylist(this.accessToken));
+            ShufflePlaylistCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.CanAlterPlaylist));
+            ShufflePlaylistCommand.Subscribe(x => this.library.ShufflePlaylist(accessToken));
 
             IObservable<bool> canPlay = this.WhenAnyValue(x => x.CurrentPlaylist.SelectedEntries)
-                .CombineLatest(this.library.LocalAccessControl.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.accessToken), this.library.LoadedSong, this.library.PlaybackState,
+                .CombineLatest(
+                    this.library.LocalAccessControl.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause),
+                        accessToken), this.library.LoadedSong, this.library.PlaybackState,
                     (selectedPlaylistEntries, hasPlayAccess, loadedSong, playBackState) =>
 
                         // The admin can always play, but if we are in party mode, we have to check
@@ -174,92 +173,88 @@ namespace Espera.View.ViewModels
                         hasPlayAccess &&
 
                         // If exactly one song is selected, the command can be executed
-                        (selectedPlaylistEntries != null && selectedPlaylistEntries.Count() == 1 ||
+                        ((selectedPlaylistEntries != null && selectedPlaylistEntries.Count() == 1) ||
 
-                        // If the current song is paused, the command can be executed
-                        (loadedSong != null || playBackState == AudioPlayerState.Paused)));
-            this.PlayCommand = ReactiveCommand.CreateAsyncTask(canPlay, async _ =>
+                         // If the current song is paused, the command can be executed
+                         (loadedSong != null || playBackState == AudioPlayerState.Paused)));
+            PlayCommand = ReactiveCommand.CreateAsyncTask(canPlay, async _ =>
             {
-                if (await this.library.PlaybackState.FirstAsync() == AudioPlayerState.Paused || await this.library.LoadedSong.FirstAsync() != null)
-                {
-                    await this.library.ContinueSongAsync(this.accessToken);
-                }
+                if (await this.library.PlaybackState.FirstAsync() == AudioPlayerState.Paused ||
+                    await this.library.LoadedSong.FirstAsync() != null)
+                    await this.library.ContinueSongAsync(accessToken);
 
                 else
-                {
-                    await this.library.PlaySongAsync(this.CurrentPlaylist.SelectedEntries.First().Index, this.accessToken);
-                }
+                    await this.library.PlaySongAsync(CurrentPlaylist.SelectedEntries.First().Index, accessToken);
             });
 
-            this.PlayOverrideCommand = ReactiveCommand.CreateAsyncTask(this.WhenAnyValue(x => x.CurrentPlaylist.SelectedEntries)
-                .CombineLatest(this.library.LocalAccessControl.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.accessToken),
-                    (selectedPlaylistEntries, hasAccess) => hasAccess && (selectedPlaylistEntries != null && selectedPlaylistEntries.Count() == 1)),
-                _ => this.library.PlaySongAsync(this.CurrentPlaylist.SelectedEntries.First().Index, this.accessToken));
+            PlayOverrideCommand = ReactiveCommand.CreateAsyncTask(this
+                    .WhenAnyValue(x => x.CurrentPlaylist.SelectedEntries)
+                    .CombineLatest(
+                        this.library.LocalAccessControl.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause),
+                            accessToken),
+                        (selectedPlaylistEntries, hasAccess) => hasAccess &&
+                                                                (selectedPlaylistEntries != null &&
+                                                                 selectedPlaylistEntries.Count() == 1)),
+                _ => this.library.PlaySongAsync(CurrentPlaylist.SelectedEntries.First().Index, accessToken));
 
-            this.PauseCommand = ReactiveCommand.CreateAsyncTask(this.library.LocalAccessControl.HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause), this.accessToken)
-                .CombineLatest(this.WhenAnyValue(x => x.IsPlaying), (hasAccess, isPlaying) => hasAccess && isPlaying),
-                _ => this.library.PauseSongAsync(this.accessToken));
+            PauseCommand = ReactiveCommand.CreateAsyncTask(this.library.LocalAccessControl
+                    .HasAccess(this.coreSettings.WhenAnyValue(x => x.LockPlayPause), accessToken)
+                    .CombineLatest(this.WhenAnyValue(x => x.IsPlaying),
+                        (hasAccess, isPlaying) => hasAccess && isPlaying),
+                _ => this.library.PauseSongAsync(accessToken));
 
             var pauseOrContinueCommand = this.WhenAnyValue(x => x.IsPlaying)
-                .Select(x => x ? this.PauseCommand : this.PlayCommand).Publish(null);
+                .Select(x => x ? PauseCommand : PlayCommand).Publish(null);
             pauseOrContinueCommand.Connect();
 
-            this.PauseContinueCommand = ReactiveCommand.CreateAsyncTask(
-                pauseOrContinueCommand.Select(x => x.CanExecuteObservable).Switch().ObserveOn(RxApp.MainThreadScheduler),
+            PauseContinueCommand = ReactiveCommand.CreateAsyncTask(
+                pauseOrContinueCommand.Select(x => x.CanExecuteObservable).Switch()
+                    .ObserveOn(RxApp.MainThreadScheduler),
                 async _ =>
                 {
                     IReactiveCommand<Unit> command = await pauseOrContinueCommand.FirstAsync();
                     await command.ExecuteAsync();
                 });
 
-            this.EditPlaylistNameCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.CanAlterPlaylist, x => x.CurrentPlaylist, (x1, x2) => x1 && !x2.Model.IsTemporary));
-            this.EditPlaylistNameCommand.Subscribe(x => this.CurrentPlaylist.EditName = true);
+            EditPlaylistNameCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.CanAlterPlaylist,
+                x => x.CurrentPlaylist, (x1, x2) => x1 && !x2.Model.IsTemporary));
+            EditPlaylistNameCommand.Subscribe(x => CurrentPlaylist.EditName = true);
 
-            this.RemovePlaylistCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.CurrentEditedPlaylist, x => x.CurrentPlaylist, x => x.CanAlterPlaylist,
-                    (currentEditedPlaylist, currentPlaylist, canAlterPlaylist) => (currentEditedPlaylist != null || currentPlaylist != null) && canAlterPlaylist));
-            this.RemovePlaylistCommand.Subscribe(x => this.RemoveCurrentPlaylist());
+            RemovePlaylistCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.CurrentEditedPlaylist,
+                x => x.CurrentPlaylist, x => x.CanAlterPlaylist,
+                (currentEditedPlaylist, currentPlaylist, canAlterPlaylist) =>
+                    (currentEditedPlaylist != null || currentPlaylist != null) && canAlterPlaylist));
+            RemovePlaylistCommand.Subscribe(x => RemoveCurrentPlaylist());
 
-            this.IsLocal = true;
+            IsLocal = true;
         }
 
-        public ReactiveCommand<object> AddPlaylistCommand { get; private set; }
+        public ReactiveCommand<object> AddPlaylistCommand { get; }
 
-        public bool CanAlterPlaylist
-        {
-            get { return this.canAlterPlaylist.Value; }
-        }
+        public bool CanAlterPlaylist => canAlterPlaylist.Value;
 
-        public bool CanChangeTime
-        {
-            get { return this.canChangeTime.Value; }
-        }
+        public bool CanChangeTime => canChangeTime.Value;
 
-        public bool CanChangeVolume
-        {
-            get { return this.canChangeVolume.Value; }
-        }
+        public bool CanChangeVolume => canChangeVolume.Value;
 
         /// <summary>
-        /// Gets a value indicating whether the window can be minimized, maximized or closed
+        ///     Gets a value indicating whether the window can be minimized, maximized or closed
         /// </summary>
-        public bool CanModifyWindow
-        {
-            get { return this.canModifyWindow.Value; }
-        }
+        public bool CanModifyWindow => canModifyWindow.Value;
 
         public PlaylistViewModel CurrentEditedPlaylist
         {
-            get { return this.Playlists.SingleOrDefault(playlist => playlist.EditName); }
+            get { return Playlists.SingleOrDefault(playlist => playlist.EditName); }
         }
 
         public PlaylistViewModel CurrentPlaylist
         {
-            get { return this.Playlists.SingleOrDefault(vm => vm.Model == this.library.CurrentPlaylist); }
+            get { return Playlists.SingleOrDefault(vm => vm.Model == library.CurrentPlaylist); }
             set
             {
                 if (value != null) // There always has to be a playlist selected
                 {
-                    this.library.SwitchToPlaylist(value.Model, this.accessToken);
+                    library.SwitchToPlaylist(value.Model, accessToken);
                     this.RaisePropertyChanged();
                 }
             }
@@ -267,197 +262,171 @@ namespace Espera.View.ViewModels
 
         public int CurrentSeconds
         {
-            get { return this.currentSeconds.Value; }
-            set { this.library.SetCurrentTime(TimeSpan.FromSeconds(value), this.accessToken); }
+            get => currentSeconds.Value;
+            set => library.SetCurrentTime(TimeSpan.FromSeconds(value), accessToken);
         }
 
-        public ISongSourceViewModel CurrentSongSource
-        {
-            get { return this.currentSongSource.Value; }
-        }
+        public ISongSourceViewModel CurrentSongSource => currentSongSource.Value;
 
-        public string CurrentTime
-        {
-            get { return this.currentTime.Value; }
-        }
+        public string CurrentTime => currentTime.Value;
 
-        public DirectYoutubeViewModel DirectYoutubeViewModel { get; private set; }
+        public DirectYoutubeViewModel DirectYoutubeViewModel { get; }
 
-        public ReactiveCommand<object> EditPlaylistNameCommand { get; private set; }
+        public ReactiveCommand<object> EditPlaylistNameCommand { get; }
 
-        public bool IsAdmin
-        {
-            get { return this.isAdmin.Value; }
-        }
+        public bool IsAdmin => isAdmin.Value;
 
         public bool IsLocal
         {
-            get { return this.isLocal; }
-            set { this.RaiseAndSetIfChanged(ref this.isLocal, value); }
+            get => isLocal;
+            set => this.RaiseAndSetIfChanged(ref isLocal, value);
         }
 
-        public bool IsPlaying
-        {
-            get { return this.isPlaying.Value; }
-        }
+        public bool IsPlaying => isPlaying.Value;
 
         public bool IsSoundCloud
         {
-            get { return this.isSoundCloud; }
-            set { this.RaiseAndSetIfChanged(ref this.isSoundCloud, value); }
+            get => isSoundCloud;
+            set => this.RaiseAndSetIfChanged(ref isSoundCloud, value);
         }
 
         public bool IsYoutube
         {
-            get { return this.isYoutube; }
-            set { this.RaiseAndSetIfChanged(ref this.isYoutube, value); }
+            get => isYoutube;
+            set => this.RaiseAndSetIfChanged(ref isYoutube, value);
         }
 
-        public LocalViewModel LocalViewModel { get; private set; }
+        public LocalViewModel LocalViewModel { get; }
 
         /// <summary>
-        /// Sets the volume to the lowest possible value.
+        ///     Sets the volume to the lowest possible value.
         /// </summary>
-        public ReactiveCommand<object> MuteCommand { get; private set; }
+        public ReactiveCommand<object> MuteCommand { get; }
 
         /// <summary>
-        /// Plays the next song in the playlist.
+        ///     Plays the next song in the playlist.
         /// </summary>
-        public ReactiveCommand<Unit> NextSongCommand { get; private set; }
+        public ReactiveCommand<Unit> NextSongCommand { get; }
 
         /// <summary>
-        /// Pauses the currently played song.
+        ///     Pauses the currently played song.
         /// </summary>
-        public ReactiveCommand<Unit> PauseCommand { get; private set; }
+        public ReactiveCommand<Unit> PauseCommand { get; }
 
         /// <summary>
-        /// A command that decides whether the songs should be paused or continued.
+        ///     A command that decides whether the songs should be paused or continued.
         /// </summary>
-        public ReactiveCommand<Unit> PauseContinueCommand { get; private set; }
+        public ReactiveCommand<Unit> PauseContinueCommand { get; }
 
         /// <summary>
-        /// Plays the song that is currently selected in the playlist or continues the song if it is paused.
+        ///     Plays the song that is currently selected in the playlist or continues the song if it is paused.
         /// </summary>
-        public ReactiveCommand<Unit> PlayCommand { get; private set; }
+        public ReactiveCommand<Unit> PlayCommand { get; }
 
-        public IReactiveDerivedList<PlaylistViewModel> Playlists { get; private set; }
+        public IReactiveDerivedList<PlaylistViewModel> Playlists { get; }
 
         /// <summary>
-        /// Overrides the currently played song.
+        ///     Overrides the currently played song.
         /// </summary>
-        public ReactiveCommand<Unit> PlayOverrideCommand { get; private set; }
+        public ReactiveCommand<Unit> PlayOverrideCommand { get; }
 
         /// <summary>
-        /// Plays the song that is before the currently played song in the playlist.
+        ///     Plays the song that is before the currently played song in the playlist.
         /// </summary>
-        public ReactiveCommand<Unit> PreviousSongCommand { get; private set; }
+        public ReactiveCommand<Unit> PreviousSongCommand { get; }
 
-        public ReactiveCommand<object> RemovePlaylistCommand { get; private set; }
+        public ReactiveCommand<object> RemovePlaylistCommand { get; }
 
-        public SettingsViewModel SettingsViewModel { get; private set; }
+        public SettingsViewModel SettingsViewModel { get; }
 
-        public ReactiveCommand<object> ShowSettingsCommand { get; private set; }
+        public ReactiveCommand<object> ShowSettingsCommand { get; }
 
         public bool ShowVideoPlayer
         {
-            get { return this.showVideoPlayer; }
-            set { this.RaiseAndSetIfChanged(ref this.showVideoPlayer, value); }
+            get => showVideoPlayer;
+            set => this.RaiseAndSetIfChanged(ref showVideoPlayer, value);
         }
 
-        public bool ShowVotes
-        {
-            get { return this.showVotes.Value; }
-        }
+        public bool ShowVotes => showVotes.Value;
 
-        public ReactiveCommand<object> ShufflePlaylistCommand { get; private set; }
+        public ReactiveCommand<object> ShufflePlaylistCommand { get; }
 
-        public SoundCloudViewModel SoundCloudViewModel { get; private set; }
+        public SoundCloudViewModel SoundCloudViewModel { get; }
 
-        public int TotalSeconds
-        {
-            get { return this.totalSeconds.Value; }
-        }
+        public int TotalSeconds => totalSeconds.Value;
 
-        public string TotalTime
-        {
-            get { return this.totalTime.Value; }
-        }
+        public string TotalTime => totalTime.Value;
 
         /// <summary>
-        /// Sets the volume to the highest possible value.
+        ///     Sets the volume to the highest possible value.
         /// </summary>
-        public ReactiveCommand<object> UnMuteCommand { get; private set; }
+        public ReactiveCommand<object> UnMuteCommand { get; }
 
         /// <summary>
-        /// Occurs when the view should update the screen state to maximized state or restore it to
-        /// normal state
+        ///     Occurs when the view should update the screen state to maximized state or restore it to
+        ///     normal state
         /// </summary>
-        public IObservable<AccessPermission> UpdateScreenState
-        {
-            get { return this.library.LocalAccessControl.ObserveAccessPermission(this.accessToken); }
-        }
+        public IObservable<AccessPermission> UpdateScreenState =>
+            library.LocalAccessControl.ObserveAccessPermission(accessToken);
 
-        public UpdateViewModel UpdateViewModel { get; private set; }
+        public UpdateViewModel UpdateViewModel { get; }
 
-        public ViewSettings ViewSettings { get; private set; }
+        public ViewSettings ViewSettings { get; }
 
         public double Volume
         {
-            get { return this.volume.Value; }
+            get => volume.Value;
             set
             {
-                this.library.SetVolume((float)value, this.accessToken);
+                library.SetVolume((float)value, accessToken);
                 this.RaisePropertyChanged();
             }
         }
 
-        public YoutubeViewModel YoutubeViewModel { get; private set; }
+        public YoutubeViewModel YoutubeViewModel { get; }
 
         public void Dispose()
         {
-            this.library.Save();
-            this.library.Dispose();
+            library.Save();
+            library.Dispose();
 
-            this.UpdateViewModel.Dispose();
+            UpdateViewModel.Dispose();
 
-            this.disposable.Dispose();
+            disposable.Dispose();
         }
 
         public void RegisterAudioPlayer(IMediaPlayerCallback callback)
         {
-            this.library.RegisterAudioPlayerCallback(callback, this.accessToken);
+            library.RegisterAudioPlayerCallback(callback, accessToken);
         }
 
         public void RegisterVideoPlayer(IMediaPlayerCallback callback)
         {
-            this.library.RegisterVideoPlayerCallback(callback, this.accessToken);
+            library.RegisterVideoPlayerCallback(callback, accessToken);
         }
 
         private void AddPlaylist()
         {
-            this.library.AddAndSwitchToPlaylist(this.GetNewPlaylistName(), this.accessToken);
+            library.AddAndSwitchToPlaylist(GetNewPlaylistName(), accessToken);
 
-            this.CurrentPlaylist = this.Playlists.Last();
-            this.CurrentPlaylist.EditName = true;
+            CurrentPlaylist = Playlists.Last();
+            CurrentPlaylist.EditName = true;
         }
 
         private PlaylistViewModel CreatePlaylistViewModel(Playlist playlist)
         {
-            return new PlaylistViewModel(playlist, this.library, this.accessToken, this.coreSettings);
+            return new PlaylistViewModel(playlist, library, accessToken, coreSettings);
         }
 
         private string GetNewPlaylistName()
         {
-            string newName = (this.Playlists ?? Enumerable.Empty<PlaylistViewModel>())
+            string newName = (Playlists ?? Enumerable.Empty<PlaylistViewModel>())
                 .Select(playlist => playlist.Name)
                 .CreateUnique(i =>
                 {
-                    string name = "New Playlist";
+                    var name = "New Playlist";
 
-                    if (i > 1)
-                    {
-                        name += " " + i;
-                    }
+                    if (i > 1) name += " " + i;
 
                     return name;
                 });
@@ -467,29 +436,20 @@ namespace Espera.View.ViewModels
 
         private void RemoveCurrentPlaylist()
         {
-            int index = this.Playlists.TakeWhile(p => p != this.CurrentPlaylist).Count();
+            int index = Playlists.TakeWhile(p => p != CurrentPlaylist).Count();
 
-            this.library.RemovePlaylist(this.CurrentPlaylist.Model, this.accessToken);
+            library.RemovePlaylist(CurrentPlaylist.Model, accessToken);
 
-            if (!this.library.Playlists.Any())
-            {
-                this.AddPlaylist();
-            }
+            if (!library.Playlists.Any()) AddPlaylist();
 
-            if (this.Playlists.Count > index)
-            {
-                this.CurrentPlaylist = this.Playlists[index];
-            }
+            if (Playlists.Count > index)
+                CurrentPlaylist = Playlists[index];
 
-            else if (this.Playlists.Count >= 1)
-            {
-                this.CurrentPlaylist = this.Playlists[index - 1];
-            }
+            else if (Playlists.Count >= 1)
+                CurrentPlaylist = Playlists[index - 1];
 
             else
-            {
-                this.CurrentPlaylist = this.Playlists[0];
-            }
+                CurrentPlaylist = Playlists[0];
         }
     }
 }

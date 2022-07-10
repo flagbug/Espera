@@ -20,46 +20,34 @@ namespace Espera.View.ViewModels
         {
             this.entry = entry;
 
-            this.disposable = new CompositeDisposable();
+            disposable = new CompositeDisposable();
 
-            this.isCorrupted = this.Model.WhenAnyValue(x => x.IsCorrupted)
+            isCorrupted = Model.WhenAnyValue(x => x.IsCorrupted)
                 .ToProperty(this, x => x.IsCorrupted)
                 .DisposeWith(disposable);
 
-            this.votes = this.entry.WhenAnyValue(x => x.Votes)
+            votes = this.entry.WhenAnyValue(x => x.Votes)
                 .ToProperty(this, x => x.Votes)
                 .DisposeWith(disposable);
         }
 
-        public int Index
-        {
-            get { return this.entry.Index; }
-        }
+        public int Index => entry.Index;
 
-        public bool IsCorrupted
-        {
-            get { return this.isCorrupted.Value; }
-        }
+        public bool IsCorrupted => isCorrupted.Value;
 
         public bool IsPlaying
         {
-            get { return this.isPlaying; }
-            set { this.RaiseAndSetIfChanged(ref this.isPlaying, value); }
+            get => isPlaying;
+            set => this.RaiseAndSetIfChanged(ref isPlaying, value);
         }
 
-        public bool IsYoutube
-        {
-            get { return this.Model is YoutubeSong; }
-        }
+        public bool IsYoutube => Model is YoutubeSong;
 
-        public int Votes
-        {
-            get { return this.votes.Value; }
-        }
+        public int Votes => votes.Value;
 
         public void Dispose()
         {
-            this.disposable.Dispose();
+            disposable.Dispose();
         }
     }
 }

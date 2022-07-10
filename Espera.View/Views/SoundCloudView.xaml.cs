@@ -7,20 +7,23 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using Espera.View.ViewModels;
 using ReactiveUI;
+using EventsMixin = System.Windows.EventsMixin;
 
 namespace Espera.View.Views
 {
     public partial class SoundCloudView : IViewFor<SoundCloudViewModel>
     {
-        public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register("ViewModel", typeof(SoundCloudViewModel), typeof(SoundCloudView));
+        public static readonly DependencyProperty ViewModelProperty =
+            DependencyProperty.Register("ViewModel", typeof(SoundCloudViewModel), typeof(SoundCloudView));
 
         public SoundCloudView()
         {
             InitializeComponent();
 
-            this.Events().DataContextChanged.Subscribe(x => this.ViewModel = (SoundCloudViewModel)x.NewValue);
+            EventsMixin.Events(this).DataContextChanged.Subscribe(x => ViewModel = (SoundCloudViewModel)x.NewValue);
 
-            this.SoundCloudSongs.ItemContainerStyle.RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x))
+            SoundCloudSongs.ItemContainerStyle
+                .RegisterEventSetter<MouseEventArgs>(MouseMoveEvent, x => new MouseEventHandler(x))
                 .Where(x => x.Item2.LeftButton == MouseButtonState.Pressed)
                 .Subscribe(x =>
                 {
@@ -28,20 +31,20 @@ namespace Espera.View.Views
                     DragDrop.DoDragDrop((ListViewItem)x.Item1, DragDropHelper.SongSourceFormat, DragDropEffects.Link);
                 });
 
-            this.SoundCloudSongs.Events().ContextMenuOpening.Where(_ => !this.ViewModel.SelectableSongs.Any())
+            EventsMixin.Events(SoundCloudSongs).ContextMenuOpening.Where(_ => !ViewModel.SelectableSongs.Any())
                 .Subscribe(x => x.Handled = true);
         }
 
         object IViewFor.ViewModel
         {
-            get { return ViewModel; }
-            set { ViewModel = (SoundCloudViewModel)value; }
+            get => ViewModel;
+            set => ViewModel = (SoundCloudViewModel)value;
         }
 
         public SoundCloudViewModel ViewModel
         {
-            get { return (SoundCloudViewModel)this.GetValue(ViewModelProperty); }
-            set { this.SetValue(ViewModelProperty, value); }
+            get => (SoundCloudViewModel)this.GetValue(ViewModelProperty);
+            set => this.SetValue(ViewModelProperty, value);
         }
 
         private void ExternalPathLeftMouseButtonDown(object sender, MouseButtonEventArgs e)
@@ -58,24 +61,18 @@ namespace Espera.View.Views
 
         private void SongDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            IReactiveCommand command = this.ViewModel.DefaultPlaybackCommand;
+            IReactiveCommand command = ViewModel.DefaultPlaybackCommand;
 
-            if (e.LeftButton == MouseButtonState.Pressed && command.CanExecute(null))
-            {
-                command.Execute(null);
-            }
+            if (e.LeftButton == MouseButtonState.Pressed && command.CanExecute(null)) command.Execute(null);
         }
 
         private void SongKeyPressed(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                IReactiveCommand command = this.ViewModel.DefaultPlaybackCommand;
+                IReactiveCommand command = ViewModel.DefaultPlaybackCommand;
 
-                if (command.CanExecute(null))
-                {
-                    command.Execute(null);
-                }
+                if (command.CanExecute(null)) command.Execute(null);
 
                 e.Handled = true;
             }

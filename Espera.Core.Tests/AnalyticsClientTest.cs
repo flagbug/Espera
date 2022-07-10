@@ -1,7 +1,7 @@
-﻿using Espera.Core.Analytics;
+﻿using System;
+using Espera.Core.Analytics;
 using Espera.Core.Settings;
 using NSubstitute;
-using System;
 using Xunit;
 
 namespace Espera.Core.Tests
@@ -37,7 +37,7 @@ namespace Espera.Core.Tests
 
                 endpoint.DidNotReceiveWithAnyArgs().UpdateEmail(Arg.Any<string>());
 
-                client.RecordBugReport("blabla", String.Empty);
+                client.RecordBugReport("blabla", string.Empty);
 
                 endpoint.DidNotReceiveWithAnyArgs().UpdateEmail(Arg.Any<string>());
 
