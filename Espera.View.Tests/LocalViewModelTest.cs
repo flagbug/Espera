@@ -1,15 +1,14 @@
-﻿using Espera.Core;
-using Espera.Core.Management;
+﻿using System;
+using System.Collections.Generic;
+using System.IO.Abstractions.TestingHelpers;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using Espera.Core;
 using Espera.Core.Settings;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
 using NSubstitute;
 using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.IO.Abstractions.TestingHelpers;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Espera.View.Tests
@@ -21,9 +20,9 @@ namespace Espera.View.Tests
             [Fact]
             public void HasAllArtistsForEmptyLibrary()
             {
-                using (Library library = Helpers.CreateLibrary())
+                using (var library = Helpers.CreateLibrary())
                 {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
                     var vm = new LocalViewModel(library, new ViewSettings(), new CoreSettings(), accessToken);
 
@@ -41,9 +40,9 @@ namespace Espera.View.Tests
             {
                 var settings = new CoreSettings();
 
-                using (Library library = Helpers.CreateLibrary(settings))
+                using (var library = Helpers.CreateLibrary(settings))
                 {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
                     var vm = new LocalViewModel(library, new ViewSettings(), settings, accessToken);
 
@@ -62,9 +61,9 @@ namespace Espera.View.Tests
             [Fact]
             public void IsTrueForEmptyLibrary()
             {
-                using (Library library = Helpers.CreateLibrary())
+                using (var library = Helpers.CreateLibrary())
                 {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
                     var vm = new LocalViewModel(library, new ViewSettings(), new CoreSettings(), accessToken);
 
@@ -80,11 +79,12 @@ namespace Espera.View.Tests
                 var songFinder = Substitute.For<ILocalSongFinder>();
                 songFinder.GetSongsAsync().Returns(Observable.Return(Tuple.Create(song, (byte[])null)));
 
-                var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData> { { "C://Song.mp3", new MockFileData("Bla") } });
+                var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+                    { { "C://Song.mp3", new MockFileData("Bla") } });
 
-                using (Library library = new LibraryBuilder().WithFileSystem(fileSystem).WithSongFinder(songFinder).Build())
+                using (var library = new LibraryBuilder().WithFileSystem(fileSystem).WithSongFinder(songFinder).Build())
                 {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
                     // NB: System.IO.Abstractions only likes backslashes
                     library.ChangeSongSourcePath("C:\\", accessToken);

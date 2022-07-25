@@ -30,7 +30,8 @@
         <ListView x:Name="LocalSongs" ItemsSource="{Binding Source={StaticResource SongsCollectionViewSource}}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
-                    <i:InvokeCommandAction Command="{Binding Path=SelectionChangedCommand}" CommandParameter="{Binding ElementName=LocalSongs, Path=SelectedItems}" />
+                    <i:InvokeCommandAction Command="{Binding Path=SelectionChangedCommand}"
+                                           CommandParameter="{Binding ElementName=LocalSongs, Path=SelectedItems}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <ListView.Style>

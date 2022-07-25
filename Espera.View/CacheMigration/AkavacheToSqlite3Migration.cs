@@ -1,13 +1,12 @@
-﻿using Akavache;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using Akavache;
 using Espera.Core;
 using Espera.Core.Settings;
 using Lager;
 using Splat;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Reflection;
 
 namespace Espera.View.CacheMigration
 {
@@ -39,9 +38,9 @@ namespace Espera.View.CacheMigration
         {
             this.Log().Info("Starting migration from deprecated BlobCache to new SqliteBlobCache");
 
-            if (!this.oldBlobCache.GetAllKeys().Wait().Any())
+            if (!oldBlobCache.GetAllKeys().Wait().Any())
             {
-                this.newBlobCache.InsertObject(MigratedKey, true).Wait();
+                newBlobCache.InsertObject(MigratedKey, true).Wait();
 
                 this.Log().Info("Nothing to migrate, returning.");
 
@@ -50,10 +49,10 @@ namespace Espera.View.CacheMigration
 
             try
             {
-                this.MigrateArtworks();
-                this.MigrateCoreSettings();
-                this.MigrateViewSettings();
-                this.MigrateChangelog();
+                MigrateArtworks();
+                MigrateCoreSettings();
+                MigrateViewSettings();
+                MigrateChangelog();
             }
 
             catch (Exception ex)
@@ -62,7 +61,7 @@ namespace Espera.View.CacheMigration
                 return;
             }
 
-            this.newBlobCache.InsertObject(MigratedKey, true).Wait();
+            newBlobCache.InsertObject(MigratedKey, true).Wait();
 
             this.Log().Info("Finished BlobCache migration");
         }
@@ -70,11 +69,11 @@ namespace Espera.View.CacheMigration
         private void MigrateArtworks()
         {
             // Don't migrate online artwork lookup key, just let them expire
-            foreach (string key in this.oldBlobCache.GetAllKeys().Wait().Where(x => x.StartsWith(BlobCacheKeys.Artwork)))
+            foreach (var key in oldBlobCache.GetAllKeys().Wait().Where(x => x.StartsWith(BlobCacheKeys.Artwork)))
             {
-                byte[] oldData = this.oldBlobCache.Get(key).Wait();
+                var oldData = oldBlobCache.Get(key).Wait();
 
-                this.newBlobCache.Insert(key, oldData).Wait();
+                newBlobCache.Insert(key, oldData).Wait();
             }
         }
 
@@ -82,37 +81,36 @@ namespace Espera.View.CacheMigration
         {
             try
             {
-                var oldChangelog = this.oldBlobCache.GetObject<Changelog>(BlobCacheKeys.Changelog).Wait();
+                var oldChangelog = oldBlobCache.GetObject<Changelog>(BlobCacheKeys.Changelog).Wait();
 
-                this.newBlobCache.InsertObject(BlobCacheKeys.Changelog, oldChangelog).Wait();
+                newBlobCache.InsertObject(BlobCacheKeys.Changelog, oldChangelog).Wait();
             }
 
             catch (KeyNotFoundException)
-            { }
+            {
+            }
         }
 
         private void MigrateCoreSettings()
         {
-            var oldCoreSettings = new CoreSettings(this.oldBlobCache);
-            var newCoreSettings = new CoreSettings(this.newBlobCache);
+            var oldCoreSettings = new CoreSettings(oldBlobCache);
+            var newCoreSettings = new CoreSettings(newBlobCache);
 
-            this.MigrateSettingsStorage(oldCoreSettings, newCoreSettings);
+            MigrateSettingsStorage(oldCoreSettings, newCoreSettings);
         }
 
         private void MigrateSettingsStorage(SettingsStorage oldStorage, SettingsStorage newStorage)
         {
-            foreach (PropertyInfo oldSetting in oldStorage.GetType().GetProperties())
-            {
+            foreach (var oldSetting in oldStorage.GetType().GetProperties())
                 newStorage.GetType().GetProperty(oldSetting.Name).SetValue(newStorage, oldSetting.GetValue(oldStorage));
-            }
         }
 
         private void MigrateViewSettings()
         {
-            var oldViewSettings = new ViewSettings(this.oldBlobCache);
-            var newViewSettings = new ViewSettings(this.newBlobCache);
+            var oldViewSettings = new ViewSettings(oldBlobCache);
+            var newViewSettings = new ViewSettings(newBlobCache);
 
-            this.MigrateSettingsStorage(oldViewSettings, newViewSettings);
+            MigrateSettingsStorage(oldViewSettings, newViewSettings);
         }
     }
 }

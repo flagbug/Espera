@@ -1,8 +1,8 @@
-﻿using Espera.Network;
-using Rareform.Validation;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Espera.Core.Analytics;
+using Espera.Network;
+using Rareform.Validation;
 using Splat;
 using TagLib;
 
@@ -13,70 +13,61 @@ namespace Espera.Core
         private string artworkKey;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalSong" /> class.
+        ///     Initializes a new instance of the <see cref="LocalSong" /> class.
         /// </summary>
         /// <param name="path">The path of the file.</param>
         /// <param name="duration">The duration of the song.</param>
         /// <param name="artworkKey">
-        /// The key of the artwork for Akavache to retrieve. Null, if there is no album cover or the
-        /// artwork isn't retrieved yet.
+        ///     The key of the artwork for Akavache to retrieve. Null, if there is no album cover or the
+        ///     artwork isn't retrieved yet.
         /// </param>
         public LocalSong(string path, TimeSpan duration, string artworkKey = null)
             : base(path, duration)
         {
-            if (artworkKey == String.Empty)
+            if (artworkKey == string.Empty)
                 Throw.ArgumentException("Artwork key cannot be an empty string", () => artworkKey);
 
-            this.ArtworkKey = artworkKey;
+            ArtworkKey = artworkKey;
         }
 
         /// <summary>
-        /// Gets the key of the artwork for Akavache to retrieve. Null, if there is no album cover.
+        ///     Gets the key of the artwork for Akavache to retrieve. Null, if there is no album cover.
         /// </summary>
         public string ArtworkKey
         {
-            get { return this.artworkKey; }
+            get => artworkKey;
             internal set
             {
-                if (this.artworkKey != value)
+                if (artworkKey != value)
                 {
-                    this.artworkKey = value;
-                    this.OnPropertyChanged();
+                    artworkKey = value;
+                    OnPropertyChanged();
                 }
             }
         }
 
-        public override bool IsVideo
-        {
-            get { return false; }
-        }
+        public override bool IsVideo => false;
 
-        public override NetworkSongSource NetworkSongSource
-        {
-            get { return NetworkSongSource.Local; }
-        }
+        public override NetworkSongSource NetworkSongSource => NetworkSongSource.Local;
 
-        public override string PlaybackPath
-        {
-            get { return this.OriginalPath; }
-        }
+        public override string PlaybackPath => OriginalPath;
 
         /// <summary>
-        /// Saves the metadata of this song to the disk.
+        ///     Saves the metadata of this song to the disk.
         /// </summary>
         /// <exception cref="TagsSaveException">The saving of the metadata failed.</exception>
         public async Task SaveTagsToDisk()
         {
             try
             {
-                using (var file = await Task.Run(() => File.Create(this.OriginalPath)))
+                using (var file = await Task.Run(() => File.Create(OriginalPath)))
                 {
-                    Tag tag = file.Tag;
+                    var tag = file.Tag;
 
-                    tag.Album = this.Album;
-                    tag.Performers = new[] { this.Artist };
-                    tag.Genres = new[] { this.Genre };
-                    tag.Title = this.Title;
+                    tag.Album = Album;
+                    tag.Performers = new[] { Artist };
+                    tag.Genres = new[] { Genre };
+                    tag.Title = Title;
 
                     await Task.Run(() => file.Save());
                 }
@@ -84,7 +75,7 @@ namespace Espera.Core
 
             catch (Exception ex)
             {
-                this.Log().ErrorException("Failed to save metadata for song " + this.OriginalPath, ex);
+                this.Log().ErrorException("Failed to save metadata for song " + OriginalPath, ex);
 
                 AnalyticsClient.Instance.RecordNonFatalError(ex);
 
@@ -93,7 +84,7 @@ namespace Espera.Core
 
             // Notify that all of the song metadata has changed, even if may not be really true, we
             // just want to update the UI
-            this.OnPropertyChanged(string.Empty);
+            OnPropertyChanged(string.Empty);
         }
     }
 }

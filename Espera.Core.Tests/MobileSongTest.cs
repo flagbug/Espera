@@ -1,9 +1,7 @@
-﻿using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
+﻿using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading.Tasks;
 using Espera.Core.Mobile;
 using Espera.Network;
 using Xunit;
@@ -33,7 +31,7 @@ namespace Espera.Core.Tests
 
                 var song = MobileSong.Create(metadata, Observable.Never<byte[]>(), fileSystem);
 
-                DirectoryInfoBase tempDir = fileSystem.DirectoryInfo.FromDirectoryName(fileSystem.Path.GetTempPath());
+                var tempDir = fileSystem.DirectoryInfo.FromDirectoryName(fileSystem.Path.GetTempPath());
 
                 Assert.Equal(song.OriginalPath, tempDir.GetFiles().First().FullName);
                 Assert.Equal(song.PlaybackPath, tempDir.GetFiles().First().FullName);
@@ -61,7 +59,7 @@ namespace Espera.Core.Tests
                 var data = new Subject<byte[]>();
                 var song = MobileSong.Create(metadata, data, new MockFileSystem());
 
-                Task awaiter = song.PrepareAsync(YoutubeStreamingQuality.Low);
+                var awaiter = song.PrepareAsync(YoutubeStreamingQuality.Low);
 
                 Assert.False(awaiter.IsCompleted);
 

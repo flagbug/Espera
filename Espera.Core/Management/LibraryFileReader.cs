@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Espera.Core.Management
 {
@@ -20,32 +20,27 @@ namespace Espera.Core.Management
             this.sourcePath = sourcePath;
         }
 
-        public bool LibraryExists
-        {
-            get { return File.Exists(this.sourcePath); }
-        }
+        public bool LibraryExists => File.Exists(sourcePath);
 
         public void InvalidateCache()
         {
-            this.cache = null;
-            this.songCache = null;
+            cache = null;
+            songCache = null;
         }
 
         public IReadOnlyList<Playlist> ReadPlaylists()
         {
             try
             {
-                this.LoadToCache();
+                LoadToCache();
 
-                return LibraryDeserializer.DeserializePlaylists(this.cache, this.songCache);
+                return LibraryDeserializer.DeserializePlaylists(cache, songCache);
             }
 
             catch (Exception ex)
             {
                 if (ex is JsonException || ex is IOException)
-                {
                     throw new LibraryReadException("Failed to read playlists.", ex);
-                }
 
                 throw;
             }
@@ -57,22 +52,20 @@ namespace Espera.Core.Management
 
             try
             {
-                this.LoadToCache();
+                LoadToCache();
 
-                songs = LibraryDeserializer.DeserializeSongs(this.cache);
+                songs = LibraryDeserializer.DeserializeSongs(cache);
             }
 
             catch (Exception ex)
             {
                 if (ex is JsonException || ex is IOException)
-                {
                     throw new LibraryReadException("Failed to read songs.", ex);
-                }
 
                 throw;
             }
 
-            this.songCache = songs;
+            songCache = songs;
             return songs;
         }
 
@@ -80,17 +73,15 @@ namespace Espera.Core.Management
         {
             try
             {
-                this.LoadToCache();
+                LoadToCache();
 
-                return LibraryDeserializer.DeserializeSongSourcePath(this.cache);
+                return LibraryDeserializer.DeserializeSongSourcePath(cache);
             }
 
             catch (Exception ex)
             {
                 if (ex is JsonException || ex is IOException)
-                {
                     throw new LibraryReadException("Failed to read song source path.", ex);
-                }
 
                 throw;
             }
@@ -101,9 +92,9 @@ namespace Espera.Core.Management
             if (cache != null)
                 return;
 
-            string json = File.ReadAllText(this.sourcePath);
+            var json = File.ReadAllText(sourcePath);
 
-            this.cache = JObject.Parse(json);
+            cache = JObject.Parse(json);
         }
     }
 }

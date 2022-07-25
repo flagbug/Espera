@@ -12,6 +12,7 @@ namespace Espera.View.DesignTime
         public DesignTimeShellViewModel()
             : base(DesignTime.LoadLibrary(), new ViewSettings(), new CoreSettings(), new WindowManager(),
                 new MobileApiInfo(Observable.Return(new List<MobileClient>()), Observable.Return(false)))
-        { }
+        {
+        }
     }
 }

@@ -1,28 +1,29 @@
-﻿using System.Reactive.Linq;
-using Refit;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using Akavache;
+using Refit;
 
 namespace Espera.Core
 {
     public class SoundCloudSongFinder : INetworkSongFinder<SoundCloudSong>
     {
+        private const string ClientId = "0367b2f7000481e0d1e0815e70c81379";
+
         /// <summary>
-        /// The time a search with a given search term is cached.
+        ///     The time a search with a given search term is cached.
         /// </summary>
         public static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(60);
 
-        private const string ClientId = "0367b2f7000481e0d1e0815e70c81379";
         private readonly IBlobCache requestCache;
 
         /// <summary>
-        /// Creates a new instance of the <see cref="SoundCloudSongFinder" /> class.
+        ///     Creates a new instance of the <see cref="SoundCloudSongFinder" /> class.
         /// </summary>
         /// <param name="requestCache">
-        /// A <see cref="IBlobCache" /> to cache the search requests. Requests with the same search
-        /// term are considered the same.
+        ///     A <see cref="IBlobCache" /> to cache the search requests. Requests with the same search
+        ///     term are considered the same.
         /// </param>
         public SoundCloudSongFinder(IBlobCache requestCache)
         {
@@ -36,19 +37,22 @@ namespace Espera.Core
         {
             searchTerm = searchTerm ?? string.Empty;
 
-            IObservable<IReadOnlyList<SoundCloudSong>> retrievalFunc = Observable.Defer(() =>
+            var retrievalFunc = Observable.Defer(() =>
                 requestCache.GetOrFetchObject(BlobCacheKeys.GetKeyForSoundCloudCache(searchTerm), () =>
-                    string.IsNullOrWhiteSpace(searchTerm) ? GetPopularSongs() : SearchSongs(searchTerm), DateTimeOffset.Now + CacheDuration));
+                        string.IsNullOrWhiteSpace(searchTerm) ? GetPopularSongs() : SearchSongs(searchTerm),
+                    DateTimeOffset.Now + CacheDuration));
 
             return retrievalFunc.Catch<IReadOnlyList<SoundCloudSong>, Exception>(ex =>
-                    Observable.Throw<IReadOnlyList<SoundCloudSong>>(new NetworkSongFinderException("SoundCloud search failed", ex)))
+                    Observable.Throw<IReadOnlyList<SoundCloudSong>>(
+                        new NetworkSongFinderException("SoundCloud search failed", ex)))
                 .Select(x => x.Where(y => y.IsStreamable || y.IsDownloadable).ToList())
                 .Do(SetupSongUrls);
         }
 
         private static IObservable<IReadOnlyList<SoundCloudSong>> GetPopularSongs()
         {
-            return RestService.For<ISoundCloudApi>("http://api-v2.soundcloud.com").GetPopularTracks(50).Select(x => x.Tracks);
+            return RestService.For<ISoundCloudApi>("http://api-v2.soundcloud.com").GetPopularTracks(50)
+                .Select(x => x.Tracks);
         }
 
         private static IObservable<IReadOnlyList<SoundCloudSong>> SearchSongs(string searchTerm)
@@ -58,17 +62,11 @@ namespace Espera.Core
 
         private static void SetupSongUrls(IEnumerable<SoundCloudSong> songs)
         {
-            foreach (SoundCloudSong song in songs)
+            foreach (var song in songs)
             {
-                if (song.IsStreamable)
-                {
-                    song.StreamUrl = new Uri(song.StreamUrl + "?client_id=" + ClientId);
-                }
+                if (song.IsStreamable) song.StreamUrl = new Uri(song.StreamUrl + "?client_id=" + ClientId);
 
-                if (song.IsDownloadable)
-                {
-                    song.DownloadUrl = new Uri(song.DownloadUrl + "?client_id=" + ClientId);
-                }
+                if (song.IsDownloadable) song.DownloadUrl = new Uri(song.DownloadUrl + "?client_id=" + ClientId);
             }
         }
     }

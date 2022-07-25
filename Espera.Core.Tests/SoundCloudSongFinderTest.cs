@@ -13,7 +13,14 @@ namespace Espera.Core.Tests
             [Fact]
             public async Task NullSearchTermDefaultsToEmptyString()
             {
-                var songs = new[] { new SoundCloudSong { IsStreamable = true, StreamUrl = new Uri("http://blabla.com"), PermaLinkUrl = new Uri("http://blabla") } };
+                var songs = new[]
+                {
+                    new SoundCloudSong
+                    {
+                        IsStreamable = true, StreamUrl = new Uri("http://blabla.com"),
+                        PermaLinkUrl = new Uri("http://blabla")
+                    }
+                };
                 var cache = new InMemoryBlobCache();
                 cache.InsertObject(BlobCacheKeys.GetKeyForSoundCloudCache(string.Empty), songs);
                 var finder = new SoundCloudSongFinder(cache);
@@ -27,7 +34,14 @@ namespace Espera.Core.Tests
             public async Task UsesCachedSongsIfAvailable()
             {
                 const string searchTerm = "Foo";
-                var songs = new[] { new SoundCloudSong { IsStreamable = true, StreamUrl = new Uri("http://blabla.com"), PermaLinkUrl = new Uri("http://blabla") } };
+                var songs = new[]
+                {
+                    new SoundCloudSong
+                    {
+                        IsStreamable = true, StreamUrl = new Uri("http://blabla.com"),
+                        PermaLinkUrl = new Uri("http://blabla")
+                    }
+                };
                 var cache = new InMemoryBlobCache();
                 cache.InsertObject(BlobCacheKeys.GetKeyForSoundCloudCache(searchTerm), songs);
                 var finder = new SoundCloudSongFinder(cache);

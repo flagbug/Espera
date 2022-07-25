@@ -1,19 +1,18 @@
-﻿using ReactiveUI;
-using Splat;
-using System;
+﻿using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
+using ReactiveUI;
+using Splat;
 
 namespace Espera.Core.Audio
 {
     /// <summary>
-    /// This class implements the basic audio player behavior.
-    /// 
-    /// The actual playback implementation is defined in the <see cref="IMediaPlayerCallback" /> implementations.
+    ///     This class implements the basic audio player behavior.
+    ///     The actual playback implementation is defined in the <see cref="IMediaPlayerCallback" /> implementations.
     /// </summary>
     public sealed class AudioPlayer : IEnableLogger
     {
@@ -29,63 +28,60 @@ namespace Espera.Core.Audio
 
         internal AudioPlayer()
         {
-            this.audioPlayerCallback = new DummyMediaPlayerCallback();
-            this.videoPlayerCallback = new DummyMediaPlayerCallback();
-            this.currentCallback = new DummyMediaPlayerCallback();
+            audioPlayerCallback = new DummyMediaPlayerCallback();
+            videoPlayerCallback = new DummyMediaPlayerCallback();
+            currentCallback = new DummyMediaPlayerCallback();
 
-            this.finishSubscription = new SerialDisposable();
-            this.gate = new SemaphoreSlim(1, 1);
+            finishSubscription = new SerialDisposable();
+            gate = new SemaphoreSlim(1, 1);
 
-            this.playbackState = new BehaviorSubject<AudioPlayerState>(AudioPlayerState.None);
-            this.PlaybackState = this.playbackState.DistinctUntilChanged();
+            playbackState = new BehaviorSubject<AudioPlayerState>(AudioPlayerState.None);
+            PlaybackState = playbackState.DistinctUntilChanged();
 
-            this.loadedSong = new BehaviorSubject<Song>(null);
-            this.TotalTime = this.loadedSong.Select(x => x == null ? TimeSpan.Zero : x.Duration);
+            loadedSong = new BehaviorSubject<Song>(null);
+            TotalTime = loadedSong.Select(x => x == null ? TimeSpan.Zero : x.Duration);
 
-            this.currentTimeChangedFromOuter = new Subject<TimeSpan>();
+            currentTimeChangedFromOuter = new Subject<TimeSpan>();
 
             var conn = Observable.Interval(TimeSpan.FromMilliseconds(300), RxApp.TaskpoolScheduler)
-                .CombineLatest(this.PlaybackState, (l, state) => state)
+                .CombineLatest(PlaybackState, (l, state) => state)
                 .Where(x => x == AudioPlayerState.Playing)
-                .Select(_ => this.CurrentTime)
-                .Merge(this.currentTimeChangedFromOuter)
+                .Select(_ => CurrentTime)
+                .Merge(currentTimeChangedFromOuter)
                 .DistinctUntilChanged(x => x.TotalSeconds)
                 .Publish(TimeSpan.Zero);
             conn.Connect();
-            this.CurrentTimeChanged = conn;
+            CurrentTimeChanged = conn;
         }
 
         public TimeSpan CurrentTime
         {
-            get { return this.currentCallback.CurrentTime; }
+            get => currentCallback.CurrentTime;
             set
             {
-                this.currentCallback.CurrentTime = value;
-                this.currentTimeChangedFromOuter.OnNext(this.CurrentTime);
+                currentCallback.CurrentTime = value;
+                currentTimeChangedFromOuter.OnNext(CurrentTime);
             }
         }
 
-        public IObservable<TimeSpan> CurrentTimeChanged { get; private set; }
+        public IObservable<TimeSpan> CurrentTimeChanged { get; }
 
-        public IObservable<Song> LoadedSong
-        {
-            get { return this.loadedSong.AsObservable(); }
-        }
+        public IObservable<Song> LoadedSong => loadedSong.AsObservable();
 
-        public IObservable<AudioPlayerState> PlaybackState { get; private set; }
+        public IObservable<AudioPlayerState> PlaybackState { get; }
 
-        public IObservable<TimeSpan> TotalTime { get; private set; }
+        public IObservable<TimeSpan> TotalTime { get; }
 
         public void RegisterAudioPlayerCallback(IMediaPlayerCallback audioPlayerCallback)
         {
-            if (this.disposeCurrentAudioCallback && this.audioPlayerCallback is IDisposable)
+            if (disposeCurrentAudioCallback && this.audioPlayerCallback is IDisposable)
             {
                 ((IDisposable)this.audioPlayerCallback).Dispose();
-                this.disposeCurrentAudioCallback = false;
+                disposeCurrentAudioCallback = false;
             }
 
             this.audioPlayerCallback = audioPlayerCallback;
-            this.disposeCurrentAudioCallback = true;
+            disposeCurrentAudioCallback = true;
         }
 
         public void RegisterVideoPlayerCallback(IMediaPlayerCallback videoPlayerCallback)
@@ -98,11 +94,11 @@ namespace Espera.Core.Audio
             if (volume < 0 || volume > 1)
                 throw new ArgumentOutOfRangeException("volume");
 
-            this.currentCallback.SetVolume(volume);
+            currentCallback.SetVolume(volume);
         }
 
         /// <summary>
-        /// Loads the specified song asynchronously into the audio player.
+        ///     Loads the specified song asynchronously into the audio player.
         /// </summary>
         /// <param name="song">The song to load and play.</param>
         /// <exception cref="ArgumentNullException"><paramref name="song" /> is <c>null</c></exception>
@@ -112,40 +108,38 @@ namespace Espera.Core.Audio
             if (song == null)
                 throw new ArgumentNullException("song");
 
-            await this.gate.WaitAsync();
+            await gate.WaitAsync();
 
-            this.finishSubscription.Disposable = Disposable.Empty;
+            finishSubscription.Disposable = Disposable.Empty;
 
             try
             {
-                await this.currentCallback.StopAsync();
-                await this.SetPlaybackStateAsync(AudioPlayerState.Stopped);
+                await currentCallback.StopAsync();
+                await SetPlaybackStateAsync(AudioPlayerState.Stopped);
             }
 
             // If the stop method throws an exception and we don't swallow it, we can never reassign
             // the current callback
             catch (Exception ex)
             {
-                this.Log().ErrorException("Failed to stop current media player callback " + this.currentCallback, ex);
+                this.Log().ErrorException("Failed to stop current media player callback " + currentCallback, ex);
             }
 
-            if (this.loadedSong.Value != null && !this.loadedSong.Value.IsVideo && this.disposeCurrentAudioCallback && this.currentCallback is IDisposable)
-            {
-                ((IDisposable)this.currentCallback).Dispose();
-            }
+            if (loadedSong.Value != null && !loadedSong.Value.IsVideo && disposeCurrentAudioCallback &&
+                currentCallback is IDisposable) ((IDisposable)currentCallback).Dispose();
 
-            this.disposeCurrentAudioCallback = false;
+            disposeCurrentAudioCallback = false;
 
-            this.loadedSong.OnNext(song);
+            loadedSong.OnNext(song);
 
-            this.currentCallback = song.IsVideo ? this.videoPlayerCallback : this.audioPlayerCallback;
+            currentCallback = song.IsVideo ? videoPlayerCallback : audioPlayerCallback;
 
             try
             {
-                await this.currentCallback.LoadAsync(new Uri(this.loadedSong.Value.PlaybackPath));
+                await currentCallback.LoadAsync(new Uri(loadedSong.Value.PlaybackPath));
 
-                this.finishSubscription.Disposable = this.currentCallback.Finished.FirstAsync()
-                    .SelectMany(_ => this.Finished().ToObservable())
+                finishSubscription.Disposable = currentCallback.Finished.FirstAsync()
+                    .SelectMany(_ => Finished().ToObservable())
                     .Subscribe();
             }
 
@@ -156,18 +150,18 @@ namespace Espera.Core.Audio
 
             finally
             {
-                this.gate.Release();
+                gate.Release();
             }
         }
 
         internal async Task PauseAsync()
         {
-            await this.gate.WaitAsync();
+            await gate.WaitAsync();
 
             try
             {
-                await this.currentCallback.PauseAsync();
-                await this.SetPlaybackStateAsync(AudioPlayerState.Paused);
+                await currentCallback.PauseAsync();
+                await SetPlaybackStateAsync(AudioPlayerState.Paused);
             }
 
             catch (Exception ex)
@@ -178,23 +172,24 @@ namespace Espera.Core.Audio
 
             finally
             {
-                this.gate.Release();
+                gate.Release();
             }
         }
 
         /// <summary>
-        /// Plays the loaded song asynchronously and sets the <see cref="PlaybackState" /> to <see
-        /// cref="AudioPlayerState.Playing" />
+        ///     Plays the loaded song asynchronously and sets the <see cref="PlaybackState" /> to
+        ///     <see
+        ///         cref="AudioPlayerState.Playing" />
         /// </summary>
         /// <exception cref="PlaybackException">An error occured while playing the song.</exception>
         internal async Task PlayAsync()
         {
-            await this.gate.WaitAsync();
+            await gate.WaitAsync();
 
             try
             {
-                await this.currentCallback.PlayAsync();
-                await this.SetPlaybackStateAsync(AudioPlayerState.Playing);
+                await currentCallback.PlayAsync();
+                await SetPlaybackStateAsync(AudioPlayerState.Playing);
             }
 
             catch (Exception ex)
@@ -204,41 +199,41 @@ namespace Espera.Core.Audio
 
             finally
             {
-                this.gate.Release();
+                gate.Release();
             }
         }
 
         internal async Task StopAsync()
         {
-            await this.gate.WaitAsync();
+            await gate.WaitAsync();
 
             try
             {
-                await this.currentCallback.StopAsync();
-                await this.SetPlaybackStateAsync(AudioPlayerState.Stopped);
+                await currentCallback.StopAsync();
+                await SetPlaybackStateAsync(AudioPlayerState.Stopped);
             }
 
             finally
             {
-                this.gate.Release();
+                gate.Release();
             }
         }
 
         private async Task Finished()
         {
-            await this.gate.WaitAsync();
+            await gate.WaitAsync();
 
-            await this.SetPlaybackStateAsync(AudioPlayerState.Finished);
+            await SetPlaybackStateAsync(AudioPlayerState.Finished);
 
-            this.gate.Release();
+            gate.Release();
         }
 
         private async Task SetPlaybackStateAsync(AudioPlayerState state)
         {
-            var connection = this.playbackState.FirstAsync(x => x == state).ToTask();
+            var connection = playbackState.FirstAsync(x => x == state).ToTask();
 
             // This is a poor man's trampoline
-            Task.Run(() => this.playbackState.OnNext(state));
+            Task.Run(() => playbackState.OnNext(state));
 
             await connection;
         }

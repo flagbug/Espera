@@ -1,11 +1,11 @@
-﻿using NAudio;
-using NAudio.Wave;
-using ReactiveMarrow;
-using System;
+﻿using System;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using NAudio;
+using NAudio.Wave;
+using ReactiveMarrow;
 
 namespace Espera.Core.Audio
 {
@@ -16,20 +16,29 @@ namespace Espera.Core.Audio
 
         public NAudioMediaPlayer()
         {
-            this.outputDevice = new WaveOutEvent();
+            outputDevice = new WaveOutEvent();
+        }
+
+        public void Dispose()
+        {
+            outputDevice.Dispose();
+
+            try
+            {
+                if (currentReader != null) currentReader.Dispose();
+            }
+
+            // Weird exception
+            catch (MmException)
+            {
+            }
         }
 
         public TimeSpan CurrentTime
         {
-            get
-            {
-                return this.currentReader == null ? TimeSpan.Zero : this.currentReader.CurrentTime;
-            }
+            get => currentReader == null ? TimeSpan.Zero : currentReader.CurrentTime;
 
-            set
-            {
-                this.currentReader.CurrentTime = value;
-            }
+            set => currentReader.CurrentTime = value;
         }
 
         public IObservable<Unit> Finished
@@ -37,27 +46,10 @@ namespace Espera.Core.Audio
             get
             {
                 return Observable.FromEventPattern<StoppedEventArgs>(
-                        h => this.outputDevice.PlaybackStopped += h,
-                        h => this.outputDevice.PlaybackStopped -= h)
+                        h => outputDevice.PlaybackStopped += h,
+                        h => outputDevice.PlaybackStopped -= h)
                     .ToUnit();
             }
-        }
-
-        public void Dispose()
-        {
-            this.outputDevice.Dispose();
-
-            try
-            {
-                if (this.currentReader != null)
-                {
-                    this.currentReader.Dispose();
-                }
-            }
-
-            // Weird exception
-            catch (MmException)
-            { }
         }
 
         public Task LoadAsync(Uri uri)
@@ -66,14 +58,11 @@ namespace Espera.Core.Audio
             {
                 var newReader = new AudioFileReader(uri.OriginalString);
 
-                AudioFileReader oldReader = Interlocked.Exchange(ref this.currentReader, newReader);
+                var oldReader = Interlocked.Exchange(ref currentReader, newReader);
 
-                if (oldReader != null)
-                {
-                    oldReader.Dispose();
-                }
+                if (oldReader != null) oldReader.Dispose();
 
-                this.outputDevice.Init(this.currentReader);
+                outputDevice.Init(currentReader);
             });
         }
 
@@ -81,8 +70,8 @@ namespace Espera.Core.Audio
         {
             return Task.Run(() =>
             {
-                this.outputDevice.Pause();
-                SpinWait.SpinUntil(() => this.outputDevice.PlaybackState == PlaybackState.Paused);
+                outputDevice.Pause();
+                SpinWait.SpinUntil(() => outputDevice.PlaybackState == PlaybackState.Paused);
             });
         }
 
@@ -90,25 +79,25 @@ namespace Espera.Core.Audio
         {
             return Task.Run(() =>
             {
-                this.outputDevice.Play();
-                SpinWait.SpinUntil(() => this.outputDevice.PlaybackState == PlaybackState.Playing);
+                outputDevice.Play();
+                SpinWait.SpinUntil(() => outputDevice.PlaybackState == PlaybackState.Playing);
             });
         }
 
         public void SetVolume(float volume)
         {
-            if (this.currentReader == null)
+            if (currentReader == null)
                 return;
 
-            this.currentReader.Volume = volume;
+            currentReader.Volume = volume;
         }
 
         public Task StopAsync()
         {
             return Task.Run(() =>
             {
-                this.outputDevice.Stop();
-                SpinWait.SpinUntil(() => this.outputDevice.PlaybackState == PlaybackState.Stopped);
+                outputDevice.Stop();
+                SpinWait.SpinUntil(() => outputDevice.PlaybackState == PlaybackState.Stopped);
             });
         }
     }

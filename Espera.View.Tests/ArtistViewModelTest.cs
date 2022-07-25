@@ -1,8 +1,7 @@
-﻿using Espera.View.ViewModels;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Espera.Core;
+using Espera.View.ViewModels;
 using Xunit;
 
 namespace Espera.View.Tests
@@ -32,7 +31,8 @@ namespace Espera.View.Tests
             var firstArtist = new ArtistViewModel("Aa", Enumerable.Empty<LocalSong>());
             var lastArtist = new ArtistViewModel("Zz", Enumerable.Empty<LocalSong>());
 
-            var correctList = new List<ArtistViewModel> { firstArtist, aPrefixBig, aPrefixSmall, thePrefixBig, thePrefixSmall, lastArtist };
+            var correctList = new List<ArtistViewModel>
+                { firstArtist, aPrefixBig, aPrefixSmall, thePrefixBig, thePrefixSmall, lastArtist };
 
             var incorrectList = correctList.ToList();
             incorrectList.Reverse();

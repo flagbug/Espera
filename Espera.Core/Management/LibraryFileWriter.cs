@@ -1,7 +1,7 @@
-﻿using Rareform.Validation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Rareform.Validation;
 
 namespace Espera.Core.Management
 {
@@ -22,25 +22,23 @@ namespace Espera.Core.Management
             // Create a temporary file, write the library to it, then delete the original library
             // file and rename the new one. This ensures that there is a minimum possibility of
             // things going wrong, for example if the process is killed mid-writing.
-            string tempFilePath = Path.Combine(Path.GetDirectoryName(this.targetPath), Guid.NewGuid().ToString());
+            var tempFilePath = Path.Combine(Path.GetDirectoryName(targetPath), Guid.NewGuid().ToString());
 
             try
             {
-                using (FileStream targetStream = File.Create(tempFilePath))
+                using (var targetStream = File.Create(tempFilePath))
                 {
                     LibrarySerializer.Serialize(songs, playlists, songSourcePath, targetStream);
                 }
 
-                File.Delete(this.targetPath);
-                File.Move(tempFilePath, this.targetPath);
+                File.Delete(targetPath);
+                File.Move(tempFilePath, targetPath);
             }
 
             catch (Exception ex)
             {
                 if (ex is IOException || ex is UnauthorizedAccessException)
-                {
                     throw new LibraryWriteException("An error occured while writing the library file.", ex);
-                }
 
                 throw;
             }

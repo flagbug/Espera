@@ -1,14 +1,13 @@
-﻿using Espera.View.ViewModels;
-using Ookii.Dialogs.Wpf;
-using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Espera.View.ViewModels;
+using Ookii.Dialogs.Wpf;
 
 namespace Espera.View.Views
 {
     /// <summary>
-    /// Interaction logic for SettingsView.xaml
+    ///     Interaction logic for SettingsView.xaml
     /// </summary>
     public partial class SettingsView
     {
@@ -16,9 +15,9 @@ namespace Espera.View.Views
         {
             InitializeComponent();
 
-            this.DataContextChanged += (sender, args) =>
+            DataContextChanged += (sender, args) =>
             {
-                this.RemotePasswordBox.Password = ((SettingsViewModel)this.DataContext).RemoteControlPassword;
+                RemotePasswordBox.Password = ((SettingsViewModel)DataContext).RemoteControlPassword;
             };
         }
 
@@ -29,9 +28,7 @@ namespace Espera.View.Views
             dialog.ShowDialog();
 
             if (!string.IsNullOrWhiteSpace(dialog.SelectedPath))
-            {
-                ((SettingsViewModel)this.DataContext).ChangeLibrarySource(dialog.SelectedPath);
-            }
+                ((SettingsViewModel)DataContext).ChangeLibrarySource(dialog.SelectedPath);
         }
 
         private void ChangeYoutubeDownloadPath(object sender, RoutedEventArgs e)
@@ -41,31 +38,26 @@ namespace Espera.View.Views
             dialog.ShowDialog();
 
             if (!string.IsNullOrWhiteSpace(dialog.SelectedPath))
-            {
-                ((SettingsViewModel)this.DataContext).YoutubeDownloadPath = dialog.SelectedPath;
-            }
+                ((SettingsViewModel)DataContext).YoutubeDownloadPath = dialog.SelectedPath;
         }
 
         private void CreateAdminButtonClick(object sender, RoutedEventArgs e)
         {
-            ICommand command = ((SettingsViewModel)this.DataContext).CreateAdminCommand;
+            ICommand command = ((SettingsViewModel)DataContext).CreateAdminCommand;
 
-            if (command.CanExecute(null))
-            {
-                command.Execute(null);
-            }
+            if (command.CanExecute(null)) command.Execute(null);
 
-            this.AdminPasswordBox.Password = String.Empty;
+            AdminPasswordBox.Password = string.Empty;
         }
 
         private void CreationPasswordChanged(object sender, RoutedEventArgs e)
         {
-            ((SettingsViewModel)this.DataContext).CreationPassword = ((PasswordBox)sender).Password;
+            ((SettingsViewModel)DataContext).CreationPassword = ((PasswordBox)sender).Password;
         }
 
         private void RemotePasswordChanged(object sender, RoutedEventArgs e)
         {
-            ((SettingsViewModel)this.DataContext).RemoteControlPassword = ((PasswordBox)sender).Password;
+            ((SettingsViewModel)DataContext).RemoteControlPassword = ((PasswordBox)sender).Password;
         }
     }
 }

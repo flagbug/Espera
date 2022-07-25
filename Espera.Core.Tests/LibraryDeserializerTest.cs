@@ -23,13 +23,13 @@ namespace Espera.Core.Tests
             [Fact(Skip = "Json does wierd things")]
             public void SmokeTest()
             {
-                string json = Helpers.GenerateSaveFile();
+                var json = Helpers.GenerateSaveFile();
                 var jobject = JObject.Parse(json);
 
-                Playlist[] playlists = LibraryDeserializer.DeserializePlaylists(jobject).ToArray();
+                var playlists = LibraryDeserializer.DeserializePlaylists(jobject).ToArray();
 
-                Playlist playlist1 = playlists[0];
-                Song[] songs1 = playlist1.Select(entry => entry.Song).ToArray();
+                var playlist1 = playlists[0];
+                var songs1 = playlist1.Select(entry => entry.Song).ToArray();
                 Song localSong1 = Helpers.LocalSong1;
                 Song localSong2 = Helpers.LocalSong2;
 
@@ -40,8 +40,8 @@ namespace Espera.Core.Tests
                 Assert.Equal(localSong2.OriginalPath, songs1[1].OriginalPath);
                 Assert.IsType<LocalSong>(songs1[1]);
 
-                Playlist playlist2 = playlists[1];
-                Song[] songs2 = playlist2.Select(entry => entry.Song).ToArray();
+                var playlist2 = playlists[1];
+                var songs2 = playlist2.Select(entry => entry.Song).ToArray();
                 Song youtubeSong1 = Helpers.YoutubeSong1;
 
                 Assert.Equal("Playlist2", playlist2.Name);
@@ -59,10 +59,10 @@ namespace Espera.Core.Tests
             [Fact(Skip = "Json does wierd things")]
             public void SmokeTest()
             {
-                string json = Helpers.GenerateSaveFile();
+                var json = Helpers.GenerateSaveFile();
                 var jobject = JObject.Parse(json);
 
-                LocalSong[] songs = LibraryDeserializer.DeserializeSongs(jobject).ToArray();
+                var songs = LibraryDeserializer.DeserializeSongs(jobject).ToArray();
 
                 Song actualSong1 = songs[0];
                 Song expectedSong1 = Helpers.LocalSong1;
@@ -81,10 +81,10 @@ namespace Espera.Core.Tests
             [Fact(Skip = "Json does wierd things")]
             public void SmokeTest()
             {
-                string json = Helpers.GenerateSaveFile();
+                var json = Helpers.GenerateSaveFile();
                 var jobject = JObject.Parse(json);
 
-                string songSourcePath = LibraryDeserializer.DeserializeSongSourcePath(jobject);
+                var songSourcePath = LibraryDeserializer.DeserializeSongSourcePath(jobject);
 
                 Assert.Equal(songSourcePath, Helpers.SongSourcePath);
             }

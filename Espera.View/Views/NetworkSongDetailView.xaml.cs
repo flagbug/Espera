@@ -5,7 +5,8 @@ namespace Espera.View.Views
 {
     public partial class NetworkSongDetailView
     {
-        public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register("Header", typeof(string), typeof(UserControl));
+        public static readonly DependencyProperty HeaderProperty =
+            DependencyProperty.Register("Header", typeof(string), typeof(UserControl));
 
         public NetworkSongDetailView()
         {
@@ -14,8 +15,8 @@ namespace Espera.View.Views
 
         public string Header
         {
-            get { return (string)this.GetValue(HeaderProperty); }
-            set { this.SetValue(HeaderProperty, value); }
+            get => (string)GetValue(HeaderProperty);
+            set => SetValue(HeaderProperty, value);
         }
     }
 }

@@ -19,6 +19,7 @@ namespace Espera.View.DesignTime
                     TrackNumber = 1
                 }
             }, () => Task.FromResult(false))
-        { }
+        {
+        }
     }
 }

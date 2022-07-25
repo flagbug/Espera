@@ -24,7 +24,7 @@ namespace Espera.Core
         {
             // The MusicBraint search service allows us to perform onme request per second on
             // average, make sure we don't exceed that.
-            this.queue = new RateLimitedOperationQueue(TimeSpan.FromSeconds(1.5), RxApp.TaskpoolScheduler);
+            queue = new RateLimitedOperationQueue(TimeSpan.FromSeconds(1.5), RxApp.TaskpoolScheduler);
         }
 
         public async Task<Uri> RetrieveAsync(string artist, string album)
@@ -34,37 +34,29 @@ namespace Espera.Core
             album = Escape(album);
 
             // Only searches are rate-limited, artwork retrievals are fine
-            IReadOnlyList<string> releaseIds = await this.queue.EnqueueOperation(() => GetReleaseIdsAsync(artist, album));
+            var releaseIds = await queue.EnqueueOperation(() => GetReleaseIdsAsync(artist, album));
 
-            if (releaseIds == null)
-            {
-                return null;
-            }
+            if (releaseIds == null) return null;
 
             return await GetArtworkLinkAsync(releaseIds);
         }
 
         /// <summary>
-        /// Escapes a lucene query
+        ///     Escapes a lucene query
         /// </summary>
-        private static String Escape(String s)
+        private static string Escape(string s)
         {
             var sb = new StringBuilder();
 
-            foreach (char c in s)
+            foreach (var c in s)
             {
                 // These characters are part of the query syntax and must be escaped
                 if (c == '\\' || c == '+' || c == '-' || c == '!' || c == '(' || c == ')' || c == ':'
                     || c == '^' || c == '[' || c == ']' || c == '\"' || c == '{' || c == '}' || c == '~'
                     || c == '*' || c == '?' || c == '/')
-                {
                     sb.Append(@"\");
-                }
 
-                if (c == '|' || c == '&')
-                {
-                    sb.Append(@"\\");
-                }
+                if (c == '|' || c == '&') sb.Append(@"\\");
 
                 sb.Append(c);
             }
@@ -74,7 +66,7 @@ namespace Espera.Core
 
         private static async Task<IReadOnlyList<string>> GetReleaseIdsAsync(string artist, string album)
         {
-            string searchRequestUrl = string.Format(SearchEndpoint, artist, album);
+            var searchRequestUrl = string.Format(SearchEndpoint, artist, album);
             string searchResponse;
 
             using (var client = new HttpClient())
@@ -88,7 +80,9 @@ namespace Espera.Core
 
                 catch (HttpRequestException ex)
                 {
-                    throw new ArtworkFetchException(string.Format("Error while requesting the release id for artist {0} and album {1}", artist, album), ex);
+                    throw new ArtworkFetchException(
+                        string.Format("Error while requesting the release id for artist {0} and album {1}", artist,
+                            album), ex);
                 }
             }
 
@@ -97,7 +91,7 @@ namespace Espera.Core
 
             XNamespace scoreNs = "http://musicbrainz.org/ns/ext#-2.0";
 
-            List<string> releaseIds = releases.Where(x => (int?)x.Attribute(scoreNs + "score") >= 95)
+            var releaseIds = releases.Where(x => (int?)x.Attribute(scoreNs + "score") >= 95)
                 .Select(x => x.Attribute("id").Value)
                 .ToList();
 
@@ -108,9 +102,9 @@ namespace Espera.Core
         {
             using (var client = new HttpClient())
             {
-                foreach (string releaseId in releaseIds)
+                foreach (var releaseId in releaseIds)
                 {
-                    string artworkRequestUrl = string.Format(ArtworkEndpoint, releaseId);
+                    var artworkRequestUrl = string.Format(ArtworkEndpoint, releaseId);
 
                     HttpResponseMessage response;
 
@@ -119,39 +113,28 @@ namespace Espera.Core
                         response = await client.GetAsync(artworkRequestUrl);
 
                         // The only valid failure status is "Not Found"
-                        if (response.StatusCode == HttpStatusCode.NotFound)
-                        {
-                            continue;
-                        }
+                        if (response.StatusCode == HttpStatusCode.NotFound) continue;
 
                         response.EnsureSuccessStatusCode();
                     }
 
                     catch (HttpRequestException ex)
                     {
-                        string errorInfo = string.Format("Could not download artwork informations for release id {0}", releaseId);
+                        var errorInfo = string.Format("Could not download artwork informations for release id {0}",
+                            releaseId);
 
                         // If we can't even get the last artwork, throw
-                        if (releaseId == releaseIds.Last())
-                        {
-                            throw new ArtworkFetchException(errorInfo, ex);
-                        }
+                        if (releaseId == releaseIds.Last()) throw new ArtworkFetchException(errorInfo, ex);
 
-                        if (releaseIds.Count > 1)
-                        {
-                            this.Log().Error(errorInfo + ", retrying with next in list.");
-                        }
+                        if (releaseIds.Count > 1) this.Log().Error(errorInfo + ", retrying with next in list.");
 
                         continue;
                     }
 
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    JToken artworkUrlToken = JObject.Parse(responseContent).SelectToken("images[0].image");
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var artworkUrlToken = JObject.Parse(responseContent).SelectToken("images[0].image");
 
-                    if (artworkUrlToken == null)
-                    {
-                        continue;
-                    }
+                    if (artworkUrlToken == null) continue;
 
                     return new Uri(artworkUrlToken.ToObject<string>());
                 }

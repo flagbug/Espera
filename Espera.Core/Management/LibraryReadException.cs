@@ -6,6 +6,7 @@ namespace Espera.Core.Management
     {
         public LibraryReadException(string message, Exception innerException)
             : base(message, innerException)
-        { }
+        {
+        }
     }
 }

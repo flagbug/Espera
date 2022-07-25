@@ -18,18 +18,21 @@ using Splat;
 namespace Espera.View.CacheMigration
 {
     /// <summary>
-    /// The deprecated, file-system based BlobCache, used for migrating to the new BlobCache.
+    ///     The deprecated, file-system based BlobCache, used for migrating to the new BlobCache.
     /// </summary>
     public class DeprecatedBlobCache : IBlobCache, IEnableLogger
     {
-        protected readonly string CacheDirectory;
         private const string BlobCacheIndexKey = "__THISISTHEINDEX__FFS_DONT_NAME_A_FILE_THIS™";
         private readonly Subject<Unit> actionTaken = new Subject<Unit>();
+        protected readonly string CacheDirectory;
         private readonly IFilesystemProvider filesystem;
         private readonly IDisposable flushThreadSubscription;
         private readonly MemoizingMRUCache<string, AsyncSubject<byte[]>> memoizedRequests;
         private readonly AsyncSubject<Unit> shutdown = new AsyncSubject<Unit>();
-        private ConcurrentDictionary<string, CacheIndexEntry> CacheIndex = new ConcurrentDictionary<string, CacheIndexEntry>();
+
+        private ConcurrentDictionary<string, CacheIndexEntry> CacheIndex =
+            new ConcurrentDictionary<string, CacheIndexEntry>();
+
         private bool disposed;
 
         public DeprecatedBlobCache(
@@ -40,91 +43,88 @@ namespace Espera.View.CacheMigration
         {
             BlobCache.EnsureInitialized();
 
-            this.filesystem = filesystemProvider ?? Locator.Current.GetService<IFilesystemProvider>();
+            filesystem = filesystemProvider ?? Locator.Current.GetService<IFilesystemProvider>();
 
-            if (this.filesystem == null)
-            {
-                throw new Exception("No IFilesystemProvider available. This should never happen, your DependencyResolver is broken");
-            }
+            if (filesystem == null)
+                throw new Exception(
+                    "No IFilesystemProvider available. This should never happen, your DependencyResolver is broken");
 
-            this.CacheDirectory = cacheDirectory ?? this.filesystem.GetDefaultRoamingCacheDirectory();
-            this.Scheduler = scheduler ?? BlobCache.TaskpoolScheduler;
+            CacheDirectory = cacheDirectory ?? filesystem.GetDefaultRoamingCacheDirectory();
+            Scheduler = scheduler ?? BlobCache.TaskpoolScheduler;
 
             // Here, we're not actually caching the requests directly (i.e. as byte[]s), but as the
             // "replayed result of the request", in the AsyncSubject - this makes the code
             // infinitely simpler because we don't have to keep a separate list of "in-flight reads"
             // vs "already completed and cached reads"
-            this.memoizedRequests = new MemoizingMRUCache<string, AsyncSubject<byte[]>>(
-                (x, c) => this.FetchOrWriteBlobFromDisk(x, c, false), 20, invalidateCallback);
+            memoizedRequests = new MemoizingMRUCache<string, AsyncSubject<byte[]>>(
+                (x, c) => FetchOrWriteBlobFromDisk(x, c, false), 20, invalidateCallback);
 
-            var cacheIndex = this.FetchOrWriteBlobFromDisk(BlobCacheIndexKey, null, true)
+            var cacheIndex = FetchOrWriteBlobFromDisk(BlobCacheIndexKey, null, true)
                 .Catch(Observable.Return(new byte[0]))
                 .Select(x => Encoding.UTF8.GetString(x, 0, x.Length).Split('\n')
-                     .SelectMany(this.ParseCacheIndexEntry)
-                     .ToDictionary(y => y.Key, y => y.Value))
+                    .SelectMany(ParseCacheIndexEntry)
+                    .ToDictionary(y => y.Key, y => y.Value))
                 .Select(x => new ConcurrentDictionary<string, CacheIndexEntry>(x));
 
-            cacheIndex.Subscribe(x => this.CacheIndex = x);
+            cacheIndex.Subscribe(x => CacheIndex = x);
 
-            this.flushThreadSubscription = Disposable.Empty;
+            flushThreadSubscription = Disposable.Empty;
 
             if (!ModeDetector.InUnitTestRunner())
-            {
-                this.flushThreadSubscription = this.actionTaken
-                    .Where(_ => this.CacheIndex != null)
-                    .Throttle(TimeSpan.FromSeconds(30), this.Scheduler)
-                    .SelectMany(_ => this.FlushCacheIndex(true))
+                flushThreadSubscription = actionTaken
+                    .Where(_ => CacheIndex != null)
+                    .Throttle(TimeSpan.FromSeconds(30), Scheduler)
+                    .SelectMany(_ => FlushCacheIndex(true))
                     .Subscribe(_ => this.Log().Debug("Flushing cache"));
-            }
 
-            this.Log().Info("{0} entries in blob cache index", this.CacheIndex.Count);
+            this.Log().Info("{0} entries in blob cache index", CacheIndex.Count);
         }
 
         public IScheduler Scheduler { get; protected set; }
 
-        public IObservable<Unit> Shutdown { get { return this.shutdown; } }
+        public IObservable<Unit> Shutdown => shutdown;
 
         public void Dispose()
         {
-            if (this.disposed) return;
-            lock (this.memoizedRequests)
+            if (disposed) return;
+            lock (memoizedRequests)
             {
-                if (this.disposed) return;
-                this.disposed = true;
+                if (disposed) return;
+                disposed = true;
 
-                this.actionTaken.OnCompleted();
-                this.flushThreadSubscription.Dispose();
+                actionTaken.OnCompleted();
+                flushThreadSubscription.Dispose();
 
-                var waitOnAllInflight = this.memoizedRequests.CachedValues()
+                var waitOnAllInflight = memoizedRequests.CachedValues()
                     .Select(x => x.Catch(Observable.Return(new byte[0])))
                     .Merge(8)
                     .Concat(Observable.Return(new byte[0]))
                     .Aggregate(Unit.Default, (acc, x) => acc);
 
                 waitOnAllInflight
-                    .SelectMany(this.FlushCacheIndex(true))
-                    .Multicast(this.shutdown)
+                    .SelectMany(FlushCacheIndex(true))
+                    .Multicast(shutdown)
                     .PermaRef();
             }
         }
 
         public IObservable<Unit> Flush()
         {
-            return this.FlushCacheIndex(false);
+            return FlushCacheIndex(false);
         }
 
         public IObservable<byte[]> Get(string key)
         {
-            if (this.disposed) return Observable.Throw<byte[]>(new ObjectDisposedException("PersistentBlobCache"));
+            if (disposed) return Observable.Throw<byte[]>(new ObjectDisposedException("PersistentBlobCache"));
 
-            if (this.IsKeyStale(key))
+            if (IsKeyStale(key))
             {
-                this.Invalidate(key);
+                Invalidate(key);
                 return ExceptionHelper.ObservableThrowKeyNotFoundException<byte[]>(key);
             }
 
             AsyncSubject<byte[]> ret;
-            lock (this.memoizedRequests)
+            lock (memoizedRequests)
             {
                 // There are three scenarios here, and we handle all of them with aplomb and elegance:
                 //
@@ -138,77 +138,73 @@ namespace Espera.View.CacheMigration
                 // 3. The key isn't in memory and isn't being fetched - in this case,
                 //    FetchOrWriteBlobFromDisk will be called which will immediately return an
                 //    AsyncSubject representing the queued disk read.
-                ret = this.memoizedRequests.Get(key);
+                ret = memoizedRequests.Get(key);
             }
 
             // If we fail trying to fetch/write the key on disk, we want to try again instead of
             // replaying the same failure
             ret.LogErrors("Get")
-               .Subscribe(x => { }, ex => this.Invalidate(key));
+                .Subscribe(x => { }, ex => Invalidate(key));
 
             return ret;
         }
 
         public IObservable<IEnumerable<string>> GetAllKeys()
         {
-            if (this.disposed) throw new ObjectDisposedException("PersistentBlobCache");
-            return Observable.Return(this.CacheIndex.ToList().Where(x => x.Value.ExpiresAt == null || x.Value.ExpiresAt >= BlobCache.TaskpoolScheduler.Now).Select(x => x.Key).ToList());
+            if (disposed) throw new ObjectDisposedException("PersistentBlobCache");
+            return Observable.Return(CacheIndex.ToList()
+                .Where(x => x.Value.ExpiresAt == null || x.Value.ExpiresAt >= BlobCache.TaskpoolScheduler.Now)
+                .Select(x => x.Key).ToList());
         }
 
         public IObservable<DateTimeOffset?> GetCreatedAt(string key)
         {
             CacheIndexEntry value;
-            if (!this.CacheIndex.TryGetValue(key, out value))
-            {
-                return Observable.Return<DateTimeOffset?>(null);
-            }
+            if (!CacheIndex.TryGetValue(key, out value)) return Observable.Return<DateTimeOffset?>(null);
 
             return Observable.Return<DateTimeOffset?>(value.CreatedAt);
         }
 
         public IObservable<Unit> Insert(string key, byte[] data, DateTimeOffset? absoluteExpiration = null)
         {
-            if (key == null || data == null)
-            {
-                return Observable.Throw<Unit>(new ArgumentNullException());
-            }
+            if (key == null || data == null) return Observable.Throw<Unit>(new ArgumentNullException());
 
             // NB: Since FetchOrWriteBlobFromDisk is guaranteed to not block, we never sit on this
             // lock for any real length of time
             AsyncSubject<byte[]> err;
-            lock (this.memoizedRequests)
+            lock (memoizedRequests)
             {
-                if (this.disposed) return Observable.Throw<Unit>(new ObjectDisposedException("PersistentBlobCache"));
+                if (disposed) return Observable.Throw<Unit>(new ObjectDisposedException("PersistentBlobCache"));
 
-                this.memoizedRequests.Invalidate(key);
-                err = this.memoizedRequests.Get(key, data);
+                memoizedRequests.Invalidate(key);
+                err = memoizedRequests.Get(key, data);
             }
 
             // If we fail trying to fetch/write the key on disk, we want to try again instead of
             // replaying the same failure
             err.LogErrors("Insert").Subscribe(
-                x => this.CacheIndex[key] = new CacheIndexEntry(this.Scheduler.Now, absoluteExpiration),
-                ex => this.Invalidate(key));
+                x => CacheIndex[key] = new CacheIndexEntry(Scheduler.Now, absoluteExpiration),
+                ex => Invalidate(key));
 
             return err.Select(_ => Unit.Default);
         }
 
         public IObservable<Unit> Invalidate(string key)
         {
-            lock (this.memoizedRequests)
+            lock (memoizedRequests)
             {
-                if (this.disposed) return Observable.Throw<Unit>(new ObjectDisposedException("PersistentBlobCache"));
+                if (disposed) return Observable.Throw<Unit>(new ObjectDisposedException("PersistentBlobCache"));
                 this.Log().Debug("Invalidating {0}", key);
-                this.memoizedRequests.Invalidate(key);
+                memoizedRequests.Invalidate(key);
             }
 
             CacheIndexEntry dontcare;
-            this.CacheIndex.TryRemove(key, out dontcare);
+            CacheIndex.TryRemove(key, out dontcare);
 
-            var path = this.GetPathForKey(key);
-            var ret = Observable.Defer(() => this.filesystem.Delete(path))
-                    .Retry(2)
-                    .Do(_ => this.actionTaken.OnNext(Unit.Default));
+            var path = GetPathForKey(key);
+            var ret = Observable.Defer(() => filesystem.Delete(path))
+                .Retry(2)
+                .Do(_ => actionTaken.OnNext(Unit.Default));
 
             return ret.Multicast(new AsyncSubject<Unit>()).PermaRef();
         }
@@ -216,14 +212,14 @@ namespace Espera.View.CacheMigration
         public IObservable<Unit> InvalidateAll()
         {
             string[] keys;
-            lock (this.memoizedRequests)
+            lock (memoizedRequests)
             {
-                if (this.disposed) return Observable.Throw<Unit>(new ObjectDisposedException("PersistentBlobCache"));
-                keys = this.CacheIndex.Keys.ToArray();
+                if (disposed) return Observable.Throw<Unit>(new ObjectDisposedException("PersistentBlobCache"));
+                keys = CacheIndex.Keys.ToArray();
             }
 
             var ret = keys.ToObservable()
-                .Select(x => Observable.Defer(() => this.Invalidate(x)))
+                .Select(x => Observable.Defer(() => Invalidate(x)))
                 .Merge(8)
                 .Aggregate(Unit.Default, (acc, x) => acc)
                 .Multicast(new AsyncSubject<Unit>());
@@ -238,13 +234,13 @@ namespace Espera.View.CacheMigration
         }
 
         /// <summary>
-        /// This method is called immediately after reading any data to disk. Override this in
-        /// encrypting data stores in order to decrypt the data.
+        ///     This method is called immediately after reading any data to disk. Override this in
+        ///     encrypting data stores in order to decrypt the data.
         /// </summary>
         /// <param name="data">The byte data that has just been read from disk.</param>
         /// <param name="scheduler">
-        /// The scheduler to use if an operation has to be deferred. If the operation can be done
-        /// immediately, use Observable.Return and ignore this parameter.
+        ///     The scheduler to use if an operation has to be deferred. If the operation can be done
+        ///     immediately, use Observable.Return and ignore this parameter.
         /// </param>
         /// <returns>A Future result representing the decrypted data</returns>
         protected virtual IObservable<byte[]> AfterReadFromDiskFilter(byte[] data, IScheduler scheduler)
@@ -253,13 +249,13 @@ namespace Espera.View.CacheMigration
         }
 
         /// <summary>
-        /// This method is called immediately before writing any data to disk. Override this in
-        /// encrypting data stores in order to encrypt the data.
+        ///     This method is called immediately before writing any data to disk. Override this in
+        ///     encrypting data stores in order to encrypt the data.
         /// </summary>
         /// <param name="data">The byte data about to be written to disk.</param>
         /// <param name="scheduler">
-        /// The scheduler to use if an operation has to be deferred. If the operation can be done
-        /// immediately, use Observable.Return and ignore this parameter.
+        ///     The scheduler to use if an operation has to be deferred. If the operation can be done
+        ///     immediately, use Observable.Return and ignore this parameter.
         /// </param>
         /// <returns>A Future result representing the encrypted data</returns>
         protected virtual IObservable<byte[]> BeforeWriteToDiskFilter(byte[] data, IScheduler scheduler)
@@ -271,16 +267,13 @@ namespace Espera.View.CacheMigration
         {
             // If this is secretly a write, dispatch to WriteBlobToDisk (we're kind of abusing the
             // 'context' variable from MemoizingMRUCache here a bit)
-            if (byteData != null)
-            {
-                return this.WriteBlobToDisk(key, (byte[])byteData, synchronous);
-            }
+            if (byteData != null) return WriteBlobToDisk(key, (byte[])byteData, synchronous);
 
             var ret = new AsyncSubject<byte[]>();
             var ms = new MemoryStream();
 
-            var scheduler = synchronous ? System.Reactive.Concurrency.Scheduler.Immediate : this.Scheduler;
-            if (this.disposed)
+            var scheduler = synchronous ? System.Reactive.Concurrency.Scheduler.Immediate : Scheduler;
+            if (disposed)
             {
                 Observable.Throw<byte[]>(new ObjectDisposedException("PersistentBlobCache"))
                     .Multicast(ret)
@@ -290,18 +283,16 @@ namespace Espera.View.CacheMigration
 
             Func<IObservable<byte[]>> readResult = () =>
                 Observable.Defer(() =>
-                    this.filesystem.OpenFileForReadAsync(this.GetPathForKey(key), scheduler))
-                .Retry(1)
-                .SelectMany(x => x.CopyToAsync(ms, scheduler))
-                .SelectMany(x => this.AfterReadFromDiskFilter(ms.ToArray(), scheduler))
-                .Catch<byte[], Exception>(ex => ExceptionHelper.ObservableThrowKeyNotFoundException<byte[]>(key, ex))
-                .Do(_ =>
-                {
-                    if (!synchronous && key != BlobCacheIndexKey)
+                        filesystem.OpenFileForReadAsync(GetPathForKey(key), scheduler))
+                    .Retry(1)
+                    .SelectMany(x => x.CopyToAsync(ms, scheduler))
+                    .SelectMany(x => AfterReadFromDiskFilter(ms.ToArray(), scheduler))
+                    .Catch<byte[], Exception>(
+                        ex => ExceptionHelper.ObservableThrowKeyNotFoundException<byte[]>(key, ex))
+                    .Do(_ =>
                     {
-                        this.actionTaken.OnNext(Unit.Default);
-                    }
-                });
+                        if (!synchronous && key != BlobCacheIndexKey) actionTaken.OnNext(Unit.Default);
+                    });
 
             readResult().Multicast(ret).PermaRef();
             return ret;
@@ -309,9 +300,9 @@ namespace Espera.View.CacheMigration
 
         private IObservable<Unit> FlushCacheIndex(bool synchronous)
         {
-            var index = this.CacheIndex.Select(x => JsonConvert.SerializeObject(x));
+            var index = CacheIndex.Select(x => JsonConvert.SerializeObject(x));
 
-            return this.WriteBlobToDisk(BlobCacheIndexKey, Encoding.UTF8.GetBytes(String.Join("\n", index)), synchronous)
+            return WriteBlobToDisk(BlobCacheIndexKey, Encoding.UTF8.GetBytes(string.Join("\n", index)), synchronous)
                 .Select(_ => Unit.Default)
                 .Catch<Unit, Exception>(ex =>
                 {
@@ -322,21 +313,18 @@ namespace Espera.View.CacheMigration
 
         private string GetPathForKey(string key)
         {
-            return Path.Combine(this.CacheDirectory, Utility.GetMd5Hash(key));
+            return Path.Combine(CacheDirectory, Utility.GetMd5Hash(key));
         }
 
         private bool IsKeyStale(string key)
         {
             CacheIndexEntry value;
-            return (this.CacheIndex.TryGetValue(key, out value) && value.ExpiresAt != null && value.ExpiresAt < this.Scheduler.Now);
+            return CacheIndex.TryGetValue(key, out value) && value.ExpiresAt != null && value.ExpiresAt < Scheduler.Now;
         }
 
         private IEnumerable<KeyValuePair<string, CacheIndexEntry>> ParseCacheIndexEntry(string s)
         {
-            if (String.IsNullOrWhiteSpace(s))
-            {
-                return Enumerable.Empty<KeyValuePair<string, CacheIndexEntry>>();
-            }
+            if (string.IsNullOrWhiteSpace(s)) return Enumerable.Empty<KeyValuePair<string, CacheIndexEntry>>();
 
             try
             {
@@ -352,26 +340,26 @@ namespace Espera.View.CacheMigration
         private AsyncSubject<byte[]> WriteBlobToDisk(string key, byte[] byteData, bool synchronous)
         {
             var ret = new AsyncSubject<byte[]>();
-            var scheduler = synchronous ? System.Reactive.Concurrency.Scheduler.Immediate : this.Scheduler;
+            var scheduler = synchronous ? System.Reactive.Concurrency.Scheduler.Immediate : Scheduler;
 
-            var path = this.GetPathForKey(key);
+            var path = GetPathForKey(key);
 
             // NB: The fact that our writing AsyncSubject waits until the write actually completes
             // means that an Insert immediately followed by a Get will take longer to process -
             // however, this also means that failed writes will disappear from the cache, which is A
             // Good Thing.
 
-            Func<IObservable<byte[]>> writeResult = () => this.BeforeWriteToDiskFilter(byteData, scheduler)
+            Func<IObservable<byte[]>> writeResult = () => BeforeWriteToDiskFilter(byteData, scheduler)
                 .Select(x => new MemoryStream(x))
                 .Zip(Observable.Defer(() =>
-                        this.filesystem.OpenFileForWriteAsync(path, scheduler))
+                            filesystem.OpenFileForWriteAsync(path, scheduler))
                         .Retry(1),
                     (from, to) => new { from, to })
                 .SelectMany(x => x.from.CopyToAsync(x.to, scheduler))
                 .Select(_ => byteData)
                 .Do(_ =>
                 {
-                    if (!synchronous && key != BlobCacheIndexKey) this.actionTaken.OnNext(Unit.Default);
+                    if (!synchronous && key != BlobCacheIndexKey) actionTaken.OnNext(Unit.Default);
                 }, ex => LogHost.Default.WarnException("Failed to write out file: " + path, ex));
 
             writeResult().Multicast(ret).Connect();
@@ -382,13 +370,13 @@ namespace Espera.View.CacheMigration
         {
             public CacheIndexEntry(DateTimeOffset createdAt, DateTimeOffset? expiresAt)
             {
-                this.CreatedAt = createdAt;
-                this.ExpiresAt = expiresAt;
+                CreatedAt = createdAt;
+                ExpiresAt = expiresAt;
             }
 
-            public DateTimeOffset CreatedAt { get; protected set; }
+            public DateTimeOffset CreatedAt { get; }
 
-            public DateTimeOffset? ExpiresAt { get; protected set; }
+            public DateTimeOffset? ExpiresAt { get; }
         }
     }
 
@@ -421,10 +409,7 @@ namespace Espera.View.CacheMigration
                 // Convert the input string to a byte array and compute the hash.
                 var data = md5Hasher.ComputeHash(Encoding.UTF8.GetBytes(input));
                 var sBuilder = new StringBuilder();
-                foreach (var item in data)
-                {
-                    sBuilder.Append(item.ToString("x2"));
-                }
+                foreach (var item in data) sBuilder.Append(item.ToString("x2"));
                 return sBuilder.ToString();
             }
         }
@@ -455,15 +440,16 @@ namespace Espera.View.CacheMigration
         public static IObservable<T> ObservableThrowKeyNotFoundException<T>(string key, Exception innerException = null)
         {
             return Observable.Throw<T>(
-                new KeyNotFoundException(String.Format(CultureInfo.InvariantCulture,
-                "The given key '{0}' was not present in the cache.", key), innerException));
+                new KeyNotFoundException(string.Format(CultureInfo.InvariantCulture,
+                    "The given key '{0}' was not present in the cache.", key), innerException));
         }
 
-        public static IObservable<T> ObservableThrowObjectDisposedException<T>(string obj, Exception innerException = null)
+        public static IObservable<T> ObservableThrowObjectDisposedException<T>(string obj,
+            Exception innerException = null)
         {
             return Observable.Throw<T>(
-                new ObjectDisposedException(String.Format(CultureInfo.InvariantCulture,
-                "The cache '{0}' was disposed.", obj), innerException));
+                new ObjectDisposedException(string.Format(CultureInfo.InvariantCulture,
+                    "The cache '{0}' was disposed.", obj), innerException));
         }
     }
 }

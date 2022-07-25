@@ -1,6 +1,6 @@
-﻿using NLog;
+﻿using System;
+using NLog;
 using Splat;
-using System;
 using LogLevel = Splat.LogLevel;
 
 namespace Espera.View
@@ -24,7 +24,7 @@ namespace Espera.View
             logger.Log(NLogLogLevelToSplatLogLevel(logLevel), message);
         }
 
-        private static NLog.LogLevel NLogLogLevelToSplatLogLevel(Splat.LogLevel logLevel)
+        private static NLog.LogLevel NLogLogLevelToSplatLogLevel(LogLevel logLevel)
         {
             switch (logLevel)
             {

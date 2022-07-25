@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using Espera.Core.Management;
 using Xunit;
 
@@ -20,8 +19,8 @@ namespace Espera.Core.Tests
 
                     LibrarySerializer.Serialize(songs, playlists, Helpers.SongSourcePath, targetStream);
 
-                    string expected = Helpers.GenerateSaveFile();
-                    string actual = Helpers.StreamToString(targetStream).Replace("\r\n", String.Empty);
+                    var expected = Helpers.GenerateSaveFile();
+                    var actual = Helpers.StreamToString(targetStream).Replace("\r\n", string.Empty);
 
                     Assert.Equal(expected, actual);
                 }

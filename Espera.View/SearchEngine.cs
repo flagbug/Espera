@@ -1,15 +1,15 @@
-﻿using Espera.Core;
-using Rareform.Validation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Espera.Core;
+using Rareform.Validation;
 
 namespace Espera.View
 {
     public static class SearchEngine
     {
         /// <summary>
-        /// Filters the source by the specified search text.
+        ///     Filters the source by the specified search text.
         /// </summary>
         /// <param name="source">The songs to search.</param>
         /// <param name="searchText">The search text.</param>
@@ -19,7 +19,7 @@ namespace Espera.View
             if (searchText == null)
                 Throw.ArgumentNullException(() => searchText);
 
-            if (String.IsNullOrWhiteSpace(searchText))
+            if (string.IsNullOrWhiteSpace(searchText))
                 return source;
 
             IEnumerable<string> keyWords = searchText.Split(' ');

@@ -24,14 +24,15 @@ namespace Espera.View.Tests
 
                 using (var library = new LibraryBuilder().WithPlaylist().Build())
                 {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
                     var playlist = library.Playlists.First();
                     library.SwitchToPlaylist(playlist, accessToken);
 
                     var fixture = new DirectYoutubeViewModel(library, new CoreSettings(), accessToken, songFinder);
 
-                    await Helpers.ThrowsAsync<ArgumentNullException>(() => fixture.AddDirectYoutubeUrlToPlaylist(null, null));
+                    await Helpers.ThrowsAsync<ArgumentNullException>(() =>
+                        fixture.AddDirectYoutubeUrlToPlaylist(null, null));
                 }
             }
 
@@ -43,7 +44,7 @@ namespace Espera.View.Tests
 
                 using (var library = new LibraryBuilder().WithPlaylist().Build())
                 {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
                     var playlist = library.Playlists.First();
                     library.SwitchToPlaylist(playlist, accessToken);
@@ -66,7 +67,7 @@ namespace Espera.View.Tests
 
                 using (var library = new LibraryBuilder().WithPlaylist().Build())
                 {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
                     var playlist = library.Playlists.First();
                     library.SwitchToPlaylist(playlist, accessToken);

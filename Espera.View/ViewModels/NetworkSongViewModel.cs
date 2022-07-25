@@ -14,22 +14,21 @@ using Splat;
 namespace Espera.View.ViewModels
 {
     /// <summary>
-    /// The base class for songs that we get over the network (e.g YouTube and SoundCloud)
+    ///     The base class for songs that we get over the network (e.g YouTube and SoundCloud)
     /// </summary>
     public abstract class NetworkSongViewModel<TViewModel, TSong> : SongSourceViewModel<TViewModel>
         where TViewModel : ISongViewModelBase
         where TSong : Song
     {
         private readonly Func<TSong, TViewModel> modelToViewModelConverter;
-        private readonly ReactiveCommand<Unit> playNowCommand;
         private readonly ObservableAsPropertyHelper<ISongViewModelBase> selectedSong;
         private readonly INetworkSongFinder<TSong> songFinder;
         private bool isSearching;
         private bool searchFailed;
 
         protected NetworkSongViewModel(Library library, Guid accessToken, CoreSettings coreSettings,
-                Func<TSong, TViewModel> modelToViewModelConverter,
-                INetworkSongFinder<TSong> songFinder = null)
+            Func<TSong, TViewModel> modelToViewModelConverter,
+            INetworkSongFinder<TSong> songFinder = null)
             : base(library, coreSettings, accessToken)
         {
             if (modelToViewModelConverter == null)
@@ -38,81 +37,72 @@ namespace Espera.View.ViewModels
             this.modelToViewModelConverter = modelToViewModelConverter;
             this.songFinder = songFinder;
 
-            IObservable<bool> canPlayNow = this.Library.LocalAccessControl.ObserveAccessPermission(accessToken)
-                .Select(x => x == AccessPermission.Admin || !this.CoreSettings.LockPlayPause);
-            this.playNowCommand = ReactiveCommand.CreateAsyncTask(canPlayNow,
-                _ => this.Library.PlayInstantlyAsync(this.SelectedSongs.Select(vm => vm.Model), accessToken));
+            var canPlayNow = Library.LocalAccessControl.ObserveAccessPermission(accessToken)
+                .Select(x => x == AccessPermission.Admin || !CoreSettings.LockPlayPause);
+            PlayNowCommand = ReactiveCommand.CreateAsyncTask(canPlayNow,
+                _ => Library.PlayInstantlyAsync(SelectedSongs.Select(vm => vm.Model), accessToken));
 
-            this.selectedSong = this.WhenAnyValue(x => x.SelectedSongs)
-                .Select(x => x == null ? null : this.SelectedSongs.FirstOrDefault())
+            selectedSong = this.WhenAnyValue(x => x.SelectedSongs)
+                .Select(x => x == null ? null : SelectedSongs.FirstOrDefault())
                 .ToProperty(this, x => x.SelectedSong);
 
-            this.Search = ReactiveCommand.Create();
+            Search = ReactiveCommand.Create();
 
             this.WhenAnyValue(x => x.SearchText, x => x.Trim()).DistinctUntilChanged().Skip(1)
                 .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler).Select(_ => Unit.Default)
-                .Merge(this.Search.ToUnit())
+                .Merge(Search.ToUnit())
                 .StartWith(Unit.Default)
-                .Select(_ => this.StartSearchAsync())
+                .Select(_ => StartSearchAsync())
                 .Switch()
-                .Select(x => x.OrderBy(this.SongOrderFunc).ToList())
+                .Select(x => x.OrderBy(SongOrderFunc).ToList())
                 .Subscribe(x =>
                 {
-                    this.SelectableSongs = x;
-                    this.SelectedSongs = (IEnumerable<ISongViewModelBase>)this.SelectableSongs.Take(1).ToList();
+                    SelectableSongs = x;
+                    SelectedSongs = (IEnumerable<ISongViewModelBase>)SelectableSongs.Take(1).ToList();
                 });
         }
 
-        public override DefaultPlaybackAction DefaultPlaybackAction
-        {
-            get { return DefaultPlaybackAction.AddToPlaylist; }
-        }
+        public override DefaultPlaybackAction DefaultPlaybackAction => DefaultPlaybackAction.AddToPlaylist;
 
         public bool IsSearching
         {
-            get { return this.isSearching; }
-            private set { this.RaiseAndSetIfChanged(ref this.isSearching, value); }
+            get => isSearching;
+            private set => this.RaiseAndSetIfChanged(ref isSearching, value);
         }
 
-        public override ReactiveCommand<Unit> PlayNowCommand
-        {
-            get { return this.playNowCommand; }
-        }
+        public override ReactiveCommand<Unit> PlayNowCommand { get; }
 
         /// <summary>
-        /// Performs a manual search, instead of an automatic search when the search text has changed.
+        ///     Performs a manual search, instead of an automatic search when the search text has changed.
         /// </summary>
-        public ReactiveCommand<object> Search { get; private set; }
+        public ReactiveCommand<object> Search { get; }
 
         public bool SearchFailed
         {
-            get { return this.searchFailed; }
-            private set { this.RaiseAndSetIfChanged(ref this.searchFailed, value); }
+            get => searchFailed;
+            private set => this.RaiseAndSetIfChanged(ref searchFailed, value);
         }
 
-        public ISongViewModelBase SelectedSong
-        {
-            get { return this.selectedSong.Value; }
-        }
+        public ISongViewModelBase SelectedSong => selectedSong.Value;
 
         private IObservable<IReadOnlyList<TViewModel>> StartSearchAsync()
         {
             return Observable.Defer(() =>
-            {
-                this.IsSearching = true;
-                this.SelectedSongs = null;
-                this.SearchFailed = false;
+                {
+                    IsSearching = true;
+                    SelectedSongs = null;
+                    SearchFailed = false;
 
-                return this.songFinder.GetSongsAsync(this.SearchText);
-            })
-            .Catch<IReadOnlyList<TSong>, NetworkSongFinderException>(ex =>
-            {
-                this.Log().ErrorException("Failed to load songs from the network", ex);
-                this.SearchFailed = true;
-                return Observable.Return(new List<TSong>());
-            })
-            .Select(x => x.Select(y => this.modelToViewModelConverter(y)).ToList())
-            .Finally(() => this.IsSearching = false);
+                    return songFinder.GetSongsAsync(SearchText);
+                })
+                .Catch<IReadOnlyList<TSong>, NetworkSongFinderException>(ex =>
+                {
+                    this.Log().ErrorException("Failed to load songs from the network", ex);
+                    SearchFailed = true;
+                    return Observable.Return(new List<TSong>());
+                })
+                .Select(x => x.Select(y => modelToViewModelConverter(y)).ToList())
+                .Finally(() => IsSearching = false);
         }
     }
 }

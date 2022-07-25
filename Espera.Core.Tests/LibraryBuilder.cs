@@ -31,27 +31,24 @@ namespace Espera.Core.Tests
             mediaPlayerCallback.Finished.Returns(finishSubject);
 
             var library = new Library(
-                this.reader ?? Substitute.For<ILibraryReader>(),
-                this.writer ?? Substitute.For<ILibraryWriter>(),
-                this.settings ?? new CoreSettings(new InMemoryBlobCache()),
-                this.fileSystem ?? new MockFileSystem(),
-                x => this.songFinder ?? SetupDefaultLocalSongFinder());
+                reader ?? Substitute.For<ILibraryReader>(),
+                writer ?? Substitute.For<ILibraryWriter>(),
+                settings ?? new CoreSettings(new InMemoryBlobCache()),
+                fileSystem ?? new MockFileSystem(),
+                x => songFinder ?? SetupDefaultLocalSongFinder());
 
-            Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+            var accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
-            if (this.playlistName != null)
-            {
-                library.AddAndSwitchToPlaylist(playlistName, accessToken);
-            }
+            if (playlistName != null) library.AddAndSwitchToPlaylist(playlistName, accessToken);
 
-            library.RegisterAudioPlayerCallback(this.audioPlayerCallback ?? mediaPlayerCallback, accessToken);
+            library.RegisterAudioPlayerCallback(audioPlayerCallback ?? mediaPlayerCallback, accessToken);
 
             return library;
         }
 
         public LibraryBuilder WithAudioPlayer(IMediaPlayerCallback player)
         {
-            this.audioPlayerCallback = player;
+            audioPlayerCallback = player;
             return this;
         }
 
@@ -63,7 +60,7 @@ namespace Espera.Core.Tests
 
         public LibraryBuilder WithPlaylist(string name = "Playlist")
         {
-            this.playlistName = name;
+            playlistName = name;
             return this;
         }
 

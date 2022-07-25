@@ -1,7 +1,7 @@
-﻿using Rareform.Validation;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Rareform.Validation;
 
 namespace Espera.Core.Management
 {
@@ -18,91 +18,91 @@ namespace Espera.Core.Management
             if (song == null)
                 Throw.ArgumentNullException(() => song);
 
-            this.Index = index;
-            this.Song = song;
+            Index = index;
+            Song = song;
 
-            this.Guid = Guid.NewGuid();
+            Guid = Guid.NewGuid();
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public Guid Guid { get; private set; }
+        public Guid Guid { get; }
 
         public int Index { get; internal set; }
 
         public bool IsShadowVoted
         {
-            get { return this.isShadowVoted; }
+            get => isShadowVoted;
             private set
             {
-                this.isShadowVoted = value;
-                this.OnPropertyChanged();
+                isShadowVoted = value;
+                OnPropertyChanged();
             }
         }
 
-        public Song Song { get; private set; }
+        public Song Song { get; }
 
         public int Votes
         {
-            get { return this.votes; }
+            get => votes;
             private set
             {
-                if (this.votes != value)
+                if (votes != value)
                 {
-                    this.votes = value;
-                    this.OnPropertyChanged();
+                    votes = value;
+                    OnPropertyChanged();
                 }
             }
         }
 
         public int CompareTo(PlaylistEntry other)
         {
-            return this.Index.CompareTo(other.Index);
+            return Index.CompareTo(other.Index);
         }
 
         public bool Equals(PlaylistEntry other)
         {
-            return other != null && this.Guid == other.Guid;
+            return other != null && Guid == other.Guid;
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public override string ToString()
         {
-                return string.Format("Index = {0}, Votes = {1}, Guid = {2}",
-                    this.Index, this.Votes, this.Guid.ToString().Substring(0, 8));
+            return string.Format("Index = {0}, Votes = {1}, Guid = {2}",
+                Index, Votes, Guid.ToString().Substring(0, 8));
         }
 
-            internal void ResetVotes()
-            {
-                this.Votes = 0;
-                this.IsShadowVoted = false;
-            }
+        internal void ResetVotes()
+        {
+            Votes = 0;
+            IsShadowVoted = false;
+        }
 
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as PlaylistEntry);
+            return Equals(obj as PlaylistEntry);
         }
 
-            internal void ShadowVote()
-            {
-                this.IsShadowVoted = true;
-            }
+        internal void ShadowVote()
+        {
+            IsShadowVoted = true;
+        }
 
-            internal void Vote()
-            {
-                this.Votes++;
-            }
+        internal void Vote()
+        {
+            Votes++;
+        }
 
-            protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-            {
-                PropertyChangedEventHandler handler = this.PropertyChanged;
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            var handler = PropertyChanged;
 
-                if (handler != null)
-                    handler(this, new PropertyChangedEventArgs(propertyName));
-            }
+            if (handler != null)
+                handler(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         public override int GetHashCode()
         {
-            return new { this.Guid }.GetHashCode();
+            return new { Guid }.GetHashCode();
         }
     }
 }

@@ -6,7 +6,8 @@ namespace Espera.View
 {
     public static class ReactiveViewHelper
     {
-        public static IObservable<Tuple<object, T>> RegisterEventSetter<T>(this Style style, RoutedEvent routedEvent, Func<EventHandler<T>, Delegate> eventHandlerCreator)
+        public static IObservable<Tuple<object, T>> RegisterEventSetter<T>(this Style style, RoutedEvent routedEvent,
+            Func<EventHandler<T>, Delegate> eventHandlerCreator)
             where T : EventArgs
         {
             return Observable.Create<Tuple<object, T>>(o =>
