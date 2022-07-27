@@ -29,7 +29,7 @@ namespace Espera.View.ViewModels
             if (coreSettings == null)
                 throw new ArgumentNullException("coreSettings");
 
-            this.Library = library;
+            Library = library;
             CoreSettings = coreSettings;
 
             searchText = string.Empty;
@@ -47,15 +47,15 @@ namespace Espera.View.ViewModels
             {
                 if (IsAdmin)
                 {
-                    this.Library.AddSongsToPlaylist(SelectedSongs.Select(song => song.Model), accessToken);
+                    Library.AddSongsToPlaylist(SelectedSongs.Select(song => song.Model), accessToken);
 
                     if (x != null)
-                        this.Library.MovePlaylistSong(this.Library.CurrentPlaylist.Last().Index, (int)x, accessToken);
+                        Library.MovePlaylistSong(Library.CurrentPlaylist.Last().Index, (int)x, accessToken);
                 }
 
                 else
                 {
-                    this.Library.AddGuestSongToPlaylist(SelectedSongs.Select(song => song.Model).Single(), accessToken);
+                    Library.AddGuestSongToPlaylist(SelectedSongs.Select(song => song.Model).Single(), accessToken);
                 }
             });
 

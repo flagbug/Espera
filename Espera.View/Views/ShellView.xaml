@@ -5,7 +5,6 @@
                       xmlns:Views="clr-namespace:Espera.View.Views"
                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                       xmlns:designTime="clr-namespace:Espera.View.DesignTime"
-                      xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                       xmlns:view="clr-namespace:Espera.View"
                       Title="Espera"

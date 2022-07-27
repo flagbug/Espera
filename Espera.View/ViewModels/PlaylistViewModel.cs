@@ -39,7 +39,7 @@ namespace Espera.View.ViewModels
             if (coreSettings == null)
                 throw new ArgumentNullException("coreSettings");
 
-            this.Model = playlist;
+            Model = playlist;
             this.library = library;
 
             disposable = new CompositeDisposable();
@@ -48,14 +48,14 @@ namespace Espera.View.ViewModels
                 .CreateDerivedCollection(entry => new PlaylistEntryViewModel(entry), x => x.Dispose())
                 .DisposeWith(disposable);
 
-            this.Model.WhenAnyValue(x => x.CurrentSongIndex).ToUnit()
+            Model.WhenAnyValue(x => x.CurrentSongIndex).ToUnit()
                 .Merge(entries.Changed.ToUnit())
                 .Subscribe(_ => UpdateCurrentSong())
                 .DisposeWith(disposable);
 
             var remainingSongs = entries.Changed
                 .Select(x => Unit.Default)
-                .Merge(this.Model.WhenAnyValue(x => x.CurrentSongIndex).ToUnit())
+                .Merge(Model.WhenAnyValue(x => x.CurrentSongIndex).ToUnit())
                 .Select(x => entries.Reverse().TakeWhile(entry => !entry.IsPlaying).ToList());
 
             songsRemaining = remainingSongs
