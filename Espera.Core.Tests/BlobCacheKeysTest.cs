@@ -1,4 +1,6 @@
-﻿namespace Espera.Core.Tests
+﻿using Xunit;
+
+namespace Espera.Core.Tests
 {
     public class BlobCacheKeysTest
     {

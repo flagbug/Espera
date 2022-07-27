@@ -1,5 +1,6 @@
 ﻿using System;
 using Espera.Core;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {

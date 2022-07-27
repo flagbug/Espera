@@ -1,4 +1,6 @@
 using System;
+using Espera.Network;
+using Newtonsoft.Json;
 
 namespace Espera.Core
 {

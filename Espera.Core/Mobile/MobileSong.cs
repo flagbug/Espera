@@ -1,6 +1,13 @@
 ﻿using System;
 using System.IO;
+using System.IO.Abstractions;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
+using Espera.Network;
+using ReactiveMarrow;
 
 namespace Espera.Core.Mobile
 {

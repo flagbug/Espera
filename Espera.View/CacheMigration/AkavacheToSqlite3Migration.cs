@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using Akavache;
 using Espera.Core;
 using Espera.Core.Settings;
+using Lager;
+using Splat;
 
 namespace Espera.View.CacheMigration
 {

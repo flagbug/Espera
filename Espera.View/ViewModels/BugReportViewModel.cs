@@ -1,4 +1,6 @@
-﻿using Espera.Core.Analytics;
+﻿using System.Reactive.Linq;
+using Espera.Core.Analytics;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {

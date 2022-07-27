@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Reactive.Disposables;
+using Akavache;
 using Espera.Core.Settings;
+using Splat;
 
 namespace Espera.Core.Analytics
 {

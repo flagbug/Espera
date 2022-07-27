@@ -1,5 +1,7 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Rareform.Validation;
 
 namespace Espera.Core.Management
 {

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Reactive.Disposables;
 using System.Runtime.CompilerServices;
+using Splat;
 
 namespace Espera.Core
 {

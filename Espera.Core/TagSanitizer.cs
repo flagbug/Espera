@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using System.Xml;
+using Rareform.Validation;
 
 namespace Espera.Core
 {

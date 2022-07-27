@@ -1,5 +1,10 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using Espera.Core;
+using Rareform.Validation;
+using ReactiveUI;
+using Splat;
 
 namespace Espera.View.ViewModels
 {

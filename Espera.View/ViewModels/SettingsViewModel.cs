@@ -1,10 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Reflection;
+using Caliburn.Micro;
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Mobile;
 using Espera.Core.Settings;
+using Espera.Network;
+using Rareform.Validation;
+using ReactiveUI;
+using Splat;
 
 namespace Espera.View.ViewModels
 {

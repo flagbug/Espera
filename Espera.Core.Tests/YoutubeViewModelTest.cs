@@ -1,10 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Espera.Core;
 using Espera.Core.Settings;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
+using Microsoft.Reactive.Testing;
+using NSubstitute;
+using ReactiveUI;
+using ReactiveUI.Testing;
+using Xunit;
 
 namespace Espera.View.Tests
 {

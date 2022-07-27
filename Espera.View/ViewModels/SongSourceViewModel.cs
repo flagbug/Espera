@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using Espera.Core.Management;
 using Espera.Core.Settings;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
@@ -25,7 +29,7 @@ namespace Espera.View.ViewModels
             if (coreSettings == null)
                 throw new ArgumentNullException("coreSettings");
 
-            Library = library;
+            this.Library = library;
             CoreSettings = coreSettings;
 
             searchText = string.Empty;
@@ -43,15 +47,15 @@ namespace Espera.View.ViewModels
             {
                 if (IsAdmin)
                 {
-                    Library.AddSongsToPlaylist(SelectedSongs.Select(song => song.Model), accessToken);
+                    this.Library.AddSongsToPlaylist(SelectedSongs.Select(song => song.Model), accessToken);
 
                     if (x != null)
-                        Library.MovePlaylistSong(Library.CurrentPlaylist.Last().Index, (int)x, accessToken);
+                        this.Library.MovePlaylistSong(this.Library.CurrentPlaylist.Last().Index, (int)x, accessToken);
                 }
 
                 else
                 {
-                    Library.AddGuestSongToPlaylist(SelectedSongs.Select(song => song.Model).Single(), accessToken);
+                    this.Library.AddGuestSongToPlaylist(SelectedSongs.Select(song => song.Model).Single(), accessToken);
                 }
             });
 

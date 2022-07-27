@@ -1,7 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Espera.Core.Management;
 using Espera.Core.Settings;
+using Rareform.Extensions;
+using Rareform.Reflection;
+using ReactiveMarrow;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {
@@ -29,7 +39,7 @@ namespace Espera.View.ViewModels
             if (coreSettings == null)
                 throw new ArgumentNullException("coreSettings");
 
-            Model = playlist;
+            this.Model = playlist;
             this.library = library;
 
             disposable = new CompositeDisposable();
@@ -38,14 +48,14 @@ namespace Espera.View.ViewModels
                 .CreateDerivedCollection(entry => new PlaylistEntryViewModel(entry), x => x.Dispose())
                 .DisposeWith(disposable);
 
-            Model.WhenAnyValue(x => x.CurrentSongIndex).ToUnit()
+            this.Model.WhenAnyValue(x => x.CurrentSongIndex).ToUnit()
                 .Merge(entries.Changed.ToUnit())
                 .Subscribe(_ => UpdateCurrentSong())
                 .DisposeWith(disposable);
 
             var remainingSongs = entries.Changed
                 .Select(x => Unit.Default)
-                .Merge(Model.WhenAnyValue(x => x.CurrentSongIndex).ToUnit())
+                .Merge(this.Model.WhenAnyValue(x => x.CurrentSongIndex).ToUnit())
                 .Select(x => entries.Reverse().TakeWhile(entry => !entry.IsPlaying).ToList());
 
             songsRemaining = remainingSongs

@@ -1,4 +1,7 @@
-﻿namespace Espera.View.Views
+﻿using System.Windows;
+using System.Windows.Controls;
+
+namespace Espera.View.Views
 {
     public partial class NetworkSongDetailView
     {

@@ -1,4 +1,6 @@
 ﻿using System;
+using NSubstitute;
+using Xunit;
 
 namespace Espera.Core.Tests
 {

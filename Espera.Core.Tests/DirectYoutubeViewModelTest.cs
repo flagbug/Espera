@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Espera.Core;
 using Espera.Core.Settings;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
+using NSubstitute;
+using Xunit;
 
 namespace Espera.View.Tests
 {

@@ -1,4 +1,12 @@
-﻿using Espera.View.ViewModels;
+﻿using System;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Input;
+using Espera.View.ViewModels;
+using ReactiveUI;
 
 namespace Espera.View.Views
 {

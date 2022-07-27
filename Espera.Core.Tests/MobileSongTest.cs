@@ -1,4 +1,10 @@
-﻿using Espera.Core.Mobile;
+﻿using System.IO.Abstractions.TestingHelpers;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using Espera.Core.Mobile;
+using Espera.Network;
+using Xunit;
 
 namespace Espera.Core.Tests
 {

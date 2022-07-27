@@ -1,4 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using Akavache;
+using Xunit;
 
 namespace Espera.Core.Tests
 {

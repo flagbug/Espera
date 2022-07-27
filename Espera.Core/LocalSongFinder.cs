@@ -1,6 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
+using System.Linq;
+using System.Reactive.Linq;
+using Rareform.Validation;
+using ReactiveUI;
+using Splat;
+using TagLib;
 using File = TagLib.File;
 
 namespace Espera.Core
@@ -129,16 +136,16 @@ namespace Espera.Core
                 WriteStream = stream;
             }
 
+            public void Dispose()
+            {
+                ReadStream.Dispose();
+            }
+
             public string Name { get; }
 
             public Stream ReadStream { get; }
 
             public Stream WriteStream { get; }
-
-            public void Dispose()
-            {
-                ReadStream.Dispose();
-            }
 
             public void CloseStream(Stream stream)
             {

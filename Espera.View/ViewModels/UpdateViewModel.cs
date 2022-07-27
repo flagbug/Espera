@@ -1,8 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
+using Akavache;
 using Espera.Core;
 using Espera.Core.Analytics;
+using ReactiveUI;
+using Splat;
+using Squirrel;
 
 namespace Espera.View.ViewModels
 {

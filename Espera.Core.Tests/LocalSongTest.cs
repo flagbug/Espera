@@ -1,4 +1,5 @@
 ﻿using System;
+using Xunit;
 
 namespace Espera.Core.Tests
 {

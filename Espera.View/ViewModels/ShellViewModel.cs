@@ -1,8 +1,16 @@
 ﻿using System;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using Caliburn.Micro;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Mobile;
 using Espera.Core.Settings;
+using Rareform.Extensions;
+using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {

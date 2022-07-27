@@ -1,8 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.IO.Abstractions.TestingHelpers;
+using System.Reactive.Linq;
+using Caliburn.Micro;
 using Espera.Core.Mobile;
 using Espera.Core.Settings;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
+using NSubstitute;
+using ReactiveUI;
+using Xunit;
 
 namespace Espera.View.Tests
 {

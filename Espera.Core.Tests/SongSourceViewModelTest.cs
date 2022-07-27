@@ -1,8 +1,13 @@
 ﻿using System;
+using System.Reactive;
+using System.Reactive.Linq;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
+using NSubstitute;
+using ReactiveUI;
+using Xunit;
 
 namespace Espera.View.Tests
 {

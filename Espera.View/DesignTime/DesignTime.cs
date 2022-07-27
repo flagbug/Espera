@@ -1,4 +1,5 @@
-﻿using Espera.Core;
+﻿using System.IO.Abstractions.TestingHelpers;
+using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 

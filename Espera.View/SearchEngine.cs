@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Espera.Core;
+using Rareform.Validation;
 
 namespace Espera.View
 {

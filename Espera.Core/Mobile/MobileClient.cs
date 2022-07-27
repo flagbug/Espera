@@ -1,10 +1,24 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Net.Sockets;
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
+using Akavache;
 using Espera.Core.Audio;
 using Espera.Core.Management;
+using Espera.Network;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Rareform.Validation;
+using ReactiveMarrow;
+using ReactiveUI;
+using Splat;
 
 namespace Espera.Core.Mobile
 {
