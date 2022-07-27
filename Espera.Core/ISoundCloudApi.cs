@@ -1,6 +1,6 @@
 ﻿using System;
-using Refit;
 using System.Collections.Generic;
+using Refit;
 
 namespace Espera.Core
 {
@@ -10,7 +10,8 @@ namespace Espera.Core
         IObservable<ExploreResponse> GetPopularTracks(int limit);
 
         [Get("/tracks.json")]
-        IObservable<IReadOnlyList<SoundCloudSong>> Search([AliasAs("q")] string searchTerm, [AliasAs("client_id")] string clientId);
+        IObservable<IReadOnlyList<SoundCloudSong>> Search([AliasAs("q")] string searchTerm,
+            [AliasAs("client_id")] string clientId);
     }
 
     public class ExploreResponse

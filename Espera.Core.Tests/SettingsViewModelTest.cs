@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reactive.Linq;
 using Caliburn.Micro;
-using Espera.Core.Management;
 using Espera.Core.Mobile;
 using Espera.Core.Settings;
 using Espera.Core.Tests;
@@ -22,9 +20,10 @@ namespace Espera.View.Tests
             var fileSystem = new MockFileSystem();
             fileSystem.Directory.CreateDirectory("C://Test");
 
-            Library library = new LibraryBuilder().WithFileSystem(fileSystem).Build();
-            Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
-            var vm = new SettingsViewModel(library, new ViewSettings(), new CoreSettings(), Substitute.For<IWindowManager>(), token,
+            var library = new LibraryBuilder().WithFileSystem(fileSystem).Build();
+            var token = library.LocalAccessControl.RegisterLocalAccessToken();
+            var vm = new SettingsViewModel(library, new ViewSettings(), new CoreSettings(),
+                Substitute.For<IWindowManager>(), token,
                 new MobileApiInfo(Observable.Return(new List<MobileClient>()), Observable.Return(false)));
 
             var coll = vm.UpdateLibraryCommand.CanExecuteObservable.CreateCollection();

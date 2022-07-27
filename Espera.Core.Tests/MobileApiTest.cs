@@ -12,7 +12,7 @@ namespace Espera.Core.Tests
             [Fact]
             public void AssertsMaximumPort()
             {
-                int port = NetworkConstants.MaxPort + 1;
+                var port = NetworkConstants.MaxPort + 1;
 
                 using (var library = Helpers.CreateLibrary())
                 {
@@ -23,7 +23,7 @@ namespace Espera.Core.Tests
             [Fact]
             public void AssertsMinimumPort()
             {
-                int port = NetworkConstants.MinPort - 1;
+                var port = NetworkConstants.MinPort - 1;
 
                 using (var library = Helpers.CreateLibrary())
                 {

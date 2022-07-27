@@ -10,7 +10,7 @@ namespace Espera.Core.Tests
             [Fact]
             public void SetsArtworkKey()
             {
-                string key = BlobCacheKeys.GetKeyForArtwork(new byte[] { 0, 1 });
+                var key = BlobCacheKeys.GetKeyForArtwork(new byte[] { 0, 1 });
 
                 var song = new LocalSong("C://Bla", TimeSpan.Zero, key);
 

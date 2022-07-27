@@ -19,10 +19,12 @@ namespace Espera.Core
 #if DEBUG
             // Set this if you want to change the app data folder for debugging
 
-            OverridenApplicationDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EsperaDebug");
+            OverridenApplicationDataPath =
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EsperaDebug");
 #endif
 
-            ApplicationRootPath = OverridenApplicationDataPath ?? Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "..");
+            ApplicationRootPath = OverridenApplicationDataPath ??
+                                  Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "..");
             BlobCachePath = Path.Combine(ApplicationRootPath, "BlobCache");
             LibraryFilePath = Path.Combine(ApplicationRootPath, "Library.json");
             LogFilePath = Path.Combine(ApplicationRootPath, "Log.txt");

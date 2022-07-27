@@ -27,13 +27,14 @@ namespace Espera.View.Tests
                     var songs = new[] { new YoutubeSong("http://blabla.com", TimeSpan.Zero) };
 
                     // Define that the old request takes longer than the new request
-                    var firstReturn = Observable.Timer(TimeSpan.FromSeconds(2000), scheduler).Select(x => new List<YoutubeSong>());
+                    var firstReturn = Observable.Timer(TimeSpan.FromSeconds(2000), scheduler)
+                        .Select(x => new List<YoutubeSong>());
                     var secondReturn = Observable.Return(new List<YoutubeSong>(songs));
 
                     var songFinder = Substitute.For<IYoutubeSongFinder>();
                     songFinder.GetSongsAsync(Arg.Any<string>()).Returns(firstReturn, secondReturn);
 
-                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var token = library.LocalAccessControl.RegisterLocalAccessToken();
                     var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, songFinder);
 
                     vm.SearchText = "Request1";
@@ -61,7 +62,7 @@ namespace Espera.View.Tests
             {
                 new TestScheduler().With(scheduler =>
                 {
-                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var token = library.LocalAccessControl.RegisterLocalAccessToken();
                     var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, songFinder);
 
                     var isSearching = vm.WhenAnyValue(x => x.IsSearching).CreateCollection();
@@ -88,7 +89,7 @@ namespace Espera.View.Tests
 
             using (var library = Helpers.CreateLibrary())
             {
-                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                var token = library.LocalAccessControl.RegisterLocalAccessToken();
                 var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, songFinder);
 
                 Assert.Equal(songs, vm.SelectableSongs.Select(x => x.Model).ToList());
@@ -101,11 +102,14 @@ namespace Espera.View.Tests
         public void SongFinderExceptionSetsSearchFailedToTrue()
         {
             var songFinder = Substitute.For<IYoutubeSongFinder>();
-            songFinder.GetSongsAsync(Arg.Any<string>()).Returns(x => { throw new NetworkSongFinderException("Blabla", null); });
+            songFinder.GetSongsAsync(Arg.Any<string>()).Returns(x =>
+            {
+                throw new NetworkSongFinderException("Blabla", null);
+            });
 
             using (var library = Helpers.CreateLibrary())
             {
-                Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                var token = library.LocalAccessControl.RegisterLocalAccessToken();
                 var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, songFinder);
 
                 Assert.True(vm.SearchFailed);
@@ -122,7 +126,7 @@ namespace Espera.View.Tests
 
                 using (var library = Helpers.CreateLibrary())
                 {
-                    Guid token = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var token = library.LocalAccessControl.RegisterLocalAccessToken();
                     var vm = new YoutubeViewModel(library, new ViewSettings(), new CoreSettings(), token, songFinder);
 
                     await vm.Search.ExecuteAsync();

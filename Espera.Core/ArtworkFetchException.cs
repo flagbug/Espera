@@ -6,6 +6,7 @@ namespace Espera.Core
     {
         public ArtworkFetchException(string message, Exception innerException)
             : base(message, innerException)
-        { }
+        {
+        }
     }
 }

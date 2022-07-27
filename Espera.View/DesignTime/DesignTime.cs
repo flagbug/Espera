@@ -13,7 +13,8 @@ namespace Espera.View.DesignTime
         {
             if (library == null)
             {
-                library = new Library(new LibraryFileReader(AppInfo.LibraryFilePath), new LibraryFileWriter(AppInfo.LibraryFilePath),
+                library = new Library(new LibraryFileReader(AppInfo.LibraryFilePath),
+                    new LibraryFileWriter(AppInfo.LibraryFilePath),
                     new CoreSettings(), new MockFileSystem());
 
                 library.Initialize();

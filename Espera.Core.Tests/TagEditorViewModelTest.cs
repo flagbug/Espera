@@ -188,7 +188,7 @@ namespace Espera.View.Tests
             [Fact]
             public async Task InvokesWarningIfMoreThanOneSong()
             {
-                bool called = false;
+                var called = false;
                 var songs = new[] { Helpers.LocalSong1, Helpers.LocalSong2 };
                 var fixture = new TagEditorViewModel(songs, () => Task.Run(() =>
                 {

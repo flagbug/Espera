@@ -1,20 +1,18 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Reactive.Disposables;
 using Akavache;
 using Espera.Core.Settings;
 using Splat;
-using System;
-using System.Collections.Generic;
-using System.Deployment.Application;
-using System.Globalization;
-using System.Reactive.Disposables;
-using Xamarin;
 
 namespace Espera.Core.Analytics
 {
     /// <summary>
-    /// Provides methods to measure data or report crashes/bugs. Every method either doesn't throw
-    /// an exception if it fails or returns a <c>bool</c> , so they can be "fire-and-forget"
-    /// methods. This also affects the authentication, meaning that if the initial authentication to
-    /// the analytics provider fails, calls to the analytics methods will return immediately.
+    ///     Provides methods to measure data or report crashes/bugs. Every method either doesn't throw
+    ///     an exception if it fails or returns a <c>bool</c> , so they can be "fire-and-forget"
+    ///     methods. This also affects the authentication, meaning that if the initial authentication to
+    ///     the analytics provider fails, calls to the analytics methods will return immediately.
     /// </summary>
     public class AnalyticsClient : IEnableLogger, IDisposable
     {
@@ -36,7 +34,7 @@ namespace Espera.Core.Analytics
         {
             get
             {
-                bool isDebugging = false;
+                var isDebugging = false;
 #if DEBUG
                 isDebugging = true;
 #endif
@@ -51,14 +49,11 @@ namespace Espera.Core.Analytics
             }
         }
 
-        public bool EnableAutomaticReports
-        {
-            get { return this.coreSettings.EnableAutomaticReports; }
-        }
+        public bool EnableAutomaticReports => coreSettings.EnableAutomaticReports;
 
         public void Dispose()
         {
-            this.endpoint.Dispose();
+            endpoint.Dispose();
         }
 
         public void Initialize(CoreSettings settings)
@@ -66,31 +61,28 @@ namespace Espera.Core.Analytics
             if (settings == null)
                 throw new ArgumentNullException("settings");
 
-            this.coreSettings = settings;
+            coreSettings = settings;
 
-            this.endpoint.Initialize();
+            endpoint.Initialize();
 
             this.Log().Info("Initialized the analytics and crash report provider");
-            this.Log().Info("Automatic analytics are {0}", this.EnableAutomaticReports ? "Enabled" : "Disabled");
+            this.Log().Info("Automatic analytics are {0}", EnableAutomaticReports ? "Enabled" : "Disabled");
         }
 
         /// <summary>
-        /// Submits a bugreport with the specified message an an optional email address. Also
-        /// uploads the log file located in the application data folder.
+        ///     Submits a bugreport with the specified message an an optional email address. Also
+        ///     uploads the log file located in the application data folder.
         /// </summary>
         /// <param name="message">The bugreport message.</param>
         /// <param name="email">The optional email address. Pass null if no email should be sent.</param>
         /// <returns>A task that returns whether the report was successfully sent or not.</returns>
         public void RecordBugReport(string message, string email = null)
         {
-            if (!String.IsNullOrWhiteSpace(email))
-            {
-                this.endpoint.UpdateEmail(email);
-            }
+            if (!string.IsNullOrWhiteSpace(email)) endpoint.UpdateEmail(email);
 
             try
             {
-                this.endpoint.ReportBug(message);
+                endpoint.ReportBug(message);
             }
 
             catch (Exception ex)
@@ -100,7 +92,7 @@ namespace Espera.Core.Analytics
         }
 
         /// <summary>
-        /// Submits a crash report with the specified exception.
+        ///     Submits a crash report with the specified exception.
         /// </summary>
         /// <param name="exception">The exception that caused the application to crash.</param>
         /// <returns>A task that returns whether the report was successfully sent or not.</returns>
@@ -108,7 +100,7 @@ namespace Espera.Core.Analytics
         {
             try
             {
-                this.endpoint.ReportFatalException(exception);
+                endpoint.ReportFatalException(exception);
             }
 
             catch (Exception ex)
@@ -119,7 +111,7 @@ namespace Espera.Core.Analytics
 
         public void RecordLibrarySize(int songCount)
         {
-            if (!this.EnableAutomaticReports)
+            if (!EnableAutomaticReports)
                 return;
 
             try
@@ -129,7 +121,7 @@ namespace Espera.Core.Analytics
                     { "Size", songCount.ToString(CultureInfo.InvariantCulture) }
                 };
 
-                this.endpoint.Track("Library Lookup", traits);
+                endpoint.Track("Library Lookup", traits);
             }
 
             catch (Exception ex)
@@ -140,12 +132,12 @@ namespace Espera.Core.Analytics
 
         public void RecordMobileUsage()
         {
-            if (!this.EnableAutomaticReports)
+            if (!EnableAutomaticReports)
                 return;
 
             try
             {
-                this.endpoint.Track("Connected Mobile API");
+                endpoint.Track("Connected Mobile API");
             }
 
             catch (Exception ex)
@@ -156,12 +148,12 @@ namespace Espera.Core.Analytics
 
         public void RecordNonFatalError(Exception exception)
         {
-            if (!this.EnableAutomaticReports)
+            if (!EnableAutomaticReports)
                 return;
 
             try
             {
-                this.endpoint.ReportNonFatalException(exception);
+                endpoint.ReportNonFatalException(exception);
             }
 
             catch (Exception ex)
@@ -172,10 +164,10 @@ namespace Espera.Core.Analytics
 
         public IDisposable RecordTime(string key, IDictionary<string, string> traits = null)
         {
-            if (!this.EnableAutomaticReports)
+            if (!EnableAutomaticReports)
                 return Disposable.Empty;
 
-            return this.endpoint.TrackTime(key, traits);
+            return endpoint.TrackTime(key, traits);
         }
     }
 }

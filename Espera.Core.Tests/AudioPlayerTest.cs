@@ -119,7 +119,12 @@ namespace Espera.Core.Tests
 
                 await audioPlayer.LoadAsync(Helpers.SetupSongMock());
 
-                Assert.Equal(new[] { AudioPlayerState.None, AudioPlayerState.Stopped, AudioPlayerState.Playing, AudioPlayerState.Stopped }, states);
+                Assert.Equal(
+                    new[]
+                    {
+                        AudioPlayerState.None, AudioPlayerState.Stopped, AudioPlayerState.Playing,
+                        AudioPlayerState.Stopped
+                    }, states);
             }
         }
 

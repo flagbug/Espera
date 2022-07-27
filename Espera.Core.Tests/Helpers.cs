@@ -19,14 +19,15 @@ namespace Espera.Core.Tests
 {
     public static class Helpers
     {
-        public static readonly LocalSong LocalSong1 = new LocalSong("C:/Music/Path1/Song1.mp3", TimeSpan.FromTicks(1), "artwork-7e316d0e701df0505fa72e2b89467910")
-        {
-            Album = "Album1",
-            Artist = "Artist1",
-            Genre = "Genre1",
-            Title = "Title1",
-            TrackNumber = 1
-        };
+        public static readonly LocalSong LocalSong1 =
+            new LocalSong("C:/Music/Path1/Song1.mp3", TimeSpan.FromTicks(1), "artwork-7e316d0e701df0505fa72e2b89467910")
+            {
+                Album = "Album1",
+                Artist = "Artist1",
+                Genre = "Genre1",
+                Title = "Title1",
+                TrackNumber = 1
+            };
 
         public static readonly LocalSong LocalSong2 = new LocalSong("C:/Music/Path2/Song2.mp3", TimeSpan.FromTicks(2))
         {
@@ -63,9 +64,10 @@ namespace Espera.Core.Tests
             {
                 library.Initialize();
 
-                updateCompleted = Observable.If(() => String.IsNullOrEmpty(library.SongSourcePath),
+                updateCompleted = Observable.If(() => string.IsNullOrEmpty(library.SongSourcePath),
                     Observable.Return(Unit.Default),
-                    library.WhenAnyValue(x => x.IsUpdating).Where(x => !x).Skip(1).FirstAsync().Timeout(TimeSpan.FromSeconds(5)).Select(_ => Unit.Default)).ToTask();
+                    library.WhenAnyValue(x => x.IsUpdating).Where(x => !x).Skip(1).FirstAsync()
+                        .Timeout(TimeSpan.FromSeconds(5)).Select(_ => Unit.Default)).ToTask();
 
                 sched.AdvanceByMs(Library.InitialUpdateDelay.TotalMilliseconds + 1);
             });
@@ -73,7 +75,8 @@ namespace Espera.Core.Tests
             await updateCompleted;
         }
 
-        public static Library CreateLibrary(CoreSettings settings = null, ILibraryReader reader = null, ILibraryWriter writer = null,
+        public static Library CreateLibrary(CoreSettings settings = null, ILibraryReader reader = null,
+            ILibraryWriter writer = null,
             IFileSystem fileSystem = null, ILocalSongFinder localSongFinder = null)
         {
             return new LibraryBuilder().WithReader(reader)
@@ -88,7 +91,8 @@ namespace Espera.Core.Tests
         {
             using (var stream = new MemoryStream())
             {
-                LibrarySerializer.Serialize(new[] { LocalSong1, LocalSong2 }, new[] { Playlist1, Playlist2 }, SongSourcePath, stream);
+                LibrarySerializer.Serialize(new[] { LocalSong1, LocalSong2 }, new[] { Playlist1, Playlist2 },
+                    SongSourcePath, stream);
 
                 return Encoding.UTF8.GetString(stream.ToArray());
             }
@@ -108,10 +112,7 @@ namespace Espera.Core.Tests
         {
             var songs = new Song[count];
 
-            for (int i = 0; i < count; i++)
-            {
-                songs[i] = SetupSongMock("Song" + i);
-            }
+            for (var i = 0; i < count; i++) songs[i] = SetupSongMock("Song" + i);
 
             return songs;
         }
@@ -126,7 +127,7 @@ namespace Espera.Core.Tests
             }
         }
 
-        public async static Task<T> ThrowsAsync<T>(Func<Task> testCode) where T : Exception
+        public static async Task<T> ThrowsAsync<T>(Func<Task> testCode) where T : Exception
         {
             try
             {

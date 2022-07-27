@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using Espera.Core.Management;
+﻿using System.Linq;
 using Espera.Core.Settings;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
@@ -15,13 +13,14 @@ namespace Espera.View.Tests
             [Fact]
             public void ExistingNameDoesNotValidate()
             {
-                using (Library library = new LibraryBuilder().Build())
+                using (var library = new LibraryBuilder().Build())
                 {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
                     library.AddPlaylist("Existing", accessToken);
                     library.AddPlaylist("New", accessToken);
 
-                    var fixture = new PlaylistViewModel(library.Playlists.Single(x => x.Name == "New"), library, accessToken, new CoreSettings());
+                    var fixture = new PlaylistViewModel(library.Playlists.Single(x => x.Name == "New"), library,
+                        accessToken, new CoreSettings());
 
                     fixture.EditName = true;
                     fixture.Name = "Existing";
@@ -33,13 +32,14 @@ namespace Espera.View.Tests
             [Fact]
             public void UniqueNameDoesValidate()
             {
-                using (Library library = new LibraryBuilder().Build())
+                using (var library = new LibraryBuilder().Build())
                 {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
                     library.AddPlaylist("Existing", accessToken);
                     library.AddPlaylist("New", accessToken);
 
-                    var fixture = new PlaylistViewModel(library.Playlists.Single(x => x.Name == "New"), library, accessToken, new CoreSettings());
+                    var fixture = new PlaylistViewModel(library.Playlists.Single(x => x.Name == "New"), library,
+                        accessToken, new CoreSettings());
 
                     fixture.EditName = true;
                     fixture.Name = "Unique";

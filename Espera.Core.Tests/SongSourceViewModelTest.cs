@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reactive;
 using System.Reactive.Linq;
-using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Espera.Core.Tests;
@@ -19,11 +18,11 @@ namespace Espera.View.Tests
             [Fact]
             public void CanExecuteWhenAdmin()
             {
-                Song song = Helpers.SetupSongMock();
+                var song = Helpers.SetupSongMock();
 
-                using (Library library = new LibraryBuilder().WithPlaylist("ThePlaylist").Build())
+                using (var library = new LibraryBuilder().WithPlaylist("ThePlaylist").Build())
                 {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
 
                     var vm = new SongSourceViewModelMock(library, accessToken);
                     var songVm = Substitute.For<ISongViewModelBase>();
@@ -42,11 +41,11 @@ namespace Espera.View.Tests
                     LockPlaylist = false
                 };
 
-                Song song = Helpers.SetupSongMock();
+                var song = Helpers.SetupSongMock();
 
-                using (Library library = new LibraryBuilder().WithPlaylist("ThePlaylist").Build())
+                using (var library = new LibraryBuilder().WithPlaylist("ThePlaylist").Build())
                 {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
                     library.LocalAccessControl.SetLocalPassword(accessToken, "Password");
                     library.LocalAccessControl.DowngradeLocalAccess(accessToken);
 
@@ -62,11 +61,11 @@ namespace Espera.View.Tests
             [Fact]
             public void CantExecuteWhenGuest()
             {
-                Song song = Helpers.SetupSongMock();
+                var song = Helpers.SetupSongMock();
 
-                using (Library library = new LibraryBuilder().WithPlaylist("ThePlaylist").Build())
+                using (var library = new LibraryBuilder().WithPlaylist("ThePlaylist").Build())
                 {
-                    Guid accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
+                    var accessToken = library.LocalAccessControl.RegisterLocalAccessToken();
                     library.LocalAccessControl.SetLocalPassword(accessToken, "Password");
                     library.LocalAccessControl.DowngradeLocalAccess(accessToken);
 
@@ -81,23 +80,15 @@ namespace Espera.View.Tests
 
             private class SongSourceViewModelMock : SongSourceViewModel<ISongViewModelBase>
             {
-                private readonly ReactiveCommand<Unit> playNowCommand;
-
                 public SongSourceViewModelMock(Library library, Guid accessToken, CoreSettings settings = null)
                     : base(library, settings ?? new CoreSettings(), accessToken)
                 {
-                    this.playNowCommand = ReactiveCommand.CreateAsyncObservable(_ => Observable.Return(Unit.Default));
+                    PlayNowCommand = ReactiveCommand.CreateAsyncObservable(_ => Observable.Return(Unit.Default));
                 }
 
-                public override DefaultPlaybackAction DefaultPlaybackAction
-                {
-                    get { return DefaultPlaybackAction.AddToPlaylist; }
-                }
+                public override DefaultPlaybackAction DefaultPlaybackAction => DefaultPlaybackAction.AddToPlaylist;
 
-                public override ReactiveCommand<Unit> PlayNowCommand
-                {
-                    get { return this.playNowCommand; }
-                }
+                public override ReactiveCommand<Unit> PlayNowCommand { get; }
             }
         }
     }

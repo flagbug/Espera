@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.Core", "Espera.Core\Espera.Core.csproj", "{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}"
 EndProject
@@ -10,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.View", "Espera.View\
 		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D} = {D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.Core.Tests", "Espera.Core.Tests\Espera.Core.Tests.csproj", "{10836E51-EAAD-4AB1-9AD8-CE200498500D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.Tests", "Espera.Core.Tests\Espera.Tests.csproj", "{10836E51-EAAD-4AB1-9AD8-CE200498500D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D} = {D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}
 	EndProjectSection
@@ -18,13 +18,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{93B8FB96-1866-41A2-AC4C-BC9BDAFF1AD0}"
 	ProjectSection(SolutionItems) = preProject
 		GlobalAssemblyInfo.cs = GlobalAssemblyInfo.cs
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Espera.View.Tests", "Espera.View.Tests\Espera.View.Tests.csproj", "{49FD0B93-B56E-44B1-815B-D3E9607B7F2F}"
-	ProjectSection(ProjectDependencies) = postProject
-		{3DB64346-7403-48C0-9766-D62A5862973F} = {3DB64346-7403-48C0-9766-D62A5862973F}
-		{D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D} = {D4AD0E4A-FECB-4CA9-9258-6BD1F22FAC0D}
-		{10836E51-EAAD-4AB1-9AD8-CE200498500D} = {10836E51-EAAD-4AB1-9AD8-CE200498500D}
 	EndProjectSection
 EndProject
 Global
@@ -45,12 +38,11 @@ Global
 		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10836E51-EAAD-4AB1-9AD8-CE200498500D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{49FD0B93-B56E-44B1-815B-D3E9607B7F2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{49FD0B93-B56E-44B1-815B-D3E9607B7F2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{49FD0B93-B56E-44B1-815B-D3E9607B7F2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{49FD0B93-B56E-44B1-815B-D3E9607B7F2F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {76C505E5-A324-4FC3-8D89-F68B0C1D9AC9}
 	EndGlobalSection
 EndGlobal

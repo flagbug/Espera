@@ -15,7 +15,8 @@
     </UserControl.Resources>
     <Grid>
         <StackPanel Margin="15, 0, 15, 0">
-            <TextBlock Text="Title" Visibility="{Binding Path=IsSingleSong, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBlock Text="Title"
+                       Visibility="{Binding Path=IsSingleSong, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox Margin="0, 0, 0, 10"
                      Text="{Binding Path=Title}"
                      Visibility="{Binding Path=IsSingleSong,

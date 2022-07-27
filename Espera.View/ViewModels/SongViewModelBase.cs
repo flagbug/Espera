@@ -1,10 +1,10 @@
-﻿using Espera.Core;
+﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
+using Espera.Core;
 using Rareform.Validation;
 using ReactiveUI;
 using Splat;
-using System;
-using System.ComponentModel;
-using System.Diagnostics;
 
 namespace Espera.View.ViewModels
 {
@@ -15,65 +15,41 @@ namespace Espera.View.ViewModels
             if (model == null)
                 Throw.ArgumentNullException(() => model);
 
-            this.Model = model;
+            Model = model;
 
-            this.OpenPathCommand = ReactiveCommand.Create();
-            this.OpenPathCommand.Subscribe(x =>
+            OpenPathCommand = ReactiveCommand.Create();
+            OpenPathCommand.Subscribe(x =>
             {
                 try
                 {
-                    Process.Start(this.Path);
+                    Process.Start(Path);
                 }
 
                 catch (Win32Exception ex)
                 {
-                    this.Log().ErrorException(String.Format("Could not open link {0}", this.Path), ex);
+                    this.Log().ErrorException(string.Format("Could not open link {0}", Path), ex);
                 }
             });
         }
 
-        public string Album
-        {
-            get { return this.Model.Album; }
-        }
+        public ReactiveCommand<object> OpenPathCommand { get; }
 
-        public string Artist
-        {
-            get { return this.Model.Artist; }
-        }
+        public string Album => Model.Album;
 
-        public TimeSpan Duration
-        {
-            get { return this.Model.Duration; }
-        }
+        public string Artist => Model.Artist;
 
-        public string FormattedDuration
-        {
-            get { return this.Duration.FormatAdaptive(); }
-        }
+        public TimeSpan Duration => Model.Duration;
 
-        public string Genre
-        {
-            get { return this.Model.Genre; }
-        }
+        public string FormattedDuration => Duration.FormatAdaptive();
 
-        public Song Model { get; private set; }
+        public string Genre => Model.Genre;
 
-        public ReactiveCommand<object> OpenPathCommand { get; private set; }
+        public Song Model { get; }
 
-        public string Path
-        {
-            get { return this.Model.OriginalPath; }
-        }
+        public string Path => Model.OriginalPath;
 
-        public string Title
-        {
-            get { return this.Model.Title; }
-        }
+        public string Title => Model.Title;
 
-        public int TrackNumber
-        {
-            get { return this.Model.TrackNumber; }
-        }
+        public int TrackNumber => Model.TrackNumber;
     }
 }

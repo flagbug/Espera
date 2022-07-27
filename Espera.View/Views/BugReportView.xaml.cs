@@ -11,7 +11,7 @@ namespace Espera.View.Views
 
         private void CancelButtonClick(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            Close();
         }
     }
 }

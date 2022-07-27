@@ -11,7 +11,7 @@ namespace Espera.Core.Tests
             {
                 const string artworkKey = BlobCacheKeys.Artwork + "mycoolhash";
 
-                string keyWithSize = BlobCacheKeys.GetArtworkKeyWithSize(artworkKey, 50);
+                var keyWithSize = BlobCacheKeys.GetArtworkKeyWithSize(artworkKey, 50);
 
                 Assert.Equal(artworkKey + "-50x50", keyWithSize);
             }

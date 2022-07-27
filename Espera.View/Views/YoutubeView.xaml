@@ -25,7 +25,8 @@
                   ItemsSource="{Binding Path=SelectableSongs}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
-                    <i:InvokeCommandAction Command="{Binding Path=SelectionChangedCommand}" CommandParameter="{Binding ElementName=YoutubeSongs, Path=SelectedItems}" />
+                    <i:InvokeCommandAction Command="{Binding Path=SelectionChangedCommand}"
+                                           CommandParameter="{Binding ElementName=YoutubeSongs, Path=SelectedItems}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <ListView.Style>
@@ -54,23 +55,28 @@
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="{Binding Path=VideoType, StringFormat=Type: \{0\}}" />
-                                    <TextBlock Margin="10, 0, 0, 0" Text="{Binding Path=Resolution, StringFormat=Resolution: \{0\}p}" />
+                                    <TextBlock Margin="10, 0, 0, 0"
+                                               Text="{Binding Path=Resolution, StringFormat=Resolution: \{0\}p}" />
                                 </StackPanel>
                             </DataTemplate>
                         </MenuItem.ItemTemplate>
                         <MenuItem.ItemContainerStyle>
                             <Style TargetType="MenuItem">
-                                <Setter Property="Command" Value="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=DataContext.SelectedSong.DownloadVideoCommand}" />
-                                <Setter Property="CommandParameter" Value="{Binding RelativeSource={RelativeSource Self}, Path=DataContext}" />
+                                <Setter Property="Command"
+                                        Value="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=DataContext.SelectedSong.DownloadVideoCommand}" />
+                                <Setter Property="CommandParameter"
+                                        Value="{Binding RelativeSource={RelativeSource Self}, Path=DataContext}" />
                             </Style>
                         </MenuItem.ItemContainerStyle>
                         <MenuItem.Style>
                             <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=SelectedSong.IsLoadingContextMenu}" Value="True">
+                                    <DataTrigger Binding="{Binding Path=SelectedSong.IsLoadingContextMenu}"
+                                                 Value="True">
                                         <Setter Property="Header" Value="Loading video infos..." />
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding Path=SelectedSong.IsLoadingContextMenu}" Value="False">
+                                    <DataTrigger Binding="{Binding Path=SelectedSong.IsLoadingContextMenu}"
+                                                 Value="False">
                                         <Setter Property="Header" Value="Download video" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -82,23 +88,28 @@
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="{Binding Path=AudioType, StringFormat=Type: \{0\}}" />
-                                    <TextBlock Margin="10, 0, 0, 0" Text="{Binding Path=AudioBitrate, StringFormat=Bitrate: \{0\} kbit/s}" />
+                                    <TextBlock Margin="10, 0, 0, 0"
+                                               Text="{Binding Path=AudioBitrate, StringFormat=Bitrate: \{0\} kbit/s}" />
                                 </StackPanel>
                             </DataTemplate>
                         </MenuItem.ItemTemplate>
                         <MenuItem.ItemContainerStyle>
                             <Style TargetType="MenuItem">
-                                <Setter Property="Command" Value="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=DataContext.SelectedSong.DownloadAudioCommand}" />
-                                <Setter Property="CommandParameter" Value="{Binding RelativeSource={RelativeSource Self}, Path=DataContext}" />
+                                <Setter Property="Command"
+                                        Value="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=DataContext.SelectedSong.DownloadAudioCommand}" />
+                                <Setter Property="CommandParameter"
+                                        Value="{Binding RelativeSource={RelativeSource Self}, Path=DataContext}" />
                             </Style>
                         </MenuItem.ItemContainerStyle>
                         <MenuItem.Style>
                             <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=SelectedSong.IsLoadingContextMenu}" Value="True">
+                                    <DataTrigger Binding="{Binding Path=SelectedSong.IsLoadingContextMenu}"
+                                                 Value="True">
                                         <Setter Property="Header" Value="Loading audio infos..." />
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding Path=SelectedSong.IsLoadingContextMenu}" Value="False">
+                                    <DataTrigger Binding="{Binding Path=SelectedSong.IsLoadingContextMenu}"
+                                                 Value="False">
                                         <Setter Property="Header" Value="Download audio" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -148,7 +159,8 @@
                         <GridViewColumnHeader Command="{Binding Path=OrderByRatingCommand}" Content="Rating" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Path=Rating, StringFormat=\{0:0.0\}, TargetNullValue=n/a}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding Path=Rating, StringFormat=\{0:0.0\}, TargetNullValue=n/a}"
+                                           TextTrimming="CharacterEllipsis" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -156,7 +168,8 @@
                         <GridViewColumnHeader Command="{Binding Path=OrderByViewsCommand}" Content="Views" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Path=Views, TargetNullValue=n/a}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding Path=Views, TargetNullValue=n/a}"
+                                           TextTrimming="CharacterEllipsis" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -164,7 +177,8 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock>
-                                    <Hyperlink PreviewMouseLeftButtonDown="ExternalPathLeftMouseButtonDown" PreviewMouseLeftButtonUp="ExternalPathLeftMouseButtonUp">
+                                    <Hyperlink PreviewMouseLeftButtonDown="ExternalPathLeftMouseButtonDown"
+                                               PreviewMouseLeftButtonUp="ExternalPathLeftMouseButtonUp">
                                         <TextBlock Foreground="{DynamicResource BlackColorBrush}"
                                                    Text="{Binding Path=Path}"
                                                    TextDecorations="Underline"

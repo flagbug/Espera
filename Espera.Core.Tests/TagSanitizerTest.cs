@@ -18,7 +18,7 @@ namespace Espera.Core.Tests
             {
                 const string tag = "A\u0018B";
 
-                string sanitized = TagSanitizer.Sanitize(tag);
+                var sanitized = TagSanitizer.Sanitize(tag);
 
                 Assert.Equal("A_B", sanitized);
             }
