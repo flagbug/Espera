@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Espera.Core.Audio;
-using NSubstitute;
-using ReactiveUI;
-using Xunit;
 
 namespace Espera.Core.Tests
 {

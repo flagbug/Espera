@@ -1,19 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Abstractions;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
 using Espera.Core.Management;
 using Espera.Core.Settings;
-using Microsoft.Reactive.Testing;
-using NSubstitute;
-using ReactiveUI;
-using ReactiveUI.Testing;
-using Xunit;
 
 namespace Espera.Core.Tests
 {

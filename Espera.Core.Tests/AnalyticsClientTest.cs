@@ -1,8 +1,6 @@
 ﻿using System;
 using Espera.Core.Analytics;
 using Espera.Core.Settings;
-using NSubstitute;
-using Xunit;
 
 namespace Espera.Core.Tests
 {

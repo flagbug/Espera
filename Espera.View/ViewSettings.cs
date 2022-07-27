@@ -1,8 +1,4 @@
-﻿using Akavache;
-using Lager;
-using Splat;
-
-namespace Espera.View
+﻿namespace Espera.View
 {
     public class ViewSettings : SettingsStorage
     {

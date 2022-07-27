@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using Espera.Core.Management;
-using Newtonsoft.Json.Linq;
-using Xunit;
+﻿using Espera.Core.Management;
 
 namespace Espera.Core.Tests
 {

@@ -1,20 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Text;
 using System.Threading.Tasks;
 using Espera.Core.Analytics;
 using Espera.Core.Management;
-using Espera.Network;
-using Rareform.Validation;
-using ReactiveMarrow;
-using ReactiveUI;
-using Splat;
 
 namespace Espera.Core.Mobile
 {

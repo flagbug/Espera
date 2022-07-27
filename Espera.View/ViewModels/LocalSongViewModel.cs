@@ -1,6 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Reactive.Linq;
 using Espera.Core;
 
 namespace Espera.View.ViewModels
@@ -37,8 +35,6 @@ namespace Espera.View.ViewModels
             return Model.Equals(other.Model);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public string Album => Model.Album;
 
         public string Artist => Model.Artist;
@@ -56,6 +52,8 @@ namespace Espera.View.ViewModels
         public string Title => Model.Title;
 
         public int TrackNumber => Model.TrackNumber;
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public override int GetHashCode()
         {

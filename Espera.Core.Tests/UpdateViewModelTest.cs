@@ -1,5 +1,4 @@
 ﻿using Espera.View.ViewModels;
-using Xunit;
 
 namespace Espera.View.Tests
 {

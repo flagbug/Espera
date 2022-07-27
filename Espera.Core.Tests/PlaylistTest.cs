@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Linq;
 using Espera.Core.Management;
-using Xunit;
 
 namespace Espera.Core.Tests
 {

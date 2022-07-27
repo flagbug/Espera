@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Espera.Core;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
-using ReactiveUI;
-using Xunit;
 
 namespace Espera.View.Tests
 {

@@ -1,6 +1,4 @@
-﻿using System.Windows;
-
-namespace Espera.View.Views
+﻿namespace Espera.View.Views
 {
     public partial class BugReportView
     {

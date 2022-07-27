@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
 using Espera.Core;
 using Espera.Core.Management;
 using Espera.Core.Settings;
-using Rareform.Validation;
-using ReactiveMarrow;
-using ReactiveUI;
-using Splat;
 
 namespace Espera.View.ViewModels
 {

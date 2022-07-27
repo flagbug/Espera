@@ -1,7 +1,5 @@
 ﻿using System;
 using Espera.Core.Mobile;
-using Espera.Network;
-using Xunit;
 
 namespace Espera.Core.Tests
 {

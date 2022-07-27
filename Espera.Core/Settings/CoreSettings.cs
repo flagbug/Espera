@@ -1,9 +1,5 @@
 ﻿using System;
-using Akavache;
 using Espera.Core.Management;
-using Espera.Network;
-using Lager;
-using Splat;
 
 namespace Espera.Core.Settings
 {

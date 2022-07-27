@@ -1,18 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Net;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
-using System.Windows.Media;
-using Akavache;
 using Espera.Core;
-using ReactiveUI;
-using Splat;
-using YoutubeExtractor;
 
 namespace Espera.View.ViewModels
 {
@@ -140,16 +130,6 @@ namespace Espera.View.ViewModels
             }
 
             catch (YoutubeParseException ex)
-            {
-                this.Log().ErrorException("Failed to load the available YouTube videos", ex);
-            }
-
-            catch (VideoNotAvailableException ex)
-            {
-                this.Log().ErrorException("Failed to load the available YouTube videos", ex);
-            }
-
-            catch (WebException ex)
             {
                 this.Log().ErrorException("Failed to load the available YouTube videos", ex);
             }

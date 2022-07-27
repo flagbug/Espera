@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Espera.Core.Management;
 using Espera.Core.Settings;
-using ReactiveUI;
-using Xunit;
 
 namespace Espera.Core.Tests
 {

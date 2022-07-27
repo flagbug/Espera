@@ -1,28 +1,12 @@
 using System;
-using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Input;
-using System.Windows.Interop;
 using Espera.Core;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
 using Espera.View.ViewModels;
-using GlobalHotKey;
-using MahApps.Metro;
-using MahApps.Metro.Controls.Dialogs;
-using ReactiveUI;
-using Splat;
-using YoutubeExtractor;
 
 namespace Espera.View.Views
 {

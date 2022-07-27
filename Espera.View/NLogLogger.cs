@@ -1,6 +1,4 @@
 ﻿using System;
-using NLog;
-using Splat;
 using LogLevel = Splat.LogLevel;
 
 namespace Espera.View

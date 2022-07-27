@@ -1,8 +1,6 @@
-﻿using System.Linq;
-using Espera.Core.Settings;
+﻿using Espera.Core.Settings;
 using Espera.Core.Tests;
 using Espera.View.ViewModels;
-using Xunit;
 
 namespace Espera.View.Tests
 {

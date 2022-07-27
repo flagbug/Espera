@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
-using System.Reactive.Linq;
 
 namespace Espera.Core
 {

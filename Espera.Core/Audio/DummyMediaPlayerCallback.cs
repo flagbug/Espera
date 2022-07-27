@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace Espera.Core.Audio

@@ -3,17 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Concurrency;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Security.Cryptography;
 using System.Text;
-using Akavache;
-using Newtonsoft.Json;
-using Splat;
 
 namespace Espera.View.CacheMigration
 {

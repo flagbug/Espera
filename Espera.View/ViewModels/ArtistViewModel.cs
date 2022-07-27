@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
 using Espera.Core;
-using ReactiveUI;
-using Splat;
 
 namespace Espera.View.ViewModels
 {

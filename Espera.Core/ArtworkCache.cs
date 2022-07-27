@@ -1,13 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
-using Akavache;
-using Punchclock;
-using Splat;
 
 namespace Espera.Core
 {

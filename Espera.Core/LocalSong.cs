@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Espera.Core.Analytics;
-using Espera.Network;
-using Rareform.Validation;
-using Splat;
-using TagLib;
 
 namespace Espera.Core
 {

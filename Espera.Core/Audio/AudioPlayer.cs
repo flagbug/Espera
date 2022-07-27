@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
-using ReactiveUI;
-using Splat;
 
 namespace Espera.Core.Audio
 {

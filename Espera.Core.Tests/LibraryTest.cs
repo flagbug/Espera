@@ -1,22 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO.Abstractions.TestingHelpers;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
-using Akavache;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
-using Microsoft.Reactive.Testing;
-using NSubstitute;
-using ReactiveUI;
-using ReactiveUI.Testing;
-using Xunit;
 
 namespace Espera.Core.Tests
 {

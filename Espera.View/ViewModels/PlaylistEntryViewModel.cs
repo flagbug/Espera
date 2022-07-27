@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Reactive.Disposables;
 using Espera.Core;
 using Espera.Core.Management;
-using ReactiveMarrow;
-using ReactiveUI;
 
 namespace Espera.View.ViewModels
 {

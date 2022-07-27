@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Espera.Network;
-using YoutubeExtractor;
 
 namespace Espera.Core
 {

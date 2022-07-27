@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reactive.Disposables;
 
 namespace Espera.Core.Analytics
 {

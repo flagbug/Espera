@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using Espera.Core.Management;
-using Xunit;
 
 namespace Espera.Core.Tests
 {

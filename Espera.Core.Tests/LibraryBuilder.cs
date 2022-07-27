@@ -1,15 +1,8 @@
 ﻿using System;
-using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Threading.Tasks;
-using Akavache;
 using Espera.Core.Audio;
 using Espera.Core.Management;
 using Espera.Core.Settings;
-using NSubstitute;
 
 namespace Espera.Core.Tests
 {
